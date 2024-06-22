@@ -1,3 +1,50 @@
+/* include border and padding in element width and height */
+* {
+    box-sizing: border-box;
+  }
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    background-color: rgb(134, 88, 88);
+}
+
+.card {
+    width: 70vw;
+    min-height: 100vh;
+    background: #fff;
+    margin: 16px auto;
+    padding: 10px;
+}
+
+.title {
+    text-align: center;
+    font-size: 50px;
+}
+
+.food-title{
+    margin: 0px;
+    text-align: center;
+}
+
+.food-block{
+
+    display: flex;
+    justify-content: center; /* Horizontal centering */
+    align-items: center;
+    margin-left:auto;
+    margin-right: auto;
+}
+.food-blocks{ 
+    display: inline-block;
+    background-color: #e3f4ff;
+    width: 30%;
+    padding: 15px;
+    margin-inline-start: 10px;
+    margin-inline: 20px;
+}
+
 img {
     height: 310px;
     width: auto;
