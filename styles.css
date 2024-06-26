@@ -50,6 +50,7 @@ body {
   background-color: #e5e7eb;
   justify-content: space-around;
   align-items: center;
+  gap: 18px;
 }
 
 .footer {
@@ -136,6 +137,7 @@ body {
 }
 .quote-section .quote-writer{
   font-weight: bold;
+  min-width: 150px;
 }
 
 /* Footer */
