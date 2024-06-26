@@ -33,6 +33,7 @@ body {
 
 .general {
   background-color: #e5e7eb;
+  gap: 18px;
 }
 
 .content {
@@ -95,6 +96,7 @@ body {
 .general .images{
   display: flex;
   min-width: 0px;
+  overflow: hidden;
 }
 
 .general img{
