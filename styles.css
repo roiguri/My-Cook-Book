@@ -1,89 +1,192 @@
-/* include border and padding in element width and height */
-* {
-    box-sizing: border-box;
-  }
+/* Page Template */
 
-html,
 body {
-    margin: 0;
-    padding: 0;
-    background-color: rgb(134, 88, 88);
+  margin: 0;
+  padding: 0;
+  display: flex;    
+  background-color: rgb(161, 99, 99);
+
+  justify-content: center;
 }
 
 .card {
-    width: 90vw;
-    min-height: 100vh;
-    background: #fff;
-    margin: 16px auto;
-    padding: 10px;
-}
-
-.title {
-    text-align: center;
-    font-size: 50px;
-}
-
-.food-title{
-    margin: 0px;
-    text-align: center;
-}
-
-.food-block{
-
-    display: flex;
-    justify-content: center; /* Horizontal centering */
-    align-items: center;
-    margin-left:auto;
-    margin-right: auto;
-}
-.food-blocks{ 
-    display: inline-block;
-    background-color: #e3f4ff;
-    width: 30%;
-    padding: 15px;
-    margin-inline-start: 10px;
-    margin-inline: 20px;
-}
-/*recipe pages*/
-
-h5{
-    padding:0px;
-    margin:0;
-
-}
-
-.preparation {
-    background-color: bisque;
-    margin:-10px;
-    padding: 10px;
-    width: 90vw;
-    height:auto;
-    display: table; /* Use table display for layout */
-  }
+  width: 90vw;
+  min-height: 100vh;
+  background: #fff;
   
-  .text-container, .image-container {
-    display: table-cell; /* Make divs behave like table cells */
-    vertical-align: top; /* Align content to the top of the cells */
-  }
-  .image-container{
-    width: 0;
-  }
-  .text-container{
-    padding-right: 1vw;
-  }
-  
-  .image-container img {
-    height: 310px; /* Make the image fill the container's height */
-    width: auto;  /* Maintain aspect ratio */
-    object-fit: cover; /* Cover the container, may crop image */
-  }
-.proccess {
-    background-color: bisque;
-    width: 90vw;
-    height: auto;
-    margin:-10px;
-    margin-top: 0px;
-    padding: 10px;
-    border-top: 3px dashed black;
-
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
+
+/* Structure */
+.header, .general, .content, .quote-section, .footer{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header{
+  background-color: #1F2937;
+  padding: 0px 26px;
+}
+
+.general {
+  background-color: #e5e7eb;
+}
+
+.content {
+  background-color: #F9FAF8;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 50px;
+  padding: 26px;
+}
+
+.quote-section {
+  background-color: #e5e7eb;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.footer {
+  min-height: 20px;
+  background-color: #1F2937;
+}
+
+
+/* Header */
+
+.header ul{
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  margin: 8;
+  padding: 0;
+  gap: 16px;
+}
+
+.header a{
+  text-decoration: none;
+  color: #F9FAF8;
+}
+
+.header .right-links{
+  font-size: 24px;
+  font-weight: 900;
+}
+
+/* General */
+.general .text {
+  padding-right: 26px;
+  align-self: flex-start;
+  padding-top: 26px;
+  padding-bottom: 16px;
+  line-height: 25px;
+}
+.general .text .title {
+  font-size: 36px;
+  font-weight: bolder;
+  padding-bottom: 16px;
+}
+
+.general .images{
+  display: flex;
+  min-width: 0px;
+}
+
+.general img{
+  object-fit: cover;
+  width: 200px;
+  max-height: 200px
+}
+
+/* Content */
+.type{
+  padding: 8px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+
+  border: 3px solid rgb(161, 99, 99);;
+  border-radius: 8px;
+
+  min-height: 150px;
+  min-width: 200px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* quote-section */
+.quote-section{
+  line-height: 30px;
+  padding: 10px;
+}
+.quote-section .quote{
+  color: #1F2937;
+  font-style: italic;
+  font-size: 20px;
+  text-align: center;
+}
+.quote-section .quote-writer{
+  font-weight: bold;
+}
+
+/* Footer */
+
+/* Recipe Pages */
+.recipe-title {
+  align-self: center;
+  padding: 26px 26px;
+  font-size: 45px;
+  font-weight: bolder;
+}
+
+.recipe{
+  display: flex;
+  justify-content: space-around;
+  padding: 26px;
+  padding-top: 0px;
+  gap: 26px;
+  flex-wrap: wrap-reverse;
+}
+
+.recipe .title{
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.recipe .sub-title{
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.box {    
+  border: 3px solid rgb(161, 99, 99);;
+  border-radius: 8px;
+  padding: 10px 26px;
+
+  line-height: 30px;
+}
+
+.process.box {
+  flex-grow: 3;
+}
+
+.preparation.box{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe .image-container img{
+  margin-top: 10px;
+  object-fit: cover;
+  width: 200px;
+  max-height: 200px
+}
+
