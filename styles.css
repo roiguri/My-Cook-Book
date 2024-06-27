@@ -180,7 +180,7 @@ body {
 }
 
 .process.box {
-  flex-grow: 3;
+  flex-grow: 1;
 }
 
 .preparation.box{
@@ -196,3 +196,6 @@ body {
   max-height: 200px
 }
 
+ol.hebrew-ordered{
+  list-style-type: hebrew;
+}
