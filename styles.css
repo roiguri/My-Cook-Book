@@ -199,3 +199,8 @@ body {
 ol.hebrew-ordered{
   list-style-type: hebrew;
 }
+
+/* grandma-cook-book */
+.grandma-cook-book{
+  flex-grow: 1;
+}
