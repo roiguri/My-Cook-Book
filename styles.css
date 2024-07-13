@@ -1,6 +1,5 @@
-/* styles.css */
 
-/* Import fonts (adjust URLs as needed) */
+/* Import fonts */
 @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Lora:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro&display=swap');
 
 :root {
@@ -21,16 +20,9 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    direction: ltr;
-    text-align: left;
 }
 
-body[dir="rtl"] {
-    direction: rtl;
-    text-align: right;
-}
-
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3 {
     font-family: var(--heading-font);
     font-weight: 700;
 }
@@ -40,59 +32,100 @@ a {
     text-decoration: none;
 }
 
-/* Updated Header styles */
+/* Header styles */
 .header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: url('wood-texture.jpg') repeat;
-  border-bottom: 3px solid var(--primary-color); /* Add separation */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: url('wood-texture.jpg') repeat;
+    border-bottom: 3px solid var(--primary-color);
 }
 
 .logo {
-  font-family: var(--heading-font);
-  font-size: 2.5rem;
-  color: var(--background-color);
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    font-family: var(--heading-font);
+    font-size: 2.5rem;
+    color: var(--background-color);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 nav ul {
-  display: flex;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
 
 nav ul li {
-  margin-right: 1rem;
+    margin-right: 1rem;
 }
 
 nav ul li:last-child {
-  margin-right: 0;
+    margin-right: 0;
 }
 
 nav ul li a {
-  color: var(--background-color);
-  font-family: var(--nav-font);
-  font-weight: bold;
-  background: var(--primary-color);
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-  display: inline-block;
-  line-height: 1.5;
-  white-space: nowrap;
+    color: var(--background-color);
+    font-family: var(--nav-font);
+    font-weight: bold;
+    background: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    display: inline-block;
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 nav ul li a:hover {
-  background-color: #5c4033;
+    background-color: #5c4033;
+}
+
+/* Search bar */
+.search-container {
+    display: flex;
+    align-items: center;
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 2px solid var(--primary-color);
+    border-radius: 5px;
+    overflow: hidden;
+    height: 40px;
+}
+
+.search-input {
+    border: none;
+    background: transparent;
+    font-family: var(--body-font);
+    font-size: 1rem;
+    padding: 0 10px;
+    flex-grow: 1;
+    outline: none;
+    height: 100%;
+}
+
+.search-button {
+    background: var(--primary-color);
+    border: none;
+    cursor: pointer;
+    padding: 0 15px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-button .icon-search {
+    color: #fff;
+    font-size: 1.2rem;
 }
 
 /* Main content */
 main {
     max-width: 1200px;
-    margin-top: 2rem;
     margin: 2rem auto;
     padding: 0 1rem;
 }
@@ -116,56 +149,15 @@ main {
     margin-bottom: 1rem;
 }
 
-.hero p {
-    font-size: 1.5rem;
-    font-style: italic;
-}
-
-/* Featured recipes and Quick links */
-.featured-recipes, .quick-links {
+/* Quick links */
+.quick-links {
     margin-top: 2rem;
 }
 
-.featured-recipes h2, .quick-links h2 {
+.quick-links h2 {
     font-size: 3rem;
     text-align: center;
     margin-bottom: 1.5rem;
-}
-
-/* Recipe grid */
-.recipe-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-}
-
-.recipe-card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s ease;
-}
-
-.recipe-card:hover {
-    transform: translateY(-5px);
-}
-
-.recipe-card img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
-
-.recipe-card h3 {
-    font-size: 1.8rem;
-    margin: 1rem;
-}
-
-.recipe-card p {
-    font-size: 1rem;
-    color: #666;
-    margin: 0 1rem 1rem;
 }
 
 /* Category jars */
@@ -204,89 +196,64 @@ main {
     font-size: 1.5rem;
 }
 
-/* Recipe page */
-.recipe-page {
-    display: flex;
+/* Featured recipes */
+.featured-recipes {
+    margin-top: 2rem;
 }
 
-.recipe {
-    flex: 3;
+.featured-recipes h2 {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.recipe-card {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
+    overflow: hidden;
+    transition: transform 0.3s ease;
 }
 
-.recipe-sidebar {
-    flex: 1;
-    margin-inline-start: 2rem;
+.recipe-card:hover {
+    transform: translateY(-5px);
 }
 
-.recipe-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.recipe-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    font-family: var(--nav-font);
-}
-
-body[dir="rtl"] .recipe-meta {
-    flex-direction: row-reverse;
-}
-
-.recipe-image {
+.recipe-card img {
     width: 100%;
-    height: auto;
-    border-radius: 10px;
-    margin-bottom: 1rem;
+    height: 200px;
+    object-fit: cover;
 }
 
-.recipe h2 {
+.recipe-card h3 {
     font-size: 1.8rem;
+    margin: 1rem;
+}
+
+.recipe-info {
+    font-size: 1rem;
+    color: #666;
+    margin: 0 1rem 1rem;
+}
+
+/* Quote section */
+.quote-section {
+    background-color: var(--secondary-color);
+    padding: 2rem;
+    text-align: center;
+    font-style: italic;
     margin-top: 2rem;
+}
+
+.quote-section blockquote {
+    font-size: 1.5rem;
     margin-bottom: 1rem;
-    border-bottom: 2px solid var(--secondary-color);
-    padding-bottom: 0.5rem;
-}
-
-.recipe-ingredients ul,
-.recipe-instructions ol {
-    padding-inline-start: 1.5rem;
-}
-
-.recipe-ingredients li,
-.recipe-instructions li {
-    margin-bottom: 0.5rem;
-}
-
-.user-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-}
-
-body[dir="rtl"] .user-actions {
-    flex-direction: row-reverse;
-}
-
-.user-actions button {
-    padding: 0.5rem 1rem;
-    background-color: var(--primary-color);
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: var(--nav-font);
-    transition: background-color 0.3s;
-}
-
-.user-actions button:hover {
-    background-color: #5c4033;
 }
 
 /* Footer */
@@ -296,76 +263,46 @@ footer {
     text-align: center;
     padding: 1rem;
     font-family: var(--nav-font);
-}
-
-/* Quote section */
-.quote-section {
-    background-color: var(--secondary-color);
-    padding: 2rem;
-    text-align: center;
-    font-style: italic;
-}
-
-.quote-section blockquote {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.quote-section cite {
-    font-family: var(--nav-font);
-    font-size: 1rem;
+    margin-top: 2rem;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .header-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    .header-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-  .logo, nav, .search-container {
-    margin-bottom: 1rem;
-  }
+    .logo, nav, .search-container {
+        margin-bottom: 1rem;
+    }
 
-  nav ul {
-    flex-direction: column;
-    width: 100%; /* Make buttons full width on mobile */
-  }
+    nav ul {
+        flex-direction: column;
+        width: 100%;
+    }
 
-  nav ul li {
-    margin-right: 0;
-    margin-bottom: 0.5rem;
-    width: 100%; /* Make buttons full width on mobile */
-  }
+    nav ul li {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
 
-  nav ul li:last-child {
-    margin-bottom: 0;
-  }
+    nav ul li:last-child {
+        margin-bottom: 0;
+    }
 
-  nav ul li a {
-    display: block; /* Make buttons full width on mobile */
-    text-align: center;
-  }
+    nav ul li a {
+        display: block;
+        text-align: center;
+    }
 
     .hero h1 {
         font-size: 3rem;
     }
 
-    .hero p {
-        font-size: 1.2rem;
-    }
-
     .featured-recipes h2, .quick-links h2 {
         font-size: 2.5rem;
-    }
-
-    .recipe-page {
-        flex-direction: column;
-    }
-
-    .recipe-sidebar {
-        margin-inline-start: 0;
-        margin-top: 2rem;
     }
 
     .category-jar {
@@ -374,102 +311,5 @@ footer {
 
     .jar-img {
         height: 160px;
-    }
-}
-
-/* Search bar */
-.search-container {
-  display: flex;
-  align-items: center;
-}
-
-.search-form {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  border: 2px solid var(--primary-color);
-  border-radius: 5px;
-  overflow: hidden;
-  height: 40px; /* Set a fixed height for the search bar */
-}
-
-.search-input {
-  border: none;
-  background: transparent;
-  font-family: var(--body-font);
-  font-size: 1rem;
-  padding: 0 10px;
-  flex-grow: 1;
-  outline: none;
-  height: 100%; /* Make the input fill the height of the search form */
-}
-
-.search-button {
-  background: var(--primary-color);
-  border: none;
-  cursor: pointer;
-  padding: 0 15px;
-  height: 100%; /* Make the button fill the height of the search form */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.search-button .icon-search {
-  color: #fff;
-  font-size: 1.2rem;
-}
-
-
-/* Add these rules to your existing CSS file */
-
-/* Default LTR layout */
-body {
-    direction: ltr;
-}
-
-/* RTL layout for main content */
-.recipe-page[dir="rtl"] {
-    direction: rtl;
-}
-
-/* Language-specific content alignment */
-.lang-specific {
-    text-align: left;
-}
-
-.recipe-page[dir="rtl"] .lang-specific {
-    text-align: right;
-}
-
-/* Adjust flex direction for RTL layout */
-.recipe-page[dir="rtl"] .recipe-meta,
-.recipe-page[dir="rtl"] .user-actions {
-    flex-direction: row-reverse;
-}
-
-/* Adjust padding for lists in RTL layout */
-.recipe-page[dir="rtl"] .recipe-ingredients ul,
-.recipe-page[dir="rtl"] .recipe-instructions ol {
-    padding-right: 1.5rem;
-    padding-left: 0;
-}
-
-/* Adjust margins for sidebar in RTL layout */
-.recipe-page[dir="rtl"] .recipe-sidebar {
-    margin-right: 2rem;
-    margin-left: 0;
-}
-
-/* Keep header and footer alignment consistent */
-header, footer {
-    direction: ltr;
-    text-align: left;
-}
-
-/* Responsive design adjustments */
-@media (max-width: 768px) {
-    .recipe-page[dir="rtl"] .recipe-sidebar {
-        margin-right: 0;
     }
 }
