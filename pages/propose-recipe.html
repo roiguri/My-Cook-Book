@@ -11,7 +11,7 @@
         <div class="logo">Our Kitchen Chronicles</div>
         <nav>
             <ul>
-                <li><a href="index.html">Home</a></li>
+                <li><a href="../index.html">Home</a></li>
                 <li><a href="#recipes">Recipes</a></li>
                 <li><a href="#meal-planner">Meal Planner</a></li>
                 <li><a href="propose-recipe.html">Propose a Recipe</a></li>
@@ -34,9 +34,75 @@
         </section>
 
         <section class="propose-recipe-form">
-            <h2>Recipe Details</h2>
-            <form dir="rtl" id="recipe-form" action="post" method="post">
-                <!-- Form fields will be added here later -->
+            <h2>פרטי המתכון</h2>
+            <form dir="rtl" id="recipe-form" action="#" method="get">
+                <div class="form-row">
+                    <div class="right-col">
+                        <label for="name">שם המנה: </label>
+                        <input type="text" id="name" name="dish-name" />
+                    </div>
+                    <div class="left-col">
+                        <label for="type">סוג מנה:  </label>
+                        <input list="dish-types" type="text" id="dish-type" name="dish-type" />
+
+                        <datalist id="dish-types">
+                            <option value="Appetizers"></option>
+                            <option value="Main Courses"></option>
+                            <option value="Side Dishes"></option>
+                            <option value="Soups & Stews"></option>
+                            <option value="Salads"></option>
+                            <option value="Desserts"></option>
+                            <option value="Breakfast & Brunch"></option>
+                            <option value="Snacks"></option>
+                            <option value="Bevrages"></option>
+                        </datalist>
+
+                    </div>                   
+                </div>
+                <div class="form-row">
+                    <div class="right-col">
+                        <label for="prep-time">זמן הכנה (בדקות): </label>
+                        <input type="text" id="prep-time" name="preparation-time" />
+                    </div>
+                    <div class="left-col">
+                        <label for="wait-time">זמן המתנה (בדקות)  </label>
+                        <input type="text" id="wait-time" name="waiting-time" />
+                    </div>                   
+                </div>
+                <div class="form-row">
+                    <div class="full">
+                        <label for="ingredients">מצרכים: </label>
+                        <fieldset class="ingredients">
+                            <div class="ingredient-entry">
+                                <input type="text" name="ingredient-quantity[]" placeholder="כמות" class="quantity-input">
+                                <input type="text" name="ingredient-item[]" placeholder="פריט" class="item-input">
+                                <button type="button" class="add-ingredient">+</button>
+                            </div>
+                        </fieldset>
+                    </div>                 
+                </div>
+                <div class="form-row">
+                    <div class="full">
+                        <label for="steps">תהליך הכנה: </label>
+                        <fieldset class="steps">
+                            <input type="text" id="steps" name="steps" />
+                            <button>+</button>
+                        </fieldset>
+                    </div>             
+                </div>
+                <div class="form-row">
+                    <div class="full">
+                        <label for="comments"> הערות: </label>
+                        <fieldset class="comments">
+                            <textarea id = "comments"></textarea>
+                        </fieldset>
+                    </div>                   
+                </div>
+                <div class="form-row">
+                    <button type="submit">Submit Recipe</button>
+                    <button type="reset">Clear Form</button>
+                </div>
+                
             </form>
         </section>
     </main>

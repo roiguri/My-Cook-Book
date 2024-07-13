@@ -360,7 +360,7 @@ footer {
 }
 
 
-/* New styles for the Propose a Recipe page */
+/* Styles for Propose a Recipe page */
 .propose-recipe-container {
     max-width: 800px;
     margin: 0 auto;
@@ -402,11 +402,22 @@ footer {
     font-size: 2.5rem;
     text-align: center;
     margin-bottom: 1.5rem;
+    margin-top: 0;
     color: var(--primary-color);
 }
 
 #recipe-form {
-    /* Styles for the form will be added here later */
+    display:flex;
+    flex-direction: column;
+}
+.form-row {
+    display: flex;
+}
+.right-col, .left-col{
+    flex:auto;
+}
+fieldset{
+    border: 0;
 }
 
 /* Responsive design for Propose a Recipe page */
