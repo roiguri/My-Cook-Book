@@ -1,102 +1,131 @@
 <!DOCTYPE html>
-<html dir = "rtl" lang="he">
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ספר המתכונים</title>
+    <title>Our Kitchen Chronicles</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <div class = "card">
-        <div class = "header">
-            <ul class="right-links">
-                <li><a href="index.html">דף הבית</a></li>
-            </ul>
-            <ul class="left-links">
-                <li><a href="pages/grandma-cook-book/grandma.html">ספר המתכונים של סבתא</a></li>
-                <li><a href="#">קישורים נוספים</a></li>
-            </ul>
+    <div class="header-container">
+        <div class="logo">
+          Our Kitchen Chronicles
         </div>
-
-        <div class = "general">
-            <div class = "text">
-                <div class = "title">
-                    ספר המתכונים שלי
-                </div>
-                <div>
-                    כאן אפשר למצוא את כל המתכונים של המשפחה </br>
-                    להוספת מתכונים ניתן ליצור קשר
-                </div>
-            </div>
-            <div class = "images">
-                <img src="img/index/bolognese.jpg" alt="Food picture">
-                <img src="img/index/israeli-couscous.jpeg" alt="Food picture">
-                <img src="img/index/rice-with-green-beans-and-carrots.jpg" alt="Food picture">
-                <img src="img/index/majadra.jpg" alt="Food picture">
-                <img src="img/index/pasta-with-chickecn-breasts.jpg" alt="Food picture">
-            </div>
-        </div>
-        
-        <div class = "content">
-            <div class = "type">
-                עיקריות
-                <a href = "pages/main-dishes/rice-with-green-beans-and-carrot.html" rel="noopener noreferrer">
-                    אורז עם שעועית וגזר
-                </a>
-                <a href = "pages/main-dishes/bolognese.html" rel="noopener noreferrer">
-                    בולונז
-                </a>
-                <a href = "pages/main-dishes/patties.html" rel="noopener noreferrer">
-                    קציצות של אמא
-                </a>
-                <a href = "pages/main-dishes/pasta-with-chicken-breasts.html" rel="noopener noreferrer">
-                    פסטה עם חזה עוף בתיבול מזרחי
-                </a>
-                <a href = "pages/main-dishes/stir-fries-pasta-with-salmon.html" rel="noopener noreferrer">
-                    מוקפץ עם סלמון וברוקולי
-                </a>
-                <a href = "pages/main-dishes/chicken-breasts-with-paprika.html" rel="noopener noreferrer">
-                    חזה עוף בפפריקה
-                </a>
-                <a href = "pages/main-dishes/shnitzel.html" rel="noopener noreferrer">
-                    שניצלים
-                </a>
-            </div>
-            <div class = "type">
-                תוספות
-                <a href = "pages/sides/white-rice.html" rel="noopener noreferrer">
-                    אורז פרסי לבן
-                </a>
-                <a href = "pages/sides/israeli-couscous.html" rel="noopener noreferrer">
-                    פתיתים
-                </a>
-                <a href = "pages/sides/Majadra.html" rel="noopener noreferrer">
-                    מג'דרה
-                </a>
-            </div>
-            <div class = "type">
-                קינוחים
-                <a href = "pages/desserts/brownies.html" rel="noopener noreferrer">
-                    בראוניז
-                </a>
-                <a href = "pages/desserts/creme-brule.html" rel="noopener noreferrer">
-                    קרם ברולה של רותם
-                </a>
-            </div>
-        </div>
-
-        <div dir = "ltr" lang ="en" class = "quote-section">
-            <div class = "quote">
-                “Cooking is like painting or writing a song. Just as there are only so many notes or colors, there are only so many flavors - it’s how you combine them that sets you apart.”
-            </div>
-            <div class = "quote-writer">
-                - Wolfgang Puck
-            </div>
-        </div>
-
-        <div class = "footer">
-
+      
+        <nav>
+          <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#recipes">Recipes</a></li>
+            <li><a href="#meal-planner">Meal Planner</a></li>
+            <li><a href="#propose">Propose a Recipe</a></li>
+          </ul>
+        </nav>
+      
+        <div class="search-container">
+          <form class="search-form" action="#" method="get">
+            <input type="text" class="search-input" placeholder="Search recipes...">
+            <button type="submit" class="search-button">
+              <i class="icon-search">🔍</i>
+            </button>
+          </form>
         </div>
     </div>
+
+    <main>
+        <section class="hero">
+            <h1>Our Kitchen Chronicles</h1>
+            <p>Discover homemade goodness in every bite</p>
+        </section>
+
+        <section class="quick-links">
+            <h2>Explore Recipes</h2>
+            <div class="category-jars">
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('appetizer-jar.jpg');"></div>
+                    <span>Appetizers</span>
+                </a>
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('main-course-jar.jpg');"></div>
+                    <span>Main Courses</span>
+                </a>
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('dessert-jar.jpg');"></div>
+                    <span>Desserts</span>
+                </a>
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('soup-jar.jpg');"></div>
+                    <span>Soups & Stews</span>
+                </a>
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('soup-jar.jpg');"></div>
+                    <span>Soups & Stews</span>
+                </a>
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('soup-jar.jpg');"></div>
+                    <span>Soups & Stews</span>
+                </a>
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('soup-jar.jpg');"></div>
+                    <span>Soups & Stews</span>
+                </a>
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('soup-jar.jpg');"></div>
+                    <span>Soups & Stews</span>
+                </a>
+                <a href="#" class="category-jar">
+                    <div class="jar-img" style="background-image: url('soup-jar.jpg');"></div>
+                    <span>Soups & Stews</span>
+                </a>
+                <!-- Add more category jars as needed -->
+            </div>
+        </section>
+        
+        <section class="featured-recipes">
+            <h2>Featured Recipes</h2>
+            <div class="recipe-grid">
+                <div class="recipe-card">
+                    <img src="rustic-soup.jpg" alt="Hearty Vegetable Soup">
+                    <h3>Hearty Vegetable Soup</h3>
+                    <p>A warming bowl of goodness</p>
+                    <div class="recipe-info">
+                        <span><i class="icon-time"></i> 45 mins</span>
+                        <span><i class="icon-difficulty"></i> Easy</span>
+                    </div>
+                </div>
+                <div class="recipe-card">
+                    <img src="rustic-bread.jpg" alt="Crusty Artisan Bread">
+                    <h3>Crusty Artisan Bread</h3>
+                    <p>Simple, rustic, delicious</p>
+                    <div class="recipe-info">
+                        <span><i class="icon-time"></i> 3 hrs</span>
+                        <span><i class="icon-difficulty"></i> Medium</span>
+                    </div>
+                </div>
+                <div class="recipe-card">
+                    <img src="apple-pie.jpg" alt="Classic Apple Pie">
+                    <h3>Classic Apple Pie</h3>
+                    <p>Just like grandma used to make</p>
+                    <div class="recipe-info">
+                        <span><i class="icon-time"></i> 1.5 hrs</span>
+                        <span><i class="icon-difficulty"></i> Medium</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+    </main>
+
+    <div class="quote-section">
+        <blockquote>
+            "Cooking is like painting or writing a song. Just as there are only so many notes or colors, there are only so many flavors—it's how you combine them that sets you apart."
+        </blockquote>
+        <cite>– Wolfgang Puck</cite>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+    </footer>
 </body>
 </html>
