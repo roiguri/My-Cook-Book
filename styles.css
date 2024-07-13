@@ -362,12 +362,9 @@ footer {
 
 /* Styles for Propose a Recipe page */
 .propose-recipe-container {
-    margin: 2rem auto;
-    padding: 2rem;
-    background-color: #FFFAF0; /* Slightly darker cream for form background */
-    border: 1px solid var(--primary-color); /* Primary color border */
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    max-width: 800px;
 }
 
 .propose-recipe-hero {
@@ -415,15 +412,20 @@ footer {
     display:flex;
     flex-direction: column;
 }
+
 .form-row {
     display: flex;
     margin-bottom: 1.5rem;
     gap: 10px;
 }
+
 .right-col, .left-col{
     flex:1;
 }
-.full{
+
+.steps-container, 
+.ingredients-container,
+.comments-container{
     width: 100%;
     padding: 0px;
     box-sizing: border-box;
@@ -465,6 +467,7 @@ select:focus {
     padding: 0;
     margin: 0;
     width: 100%;
+    gap: 10px;
 }
 
 .steps{
@@ -476,16 +479,15 @@ select:focus {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
+    gap: 10px;
 }
 
 .ingredient-entry>.quantity-input {
     width: calc(30% - 5px);
-    margin-left: 10px;
 }
 
 .item-input {
     flex-grow: 1;
-    margin-left: 10px;
 }
 
 .add-ingredient, .add-step {
@@ -527,6 +529,7 @@ select:focus {
     color: white;
     border: none;
     border-radius: 5px;
+    font-family: var(--body-font);
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -556,9 +559,6 @@ select:focus {
         margin-bottom: 1rem;
     }
 
-    .ingredient-entry {
-        flex-wrap: wrap;
-    }
     .propose-recipe-hero h1 {
         font-size: 2.5rem;
     }
