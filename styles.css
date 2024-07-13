@@ -35,6 +35,7 @@ body {
   background-color: #e5e7eb;
   gap: 18px;
   align-items: stretch;
+  flex-grow: 0;
 }
 
 .content {
@@ -99,6 +100,8 @@ body {
   display: flex;
   min-width: 0px;
   overflow: hidden;
+  flex-grow: 0;
+  object-fit: cover;
 }
 
 .general img{
