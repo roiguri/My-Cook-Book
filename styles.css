@@ -362,9 +362,12 @@ footer {
 
 /* Styles for Propose a Recipe page */
 .propose-recipe-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #FFFAF0; /* Slightly darker cream for form background */
+    border: 1px solid var(--primary-color); /* Primary color border */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .propose-recipe-hero {
@@ -383,12 +386,14 @@ footer {
 }
 
 .propose-recipe-hero h1 {
+    color: var(--primary-color);
     font-size: 3.5rem;
     margin-bottom: 0.5rem;
 }
 
 .propose-recipe-hero p {
     font-size: 1.2rem;
+    color: #5D4037;
 }
 
 .propose-recipe-form {
@@ -412,16 +417,148 @@ footer {
 }
 .form-row {
     display: flex;
+    margin-bottom: 1.5rem;
+    gap: 10px;
 }
 .right-col, .left-col{
-    flex:auto;
+    flex:1;
 }
-fieldset{
+.full{
+    width: 100%;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+label{
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #5D4037;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #8B4513; /* Primary color */
+    border-radius: 5px;
+    font-family: 'Rubik', sans-serif;
+    font-size: 14px;
+    background-color: #FFF;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #5D4037; /* Slightly lighter brown */
+    box-shadow: 0 0 5px rgba(139, 69, 19, 0.5); /* Subtle glow */
+}
+
+/* Ingredients and Steps Styles */
+.ingredients, .steps {
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.steps{
+    display: flex;
+    gap: 10px;
+}
+
+.ingredient-entry {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ingredient-entry>.quantity-input {
+    width: calc(30% - 5px);
+    margin-left: 10px;
+}
+
+.item-input {
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.add-ingredient, .add-step {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #8B4513; /* Primary color */
+    color: white;
+    border: none;
+    font-size: 18px;
+    font-weight: bolder;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.add-ingredient:hover, .add-step:hover {
+    background-color: #6b3a0f; /* Darker shade on hover */
+}
+
+/* Comments Styles */
+.comments textarea {
+    width: 100%;
+    height: 100px;
+    box-sizing: border-box;
+    resize: none;
+}
+.comments{
     border: 0;
+    padding: 0;
+}
+
+/* Submit Button Styles */
+.submit-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #8B4513; /* Primary color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #6b3a0f; /* Darker shade on hover */
 }
 
 /* Responsive design for Propose a Recipe page */
 @media (max-width: 768px) {
+    .ingredient-entry > .quantity-input, 
+    .item-input {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+    }
+
+    .right-col, .left-col {
+        width: 100%;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+
+    .ingredient-entry {
+        flex-wrap: wrap;
+    }
     .propose-recipe-hero h1 {
         font-size: 2.5rem;
     }
