@@ -41,6 +41,7 @@ a {
   padding: 1rem;
   background: url('wood-texture.jpg') repeat;
   border-bottom: 3px solid var(--primary-color);
+  gap: 0.5rem;
 }
 
 .logo {
@@ -58,7 +59,7 @@ nav ul {
 }
 
 nav ul li {
-  margin-right: 1rem;
+  margin-right: 0.5rem;
 }
 
 nav ul li:last-child {
@@ -79,6 +80,10 @@ nav ul li a {
 
 nav ul li a:hover {
   background-color: #5c4033;
+}
+
+.nav-search-container{
+  gap: 0.5rem;
 }
 
 /* Search bar */
@@ -268,7 +273,7 @@ footer {
 }
 
 /* Responsive design */
-@media (max-width: 1024px) {
+@media (max-width: 1064px) {
   .header-container {
       flex-direction: column;
       align-items: center;
@@ -281,10 +286,16 @@ footer {
   nav {
       margin-bottom: 1rem;
   }
-
+  
   .search-container {
       width: 100%;
       max-width: 400px;
+      display: flex;
+      justify-content: center;
+  }
+
+  .nav-search-container{
+    flex-direction: column;
   }
 }
 
@@ -296,12 +307,12 @@ footer {
 
   .logo {
       text-align: center;
-      margin-bottom: 1rem;
   }
 
   nav ul {
       flex-direction: column;
       width: 100%;
+      margin-bottom: 0;
   }
 
   nav ul li {
