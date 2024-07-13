@@ -39,14 +39,16 @@ a {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: url('wood-texture.jpg') repeat;
+  background: url('img/index/wood-texture.jpg') repeat-x;
+  background-size: auto 100%;
   border-bottom: 3px solid var(--primary-color);
   gap: 0.5rem;
 }
 
 .logo {
   font-family: var(--heading-font);
-  font-size: 2.5rem;
+  font-weight: bolder;
+  font-size: 3rem;
   color: var(--background-color);
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
@@ -73,6 +75,7 @@ nav ul li a {
   background: var(--primary-color);
   padding: 0.5rem 1rem;
   border-radius: 5px;
+  border: 2px black solid;
   transition: background-color 0.3s;
   display: inline-block;
   white-space: nowrap;
@@ -90,6 +93,7 @@ nav ul li a:hover {
 .search-container {
   display: flex;
   align-items: center;
+  
 }
 
 .search-form {
@@ -98,6 +102,7 @@ nav ul li a:hover {
   background-color: #fff;
   border: 2px solid var(--primary-color);
   border-radius: 5px;
+  border: 2px black solid;
   overflow: hidden;
   height: 40px;
 }
@@ -138,7 +143,7 @@ main {
 
 /* Hero section */
 .hero {
-    background: url('rustic-kitchen.jpg') no-repeat center center;
+    background: url('img/rustic-kitchen.jpg') no-repeat center center;
     background-size: cover;
     height: 400px;
     display: flex;
@@ -353,4 +358,69 @@ footer {
   .jar-img {
       height: 160px;
   }
+}
+
+
+/* New styles for the Propose a Recipe page */
+.propose-recipe-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.propose-recipe-hero {
+    background: url('img/propose-recipe-hero.jpg') no-repeat center center;
+    background-size: cover;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.propose-recipe-hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.propose-recipe-hero p {
+    font-size: 1.2rem;
+}
+
+.propose-recipe-form {
+    background-color: var(--secondary-color);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.propose-recipe-form h2 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+#recipe-form {
+    /* Styles for the form will be added here later */
+}
+
+/* Responsive design for Propose a Recipe page */
+@media (max-width: 768px) {
+    .propose-recipe-hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .propose-recipe-hero p {
+        font-size: 1rem;
+    }
+
+    .propose-recipe-form h2 {
+        font-size: 2rem;
+    }
 }
