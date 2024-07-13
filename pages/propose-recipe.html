@@ -37,11 +37,11 @@
             <h2>פרטי המתכון</h2>
             <form dir="rtl" id="recipe-form" action="#" method="get">
                 <div class="form-row">
-                    <div class="right-col">
+                    <div class="form-group">
                         <label for="name">שם המנה: </label>
                         <input type="text" id="name" name="dish-name" />
                     </div>
-                    <div class="left-col">
+                    <div class="form-group">
                         <label for="type">סוג מנה:  </label>
                         <input list="dish-types" type="text" id="dish-type" name="dish-type" />
 
@@ -60,28 +60,28 @@
                     </div>                   
                 </div>
                 <div class="form-row">
-                    <div class="right-col">
+                    <div class="form-group">
                         <label for="prep-time">זמן הכנה (בדקות): </label>
                         <input type="text" id="prep-time" name="preparation-time" />
                     </div>
-                    <div class="left-col">
+                    <div class="form-group">
                         <label for="wait-time">זמן המתנה (בדקות): </label>
                         <input type="text" id="wait-time" name="waiting-time" />
                     </div>                   
                 </div>
-                <div class="form-row">
+                <div class="form-group">
                     <div class="ingredients-container">
                         <label for="ingredients">מצרכים: </label>
                         <fieldset class="ingredients">
                             <div class="ingredient-entry">
                                 <input type="text" name="ingredient-quantity[]" placeholder="כמות" class="quantity-input">
                                 <input type="text" name="ingredient-item[]" placeholder="פריט" class="item-input">
-                                <button type="button" class="add-ingredient">+</button>
+                                <button type="button" id="add-ingredient" class="add-ingredient">+</button>
                             </div>
                         </fieldset>
                     </div>                 
                 </div>
-                <div class="form-row">
+                <div class="form-group">
                     <div class="steps-container">
                         <label for="steps">תהליך הכנה: </label>
                         <fieldset class="steps">
@@ -90,7 +90,7 @@
                         </fieldset>
                     </div>             
                 </div>
-                <div class="form-row">
+                <div class="form-group">
                     <div class="comments-container">
                         <label for="comments"> הערות: </label>
                         <fieldset class="comments">
@@ -98,9 +98,8 @@
                         </fieldset>
                     </div>                   
                 </div>
-                <div class="form-row">
+                <div class="form-group">
                     <button class="submit-button" type="submit">שלח מתכון</button>
-                    <button class="submit-button" type="reset">נקה</button>
                 </div>
             </form>
         </section>
@@ -116,5 +115,6 @@
     <footer>
         <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
     </footer>
+    <scripts src="form-script.js"></scripts>
 </body>
 </html>
