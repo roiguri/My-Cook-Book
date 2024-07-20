@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const cookingTimeFilter = document.getElementById('cooking-time');
     const difficultyFilter = document.getElementById('difficulty');
     const mainIngredientFilter = document.getElementById('main-ingredient');
-    const tagsFilter = document.getElementById('tags');
     const pageTitle = document.querySelector('h1');
 
     let currentCategory = 'appetizers';
@@ -93,10 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         // Apply tag filter
-        const selectedTags = Array.from(tagsFilter.selectedOptions).map(option => option.value);
         if (selectedTags.length > 0) {
             filteredRecipes = filteredRecipes.filter(recipe => {
-                console.log(`Tag filter: ${recipe.name}, Tags: ${recipe.tags.join(', ')}, Selected: ${selectedTags.join(', ')}`);
                 return selectedTags.every(tag => recipe.tags.includes(tag));
             });
         }
@@ -156,24 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Difficulty filter HTML:", difficultyFilter.innerHTML);
     }
 
-    function populateTagFilter() {
-        // Filter recipes for the current category
-        const currentCategoryRecipes = recipes.filter(recipe => recipe.category === currentCategory);
-        
-        // Get unique tags from the current category recipes
-        const categoryTags = [...new Set(currentCategoryRecipes.flatMap(recipe => recipe.tags))];
-        
-        // Sort tags alphabetically
-        categoryTags.sort((a, b) => a.localeCompare(b, 'he'));
-    
-        // Populate the tag filter dropdown
-        tagsFilter.innerHTML = categoryTags.map(tag => `
-            <option value="${tag}">${tag}</option>
-        `).join('');
-        
-        console.log(`Populated tags for category '${currentCategory}':`, categoryTags);
-    }
-
     function populateCookingTimeFilter() {
         cookingTimeFilter.innerHTML = `
             <option value="">כל זמני הבישול</option>
@@ -182,6 +161,70 @@ document.addEventListener('DOMContentLoaded', function() {
             <option value="61">61+ דקות</option>
         `;
         console.log("Populated cooking time filter options");
+    }
+
+    /* tag filter */
+    let allTags = [];
+    let selectedTags = [];
+
+    function populateTagFilter() {
+        const currentCategoryRecipes = recipes.filter(recipe => recipe.category === currentCategory);
+        allTags = [...new Set(currentCategoryRecipes.flatMap(recipe => recipe.tags))];
+        allTags.sort((a, b) => a.localeCompare(b, 'he'));
+        
+        const tagSearchInput = document.getElementById('tag-search');
+        const tagSuggestions = document.getElementById('tag-suggestions');
+        const selectedTagsContainer = document.getElementById('selected-tags');
+
+        tagSearchInput.addEventListener('input', handleTagSearch);
+        tagSuggestions.addEventListener('click', handleTagSelection);
+        selectedTagsContainer.addEventListener('click', handleTagRemoval);
+
+        updateSelectedTags();
+    }
+
+    function handleTagSearch(event) {
+        const searchTerm = event.target.value.toLowerCase();
+        const tagSuggestions = document.getElementById('tag-suggestions');
+        
+        if (searchTerm.length === 0) {
+            tagSuggestions.style.display = 'none';
+            return;
+        }
+
+        const filteredTags = allTags.filter(tag => 
+            tag.toLowerCase().includes(searchTerm) && !selectedTags.includes(tag)
+        );
+
+        tagSuggestions.innerHTML = filteredTags.map(tag => `<div>${tag}</div>`).join('');
+        tagSuggestions.style.display = filteredTags.length > 0 ? 'block' : 'none';
+    }
+
+    function handleTagSelection(event) {
+        if (event.target.tagName === 'DIV') {
+            const selectedTag = event.target.textContent;
+            selectedTags.push(selectedTag);
+            updateSelectedTags();
+            filterAndDisplayRecipes();
+            document.getElementById('tag-search').value = '';
+            document.getElementById('tag-suggestions').style.display = 'none';
+        }
+    }
+
+    function handleTagRemoval(event) {
+        if (event.target.classList.contains('remove-tag')) {
+            const tagToRemove = event.target.parentElement.textContent.slice(0, -1);
+            selectedTags = selectedTags.filter(tag => tag !== tagToRemove);
+            updateSelectedTags();
+            filterAndDisplayRecipes();
+        }
+    }
+
+    function updateSelectedTags() {
+        const selectedTagsContainer = document.getElementById('selected-tags');
+        selectedTagsContainer.innerHTML = selectedTags.map(tag => 
+            `<div class="selected-tag">${tag}<span class="remove-tag">×</span></div>`
+        ).join('');
     }
 
     // Event listeners
@@ -196,9 +239,26 @@ document.addEventListener('DOMContentLoaded', function() {
         switchCategory(e.target.value);
     });
 
-    [cookingTimeFilter, difficultyFilter, mainIngredientFilter, tagsFilter].forEach(filter => {
-        filter.addEventListener('change', filterAndDisplayRecipes);
+    [cookingTimeFilter, difficultyFilter, mainIngredientFilter].forEach(filter => {
+        if (filter) {  // Add a null check
+            filter.addEventListener('change', filterAndDisplayRecipes);
+        }
     });
+    
+    // Add event listeners for our new tag filter elements
+    const tagSearchInput = document.getElementById('tag-search');
+    const tagSuggestions = document.getElementById('tag-suggestions');
+    const selectedTagsContainer = document.getElementById('selected-tags');
+    
+    if (tagSearchInput) {
+        tagSearchInput.addEventListener('input', handleTagSearch);
+    }
+    if (tagSuggestions) {
+        tagSuggestions.addEventListener('click', handleTagSelection);
+    }
+    if (selectedTagsContainer) {
+        selectedTagsContainer.addEventListener('click', handleTagRemoval);
+    }
 
     // Check if the page was reached from the navigation bar
     if (window.location.hash) {

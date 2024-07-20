@@ -138,6 +138,66 @@ footer {
     border-radius: 4px;
 }
 
+/* tag filter styles */
+.tag-filter {
+    position: relative;
+}
+
+#tag-search {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    direction: rtl;
+}
+
+#tag-suggestions {
+    position: absolute;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    background-color: white;
+    z-index: 1000;
+    display: none;
+}
+
+#tag-suggestions div {
+    padding: 8px;
+    cursor: pointer;
+    direction: rtl;
+}
+
+#tag-suggestions div:hover {
+    background-color: #f1f1f1;
+}
+
+#selected-tags {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.selected-tag {
+    background-color: #e4e4e4;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    direction: rtl;
+}
+
+.remove-tag {
+    margin-right: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
 /* Recipe Grid Styles */
 .recipe-grid {
     direction: rtl;
