@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Kitchen Chronicles - Recipes</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="category-styles.css">
+</head>
+<body>
+    <div class="header-container">
+        <div class="logo">
+          Our Kitchen Chronicles
+        </div>
+        <button class="nav-toggle" aria-label="Toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-search-container">
+            <nav>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../../pages/category-pages/categories.html">Recipes</a></li>
+                    <li><a href="#meal-planner">Meal Planner</a></li>
+                    <li><a href="../propose-recipe.html">Propose a Recipe</a></li>
+                </ul>
+            </nav>
+            <div class="search-container">
+                <form class="search-form" action="#" method="get">
+                <input type="text" class="search-input" placeholder="Search recipes...">
+                <button type="submit" class="search-button">
+                    <i class="icon-search">🔍</i>
+                </button>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+    
+    <main class="category-page">
+        <h1>Recipes</h1>
+        
+        <div class="search-bar">
+            <input type="text" placeholder="Search recipes...">
+            <button>Search</button>
+        </div>
+        
+        <nav class="category-tabs">
+            <ul>
+                <li><a href="#appetizers" class="active">Appetizers</a></li>
+                <li><a href="#main-courses">Main Courses</a></li>
+                <li><a href="#side-dishes">Side Dishes</a></li>
+                <li><a href="#soups-stews">Soups & Stews</a></li>
+                <li><a href="#salads">Salads</a></li>
+                <li><a href="#desserts">Desserts</a></li>
+                <li><a href="#breakfast-brunch">Breakfast & Brunch</a></li>
+                <li><a href="#snacks">Snacks</a></li>
+                <li><a href="#beverages">Beverages</a></li>
+            </ul>
+        </nav>
+
+        <div class="category-dropdown">
+            <select id="category-select">
+                <option value="appetizers">Appetizers</option>
+                <option value="main-courses">Main Courses</option>
+                <option value="side-dishes">Side Dishes</option>
+                <option value="soups-stews">Soups & Stews</option>
+                <option value="salads">Salads</option>
+                <option value="desserts">Desserts</option>
+                <option value="breakfast-brunch">Breakfast & Brunch</option>
+                <option value="snacks">Snacks</option>
+                <option value="beverages">Beverages</option>
+            </select>
+        </div>
+        
+        <section class="filters">
+            <div class="filter-group">
+                <label for="cooking-time">Cooking Time:</label>
+                <select id="cooking-time">
+                    <option value="">All</option>
+                    <option value="0-30">0-30 minutes</option>
+                    <option value="30-60">30-60 minutes</option>
+                    <option value="60+">60+ minutes</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="main-ingredient">Main Ingredient:</label>
+                <select id="main-ingredient">
+                    <option value="">All</option>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="tags">Tags:</label>
+                <select id="tags" multiple>
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+        </section>
+        
+        <section class="recipe-grid" id="recipe-grid">
+            <!-- Recipe cards will be dynamically added here -->
+        </section>
+        
+        <div class="pagination">
+            <!-- Pagination controls will be added here -->
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+    </footer>
+
+    <script src="../../js/navigation-script.js"></script>
+    <script src="../../js/recipe-data.js"></script>
+    <script src="../../js/category.js"></script>
+</body>
+</html>
