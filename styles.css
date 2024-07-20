@@ -45,6 +45,11 @@ a {
   gap: 0.5rem;
 }
 
+.nav-search-container{
+    display: flex;
+    
+}
+
 .logo {
   font-family: var(--heading-font);
   font-weight: bolder;
@@ -75,7 +80,7 @@ nav ul li a {
   background: var(--primary-color);
   padding: 0.5rem 1rem;
   border-radius: 5px;
-  border: 2px black solid;
+
   transition: background-color 0.3s;
   display: inline-block;
   white-space: nowrap;
@@ -93,7 +98,6 @@ nav ul li a:hover {
 .search-container {
   display: flex;
   align-items: center;
-  
 }
 
 .search-form {
@@ -102,7 +106,7 @@ nav ul li a:hover {
   background-color: #fff;
   border: 2px solid var(--primary-color);
   border-radius: 5px;
-  border: 2px black solid;
+
   overflow: hidden;
   height: 40px;
 }
