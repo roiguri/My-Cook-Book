@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     
     <script defer src="js/navigation-script.js"></script>
+    <script defer src="js/recipe-data.js"></script>
+    <script defer src="js/featured-recipes.js"></script>
 
 </head>
 <body>
@@ -91,34 +93,8 @@
         
         <section class="featured-recipes">
             <h2>Featured Recipes</h2>
-            <div class="recipe-grid">
-                <div class="recipe-card">
-                    <img src="rustic-soup.jpg" alt="Hearty Vegetable Soup">
-                    <h3>Hearty Vegetable Soup</h3>
-                    <p>A warming bowl of goodness</p>
-                    <div class="recipe-info">
-                        <span><i class="icon-time"></i> 45 mins</span>
-                        <span><i class="icon-difficulty"></i> Easy</span>
-                    </div>
-                </div>
-                <div class="recipe-card">
-                    <img src="rustic-bread.jpg" alt="Crusty Artisan Bread">
-                    <h3>Crusty Artisan Bread</h3>
-                    <p>Simple, rustic, delicious</p>
-                    <div class="recipe-info">
-                        <span><i class="icon-time"></i> 3 hrs</span>
-                        <span><i class="icon-difficulty"></i> Medium</span>
-                    </div>
-                </div>
-                <div class="recipe-card">
-                    <img src="apple-pie.jpg" alt="Classic Apple Pie">
-                    <h3>Classic Apple Pie</h3>
-                    <p>Just like grandma used to make</p>
-                    <div class="recipe-info">
-                        <span><i class="icon-time"></i> 1.5 hrs</span>
-                        <span><i class="icon-difficulty"></i> Medium</span>
-                    </div>
-                </div>
+            <div id="featured-recipes-grid" class="favorites-grid">
+                <!-- Featured recipes will be dynamically inserted here -->
             </div>
         </section>
 
@@ -135,5 +111,7 @@
     <footer>
         <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
     </footer>
+
+    
 </body>
 </html>

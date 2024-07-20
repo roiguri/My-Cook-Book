@@ -25,7 +25,7 @@ const recipes = [
     { id: 301, name: "אורז עם שעועית וגזר", category: "side-dishes", cookingTime: 90, difficulty: "בינונית",
         mainIngredient: "אורז", image: "rice-with-green-beans-and-carrots.jpg", tags: ["אורז", "שעועית", "גזר"] },
 
-    { id: 302, name: "אורז פרסי לבן", category: "side-dishes", cookingTime: 90, difficulty: "בינונית",
+    { id: 302, name: "אורז לבן פרסי", category: "side-dishes", cookingTime: 90, difficulty: "בינונית",
         mainIngredient: "אורז", image: "white-rice.jpg", tags: ["אורז"] },
 
     { id: 303, name: "פתיתים", category: "side-dishes", cookingTime: 15, difficulty: "קלה",
