@@ -69,6 +69,7 @@ nav ul {
 
 nav ul li {
   margin-right: 0.5rem;
+  box-shadow: h-offset v-offset blur spread color;
 }
 
 nav ul li:last-child {
@@ -142,9 +143,9 @@ nav ul li a:hover {
 .search-form {
   display: flex;
   align-items: center;
-  background-color: #fff;
   border: 2px solid var(--primary-color);
   border-radius: 5px;
+  background-color: var(--primary-color);
 
   overflow: hidden;
   height: 40px;
