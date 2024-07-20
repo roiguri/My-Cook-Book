@@ -4,7 +4,7 @@ const recipes = [
 
     /* main- courses */
     { id: 201, name: "מוקפץ עם סלמון וברוקולי", category: "main-courses", cookingTime: 30, difficulty: "קלה",
-        mainIngredient: "דג", image: "stir-fried-noodles-with-salmon.jpg", tags: ["סלמון", "ברוקולי", "שעועית ירוקה"] },
+        mainIngredient: "דג", image: "stir-fried-noodles-with-salmon.jpg", tags: ["סלמון", "ברוקולי", "שעועית ירוקה","פסטה"] },
 
     { id: 202, name: "בולונז", category: "main-courses", cookingTime: 90, difficulty: "בינונית",
         mainIngredient: "בשר", image: "bolognese.jpg", tags: ["בשר טחון", "גזר"] },
@@ -16,10 +16,10 @@ const recipes = [
         mainIngredient: "עוף", image: "pasta-with-chickecn-breasts.jpg", tags: ["עוף", "פסטה","ברוקולי", "קלמטה", "ארטישוק"] },
 
     { id: 205, name: "חזה עוף בפפריקה", category: "main-courses", cookingTime: 20, difficulty: "קלה",
-        mainIngredient: "עוף", image: "chicken-breasts-with-paprika.jpg", tags: ["עוף"] },
+        mainIngredient: "עוף", image: "chicken-breasts-with-paprika.jpg", tags: ["עוף", "פפריקה"] },
 
     { id: 206, name: "שניצלים", category: "main-courses", cookingTime: 30, difficulty: "קלה",
-        mainIngredient: "עוף", image: "shnitzel.jpeg", tags: ["עוף"] },
+        mainIngredient: "עוף", image: "shnitzel.jpeg", tags: ["עוף", "פירורי לחם"] },
 
     /* sides */
     { id: 301, name: "אורז עם שעועית וגזר", category: "side-dishes", cookingTime: 90, difficulty: "בינונית",
@@ -29,7 +29,7 @@ const recipes = [
         mainIngredient: "אורז", image: "white-rice.jpg", tags: ["אורז"] },
 
     { id: 303, name: "פתיתים", category: "side-dishes", cookingTime: 15, difficulty: "קלה",
-        mainIngredient: "פתיתים", image: "israeli-couscous.jpeg", tags: ["פתיתים"] },
+        mainIngredient: "פתיתים", image: "israeli-couscous.jpeg", tags: ["פתיתים", "תיבולית"] },
 
     { id: 304, name: "מג'דרה", category: "side-dishes", cookingTime: 75, difficulty: "בינונית",
         mainIngredient: "אורז", image: "majadra.jpg", tags: ["אורז", "עדשים ירוקות"] },

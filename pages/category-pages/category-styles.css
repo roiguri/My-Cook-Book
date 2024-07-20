@@ -28,6 +28,8 @@ footer {
 .category-page h1 {
     text-align: center;
     margin-bottom: 20px;
+    margin-top: 0;
+    font-size: 3rem;
 }
 
 /* Search Bar Styles */
@@ -264,6 +266,32 @@ footer {
 .pagination button.active {
     background-color: #4CAF50;
     color: white;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.pagination button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 0 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.pagination button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#page-info {
+    margin: 0 10px;
 }
 
 /* Responsive Design */

@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentCategory = 'appetizers';
     let currentPage = 1;
-    const recipesPerPage = 8;
+    const recipesPerPage = 4;
 
     // Function to switch categories
     function switchCategory(category) {
@@ -74,14 +74,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
         // Apply difficulty filter
         if (difficultyFilter.value) {
-            console.log("Applying difficulty filter, selected value:", difficultyFilter.value);
             filteredRecipes = filteredRecipes.filter(recipe => {
                 console.log(`Recipe: ${recipe.name}, Difficulty: ${recipe.difficulty}, Selected: ${difficultyFilter.value}, Match: ${recipe.difficulty === difficultyFilter.value}`);
                 return recipe.difficulty === difficultyFilter.value;
             });
         }
     
-        console.log("Filtered recipes after difficulty filter:", filteredRecipes);
     
         // Apply main ingredient filter
         if (mainIngredientFilter.value) {
@@ -101,9 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Final filteredRecipes:", filteredRecipes);
     
         // Pagination
+        const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
         const startIndex = (currentPage - 1) * recipesPerPage;
-        const paginatedRecipes = filteredRecipes.slice(startIndex, startIndex + recipesPerPage);
-    
+        const paginatedRecipes = filteredRecipes.slice(startIndex, startIndex + recipesPerPage);    
+        
         displayRecipes(paginatedRecipes);
         updatePagination(filteredRecipes.length);
     }
@@ -126,8 +125,20 @@ document.addEventListener('DOMContentLoaded', function() {
    
     // Function to update pagination
     function updatePagination(totalRecipes) {
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+        const pageInfo = document.getElementById('page-info');
         const totalPages = Math.ceil(totalRecipes / recipesPerPage);
-        // Implement pagination UI update here
+    
+        prevButton.disabled = currentPage === 1;
+        nextButton.disabled = currentPage === totalPages;
+    
+        pageInfo.textContent = `עמוד ${currentPage} מתוך ${totalPages}`;
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        filterAndDisplayRecipes();
     }
 
     function populateMainIngredientFilter() {
@@ -266,6 +277,19 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         pageTitle.textContent = "Recipes";
     }
+    // pagination listeners
+    document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+            goToPage(currentPage - 1);
+        }
+    });
+    
+    document.getElementById('next-page').addEventListener('click', () => {
+        const totalPages = Math.ceil(recipes.filter(recipe => recipe.category === currentCategory).length / recipesPerPage);
+        if (currentPage < totalPages) {
+            goToPage(currentPage + 1);
+        }
+    });
 
     // Initial setup
     
