@@ -483,6 +483,7 @@ label {
 
 input[type="text"],
 input[type="number"],
+input[type="file"],
 textarea,
 select {
     width: 100%;
@@ -512,6 +513,8 @@ select:focus {
     padding: 0;
     margin: 0;
     width: 100%;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .steps {
@@ -535,7 +538,9 @@ select:focus {
 }
 
 .add-ingredient,
-.add-step {
+.add-step,
+.remove-ingredient, 
+.remove-step {
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -552,6 +557,11 @@ select:focus {
 .add-ingredient:hover,
 .add-step:hover {
     background-color: #6b3a0f;
+}
+/* add images styles */
+.images{
+    border: 0;
+    padding: 0;
 }
 
 /* Comments Styles */

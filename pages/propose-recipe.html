@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../styles.css">
 
     <script defer src="../scripts/navigation-script.js"></script>
+    <script defer src="../scripts/propose-recipe.js"></script>
 
 </head>
 <body>
@@ -43,7 +44,7 @@
 
         <section class="propose-recipe-form">
             <h2>פרטי המתכון</h2>
-            <form dir="rtl" id="recipe-form" action="#" method="get">
+            <form dir="rtl" id="recipe-form" action="#" method="get" enctype="multipart/form-data">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="name">שם המנה: </label>
@@ -78,25 +79,33 @@
                     </div>                   
                 </div>
                 <div class="form-group">
-                    <div class="ingredients-container">
+                    <div id ="ingredients-container" class="ingredients-container">
                         <label for="ingredients">מצרכים: </label>
                         <fieldset class="ingredients">
                             <div class="ingredient-entry">
                                 <input type="text" name="ingredient-quantity[]" placeholder="כמות" class="quantity-input">
                                 <input type="text" name="ingredient-item[]" placeholder="פריט" class="item-input">
-                                <button type="button" id="add-ingredient" class="add-ingredient">+</button>
+                                <button type="button" class="add-ingredient">+</button>
                             </div>
                         </fieldset>
                     </div>                 
                 </div>
                 <div class="form-group">
-                    <div class="steps-container">
+                    <div id = "steps-container" class="steps-container">
                         <label for="steps">תהליך הכנה: </label>
                         <fieldset class="steps">
-                            <input type="text" id="steps" name="steps" />
-                            <button class="add-step">+</button>
+                            <input type="text" name="steps" />
+                            <button type="button" class="add-step">+</button>
                         </fieldset>
                     </div>             
+                </div>
+                <div class="form-group">
+                    <div class="upload-img">
+                        <label for="images"> הוסף תמונה: </label>
+                        <fieldset class="images">
+                            <input type="file" id="image" name="image" accept="image/*" required>
+                        </fieldset>
+                    </div>                   
                 </div>
                 <div class="form-group">
                     <div class="comments-container">
