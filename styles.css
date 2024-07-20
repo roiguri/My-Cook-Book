@@ -204,6 +204,11 @@ main {
     margin-bottom: 1rem;
 }
 
+.hero p {
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
 /* Quick links */
 .quick-links {
     margin-top: 2rem;
