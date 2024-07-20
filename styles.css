@@ -6,7 +6,7 @@
     --heading-font: 'Amatic SC', cursive;
     --body-font: 'Lora', serif;
     --nav-font: 'Source Sans Pro', sans-serif;
-    --primary-color: #8b4513;
+    --primary-color: #bb6016;
     --secondary-color: #e6dfd1;
     --text-color: #3a3a3a;
     --background-color: #f5f2e9;
@@ -519,7 +519,7 @@ textarea,
 select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #8B4513;
+    border: 1px solid var(--primary-color);
     border-radius: 5px;
     font-family: 'Rubik', sans-serif;
     font-size: 14px;
@@ -575,7 +575,7 @@ select:focus {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: #8B4513;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     font-size: 18px;
@@ -613,7 +613,7 @@ select:focus {
     display: block;
     width: 100%;
     padding: 12px;
-    background-color: #8B4513;
+    background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: 5px;

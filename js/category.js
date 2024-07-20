@@ -119,11 +119,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h3>${recipe.name}</h3>
                 <p>זמן בישול: ${recipe.cookingTime} דקות</p>
                 <p>רמת קושי: ${recipe.difficulty}</p>
-                <p>תגיות: ${recipe.tags.join(', ')}</p>
+
             </div>
         `).join('');
     }
-
+    /* add the following line to above function to add tags ro recipe card:
+                    <p>תגיות: ${recipe.tags.join(', ')}</p> 
+    */
+   
     // Function to update pagination
     function updatePagination(totalRecipes) {
         const totalPages = Math.ceil(totalRecipes / recipesPerPage);
