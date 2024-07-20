@@ -20,6 +20,8 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    background: url('img/background/stone-counter-top.jpg') repeat center center;
+    background-size: cover;
 }
 
 h1, h2, h3 {
@@ -39,7 +41,7 @@ a {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: url('img/index/wood-texture.jpg') repeat-x;
+  background: url('img/background/wood-texture.jpg') repeat-x;
   background-size: auto 100%;
   border-bottom: 3px solid var(--primary-color);
   gap: 0.5rem;
@@ -47,7 +49,7 @@ a {
 
 .nav-search-container{
     display: flex;
-    
+
 }
 
 .logo {
@@ -93,6 +95,43 @@ nav ul li a:hover {
 .nav-search-container{
   gap: 0.5rem;
 }
+
+/* styles for colapsible menu */
+.nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+  }
+  
+  .hamburger {
+    display: block;
+    width: 30px;
+    height: 3px;
+    background-color: var(--background-color);
+    position: relative;
+    transition: background-color 0.3s;
+  }
+  
+  .hamburger::before,
+  .hamburger::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color);
+    transition: transform 0.3s;
+  }
+  
+  .hamburger::before {
+    transform: translateY(-8px);
+  }
+  
+  .hamburger::after {
+    transform: translateY(8px);
+  }
+
 
 /* Search bar */
 .search-container {
@@ -143,12 +182,12 @@ main {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
+
 }
 
 /* Hero section */
 .hero {
-    background: url('img/rustic-kitchen.jpg') no-repeat center center;
-    background-size: cover;
+
     height: 200px;
     display: flex;
     flex-direction: column;
@@ -578,3 +617,72 @@ select:focus {
         font-size: 2rem;
     }
 }
+
+/* Responsive design for hamburger menu */
+@media (max-width: 768px) {
+    .header-container {
+      flex-wrap: wrap;
+    }
+  
+    .nav-toggle {
+      display: block;
+      order: 1;
+    }
+  
+    .logo {
+      flex-grow: 1;
+      order: 0;
+    }
+  
+    .nav-search-container {
+      flex-basis: 100%;
+      order: 2;
+      display: none;
+    }
+  
+    .nav-search-container.active {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    nav ul {
+      flex-direction: column;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+  
+    nav ul li {
+      margin-bottom: 0.5rem;
+    }
+  
+    nav ul li:last-child {
+      margin-bottom: 0;
+    }
+  
+    nav ul li a {
+      display: block;
+      text-align: center;
+    }
+  
+    .search-container {
+      width: 100%;
+    }
+  
+    .search-form {
+      width: 100%;
+    }
+  }
+
+
+/* Animation for hamburger menu */
+.nav-toggle.active .hamburger {
+    background-color: transparent;
+  }
+  
+  .nav-toggle.active .hamburger::before {
+    transform: rotate(45deg);
+  }
+  
+  .nav-toggle.active .hamburger::after {
+    transform: rotate(-45deg);
+  }

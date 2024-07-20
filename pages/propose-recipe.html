@@ -5,25 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Propose a Recipe - Our Kitchen Chronicles</title>
     <link rel="stylesheet" href="../styles.css">
+
+    <script defer src="../scripts/navigation-script.js"></script>
+
 </head>
 <body>
     <header class="header-container">
         <div class="logo">Our Kitchen Chronicles</div>
-        <nav>
-            <ul>
-                <li><a href="../index.html">Home</a></li>
+        <button class="nav-toggle" aria-label="Toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-search-container">
+            <nav>
+                <ul>
+                <li><a href="#home">Home</a></li>
                 <li><a href="#recipes">Recipes</a></li>
                 <li><a href="#meal-planner">Meal Planner</a></li>
-                <li><a href="propose-recipe.html">Propose a Recipe</a></li>
-            </ul>
-        </nav>
-        <div class="search-container">
-            <form class="search-form" action="#" method="get">
+                <li><a href="pages/propose-recipe.html">Propose a Recipe</a></li>
+                </ul>
+            </nav>
+            <div class="search-container">
+                <form class="search-form" action="#" method="get">
                 <input type="text" class="search-input" placeholder="Search recipes...">
                 <button type="submit" class="search-button">
-                    <span class="icon-search">🔍</span>
+                    <i class="icon-search">🔍</i>
                 </button>
-            </form>
+                </form>
+            </div>
         </div>
     </header>
 
