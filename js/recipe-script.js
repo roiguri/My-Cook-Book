@@ -45,16 +45,38 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Populate instructions list
-    const instructionsList = document.getElementById('instructions-list');
-    recipe.instructions.forEach(instruction => {
-        const li = document.createElement('li');
-        li.textContent = instruction;
-        instructionsList.appendChild(li);
-    });
+    function populateInstructions(recipe) {
+        const instructionsList = document.getElementById('instructions-list');
+        instructionsList.innerHTML = ''; // Clear existing instructions
+    
+        if (recipe.stages && recipe.stages.length > 0) {
+            recipe.stages.forEach((stage, index) => {
+                const stageTitle = document.createElement('h3');
+                stageTitle.textContent = `שלב ${index + 1}: ${stage.title}`;
+                stageTitle.classList.add('stage-title');
+                instructionsList.appendChild(stageTitle);
+    
+                const stageList = document.createElement('ol');
+                stage.instructions.forEach(instruction => {
+                    const li = document.createElement('li');
+                    li.textContent = instruction;
+                    stageList.appendChild(li);
+                });
+                instructionsList.appendChild(stageList);
+            });
+        } else {
+            // Fallback to the original instructions array
+            recipe.instructions.forEach(instruction => {
+                const li = document.createElement('li');
+                li.textContent = instruction;
+                instructionsList.appendChild(li);
+            });
+        }
+    }
+    populateInstructions(recipe);
+
 
     // Adjust Servings
-
-
     const servingsInput = document.getElementById('servings');
     servingsInput.setAttribute("value", recipe.servings);
 

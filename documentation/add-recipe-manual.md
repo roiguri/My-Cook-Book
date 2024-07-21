@@ -1,67 +1,139 @@
-# Manual: How to Add a New Recipe
+# Manual for Adding Recipes to Our Kitchen Chronicles
 
-To add a new recipe to the website, follow these steps:
+## 1. Recipe Data Structure
 
-1. Open the `recipeData.js` file in the `js` directory.
-
-2. Locate the `recipes` array in the file.
-
-3. Add a new recipe object to the array. Use the following template:
-
-   ```javascript
-   {
-     id: [Unique ID number],
-     name: "[Recipe Name]",
-     category: "[Category]",
-     cookingTime: [Cooking time in minutes],
-     difficulty: "[easy/medium/hard]",
-     mainIngredient: "[Main ingredient]",
-     image: "[image-filename.jpg]",
-     tags: ["tag1", "tag2", "tag3"]
-   }
-   ```
-
-4. Fill in the details for your new recipe:
-   - `id`: Assign a unique ID number (increment the highest existing ID).
-   - `name`: The name of your recipe.
-   - `category`: One of the existing categories (appetizers, main-courses, side-dishes, soups-stews, salads, desserts, breakfast-brunch, snacks, beverages).
-   - `cookingTime`: The total cooking time in minutes.
-   - `difficulty`: Choose from "easy", "medium", or "hard".
-   - `mainIngredient`: The primary ingredient in the recipe.
-   - `image`: The filename of the recipe image (make sure to add this image to the `img/recipes` directory).
-   - `tags`: An array of relevant tags for the recipe.
-
-5. Save the `recipeData.js` file.
-
-6. Add the recipe image:
-   - Name your image file according to what you specified in the recipe object.
-   - Place the image file in the `img/recipes` directory.
-
-7. Test the website to ensure the new recipe appears in the correct category and can be filtered appropriately.
-
-## Example
-
-Here's an example of adding a new recipe:
+Each recipe is an object in the `recipes` array in the `recipe-data.js` file. Here's the basic structure:
 
 ```javascript
 {
-  id: 4,
-  name: "Margherita Pizza",
-  category: "main-courses",
-  cookingTime: 30,
-  difficulty: "medium",
-  mainIngredient: "cheese",
-  image: "margherita-pizza.jpg",
-  tags: ["italian", "vegetarian", "quick"]
+    id: number,
+    name: string,
+    category: string,
+    cookingTime: number,
+    difficulty: string,
+    mainIngredient: string,
+    image: string,
+    tags: array,
+    servings: number,
+    ingredients: array,
+    instructions: array,
+    stages: array (optional)
 }
 ```
 
-## Important Notes
+## 2. Field Details
 
-- Ensure that the `id` is unique for each recipe.
-- The `category` must match one of the existing categories exactly.
-- The `difficulty` must be either "easy", "medium", or "hard".
-- Make sure the image file exists in the `img/recipes` directory and matches the filename specified in the recipe object.
-- Tags are used for filtering, so choose them carefully to help users find the recipe.
+- `id`: Unique identifier for the recipe. Use the following convention:
+  - 1xx: Appetizers
+  - 2xx: Main Courses
+  - 3xx: Side Dishes
+  - 4xx: Soups & Stews
+  - 5xx: Salads
+  - 6xx: Desserts
+  - 7xx: Breakfast & Brunch
+  - 8xx: Snacks
+  - 9xx: Beverages
 
-After adding a new recipe, always test the website to ensure everything works correctly.
+- `name`: The recipe name in Hebrew.
+- `category`: One of the following: "appetizers", "main-courses", "side-dishes", "soups-stews", "salads", "desserts", "breakfast-brunch", "snacks", "beverages".
+- `cookingTime`: Total time in minutes, including preparation and cooking.
+- `difficulty`: One of the following in Hebrew: "קלה", "בינונית", "קשה".
+- `mainIngredient`: The primary ingredient of the dish in Hebrew.
+- `image`: Filename of the recipe image, including extension (e.g., "recipe-name.jpg").
+- `tags`: An array of relevant keywords in Hebrew.
+- `servings`: The number of servings the recipe yields.
+- `ingredients`: An array of ingredient objects, each containing:
+  ```javascript
+  { item: string, amount: number, unit: string }
+  ```
+- `instructions`: An array of strings, each representing a step in the recipe (for recipes without distinct stages).
+- `stages`: An array of stage objects (for recipes with distinct stages), each containing:
+  ```javascript
+  { title: string, instructions: array }
+  ```
+
+## 3. Instructions vs. Stages
+
+- Use `instructions` for recipes with a simple, linear set of steps.
+- Use `stages` for recipes with distinct phases or when grouping steps makes the recipe easier to follow.
+
+Example with `instructions`:
+```javascript
+instructions: [
+    "Mix flour and salt in a bowl.",
+    "Add water and knead into a dough.",
+    "Let the dough rest for 30 minutes.",
+    "Roll out and bake at 200°C for 15 minutes."
+]
+```
+
+Example with `stages`:
+```javascript
+stages: [
+    {
+        title: "הכנת הבצק",
+        instructions: [
+            "Mix flour and salt in a bowl.",
+            "Add water and knead into a dough.",
+            "Let the dough rest for 30 minutes."
+        ]
+    },
+    {
+        title: "אפייה",
+        instructions: [
+            "Roll out the dough.",
+            "Bake at 200°C for 15 minutes."
+        ]
+    }
+]
+```
+
+## 4. Image Guidelines
+
+- Save recipe images in the appropriate category folder: `img/recipes/[category]/`.
+- Use descriptive, kebab-case filenames (e.g., "chocolate-chip-cookies.jpg").
+- Optimize images for web use (compress and resize as needed).
+
+## 5. Adding a New Recipe
+
+1. Choose the next available ID in the appropriate category range.
+2. Fill in all required fields in the recipe object.
+3. Add the recipe object to the `recipes` array in `recipe-data.js`.
+4. Save the recipe image in the correct folder with the filename specified in the `image` field.
+
+## 6. Naming Conventions
+
+- Use kebab-case for image filenames and URL-related strings.
+- Use camelCase for JavaScript variable and property names.
+- Use Title Case for recipe names and stage titles.
+
+## 7. Hebrew Text
+
+- Ensure all Hebrew text is right-to-left (RTL) compatible.
+- Use Unicode Hebrew characters (not transliterations).
+
+## 8. Tags
+
+- Use relevant, concise tags in Hebrew.
+- Include main ingredients, cooking methods, and dietary information (e.g., "vegetarian", "gluten-free").
+
+## 9. Links and Navigation
+
+- Ensure the recipe ID in the URL hash matches the `id` in the recipe object.
+- Update any necessary navigation elements or category pages to include the new recipe.
+
+## 10. Testing
+
+- After adding a new recipe, test the following:
+  - Recipe loads correctly on the recipe page.
+  - All links to the recipe work.
+  - Image displays properly.
+  - Ingredient amounts adjust correctly with serving size changes.
+  - Print functionality works as expected.
+
+## 11. Maintenance
+
+- Regularly review and update recipes for accuracy and consistency.
+- Consider adding new categories or tags as the recipe collection grows.
+
+Remember to maintain consistency across all recipes and follow these guidelines to ensure a smooth user experience on Our Kitchen Chronicles.
