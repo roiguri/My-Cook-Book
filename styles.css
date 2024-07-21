@@ -416,7 +416,7 @@ footer {
   }
 
   .hero h1 {
-      font-size: 3rem;
+      display: none;
   }
 
   .featured-recipes h2, .quick-links h2 {
