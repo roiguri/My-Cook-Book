@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="recipe-title">Recipe Title - Our Kitchen Chronicles</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../styles/recipe-page.css">
+</head>
+<body>
+    <div class="header-container">
+        <div class="logo">
+          Our Kitchen Chronicles
+        </div>
+        <button class="nav-toggle" aria-label="Toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-search-container">
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="pages/category-pages/categories.html">Recipes</a></li>
+                    <li><a href="#meal-planner">Meal Planner</a></li>
+                    <li><a href="pages/propose-recipe.html">Propose a Recipe</a></li>
+                </ul>
+            </nav>
+            <div class="search-container">
+                <form class="search-form" action="#" method="get">
+                <input type="text" class="search-input" placeholder="Search recipes...">
+                <button type="submit" class="search-button">
+                    <i class="icon-search">🔍</i>
+                </button>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+
+    <main class="recipe-container">
+        <h1 id="recipe-name" class="recipe-title"></h1>
+        
+        <div class="recipe-meta">
+            <span id="recipe-time" class="recipe-time"></span>
+            <span id="recipe-difficulty" class="recipe-difficulty"></span>
+            <span id="recipe-category" class="recipe-category"></span>
+        </div>
+
+        <div class="recipe-content">
+            <div class="recipe-details">
+                <div class="serving-adjuster">
+                    <label for="servings">מספר מנות:</label>
+                    <input type="number" id="servings" name="servings" value="4" min="1" max="20">
+                </div>
+
+                <h2>מצרכים:</h2>
+                <ul id="ingredients-list" class="ingredients-list">
+                    <!-- Ingredients will be populated here -->
+                </ul>
+            </div>
+
+            <div class="recipe-image-container">
+                <img id="recipe-image" src="" alt="" class="recipe-image">
+            </div>
+        </div>
+
+        <div class="recipe-instructions">
+            <h2>הוראות הכנה:</h2>
+            <ol id="instructions-list">
+                <!-- Instructions will be populated here -->
+            </ol>
+        </div>
+
+        <button id="print-recipe" class="print-button">הדפס מתכון</button>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Our Kitchen Chronicles. כל הזכויות שמורות.</p>
+    </footer>
+
+    <script src="../../js/recipe-data.js"></script>
+    <script src="../../js/recipe-script.js"></script>
+    <script src="../../js/navigation-script.js"></script>
+</body>
+</html>

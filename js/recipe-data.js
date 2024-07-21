@@ -3,8 +3,37 @@ const recipes = [
     /* appetizers */ 
 
     /* main- courses */
-    { id: 201, name: "מוקפץ עם סלמון וברוקולי", category: "main-courses", cookingTime: 30, difficulty: "קלה",
-        mainIngredient: "דג", image: "stir-fried-noodles-with-salmon.jpg", tags: ["סלמון", "ברוקולי", "שעועית ירוקה","פסטה"] },
+    {
+        id: 201,
+        name: "מוקפץ עם סלמון וברוקולי",
+        category: "main-courses",
+        cookingTime: 30,
+        difficulty: "קלה",
+        mainIngredient: "דג",
+        image: "stir-fried-noodles-with-salmon.jpg",
+        tags: ["סלמון", "ברוקולי", "שעועית ירוקה","פסטה"],
+        // New fields
+        servings: 4,
+        ingredients: [
+            { item: "פילה סלמון", amount: 500, unit: "גרם" },
+            { item: "ברוקולי", amount: 1, unit: "ראש" },
+            { item: "שעועית ירוקה", amount: 200, unit: "גרם" },
+            { item: "פסטה", amount: 250, unit: "גרם" },
+            { item: "שמן זית", amount: 2, unit: "כפות" },
+            { item: "שום", amount: 2, unit: "שיניים" },
+            { item: "מלח", amount: 1, unit: "כפית" },
+            { item: "פלפל שחור", amount: 0.5, unit: "כפית" }
+        ],
+        instructions: [
+            "הרתיחו מים במיחם גדול והוסיפו מלח. בשלו את הפסטה לפי הוראות היצרן עד שהיא אל דנטה.",
+            "בינתיים, חתכו את הסלמון לקוביות בגודל ביס. חתכו את הברוקולי לפרחים קטנים ואת השעועית הירוקה לחתיכות באורך 5 ס\"מ.",
+            "חממו שמן זית במחבת גדולה או ווק על אש גבוהה. הוסיפו את השום הכתוש וטגנו במשך 30 שניות עד שמשחים.",
+            "הוסיפו את קוביות הסלמון וטגנו במשך 2-3 דקות עד שהן משחימות מעט מכל הצדדים.",
+            "הוסיפו את הברוקולי והשעועית הירוקה וטגנו במשך 3-4 דקות נוספות עד שהירקות מתרככים אך עדיין פריכים.",
+            "הוסיפו את הפסטה המבושלת למחבת ובחשו היטב. תבלו במלח ופלפל לפי הטעם.",
+            "הגישו חם."
+        ]
+    },
 
     { id: 202, name: "בולונז", category: "main-courses", cookingTime: 90, difficulty: "בינונית",
         mainIngredient: "בשר", image: "bolognese.jpg", tags: ["בשר טחון", "גזר"] },
