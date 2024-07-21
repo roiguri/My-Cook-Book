@@ -2,18 +2,19 @@ const featuredRecipeNames = ["מוקפץ עם סלמון וברוקולי", "ב�
 
 function createFeaturedRecipeCard(recipe) {
     return `
-        <div class="favorites-card">
-            <div class="image-container">
-                <img src="img/recipes/${recipe.category}/${recipe.image}" alt="${recipe.name}">
-            </div>    
-            <div class="info-container">
-                <h3>${recipe.name}</h3>
-                <div class="favorites-info">
-                    זמן בישול: ${recipe.cookingTime} דקות<br>
-                    רמת קושי: ${recipe.difficulty}
+        <a href="pages/recipes/recipe-page.html#${recipe.id}" class="favorites-card-link">
+            <div class="favorites-card">
+                <div class="image-container">
+                    <img src="img/recipes/${recipe.category}/${recipe.image}" alt="${recipe.name}">
+                </div>    
+                <div class="info-container">
+                    <h3>${recipe.name}</h3>
+                    <div class="favorites-info">
+                        זמן בישול: ${recipe.cookingTime} דקות<br>
+                        רמת קושי: ${recipe.difficulty}
+                    </div>
                 </div>
             </div>
-        </div>
     `;
 }
 

@@ -1,8 +1,26 @@
 // recipe-script.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    // For now, we'll use the first recipe in the database
-    const recipe = recipes[0];
+    
+    // Get the hash from the URL, remove the '#' symbol, and parse it as an integer
+    const recipeId = window.location.hash.slice(1);
+    console.log('Recipe ID from URL:', recipeId);
+
+    // Ensure recipes are loaded
+    if (typeof recipes === 'undefined' || recipes.length === 0) {
+        console.error('Recipes not loaded. Check if recipe-data.js is included before recipe-script.js');
+        return;
+    }
+
+    // Find the recipe with the matching id
+    const recipe = recipes.find(r => r.id.toString() === recipeId);
+    console.log('Found recipe:', recipe);
+
+    // If no matching recipe is found, default to the first recipe
+    if (!recipe) {
+        console.warn('No matching recipe found, defaulting to first recipe');
+        recipe = recipes[0];
+    }  
 
     // Populate recipe details
     document.title = `${recipe.name} - Our Kitchen Chronicles`;

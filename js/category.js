@@ -122,14 +122,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to display recipes
     function displayRecipes(recipes) {
-        recipeGrid.innerHTML = recipes.map(recipe => `
-            <div class="recipe-card">
-                <img src="../../img/recipes/${recipe.category}/${recipe.image}" alt="${recipe.name}">
-                <h3>${recipe.name}</h3>
-                <p>זמן בישול: ${recipe.cookingTime} דקות</p>
-                <p>רמת קושי: ${recipe.difficulty}</p>
-
-            </div>
+        recipeGrid.innerHTML = recipes.map((recipe, index) => `
+            <a href="../recipes/recipe-page.html#${recipe.id}" class="recipe-card-link">
+                <div class="recipe-card">
+                    <img src="../../img/recipes/${recipe.category}/${recipe.image}" alt="${recipe.name}">
+                    <h3>${recipe.name}</h3>
+                    <p>זמן בישול: ${recipe.cookingTime} דקות</p>
+                    <p>רמת קושי: ${recipe.difficulty}</p>
+                </div>
+            </a>
         `).join('');
     }
     /* add the following line to above function to add tags ro recipe card:
