@@ -60,18 +60,6 @@ ingredientList.addEventListener("click", function(event) {
 });
 
 
-/* Add step list Item */
-/*
-<div class="form-group">
-<div class="steps-container">
-    <label for="steps">תהליך הכנה: </label>
-    <fieldset class="steps">
-        <input type="text" id="steps" name="steps" />
-        <button class="add-step">+</button>
-    </fieldset>
-</div>             
-</div>
-*/
 function addStepLine(event) {
     /* create new entry element */
     const newEntry = document.createElement("fieldset");

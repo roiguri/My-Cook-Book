@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Set recipe image
     const recipeImage = document.getElementById('recipe-image');
-    recipeImage.src = `../../img/recipes/${recipe.category}/${recipe.image}`;
+    recipeImage.src = `../img/recipes/${recipe.category}/${recipe.image}`;
     recipeImage.alt = recipe.name;
     // Set number of servings: 
 
