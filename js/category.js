@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updateActiveTab();
         updatePageTitle();
         populateMainIngredientFilter();
-        populateTagFilter(); // Add this line to update tags when category changes
+        populateTagFilter();
+        syncCategoryDropdown();
         filterAndDisplayRecipes();
     }
 
@@ -54,7 +55,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function filterAndDisplayRecipes() {
         console.log("Starting filteredRecipes:", recipes.filter(recipe => recipe.category === currentCategory));
         
-        let filteredRecipes = currentCategory === 'all' ? recipes : recipes.filter(recipe => recipe.category === currentCategory);    
+        let filteredRecipes = recipes;
+
+        // Apply category filter (if not 'all')
+        if (currentCategory !== 'all') {
+            filteredRecipes = filteredRecipes.filter(recipe => recipe.category === currentCategory);
+        }   
+
         // Apply cooking time filter
         console.log(`total filtered-recipes: ${filteredRecipes.length}`)
         if (cookingTimeFilter.value) {
@@ -96,11 +103,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         // Apply tag filter
-        if (selectedTags.length > 0) {
-            filteredRecipes = filteredRecipes.filter(recipe => {
-                return selectedTags.every(tag => recipe.tags.includes(tag));
-            });
-        }
+    if (selectedTags.length > 0) {
+        filteredRecipes = filteredRecipes.filter(recipe => {
+            return selectedTags.every(tag => recipe.tags.includes(tag));
+        });
+    }
     
         console.log("Final filteredRecipes:", filteredRecipes);
     
@@ -161,14 +168,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function populateMainIngredientFilter() {
-        const currentRecipes = recipes.filter(recipe => recipe.category === currentCategory);
-        const mainIngredients = [...new Set(currentRecipes.map(recipe => recipe.mainIngredient))];
+        const relevantRecipes = currentCategory === 'all' ? recipes : recipes.filter(recipe => recipe.category === currentCategory);
+        const mainIngredients = [...new Set(relevantRecipes.map(recipe => recipe.mainIngredient))];
         
         mainIngredientFilter.innerHTML = '<option value="">All</option>' + 
             mainIngredients.map(ingredient => `
                 <option value="${ingredient}">${ingredient}</option>
             `).join('');
+        
         console.log("Populated main ingredients:", mainIngredients);
+        console.log(`Populated ${mainIngredients.length} main ingredients for ${currentCategory === 'all' ? 'all categories' : currentCategory}`);
     }
 
     function populateDifficultyFilter() {
@@ -198,18 +207,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedTags = [];
 
     function populateTagFilter() {
-        const currentCategoryRecipes = recipes.filter(recipe => recipe.category === currentCategory);
-        allTags = [...new Set(currentCategoryRecipes.flatMap(recipe => recipe.tags))];
+        const relevantRecipes = currentCategory === 'all' ? recipes : recipes.filter(recipe => recipe.category === currentCategory);
+        allTags = [...new Set(relevantRecipes.flatMap(recipe => recipe.tags))];
         allTags.sort((a, b) => a.localeCompare(b, 'he'));
         
         const tagSearchInput = document.getElementById('tag-search');
         const tagSuggestions = document.getElementById('tag-suggestions');
         const selectedTagsContainer = document.getElementById('selected-tags');
-
-        tagSearchInput.addEventListener('input', handleTagSearch);
-        tagSuggestions.addEventListener('click', handleTagSelection);
-        selectedTagsContainer.addEventListener('click', handleTagRemoval);
-
+    
+        // Clear existing tags
+        selectedTags = [];
         updateSelectedTags();
     }
 
@@ -257,6 +264,13 @@ document.addEventListener('DOMContentLoaded', function() {
         ).join('');
     }
 
+    function syncCategoryDropdown() {
+        const dropdown = document.getElementById('category-select');
+        if (dropdown) {
+            dropdown.value = currentCategory;
+        }
+    }
+
     // Event listeners
     categoryTabs.addEventListener('click', (e) => {
         if (e.target.tagName === 'A') {
@@ -264,6 +278,12 @@ document.addEventListener('DOMContentLoaded', function() {
             switchCategory(e.target.getAttribute('href').slice(1));
         }
     });
+
+    if (categoryDropdown) {
+        categoryDropdown.addEventListener('change', (e) => {
+            switchCategory(e.target.value);
+        });
+    }
 
     categoryDropdown.addEventListener('change', (e) => {
         switchCategory(e.target.value);
@@ -312,6 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
     populateDifficultyFilter();
     updateActiveTab();
     updatePageTitle();
+    syncCategoryDropdown();
     filterAndDisplayRecipes();
     
 });
