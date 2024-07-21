@@ -11,7 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainIngredientFilter = document.getElementById('main-ingredient');
     const pageTitle = document.querySelector('h1');
 
-    let currentCategory = 'appetizers';
+    let currentCategory;
+    if (window.location.hash) {
+        currentCategory = window.location.hash.slice(1);
+    } else {
+        currentCategory = 'all';
+    }
+    
     let currentPage = 1;
     const recipesPerPage = 4;
 
@@ -40,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to update page title
     function updatePageTitle() {
-        const categoryName = currentCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const categoryName = currentCategory === 'all' ? 'All Recipes' : currentCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
         pageTitle.textContent = categoryName;
     }
 
@@ -48,9 +54,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function filterAndDisplayRecipes() {
         console.log("Starting filteredRecipes:", recipes.filter(recipe => recipe.category === currentCategory));
         
-        let filteredRecipes = recipes.filter(recipe => recipe.category === currentCategory);
-    
+        let filteredRecipes = currentCategory === 'all' ? recipes : recipes.filter(recipe => recipe.category === currentCategory);    
         // Apply cooking time filter
+        console.log(`total filtered-recipes: ${filteredRecipes.length}`)
         if (cookingTimeFilter.value) {
             console.log("Applying cooking time filter:", cookingTimeFilter.value);
             
@@ -130,15 +136,28 @@ document.addEventListener('DOMContentLoaded', function() {
         const pageInfo = document.getElementById('page-info');
         const totalPages = Math.ceil(totalRecipes / recipesPerPage);
     
-        prevButton.disabled = currentPage === 1;
-        nextButton.disabled = currentPage === totalPages;
+        currentPage = Math.max(1, Math.min(currentPage, totalPages));
+
+        prevButton.disabled = currentPage <= 1;
+        nextButton.disabled = currentPage >= totalPages;
     
-        pageInfo.textContent = `עמוד ${currentPage} מתוך ${totalPages}`;
+        pageInfo.textContent = totalPages > 0 ? 
+            `עמוד ${currentPage} מתוך ${totalPages}` : 
+            'אין תוצאות';
     }
 
     function goToPage(page) {
-        currentPage = page;
-        filterAndDisplayRecipes();
+        const totalRecipes = currentCategory === 'all' ? 
+            recipes.length : 
+            recipes.filter(recipe => recipe.category === currentCategory).length;
+        const totalPages = Math.ceil(totalRecipes / recipesPerPage);
+    
+        if (page > 0 && page <= totalPages) {
+            currentPage = page;
+            filterAndDisplayRecipes();
+        } else {
+            console.warn(`Attempted to go to invalid page: ${page}. Total pages: ${totalPages}`);
+        }
     }
 
     function populateMainIngredientFilter() {
@@ -279,16 +298,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // pagination listeners
     document.getElementById('prev-page').addEventListener('click', () => {
-        if (currentPage > 1) {
-            goToPage(currentPage - 1);
-        }
+        goToPage(currentPage - 1);
     });
     
     document.getElementById('next-page').addEventListener('click', () => {
-        const totalPages = Math.ceil(recipes.filter(recipe => recipe.category === currentCategory).length / recipesPerPage);
-        if (currentPage < totalPages) {
-            goToPage(currentPage + 1);
-        }
+        goToPage(currentPage + 1);
     });
 
     // Initial setup
