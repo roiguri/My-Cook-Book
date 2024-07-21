@@ -1,3 +1,13 @@
+:root {
+    --heading-font: 'Amatic SC', cursive;
+    --body-font: 'Lora', serif;
+    --nav-font: 'Source Sans Pro', sans-serif;
+    --primary-color: #bb6016;
+    --secondary-color: #e6dfd1;
+    --text-color: #3a3a3a;
+    --background-color: #f5f2e9;
+}
+
 /* layout */
 
 html, body {
@@ -212,7 +222,9 @@ footer {
 .recipe-card img {
     border-radius: 10%;
 }
-
+.recipe-card-link {
+    display: flex;
+}
 .recipe-card {
     background-color: #fff;
     border-radius: 10px;
@@ -221,8 +233,12 @@ footer {
     transition: transform 0.3s ease;
     padding: 20px;
     direction: rtl;
+    color: var(--text-color);
+    flex-grow:1;
 }
-
+.recipe-card h3 {
+    color: var(--primary-color);
+}
 .recipe-card:hover {
     transform: translateY(-5px);
 }
@@ -237,12 +253,6 @@ footer {
     font-size: 1.8rem;
     margin: 1rem;
     text-align: center;
-}
-
-.recipe-info {
-    font-size: 1rem;
-    color: #666;
-    margin: 0 1rem 1rem;
 }
 
 /* Pagination Styles */
