@@ -75,6 +75,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     populateInstructions(recipe);
 
+    // Populate comments list
+    const commentsList = document.getElementById('comments-list');
+
+    if ("comments" in recipe){
+        console.log(`comments: `, recipe.comments)
+        recipe.comments.forEach(comment => {
+            const li = document.createElement('li');
+            li.textContent = comment;
+            commentsList.appendChild(li);
+        });
+    }
+    else{
+        commentsList.parentNode.style.display = 'none';
+    }
+
 
     // Adjust Servings
     const servingsInput = document.getElementById('servings');
@@ -113,11 +128,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const printButton = document.getElementById('print-recipe');
     printButton.addEventListener('click', printRecipe);
 });
-
-
-
-
-
 
 function printRecipe() {
     window.print();

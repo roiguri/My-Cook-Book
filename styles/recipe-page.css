@@ -59,16 +59,19 @@
     margin-bottom: 10px;
 }
 
-.recipe-instructions ol {
+.recipe-instructions ol, 
+.recipe-comments ol{
     padding-right: 20px;
     margin-bottom: 20px;
 }
 
-.recipe-instructions > ol {
+.recipe-instructions > ol, 
+.recipe-comments > ol {
     padding-right: 0;
 }
 
-.recipe-instructions li {
+.recipe-instructions li, 
+.recipe-comments li {
     margin-bottom: 10px;
     line-height: 1.6;
 }
@@ -106,20 +109,12 @@
 }
 
 .recipe-instructions h2,
-.recipe-details h2 {
+.recipe-details h2, 
+.recipe-comments h2 {
     font-family: var(--heading-font);
     font-size: 2rem;
     color: var(--primary-color);
     margin-bottom: 20px;
-}
-
-.recipe-instructions ol {
-    padding-right: 20px;
-}
-
-.recipe-instructions li {
-    margin-bottom: 15px;
-    line-height: 1.6;
 }
 
 .print-button {
