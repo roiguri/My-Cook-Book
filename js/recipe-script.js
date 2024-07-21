@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const recipeImage = document.getElementById('recipe-image');
     recipeImage.src = `../../img/recipes/${recipe.category}/${recipe.image}`;
     recipeImage.alt = recipe.name;
+    // Set number of servings: 
+
 
     // Populate ingredients list
     const ingredientsList = document.getElementById('ingredients-list');
@@ -32,18 +34,50 @@ document.addEventListener('DOMContentLoaded', function() {
         instructionsList.appendChild(li);
     });
 
-    // Add serving size adjuster functionality
+    // Adjust Servings
+
+
     const servingsInput = document.getElementById('servings');
+    servingsInput.setAttribute("value", recipe.servings);
+
+    const originalServings = parseInt(servingsInput.value);
+    const amountSpans = document.querySelectorAll('.amount');
+    const originalAmounts = Array.from(amountSpans).map(span => parseFloat(span.textContent));
+    console.log('Number of amount spans:', amountSpans.length);
+
+    // Add serving size adjuster functionality
     servingsInput.addEventListener('change', adjustServings);
+
+    function adjustServings() {
+        const newServings = parseInt(servingsInput.value);
+        const scalingFactor = newServings / originalServings;
+        console.log(scalingFactor)
+        amountSpans.forEach((span, index) => {
+            const originalAmount = originalAmounts[index];
+            const newAmount = originalAmount * scalingFactor;
+            span.textContent = formatNumber(newAmount);
+        });
+    }
+
+    function formatNumber(number) {
+        // If the number has no decimal part, return it as is
+        if (Number.isInteger(number)) {
+            return number.toString();
+        }
+        
+        // Otherwise, format to a maximum of 2 decimal places
+        return number.toFixed(2).replace(/\.?0+$/, '');
+    }
 
     // Add print functionality
     const printButton = document.getElementById('print-recipe');
     printButton.addEventListener('click', printRecipe);
 });
 
-function adjustServings() {
-    // Implement serving size adjustment logic here
-}
+
+
+
+
 
 function printRecipe() {
     window.print();
