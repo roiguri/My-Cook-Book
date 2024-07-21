@@ -662,7 +662,9 @@ select:focus {
 /* Responsive design for hamburger menu */
 @media (max-width: 768px) {
     .header-container {
-      flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap:nowrap;
     }
   
     .nav-toggle {
