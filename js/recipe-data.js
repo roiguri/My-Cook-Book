@@ -256,6 +256,57 @@ const recipes = [
         ]
     },
 
+    // Asado
+    {
+        id: 207, // Assuming this is the next ID in the main-courses category
+        name: "אסאדו",
+        category: "main-courses",
+        cookingTime: 720, // 10 hours plus preparation time
+        difficulty: "בינונית",
+        mainIngredient: "בשר",
+        image: "asado.jpg", // Placeholder image name
+        tags: ["בשר", "צלי", "בישול איטי"],
+        servings: 6, // Estimated serving size
+        ingredients: [
+            { item: "נתח אסאדו", amount: 2, unit: "קילו גרם" },
+            { item: "שמן זית", amount: 2, unit: "כפות" },
+            { item: "מלח גס", amount: 1, unit: "כף" },
+            { item: "פלפל שחור גס", amount: 1, unit: "כפית" }
+        ],
+        stages: [
+            {
+                title: "הכנה והתיבול",
+                instructions: [
+                    "מרחו על נתח האסאדו שמן זית, מלח גס ופלפל שחור גס.",
+                    "עסו את התיבול היטב לתוך הבשר."
+                ]
+            },
+            {
+                title: "צריבה",
+                instructions: [
+                    "חממו מחבת פסים עד שתהיה רותחת.",
+                    "צרבו את הנתח מכל כיוון במשך 2 דקות."
+                ]
+            },
+            {
+                title: "עטיפה",
+                instructions: [
+                    "עטפו את הנתח בנייר אפייה.",
+                    "עטפו שכבה נוספת בנייר אלומיניום."
+                ]
+            },
+            {
+                title: "צלייה",
+                instructions: [
+                    "חממו תנור מראש ל-135 מעלות.",
+                    "הכניסו את הנתח העטוף לתנור.",
+                    "צלו במשך 9 שעות.",
+                    "העלו את חום התנור ל-150 מעלות והמשיכו לצלות עוד 3 שעות."
+                ]
+            }
+        ]
+    },
+
     /* Side - Dishes */
 
     // Rice with Green Beans and Carrot
