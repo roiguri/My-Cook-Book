@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Populate recipe details
     document.title = `${recipe.name} - Our Kitchen Chronicles`;
     document.getElementById('recipe-name').textContent = recipe.name;
-    document.getElementById('recipe-time').textContent = `זמן הכנה: ${recipe.cookingTime} דקות`;
+    document.getElementById('recipe-time').textContent = `זמן הכנה: ${cookingTime(recipe.cookingTime)}`;
     document.getElementById('recipe-difficulty').textContent = `רמת קושי: ${recipe.difficulty}`;
     document.getElementById('recipe-category').textContent = `קטגוריה: ${recipe.category}`;
 
@@ -43,6 +43,30 @@ document.addEventListener('DOMContentLoaded', function() {
         li.innerHTML = `<span class="amount">${ingredient.amount}</span> <span class="unit">${ingredient.unit}</span> <span class="item">${ingredient.item}</span>`;
         ingredientsList.appendChild(li);
     });
+    
+    // Create a time string:
+    function cookingTime(time) {
+        let finalTime;
+        if (time <= 60){
+            finalTime = `${time} דקות`;
+        }
+        else if (time > 60 && time < 120){
+            finalTime = `שעה ו-${time%60} דקות`;
+        }
+        else if (time == 120){
+            finalTime = "שעתיים";
+        }
+        else if (time > 120 && time < 180){
+            finalTime = `שעתיים ו-${time%60} דקות`;;
+        }
+        else if (time % 60 == 0) {
+            finalTime = `${time/60} שעות`
+        }
+        else {
+            finalTime = `${~~(time/60)} שעות ו-${time%60} דקות`;
+        }
+        return finalTime;
+    }
 
     // Populate instructions list
     function populateInstructions(recipe) {

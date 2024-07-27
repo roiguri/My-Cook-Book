@@ -125,9 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
         recipeGrid.innerHTML = recipes.map((recipe, index) => `
             <a href="./recipe-page.html#${recipe.id}" class="recipe-card-link">
                 <div class="recipe-card">
-                    <img src="../img/recipes/${recipe.category}/${recipe.image}" alt="${recipe.name}">
+                    <img src="../img/recipes-compressed/${recipe.category}/${recipe.image}" alt="${recipe.name}">
                     <h3>${recipe.name}</h3>
-                    <p>זמן בישול: ${recipe.cookingTime} דקות</p>
+                    <p>זמן בישול: ${cookingTime(recipe.cookingTime)}</p>
                     <p>רמת קושי: ${recipe.difficulty}</p>
                 </div>
             </a>
@@ -136,6 +136,30 @@ document.addEventListener('DOMContentLoaded', function() {
     /* add the following line to above function to add tags ro recipe card:
                     <p>תגיות: ${recipe.tags.join(', ')}</p> 
     */
+
+    // Create a time string:
+    function cookingTime(time) {
+        let finalTime;
+        if (time <= 60){
+            finalTime = `${time} דקות`;
+        }
+        else if (time > 60 && time < 120){
+            finalTime = `שעה ו-${time%60} דקות`;
+        }
+        else if (time == 120){
+            finalTime = "שעתיים";
+        }
+        else if (time > 120 && time < 180){
+            finalTime = `שעתיים ו-${time%60} דקות`;;
+        }
+        else if (time % 60 == 0) {
+            finalTime = `${time/60} שעות`
+        }
+        else {
+            finalTime = `${~~(time/60)} שעות ו-${time%60} דקות`;
+        }
+        return finalTime;
+    }
    
     // Function to update pagination
     function updatePagination(totalRecipes) {
