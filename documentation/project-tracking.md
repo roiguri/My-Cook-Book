@@ -6,22 +6,24 @@
 1. Website refactoring and establishing best practices
 
 ### 📅 Planned
-2. Simple CSS/HTML changes
-3. Core JavaScript enhancements
-4. Basic full-stack features
-5. Database schema changes
-6. Advanced features and new technologies
+1. Link to home page from website logo
+2. Fix text alignment for recipes
+3. Complete the "Propose a Recipe" form functionality
+4. Implement server-side handling of recipe submissions
+
 
 ### ✅ Completed
 (No items currently completed)
 
 ### ⏸️ On Hold
-(No items currently on hold)
+1. Core JavaScript enhancements
+2. Basic full-stack features
+3. Database schema changes
+4. Advanced features and new technologies
 
 ---
 
 ## 📋 Next Steps
-- Define coding standards and best practices
 - Refactor existing code to meet these standards
 - Implement simple CSS/HTML changes
 

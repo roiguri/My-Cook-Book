@@ -91,6 +91,8 @@ stages: [
 ## 4. Image Guidelines
 
 - Save recipe images in the appropriate category folder: `img/recipes/[category]/`.
+- Save size recipe compressed images in the appropriate category folder: `img/recipes-compressed/[category]/`.
+- Make sure to alwayd add the image to both recipes and reciped-compressed.
 - Use descriptive, kebab-case filenames (e.g., "chocolate-chip-cookies.jpg").
 - Optimize images for web use (compress and resize as needed).
 
@@ -116,6 +118,7 @@ stages: [
 
 - Use relevant, concise tags in Hebrew.
 - Include main ingredients, cooking methods, and dietary information (e.g., "vegetarian", "gluten-free").
+- Make sure to check if there is already a relevant Main Ingredient before choosing a different one.
 
 ## 9. Links and Navigation
 
