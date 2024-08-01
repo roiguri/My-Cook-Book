@@ -6,14 +6,13 @@
 1. Website refactoring and establishing best practices
 
 ### 📅 Planned
-1. Link to home page from website logo
-2. Fix text alignment for recipes
-3. Complete the "Propose a Recipe" form functionality
-4. Implement server-side handling of recipe submissions
+1. Fix text alignment for recipes
+2. Complete the "Propose a Recipe" form functionality
+3. Implement server-side handling of recipe submissions
 
 
 ### ✅ Completed
-(No items currently completed)
+1. Link to home page from website logo
 
 ### ⏸️ On Hold
 1. Core JavaScript enhancements
