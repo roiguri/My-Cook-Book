@@ -1,0 +1,32 @@
+/* base styles */
+:root {
+    --heading-font: 'Amatic SC', cursive;
+    --body-font: 'Lora', serif;
+    --nav-font: 'Source Sans Pro', sans-serif;
+    --primary-color: #bb6016;
+    --secondary-color: #e6dfd1;
+    --text-color: #3a3a3a;
+    --background-color: #f5f2e9;
+}
+
+/* basic elements */
+body {
+    font-family: var(--body-font);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background: url('../img/background/stone-counter-top.jpg') repeat center center;
+    background-size: cover;
+}
+
+h1, h2, h3 {
+    font-family: var(--heading-font);
+    font-weight: 700;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}

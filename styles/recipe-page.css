@@ -1,6 +1,5 @@
-/* recipe-styles.css */
-
-.recipe-container {
+/* Move to pages.css */
+.recipe-page .recipe-container {
     max-width: 600px;
     min-width: 200px;
     margin: 0 auto;
@@ -10,7 +9,7 @@
     direction: rtl;
 }
 
-.recipe-title {
+.recipe-page .recipe-title {
     font-family: var(--heading-font);
     font-size: 3rem;
     color: var(--primary-color);
@@ -18,7 +17,7 @@
     margin-bottom: 20px;
 }
 
-.recipe-meta {
+.recipe-page .recipe-meta {
     display: flex;
     justify-content: center;
     gap: 20px;
@@ -27,13 +26,14 @@
     color: var(--text-color);
 }
 
-.recipe-content {
+.recipe-page .recipe-content {
     display: flex;
     flex-direction: column;
     gap: 40px;
     margin-bottom: 40px;
 }
 
+/* Move to components.css */
 .recipe-image-container {
     width: 100%;
 }
@@ -60,7 +60,7 @@
 }
 
 .recipe-instructions ol, 
-.recipe-comments ol{
+.recipe-comments ol {
     padding-right: 20px;
     margin-bottom: 20px;
 }
@@ -134,8 +134,9 @@
     background-color: #a05012;
 }
 
+/* Move to responsive.css */
 @media (min-width: 769px) {
-    .recipe-content {
+    .recipe-page .recipe-content {
         flex-direction: row;
         align-items: flex-start;
     }
@@ -152,16 +153,14 @@
 }
 
 @media (max-width: 768px) {
-    .recipe-meta {
+    .recipe-page .recipe-meta {
         flex-direction: column;
         align-items: center;
     }
 }
 
-/* ... (previous CSS remains the same) ... */
-
+/* Move to print.css */
 @media print {
-    /* Reset all styles for printing */
     * {
         background: transparent !important;
         color: #000 !important;
@@ -182,23 +181,23 @@
         display: none !important;
     }
 
-    .recipe-container {
+    .recipe-page .recipe-container {
         max-width: 100%;
         padding: 0;
         margin: 0;
     }
 
-    .recipe-title {
+    .recipe-page .recipe-title {
         font-size: 24pt;
         margin-bottom: 10pt;
     }
 
-    .recipe-meta {
+    .recipe-page .recipe-meta {
         font-size: 10pt;
         margin-bottom: 15pt;
     }
 
-    .recipe-content {
+    .recipe-page .recipe-content {
         display: flex;
         flex-direction: row;
         gap: 20pt;
@@ -245,17 +244,14 @@
         margin-bottom: 5pt;
     }
 
-    /* Add page breaks */
     .recipe-instructions {
         page-break-before: avoid;
     }
 
-    /* Avoid page breaks inside elements */
     li, h2 {
         page-break-inside: avoid;
     }
 
-    /* Display URLs after links */
     a[href^="http"]:after {
         content: " (" attr(href) ")";
     }

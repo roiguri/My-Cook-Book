@@ -1,0 +1,140 @@
+
+@media (max-width: 1100px) {
+    .header-container {
+        flex-direction: column;
+        align-items: center;
+    }
+  
+    .logo {
+        margin-bottom: 1rem;
+    }
+  
+    nav {
+        margin-bottom: 1rem;
+    }
+    
+    .search-container {
+        width: 100%;
+        max-width: 400px;
+        display: flex;
+        justify-content: center;
+    }
+  
+    .nav-search-container{
+        flex-direction: column;
+    }
+}
+  
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .logo {
+        text-align: center;
+    }
+
+    nav ul {
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    nav ul li {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+
+    nav ul li:last-child {
+        margin-bottom: 0;
+    }
+
+    nav ul li a {
+        display: block;
+        text-align: center;
+    }
+
+    .search-container {
+        width: 100%;
+        max-width: none;
+    }
+
+    .search-form {
+        width: 100%;
+    }
+
+    .category-jar {
+        width: 120px;
+    }
+
+    .jar-img {
+        height: 160px;
+    }
+
+    /* page specific */ 
+    .home-page .hero h1 {
+        display: none;
+    }
+
+    .home-page .featured-recipes h2, .home-page .quick-links h2 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Hamburger Menu Styles */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap:nowrap;
+    }
+
+    .nav-toggle {
+        display: block;
+        order: 1;
+    }
+
+    .logo {
+        flex-grow: 1;
+        order: 0;
+    }
+
+    .nav-search-container {
+        flex-basis: 100%;
+        order: 2;
+        display: none;
+    }
+
+    .nav-search-container.active {
+        display: flex;
+        flex-direction: column;
+    }
+
+    nav ul {
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    nav ul li {
+        margin-bottom: 0.5rem;
+    }
+
+    nav ul li:last-child {
+        margin-bottom: 0;
+    }
+
+    nav ul li a {
+        display: block;
+        text-align: center;
+    }
+
+    .search-container {
+        width: 100%;
+    }
+
+    .search-form {
+        width: 100%;
+    }
+}

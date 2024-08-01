@@ -1,0 +1,86 @@
+
+/* header */
+.header-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: url('../img/background/wood-texture.jpg') repeat-x;
+    background-size: auto 100%;
+    border-bottom: 3px solid var(--primary-color);
+    gap: 0.5rem;
+}
+
+nav ul {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav ul li {
+    margin-right: 0.5rem;
+    box-shadow: h-offset v-offset blur spread color;
+}
+
+nav ul li:last-child {
+    margin-right: 0;
+}
+
+nav ul li a {
+    color: var(--background-color);
+    font-family: var(--nav-font);
+    font-weight: bold;
+    background: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+
+    transition: background-color 0.3s;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+nav ul li a:hover {
+    background-color: #5c4033;
+}
+
+/* header */
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+
+}
+
+.nav-search-container{
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Quote Section */
+.quote-section {
+    background-color: var(--secondary-color);
+    padding: 2rem;
+    text-align: center;
+    font-style: italic;
+    margin-top: 2rem;
+}
+
+.quote-section blockquote {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Footer */
+footer {
+    background-color: var(--text-color);
+    color: var(--background-color);
+    text-align: center;
+    padding: 1rem;
+    font-family: var(--nav-font);
+}
+
+#icon-attribute {
+    color: gray;
+}
