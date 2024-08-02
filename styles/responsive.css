@@ -1,4 +1,3 @@
-
 @media (max-width: 1100px) {
     .header-container {
         flex-direction: column;
@@ -72,13 +71,35 @@
         height: 160px;
     }
 
-    /* page specific */ 
+    /* page specific - home-page */ 
     .home-page .hero h1 {
         display: none;
     }
 
     .home-page .featured-recipes h2, .home-page .quick-links h2 {
         font-size: 2.5rem;
+    }
+
+    /* page specific - category-page */
+    .category-page .category-tabs ul {
+        flex-direction: column;
+        display: none;
+    }
+
+    .category-page .category-dropdown {
+        display: block;
+    }
+
+    .category-page .filters {
+        flex-direction: column;
+    }
+
+    .category-page .filter-group {
+        width: 100%;
+    }
+
+    .category-page .recipe-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
 }
 

@@ -51,3 +51,11 @@
             direction: rtl;
             justify-content: center;
         }
+
+/* Category Page */
+.category-page h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 0;
+    font-size: 3rem;
+}

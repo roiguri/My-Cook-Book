@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/category-page.css">
 </head>
-<body>
+<body class = "category-page">
     <div class="header-container">
         <div class="logo">
           Our Kitchen Chronicles
@@ -35,7 +35,7 @@
                     <li><a href="./propose-recipe.html">Propose a Recipe</a></li>
                 </ul>
             </nav>
-            <div class="search-container">
+            <div class="search-container header-search">
                 <form class="search-form" action="#" method="get">
                 <input type="text" class="search-input" placeholder="Search recipes...">
                 <button type="submit" class="search-button">
@@ -47,12 +47,14 @@
         
     </div>
     
-    <main class="category-page">
+    <main>
         <h1 id = "category-header">Recipes</h1>
         
-        <div class="search-bar">
-            <input type="text" placeholder="Search recipes...">
-            <button>Search</button>
+        <div class="search-bar categories-search">
+            <form class = "search-form">
+                <input class = "search-input" type="text" placeholder="Search recipes...">
+                <button class = "search-button">Search</button>
+            </form>
         </div>
         
         <nav class="category-tabs">

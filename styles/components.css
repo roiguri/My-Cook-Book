@@ -268,7 +268,6 @@
     }
 
     #tag-suggestions {
-        position: absolute;
         width: 100%;
         max-height: 200px;
         overflow-y: auto;
@@ -314,102 +313,133 @@
     }
 
 /* Recipe Cards */
-    .recipe-grid {
-        direction: rtl;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
+
+    /* Base styles for recipe cards */
+    .recipe-card-base {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      direction: rtl;
+      color: var(--text-color);
     }
     
-    .recipe-card img {
-        border-radius: 10%;
+    .recipe-card-base:hover {
+      transform: translateY(-5px);
     }
     
-    .recipe-card-link {
-        display: flex;
+    .recipe-card-base img {
+      object-fit: cover;
+      border-radius: 5%;
     }
     
-    .recipe-card {
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        transition: transform 0.3s ease;
-        padding: 20px;
-        direction: rtl;
-        color: var(--text-color);
-        flex-grow: 1;
+    .recipe-card-base h3 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin: 1rem;
+      text-align: center;
     }
     
-    .recipe-card h3 {
-        color: var(--primary-color);
+    /* Styles for recipe cards on categories page */
+    .category-page .recipe-grid {
+      direction: rtl;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
     }
     
-    .recipe-card:hover {
-        transform: translateY(-5px);
+    .category-page .recipe-card {
+      padding: 20px;
+      flex-grow: 1;
     }
     
-    .recipe-card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
+    .category-page .recipe-card img {
+      width: 100%;
+      height: 200px;
     }
     
-    .recipe-card h3 {
-        font-size: 1.8rem;
-        margin: 1rem;
-        text-align: center;
+    .category-page .recipe-card-link {
+      display: flex;
+    }
+    
+    /* Styles for favorite cards on home page */
+    .home-page .favorites-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    
+    .home-page .favorites-card {
+      display: flex;
+      gap: 20px;
+      padding: 10px;
+      width: 300px;
+      min-width: 250px;
+      max-width: 100%;
+    }
+    
+    .home-page .favorites-card .image-container {
+      flex: 0 0 auto;
+      width: 150px;
+    }
+    
+    .home-page .favorites-card img {
+      width: auto;
+      height: 200px;
+    }
+    
+    .home-page .favorites-card .info-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 150px;
+    }
+    
+    .home-page .favorites-card .favorites-info {
+      font-size: 1rem;
+      color: #666;
+      margin: 0;
+      min-width: 150px;
     }
 
-/* Favorites Card */
-    .favorites-card {
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        transition: transform 0.3s ease;
-        padding: 10px;
-        direction: rtl;
+/* Pagination */
+    .pagination {
         display: flex;
-        gap: 20px;
-        width: 300px; /* Adjust for 3 cards per row with gap */
-        min-width: 250px; /* Minimum width before wrapping */
-        max-width: 100%; /* Ensure it doesn't exceed container width */
-    
-    }
-    
-    .favorites-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .favorites-card .image-container {
-        flex: 0 0 auto; /* Prevent image from shrinking */
-        width: 150px; /* Set a fixed width for the image container */
-    }
-    
-    .favorites-card img {
-        width: auto;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 5%;
-    }
-    
-    .favorites-card h3 {
-        font-size: 1.8rem;
-        margin: 0 0 1rem 0;
-    }
-    .favorites-card .info-container {
-         /* Allow info container to take remaining space */
-        display: flex;
-        flex-direction: column;
         justify-content: center;
-        min-width: 150px;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
     }
-    
-    .favorites-info {
-        font-size: 1rem;
-        color: #666;
-        margin: 0;
-        min-width: 150px;
+
+    .pagination button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        margin: 0 5px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
     }
+
+    .pagination button:hover,
+    .pagination button.active {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .pagination button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+
+    #page-info {
+        margin: 0 10px;
+    }
+
+
+
+

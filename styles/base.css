@@ -10,6 +10,11 @@
 }
 
 /* basic elements */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 body {
     font-family: var(--body-font);
     background-color: var(--background-color);
@@ -19,6 +24,9 @@ body {
     padding: 0;
     background: url('../img/background/stone-counter-top.jpg') repeat center center;
     background-size: cover;
+
+    display: flex;
+    flex-direction: column;
 }
 
 h1, h2, h3 {

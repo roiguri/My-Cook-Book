@@ -79,6 +79,7 @@ footer {
     text-align: center;
     padding: 1rem;
     font-family: var(--nav-font);
+    flex-shrink: 0;
 }
 
 #icon-attribute {
