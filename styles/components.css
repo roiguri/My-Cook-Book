@@ -254,10 +254,20 @@
     }
 
     /* filter tags */
-    .tag-filter {
-        position: relative;
-    }
+    /*   
 
+
+
+    */
+
+
+
+    /* UPDATED */
+    .filter-group.tag-filter {
+        position: relative;
+        box-sizing: border-box;
+    }
+    
     #tag-search {
         width: 100%;
         padding: 8px;
@@ -265,9 +275,11 @@
         border: 1px solid #ccc;
         border-radius: 4px;
         direction: rtl;
+        box-sizing: border-box;
     }
-
+    
     #tag-suggestions {
+        position: absolute;
         width: 100%;
         max-height: 200px;
         overflow-y: auto;
@@ -277,6 +289,9 @@
         background-color: white;
         z-index: 1000;
         display: none;
+        box-sizing: border-box;
+        left: 0;  
+        direction: rtl;
     }
 
     #tag-suggestions div {
@@ -288,14 +303,16 @@
     #tag-suggestions div:hover {
         background-color: #f1f1f1;
     }
-
+    
     #selected-tags {
         margin-top: 10px;
         display: flex;
         flex-wrap: wrap;
         gap: 5px;
+        width: 100%;
+        box-sizing: border-box;
     }
-
+    
     .selected-tag {
         background-color: #e4e4e4;
         border: 1px solid #aaa;
@@ -304,8 +321,9 @@
         display: flex;
         align-items: center;
         direction: rtl;
+        box-sizing: border-box;
     }
-
+    
     .remove-tag {
         margin-right: 5px;
         cursor: pointer;
