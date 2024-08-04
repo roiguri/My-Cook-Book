@@ -10,6 +10,7 @@
 2. Fix text alignment for recipes
 3. Complete the "Propose a Recipe" form functionality
 4. Implement server-side handling of recipe submissions
+5. add footnote for logo on all pages
 
 
 ### ✅ Completed

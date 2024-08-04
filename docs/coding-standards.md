@@ -1,7 +1,7 @@
 # Coding Standards for Our Kitchen Chronicles
 
 ## HTML Standards
-- Use 2 spaces for indentation
+- Use tab indentation
 - Use kebab-case for class and ID names (e.g., `recipe-card`, `ingredient-list`)
 - Use semantic HTML elements where appropriate (e.g., `<nav>`, `<article>`, `<section>`)
 - Always include alt text for images
