@@ -1,132 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Kitchen Chronicles</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    
-    
-    <!-- Favicon for browsers -->
-    <link rel="icon" type="image/png" sizes="32x32" href="img/icon/wooden-spoon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="img/icon/wooden-spoon-16.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Kitchen Chronicles</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  
+  
+  <!-- Favicon for browsers -->
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon/wooden-spoon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/icon/wooden-spoon-16.png">
 
-    <!-- Icon for Android Chrome -->
-    <link rel="manifest" href="/My-Cook-Book/site.webmanifest.json">
+  <!-- Icon for Android Chrome -->
+  <link rel="manifest" href="/My-Cook-Book/site.webmanifest.json">
 
-    <!-- Icon for iOS -->
-    <link rel="apple-touch-icon" sizes="128x128" href="img/icon/wooden-spoon-16.png">
-    
-    <script defer src="js/navigation-script.js"></script>
-    <script defer src="js/recipe-data.js"></script>
-    <script defer src="js/featured-recipes.js"></script>
+  <!-- Icon for iOS -->
+  <link rel="apple-touch-icon" sizes="128x128" href="img/icon/wooden-spoon-16.png">
+  
+  <script defer src="js/navigation-script.js"></script>
+  <script defer src="js/recipe-data.js"></script>
+  <script defer src="js/featured-recipes.js"></script>
 
 </head>
 <body class = "home-page">
-    <div class="header-container">
-        <a href="index.html">
-            <div class="logo">
-              Our Kitchen Chronicles
-            </div>
-        </a>
-        <button class="nav-toggle" aria-label="Toggle navigation">
-            <span class="hamburger"></span>
-        </button>
-        <div class="nav-search-container">
-            <nav>
-                <ul>
-                    <li><a href="./index.html">Home</a></li>
-                    <li><a href="./pages/categories.html">Recipes</a></li>
-                    <li><a href="#meal-planner">Meal Planner</a></li>
-                    <li><a href="./pages/propose-recipe.html">Propose a Recipe</a></li>
-                </ul>
-            </nav>
-            <div class="search-bar header-search">
-                <form class="search-form" action="#" method="get">
-                <input type="text" class="search-input" placeholder="Search recipes...">
-                <button type="submit" class="search-button">
-                    <i class="icon-search">🔍</i>
-                </button>
-                </form>
-            </div>
+  <header class="header-container">
+    <a href="index.html">
+        <div class="logo">
+          Our Kitchen Chronicles
         </div>
-        
-    </header>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">
+        <span class="hamburger"></span>
+    </button>
+    <div class="nav-search-container">
+      <nav>
+        <ul>
+          <li><a href="./index.html">Home</a></li>
+          <li><a href="./pages/categories.html">Recipes</a></li>
+          <li><a href="#meal-planner">Meal Planner</a></li>
+          <li><a href="./pages/propose-recipe.html">Propose a Recipe</a></li>
+        </ul>
+      </nav>
+        <div class="search-bar header-search">
+          <form class="search-form" action="#" method="get">
+            <input type="text" class="search-input" placeholder="Search recipes...">
+            <button type="submit" class="search-button">
+                <i class="icon-search">🔍</i>
+            </button>
+          </form>
+        </div>
+    </div>      
+  </header>
 
-    <main>
-        <section class="hero">
-            <h1>Our Kitchen Chronicles</h1>
-            <p>Discover homemade goodness in every bite</p>
-        </section>
+  <main>
+    <section class="hero">
+      <h1>Our Kitchen Chronicles</h1>
+      <p>Discover homemade goodness in every bite</p>
+    </section>
 
-        <section class="quick-links">
-            <h2>Explore Recipes</h2>
-            <div class="category-jars">
-                <a href="pages/categories.html#appetizers" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/appetizers.jpg');"></div>
-                    <span>Appetizers</span>
-                </a>
-                <a href="pages/categories.html#main-courses" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/main-course.webp');"></div>
-                    <span>Main Courses</span>
-                </a>
-                <a href="pages/categories.html#side-dishes" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/side-dishes.jpg');"></div>
-                    <span>Side Dishes</span>
-                </a>
-                <a href="pages/categories.html#soups-stews" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/soups&stews.jpg');"></div>
-                    <span>Soups & Stews</span>
-                </a>
-                <a href="pages/categories.html#salads" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/salad.jpg');"></div>
-                    <span>Salads</span>
-                </a>
-                <a href="pages/categories.html#desserts" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/dessert.jpg');"></div>
-                    <span>Desserts</span>
-                </a>
-                <a href="pages/categories.html#breakfast-brunch" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/breakfast.jpeg');"></div>
-                    <span>Breakfast & Brunch</span>
-                </a>
-                <a href="pages/categories.html#snacks" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/snacks.jpg');"></div>
-                    <span>Snacks</span>
-                </a>
-                <a href="pages/categories.html#beverages" class="category-jar">
-                    <div class="jar-img" style="background-image: url('img/category-jars/optimized/beverages.jpg');"></div>
-                    <span>Beverages</span>
-                </a>
-                <!-- Add more category jars as needed -->
+    <section class="quick-links">
+      <h2>Explore Recipes</h2>
+      <div class="category-jars">
+        <a href="pages/categories.html#appetizers" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/appetizers.jpg');"></div>
+          <span>Appetizers</span>
+        </a>
+        <a href="pages/categories.html#main-courses" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/main-course.webp');"></div>
+          <span>Main Courses</span>
+        </a>
+        <a href="pages/categories.html#side-dishes" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/side-dishes.jpg');"></div>
+          <span>Side Dishes</span>
+        </a>
+        <a href="pages/categories.html#soups-stews" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/soups&stews.jpg');"></div>
+          <span>Soups & Stews</span>
+        </a>
+        <a href="pages/categories.html#salads" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/salad.jpg');"></div>
+          <span>Salads</span>
+        </a>
+        <a href="pages/categories.html#desserts" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/dessert.jpg');"></div>
+          <span>Desserts</span>
+        </a>
+        <a href="pages/categories.html#breakfast-brunch" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/breakfast.jpeg');"></div>
+          <span>Breakfast & Brunch</span>
+        </a>
+        <a href="pages/categories.html#snacks" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/snacks.jpg');"></div>
+          <span>Snacks</span>
+        </a>
+        <a href="pages/categories.html#beverages" class="category-jar">
+          <div class="jar-img" style="background-image: url('img/category-jars/optimized/beverages.jpg');"></div>
+          <span>Beverages</span>
+        </a>
+        <!-- Add more category jars as needed -->
+      </div>
+    </section>
+      
+    <section class="featured-recipes">
+      <h2>Featured Recipes</h2>
+      <div id="featured-recipes-grid" class="favorites-grid">
+        <!-- Featured recipes will be dynamically inserted here -->
+      </div>
+    </section>
+  </main>
 
-            </div>
-        </section>
-        
-        <section class="featured-recipes">
-            <h2>Featured Recipes</h2>
-            <div id="featured-recipes-grid" class="favorites-grid">
-                <!-- Featured recipes will be dynamically inserted here -->
-            </div>
-        </section>
+  <div class="quote-section">
+    <blockquote>
+      "Cooking is like painting or writing a song. Just as there are only so many notes or colors, there are only so many flavors—it's how you combine them that sets you apart."
+    </blockquote>
+    <cite>– Wolfgang Puck</cite>
+  </div>
 
-
-    </main>
-
-    <div class="quote-section">
-        <blockquote>
-            "Cooking is like painting or writing a song. Just as there are only so many notes or colors, there are only so many flavors—it's how you combine them that sets you apart."
-        </blockquote>
-        <cite>– Wolfgang Puck</cite>
-    </div>
-
-    <footer>
-        <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
-        <a id="icon-attribute" href="https://www.flaticon.com/free-icons/spoon" title="spoon icons">Spoon icons created by Freepik - Flaticon</a>
-    </footer>
-
-    
+  <footer>
+    <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+    <a id="icon-attribute" href="https://www.flaticon.com/free-icons/spoon" title="spoon icons">Spoon icons created by Freepik - Flaticon</a>
+  </footer>
 </body>
 </html>
