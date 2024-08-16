@@ -14,37 +14,41 @@
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-.home-page .hero h1 {
-  font-size: 4.5rem;
-  margin-bottom: 1rem;
-}
+  .home-page .hero h1 {
+    font-size: 4.5rem;
+    margin-bottom: 1rem;
+  }
 
-.home-page .hero p {
-  font-size: 1.5rem;
-  font-weight: 400;
-}
+  .home-page .hero p {
+    font-size: 1.5rem;
+    font-weight: 400;
+  }
+
 
 /* Main Page - Quick links section */
 .home-page .quick-links {
   margin-top: 2rem;
 }
 
-.home-page .quick-links h2 {
-  font-size: 3rem;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
+  .home-page .quick-links h2 {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+
 /* Main Page - featured recipes section */
 .home-page .featured-recipes {
   margin-top: 2rem;
 }
 
-.home-page .featured-recipes h2 {
-  font-size: 3rem;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
+  .home-page .featured-recipes h2 {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
 
+  
 .home-page .favorites-grid {
   display: flex;
   flex-wrap: wrap;

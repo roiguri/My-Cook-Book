@@ -21,31 +21,32 @@ nav ul {
   margin: 0;
 }
 
-nav ul li {
-  margin-right: 0.5rem;
-  box-shadow: h-offset v-offset blur spread color;
-}
+  nav ul li {
+    margin-right: 0.5rem;
+    box-shadow: h-offset v-offset blur spread color;
+  }
 
-nav ul li:last-child {
-  margin-right: 0;
-}
+    nav ul li:last-child {
+      margin-right: 0;
+    }
 
-nav ul li a {
-  color: var(--background-color);
-  font-family: var(--nav-font);
-  font-weight: bold;
-  background: var(--primary-color);
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
+  nav ul li a {
+    color: var(--background-color);
+    font-family: var(--nav-font);
+    font-weight: bold;
+    background: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
 
-  transition: background-color 0.3s;
-  display: inline-block;
-  white-space: nowrap;
-}
+    transition: background-color 0.3s;
+    display: inline-block;
+    white-space: nowrap;
+  }
 
-nav ul li a:hover {
-  background-color: #5c4033;
-}
+    nav ul li a:hover {
+      background-color: #5c4033;
+    }
+
 
 main {
   max-width: 1200px;
@@ -53,6 +54,7 @@ main {
   padding: 0 1rem;
 
 }
+
 
 .nav-search-container{
   display: flex;
@@ -74,10 +76,10 @@ main {
   margin-top: 2rem;
 }
 
-.quote-section blockquote {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
+  .quote-section blockquote {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
 
 
 
@@ -95,6 +97,6 @@ footer {
   flex-shrink: 0;
 }
 
-#icon-attribute {
-  color: gray;
-}
+  #icon-attribute {
+    color: gray;
+  }

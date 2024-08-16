@@ -375,21 +375,22 @@
   color: var(--text-color);
 }
 
-.recipe-card-base:hover {
-  transform: translateY(-5px);
-}
+  .recipe-card-base:hover {
+    transform: translateY(-5px);
+  }
 
-.recipe-card-base img {
-  object-fit: cover;
-  border-radius: 5%;
-}
+  .recipe-card-base img {
+    object-fit: cover;
+    border-radius: 5%;
+  }
 
-.recipe-card-base h3 {
-  font-size: 1.8rem;
-  color: var(--primary-color);
-  margin: 1rem;
-  text-align: center;
-}
+  .recipe-card-base h3 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin: 1rem;
+    text-align: center;
+  }
+
 
 /* Styles for recipe cards on categories page */
 .category-page .recipe-grid {
@@ -400,19 +401,20 @@
   margin-bottom: 20px;
 }
 
-.category-page .recipe-card {
-  padding: 20px;
-  flex-grow: 1;
-}
+  .category-page .recipe-card {
+    padding: 20px;
+    flex-grow: 1;
+  }
 
-.category-page .recipe-card img {
-  width: 100%;
-  height: 200px;
-}
+  .category-page .recipe-card img {
+    width: 100%;
+    height: 200px;
+  }
 
-.category-page .recipe-card-link {
-  display: flex;
-}
+  .category-page .recipe-card-link {
+    display: flex;
+  }
+
 
 /* Styles for favorite cards on home page */
 .home-page .favorites-grid {
@@ -422,38 +424,38 @@
   justify-content: center;
 }
 
-.home-page .favorites-card {
-  display: flex;
-  gap: 20px;
-  padding: 10px;
-  width: 300px;
-  min-width: 250px;
-  max-width: 100%;
-}
+  .home-page .favorites-card {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+    width: 300px;
+    min-width: 250px;
+    max-width: 100%;
+  }
 
-.home-page .favorites-card .image-container {
-  flex: 0 0 auto;
-  width: 150px;
-}
+    .home-page .favorites-card .image-container {
+      flex: 0 0 auto;
+      width: 150px;
+    }
 
-.home-page .favorites-card img {
-  width: auto;
-  height: 200px;
-}
+    .home-page .favorites-card img {
+      width: auto;
+      height: 200px;
+    }
 
-.home-page .favorites-card .info-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 150px;
-}
+    .home-page .favorites-card .info-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 150px;
+    }
 
-.home-page .favorites-card .favorites-info {
-  font-size: 1rem;
-  color: #666;
-  margin: 0;
-  min-width: 150px;
-}
+    .home-page .favorites-card .favorites-info {
+      font-size: 1rem;
+      color: #666;
+      margin: 0;
+      min-width: 150px;
+    }
 
 
     
@@ -462,39 +464,39 @@
 /*------------------------------------*\
     #pagination
 \*------------------------------------*/
-    .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
 
-    .pagination button {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        margin: 0 5px;
-        cursor: pointer;
-        border-radius: 5px;
-        transition: background-color 0.3s;
-    }
+.pagination button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
 
-    .pagination button:hover,
-    .pagination button.active {
-        background-color: var(--submenu-color);
-        color: white;
-    }
+  .pagination button:hover,
+  .pagination button.active {
+    background-color: var(--submenu-color);
+    color: white;
+  }
 
-    .pagination button:disabled {
-        background-color: var(--disabled-color);
-        cursor: not-allowed;
-    }
+  .pagination button:disabled {
+    background-color: var(--disabled-color);
+    cursor: not-allowed;
+  }
 
-    #page-info {
-        margin: 0 10px;
-    }
+#page-info {
+  margin: 0 10px;
+}
 
 
     
@@ -503,271 +505,280 @@
 /*------------------------------------*\
     #form-components
 \*------------------------------------*/
-    /* General Compontents */
-    .form-row {
-        display: flex;
-        margin-bottom: 1.5rem;
-        gap: 10px;
-    }
+/* General Compontents */
+.form-row {
+  display: flex;
+  margin-bottom: 1.5rem;
+  gap: 10px;
+}
 
-    .form-group {
-        flex: 1;
-        margin-bottom: 1.5rem;
-    }
+.form-group {
+  flex: 1;
+  margin-bottom: 1.5rem;
+}
 
-    label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: bold;
-        color: var(--primary-color);
-    }
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
 
-    input[type="text"],
-    input[type="number"],
-    input[type="file"],
-    textarea,
-    select {
-        width: 100%;
-        padding: 10px;
-        border-radius: 5px;
-        font-family: 'Rubik', sans-serif;
-        font-size: 14px;
-        background-color: #FFF;
-        transition: border-color 0.3s ease;
-        box-sizing: border-box;
-    }
+input[type="text"],
+input[type="number"],
+input[type="file"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: 'Rubik', sans-serif;
+  font-size: 14px;
+  background-color: #FFF;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
 
-    input[type="text"]:focus,
-    input[type="number"]:focus,
-    textarea:focus,
-    select:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 5px rgba(139, 69, 19, 0.5);
-    }
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(139, 69, 19, 0.5);
+  }
 
-    /* buttons */ 
-    .base-button {
-        display: block;
-        padding: 12px;
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-family: var(--body-font);
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        margin-bottom: 10px;
-    }
-    
-    .base-button:hover {
-        background-color: var(--primary-hover);
-    }
+/* buttons */ 
+.base-button {
+  display: block;
+  padding: 12px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-family: var(--body-font);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
+}
 
-    /* print button */
-        .print-button {
-            margin: 40px auto;
-        }
+  .base-button:hover {
+    background-color: var(--primary-hover);
+  }
 
-    /* submit button */
-        .submit-button {
-            width: 100%;
-        }
+  /* print button */
+  .print-button {
+      margin: 40px auto;
+  }
 
-    /* form specific */
-    .propose-recipe-form input[type="text"],
-    .propose-recipe-form input[type="number"],
-    .propose-recipe-form input[type="file"],
-    .propose-recipe-form textarea,
-    .propose-recipe-form select {
-        border: 1px solid var(--primary-color);
-    }
+  /* submit button */
+  .submit-button {
+    width: 100%;
+  }
 
-    .propose-recipe-form {
-        background-color: var(--secondary-color);
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
 
-    .propose-recipe-form h2 {
-        font-size: 2.5rem;
-        text-align: center;
-        margin-bottom: 1.5rem;
-        margin-top: 0;
-        color: var(--primary-color);
-    }
- 
-    .ingredients-container,
-    .steps-container,
-    .comments-container {
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    .ingredients,
-    .steps {
-        border: none;
-        padding: 0;
-        margin: 0;
-        width: 100%;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-    
-    .steps {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .ingredient-entry {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        gap: 10px;
-    }
-    
+/* form specific */
+.propose-recipe-form {
+  background-color: var(--secondary-color);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+  .propose-recipe-form h2 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+    color: var(--primary-color);
+  }
+
+.propose-recipe-form input[type="text"],
+.propose-recipe-form input[type="number"],
+.propose-recipe-form input[type="file"],
+.propose-recipe-form textarea,
+.propose-recipe-form select {
+  border: 1px solid var(--primary-color);
+}
+
+.ingredients-container,
+.steps-container,
+.comments-container {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+  .ingredients,
+  .steps {
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .steps {
+    display: flex;
+    gap: 10px;
+  }
+
+  .ingredient-entry {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
     .ingredient-entry > .quantity-input {
-        width: calc(30% - 5px);
+      width: calc(30% - 5px);
     }
-    
-    .item-input {
-        flex-grow: 1;
-    }
-    
-    .add-ingredient,
-    .add-step,
-    .remove-ingredient, 
-    .remove-step {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        font-size: 18px;
-        font-weight: bolder;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        flex-shrink: 0;
-    }
-    
-    .add-ingredient:hover,
-    .add-step:hover {
-        background-color: #6b3a0f;
-    }
-    
-    .images-upload {
-        border: 0;
-        padding: 0;
-    }
-    
+
+  .item-input {
+    flex-grow: 1;
+  }
+
+  .add-ingredient,
+  .add-step,
+  .remove-ingredient, 
+  .remove-step {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    font-size: 18px;
+    font-weight: bolder;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .add-ingredient:hover,
+  .add-step:hover {
+    background-color: #6b3a0f;
+  }
+
+  .comments {
+    border: 0;
+    padding: 0;
+  }
+
     .comments textarea {
-        width: 100%;
-        height: 100px;
-        box-sizing: border-box;
-        resize: none;
-    }
-    
-    .comments {
-        border: 0;
-        padding: 0;
+      width: 100%;
+      height: 100px;
+      box-sizing: border-box;
+      resize: none;
     }
 
 
+.images-upload {
+  border: 0;
+  padding: 0;
+}
 
-    
+
+
+
 
 /*------------------------------------*\
     #recipe-components
 \*------------------------------------*/
-    /* Recipe Image */
-        .recipe-image-container {
-            width: 100%;
-            align-self: start;
-        }
+/* Recipe-Details */
+.recipe-details {
+  width: 100%;
+}
 
-        .recipe-image {
-            width: 100%;
-            height: auto;
-            max-height: none;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+  /* Servings Adjuster */
+  .serving-adjuster {
+    margin-bottom: 20px;
+  }
 
-    /* Recipe-Details */
-        .recipe-details {
-            width: 100%;
-        }
+  .serving-adjuster label {
+    margin-left: 10px;
+  }
 
-        .stage-title {
-            font-family: var(--heading-font);
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
+  .serving-adjuster input {
+    width: 60px;
+    padding: 5px;
+    font-size: 1rem;
+  }
 
-        .recipe-instructions ol, 
-        .recipe-comments ol {
-            padding-right: 20px;
-            margin-bottom: 20px;
-        }
+  /* Ingredientes List */
+  .ingredients-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .ingredients-list li {
+    margin-bottom: 10px;
+  }
+  
+  .amount {
+    font-weight: bold;
+    margin-left: 5px;
+  }
+  
+  .unit {
+    margin-left: 5px;
+  }
 
-        .recipe-instructions > ol, 
-        .recipe-comments > ol {
-            padding-right: 0;
-        }
 
-        .recipe-instructions li, 
-        .recipe-comments li {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
+/* Recipe Image */
+.recipe-image-container {
+  width: 100%;
+  align-self: start;
+}
 
-        .ingredients-list {
-            list-style-type: none;
-            padding: 0;
-        }
+  .recipe-image {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 
-        .ingredients-list li {
-            margin-bottom: 10px;
-        }
 
-        .amount {
-            font-weight: bold;
-            margin-left: 5px;
-        }
+/* Recipe Instructions */
+.recipe-instructions h2,
+.recipe-details h2, 
+.recipe-comments h2 {
+  font-family: var(--heading-font);
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
 
-        .unit {
-            margin-left: 5px;
-        }
+.recipe-instructions ol, 
+.recipe-comments ol {
+  padding-right: 20px;
+  margin-bottom: 20px;
+}
 
-        .recipe-instructions h2,
-        .recipe-details h2, 
-        .recipe-comments h2 {
-            font-family: var(--heading-font);
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-    /* Servings Adjuster */
-        .serving-adjuster {
-            margin-bottom: 20px;
-        }
+  .recipe-instructions > ol, 
+  .recipe-comments > ol {
+    padding-right: 0;
+  }
 
-        .serving-adjuster label {
-            margin-left: 10px;
-        }
+  .recipe-instructions li, 
+  .recipe-comments li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
 
-        .serving-adjuster input {
-            width: 60px;
-            padding: 5px;
-            font-size: 1rem;
-        }
+.stage-title {
+  font-family: var(--heading-font);
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+
     
 
 
