@@ -138,6 +138,7 @@
   .nav-toggle {
     display: block;
     order: 1;
+    align-self: start;
   }
 
   .logo {
@@ -154,6 +155,8 @@
   .nav-search-container.active {
     display: flex;
     flex-direction: column;
+    align-self: stretch;
+    margin-inline: 25px;
   }
 
   nav ul {
