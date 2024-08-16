@@ -6,10 +6,9 @@
 
 ### 📅 Planned
 1. Fix text alignment for recipes
-2. Complete the "Propose a Recipe" form functionality
-3. Implement server-side handling of recipe submissions
-4. Implement server-side handling of recipe submissions
-5. add footnote for logo on all pages
+2. Implement server-side handling of recipe submissions
+3. add footnote for logo on all pages
+4. Add Stylint
 
 ### ✅ Completed
 1. Link to home page from website logo
