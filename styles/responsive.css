@@ -86,7 +86,7 @@
   .recipe-page .recipe-content{
     grid-template-columns: 1fr;
   }
-  
+
   .recipe-page .recipe-meta {
     flex-direction: column;
     align-items: center;
@@ -201,15 +201,8 @@
     margin-bottom: 1rem;
   }
 
-  nav {
-    margin-bottom: 1rem;
-  }
-
   .search-container {
     width: 100%;
-    max-width: 400px;
-    display: flex;
-    justify-content: center;
   }
 
   .nav-search-container {
