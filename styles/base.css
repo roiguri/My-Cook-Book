@@ -1,0 +1,53 @@
+/*------------------------------------*\
+    #CSS-Variables
+\*------------------------------------*/
+:root {
+  --heading-font: 'Amatic SC', cursive;
+  --body-font: 'Lora', serif;
+  --nav-font: 'Source Sans Pro', sans-serif;
+  --primary-color: #bb6016;
+  --primary-hover: #a05012;
+  --secondary-color: #e6dfd1;
+  --text-color: #3a3a3a;
+  --background-color: #f5f2e9;
+  --submenu-color: #4CAF50;
+  --disabled-color: #cccccc;
+}
+
+
+
+
+
+/*------------------------------------*\
+    #Basic-Elements
+\*------------------------------------*/
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--body-font);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background: url('../img/background/stone-counter-top.jpg') repeat center center;
+  background-size: cover;
+
+  display: flex;
+  flex-direction: column;
+}
+
+
+h1, h2, h3 {
+  font-family: var(--heading-font);
+  font-weight: 700;
+}
+
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}

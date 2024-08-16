@@ -1,27 +1,53 @@
 # Coding Standards for Our Kitchen Chronicles
 
 ## HTML Standards
-- Use 2 spaces for indentation
+- Use tab indentation
 - Use kebab-case for class and ID names (e.g., `recipe-card`, `ingredient-list`)
 - Use semantic HTML elements where appropriate (e.g., `<nav>`, `<article>`, `<section>`)
 - Always include alt text for images
 
-## CSS Standards
-- Follow BEM (Block Element Modifier) methodology for class naming
-- Use kebab-case for class names (e.g., `.recipe-card__title--large`)
-- Use a mobile-first approach for responsive design
-- Define variables for colors and typography in :root
-- Organize styles from general to specific
-- Use CSS custom properties (variables) for repeated values
-- Use logical and consistent file structure for CSS
+## CSS Organization Rules:
 
-## CSS File Structure
-Organize CSS into the following files:
-- base.css: Reset styles, typography, and general element styles
-- layout.css: Grid systems and overall page structure
-- components.css: Styles for reusable components (buttons, forms, etc.)
-- pages.css: Page-specific styles
-- utilities.css: Utility classes for common adjustments
+File Structure:
+Divide CSS into separate files: base.css, layout.css, components.css, pages.css, responsive.css, and print.css.
+Use a main.css file to import all other CSS files.
+- base.css: Include root variables, typography, and basic element styles.
+Define global styles that apply throughout the site.
+- layout.css: Contains styles for major layout components (header, footer, main content areas).
+Focuses on the structure of the page rather than specific components.
+- components.css: Include styles for reusable components (buttons, forms, cards, etc.).
+Keep these styles generic and not tied to specific pages.
+- pages.css: Contains page-specific styles.
+Use page-specific classes as prefixes (e.g., .home-page, .category-page) to scope styles to particular pages.
+- responsive.css: Group all media queries here.
+Organize by component or page as needed.
+
+Naming Conventions:
+- Use kebab-case for class names (e.g., .recipe-card, .search-bar).
+- Follow BEM (Block Element Modifier) methodology for naming when appropriate.
+
+Specificity:
+- Keep specificity as low as possible.
+- Avoid using IDs for styling; prefer classes.
+
+Comments:
+- Use comments to separate major sections within each file.
+- Briefly explain complex selectors or non-obvious style choices.
+
+Reusability:
+- Design components to be reusable across different pages when possible.
+- Avoid overly specific selectors that tie styles to particular HTML structures.
+
+Modularity:
+- Group related styles together.
+- Use CSS custom properties (variables) for repeated values.
+
+Responsiveness:
+- Use a mobile-first approach when writing media queries.
+
+Optimization:
+- Minimize the use of !important.
+- Group related media queries together in the responsive.css file.
 
 ## JavaScript Standards
 - Use ES6+ syntax

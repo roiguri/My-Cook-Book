@@ -3,7 +3,7 @@ const featuredRecipeNames = ["מוקפץ עם סלמון וברוקולי", "ב�
 function createFeaturedRecipeCard(recipe) {
     return `
         <a href="pages/recipe-page.html#${recipe.id}" class="favorites-card-link">
-            <div class="favorites-card">
+            <div class="favorites-card recipe-card-base">
                 <div class="image-container">
                     <img src="img/recipes/compressed/${recipe.category}/${recipe.image}" alt="${recipe.name}">
                 </div>    
