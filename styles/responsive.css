@@ -11,6 +11,24 @@
     text-align: center;
   }
 
+  .nav-search-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+    .search-auth-container {
+      gap: 1rem;
+      order: -1; /* Move search and auth to the top in mobile view */
+    }
+
+      .search-bar {
+          flex-grow: 1;
+      }
+
+      #auth-container {
+          flex-shrink: 0;
+      }
+  
   nav ul {
     flex-direction: column;
     width: 100%;

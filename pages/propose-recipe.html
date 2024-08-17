@@ -1,59 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Propose a Recipe - Our Kitchen Chronicles</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Propose a Recipe - Our Kitchen Chronicles</title>
 
 
-    <!-- Favicon for browsers -->
-    <link rel="icon" type="image/png" sizes="32x32" href="../img/icon/wooden-spoon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="../img/icon/wooden-spoon-16.png">
+  <!-- Favicon for browsers -->
+  <link rel="icon" type="image/png" sizes="32x32" href="../img/icon/wooden-spoon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../img/icon/wooden-spoon-16.png">
 
-    <!-- Icon for Android Chrome -->
-    <link rel="manifest" href="/My-Cook-Book/site.webmanifest.json">
+  <!-- Icon for Android Chrome -->
+  <link rel="manifest" href="/My-Cook-Book/site.webmanifest.json">
 
-    <!-- Icon for iOS -->
-    <link rel="apple-touch-icon" sizes="128x128" href="../img/icon/wooden-spoon-16.png">
+  <!-- Icon for iOS -->
+  <link rel="apple-touch-icon" sizes="128x128" href="../img/icon/wooden-spoon-16.png">
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="../styles/propose-a-recipe.css">
-    
-    <!-- Scripts -->
-    <script defer src="../js/navigation-script.js"></script>
-    <script defer src="../js/propose-recipe.js"></script>
-    <script type="module" src="../js/firebase-config.js"></script>
+  <!-- Styles -->
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="../styles/propose-a-recipe.css">
+  
+  <!-- Scripts -->
+  <script defer src="../js/navigation-script.js"></script>
+  <script defer src="../js/propose-recipe.js"></script>
+
+  <!-- firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../config/firebase-config.js"></script>
+  <script defer src="../js/auth.js"></script>
+  <script defer src="../js/common.js"></script>
+  
 </head>
 <body class = "propose-recipe">
-    <header class="header-container">
-        <a href="../index.html">
-            <div class="logo">
-              Our Kitchen Chronicles
-            </div>
-        </a>
-        <button class="nav-toggle" aria-label="Toggle navigation">
-            <span class="hamburger"></span>
-        </button>
-        <div class="nav-search-container">
-            <nav>
-                <ul>
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="./categories.html">Recipes</a></li>
-                <li><a href="#meal-planner">Meal Planner</a></li>
-                <li><a href="./propose-recipe.html">Propose a Recipe</a></li>
-                </ul>
-            </nav>
-            <div class="search-bar header-search">
-                <form class="search-form" action="#" method="get">
-                <input type="text" class="search-input" placeholder="Search recipes...">
-                <button type="submit" class="search-button">
-                    <i class="icon-search">🔍</i>
-                </button>
-                </form>
-            </div>
+  <header class="header-container">
+    <a href="../index.html">
+      <div class="logo">
+        Our Kitchen Chronicles
+      </div>
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation">
+      <span class="hamburger"></span>
+    </button>
+    <div class="nav-search-container">
+      <nav>
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="./categories.html">Recipes</a></li>
+          <li><a href="#meal-planner">Meal Planner</a></li>
+          <li><a href="./propose-recipe.html">Propose a Recipe</a></li>
+        </ul>
+      </nav>
+      <div class="search-auth-container">
+        <div class="search-bar header-search">
+          <form class="search-form" action="#" method="get">
+            <input type="text" class="search-input" placeholder="Search recipes...">
+            <button type="submit" class="search-button">
+                <i class="icon-search">🔍</i>
+            </button>
+          </form>
         </div>
-    </header>
+        <div id="auth-container">
+          <button id="auth-trigger" class="auth-button base-button" aria-label="Login or Signup">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
 
   <main class="propose-recipe-container">
     <section class="propose-recipe-hero">
@@ -156,5 +173,36 @@
   <footer>
     <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
   </footer>
+
+  <div id="auth-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Login</button>
+        <button class="auth-tab" data-tab="signup">Sign Up</button>
+        <button class="auth-tab" data-tab="reset">Reset Password</button>
+      </div>
+      <div id="login-form" class="auth-form active">
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Password" required>
+        <div class="remember-me">
+          <input type="checkbox" id="remember-me">
+          <label for="remember-me">Remember Me</label>
+        </div>
+        <button type="submit" id="login-submit">Login</button>
+        <button id="google-signin" class="google-btn">Sign in with Google</button>
+      </div>
+      <div id="signup-form" class="auth-form">
+        <input type="email" id="signup-email" placeholder="Email" required>
+        <input type="password" id="signup-password" placeholder="Password" required>
+        <button type="submit" id="signup-submit">Sign Up</button>
+        <button id="google-signup" class="google-btn">Sign up with Google</button>
+      </div>
+      <div id="reset-form" class="auth-form">
+        <input type="email" id="reset-email" placeholder="Email" required>
+        <button type="submit" id="reset-submit">Reset Password</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

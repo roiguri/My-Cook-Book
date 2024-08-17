@@ -52,6 +52,20 @@
 - Low: Implement a recipe timer feature
 - Low: Recipes suggestion for recipe page
 
+### Sign Up
+- fix close pop up button
+- Enhance form validation and error handling
+- Check email verification
+- Improve the UI/UX of the authentication forms and modal
+- Implement protected routes for authenticated users
+- Add user profile management functionality (On pop up menu)
+- Integrate authentication with your recipe functionality (e.g., saving favorite recipes, submitting new recipes)
+- Check remember me functionality
+- Add loading indicators during authentication processes
+- Implement logout functionality
+- Fix Google Sign In
+- User icon
+
 ### 🔌 API integrations
 - Medium: Develop a "Share as PDF" feature to replace the current print button
 - Low: Integrate with a nutrition API to provide detailed nutritional information

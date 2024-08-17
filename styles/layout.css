@@ -14,38 +14,57 @@
   gap: 0.5rem;
 }
 
-nav ul {
+.nav-search-container {
   display: flex;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
 }
 
-  nav ul li {
-    margin-right: 0.5rem;
-    box-shadow: h-offset v-offset blur spread color;
+  .search-auth-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
-    nav ul li:last-child {
-      margin-right: 0;
+    .search-container {
+      display: flex;
+      align-items: center;
     }
 
-  nav ul li a {
-    color: var(--background-color);
-    font-family: var(--nav-font);
-    font-weight: bold;
-    background: var(--primary-color);
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-
-    transition: background-color 0.3s;
-    display: inline-block;
-    white-space: nowrap;
+  
+  nav ul {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
   }
 
-    nav ul li a:hover {
-      background-color: #5c4033;
+    nav ul li {
+      margin-right: 0.5rem;
+      box-shadow: h-offset v-offset blur spread color;
     }
+
+      nav ul li:last-child {
+        margin-right: 0;
+      }
+
+    nav ul li a {
+      color: var(--background-color);
+      font-family: var(--nav-font);
+      font-weight: bold;
+      background: var(--primary-color);
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+
+      transition: background-color 0.3s;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+      nav ul li a:hover {
+        background-color: #5c4033;
+      }
 
 
 main {

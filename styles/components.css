@@ -578,6 +578,37 @@ select {
     width: 100%;
   }
 
+  /* auth button */
+  .auth-button {
+    /* Reset any inherited styles that might be causing issues */
+    margin: 0;
+    padding: 0;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+
+    /* Set precise dimensions */
+    width: 40px;
+    height: 44px;
+
+    /* Center the icon */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Ensure the button doesn't grow or shrink */
+    flex: 0 0 auto;
+
+    /* Match border-radius with design */
+    border-radius: 5px;
+  }
+
+    .auth-button svg {
+      width: 24px;
+      height: 24px;
+    }
+
 
 /* form specific */
 .propose-recipe-form {
@@ -777,6 +808,119 @@ select {
   margin-top: 20px;
   margin-bottom: 10px;
 }
+
+
+
+
+
+/*------------------------------------*\
+    #avatar
+\*------------------------------------*/
+/* Styles for the avatar (when user is logged in) */
+.avatar {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+  .avatar:hover {
+    background-color: #5c4033;
+  }
+
+
+
+
+
+/*------------------------------------*\
+    #sign-up-modal
+\*------------------------------------*/
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+}
+  
+  .modal-content {
+    background-color: var(--background-color);
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    max-width: 80%;
+    border-radius: 10px;
+  }
+  
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .auth-tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+    .auth-tab {
+      background-color: var(--secondary-color);
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      flex-grow: 1;
+    }
+    
+    .auth-tab.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+  
+  .auth-form {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+    .auth-form.active {
+      display: flex;
+    }
+    
+    .auth-form input,
+    .auth-form button {
+      padding: 10px;
+      font-size: 16px;
+    }
+  
+  .remember-me {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .google-btn {
+    background-color: #4285F4;
+    color: white;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+  }
 
 
     
