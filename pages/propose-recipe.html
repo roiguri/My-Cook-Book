@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Propose a Recipe - Our Kitchen Chronicles</title>
-    <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="../styles/propose-a-recipe.css">
+
 
     <!-- Favicon for browsers -->
     <link rel="icon" type="image/png" sizes="32x32" href="../img/icon/wooden-spoon-32.png">
@@ -17,9 +16,14 @@
     <!-- Icon for iOS -->
     <link rel="apple-touch-icon" sizes="128x128" href="../img/icon/wooden-spoon-16.png">
 
+    <!-- Styles -->
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/propose-a-recipe.css">
+    
+    <!-- Scripts -->
     <script defer src="../js/navigation-script.js"></script>
     <script defer src="../js/propose-recipe.js"></script>
-
+    <script type="module" src="../js/firebase-config.js"></script>
 </head>
 <body class = "propose-recipe">
     <header class="header-container">
@@ -51,101 +55,106 @@
         </div>
     </header>
 
-    <main class="propose-recipe-container">
-        <section class="propose-recipe-hero">
-            <h1>Propose a Recipe</h1>
-            <p>Share your culinary creations with our community</p>
-        </section>
+  <main class="propose-recipe-container">
+    <section class="propose-recipe-hero">
+      <h1>Propose a Recipe</h1>
+      <p>Share your culinary creations with our community</p>
+    </section>
 
-        <section class="propose-recipe-form">
-            <h2>פרטי המתכון</h2>
-            <form dir="rtl" id="recipe-form" action="#" method="get" enctype="multipart/form-data">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="name">שם המנה: </label>
-                        <input type="text" id="name" name="dish-name" />
-                    </div>
-                    <div class="form-group">
-                        <label for="type">סוג מנה:  </label>
-                        <input list="dish-types" type="text" id="dish-type" name="dish-type" />
+    <section class="propose-recipe-form">
+      <h2>פרטי המתכון</h2>
+      <form dir="rtl" id="recipe-form" action="#" method="get" enctype="multipart/form-data">
+        <div class="form-row">
+          <div class="form-group">
+              <label for="name">שם המנה: </label>
+              <input type="text" id="name" name="dish-name" />
+          </div>
+          <div class="form-group">
+            <label for="type">סוג מנה:  </label>
+            <input list="dish-types" type="text" id="dish-type" name="dish-type" />
 
-                        <datalist id="dish-types">
-                            <option value="Appetizers"></option>
-                            <option value="Main Courses"></option>
-                            <option value="Side Dishes"></option>
-                            <option value="Soups & Stews"></option>
-                            <option value="Salads"></option>
-                            <option value="Desserts"></option>
-                            <option value="Breakfast & Brunch"></option>
-                            <option value="Snacks"></option>
-                            <option value="Bevrages"></option>
-                        </datalist>
+            <datalist id="dish-types">
+              <option value="Appetizers"></option>
+              <option value="Main Courses"></option>
+              <option value="Side Dishes"></option>
+              <option value="Soups & Stews"></option>
+              <option value="Salads"></option>
+              <option value="Desserts"></option>
+              <option value="Breakfast & Brunch"></option>
+              <option value="Snacks"></option>
+              <option value="Bevrages"></option>
+            </datalist>
+          </div>                   
+        </div>
 
-                    </div>                   
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="prep-time">זמן הכנה (בדקות): </label>
-                        <input type="text" id="prep-time" name="preparation-time" />
-                    </div>
-                    <div class="form-group">
-                        <label for="wait-time">זמן המתנה (בדקות): </label>
-                        <input type="text" id="wait-time" name="waiting-time" />
-                    </div>                   
-                </div>
-                <div class="form-group">
-                    <div id ="ingredients-container" class="ingredients-container">
-                        <label for="ingredients">מצרכים: </label>
-                        <fieldset class="ingredients">
-                            <div class="ingredient-entry">
-                                <input type="text" name="ingredient-quantity[]" placeholder="כמות" class="quantity-input">
-                                <input type="text" name="ingredient-item[]" placeholder="פריט" class="item-input">
-                                <button type="button" class="add-ingredient">+</button>
-                            </div>
-                        </fieldset>
-                    </div>                 
-                </div>
-                <div class="form-group">
-                    <div id = "steps-container" class="steps-container">
-                        <label for="steps">תהליך הכנה: </label>
-                        <fieldset class="steps">
-                            <input type="text" name="steps" />
-                            <button type="button" class="add-step">+</button>
-                        </fieldset>
-                    </div>             
-                </div>
-                <div class="form-group">
-                    <div class="upload-img">
-                        <label for="images"> הוסף תמונה: </label>
-                        <fieldset class="images-upload">
-                            <input type="file" id="image" name="image" accept="image/*" required>
-                        </fieldset>
-                    </div>                   
-                </div>
-                <div class="form-group">
-                    <div class="comments-container">
-                        <label for="comments"> הערות: </label>
-                        <fieldset class="comments">
-                            <textarea id = "comments"></textarea>
-                        </fieldset>
-                    </div>                   
-                </div>
-                <div class="form-group">
-                    <button class="base-button submit-button" type="submit">שלח מתכון</button>
-                </div>
-            </form>
-        </section>
-    </main>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prep-time">זמן הכנה (בדקות): </label>
+            <input type="text" id="prep-time" name="preparation-time" />
+          </div>
+          <div class="form-group">
+            <label for="wait-time">זמן המתנה (בדקות): </label>
+            <input type="text" id="wait-time" name="waiting-time" />
+          </div>                   
+        </div>
 
-    <div class="quote-section">
-        <blockquote>
-            "Cooking is like painting or writing a song. Just as there are only so many notes or colors, there are only so many flavors - it's how you combine them that sets you apart."
-        </blockquote>
-        <p>-- Wolfgang Puck</p>
-    </div>
+        <div class="form-group">
+          <div id ="ingredients-container" class="ingredients-container">
+            <label for="ingredients">מצרכים: </label>
+            <fieldset class="ingredients">
+              <div class="ingredient-entry">
+                <input type="text" name="ingredient-quantity[]" placeholder="כמות" class="quantity-input">
+                <input type="text" name="ingredient-item[]" placeholder="פריט" class="item-input">
+                <button type="button" class="add-ingredient">+</button>
+              </div>
+            </fieldset>
+          </div>                 
+        </div>
 
-    <footer>
-        <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
-    </footer>
+        <div class="form-group">
+          <div id = "steps-container" class="steps-container">
+            <label for="steps">תהליך הכנה: </label>
+            <fieldset class="steps">
+              <input type="text" name="steps" />
+              <button type="button" class="add-step">+</button>
+            </fieldset>
+          </div>             
+        </div>
+
+        <div class="form-group">
+          <div class="upload-img">
+            <label for="images"> הוסף תמונה: </label>
+            <fieldset class="images-upload">
+              <input type="file" id="image" name="image" accept="image/*" required>
+            </fieldset>
+          </div>                   
+        </div>
+
+        <div class="form-group">
+          <div class="comments-container">
+            <label for="comments"> הערות: </label>
+            <fieldset class="comments">
+              <textarea id = "comments"></textarea>
+            </fieldset>
+          </div>                   
+        </div>
+
+        <div class="form-group">
+          <button class="base-button submit-button" type="submit">שלח מתכון</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <div class="quote-section">
+    <blockquote>
+      "Cooking is like painting or writing a song. Just as there are only so many notes or colors, there are only so many flavors - it's how you combine them that sets you apart."
+    </blockquote>
+    <p>-- Wolfgang Puck</p>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+  </footer>
 </body>
 </html>
