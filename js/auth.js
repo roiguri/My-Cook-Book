@@ -33,7 +33,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Open modal
-  authTrigger.onclick = () => modal.style.display = "block";
+  authTrigger.addEventListener('click', handleAuthTriggerClick);
+
+  function handleAuthTriggerClick() {
+    const user = firebase.auth().currentUser;
+    if (user) {
+      // User is signed in, show signed user content
+      updateUIForUser(user, true);
+    } else {
+      // User is not signed in, show unsigned user content
+      modal.style.display = "block";
+      populateUnsignedUserContent();
+    }
+  }
 
   // Populate modal for unsigned user
   function populateUnsignedUserContent() {
@@ -150,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .then((userCredential) => {
         console.log('User logged in:', userCredential.user);
-        updateUIForUser(userCredential.user);
+        updateUIForUser(userCredential.user, true);
         // modal.style.display = "none"; // hide pop up after signin
       })
       .catch((error) => {
@@ -169,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .then((userCredential) => {
         console.log('User signed up:', userCredential.user);
         userCredential.user.sendEmailVerification();
-        updateUIForUser(userCredential.user);
+        updateUIForUser(userCredential.user, true);
         // modal.style.display = "none"; // hide pop up after signin
       })
       .catch((error) => {
@@ -186,8 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
     firebase.auth().sendPasswordResetEmail(email)
       .then(() => {
         alert('Password reset email sent. Check your inbox.');
-        updateUIForUser(userCredential.user);
-        // modal.style.display = "none"; // hide pop up after signin
+        modal.style.display = "none"; // hide pop up after signin
       })
       .catch((error) => {
         console.error('Reset password error:', error);
@@ -202,7 +213,8 @@ document.addEventListener('DOMContentLoaded', function() {
     firebase.auth().signInWithPopup(provider)
       .then((result) => {
         console.log('Google sign in:', result.user);
-        modal.style.display = "none";
+        updateUIForUser(userCredential.user, true);
+        // modal.style.display = "none"; //hide pop up after signing in
       }).catch((error) => {
         console.error('Google sign in error:', error);
         showError('login-form', error.message);
@@ -267,15 +279,18 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Update UI for logged in user
-  function updateUIForUser(user) {
+  function updateUIForUser(user, showModal = false) {
     const authTrigger = document.getElementById('auth-trigger');
     if (user.photoURL) {
       authTrigger.innerHTML = `<img src="${user.photoURL}" alt="User Avatar" class="avatar">`;
     } else {
       authTrigger.innerHTML = `<div class="avatar">${user.email[0].toUpperCase()}</div>`;
     }
-    populateSignedUserContent(user);
-    modal.style.display = "block"; // Show the modal
+
+    if (showModal) {
+      populateSignedUserContent(user);
+      modal.style.display = "block";
+    }
   }
 
   // Update UI for unsigned user
@@ -290,6 +305,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Check auth state
+  let isInitialLoad = true;
+  
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       console.log('User is signed in:', user.email);
@@ -298,8 +315,11 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('User is signed out');
       updateUIForUnsignedUser();
     }
+    isInitialLoad = false;
+
+    // Update the click handler for the auth trigger
+    const authTrigger = document.getElementById('auth-trigger');
+    authTrigger.onclick = handleAuthTriggerClick;
   });
 
-  // Initial population of unsigned user content
-  populateUnsignedUserContent();
 });

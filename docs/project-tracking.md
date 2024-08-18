@@ -3,6 +3,11 @@
 ## 🚀 Master List
 
 ### 🔄 In Progress
+1. Update user profile settings UI
+2. Add close functionality to user settings
+3. User icon:
+  - fix hover
+4. Only present popup menu for new users.
 
 ### 📅 Planned
 1. Fix text alignment for recipes
@@ -13,6 +18,10 @@
 ### ✅ Completed
 1. Link to home page from website logo
 2. Fix close pop up button
+3. Implement logout functionality
+4. Add user profile management functionality (On pop up menu)
+5. Check remember me functionality
+
 
 ### ⏸️ On Hold
 1. Core JavaScript enhancements
@@ -38,7 +47,6 @@
 ## 📊 Feature Categories
 
 ### 🎨 Simple CSS/HTML changes
-- High: Link to home page from website logo
 - High: Fix text alignment for recipes
 - Medium: Minimize filter options for mobile layout
 - Medium: Enhance visual hierarchy of recipe pages
@@ -58,13 +66,12 @@
 - Check email verification
 - Improve the UI/UX of the authentication forms and modal
 - Implement protected routes for authenticated users
-- Add user profile management functionality (On pop up menu)
 - Integrate authentication with your recipe functionality (e.g., saving favorite recipes, submitting new recipes)
-- Check remember me functionality
 - Add loading indicators during authentication processes
-- Implement logout functionality
 - Fix Google Sign In
-- User icon
+- User icon:
+  - fix hover
+- Only present popup menu for new users.
 
 ### 🔌 API integrations
 - Medium: Develop a "Share as PDF" feature to replace the current print button
