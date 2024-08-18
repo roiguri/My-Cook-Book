@@ -176,11 +176,11 @@
 
   <div id="auth-modal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
       <div class="auth-tabs">
-        <button class="auth-tab active" data-tab="login">Login</button>
-        <button class="auth-tab" data-tab="signup">Sign Up</button>
-        <button class="auth-tab" data-tab="reset">Reset Password</button>
+        <button class="auth-tab active" id="auth-login" data-tab="login">Login</button>
+        <button class="auth-tab" id="auth-sign-up" data-tab="signup">Sign Up</button>
+        <button class="auth-tab" id="auth-reset" data-tab="reset">Reset Password</button>
+        <button class="auth-tab close" id="auth-close" data-tab="close">&times;</button>
       </div>
       <div id="login-form" class="auth-form active">
         <input type="email" id="login-email" placeholder="Email" required>

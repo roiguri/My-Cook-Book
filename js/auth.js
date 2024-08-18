@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const modal = document.getElementById('auth-modal');
   const authTrigger = document.getElementById('auth-trigger');
   const closeBtn = document.getElementsByClassName('close')[0];
-  const tabs = document.querySelectorAll('.auth-tab');
+  const tabs = document.querySelectorAll('.auth-tab:not(.close)');
   const forms = document.querySelectorAll('.auth-form');
 
   // Open modal

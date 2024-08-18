@@ -862,14 +862,6 @@ select {
     border-radius: 10px;
   }
   
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  
   .auth-tabs {
     display: flex;
     justify-content: space-between;
@@ -884,10 +876,23 @@ select {
       flex-grow: 1;
     }
     
-    .auth-tab.active {
-      background-color: var(--primary-color);
-      color: white;
-    }
+      .auth-tab.active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .auth-tab:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      #auth-login {
+        border-bottom-left-radius: 10px;
+      }
+
+      #auth-close {
+        border-top-right-radius: 10px;
+      }
   
   .auth-form {
     display: none;
