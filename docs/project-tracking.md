@@ -3,7 +3,7 @@
 ## 🚀 Master List
 
 ### 🔄 In Progress
-1. Update user profile settings UI
+1. Update user profile settings UI: chenge select (from radio to directly choosing the image)
 2. Add close functionality to user settings
 3. User icon:
   - fix hover

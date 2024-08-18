@@ -136,9 +136,11 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="avatar-options">
           ${avatarOptions}
         </div>
-        <button id="save-avatar" class="base-button">Save Avatar</button>
       </div>
-      <button id="logout-button" class="base-button">Log Out</button>
+      <div class="profile-buttons">
+        <button id="save-avatar" class="base-button">Save Avatar</button>
+        <button id="logout-button" class="base-button">Log Out</button>
+      </div>
     `;
   
     console.log('HTML content to be set:', htmlContent);
