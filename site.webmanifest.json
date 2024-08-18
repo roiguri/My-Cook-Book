@@ -15,7 +15,7 @@
             "purpose": "any maskable"
         }
     ],
-    "start_url": "/My-Cook-Book/",
+    "start_url": "/cook-book-test/",
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "display": "standalone"
