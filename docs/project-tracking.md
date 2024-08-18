@@ -12,6 +12,7 @@
 
 ### ✅ Completed
 1. Link to home page from website logo
+2. Fix close pop up button
 
 ### ⏸️ On Hold
 1. Core JavaScript enhancements
@@ -53,7 +54,6 @@
 - Low: Recipes suggestion for recipe page
 
 ### Sign Up
-- fix close pop up button
 - Enhance form validation and error handling
 - Check email verification
 - Improve the UI/UX of the authentication forms and modal

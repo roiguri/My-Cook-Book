@@ -893,6 +893,11 @@ select {
       #auth-close {
         border-top-right-radius: 10px;
       }
+
+      .avatar-option{
+        width: 40px;
+        height: 40px;
+      }
   
   .auth-form {
     display: none;
