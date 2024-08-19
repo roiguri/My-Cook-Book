@@ -3,11 +3,9 @@
 ## 🚀 Master List
 
 ### 🔄 In Progress
-1. Update user profile settings UI: chenge select (from radio to directly choosing the image)
+1. Update user profile settings UI: change select (from radio to directly choosing the image)
 2. Add close functionality to user settings
-3. User icon:
-  - fix hover
-4. Only present popup menu for new users.
+3. Only present popup menu for new users.
 
 ### 📅 Planned
 1. Fix text alignment for recipes
@@ -21,6 +19,7 @@
 3. Implement logout functionality
 4. Add user profile management functionality (On pop up menu)
 5. Check remember me functionality
+6. Fix navigation bar hover
 
 
 ### ⏸️ On Hold

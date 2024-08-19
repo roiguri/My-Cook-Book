@@ -63,7 +63,7 @@
     }
 
       nav ul li a:hover {
-        background-color: #5c4033;
+        background-color: var(--primary-hover);
       }
 
 
