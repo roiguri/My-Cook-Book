@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <label for="remember-me">Remember Me</label>
         </div>
         <button id="login-submit" class="base-button">Login</button>
-        <button id="google-signin" class="base-button">Sign in with Google</button>
+        <button id="google-signin" class="base-button google-btn">Sign in with Google</button>
       </div>
       <div id="signup-form" class="auth-form">
         <input type="email" id="signup-email" placeholder="Email" required>
@@ -123,10 +123,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Avatar URLs:', avatarUrls);
     
     const avatarOptions = avatarUrls.map((url, index) => `
-      <label>
-        <input type="radio" name="avatar" value="${url}" ${user.photoURL === url ? 'checked' : ''}>
+      <button class="avatar-button ${user.photoURL === url ? 'selected' : ''}" data-avatar-url="${url}">
         <img src="${url}" alt="Avatar ${index + 1}" class="avatar-option">
-      </label>
+      </button>
     `).join('');
   
     const htmlContent = `
@@ -147,6 +146,14 @@ document.addEventListener('DOMContentLoaded', function() {
     modalContent.innerHTML = htmlContent;
     console.log('HTML content after setting:', modalContent.innerHTML);
   
+    const avatarButtons = document.querySelectorAll('.avatar-button');
+    avatarButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        avatarButtons.forEach(btn => btn.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    });
+
     document.getElementById('save-avatar').addEventListener('click', saveAvatar);
     document.getElementById('logout-button').addEventListener('click', logoutUser);
   }
@@ -225,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Save Avatar
   function saveAvatar() {
-    const selectedAvatar = document.querySelector('input[name="avatar"]:checked');
+    const selectedAvatar = document.querySelector('.avatar-button.selected');
     if (!selectedAvatar) {
       console.error('No avatar selected');
       return;
@@ -237,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    const newAvatarUrl = selectedAvatar.value;
+    const newAvatarUrl = selectedAvatar.dataset.avatarUrl;
 
     user.updateProfile({
       photoURL: newAvatarUrl
