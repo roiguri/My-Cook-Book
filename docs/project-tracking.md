@@ -3,9 +3,8 @@
 ## 🚀 Master List
 
 ### 🔄 In Progress
-1. Update user profile settings UI: change select (from radio to directly choosing the image)
-2. Add close functionality to user settings
-3. Only present popup menu for new users.
+1. Move database to firebase
+2. Implement propose a recipe
 
 ### 📅 Planned
 1. Fix text alignment for recipes
@@ -20,6 +19,8 @@
 4. Add user profile management functionality (On pop up menu)
 5. Check remember me functionality
 6. Fix navigation bar hover
+7. Update user profile settings UI: change select (from radio to directly choosing the image)
+8. Add close functionality to user settings
 
 
 ### ⏸️ On Hold
@@ -61,15 +62,13 @@
 - Low: Recipes suggestion for recipe page
 
 ### Sign Up
-- Enhance form validation and error handling
+- Enhance form validation and error handling (noticefitting the modal size)
 - Check email verification
 - Improve the UI/UX of the authentication forms and modal
 - Implement protected routes for authenticated users
 - Integrate authentication with your recipe functionality (e.g., saving favorite recipes, submitting new recipes)
 - Add loading indicators during authentication processes
 - Fix Google Sign In
-- User icon:
-  - fix hover
 - Only present popup menu for new users.
 
 ### 🔌 API integrations

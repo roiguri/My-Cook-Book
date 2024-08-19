@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     `).join('');
   
     const htmlContent = `
+      <button class="auth-tab close" id="signed-close">&times;</button>
       <h2>Welcome, ${user.displayName || user.email}</h2>
       <div id="avatar-selection">
         <h3>Choose your avatar:</h3>
@@ -156,6 +157,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('save-avatar').addEventListener('click', saveAvatar);
     document.getElementById('logout-button').addEventListener('click', logoutUser);
+    
+    // Add event listener for the close button
+    document.getElementById('signed-close').addEventListener('click', () => {
+      modal.style.display = "none";
+    });
   }
 
   // Handle Login
