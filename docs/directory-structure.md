@@ -1,7 +1,6 @@
 our-kitchen-chronicles/
 │
 ├── index.html
-├── styles.css
 ├── site.webmanifest.json
 ├── README.md
 ├── pages/
@@ -10,16 +9,21 @@ our-kitchen-chronicles/
 │   └── recipe-page.html
 │
 ├── css/
-│   ├── category-page.css
-│   └── recipe-page.css
+│   ├── base.css
+│   ├── components.css
+│   ├── layout.css
+│   ├── main.css
+│   ├── pages.css
+│   └── responsive.css
 │
 ├── js/
-│   ├── navigation-script.js
+│   ├── auth.js
 │   ├── category.js
 │   ├── featured-recipes.js
+│   ├── navigation-script.js
 │   ├── propose-recipe.js
-│   ├── recipe-script.js
-│   └── recipe-data.js
+│   ├── recipe-data.js
+│   └── recipe-script.js
 │
 ├── img/
 │   ├── background/
@@ -30,24 +34,25 @@ our-kitchen-chronicles/
 │   │       ├── appetizers.jpg
 │   │       ├── main-course.webp
 │   │       └── ...
-│   ├── recipes/full/
-│   │   ├── main-courses/
-│   │   │   ├── bolognese.jpg
-│   │   │   ├── stir-fried-noodles-with-salmon.jpg
+│   ├── recipes/
+│   │   ├── full/
+│   │   │   ├── main-courses/
+│   │   │   │   ├── bolognese.jpg
+│   │   │   │   ├── stir-fried-noodles-with-salmon.jpg
+│   │   │   │   └── ...
+│   │   │   ├── desserts/
+│   │   │   │   ├── brownies.jpg
+│   │   │   │   └── ...
 │   │   │   └── ...
-│   │   ├── desserts/
-│   │   │   ├── brownies.jpg
-│   │   │   └── ...
-│   │   └── ...
-│   ├── recipes/compressed/
-│   │   ├── main-courses/
-│   │   │   ├── bolognese.jpg
-│   │   │   ├── stir-fried-noodles-with-salmon.jpg
-│   │   │   └── ...
-│   │   ├── desserts/
-│   │   │   ├── brownies.jpg
-│   │   │   └── ...
-│   │   └── ...
+│   │   └── compressed/
+│   │       ├── main-courses/
+│   │       │   ├── bolognese.jpg
+│   │       │   ├── stir-fried-noodles-with-salmon.jpg
+│   │       │   └── ...
+│   │       ├── desserts/
+│   │       │   ├── brownies.jpg
+│   │       │   └── ...
+│   │       └── ...
 │   └── icon/
 │       ├── wooden-spoon-16.png
 │       └── ...
@@ -60,4 +65,8 @@ our-kitchen-chronicles/
 │   ├── coding-standards.md
 │   ├── directory-structure.md
 │   ├── project-tracking.md
-│   └── site-plan.md
+│   ├── site-plan.md
+│   └── style-guide.md
+│
+└── config/
+│   └── firebase-config.js

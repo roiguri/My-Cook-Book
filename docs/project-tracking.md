@@ -5,6 +5,8 @@
 ### 🔄 In Progress
 1. Move database to firebase
 2. Implement propose a recipe
+3. Fix Google Sign In
+4. Enhance form validation and error handling (noticefitting the modal size)
 
 ### 📅 Planned
 1. Fix text alignment for recipes
