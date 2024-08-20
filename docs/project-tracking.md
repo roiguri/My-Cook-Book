@@ -4,15 +4,20 @@
 
 ### 🔄 In Progress
 1. Move database to firebase
-2. Implement propose a recipe
-3. Fix Google Sign In
-4. Enhance form validation and error handling (noticefitting the modal size)
+    - fix images
+    - change ID to unique firebase ID
+    - update favorite cards and categories to firebase
+    - improve speed
+
 
 ### 📅 Planned
-1. Fix text alignment for recipes
-2. Implement server-side handling of recipe submissions
-3. add footnote for logo on all pages
-4. Add Stylint
+1. Implement propose a recipe
+2. Fix Google Sign In
+3. Enhance form validation and error handling (noticefitting the modal size)
+4. Fix text alignment for recipes
+5. Implement server-side handling of recipe submissions
+6. add footnote for logo on all pages
+7. Add Stylint
 
 ### ✅ Completed
 1. Link to home page from website logo
