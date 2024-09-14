@@ -1,7 +1,6 @@
 // category.js
-// Assuming recipes is a global variable defined in recipeData.js
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // DOM elements
     const categoryTabs = document.querySelector('.category-tabs ul');
     const categoryDropdown = document.getElementById('category-select');
@@ -20,6 +19,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let currentPage = 1;
     const recipesPerPage = 4;
+    let allRecipes = [];
+
+    // Fetch all recipes from Firestore
+    async function fetchAllRecipes() {
+        const recipesRef = db.collection('recipes');
+        const snapshot = await recipesRef.get();
+        allRecipes = snapshot.docs.map(doc => ({ FirestoreID: doc.id, ...doc.data() }));
+    }
 
     // Function to switch categories
     function switchCategory(category) {
@@ -51,11 +58,9 @@ document.addEventListener('DOMContentLoaded', function() {
         pageTitle.textContent = categoryName;
     }
 
-    // Function to filter and diaplay recipes
-    function filterAndDisplayRecipes() {
-        console.log("Starting filteredRecipes:", recipes.filter(recipe => recipe.category === currentCategory));
-        
-        let filteredRecipes = recipes;
+    // Function to filter and display recipes
+    async function filterAndDisplayRecipes() {
+        let filteredRecipes = allRecipes;
 
         // Apply category filter (if not 'all')
         if (currentCategory !== 'all') {
@@ -63,10 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }   
 
         // Apply cooking time filter
-        console.log(`total filtered-recipes: ${filteredRecipes.length}`)
         if (cookingTimeFilter.value) {
-            console.log("Applying cooking time filter:", cookingTimeFilter.value);
-            
             let min, max;
             if (cookingTimeFilter.value.endsWith('+')) {
                 min = parseInt(cookingTimeFilter.value);
@@ -75,67 +77,66 @@ document.addEventListener('DOMContentLoaded', function() {
                 [min, max] = cookingTimeFilter.value.split('-').map(Number);
             }
             
-            console.log("Min:", min, "Max:", max);
-            
-            filteredRecipes = filteredRecipes.filter(recipe => {
-                console.log(`Recipe: ${recipe.name}, Cooking Time: ${recipe.cookingTime}`);
-                let keep = recipe.cookingTime >= min && (max === Infinity || recipe.cookingTime <= max);
-                console.log(`Keep recipe? ${keep}`);
-                return keep;
-            });
+            filteredRecipes = filteredRecipes.filter(recipe => 
+                recipe.cookingTime >= min && (max === Infinity || recipe.cookingTime <= max)
+            );
         }
     
         // Apply difficulty filter
         if (difficultyFilter.value) {
-            filteredRecipes = filteredRecipes.filter(recipe => {
-                console.log(`Recipe: ${recipe.name}, Difficulty: ${recipe.difficulty}, Selected: ${difficultyFilter.value}, Match: ${recipe.difficulty === difficultyFilter.value}`);
-                return recipe.difficulty === difficultyFilter.value;
-            });
+            filteredRecipes = filteredRecipes.filter(recipe => recipe.difficulty === difficultyFilter.value);
         }
-    
     
         // Apply main ingredient filter
         if (mainIngredientFilter.value) {
-            filteredRecipes = filteredRecipes.filter(recipe => {
-                console.log(`Main ingredient filter: ${recipe.name}, Ingredient: ${recipe.mainIngredient}, Selected: ${mainIngredientFilter.value}`);
-                return recipe.mainIngredient === mainIngredientFilter.value;
-            });
+            filteredRecipes = filteredRecipes.filter(recipe => recipe.mainIngredient === mainIngredientFilter.value);
         }
     
         // Apply tag filter
-    if (selectedTags.length > 0) {
-        filteredRecipes = filteredRecipes.filter(recipe => {
-            return selectedTags.every(tag => recipe.tags.includes(tag));
-        });
-    }
-    
-        console.log("Final filteredRecipes:", filteredRecipes);
+        if (selectedTags.length > 0) {
+            filteredRecipes = filteredRecipes.filter(recipe => 
+                selectedTags.every(tag => recipe.tags.includes(tag))
+            );
+        }
     
         // Pagination
         const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
         const startIndex = (currentPage - 1) * recipesPerPage;
         const paginatedRecipes = filteredRecipes.slice(startIndex, startIndex + recipesPerPage);    
         
-        displayRecipes(paginatedRecipes);
+        await displayRecipes(paginatedRecipes);
         updatePagination(filteredRecipes.length);
     }
 
     // Function to display recipes
-    function displayRecipes(recipes) {
-        recipeGrid.innerHTML = recipes.map((recipe, index) => `
-            <a href="./recipe-page.html#${recipe.id}" class="recipe-card-link">
-                <div class="recipe-card recipe-card-base">
-                    <img src="../img/recipes/compressed/${recipe.category}/${recipe.image}" alt="${recipe.name}">
-                    <h3>${recipe.name}</h3>
-                    <p>זמן בישול: ${cookingTime(recipe.cookingTime)}</p>
-                    <p>רמת קושי: ${recipe.difficulty}</p>
-                </div>
-            </a>
-        `).join('');
+    async function displayRecipes(recipes) {
+        const recipeCards = await Promise.all(recipes.map(async (recipe) => {
+            const imageUrl = await getImageUrl(recipe);
+            return `
+                <a href="./recipe-page.html?id=${recipe.FirestoreID}" class="recipe-card-link">
+                    <div class="recipe-card recipe-card-base">
+                        <img src="${imageUrl}" alt="${recipe.name}" onerror="this.src='../img/placeholder.jpg';">
+                        <h3>${recipe.name}</h3>
+                        <p>זמן בישול: ${cookingTime(recipe.cookingTime)}</p>
+                        <p>רמת קושי: ${recipe.difficulty}</p>
+                    </div>
+                </a>
+            `;
+        }));
+        recipeGrid.innerHTML = recipeCards.join('');
     }
-    /* add the following line to above function to add tags ro recipe card:
-                    <p>תגיות: ${recipe.tags.join(', ')}</p> 
-    */
+
+    // Function to get image URL from Firebase Storage
+    async function getImageUrl(recipe) {
+        try {
+            const imagePath = `img/recipes/compressed/${recipe.category}/${recipe.image}`;
+            const imageRef = storage.ref().child(imagePath);
+            return await imageRef.getDownloadURL();
+        } catch (error) {
+            console.error("Error fetching image URL:", error);
+            return '../img/placeholder.jpg'; // Fallback to local placeholder
+        }
+    }
 
     // Create a time string:
     function cookingTime(time) {
@@ -180,8 +181,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function goToPage(page) {
         const totalRecipes = currentCategory === 'all' ? 
-            recipes.length : 
-            recipes.filter(recipe => recipe.category === currentCategory).length;
+            allRecipes.length : 
+            allRecipes.filter(recipe => recipe.category === currentCategory).length;
         const totalPages = Math.ceil(totalRecipes / recipesPerPage);
     
         if (page > 0 && page <= totalPages) {
@@ -193,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function populateMainIngredientFilter() {
-        const relevantRecipes = currentCategory === 'all' ? recipes : recipes.filter(recipe => recipe.category === currentCategory);
+        const relevantRecipes = currentCategory === 'all' ? allRecipes : allRecipes.filter(recipe => recipe.category === currentCategory);
         const mainIngredients = [...new Set(relevantRecipes.map(recipe => recipe.mainIngredient))];
         
         mainIngredientFilter.innerHTML = '<option value="">All</option>' + 
@@ -232,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedTags = [];
 
     function populateTagFilter() {
-        const relevantRecipes = currentCategory === 'all' ? recipes : recipes.filter(recipe => recipe.category === currentCategory);
+        const relevantRecipes = currentCategory === 'all' ? allRecipes : allRecipes.filter(recipe => recipe.category === currentCategory);
         allTags = [...new Set(relevantRecipes.flatMap(recipe => recipe.tags))];
         allTags.sort((a, b) => a.localeCompare(b, 'he'));
         
@@ -351,13 +352,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initial setup
-    
+    await fetchAllRecipes();
     populateMainIngredientFilter();
     populateTagFilter();
     populateDifficultyFilter();
     updateActiveTab();
     updatePageTitle();
     syncCategoryDropdown();
-    filterAndDisplayRecipes();
-    
+    await filterAndDisplayRecipes();
 });

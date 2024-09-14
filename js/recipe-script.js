@@ -2,7 +2,8 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // Get recipeId from URL
-    const recipeId = window.location.hash.slice(1);
+    const urlParams = new URLSearchParams(window.location.search);
+    const recipeId = urlParams.get('id');
     console.log('Recipe ID from URL:', recipeId);  
 
     // Variables to store original values 
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get Firestore Reference
     const db = firebase.firestore();
 
-    db.collection('recipes').doc("4lJ3JBIBrFBJanj9o33p").get()
+    db.collection('recipes').doc(recipeId).get()
         .then((doc) => {
             if (doc.exists) {
                 const recipe = doc.data();
@@ -53,10 +54,18 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('recipe-category').textContent = `קטגוריה: ${recipe.category}`;
     }
     
-    function setRecipeImage(recipe){
-      const recipeImage = document.getElementById('recipe-image');
-      recipeImage.src = `../img/recipes/full/${recipe.category}/${recipe.image}`;
-      recipeImage.alt = recipe.name;
+    async function setRecipeImage(recipe) {
+        const recipeImage = document.getElementById('recipe-image');
+        try {
+            const imagePath = `img/recipes/full/${recipe.category}/${recipe.image}`;
+            const imageRef = storage.ref().child(imagePath);
+            const imageUrl = await imageRef.getDownloadURL();
+            recipeImage.src = imageUrl;
+        } catch (error) {
+            console.error("Error fetching image URL:", error);
+            recipeImage.src = '../img/placeholder.jpg'; // Fallback to local placeholder
+        }
+        recipeImage.alt = recipe.name;
     }
 
     function populateIngredientsList(recipe){
@@ -159,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
           finalTime = `שעתיים ו-${time%60} דקות`;;
       }
       else if (time % 60 == 0) {
-          finalTime = `${time/60} שעות`
+          finalTime = `${~~(time/60)} שעות`
       }
       else {
           finalTime = `${~~(time/60)} שעות ו-${time%60} דקות`;

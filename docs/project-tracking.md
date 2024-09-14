@@ -4,11 +4,12 @@
 
 ### 🔄 In Progress
 1. Move database to firebase
-    - fix images
-    - change ID to unique firebase ID
-    - update favorite cards and categories to firebase
     - improve speed
-
+    - fix adjust servings 
+    - add placeholder images
+    - remove data from local storage
+    - add loading to recipe page
+    - move all photos to firebase
 
 ### 📅 Planned
 1. Implement propose a recipe
