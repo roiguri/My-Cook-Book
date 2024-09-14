@@ -730,6 +730,10 @@ select {
       resize: none;
     }
 
+  .invalid {
+    border: 1px solid red !important;
+  }
+
 
 .images-upload {
   border: 0;

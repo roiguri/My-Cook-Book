@@ -21,11 +21,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     const recipesPerPage = 4;
     let allRecipes = [];
 
-    // Fetch all recipes from Firestore
+    // Fetch approved recipes from Firestore
     async function fetchAllRecipes() {
-        const recipesRef = db.collection('recipes');
+        const recipesRef = db.collection('recipes').where('approved', '==', true);
         const snapshot = await recipesRef.get();
         allRecipes = snapshot.docs.map(doc => ({ FirestoreID: doc.id, ...doc.data() }));
+        console.log(allRecipes);
     }
 
     // Function to switch categories
@@ -132,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const imageRef = storage.ref().child(imagePath);
             return await imageRef.getDownloadURL();
         } catch (error) {
-            console.error("Error fetching image URL:", error);
             // Return data URL for an empty rounded square
             return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
                 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">

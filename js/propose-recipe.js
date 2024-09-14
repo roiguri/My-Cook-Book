@@ -226,4 +226,194 @@ else if (event.target.classList.contains("remove-stage")) {
   console.log("Remove stage button clicked");
   removeStage(event);
 }
+else if (event.target.id === "submit-button") {
+  console.log("Submit button clicked");
+  submitRecipe(event);
+}
 });
+
+// form submission
+async function submitRecipe(event) {
+  console.log("Submit button clicked");
+  
+  if (!validateForm()) {
+    console.log("Form is invalid");
+    document.querySelector(".error-message").style.display = "block";
+    return; // Stop submission if form is invalid
+  }
+  console.log("Form is valid");
+  document.querySelector(".error-message").style.display = "none";
+
+  const formData = getFormData();
+  try {
+    // Upload image if present
+    const imageInput = document.getElementById('recipe-image');
+    if (imageInput && imageInput.files.length > 0) {
+      const file = imageInput.files[0];
+      const imageUrl = await uploadImage(file, formData.category);
+      formData.image = imageUrl;
+    }
+
+    // Add recipe to Firestore
+    const docRef = await db.collection('recipes').add(formData);
+    
+    // Update the recipe with its ID
+    await docRef.update({ id: docRef.id });
+
+    alert('המתכון נשלח בהצלחה!');
+    // Optionally, reset the form or redirect the user
+  } catch (error) {
+    console.error('Error submitting recipe:', error);
+    alert('אירעה שגיאה בשליחת המתכון. נא לנסות שוב.');
+  }
+}
+
+async function uploadImage(file, category) {
+  const storageRef = firebase.storage().ref();
+  const fullImageRef = storageRef.child(`img/recipes/full/${category}/${file.name}`);
+  const compressedImageRef = storageRef.child(`img/recipes/compressed/${category}/${file.name}`);
+
+  // Upload full size image
+  await fullImageRef.put(file);
+
+  // Compress and upload compressed image
+  const compressedFile = await compressImage(file);
+  await compressedImageRef.put(compressedFile);
+
+  // Return the full size image URL
+  return await fullImageRef.getDownloadURL();
+}
+
+async function compressImage(file) {
+  // Implement image compression logic here
+  // For simplicity, we're just returning the original file
+  // You should use a library like browser-image-compression for actual compression
+  return file;
+}
+
+function validateForm() {
+  let isValid = true;
+  console.log("Validating form");
+
+  function addValidationListener(field) {
+    field.addEventListener('input', function() {
+      if (field.value.trim()) {
+        field.classList.remove('invalid');
+      }
+    });
+  }
+
+  // 1. Check if mandatory fields are filled
+  const mandatoryFields = [
+    'name', 'dish-type', 'prep-time', 'wait-time'
+  ];
+  mandatoryFields.forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (!field.value.trim()) { 
+      isValid = false;
+      field.classList.add('invalid');
+      addValidationListener(field);
+    } else {
+      field.classList.remove('invalid');
+    }
+  });
+
+  // 2. Check if preparation and waiting times are numbers
+  const timeFields = ['prep-time', 'wait-time'];
+  timeFields.forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    const value = parseInt(field.value);
+    if (isNaN(value) || value < 0) { 
+      isValid = false;
+      field.classList.add('invalid');
+      field.addEventListener('input', function() {
+        const newValue = parseInt(this.value);
+        if (!isNaN(newValue) && newValue >= 0) {
+          this.classList.remove('invalid');
+        }
+      });
+    } else {
+      field.classList.remove('invalid');
+    }
+  });
+
+  // 3. Check if all ingredient fields are filled in all entries
+  const ingredientEntries = document.querySelectorAll('.ingredient-entry');
+  ingredientEntries.forEach(entry => {
+    const quantityInput = entry.querySelector('.quantity-input');
+    const unitInput = entry.querySelector('.unit-input');
+    const itemInput = entry.querySelector('.item-input');
+
+    [quantityInput, unitInput, itemInput].forEach(input => {
+      if (!input.value.trim()) {
+        isValid = false;
+        input.classList.add('invalid');
+        addValidationListener(input);
+      } else {
+        input.classList.remove('invalid');
+      }
+    });
+  });
+
+  // 4. Check if all step fields are filled in all stages
+  const stagesContainers = document.querySelectorAll('.steps-container');
+  stagesContainers.forEach(container => {
+    container.querySelectorAll('.steps input[type="text"]').forEach(input => {
+      if (!input.value.trim()) {
+        isValid = false;
+        input.classList.add('invalid');
+        addValidationListener(input);
+      } else {
+        input.classList.remove('invalid');
+      }
+    });
+  });
+
+  return isValid;
+}
+
+function getFormData() {
+  const formData = {
+    name: document.getElementById('name').value.trim(),
+    category: document.getElementById('dish-type').value,
+    cookingTime: parseInt(document.getElementById('prep-time').value) + parseInt(document.getElementById('wait-time').value),
+    // difficulty: document.getElementById('difficulty').value,
+    // mainIngredient: document.getElementById('main-ingredient').value,
+    // tags: Array.from(document.getElementById('tags').selectedOptions).map(option => option.value),
+    // servings: parseInt(document.getElementById('servings').value),
+    ingredients: [],
+    approved: false  // Added for future manager approval
+  };
+
+  // Get ingredients
+  document.querySelectorAll('.ingredient-entry').forEach(entry => {
+    formData.ingredients.push({
+      amount: entry.querySelector('.quantity-input').value.trim(),
+      unit: entry.querySelector('.unit-input').value.trim(),
+      item: entry.querySelector('.item-input').value.trim()
+    });
+  });
+
+  // Check if stages are present
+  const stagesContainers = document.querySelectorAll('.steps-container');
+  if (stagesContainers.length > 1) {
+    formData.stages = [];
+    stagesContainers.forEach((container, index) => {
+      const stage = {
+        title: `שלב ${index + 1}`,
+        instructions: Array.from(container.querySelectorAll('.steps input[type="text"]')).map(input => input.value.trim())
+      };
+      formData.stages.push(stage);
+    });
+  } else {
+    formData.instructions = Array.from(document.querySelector('.steps-container').querySelectorAll('input[type="text"]')).map(input => input.value.trim());
+  }
+
+  // Get comments if present
+  const comments = document.getElementById('comments').value.trim();
+  if (comments) {
+    formData.comments = [comments];
+  }
+
+  return formData;
+}

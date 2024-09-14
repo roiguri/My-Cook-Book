@@ -79,6 +79,7 @@
 
     <section class="propose-recipe-form">
       <h2>פרטי המתכון</h2>
+      <div dir = "rtl" class="error-message" style="display: none; color: red; font-weight: bold;">נא למלא את כל השדות החובה</div>
       <form dir="rtl" id="recipe-form" action="#" method="get" enctype="multipart/form-data">
         <div class="form-row">
           <div class="form-group">
@@ -145,7 +146,7 @@
           <div class="upload-img">
             <label for="images"> הוסף תמונה: </label>
             <fieldset class="images-upload">
-              <input type="file" id="image" name="image" accept="image/*" required>
+              <input type="file" id="image" name="image" accept="image/*">
             </fieldset>
           </div>                   
         </div>
@@ -160,7 +161,7 @@
         </div>
 
         <div class="form-group">
-          <button class="base-button submit-button" type="submit">שלח מתכון</button>
+          <button type="button" class="base-button submit-button" id="submit-button">שלח מתכון</button>
         </div>
       </form>
     </section>
