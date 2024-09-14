@@ -11,6 +11,12 @@ function addIngredientLine(event) {
     newQuan.placeholder = "כמות";
     newQuan.classList.add("quantity-input");
 
+    const newUnit = document.createElement("input");
+    newUnit.setAttribute("type", "text");
+    newUnit.setAttribute("name", "ingredient-unit[]");
+    newUnit.placeholder = "יחידה";
+    newUnit.classList.add("unit-input");
+
     const newItem = document.createElement("input");
     newItem.setAttribute("type", "text");
     newItem.setAttribute("name", "ingredient-item[]");
@@ -24,6 +30,7 @@ function addIngredientLine(event) {
     
     /* append all elements to entry */
     newEntry.appendChild(newQuan);
+    newEntry.appendChild(newUnit);
     newEntry.appendChild(newItem);
     newEntry.appendChild(newAddBtn);
 

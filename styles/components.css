@@ -682,6 +682,10 @@ select {
       width: calc(30% - 5px);
     }
 
+    .ingredient-entry > .unit-input {
+      width: calc(30% - 5px);
+    }
+
   .item-input {
     flex-grow: 1;
   }
