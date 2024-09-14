@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let originalServings;
     let amountSpans;
     let originalAmounts;
+    let servingsInput;
 
     // Get Firestore Reference
     const db = firebase.firestore();
@@ -80,15 +81,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function populateInstructions(recipe) {
         const instructionsList = document.getElementById('instructions-list');
         instructionsList.innerHTML = ''; // Clear existing instructions
-    
+
         if (recipe.stages && recipe.stages.length > 0) {
             recipe.stages.forEach((stage, index) => {
                 const stageTitle = document.createElement('h3');
                 stageTitle.textContent = `שלב ${index + 1}: ${stage.title}`;
                 stageTitle.classList.add('stage-title');
                 instructionsList.appendChild(stageTitle);
-    
+
                 const stageList = document.createElement('ol');
+                stageList.classList.add('instruction-list');
                 stage.instructions.forEach(instruction => {
                     const li = document.createElement('li');
                     li.textContent = instruction;
@@ -98,11 +100,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } else {
             // Fallback to the original instructions array
+            const singleStageList = document.createElement('ol');
+            singleStageList.classList.add('instruction-list');
             recipe.instructions.forEach(instruction => {
                 const li = document.createElement('li');
                 li.textContent = instruction;
-                instructionsList.appendChild(li);
+                singleStageList.appendChild(li);
             });
+            instructionsList.appendChild(singleStageList);
         }
     }
 
@@ -123,21 +128,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Adjust Servings
     function setupServingsAdjuster(recipe){
-      const servingsInput = document.getElementById('servings');
-      servingsInput.setAttribute("value", recipe.servings);
-      const originalServings = parseInt(servingsInput.value);
-      const amountSpans = document.querySelectorAll('.amount');
-      const originalAmounts = Array.from(amountSpans).map(span => parseFloat(span.textContent));
-      console.log('Number of amount spans:', amountSpans.length);
+        servingsInput = document.getElementById('servings');
+        servingsInput.setAttribute("value", recipe.servings);
+        originalServings = parseInt(servingsInput.value);
+        amountSpans = document.querySelectorAll('.amount');
+        originalAmounts = Array.from(amountSpans).map(span => parseFloat(span.textContent));
+        console.log('Number of amount spans:', amountSpans.length);
 
-      // Add serving size adjuster functionality
-      servingsInput.addEventListener('change', adjustServings);
+        // Add serving size adjuster functionality
+        servingsInput.addEventListener('change', adjustServings);
     }
 
     function adjustServings() {
         const newServings = parseInt(servingsInput.value);
         const scalingFactor = newServings / originalServings;
-        console.log(scalingFactor)
+        console.log('Scaling factor:', scalingFactor);
         amountSpans.forEach((span, index) => {
             const originalAmount = originalAmounts[index];
             const newAmount = originalAmount * scalingFactor;

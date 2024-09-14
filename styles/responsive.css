@@ -109,6 +109,15 @@
     flex-direction: column;
     align-items: center;
   }
+  
+  .recipe-content {
+    flex-direction: column;
+  }
+
+  .recipe-details, .recipe-image-container {
+    width: 100%;
+  }
+  
 
   /* propose-recipe */
   .propose-recipe .form-row {

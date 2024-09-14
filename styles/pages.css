@@ -110,12 +110,55 @@
 }
 
 .recipe-page .recipe-content {
-  gap: 40px;
+  gap: 2rem;
   margin-bottom: 40px;
 
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: flex;
+  flex: 1;
+  min-width: 300px;
 }
+
+.recipe-image-container {
+  flex: 1;
+  min-width: 300px;
+}
+
+.recipe-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.ingredients-list {
+  padding-right: 0;
+  list-style-type: none;
+}
+
+.ingredients-list li {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.amount {
+  text-align: left;
+  margin-left: 0.25rem;
+}
+
+.unit {
+  margin-left: 0.25rem;
+}
+
+.item {
+  flex: 1;
+}
+
+#servings {
+  width: 3rem;
+  text-align: center;
+}
+
+
 
 
 

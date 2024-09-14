@@ -3,22 +3,15 @@
 ## 🚀 Master List
 
 ### 🔄 In Progress
-1. Move database to firebase
-    - improve speed
-    - fix adjust servings 
-    - add placeholder images
-    - remove data from local storage
-    - add loading to recipe page
-    - move all photos to firebase
+1. Implement propose a recipe
 
 ### 📅 Planned
-1. Implement propose a recipe
-2. Fix Google Sign In
-3. Enhance form validation and error handling (noticefitting the modal size)
-4. Fix text alignment for recipes
-5. Implement server-side handling of recipe submissions
-6. add footnote for logo on all pages
-7. Add Stylint
+1. Fix Google Sign In
+2. Enhance form validation and error handling (noticefitting the modal size)
+3. Fix text alignment for recipes
+4. Implement server-side handling of recipe submissions
+5. add footnote for logo on all pages
+6. Add Stylint
 
 ### ✅ Completed
 1. Link to home page from website logo
@@ -29,6 +22,10 @@
 6. Fix navigation bar hover
 7. Update user profile settings UI: change select (from radio to directly choosing the image)
 8. Add close functionality to user settings
+9. fix adjust servings 
+10. add placeholder images
+11. remove data from local storage
+
 
 
 ### ⏸️ On Hold
@@ -36,6 +33,10 @@
 2. Basic full-stack features
 3. Database schema changes
 4. Advanced features and new technologies
+5. Move database to firebase
+    - improve speed
+    - add loading to recipe page
+    - move all photos to firebase
 
 ---
 
