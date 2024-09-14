@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         allTags = [...new Set(relevantRecipes.flatMap(recipe => recipe.tags))];
         allTags.sort((a, b) => a.localeCompare(b, 'he'));
         
-        const tagSearchInput = document.getElementById('tag-search');
+        const tagSearchInput = document.getElementById('tag-filter');
         const tagSuggestions = document.getElementById('tag-suggestions');
         const selectedTagsContainer = document.getElementById('selected-tags');
     
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             selectedTags.push(selectedTag);
             updateSelectedTags();
             filterAndDisplayRecipes();
-            document.getElementById('tag-search').value = '';
+            document.getElementById('tag-filter').value = '';
             document.getElementById('tag-suggestions').style.display = 'none';
         }
     }
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
     
     // Add event listeners for our new tag filter elements
-    const tagSearchInput = document.getElementById('tag-search');
+    const tagSearchInput = document.getElementById('tag-filter');
     const tagSuggestions = document.getElementById('tag-suggestions');
     const selectedTagsContainer = document.getElementById('selected-tags');
     
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (selectedTagsContainer) {
         selectedTagsContainer.addEventListener('click', handleTagRemoval);
     }
-
+    
     // Check if the page was reached from the navigation bar
     if (window.location.hash) {
         currentCategory = window.location.hash.slice(1);

@@ -131,7 +131,7 @@
       </div>
       <div class="filter-group tag-filter">
         <label for="tag-search"> Tags:</label>
-        <input type="text" id="tag-search" placeholder="הקלד לחיפוש תגיות">
+        <input name="tag-filter" type="search" data-purpose="recipe-filtering" id="tag-filter" placeholder="הקלד לחיפוש תגיות" autocomplete="not-password" readonly onfocus="this.removeAttribute('readonly');">
         <div id="tag-suggestions"></div>
         <div id="selected-tags"></div>
       </div>
