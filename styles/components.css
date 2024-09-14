@@ -671,7 +671,7 @@ select {
     gap: 10px;
   }
 
-  .ingredient-entry {
+  .ingredient-entry, .title-container {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
@@ -693,7 +693,8 @@ select {
   .add-ingredient,
   .add-step,
   .remove-ingredient, 
-  .remove-step {
+  .remove-step,
+  .remove-stage {
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -705,6 +706,11 @@ select {
     cursor: pointer;
     transition: background-color 0.3s ease;
     flex-shrink: 0;
+  }
+
+
+  .stage-name {
+    margin-bottom: 10px;
   }
 
   .add-ingredient:hover,
