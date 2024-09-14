@@ -79,7 +79,7 @@
 
     <section class="propose-recipe-form">
       <h2>פרטי המתכון</h2>
-      <div dir = "rtl" class="error-message" style="display: none; color: red; font-weight: bold;">נא למלא את כל השדות החובה</div>
+      <div dir = "rtl" class="error-message" style="display: none; color: red; font-weight: bold;">נא למלא את כל שדות החובה</div>
       <form dir="rtl" id="recipe-form" action="#" method="get" enctype="multipart/form-data">
         <div class="form-row">
           <div class="form-group">
@@ -88,31 +88,56 @@
           </div>
           <div class="form-group">
             <label for="type">סוג מנה:  </label>
-            <input list="dish-types" type="text" id="dish-type" name="dish-type" />
-
-            <datalist id="dish-types">
-              <option value="Appetizers"></option>
-              <option value="Main Courses"></option>
-              <option value="Side Dishes"></option>
-              <option value="Soups & Stews"></option>
-              <option value="Salads"></option>
-              <option value="Desserts"></option>
-              <option value="Breakfast & Brunch"></option>
-              <option value="Snacks"></option>
-              <option value="Bevrages"></option>
-            </datalist>
+            <select id="dish-type" name="dish-type">
+              <option value="">בחר סוג מנה</option>
+              <option value="appetizers">Appetizers</option>
+              <option value="main-courses">Main Courses</option>
+              <option value="side-dishes">Side Dishes</option>
+              <option value="soups&Stews">Soups & Stews</option>
+              <option value="salads">Salads</option>
+              <option value="desserts">Desserts</option>
+              <option value="breakfast&brunch">Breakfast & Brunch</option>
+              <option value="snacks">Snacks</option>
+              <option value="bevrages">Bevrages</option>
+            </select>
           </div>                   
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="prep-time">זמן הכנה (בדקות): </label>
-            <input type="text" id="prep-time" name="preparation-time" />
+            <input type="number" min="1" id="prep-time" name="preparation-time" />
           </div>
           <div class="form-group">
             <label for="wait-time">זמן המתנה (בדקות): </label>
-            <input type="text" id="wait-time" name="waiting-time" />
+            <input type="number" min="1" id="wait-time" name="waiting-time" />
           </div>                   
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="servings">מספר מנות: </label>
+            <input type="number" id="servings-form"  name="servings" min="1" />
+          </div>
+          <div class="form-group">
+            <label for="difficulty">דרגת קושי: </label>
+            <select id="difficulty" name="difficulty">
+              <option value="">בחר דרגת קושי</option>
+              <option value="קלה">קלה</option>
+              <option value="בינונית">בינונית</option>
+              <option value="קשה">קשה</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="main-ingredient">מרכיב עיקרי: </label>
+            <input type="text" id="main-ingredient" name="main-ingredient" />
+          </div>
+          <div class="form-group">
+            <label for="tags">תגים: </label>
+            <input type="text" id="tags" name="tags" placeholder="הפרידו בפסיקים" />
+          </div>
         </div>
 
         <div class="form-group">

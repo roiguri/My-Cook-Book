@@ -164,6 +164,8 @@
 
 
 
+
+
 /*------------------------------------*\
     #propose-recipe-page
 \*------------------------------------*/
@@ -203,3 +205,6 @@
   color: var(--primary-color);
 }
 
+.servings-proposal #servings {
+  width: none;
+}

@@ -305,7 +305,8 @@ function validateForm() {
 
   // 1. Check if mandatory fields are filled
   const mandatoryFields = [
-    'name', 'dish-type', 'prep-time', 'wait-time'
+    'name', 'dish-type', 'prep-time', 'wait-time', 'servings-form',
+    'difficulty', 'main-ingredient'
   ];
   mandatoryFields.forEach(fieldId => {
     const field = document.getElementById(fieldId);
@@ -319,7 +320,7 @@ function validateForm() {
   });
 
   // 2. Check if preparation and waiting times are numbers
-  const timeFields = ['prep-time', 'wait-time'];
+  const timeFields = ['prep-time', 'wait-time', 'servings-form'];
   timeFields.forEach(fieldId => {
     const field = document.getElementById(fieldId);
     const value = parseInt(field.value);
@@ -377,10 +378,10 @@ function getFormData() {
     name: document.getElementById('name').value.trim(),
     category: document.getElementById('dish-type').value,
     cookingTime: parseInt(document.getElementById('prep-time').value) + parseInt(document.getElementById('wait-time').value),
-    // difficulty: document.getElementById('difficulty').value,
-    // mainIngredient: document.getElementById('main-ingredient').value,
-    // tags: Array.from(document.getElementById('tags').selectedOptions).map(option => option.value),
-    // servings: parseInt(document.getElementById('servings').value),
+    difficulty: document.getElementById('difficulty').value,
+    mainIngredient: document.getElementById('main-ingredient').value,
+    tags: document.getElementById('tags').value.split(',').map(tag => tag.trim()),
+    servings: parseInt(document.getElementById('servings-form').value),
     ingredients: [],
     approved: false  // Added for future manager approval
   };
