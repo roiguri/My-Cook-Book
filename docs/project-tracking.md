@@ -3,7 +3,13 @@
 ## 🚀 Master List
 
 ### 🔄 In Progress
-1. Implement propose a recipe
+1. Add missing fields to propose a recipe
+2. Add approve recipe functionality
+3. Add server side validation to propose a recipe
+4. Add client side validation to propose a recipe
+4. Add server side handling of recipe submissions
+5. Add server side handling of recipe submissions
+6. Add suggest image for missing images
 
 ### 📅 Planned
 1. Fix Google Sign In
@@ -25,6 +31,7 @@
 9. fix adjust servings 
 10. add placeholder images
 11. remove data from local storage
+12. Implement propose a recipe
 
 
 
