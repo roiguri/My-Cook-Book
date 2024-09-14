@@ -2,7 +2,7 @@
 
 ## 1. Recipe Data Structure
 
-Each recipe is an object in the `recipes` array in the `recipe-data.js` file. Here's the basic structure:
+Each recipe is an object in the Firestore database. Here's the basic structure:
 
 ```javascript
 {
@@ -100,7 +100,7 @@ stages: [
 
 1. Choose the next available ID in the appropriate category range.
 2. Fill in all required fields in the recipe object.
-3. Add the recipe object to the `recipes` array in `recipe-data.js`.
+3. Add the recipe object to the Firestore database.
 4. Save the recipe image in the correct folder with the filename specified in the `image` field.
 
 ## 6. Naming Conventions

@@ -22,7 +22,6 @@ our-kitchen-chronicles/
 │   ├── featured-recipes.js
 │   ├── navigation-script.js
 │   ├── propose-recipe.js
-│   ├── recipe-data.js
 │   └── recipe-script.js
 │
 ├── img/
