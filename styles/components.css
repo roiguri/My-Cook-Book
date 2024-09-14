@@ -436,7 +436,7 @@
 
   .home-page .favorites-card {
     display: flex;
-    gap: 20px;
+    gap: 5px;
     padding: 10px;
     width: 300px;
     min-width: 250px;
@@ -446,6 +446,9 @@
     .home-page .favorites-card .image-container {
       flex: 0 0 auto;
       width: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .home-page .favorites-card img {
@@ -456,7 +459,7 @@
     .home-page .favorites-card .info-container {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       min-width: 150px;
     }
 
@@ -465,6 +468,8 @@
       color: #666;
       margin: 0;
       min-width: 150px;
+      text-align: center;
+      margin-bottom: 10px;
     }
 
 
