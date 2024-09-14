@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }));
         recipeGrid.innerHTML = recipeCards.join('');
     }
-
     // Function to get image URL from Firebase Storage
     async function getImageUrl(recipe) {
         try {
@@ -134,7 +133,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             return await imageRef.getDownloadURL();
         } catch (error) {
             console.error("Error fetching image URL:", error);
-            return '../img/placeholder.jpg'; // Fallback to local placeholder
+            // Return data URL for an empty rounded square
+            return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
+                <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="200" rx="20" ry="20" fill="#f0f0f0" />
+                </svg>
+            `);
         }
     }
 
