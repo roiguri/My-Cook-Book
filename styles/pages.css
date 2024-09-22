@@ -83,13 +83,14 @@
     #recipe-page
 \*------------------------------------*/
 .recipe-page .recipe-container {
-  max-width: 600px;
+  max-width: 100%;
   min-width: 200px;
   margin: 0 auto;
   padding: 100px;
   font-family: var(--body-font);
   background-color: var(--background-color);
   direction: rtl;
+  flex-grow: 1;
 }
 
 .recipe-page .recipe-title {
