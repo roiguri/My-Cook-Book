@@ -209,3 +209,8 @@
 .servings-proposal #servings {
   width: none;
 }
+
+.propose-recipe .form-buttons {
+  display: flex;
+  gap: 10px;
+}

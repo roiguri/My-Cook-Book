@@ -230,6 +230,10 @@ else if (event.target.id === "submit-button") {
   console.log("Submit button clicked");
   submitRecipe(event);
 }
+else if (event.target.id === "clear-button")  {
+  console.log("Clear button clicked");
+  clearRecipe(event);
+}
 });
 
 // form submission
@@ -417,4 +421,84 @@ function getFormData() {
   }
 
   return formData;
+}
+
+function clearRecipe(event) {
+  // Clear all input fields
+  document.querySelectorAll('input').forEach(input => {
+    input.value = '';
+    input.classList.remove('invalid');
+  });
+
+  // Clear all select fields
+  document.querySelectorAll('select').forEach(select => {
+    select.selectedIndex = 0;
+    select.classList.remove('invalid');
+  });
+
+  // Clear all textareas
+  document.querySelectorAll('textarea').forEach(textarea => {
+    textarea.value = '';
+    textarea.classList.remove('invalid');
+  });
+
+  // Reset ingredients to initial state
+  const ingredientsContainer = document.querySelector('.ingredients');
+  const ingredientEntries = ingredientsContainer.querySelectorAll('.ingredient-entry');
+  ingredientEntries.forEach((entry, index) => {
+    if (index === 0) {
+      // Reset first ingredient entry
+      entry.querySelector('.quantity-input').value = '';
+      entry.querySelector('.unit-input').value = '';
+      entry.querySelector('.item-input').value = '';
+      const addButton = entry.querySelector('button');
+      addButton.textContent = '+';
+      addButton.classList.remove('remove-ingredient');
+      addButton.classList.add('add-ingredient');
+    } else {
+      // Remove additional ingredient entries
+      entry.remove();
+    }
+  });
+
+  // Reset instructions to initial state
+  const stagesContainer = document.getElementById('stages-container');
+  const stepsContainers = stagesContainer.querySelectorAll('.steps-container');
+  stepsContainers.forEach((container, index) => {
+    if (index === 0) {
+      // Reset first stage
+      const steps = container.querySelectorAll('.steps');
+      steps.forEach((step, stepIndex) => {
+        if (stepIndex === 0) {
+          // Reset first step
+          step.querySelector('input[type="text"]').value = '';
+          const addButton = step.querySelector('button');
+          addButton.textContent = '+';
+          addButton.classList.remove('remove-step');
+          addButton.classList.add('add-step');
+        } else {
+          // Remove additional steps
+          step.remove();
+        }
+      });
+      // Remove stage title and name if present
+      const titleContainer = container.querySelector('.title-container');
+      if (titleContainer) titleContainer.remove();
+      const stageName = container.querySelector('.stage-name');
+      if (stageName) stageName.remove();
+    } else {
+      // Remove additional stages
+      container.remove();
+    }
+  });
+
+  // Reset stage counter
+  stageCounter = 1;
+
+  // Reset the form
+  document.getElementById('recipe-form').reset();
+
+  // Hide error message if visible
+  const errorMessage = document.querySelector('.error-message');
+  if (errorMessage) errorMessage.style.display = 'none';
 }
