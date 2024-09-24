@@ -101,6 +101,10 @@
   }
 
   /* recipe page */
+  .recipe-page .recipe-container{
+    padding: 30px;
+  }
+
   .recipe-page .recipe-content{
     grid-template-columns: 1fr;
   }
