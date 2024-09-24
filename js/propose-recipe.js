@@ -228,7 +228,7 @@ else if (event.target.classList.contains("remove-stage")) {
 }
 else if (event.target.id === "submit-button") {
   console.log("Submit button clicked");
-  submitRecipe(event);
+  confirmSubmitRecipe(event);
 }
 else if (event.target.id === "clear-button")  {
   console.log("Clear button clicked");
@@ -237,16 +237,26 @@ else if (event.target.id === "clear-button")  {
 });
 
 // form submission
-async function submitRecipe(event) {
-  console.log("Submit button clicked");
-  
+function confirmSubmitRecipe(event) {
+  event.preventDefault(); // Prevent form from submitting immediately
+
   if (!validateForm()) {
     console.log("Form is invalid");
     document.querySelector(".error-message").style.display = "block";
-    return; // Stop submission if form is invalid
+    return;
   }
-  console.log("Form is valid");
-  document.querySelector(".error-message").style.display = "none";
+
+  const confirmMessage = "האם אתה בטוח שברצונך לשלוח את המתכון? לאחר השליחה לא ניתן יהיה לערוך את המתכון.";
+  if (confirm(confirmMessage)) {
+    console.log("Form submission confirmed");
+    submitRecipe();
+  } else {
+    console.log("Form submission cancelled");
+  }
+}
+
+async function submitRecipe(event) {
+  console.log("Submitting form");
 
   const formData = getFormData();
   try {
