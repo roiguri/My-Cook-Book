@@ -3,35 +3,37 @@
 ## 🚀 Master List
 
 ### 🔄 In Progress
-1. Add approve recipe functionality
-2. Add suggest image for missing images
-3. Add server side validation to propose a recipe
-4. Add client side validation to propose a recipe
-5. Add server side handling of recipe submissions
-6. Add server side handling of recipe submissions
+- Add suggest image for missing images
+- Add server side validation to recipe submission
+
 
 ### 📅 Planned
-1. Fix Google Sign In
-2. Enhance form validation and error handling (noticefitting the modal size)
-3. Fix text alignment for recipes
-4. Implement server-side handling of recipe submissions
-5. add footnote for logo on all pages
-6. Add Stylint
+- Fix Google Sign In
+- Enhance validation and error handling for user auth (notice 
+  fitting the modal size)
+- Implement server-side handling of recipe submissions
+- add footnote for logo on all pages
+- Add Stylint
 
 ### ✅ Completed
-1. Link to home page from website logo
-2. Fix close pop up button
-3. Implement logout functionality
-4. Add user profile management functionality (On pop up menu)
-5. Check remember me functionality
-6. Fix navigation bar hover
-7. Update user profile settings UI: change select (from radio to directly choosing the image)
-8. Add close functionality to user settings
-9. fix adjust servings 
-10. add placeholder images
-11. remove data from local storage
-12. Implement propose a recipe
-13. Add missing fields to propose a recipe
+- Link to home page from website logo
+- Fix close pop up button
+- Implement logout functionality
+- Add user profile management functionality (On pop up menu)
+- Check remember me functionality
+- Fix navigation bar hover
+- Update user profile settings UI: change select (from radio to directly choosing the image)
+- Add close functionality to user settings
+- fix adjust servings 
+- add placeholder images
+- remove data from local storage
+- Implement propose a recipe
+- Add missing fields to propose a recipe
+- Fix text alignment for recipes
+- Add approve recipe functionality
+- change category images
+
+
 
 
 
@@ -64,13 +66,11 @@
 ## 📊 Feature Categories
 
 ### 🎨 Simple CSS/HTML changes
-- High: Fix text alignment for recipes
 - Medium: Minimize filter options for mobile layout
 - Medium: Enhance visual hierarchy of recipe pages
 - Medium: Refine print styles for better recipe printouts
 - Low: Add hover effects to recipe cards
 - Low: Implement a dark mode option
-- Low: Change category images
 
 ### 💻 JavaScript enhancements
 - High: Implement search functionality for navigation bar and recipes page
@@ -102,9 +102,7 @@
 - Low: Add option for steps in recipes / automated steps division in database
 
 ### 🏗️ Full-stack features
-- High: Complete the "Propose a Recipe" form functionality
 - High: Implement server-side handling of recipe submissions
-- Medium: Add image upload functionality for user-submitted recipes
 - Medium: Create user accounts and authentication system
 - Low: Develop an admin panel for recipe management and moderation
 - Low: Implement the meal planner (details to be discussed)

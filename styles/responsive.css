@@ -103,6 +103,7 @@
   /* recipe page */
   .recipe-page .recipe-container{
     padding: 30px;
+    width: auto;
   }
 
   .recipe-page .recipe-content{
