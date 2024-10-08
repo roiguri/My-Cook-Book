@@ -12,8 +12,6 @@ const urlsToCache = [
   '/styles/components.css',
   '/styles/pages.css',
   '/styles/responsive.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&family=Lora:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro&display=swap'
   // Add other critical assets here
 ];
 
