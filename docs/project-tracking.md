@@ -4,16 +4,21 @@
 
 ### 🔄 In Progress
 - Add suggest image for missing images
-- Add server side validation to recipe submission
+- Add auto generation of recipe
+- Add favorite recipe option
+- Make favorite recipes available offline
+- Add grandma cookbook
+- Create plan a meal page
+- Minimize filter options for mobile
 
 
 ### 📅 Planned
 - Fix Google Sign In
 - Enhance validation and error handling for user auth (notice 
   fitting the modal size)
-- Implement server-side handling of recipe submissions
-- add footnote for logo on all pages
-- Add Stylint
+- Make sure, cache is deleted on change
+- Add server side validation to recipe submission
+
 
 ### ✅ Completed
 - Link to home page from website logo
@@ -47,6 +52,8 @@
     - improve speed
     - add loading to recipe page
     - move all photos to firebase
+6. add footnote for logo on all pages
+7. Add Stylint
 
 ---
 
