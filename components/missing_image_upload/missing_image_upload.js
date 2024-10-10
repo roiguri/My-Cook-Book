@@ -47,6 +47,10 @@ class MissingImageUpload extends HTMLElement {
         this.closeModal();
       }
     });
+
+    // Add event listener for file selection
+    const fileInput = this.shadowRoot.getElementById('recipe-image');
+    fileInput.addEventListener('change', (event) => this.handleFileSelect(event));
   }
 
   /**
@@ -145,6 +149,19 @@ class MissingImageUpload extends HTMLElement {
       .base-button:hover {
         background-color: var(--primary-hover, #5c4033);
       }
+
+      #image-preview-container {
+        display: flex;
+        justify-content: center;
+        margin-top: -10px;
+        margin-bottom: 10px;
+      }
+
+      .image-preview {
+        max-width: 100%; 
+        max-height: 200px;
+        border-radius: 20px;
+      }
     `;
   }
 
@@ -162,6 +179,7 @@ class MissingImageUpload extends HTMLElement {
               <label for="recipe-image">Recipe Image:</label>
               <input type="file" id="recipe-image" name="recipe-image" accept="image/*" required>
             </div>
+            <div id="image-preview-container"></div>
             <div class="buttons">
               <button type="submit" class="base-button submit-button">העלה תמונה</button>
               <button type="button" id="clear-image" class="base-button clear-button">נקה</button>
@@ -190,7 +208,36 @@ class MissingImageUpload extends HTMLElement {
   clearFileInput() {
     const fileInput = this.shadowRoot.getElementById('recipe-image');
     fileInput.value = '';
+
+    const previewContainer = this.shadowRoot.getElementById('image-preview-container');
+    previewContainer.innerHTML = '';
+    
     console.log('File input cleared');
+  }
+
+  handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+      console.log('File selected:', file.name);
+      
+      // Check if the file is an image
+      if (file.type.startsWith('image/')) {
+        console.log('Valid image file selected');
+        this.previewImage(file);
+      } else {
+        console.error('Invalid file type. Please select an image.');
+        // You could add user-facing error message here
+      }
+    }
+  }
+
+  previewImage(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const previewContainer = this.shadowRoot.getElementById('image-preview-container');
+      previewContainer.innerHTML = `<img class="image-preview" src="${e.target.result}" alt="Image preview">`;
+    };
+    reader.readAsDataURL(file);
   }
 
 }
