@@ -13,7 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-  <script src="config/firebase-config.js"></script>
+  <script src="../../config/firebase-config.js"></script>
   <script defer src="../../js/auth.js"></script>
 </head>
 <body>
@@ -36,9 +36,12 @@
   <button class="upload-missing-image-button" data-recipe-id="123">Upload Image</button>
 
   <script>
-      const modal = document.querySelector('missing-image-upload');
-    const openMissingImage = document.querySelector('.upload-missing-image-button');
-    openMissingImage.addEventListener('click', () => modal.openModal());
+    document.querySelector('.upload-missing-image-button').addEventListener('click', (event) => {
+    event.preventDefault();
+    const recipeId = event.target.getAttribute('data-recipe-id');
+    const uploadComponent = document.querySelector('missing-image-upload');
+    uploadComponent.openModalForRecipe(recipeId);
+  });
   </script>
 </body>
 </html>
