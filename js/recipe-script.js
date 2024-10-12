@@ -65,8 +65,21 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error("Error fetching image URL:", error);
             recipeImage.src = '../img/placeholder.jpg'; // Fallback to local placeholder
+            recipeImage.classList.add("missing-image-update")
+            recipeImage.setAttribute('data-recipe-id', recipeId);
+            console.log(recipeId);
         }
         recipeImage.alt = recipe.name;
+
+        // Add click event listener to missing image
+        if (recipeImage.classList.contains('missing-image-update')) {
+          recipeImage.addEventListener('click', (event) => {
+              event.preventDefault();
+              const recipeId = recipeImage.getAttribute('data-recipe-id');
+              const uploadComponent = document.querySelector('missing-image-upload');
+              uploadComponent.openModalForRecipe(recipeId);
+          });
+       }
     }
 
     function populateIngredientsList(recipe){
