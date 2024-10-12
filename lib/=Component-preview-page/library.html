@@ -100,11 +100,10 @@
                 <pre class="code-snippet" id="code-snippet">
 &lt;button class="open-modal"&gt;Open Modal&lt;/button&gt;
 
-&lt;custom-modal id="demo-modal"&gt;
-    &lt;h3&gt;Hello World&lt;/h3&gt;
+&lt;custom-modal&gt;
 &lt;/custom-modal&gt;
 
-&lt;script src="modal/modal.js"&gt;&lt;/script&gt;
+&lt;script src="../modal/modal.js"&gt;&lt;/script&gt;
 &lt;script&gt;
     const modal = document.querySelector('custom-modal');
     const openButton = document.querySelector('.open-modal');
@@ -161,7 +160,7 @@
         </aside>
     </div>
 
-    <script src="modal/modal.js"></script>
+    <script src="../modal/modal.js"></script>
     <script>
         function showComponent(componentName) {
             // Hide all component sections
@@ -214,11 +213,10 @@
             codeSnippet.innerHTML = `
 &lt;button class="open-modal"&gt;Open Modal&lt;/button&gt;
 
-&lt;custom-modal id="demo-modal" style="--modal-width: ${width}; --modal-height: ${height}; --modal-background-color: ${bgColor};"&gt;
-    &lt;h3&gt;Hello World&lt;/h3&gt;
+&lt;custom-modal style="--modal-width: ${width}; --modal-height: ${height}; --modal-background-color: ${bgColor};"&gt;
 &lt;/custom-modal&gt;
 
-&lt;script src="modal/modal.js"&gt;&lt;/script&gt;
+&lt;script src="../modal/modal.js"&gt;&lt;/script&gt;
 &lt;script&gt;
     const modal = document.querySelector('custom-modal');
     const openButton = document.querySelector('.open-modal');
