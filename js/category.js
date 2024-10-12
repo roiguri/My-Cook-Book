@@ -133,11 +133,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             return await imageRef.getDownloadURL();
         } catch (error) {
             // Return data URL for an empty rounded square
-            return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
-                <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="200" height="200" rx="20" ry="20" fill="#f0f0f0" />
-                </svg>
-            `);
+            const imagePath = `img/recipes/compressed/place-holder-missing.png`;
+            const imageRef = storage.ref().child(imagePath);
+            return await imageRef.getDownloadURL();
         }
     }
 

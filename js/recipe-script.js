@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             recipeImage.src = imageUrl;
         } catch (error) {
             console.error("Error fetching image URL:", error);
-            const imagePath = `img/recipes/compressed/place-holder.png`;
+            const imagePath = `img/recipes/compressed/place-holder-add-new.png`;
             const imageRef = storage.ref().child(imagePath);
             const imageUrl = await imageRef.getDownloadURL();
             recipeImage.src = imageUrl;
