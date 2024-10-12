@@ -64,12 +64,21 @@ document.addEventListener('DOMContentLoaded', function() {
             recipeImage.src = imageUrl;
         } catch (error) {
             console.error("Error fetching image URL:", error);
-            recipeImage.src = '../img/placeholder.jpg'; // Fallback to local placeholder
+            const imagePath = `img/recipes/compressed/place-holder.png`;
+            const imageRef = storage.ref().child(imagePath);
+            const imageUrl = await imageRef.getDownloadURL();
+            recipeImage.src = imageUrl;
+
+            // Apply styles when image fails to load
+            recipeImage.style.width = '200px';
+            recipeImage.style.height = '200px'; 
+            recipeImage.style.cursor = 'pointer';
+
             recipeImage.classList.add("missing-image-update")
             recipeImage.setAttribute('data-recipe-id', recipeId);
             console.log(recipeId);
         }
-        recipeImage.alt = recipe.name;
+        recipeImage.alt = "לחץ להצעת תמונה חדשה";
 
         // Add click event listener to missing image
         if (recipeImage.classList.contains('missing-image-update')) {
