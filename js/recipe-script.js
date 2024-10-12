@@ -114,7 +114,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function populateCommentList(recipe){
       const commentsList = document.getElementById('comments-list');
       if ("comments" in recipe){
-          console.log(`comments: `, recipe.comments)
           recipe.comments.forEach(comment => {
               const li = document.createElement('li');
               li.textContent = comment;
@@ -133,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
         originalServings = parseInt(servingsInput.value);
         amountSpans = document.querySelectorAll('.amount');
         originalAmounts = Array.from(amountSpans).map(span => parseFloat(span.textContent));
-        console.log('Number of amount spans:', amountSpans.length);
 
         // Add serving size adjuster functionality
         servingsInput.addEventListener('change', adjustServings);
@@ -142,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function adjustServings() {
         const newServings = parseInt(servingsInput.value);
         const scalingFactor = newServings / originalServings;
-        console.log('Scaling factor:', scalingFactor);
         amountSpans.forEach((span, index) => {
             const originalAmount = originalAmounts[index];
             const newAmount = originalAmount * scalingFactor;

@@ -7,13 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeBtn = document.getElementsByClassName('close')[0];
   const tabs = modalContent.querySelectorAll('.auth-tab:not(.close)');
   const forms = modalContent.querySelectorAll('.auth-form');
-
-  console.log('Modal:', modal);
-  console.log('Modal Content:', modalContent);
-  console.log('Auth Trigger:', authTrigger);
-  console.log('Close Button:', closeBtn);
-  console.log('Tabs:', tabs);
-  console.log('Forms:', forms);
   
   // Firebase storage
   const storage = firebase.storage();
@@ -49,7 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Populate modal for unsigned user
   function populateUnsignedUserContent() {
-    console.log('Populating unsigned user content');
     const htmlContent = `
       <div class="auth-tabs">
         <button class="auth-tab active" id="auth-login" data-tab="login">Login</button>
@@ -78,9 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button id="reset-submit" class="base-button">Reset Password</button>
       </div>
     `;
-    console.log('HTML content to be set:', htmlContent);
     modalContent.innerHTML = htmlContent;
-    console.log('HTML content after setting:', modalContent.innerHTML);
     
     // Reattach event listeners
     attachEventListeners();
@@ -118,9 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Populate modal for signed user
   async function populateSignedUserContent(user) {
-    console.log('Populating signed user content');
     const avatarUrls = await getAvatarUrls();
-    console.log('Avatar URLs:', avatarUrls);
     
     const avatarOptions = avatarUrls.map((url, index) => `
       <button class="avatar-button ${user.photoURL === url ? 'selected' : ''}" data-avatar-url="${url}">
@@ -143,9 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     `;
   
-    console.log('HTML content to be set:', htmlContent);
     modalContent.innerHTML = htmlContent;
-    console.log('HTML content after setting:', modalContent.innerHTML);
   
     const avatarButtons = document.querySelectorAll('.avatar-button');
     avatarButtons.forEach(button => {
@@ -176,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return firebase.auth().signInWithEmailAndPassword(email, password);
       })
       .then((userCredential) => {
-        console.log('User logged in:', userCredential.user);
         updateUIForUser(userCredential.user, true);
         // modal.style.display = "none"; // hide pop up after signin
       })
@@ -194,7 +179,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
-        console.log('User signed up:', userCredential.user);
         userCredential.user.sendEmailVerification();
         updateUIForUser(userCredential.user, true);
         // modal.style.display = "none"; // hide pop up after signin
@@ -227,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithPopup(provider)
       .then((result) => {
-        console.log('Google sign in:', result.user);
         updateUIForUser(userCredential.user, true);
         // modal.style.display = "none"; //hide pop up after signing in
       }).catch((error) => {
@@ -255,14 +238,12 @@ document.addEventListener('DOMContentLoaded', function() {
     user.updateProfile({
       photoURL: newAvatarUrl
     }).then(() => {
-      console.log('Avatar updated successfully');
       updateUIForUser(user);
       // Update Firestore
       return firebase.firestore().collection('users').doc(user.uid).set({
         avatarUrl: newAvatarUrl
       }, { merge: true });
     }).then(() => {
-      console.log('Firestore updated successfully');
       // Close the modal
       modal.style.display = "none";
     }).catch((error) => {
@@ -274,7 +255,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Log Out
   function logoutUser() {
     firebase.auth().signOut().then(() => {
-      console.log('User signed out');
       modal.style.display = "none";
       updateUIForUnsignedUser();
     }).catch((error) => {
@@ -324,10 +304,8 @@ document.addEventListener('DOMContentLoaded', function() {
   
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-      console.log('User is signed in:', user.email);
       updateUIForUser(user);
     } else {
-      console.log('User is signed out');
       updateUIForUnsignedUser();
     }
     isInitialLoad = false;

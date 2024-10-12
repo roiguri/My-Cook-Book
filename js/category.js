@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         const recipesRef = db.collection('recipes').where('approved', '==', true);
         const snapshot = await recipesRef.get();
         allRecipes = snapshot.docs.map(doc => ({ FirestoreID: doc.id, ...doc.data() }));
-        console.log(allRecipes);
     }
 
     // Function to switch categories
@@ -205,9 +204,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             mainIngredients.map(ingredient => `
                 <option value="${ingredient}">${ingredient}</option>
             `).join('');
-        
-        console.log("Populated main ingredients:", mainIngredients);
-        console.log(`Populated ${mainIngredients.length} main ingredients for ${currentCategory === 'all' ? 'all categories' : currentCategory}`);
     }
 
     function populateDifficultyFilter() {
@@ -217,9 +213,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             difficulties.map(difficulty => `
                 <option value="${difficulty}">${difficulty}</option>
             `).join('');
-        
-        console.log("Populated difficulties:", difficulties);
-        console.log("Difficulty filter HTML:", difficultyFilter.innerHTML);
     }
 
     function populateCookingTimeFilter() {
@@ -229,7 +222,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             <option value="31-60">31-60 דקות</option>
             <option value="61">61+ דקות</option>
         `;
-        console.log("Populated cooking time filter options");
     }
 
     /* tag filter */

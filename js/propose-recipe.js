@@ -54,13 +54,11 @@ function removeIngredientLine(event){
 const ingredientList = document.getElementById("ingredients-container");
 ingredientList.addEventListener("click", function(event) {
     if (event.target.classList.contains("add-ingredient")) { // Check if the clicked element is a button
-        console.log("Button clicked:", event.target.textContent);
         
         addIngredientLine(event);
 
     }
     else if (event.target.classList.contains("remove-ingredient")) { // Check if the clicked element is a button
-        console.log("Button clicked:", event.target.textContent);
         removeIngredientLine(event);
         
     }
@@ -77,7 +75,6 @@ function addStage(event) {
       const title = document.createElement("h3");
       title.textContent = `שלב ${stageCounter}`;
       const stepsContainer = document.getElementById("steps-container");
-      console.log("stepsContainer: ", stepsContainer);
 
       const rmStageBtn = document.createElement("button");
       rmStageBtn.setAttribute("type", "button");
@@ -152,7 +149,6 @@ function updateStageCounters() {
   const stages = document.querySelectorAll('.steps-container');
   if (stages.length === 1) {
     stageCounter = 1;
-    console.log("stageCounter: ", stageCounter);
     const stage = document.querySelector('.steps-container');
     stage.querySelector('.title-container').remove();
     stage.querySelector('.stage-name').remove();
@@ -211,27 +207,21 @@ function removeStepLine(event){
 
 document.addEventListener('click', function(event) {
   if (event.target.classList.contains("add-step")) {
-      console.log("Button clicked:", event.target.textContent);
     addStepLine(event);
 }
 else if (event.target.classList.contains("remove-step")) {
-    console.log("Button clicked:", event.target.textContent);
     removeStepLine(event);
 }
 else if (event.target.id === "add-stage") {
-    console.log("Add stage button clicked");
     addStage(event);
 }
 else if (event.target.classList.contains("remove-stage")) {
-  console.log("Remove stage button clicked");
   removeStage(event);
 }
 else if (event.target.id === "submit-button") {
-  console.log("Submit button clicked");
   confirmSubmitRecipe(event);
 }
 else if (event.target.id === "clear-button")  {
-  console.log("Clear button clicked");
   clearRecipe(event);
 }
 });
@@ -248,7 +238,6 @@ function confirmSubmitRecipe(event) {
 
   const confirmMessage = "האם אתה בטוח שברצונך לשלוח את המתכון? לאחר השליחה לא ניתן יהיה לערוך את המתכון.";
   if (confirm(confirmMessage)) {
-    console.log("Form submission confirmed");
     submitRecipe();
   } else {
     console.log("Form submission cancelled");
@@ -256,8 +245,6 @@ function confirmSubmitRecipe(event) {
 }
 
 async function submitRecipe(event) {
-  console.log("Submitting form");
-
   const formData = getFormData();
   try {
     // Upload image if present
@@ -307,7 +294,6 @@ async function compressImage(file) {
 
 function validateForm() {
   let isValid = true;
-  console.log("Validating form");
 
   function addValidationListener(field) {
     field.addEventListener('input', function() {
