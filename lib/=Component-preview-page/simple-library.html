@@ -7,6 +7,7 @@
   <!-- component scripts -->
   <script src="../modal/modal.js"></script>
   <script src="../missing_image_upload/missing_image_upload.js"></script>
+  <script src="../scroll_list/scroll_list.js"></script>
   
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -42,6 +43,37 @@
     const uploadComponent = document.querySelector('missing-image-upload');
     uploadComponent.openModalForRecipe(recipeId);
   });
+  </script>
+
+  <!-- scrolling list -->
+  <h3>scrolling list</h3>
+
+  <scrolling-list dir="rtl" id="myList" height="200px" width="300px" expandable-items="true" ></scrolling-list>
+
+  <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          const list = document.getElementById('myList');
+
+          const createHeader = (text) => {
+              const div = document.createElement('div');
+              div.textContent = text;
+              return div;
+          };
+
+          const createContent = (text) => {
+              const button = document.createElement('button');
+              button.textContent = text;
+              button.onclick = () => alert('Button clicked!');
+              return button;
+          };
+
+          const items = Array.from({ length: 100 }, (_, index) => ({
+              header: createHeader(`זה הכפתור ה- ${index + 1}`),
+              content: createContent(`Click me ${index + 1}`)
+          }));
+
+          list.setItems(items);
+      });
   </script>
 </body>
 </html>
