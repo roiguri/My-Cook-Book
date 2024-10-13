@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>לוח בקרה למנהל - Our Kitchen Chronicles</title>
+    <title>Our Kitchen Chronicles - Dashboard</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="stylesheet" href="/styles/manager-dashboard.css">
+    <script src="../lib/scrolling_list/scroll_list.js"></script>
 </head>
 <body>
     <header class="header-container">
@@ -47,20 +48,27 @@
     </header>
 
     <main class="manager-dashboard">
-        <h1>לוח בקרה למנהל</h1>
+        <h1>Manager Dashboard</h1>
         
         <div class="sections">
-          <section id="user-management">
+          <section id="user-management" class="section">
               <h2>ניהול משתמשים</h2>
-              <div id="user-list"></div>
+              <scrolling-list id="user-list" height="300px" expandable-items="true"></scrolling-list>
           </section>
-          <section id="recipe-approval">
+
+          <section id="all-recipes" class="section all-recipes">
+              <h2>כל המתכונים</h2>
+              <input type="text" id="recipe-search" placeholder="חיפוש מתכונים...">
+              <select id="recipe-filter">
+                  <option value="">סינון לפי קטגוריה</option>
+                  <!-- Add categories dynamically -->
+              </select>
+              <scrolling-list id="all-recipes-list" height="300px" expandable-items="true"></scrolling-list>
+          </section>
+
+          <section id="recipe-approval" class="section">
               <h2>אישור מתכונים</h2>
-              <div id="pending-recipes"></div>
-          </section>
-          <section id="image-approval">
-              <h2>אישור תמונות</h2>
-              <div id="pending-images"></div>
+              <scrolling-list id="pending-recipes-list" height="300px" expandable-items="true"></scrolling-list>
           </section>
         </div>
     </main>

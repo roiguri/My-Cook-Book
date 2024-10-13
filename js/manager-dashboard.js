@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeDashboard() {
   loadUserList();
+  loadAllRecipes();
   loadPendingRecipes();
   loadPendingImages();
 }
@@ -26,132 +27,220 @@ function initializeDashboard() {
 function loadUserList() {
   const userList = document.getElementById('user-list');
   db.collection('users').get().then((snapshot) => {
-      userList.innerHTML = '';
-      snapshot.forEach((doc) => {
-          const userData = doc.data();
-          const userElement = document.createElement('div');
-          userElement.classList.add('user-item');
-          userElement.innerHTML = `
-              <span>${userData.email}</span>
-              <select data-user-id="${doc.id}">
-                  <option value="user" ${userData.role === 'user' ? 'selected' : ''}>User</option>
-                  <option value="manager" ${userData.role === 'manager' ? 'selected' : ''}>Manager</option>
-              </select>
-          `;
-          userList.appendChild(userElement);
-      });
-  });
+      const users = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+      }));
+      
+      const userItems = users.map(user => ({
+          header: user.email,
+          content: createUserRoleSelector(user)
+      }));
 
-  userList.addEventListener('change', function(event) {
-      if (event.target.tagName === 'SELECT') {
-          const userId = event.target.getAttribute('data-user-id');
-          const newRole = event.target.value;
-          updateUserRole(userId, newRole);
-      }
-  });
+      userList.setItems(userItems);
+  }).catch(handleError);
+}
+
+function createUserRoleSelector(user) {
+  const container = document.createElement('div');
+  const select = document.createElement('select');
+  select.innerHTML = `
+      <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+      <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option>
+  `;
+  const saveButton = document.createElement('button');
+  saveButton.textContent = 'שמור';
+  saveButton.addEventListener('click', () => updateUserRole(user.id, select.value));
+  
+  container.appendChild(select);
+  container.appendChild(saveButton);
+  return container;
 }
 
 function updateUserRole(userId, newRole) {
-  db.collection('users').doc(userId).update({
-      role: newRole
-  }).then(() => {
-      console.log('User role updated successfully');
-  }).catch((error) => {
-      console.error('Error updating user role:', error);
+  db.collection('users').doc(userId).update({ role: newRole })
+      .then(() => showSuccessMessage('תפקיד המשתמש עודכן בהצלחה'))
+      .catch(handleError);
+}
+
+function loadAllRecipes() {
+  const recipeList = document.getElementById('all-recipes-list');
+  const searchInput = document.getElementById('recipe-search');
+  const filterSelect = document.getElementById('recipe-filter');
+
+  let allRecipes = [];
+
+  db.collection('recipes').get().then((snapshot) => {
+      allRecipes = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+      }));
+      
+      updateRecipeList(allRecipes);
+      populateFilterOptions(allRecipes);
+  }).catch(handleError);
+
+  searchInput.addEventListener('input', () => filterRecipes(allRecipes));
+  filterSelect.addEventListener('change', () => filterRecipes(allRecipes));
+}
+
+function updateRecipeList(recipes) {
+  const recipeList = document.getElementById('all-recipes-list');
+  const recipeItems = recipes.map(recipe => ({
+      header: recipe.name,
+      content: createRecipeContent(recipe)
+  }));
+  recipeList.setItems(recipeItems);
+}
+
+function createRecipeContent(recipe) {
+  const container = document.createElement('div');
+  container.innerHTML = `
+      <p>קטגוריה: ${recipe.category}</p>
+      <p>זמן הכנה: ${recipe.cookingTime} דקות</p>
+      <button class="edit-recipe" data-id="${recipe.id}">ערוך</button>
+  `;
+  container.querySelector('.edit-recipe').addEventListener('click', () => editRecipe(recipe));
+  return container;
+}
+
+function editRecipe(recipe) {
+  // Implement recipe editing logic here
+  console.log('Editing recipe:', recipe.id);
+  // Open a modal or navigate to an edit page
+}
+
+function filterRecipes(recipes) {
+  const searchTerm = document.getElementById('recipe-search').value.toLowerCase();
+  const filterCategory = document.getElementById('recipe-filter').value;
+
+  const filteredRecipes = recipes.filter(recipe => 
+      recipe.name.toLowerCase().includes(searchTerm) &&
+      (filterCategory === '' || recipe.category === filterCategory)
+  );
+
+  updateRecipeList(filteredRecipes);
+}
+
+function populateFilterOptions(recipes) {
+  const filterSelect = document.getElementById('recipe-filter');
+  const categories = [...new Set(recipes.map(recipe => recipe.category))];
+  
+  categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      filterSelect.appendChild(option);
   });
 }
 
 function loadPendingRecipes() {
-  const pendingRecipes = document.getElementById('pending-recipes');
+  const pendingRecipesList = document.getElementById('pending-recipes-list');
   db.collection('recipes').where('approved', '==', false).get().then((snapshot) => {
-      pendingRecipes.innerHTML = '';
-      snapshot.forEach((doc) => {
-          const recipeData = doc.data();
-          const recipeElement = document.createElement('div');
-          recipeElement.classList.add('recipe-item');
-          recipeElement.innerHTML = `
-              <h3>${recipeData.name}</h3>
-              <button class="approve-recipe" data-recipe-id="${doc.id}">Approve</button>
-              <button class="reject-recipe" data-recipe-id="${doc.id}">Reject</button>
-          `;
-          pendingRecipes.appendChild(recipeElement);
-      });
-  });
+      const pendingRecipes = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+      }));
+      
+      const recipeItems = pendingRecipes.map(recipe => ({
+          header: recipe.name,
+          content: createPendingRecipeContent(recipe)
+      }));
 
-  pendingRecipes.addEventListener('click', function(event) {
-      if (event.target.classList.contains('approve-recipe')) {
-          const recipeId = event.target.getAttribute('data-recipe-id');
-          approveRecipe(recipeId);
-      } else if (event.target.classList.contains('reject-recipe')) {
-          const recipeId = event.target.getAttribute('data-recipe-id');
-          rejectRecipe(recipeId);
-      }
-  });
+      pendingRecipesList.setItems(recipeItems);
+  }).catch(handleError);
+}
+
+function createPendingRecipeContent(recipe) {
+  const container = document.createElement('div');
+  container.innerHTML = `
+      <p>קטגוריה: ${recipe.category}</p>
+      <p>זמן הכנה: ${recipe.cookingTime} דקות</p>
+      <button class="approve-recipe" data-id="${recipe.id}">אשר</button>
+      <button class="reject-recipe" data-id="${recipe.id}">דחה</button>
+  `;
+  container.querySelector('.approve-recipe').addEventListener('click', () => confirmAction('לאשר', () => approveRecipe(recipe.id)));
+  container.querySelector('.reject-recipe').addEventListener('click', () => confirmAction('לדחות', () => rejectRecipe(recipe.id)));
+  return container;
 }
 
 function approveRecipe(recipeId) {
-  db.collection('recipes').doc(recipeId).update({
-      approved: true
-  }).then(() => {
-      console.log('Recipe approved successfully');
-      loadPendingRecipes(); // Reload the pending recipes list
-  }).catch((error) => {
-      console.error('Error approving recipe:', error);
-  });
+  db.collection('recipes').doc(recipeId).update({ approved: true })
+      .then(() => {
+          showSuccessMessage('המתכון אושר בהצלחה');
+          loadPendingRecipes();
+      })
+      .catch(handleError);
 }
 
 function rejectRecipe(recipeId) {
-  db.collection('recipes').doc(recipeId).delete().then(() => {
-      console.log('Recipe rejected and deleted successfully');
-      loadPendingRecipes(); // Reload the pending recipes list
-  }).catch((error) => {
-      console.error('Error rejecting recipe:', error);
-  });
+  db.collection('recipes').doc(recipeId).delete()
+      .then(() => {
+          showSuccessMessage('המתכון נדחה ונמחק בהצלחה');
+          loadPendingRecipes();
+      })
+      .catch(handleError);
 }
 
 function loadPendingImages() {
-  const pendingImages = document.getElementById('pending-images');
+  const pendingImagesList = document.getElementById('pending-images-list');
   const storageRef = firebase.storage().ref('pendingImages');
   
   storageRef.listAll().then((result) => {
-      pendingImages.innerHTML = '';
-      result.items.forEach((imageRef) => {
-          imageRef.getDownloadURL().then((url) => {
-              const imageElement = document.createElement('div');
-              imageElement.classList.add('image-item');
-              imageElement.innerHTML = `
-                  <img src="${url}" alt="Pending image">
-                  <button class="approve-image" data-image-path="${imageRef.fullPath}">Approve</button>
-                  <button class="reject-image" data-image-path="${imageRef.fullPath}">Reject</button>
-              `;
-              pendingImages.appendChild(imageElement);
-          });
+      Promise.all(result.items.map(imageRef => 
+          imageRef.getDownloadURL().then(url => ({ ref: imageRef, url }))
+      )).then(images => {
+          const imageItems = images.map(image => ({
+              header: image.ref.name,
+              content: createPendingImageContent(image)
+          }));
+          pendingImagesList.setItems(imageItems);
       });
-  });
+  }).catch(handleError);
+}
 
-  pendingImages.addEventListener('click', function(event) {
-      if (event.target.classList.contains('approve-image')) {
-          const imagePath = event.target.getAttribute('data-image-path');
-          approveImage(imagePath);
-      } else if (event.target.classList.contains('reject-image')) {
-          const imagePath = event.target.getAttribute('data-image-path');
-          rejectImage(imagePath);
-      }
-  });
+function createPendingImageContent(image) {
+  const container = document.createElement('div');
+  container.innerHTML = `
+      <img src="${image.url}" alt="Pending image" style="max-width: 200px; max-height: 200px;">
+      <button class="approve-image" data-path="${image.ref.fullPath}">אשר</button>
+      <button class="reject-image" data-path="${image.ref.fullPath}">דחה</button>
+  `;
+  container.querySelector('.approve-image').addEventListener('click', () => confirmAction('לאשר', () => approveImage(image.ref.fullPath)));
+  container.querySelector('.reject-image').addEventListener('click', () => confirmAction('לדחות', () => rejectImage(image.ref.fullPath)));
+  return container;
 }
 
 function approveImage(imagePath) {
   // Implement image approval logic here
   console.log('Approving image:', imagePath);
   // Move the image to the appropriate folder and update the database
+  showSuccessMessage('התמונה אושרה בהצלחה');
+  loadPendingImages();
 }
 
 function rejectImage(imagePath) {
   // Implement image rejection logic here
   console.log('Rejecting image:', imagePath);
   // Delete the image from storage
+  showSuccessMessage('התמונה נדחתה ונמחקה בהצלחה');
+  loadPendingImages();
 }
 
+function confirmAction(action, callback) {
+  if (confirm(`האם אתה בטוח שברצונך ${action} פריט זה?`)) {
+      callback();
+  }
+}
+
+function showSuccessMessage(message) {
+  alert(message); // Replace with a more user-friendly notification system
+}
+
+function handleError(error) {
+  console.error('Error:', error);
+  alert('אירעה שגיאה. אנא נסה שנית.'); // Replace with a more user-friendly error handling system
+}
 // Add this function to your auth.js file if it's not already there
 function checkManagerStatus(user) {
   return db.collection('users').doc(user.uid).get().then((doc) => {
