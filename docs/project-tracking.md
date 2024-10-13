@@ -3,8 +3,16 @@
 ## 🚀 Master List
 
 ### 🔄 In Progress
-- Add suggest image for missing images
+- Finish manager dashboard:
+  - add option for deleting user from dashboard (are you sure pop up)
+  - add approval for recipes and images
+  - preview modal
+  - edit modal
+  - attach preview and edit to dashboards
 - Add auto generation of recipe
+- fix user sign in:
+  - add rules for security
+  - more data on users
 - Add favorite recipe option
 - Make favorite recipes available offline
 - Add grandma cookbook
