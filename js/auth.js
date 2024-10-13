@@ -171,22 +171,28 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
 
-  // Handle Signup
   function handleSignup(e) {
     e.preventDefault();
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        userCredential.user.sendEmailVerification();
-        updateUIForUser(userCredential.user, true);
-        // modal.style.display = "none"; // hide pop up after signin
-      })
-      .catch((error) => {
-        console.error('Signup error:', error);
-        showError('signup-form', error.message);
-      });
+        .then((userCredential) => {
+            console.log('User signed up:', userCredential.user);
+            // Add user to Firestore with default role
+            return db.collection('users').doc(userCredential.user.uid).set({
+                email: email,
+                role: 'user'  // Default role
+            });
+        })
+        .then(() => {
+            console.log('User added to Firestore');
+            updateUIForUser(userCredential.user);
+        })
+        .catch((error) => {
+            console.error('Signup error:', error);
+            showError('signup-form', error.message);
+        });
   }
 
   // Handle Password Reset
@@ -282,11 +288,17 @@ document.addEventListener('DOMContentLoaded', function() {
       authTrigger.innerHTML = `<div class="avatar">${user.email[0].toUpperCase()}</div>`;
     }
 
+    // Check if the user is a manager and add a dashboard tab if they are
+    checkManagerStatus(user).then((isManager) => {
+      updateDashboardTab(isManager);
+    });
+
     if (showModal) {
       populateSignedUserContent(user);
       modal.style.display = "block";
     }
   }
+  
 
   // Update UI for unsigned user
   function updateUIForUnsignedUser() {
@@ -296,9 +308,15 @@ document.addEventListener('DOMContentLoaded', function() {
         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
       </svg>
     `;
+
     populateUnsignedUserContent();
+
+    // Ensure the dashboard tab is removed for unsigned users
+    updateDashboardTab(false);
   }
 
+
+  
   // Check auth state
   let isInitialLoad = true;
   
@@ -314,5 +332,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const authTrigger = document.getElementById('auth-trigger');
     authTrigger.onclick = handleAuthTriggerClick;
   });
+
+  function updateDashboardTab(show) {
+    const navMenu = document.querySelector('nav ul'); // Adjust this selector to match your header's navigation menu
+    const existingDashboardTab = document.querySelector('#dashboard-tab');
+    
+    if (show) {
+        if (!existingDashboardTab) {
+            const dashboardTab = document.createElement('li');
+            dashboardTab.id = 'dashboard-tab';
+            const dashboardLink = document.createElement('a');
+            dashboardLink.href = '/pages/manager-dashboard.html';
+            dashboardLink.textContent = 'Dashboard';
+            dashboardTab.appendChild(dashboardLink);
+            navMenu.appendChild(dashboardTab);
+        }
+    } else {
+        if (existingDashboardTab) {
+            existingDashboardTab.remove();
+        }
+    }
+  } 
+
+  // Function to check if a user has manager status
+  function checkManagerStatus(user) {
+    return db.collection('users').doc(user.uid).get()
+        .then((doc) => {
+            if (doc.exists && doc.data().role === 'manager') {
+                return true;
+            }
+            return false;
+        })
+        .catch((error) => {
+            console.error("Error checking manager status:", error);
+            return false;
+        });
+  }
 
 });

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לוח בקרה למנהל - Our Kitchen Chronicles</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/manager-dashboard.css">
+</head>
+<body>
+    <header class="header-container">
+      <a href="../index.html">
+          <div class="logo">
+            Our Kitchen Chronicles
+          </div>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+          <span class="hamburger"></span>
+      </button>
+      <div class="nav-search-container">
+        <nav>
+          <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="./categories.html">Recipes</a></li>
+            <li><a href="#meal-planner">Meal Planner</a></li>
+            <li><a href="./propose-recipe.html">Propose a Recipe</a></li>
+          </ul>
+        </nav>
+        <div class="search-auth-container">
+          <div class="search-bar header-search">
+            <form class="search-form" action="#" method="get">
+              <input type="text" class="search-input" placeholder="Search recipes...">
+              <button type="submit" class="search-button">
+                  <i class="icon-search">🔍</i>
+              </button>
+            </form>
+          </div>
+          <div id="auth-container">
+            <button id="auth-trigger" class="auth-button base-button" aria-label="Login or Signup">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>      
+    </header>
+
+    <main class="manager-dashboard">
+        <h1>לוח בקרה למנהל</h1>
+        
+        <div class="sections">
+          <section id="user-management">
+              <h2>ניהול משתמשים</h2>
+              <div id="user-list"></div>
+          </section>
+          <section id="recipe-approval">
+              <h2>אישור מתכונים</h2>
+              <div id="pending-recipes"></div>
+          </section>
+          <section id="image-approval">
+              <h2>אישור תמונות</h2>
+              <div id="pending-images"></div>
+          </section>
+        </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+      <a id="icon-attribute" href="https://www.flaticon.com/free-icons/spoon" title="spoon icons">Spoon icons created by Freepik - Flaticon</a>
+    </footer>
+
+    <div id="auth-modal" class="modal">
+      <div class="modal-content">
+        <!-- modal content will be dynamically inserted here -->
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="../config/firebase-config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/manager-dashboard.js"></script>
+</body>
+</html>
