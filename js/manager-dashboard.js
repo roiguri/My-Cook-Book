@@ -20,12 +20,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeDashboard() {
   loadUserList();
   loadAllRecipes();
-  loadPendingRecipes();
-  loadPendingImages();
+  // loadPendingRecipes();
+  // loadPendingImages();
 }
 
+
+/**
+ * User Management
+ *  */ 
 function loadUserList() {
   const userList = document.getElementById('user-list');
+  
   db.collection('users').get().then((snapshot) => {
       const users = snapshot.docs.map(doc => ({
           id: doc.id,
@@ -33,16 +38,22 @@ function loadUserList() {
       }));
       
       const userItems = users.map(user => ({
-          header: user.email,
-          content: createUserRoleSelector(user)
+          header: createHeader(user.email),
+          content: createContent(user)
       }));
 
       userList.setItems(userItems);
   }).catch(handleError);
 }
 
-function createUserRoleSelector(user) {
-  const container = document.createElement('div');
+function createHeader(email) {
+  const header = document.createElement('div');
+  header.textContent = email;
+  return header;
+}
+
+function createContent(user) {
+  const content = document.createElement('div');
   const select = document.createElement('select');
   select.innerHTML = `
       <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
@@ -52,9 +63,9 @@ function createUserRoleSelector(user) {
   saveButton.textContent = 'שמור';
   saveButton.addEventListener('click', () => updateUserRole(user.id, select.value));
   
-  container.appendChild(select);
-  container.appendChild(saveButton);
-  return container;
+  content.appendChild(select);
+  content.appendChild(saveButton);
+  return content;
 }
 
 function updateUserRole(userId, newRole) {
@@ -63,6 +74,10 @@ function updateUserRole(userId, newRole) {
       .catch(handleError);
 }
 
+
+/**
+ * All Recipes
+ */
 function loadAllRecipes() {
   const recipeList = document.getElementById('all-recipes-list');
   const searchInput = document.getElementById('recipe-search');
@@ -134,6 +149,10 @@ function populateFilterOptions(recipes) {
   });
 }
 
+/**
+ * Pending Recipes
+ */
+/*
 function loadPendingRecipes() {
   const pendingRecipesList = document.getElementById('pending-recipes-list');
   db.collection('recipes').where('approved', '==', false).get().then((snapshot) => {
@@ -181,7 +200,12 @@ function rejectRecipe(recipeId) {
       })
       .catch(handleError);
 }
+*/
 
+/**
+ * Pending Images
+ */
+/*
 function loadPendingImages() {
   const pendingImagesList = document.getElementById('pending-images-list');
   const storageRef = firebase.storage().ref('pendingImages');
@@ -232,6 +256,7 @@ function confirmAction(action, callback) {
       callback();
   }
 }
+*/
 
 function showSuccessMessage(message) {
   alert(message); // Replace with a more user-friendly notification system
