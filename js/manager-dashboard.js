@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeDashboard() {
   loadUserList();
   loadAllRecipes();
-  // loadPendingRecipes();
+  loadPendingRecipes();
   // loadPendingImages();
 }
 
@@ -85,7 +85,7 @@ function loadAllRecipes() {
 
   let allRecipes = [];
 
-  db.collection('recipes').get().then((snapshot) => {
+  db.collection('recipes').where('approved', '==', true).get().then((snapshot) => {
       allRecipes = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -147,6 +147,52 @@ function populateFilterOptions(recipes) {
       option.textContent = category;
       filterSelect.appendChild(option);
   });
+}
+
+/**
+ * Pending
+ */
+function loadPendingRecipes() {
+  const recipeList = document.getElementById('all-recipes-list');
+
+  let allRecipes = [];
+
+  db.collection('recipes').where('approved', '==', false).get().then((snapshot) => {
+      allRecipes = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+      }));
+      
+      updatePendingRecipeList(allRecipes);
+  }).catch(handleError);
+}
+
+function updatePendingRecipeList(recipes) {
+  const recipeList = document.getElementById('pending-recipes-list');
+  const recipeItems = recipes.map(recipe => ({
+      header: recipe.name,
+      content: createPendingRecipeHeader(recipe)
+  }));
+  console.log("start pending");
+  recipeList.setItems(recipeItems);
+}
+
+function loadPendingImages() {
+
+}
+
+function createPendingRecipeHeader(recipe) {
+  const container = document.createElement('div');
+  container.innerHTML = `
+      שם: ${recipe.name}
+      <button class="preview-recipe" data-id="${recipe.id}">הצג</button>
+  `;
+  container.querySelector('.preview-recipe').addEventListener('click', () => previewImage('להציג', () => previewImage(recipe.id)));
+  return container;
+}
+
+function createPendingImageHeader() {
+
 }
 
 /**
