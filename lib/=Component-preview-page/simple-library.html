@@ -7,7 +7,6 @@
   <!-- component scripts -->
   <script src="../modal/modal.js"></script>
   <script src="../missing_image_upload/missing_image_upload.js"></script>
-  <script src="../scroll_list/scroll_list.js"></script>
   
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -51,33 +50,39 @@
   <scrolling-list dir="rtl" id="myList" height="200px" width="300px" expandable-items="true" ></scrolling-list>
 
   <script>
-      document.addEventListener('DOMContentLoaded', () => {
-          const list = document.getElementById('myList');
+        console.log("Starting DOMContentLoaded event listener...");
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOMContentLoaded event fired.");
+            const list = document.getElementById('myList');
+            console.log("List element:", list);
 
-          const createHeader = (text) => {
-              const div = document.createElement('div');
-              div.textContent = text;
-              return div;
-          };
+            const createHeader = (text) => {
+                console.log("Creating header:", text);
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div;
+            };
 
-          const createContent = (text) => {
-              const button = document.createElement('button');
-              button.textContent = text;
-              button.onclick = () => alert('Button clicked!');
-              return button;
-          };
+            const createContent = (text) => {
+                console.log("Creating content:", text);
+                const button = document.createElement('button');
+                button.textContent = text;
+                button.onclick = () => alert('Button clicked!');
+                return button;
+            };
 
-          const items = Array.from({ length: 100 }, (_, index) => ({
-              header: createHeader(`זה הכפתור ה- ${index + 1}`),
-              content: createContent(`Click me ${index + 1}`)
-          }));
+            const items = Array.from({ length: 100 }, (_, index) => ({
+                header: createHeader(`זה הכפתור ה- ${index + 1}`),
+                content: createContent(`Click me ${index + 1}`)
+            }));
 
-          list.setItems(items);
-      });
+            console.log("Items created:", items.length);
+            list.setItems(items);
+            console.log("setItems called");});
   </script>
 
   <h3>tab switching</h3>
-  <tab-switching dir="rtl" tabs-color="#e6dfd1" content-window-color="#f5f2e9" width="300px">
+  <tab-switching dir="rtl" tabs-color="#e6dfd1" content-window-color="#f5f2e9" height="400px" width="300px">
     <tab name="Tab 1">
         This is the content of Tab 1.
     </tab>
@@ -90,5 +95,7 @@
   </tab-switching>
 
   <script src="../tab_switching/tab_switching.js"></script>
+  <script src="../scroll_list/scroll_list.js"></script>
+
 </body>
 </html>
