@@ -65,16 +65,15 @@
               <scrolling-list id="all-recipes-list" height="330px" expandable-items="true" header-text-color="black"></scrolling-list>
           </section>
 
-          <section id="pending-items" class="dashboard-section">
-            <h2>פריטים ממתינים לאישור</h2>
-            <tab-switching id="pending-items-tabs" width="100%" height="500px">
-              <tab name="מתכונים ממתינים">
-                <scrolling-list id="pending-recipes-list" height="300px" width="100%"></scrolling-list>
-              </tab>
-              <tab name="תמונות ממתינות">
-              </tab>
-            </tab-switching>
-        </section>
+          <section id="pending-recipes" class="dashboard-section">
+              <h2>מתכונים ממתינים לאישור</h2>
+              <scrolling-list id="pending-recipes-list" height="400px"></scrolling-list>
+          </section>
+
+          <section id="pending-images" class="dashboard-section">
+            <h2>תמונות ממתינות לאישור</h2>
+            <scrolling-list id="pending-images-list" height="400px"></scrolling-list>
+          </section>
         </div>
     </main>
 
@@ -84,10 +83,8 @@
     </footer>
 
     <!-- modals -->
-     
-    <custom-modal id="image-preview-modal" width="80%" height="auto">
-      <!-- Modal content will be dynamically populated -->
-    </custom-modal>
+    
+    <image-approval-component></image-approval-component>
 
     <div id="auth-modal" class="modal">
       <div class="modal-content">
@@ -105,7 +102,7 @@
 
     <!-- components -->
     <script src="../lib/scrolling_list/scroll_list.js"></script>
-    <script src="../lib/tab_switching/tab_switching.js" defer></script>
+    <script src="../lib/image_approval/image_approval.js"></script>
     <script src="../lib/modal/modal.js"></script>
 </body>
 </html>
