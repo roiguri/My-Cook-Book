@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const dashboardLink = document.createElement('a');
             // Check if the current page is index.html
             if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
-              dashboardLink.href = '../pages/manager-dashboard.html';
+              dashboardLink.href = './pages/manager-dashboard.html';
             } else {
                 dashboardLink.href = './manager-dashboard.html';
             }            

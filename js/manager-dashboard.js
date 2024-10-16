@@ -125,7 +125,7 @@ function createRecipeContent(recipe) {
 }
 
 function editRecipe(recipe) {
-  // Implement recipe editing logic here
+  // TODO: Implement recipe editing logic here
   console.log('Editing recipe:', recipe.id);
   // Open a modal or navigate to an edit page
 }
