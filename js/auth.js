@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
               dashboardLink.href = '../pages/manager-dashboard.html';
             } else {
-                dashboardLink.href = './pages/manager-dashboard.html';
+                dashboardLink.href = './manager-dashboard.html';
             }            
             dashboardLink.textContent = 'Dashboard';
             dashboardTab.appendChild(dashboardLink);
