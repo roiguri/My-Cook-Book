@@ -2,30 +2,98 @@
 
 ## 🚀 Master List
 
-### 🔄 In Progress
-- Finish manager dashboard:
-  - add option for deleting user from dashboard (are you sure pop up)
-  - add approval for recipes and images
-  - preview modal
-  - edit modal
-  - attach preview and edit to dashboards
-- Add auto generation of recipe
-- fix user sign in:
-  - add rules for security
-  - more data on users
-- Add favorite recipe option
-- Make favorite recipes available offline
-- Add grandma cookbook
-- Create plan a meal page
-- Minimize filter options for mobile
+## 📋 Next Steps
+- Manager dashboard:
+  * Are you sure modal
+  * Fix Image upload
+  * Preview and edit recipes
+  * Improve page style
+- New Feature: Automation of propose a recipe
+- Personal component library
+- Focus on users
+- Simple tweeks
 
+### ⏸️ On Hold
+- 
 
-### 📅 Planned
-- Fix Google Sign In
-- Enhance validation and error handling for user auth (notice 
-  fitting the modal size)
-- Make sure, cache is deleted on change
-- Add server side validation to recipe submission
+---
+
+## 📊 Feature Categories
+
+### 🎨 Simple Tweeks:
+- High: Make sure cache is deleted on change
+- High: Minimize filter options for mobile layout
+- High: Change pagination to infinite scroll for mobile devices
+- High: Add special recipes for authorized users (grandma's book)
+- Medium: Implement search functionality for navigation bar and recipes page
+- Medium: Refine print styles for better recipe printouts
+- Low: Implement a dark mode option
+- Low: add footnote for logo on all pages
+
+### Recipes
+- High: Add component for carousel of images
+- High: Change image names on database (recipeId based)
+- 
+
+### Propose a recipe
+- High: Implement the option to add multiple images
+- Medium: Use Enter key to move between focus elements
+- Medium: Add preview option
+- Medium: Improve error messages (user have to be signed in)
+- Medium: make sure all data base fields are recieving attention
+
+### Manager dashboard
+- High: Add collapsed menu for mobile devices
+- High: Fix upload image implementation.
+- High: Implement preview and edit recipes
+- Medium: Present no pending recipes/images
+- Medium: Improve page style
+- Medium: change layout for mobile (card size according to list size)
+- Medium: Manage multiple image suggestion
+- Low: Remove users/recipes
+- Low: combine pending recipes/images with tabs
+
+### Users
+- High: Fix user log in and sign up
+- High: Add more information for user sign up and add settings/profile page
+- High: Add favorites page for user (and all recipes becomes discover)\
+- High: Make favorites available offline
+- Medium: Upload personal recipes
+- Medium: Enhance form validation and error handling (notice fitting the modal size)
+- Medium: Check email verification + google sign in
+- Medium: Change auth modal to independent component
+- Medium: only present choose avatar to new users + upload avatar.
+- Low: Implement protected routes for authenticated users
+- Low: Add loading indicators during authentication processes
+
+### 🔌 API integrations
+- Medium: Develop a "Share as PDF" feature to replace the current print button
+- Medium: Shrink images uploaded by users
+- Medium: Translate recipes
+- Low: Integrate with a nutrition API to provide detailed nutritional information
+- Low: Add social media sharing capabilities
+- Low: Implement a weather API to suggest recipes based on current weather
+
+### 🏗️ New Features
+- High: Suggest a recipe based on free text
+- Medium: Implement a comment & rating system for recipes
+- Medium: Suggest a recipe link to other internet page/instructions video for "Propose a Recipe" page
+- Medium: Improve website security
+- Medium: server side validations
+- Low: Implement the meal planner
+- Low: Implement a recipe timer feature
+- Low: Recipes suggestion for recipe page
+
+### 🔧 Website refactoring
+- High: Change entire website to be component based
+- High: Learn and use (if needed) java script modules
+- High: Add linter
+- Medium: Optimizing performance
+- Medium: variables for typography
+
+### Recipe specific
+- Creme brule: 8 dishes
+- Add image for נשיקות - improve explanation + 48 dishes
 
 
 ### ✅ Completed
@@ -45,91 +113,3 @@
 - Fix text alignment for recipes
 - Add approve recipe functionality
 - change category images
-
-
-
-
-
-
-### ⏸️ On Hold
-1. Core JavaScript enhancements
-2. Basic full-stack features
-3. Database schema changes
-4. Advanced features and new technologies
-5. Move database to firebase
-    - improve speed
-    - add loading to recipe page
-    - move all photos to firebase
-6. add footnote for logo on all pages
-7. Add Stylint
-
----
-
-## 📋 Next Steps
-- Refactor existing code to meet these standards
-- Implement simple CSS/HTML changes
-
----
-
-## ❓ Questions/Decisions
-- What specific coding standards and best practices should we adopt?
-- How can we structure our codebase to make future additions easier?
-- Which simple CSS/HTML changes should we prioritize first?
-
----
-
-## 📊 Feature Categories
-
-### 🎨 Simple CSS/HTML changes
-- Medium: Minimize filter options for mobile layout
-- Medium: Enhance visual hierarchy of recipe pages
-- Medium: Refine print styles for better recipe printouts
-- Low: Add hover effects to recipe cards
-- Low: Implement a dark mode option
-
-### 💻 JavaScript enhancements
-- High: Implement search functionality for navigation bar and recipes page
-- Medium: Change pagination to infinite scroll for mobile devices
-- Low: Implement a recipe timer feature
-- Low: Recipes suggestion for recipe page
-
-### Sign Up
-- Enhance form validation and error handling (noticefitting the modal size)
-- Check email verification
-- Improve the UI/UX of the authentication forms and modal
-- Implement protected routes for authenticated users
-- Integrate authentication with your recipe functionality (e.g., saving favorite recipes, submitting new recipes)
-- Add loading indicators during authentication processes
-- Fix Google Sign In
-- Only present popup menu for new users.
-
-### 🔌 API integrations
-- Medium: Develop a "Share as PDF" feature to replace the current print button
-- Low: Integrate with a nutrition API to provide detailed nutritional information
-- Low: Add social media sharing capabilities
-- Low: Implement a weather API to suggest recipes based on current weather
-
-### 🗃️ Database schema changes
-- High: Add a comments system to recipes
-- Medium: Implement a rating system for recipes
-- Medium: Create a user favorites feature
-- Low: Add recipe categories and tags management
-- Low: Add option for steps in recipes / automated steps division in database
-
-### 🏗️ Full-stack features
-- High: Implement server-side handling of recipe submissions
-- Medium: Create user accounts and authentication system
-- Low: Develop an admin panel for recipe management and moderation
-- Low: Implement the meal planner (details to be discussed)
-- Low: Complete the form based on link to other internet page/instructions video for "Propose a Recipe" page
-
-### 🔧 Website refactoring
-- High: Maintaining code best practices and order
-- High: Improving code structure and organization
-- Medium: Optimizing performance
-
-### 🚀 Advanced features and new technologies
-- Medium: PWA implementation
-- Low: Internationalization (i18n)
-- Low: Machine learning integration
-- Low: Advanced CSS Techniques
