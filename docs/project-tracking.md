@@ -42,8 +42,6 @@
 - Medium: make sure all data base fields are recieving attention
 
 ### Manager dashboard
-- High: Add collapsed menu for mobile devices
-- High: Fix upload image implementation.
 - High: Implement preview and edit recipes
 - Medium: Present no pending recipes/images
 - Medium: Improve page style
@@ -112,4 +110,4 @@
 - Fix text alignment for recipes
 - Add approve recipe functionality
 - change category images
-- manager dashboard: Fix Image preview
+- manager dashboard: Fix Image preview, fix collapsed menu
