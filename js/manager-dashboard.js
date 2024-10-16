@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
           window.location.href = '/'; // Redirect to home if not logged in
       }
   });
-
+  const imageApprovalComponent = document.querySelector('image-approval-component');
+  imageApprovalComponent.addEventListener('image-approved', handleImageApproved);
+  imageApprovalComponent.addEventListener('image-rejected', handleImageRejected);
 });
 
 function initializeDashboard() {
@@ -81,6 +83,8 @@ function updateUserRole(userId, newRole) {
  */
 function loadAllRecipes() {
   const recipeList = document.getElementById('all-recipes-list');
+  recipeList.setItems([]);
+  
   const searchInput = document.getElementById('recipe-search');
   const filterSelect = document.getElementById('recipe-filter');
 
@@ -210,8 +214,9 @@ function previewRecipe(recipeId) {
 /**
  * Pending Images 
  */
-function loadPendingImages() {
+async function loadPendingImages() {
   const pendingImagesList = document.getElementById('pending-images-list');
+  pendingImagesList.setItems([]);
   const storage = firebase.storage();
   const pendingImagesRef = storage.ref('pendingImages');
 
@@ -311,6 +316,18 @@ function openImageApprovalModal(imageUrl, recipeId, recipeName) {
   imageApprovalComponent.openModalForImage(imageData);
 }
 
+function handleImageApproved(event) {
+  console.log('Image approved for recipe:', event.detail.recipeId);
+  // Refresh both pending images and all recipes lists
+  loadPendingImages();
+  loadAllRecipes();
+}
+
+function handleImageRejected(event) {
+  console.log('Image rejected for recipe:', event.detail.recipeId);
+  // Only refresh the pending images list
+  loadPendingImages();
+}
 
 
 /**
