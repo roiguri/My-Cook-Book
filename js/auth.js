@@ -342,7 +342,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const dashboardTab = document.createElement('li');
             dashboardTab.id = 'dashboard-tab';
             const dashboardLink = document.createElement('a');
-            dashboardLink.href = '/pages/manager-dashboard.html';
+            // Check if the current page is index.html
+            if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+              dashboardLink.href = '../pages/manager-dashboard.html';
+            } else {
+                dashboardLink.href = './pages/manager-dashboard.html';
+            }            
             dashboardLink.textContent = 'Dashboard';
             dashboardTab.appendChild(dashboardLink);
             navMenu.appendChild(dashboardTab);
