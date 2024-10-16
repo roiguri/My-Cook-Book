@@ -4,9 +4,9 @@
 
 ## 📋 Next Steps
 - Manager dashboard:
-  * Are you sure modal
   * Preview and edit recipes
   * Improve page style
+  * Add message and confiramtion modals
 - New Feature: Automation of propose a recipe
 - Personal component library
 - Focus on users
@@ -111,3 +111,4 @@
 - Add approve recipe functionality
 - change category images
 - manager dashboard: Fix Image preview, fix collapsed menu
+- create message and confirmation modal.
