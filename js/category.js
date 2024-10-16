@@ -127,16 +127,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
     // Function to get image URL from Firebase Storage
     async function getImageUrl(recipe) {
-        try {
-            const imagePath = `img/recipes/compressed/${recipe.category}/${recipe.image}`;
-            const imageRef = storage.ref().child(imagePath);
-            return await imageRef.getDownloadURL();
-        } catch (error) {
-            // Return data URL for an empty rounded square
-            const imagePath = `img/recipes/compressed/place-holder-missing.png`;
-            const imageRef = storage.ref().child(imagePath);
-            return await imageRef.getDownloadURL();
-        }
+      try {
+          let imagePath;
+          if (recipe.pendingImage && recipe.pendingImage.compressed) {
+              imagePath = recipe.pendingImage.compressed;
+          } else {
+              imagePath = `img/recipes/compressed/${recipe.category}/${recipe.image}`;
+          }
+          const imageRef = storage.ref().child(imagePath);
+          return await imageRef.getDownloadURL();
+      } catch (error) {
+          const imagePath = `img/recipes/compressed/place-holder-missing.png`;
+          const imageRef = storage.ref().child(imagePath);
+          return await imageRef.getDownloadURL();
+      }
     }
 
     // Create a time string:

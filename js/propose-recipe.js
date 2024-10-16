@@ -251,8 +251,15 @@ async function submitRecipe(event) {
     const imageInput = document.getElementById('recipe-image');
     if (imageInput && imageInput.files.length > 0) {
       const file = imageInput.files[0];
-      const imageUrl = await uploadImage(file, formData.category);
-      formData.image = imageUrl;
+
+      // Extract file extension
+      const fileExtension = file.name.split('.').pop(); 
+
+      // Construct the image name
+      const imageName = `${this.recipeId}.${fileExtension}`;
+
+      const imageUrl = await uploadImage(file, formData.category, imageName);
+      formData.image = imageName;
     }
 
     // Add recipe to Firestore
@@ -269,10 +276,11 @@ async function submitRecipe(event) {
   }
 }
 
-async function uploadImage(file, category) {
+async function uploadImage(file, category, imageName) {
   const storageRef = firebase.storage().ref();
-  const fullImageRef = storageRef.child(`img/recipes/full/${category}/${file.name}`);
-  const compressedImageRef = storageRef.child(`img/recipes/compressed/${category}/${file.name}`);
+  
+  const fullImageRef = storageRef.child(`img/recipes/full/${category}/${imageName}`);
+  const compressedImageRef = storageRef.child(`img/recipes/compressed/${category}/${imageName}`);
 
   // Upload full size image
   await fullImageRef.put(file);

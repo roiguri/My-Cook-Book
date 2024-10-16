@@ -5,7 +5,6 @@
 ## 📋 Next Steps
 - Manager dashboard:
   * Are you sure modal
-  * Fix Image upload
   * Preview and edit recipes
   * Improve page style
 - New Feature: Automation of propose a recipe
@@ -113,3 +112,4 @@
 - Fix text alignment for recipes
 - Add approve recipe functionality
 - change category images
+- manager dashboard: Fix Image preview

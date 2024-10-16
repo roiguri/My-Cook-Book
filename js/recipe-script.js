@@ -56,40 +56,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     async function setRecipeImage(recipe) {
-        const recipeImage = document.getElementById('recipe-image');
-        try {
-            const imagePath = `img/recipes/full/${recipe.category}/${recipe.image}`;
-            const imageRef = storage.ref().child(imagePath);
-            const imageUrl = await imageRef.getDownloadURL();
-            recipeImage.src = imageUrl;
-        } catch (error) {
-            console.error("Error fetching image URL:", error);
-            const imagePath = `img/recipes/compressed/place-holder-add-new.png`;
-            const imageRef = storage.ref().child(imagePath);
-            const imageUrl = await imageRef.getDownloadURL();
-            recipeImage.src = imageUrl;
+      const recipeImage = document.getElementById('recipe-image');
+      try {
+          let imagePath;
+          if (recipe.pendingImage && recipe.pendingImage.full) {
+              imagePath = recipe.pendingImage.full;
+          } else {
+              imagePath = `img/recipes/full/${recipe.category}/${recipe.image}`;
+          }
+          const imageRef = storage.ref().child(imagePath);
+          const imageUrl = await imageRef.getDownloadURL();
+          recipeImage.src = imageUrl;
 
-            // Apply styles when image fails to load
-            recipeImage.style.width = '200px';
-            recipeImage.style.height = '200px'; 
-            recipeImage.style.cursor = 'pointer';
-
-            recipeImage.classList.add("missing-image-update")
-            recipeImage.setAttribute('data-recipe-id', recipeId);
-            console.log(recipeId);
-        }
-        recipeImage.alt = "לחץ להצעת תמונה חדשה";
-
-        // Add click event listener to missing image
-        if (recipeImage.classList.contains('missing-image-update')) {
+      } catch (error) {
+          console.error("Error fetching image URL:", error);
+          const imagePath = `img/recipes/compressed/place-holder-add-new.png`;
+          const imageRef = storage.ref().child(imagePath);
+          const imageUrl = await imageRef.getDownloadURL();
+          recipeImage.src = imageUrl;
+  
+          // Apply styles when image fails to load
+          recipeImage.style.width = '200px';
+          recipeImage.style.height = '200px'; 
+          recipeImage.style.cursor = 'pointer';
+  
+          recipeImage.classList.add("missing-image-update")
+          recipeImage.setAttribute('data-recipe-id', recipeId);
+      }
+      recipeImage.alt = "לחץ להצעת תמונה חדשה";
+  
+      // Add click event listener to missing image
+      if (recipeImage.classList.contains('missing-image-update')) {
           recipeImage.addEventListener('click', (event) => {
               event.preventDefault();
               const recipeId = recipeImage.getAttribute('data-recipe-id');
               const uploadComponent = document.querySelector('missing-image-upload');
               uploadComponent.openModalForRecipe(recipeId);
           });
-       }
-    }
+      }
+  }
 
     function populateIngredientsList(recipe){
       const ingredientsList = document.getElementById('ingredients-list');

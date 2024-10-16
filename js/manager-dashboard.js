@@ -217,45 +217,37 @@ function previewRecipe(recipeId) {
 async function loadPendingImages() {
   const pendingImagesList = document.getElementById('pending-images-list');
   pendingImagesList.setItems([]);
-  const storage = firebase.storage();
-  const pendingImagesRef = storage.ref('pendingImages');
 
-  pendingImagesRef.listAll()
-    .then((res) => {
-      const imagePromises = res.items.map(imageRef => {
-        return imageRef.getDownloadURL().then(url => {
-          return { name: imageRef.name, url: url };
-        });
+  try {
+    const recipesSnapshot = await db.collection('recipes').where('pendingImage', '!=', null).get();
+    const pendingImages = [];
+
+    // Extract relevant data from each recipe with a pending image
+    recipesSnapshot.forEach(doc => {
+      const recipe = doc.data();
+      pendingImages.push({
+        recipeId: doc.id,
+        recipeName: recipe.name,
+        imageUrl: recipe.pendingImage.full // Assuming you want to display the full-size image
       });
+    });
 
-      return Promise.all(imagePromises);
-    })
-    .then((images) => {
-      // Fetch recipe names for all images
-      const recipeIds = images.map(image => image.name.split('.')[0]);
-      return Promise.all([
-        images,
-        fetchRecipeNames(recipeIds)
-      ]);
-    })
-    .then(([images, recipeNames]) => {
-      const imageItems = images.map(image => {
-        const recipeId = image.name.split('.')[0];
-        const recipeName = recipeNames[recipeId] || 'Unknown Recipe';
-        return {
-          header: createPendingImageHeader(image, recipeName),
-          content: createPendingImageContent(image)
-        };
-      });
+    // Create list items for the scrolling list
+    const imageItems = pendingImages.map(image => ({
+      header: createPendingImageHeader(image),
+      content: createPendingImageContent(image)
+    }));
 
-      if (pendingImagesList) {
-        pendingImagesList.setItems(imageItems);
-        console.log("Pending images set in scrolling list");
-      } else {
-        console.error("Cannot find pending images list element");
-      }
-    })
-    .catch(handleError);
+    // Populate the scrolling list
+    if (pendingImagesList) {
+      pendingImagesList.setItems(imageItems);
+      console.log("Pending images set in scrolling list");
+    } else {
+      console.error("Cannot find pending images list element");
+    }
+  } catch (error) {
+    handleError(error);
+  }
 }
 
 function fetchRecipeNames(recipeIds) {
@@ -270,25 +262,25 @@ function fetchRecipeNames(recipeIds) {
 }
 
 // Update the createPendingImageHeader function
-function createPendingImageHeader(image, recipeName) {
+function createPendingImageHeader(image) {
   const header = document.createElement('div');
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
   header.style.alignItems = 'center';
   
   const span = document.createElement('span');
-  span.innerHTML = `${recipeName}`;
+  span.innerHTML = `${image.recipeName}`;
 
   const previewButton = document.createElement('button');
   previewButton.classList.add("preview-image");
-  previewButton.setAttribute('data-url', `${image.url}`);
-  previewButton.setAttribute('data-recipe-id', `${image.name.split('.')[0]}`);
+  previewButton.setAttribute('data-url', `${image.imageUrl}`);
+  previewButton.setAttribute('data-recipe-id', `${image.recipeId}`);
   previewButton.textContent = 'הצג';
   previewButton.addEventListener('click', function(event) {
     event.preventDefault();
     const imageUrl = this.getAttribute('data-url');
     const recipeId = this.getAttribute('data-recipe-id');
-    openImageApprovalModal(imageUrl, recipeId, recipeName);
+    openImageApprovalModal(imageUrl, recipeId, image.recipeName);
   })
 
   header.appendChild(span);
@@ -321,12 +313,16 @@ function handleImageApproved(event) {
   // Refresh both pending images and all recipes lists
   loadPendingImages();
   loadAllRecipes();
+
+  // TODO: Add a user message
 }
 
 function handleImageRejected(event) {
   console.log('Image rejected for recipe:', event.detail.recipeId);
   // Only refresh the pending images list
   loadPendingImages();
+
+  // TODO: Add a user message
 }
 
 

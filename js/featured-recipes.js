@@ -1,14 +1,19 @@
 const featuredRecipeNames = ["מוקפץ עם סלמון וברוקולי", "בולונז", "אורז לבן פרסי"];
 
 async function getImageUrl(recipe) {
-    try {
-        const imagePath = `img/recipes/compressed/${recipe.category}/${recipe.image}`;
-        const imageRef = storage.ref().child(imagePath);
-        return await imageRef.getDownloadURL();
-    } catch (error) {
-        console.error("Error fetching image URL:", error);
-        return 'img/placeholder.jpg'; // Fallback to local placeholder
-    }
+  try {
+      let imagePath;
+      if (recipe.pendingImage && recipe.pendingImage.compressed) {
+          imagePath = recipe.pendingImage.compressed;
+      } else {
+          imagePath = `img/recipes/compressed/${recipe.category}/${recipe.image}`;
+      }
+      const imageRef = storage.ref().child(imagePath);
+      return await imageRef.getDownloadURL();
+  } catch (error) {
+      console.error("Error fetching image URL:", error);
+      return 'img/placeholder.jpg'; // Fallback to local placeholder
+  }
 }
 
 async function createFeaturedRecipeCard(recipe) {
