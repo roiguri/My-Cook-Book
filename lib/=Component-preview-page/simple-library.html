@@ -97,5 +97,18 @@
   <script src="../tab_switching/tab_switching.js"></script>
   <script src="../scroll_list/scroll_list.js"></script>
 
+
+  <h3>message modal</h3>
+
+  <message-modal></message-modal>
+  <button id="openModalButton">Open Modal</button>
+  <script src="../message-modal/message-modal.js"></script> 
+  <script>
+    const modal = document.querySelector('message-modal');
+    document.getElementById('openModalButton').addEventListener('click', () => {
+      modal.show(' התמונה נשלחה בהצלחה !', 'כל הכבוד!', 'הצג');
+    });
+  </script>
+
 </body>
 </html>
