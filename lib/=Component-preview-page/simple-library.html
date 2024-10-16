@@ -110,5 +110,28 @@
     });
   </script>
 
+  <h3>confirmation modal</h3>
+
+  <confirmation-modal></confirmation-modal>
+  <button id="openConfirmModalButton">Open Modal</button>
+  <script src="../confirmation_modal/confirmation_modal.js"></script> 
+  <script>
+    const confirm_modal = document.querySelector('confirmation-modal');
+    
+    confirm_modal.addEventListener('confirm-approved', () => {
+      console.log('Action approved!');
+      // Perform approve action
+    });
+    
+    confirm_modal.addEventListener('confirm-rejected', () => {
+      console.log('Action rejected!');
+      // Perform reject action
+    });
+    
+    document.getElementById('openConfirmModalButton').addEventListener('click', () => {
+      confirm_modal.confirm('Confirm Action', 'Are you sure you want to proceed?', 'Yes', 'No');
+    });
+  </script>
+
 </body>
 </html>
