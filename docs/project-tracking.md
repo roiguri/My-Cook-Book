@@ -42,11 +42,12 @@
 - Medium: make sure all data base fields are recieving attention
 
 ### Manager dashboard
-- High: Implement preview and edit recipes
+- High: Implement edit recipes
 - Medium: Present no pending recipes/images
 - Medium: Improve page style
 - Medium: change layout for mobile (card size according to list size)
 - Medium: Manage multiple image suggestion
+- Low: Fix position of preview-recipe modal
 - Low: Remove users/recipes
 - Low: combine pending recipes/images with tabs
 
@@ -112,3 +113,4 @@
 - change category images
 - manager dashboard: Fix Image preview, fix collapsed menu
 - create message and confirmation modal.
+- implement preview recipe component.
