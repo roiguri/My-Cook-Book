@@ -21,6 +21,8 @@
   <!-- component scripts -->
   <script src="../modal/modal.js"></script>
   <script src="../missing_image_upload/missing_image_upload.js"></script>
+  <script src="../recipe_preview_modal/recipe_preview_modal.js"></script>
+
   
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -146,6 +148,18 @@
     <recipe-component recipe-id="4lJ3JBIBrFBJanj9o33p"></recipe-component>
   </div>
   <script src="../recipe_component/recipe_component.js"></script>
+
+  <h3>Recipe preview</h3>
+  <recipe-preview-modal id="recipe-preview" recipe-id="4lJ3JBIBrFBJanj9o33p" recipe-name="Delicious Cake" show-buttons="true"></recipe-preview-modal>
+  <button id="preview-button">Preview Recipe</button> 
+  <script>
+    const previewButton = document.getElementById('preview-button');
+    const recipePreviewModal = document.getElementById('recipe-preview');
+    previewButton.addEventListener('click', () => {
+      recipePreviewModal.openModal(); 
+    });
+  </script>
+
 
 </body>
 </html>
