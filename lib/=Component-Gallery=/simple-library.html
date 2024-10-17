@@ -33,6 +33,25 @@
   <script defer src="../../js/auth.js"></script>
 </head>
 <body>
+
+
+  <h3>Recipe preview</h3>
+  <recipe-preview-modal id="recipe-preview" recipe-id="4lJ3JBIBrFBJanj9o33p" recipe-name="Delicious Cake" show-buttons="false"></recipe-preview-modal>
+  <button id="preview-button">Preview Recipe</button> 
+  <script>
+    const previewButton = document.getElementById('preview-button');
+    const recipePreviewModal = document.getElementById('recipe-preview');
+    previewButton.addEventListener('click', () => {
+      recipePreviewModal.openModal(); 
+    });
+  </script>
+
+  <h3>recipe component</h3>
+  <div style="width: auto; max-width: 600px; padding: 20px; background-color:var(--secondary-color)">
+    <recipe-component recipe-id="4lJ3JBIBrFBJanj9o33p"></recipe-component>
+  </div>
+  <script src="../recipe_component/recipe_component.js"></script>
+
   <!-- custom modal -->
   <h3>custom modal</h3>
 
@@ -140,23 +159,6 @@
     
     document.getElementById('openConfirmModalButton').addEventListener('click', () => {
       confirm_modal.confirm('Confirm Action', 'Are you sure you want to proceed?', 'Yes', 'No');
-    });
-  </script>
-
-  <h3>recipe component</h3>
-  <div style="width: auto; max-width: 600px; padding: 20px; background-color:var(--secondary-color)">
-    <recipe-component recipe-id="4lJ3JBIBrFBJanj9o33p"></recipe-component>
-  </div>
-  <script src="../recipe_component/recipe_component.js"></script>
-
-  <h3>Recipe preview</h3>
-  <recipe-preview-modal id="recipe-preview" recipe-id="4lJ3JBIBrFBJanj9o33p" recipe-name="Delicious Cake" show-buttons="true"></recipe-preview-modal>
-  <button id="preview-button">Preview Recipe</button> 
-  <script>
-    const previewButton = document.getElementById('preview-button');
-    const recipePreviewModal = document.getElementById('recipe-preview');
-    previewButton.addEventListener('click', () => {
-      recipePreviewModal.openModal(); 
     });
   </script>
 
