@@ -190,6 +190,7 @@ function createPendingRecipeHeader(recipe) {
     <span>${recipe.name} | ${recipe.category || 'No category'}</span>
     <button class="preview-recipe" data-id="${recipe.id}">הצג</button>
   `;
+
   return header;
 }
 
@@ -199,16 +200,33 @@ function createPendingRecipeContent(recipe) {
   return content;
 }
 
-document.addEventListener('click', function(event) {
-  if (event.target.classList.contains('preview-recipe')) {
-    const recipeId = event.target.getAttribute('data-id');
-    previewRecipe(recipeId);
+const pendingRecipeList = document.getElementById('pending-recipes-list');
+pendingRecipeList.addEventListener('scrolling-list-ready', () => {
+  const shadowRoot = pendingRecipeList.shadowRoot;
+  if (shadowRoot) {
+    shadowRoot.addEventListener('click', (event) => {
+      if (event.target.classList.contains('preview-recipe')) {
+        const recipeId = event.target.getAttribute('data-id');
+        previewRecipe(recipeId);
+      }
+    });
+  } else {
+    console.error('Shadow root not found!');
   }
 });
 
+
 function previewRecipe(recipeId) {
   console.log(`Preview recipe with id: ${recipeId}`);
-  // We'll implement the preview modal later
+  const previewContainer = document.querySelector('.preview-recipe-container');
+  previewContainer.innerHTML = `
+  <recipe-preview-modal id="recipe-preview" recipe-id="${recipeId}" recipe-name="Delicious Cake" show-buttons="true">
+  `
+
+  customElements.whenDefined('recipe-preview-modal').then(() => {
+    const previewRecipeModal = document.querySelector('recipe-preview-modal');
+    previewRecipeModal.openModal(); 
+  });
 }
 
 /**
