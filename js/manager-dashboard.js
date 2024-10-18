@@ -215,7 +215,9 @@ pendingRecipeList.addEventListener('scrolling-list-ready', () => {
   }
 });
 
-
+/**
+ * Preview Recipe
+ */
 function previewRecipe(recipeId) {
   console.log(`Preview recipe with id: ${recipeId}`);
   const previewContainer = document.querySelector('.preview-recipe-container');
@@ -226,6 +228,24 @@ function previewRecipe(recipeId) {
   customElements.whenDefined('recipe-preview-modal').then(() => {
     const previewRecipeModal = document.querySelector('recipe-preview-modal');
     previewRecipeModal.openModal(); 
+
+    previewRecipeModal.addEventListener('recipe-approved', (event) => {
+      // TODO: Implement user message for successful approval
+      console.log('Recipe approved:', event.detail.recipeId);
+      // Refresh the recipe dashboards
+      loadPendingRecipes();
+      loadAllRecipes();
+    });
+  
+    previewRecipeModal.addEventListener('recipe-rejected', (event) => {
+      // TODO: Implement user message for successful rejection
+      console.log('Recipe rejected:', event.detail.recipeId);
+      // Refresh the recipe dashboards
+      setTimeout(() => {
+        loadPendingRecipes();
+        loadAllRecipes();
+      }, 300);
+    });
   });
 }
 
@@ -342,7 +362,6 @@ function handleImageRejected(event) {
 
   // TODO: Add a user message
 }
-
 
 /**
  * Helper functions
