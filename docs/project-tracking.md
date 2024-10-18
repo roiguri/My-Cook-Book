@@ -38,7 +38,7 @@
 - High: Implement the option to add multiple images
 - Medium: Use Enter key to move between focus elements
 - Medium: Add preview option
-- Medium: Improve error messages (user have to be signed in)
+- Medium: Improve error messages (user have to be signed in + using tool tips)
 - Medium: make sure all data base fields are recieving attention
 
 ### Manager dashboard
