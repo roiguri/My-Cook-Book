@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function populateRecipeDetails(recipe){
       document.title = `${recipe.name} - Our Kitchen Chronicles`;
       document.getElementById('recipe-name').textContent = recipe.name;
-      document.getElementById('recipe-time').textContent = `זמן הכנה: ${cookingTime(recipe.cookingTime)}`;
+      document.getElementById('prep-time').textContent = `זמן הכנה: ${cookingTime(recipe.prepTime)}`;
+      document.getElementById('wait-time').textContent = `זמן המתנה: ${cookingTime(recipe.waitTime)}`;
       document.getElementById('recipe-difficulty').textContent = `רמת קושי: ${recipe.difficulty}`;
       document.getElementById('recipe-category').textContent = `קטגוריה: ${recipe.category}`;
     }
@@ -184,7 +185,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Helper Functions
     function cookingTime(time) {
       let finalTime;
-      if (time <= 60){
+      if (time == 0 || time == null) {
+        finalTime = 'ללא'
+      }
+      else if (time <= 60){
           finalTime = `${time} דקות`;
       }
       else if (time > 60 && time < 120){

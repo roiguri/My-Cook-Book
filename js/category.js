@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
             
             filteredRecipes = filteredRecipes.filter(recipe => 
-                recipe.cookingTime >= min && (max === Infinity || recipe.cookingTime <= max)
+                (recipe.preptime + recipe.waitTime) >= min && (max === Infinity || (recipe.preptime + recipe.waitTime) <= max)
             );
         }
     
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     <div class="recipe-card recipe-card-base">
                         <img src="${imageUrl}" alt="${recipe.name}" onerror="this.src='../img/placeholder.jpg';">
                         <h3>${recipe.name}</h3>
-                        <p>זמן בישול: ${cookingTime(recipe.cookingTime)}</p>
+                        <p>זמן בישול: ${cookingTime(recipe.prepTime + recipe.waitTime)}</p>
                         <p>רמת קושי: ${recipe.difficulty}</p>
                     </div>
                 </a>

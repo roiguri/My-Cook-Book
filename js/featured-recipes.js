@@ -27,7 +27,7 @@ async function createFeaturedRecipeCard(recipe) {
                 <div class="info-container">
                     <h3>${recipe.name}</h3>
                     <div class="favorites-info">
-                        זמן בישול: ${recipe.cookingTime} דקות<br>
+                        זמן בישול: ${recipe.prepTime + recipe.waitTime} דקות<br>
                         רמת קושי: ${recipe.difficulty}
                     </div>
                 </div>
