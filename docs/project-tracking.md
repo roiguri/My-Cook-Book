@@ -88,6 +88,7 @@
 - High: Add linter
 - Medium: Optimizing performance
 - Medium: variables for typography
+- Medium: save recipe images with recipe ID
 
 ### Recipe specific
 - Creme brule: 8 dishes
