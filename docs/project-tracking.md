@@ -43,11 +43,8 @@
 - Medium: make sure all data base fields are recieving attention
 
 ### Manager dashboard
-- Medium: Present no pending recipes/images
 - Medium: Improve page style
-- Medium: change layout for mobile (card size according to list size)
 - Medium: Manage multiple image suggestion
-- Low: Fix position of preview-recipe modal
 - Low: Remove users/recipes
 - Low: combine pending recipes/images with tabs
 
@@ -113,7 +110,12 @@
 - Fix text alignment for recipes
 - Add approve recipe functionality
 - change category images
-- manager dashboard: Fix Image preview, fix collapsed menu
+- manager dashboard: 
+  * Fix Image preview
+  * fix collapsed menu
+  * implement preview recipe component.
+  * Implement edit recipes
+  * Present no pending recipes/images
+  * change layout for mobile (card size according to list size)
+  * Fix position of preview-recipe modal
 - create message and confirmation modal.
-- implement preview recipe component.
-- Implement edit recipes
