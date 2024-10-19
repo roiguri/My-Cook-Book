@@ -25,7 +25,8 @@
   <script src="../recipe_form_component/recipe_form_component.js"></script>
   <script src="../recipe_form_component/propose_recipe_component.js"></script>
   <script src="../recipe_form_component/edit_recipe_component.js"></script>
-
+  <script src="../recipe_preview_modal/edit_preview_recipe.js"></script>
+  <script src="../recipe_component/recipe_component.js"></script>
 
   
   <!-- firebase -->
@@ -37,9 +38,26 @@
   <script defer src="../../js/auth.js"></script>
 </head>
 <body>
+  <edit-preview-recipe 
+    path-to-icon="../../img/icon/other/"
+    recipe-id="4lJ3JBIBrFBJanj9o33p" 
+    start-mode="preview">
+  </edit-preview-recipe>
+  <button id="open-edit-preview">open modal</button>
+  <script>
+    const editPreviewModal = document.querySelector('edit-preview-recipe'); 
+
+    // Add an event listener to a button or trigger the modal opening directly
+    const openModalButton = document.getElementById('open-edit-preview'); // Replace with your button ID
+    openModalButton.addEventListener('click', () => {
+      console.log("clicked");
+      editPreviewModal.openModal();
+    });
+  </script>
+
   <!-- Edit a recipe -->
-  <h3>edit a recipe</h3>
-  <edit-recipe-component recipe-id="RY6ZgMLedsoOpYhYun0x"></edit-recipe-component>
+  <!-- <h3>edit a recipe</h3>
+  <edit-recipe-component recipe-id="RY6ZgMLedsoOpYhYun0x"></edit-recipe-component> -->
 
   <!-- <h3> propose a recipe </h3>
   <propose-recipe-component></propose-recipe-component> -->
