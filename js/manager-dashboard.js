@@ -117,7 +117,7 @@ function createRecipeContent(recipe) {
   const container = document.createElement('div');
   container.innerHTML = `
       <p>קטגוריה: ${recipe.category}</p>
-      <p>זמן הכנה: ${recipe.cookingTime} דקות</p>
+      <p>זמן הכנה: ${recipe.prepTime + recipe.waitTime} דקות</p>
       <button class="edit-recipe" data-id="${recipe.id}">ערוך</button>
   `;
   container.querySelector('.edit-recipe').addEventListener('click', () => editRecipe(recipe));
