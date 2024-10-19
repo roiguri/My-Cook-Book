@@ -244,7 +244,7 @@ function previewRecipe(recipeId) {
       setTimeout(() => {
         loadPendingRecipes();
         loadAllRecipes();
-      }, 300);
+      }, 600);
     });
   });
 }
