@@ -66,7 +66,11 @@ function createContent(user) {
   saveButton.textContent = 'שמור';
   saveButton.addEventListener('click', () => updateUserRole(user.id, select.value));
   
+  const space = document.createElement('div');
+  space.style.width = '20px';
+
   content.appendChild(select);
+  content.appendChild(space);
   content.appendChild(saveButton);
   return content;
 }
@@ -182,15 +186,21 @@ function loadPendingRecipes() {
       header: createPendingRecipeHeader(recipe),
       content: createPendingRecipeContent(recipe)
     }));
+
+    if (recipeItems.length == 0) {
+      const pendingRecipeSection = document.getElementById("pending-recipes");
+      pendingRecipeSection.querySelector(".no-pending-message").textContent = "אין מתכונים הממתינים לאישור";
+    }
+
     // Use the shadowRoot to access the scrolling-list's setItems method
     if (pendingRecipesList) {
       console.log(recipeItems);
-    pendingRecipesList.setItems(recipeItems);
+      pendingRecipesList.setItems(recipeItems);
       console.log("Items set in scrolling list");
     } else {
       console.error("Cannot find scrolling list element");
     }
-  }).catch(handleError);
+  }).catch(handleError); 
 }
 
 function createPendingRecipeHeader(recipe) {
@@ -287,6 +297,11 @@ async function loadPendingImages() {
       header: createPendingImageHeader(image),
       content: createPendingImageContent(image)
     }));
+
+    if (imageItems.length == 0) {
+      const pendingRecipeSection = document.getElementById("pending-images");
+      pendingRecipeSection.querySelector(".no-pending-message").textContent = "אין תמונות הממתינות לאישור";
+    }
 
     // Populate the scrolling list
     if (pendingImagesList) {

@@ -97,6 +97,10 @@
   background-color: var(--primary-hover);
 }
 
+.no-pending-message {
+  align-self: center;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .manager-dashboard {
@@ -109,5 +113,14 @@
 
   .manager-dashboard h2 {
       font-size: 1.5rem;
+  }
+
+  .manager-dashboard section {
+    height: auto;
+  }
+
+  scrolling-list {
+    height: auto;
+    max-height: 400px;
   }
 }
