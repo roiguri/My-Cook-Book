@@ -35,6 +35,7 @@
 - 
 
 ### Propose a recipe
+- High: fix layout for ingredient input
 - High: Implement the option to add multiple images
 - Medium: Use Enter key to move between focus elements
 - Medium: Add preview option
@@ -83,6 +84,7 @@
 - Low: Recipes suggestion for recipe page
 
 ### 🔧 Website refactoring
+- High: improve mobile compatability
 - High: Change entire website to be component based
 - High: Learn and use (if needed) java script modules
 - High: Add linter
