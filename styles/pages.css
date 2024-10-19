@@ -169,15 +169,16 @@
 /*------------------------------------*\
     #propose-recipe-page
 \*------------------------------------*/
-.propose-recipe #recipe-form {
-  display: flex;
-  flex-direction: column;
+.propose-recipe-form {
+  background-color: var(--secondary-color);
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.propose-recipe .propose-recipe-container {
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  max-width: 800px;
+.propose-recipe .propose-recipe-hero p {
+  font-size: 1.2rem;
+  color: var(--primary-color);
 }
 
 .propose-recipe .propose-recipe-hero {
@@ -198,18 +199,4 @@
   color: var(--primary-color);
   font-size: 3.5rem;
   margin-bottom: 0.5rem;
-}
-
-.propose-recipe .propose-recipe-hero p {
-  font-size: 1.2rem;
-  color: var(--primary-color);
-}
-
-.servings-proposal #servings {
-  width: none;
-}
-
-.propose-recipe .form-buttons {
-  display: flex;
-  gap: 10px;
 }
