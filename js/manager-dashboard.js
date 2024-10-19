@@ -410,3 +410,4 @@ function checkManagerStatus(user) {
       return false;
   });
 }
+
