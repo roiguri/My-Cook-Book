@@ -125,9 +125,21 @@ function createRecipeContent(recipe) {
 }
 
 function editRecipe(recipe) {
-  // TODO: Implement recipe editing logic here
-  console.log('Editing recipe:', recipe.id);
+  const editPreviewContainer = document.querySelector(".edit-preview-container");
   // Open a modal or navigate to an edit page
+  editPreviewContainer.innerHTML = '';
+  editPreviewContainer.innerHTML = `
+    <edit-preview-recipe
+      path-to-icon="../../img/icon/other/"
+      recipe-id="${recipe.id}" 
+      start-mode="edit">
+    </edit-preview-recipe>
+  `;
+  const editPreviewRecipe = document.querySelector("edit-preview-recipe");
+  setTimeout(() => {
+    editPreviewRecipe.openModal();
+  }, 100);
+
 }
 
 function filterRecipes(recipes) {
