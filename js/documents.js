@@ -116,7 +116,7 @@ async function initializeSearch() {
                   const newIframe = document.createElement('iframe');
                   newIframe.id = 'pdf-iframe';
                   newIframe.style.display = 'block';
-                  newIframe.src = baseUrl + '#page=' + page;
+                  newIframe.src = baseUrl + '#page=' + page + '&view=FitH&pagemode=none&toolbar=0';
                   iframe.parentNode.replaceChild(newIframe, iframe);
                   
               } else {
@@ -157,7 +157,7 @@ async function loadPDF() {
       // Hide loading message and show PDF
       document.getElementById('loading-message').style.display = 'none';
       const iframe = document.getElementById('pdf-iframe');
-      iframe.src = `${url}#page=1&view=FitH&pagemode=none&toolbar=1`;
+      iframe.src = `${url}#page=1&view=FitH&pagemode=none&toolbar=0`;
       iframe.style.display = 'block';
       
   } catch (error) {

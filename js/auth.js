@@ -318,9 +318,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 documentsTab.id = 'documents-tab';
                 const documentsLink = document.createElement('a');
                 if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
-                  dashboardLink.href = './pages/documents.html';
+                  documentsLink.href = './pages/documents.html';
                 } else {
-                  dashboardLink.href = './documents.html';
+                  documentsLink.href = './documents.html';
                 }
                 documentsLink.textContent = "Grandma's Cookbook";
                 documentsTab.appendChild(documentsLink);
