@@ -82,6 +82,11 @@
 
   .home-page .category-jars {
     gap: 20px;
+    margin-bottom: 4rem;
+  }
+
+  .home-page main {
+    margin: 0 auto;
   }
 
   /* page specific - category-page */
