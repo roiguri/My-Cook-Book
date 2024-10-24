@@ -42,7 +42,7 @@ async function loadPDF() {
       document.getElementById('loading-message').style.display = 'none';
       const iframe = document.getElementById('pdf-iframe');
       // Add #page=1&view=FitH to show one page at a time
-      iframe.src = `${url}#page=1&view=Fit&pagemode=none#layout=SinglePage`;
+      iframe.src = `${url}#page=1&view=Fit&pagemode=none`;
       iframe.style.display = 'block';
       
   } catch (error) {
