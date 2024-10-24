@@ -86,6 +86,12 @@
     margin: 4rem auto;
   }
 
+  .home-page .category-jars span {
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+  }
+
   .home-page main {
     margin: 0 auto;
   }
