@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
       'breakfast-brunch': 'ארוחות בוקר',
       'snacks': 'חטיפים',
       'beverages': 'משקאות',
+      'desserts': 'קינוחים',
     };
     
     // Functions to populate Recipe Page:

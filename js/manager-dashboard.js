@@ -126,6 +126,7 @@ const categoryMapping = {
   'breakfast-brunch': 'ארוחות בוקר',
   'snacks': 'חטיפים',
   'beverages': 'משקאות',
+  'desserts': 'קינוחים',
 };
 
 function createRecipeContent(recipe) {
