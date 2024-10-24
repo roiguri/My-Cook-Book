@@ -117,10 +117,21 @@ function updateRecipeList(recipes) {
   recipeList.setItems(recipeItems);
 }
 
+const categoryMapping = {
+  'appetizers': 'מנות ראשונות',
+  'main-courses': 'מנות עיקריות',
+  'side-dishes': 'תוספות',
+  'soups-stews': 'מרקים ותבשילים',
+  'salads': 'סלטים',
+  'breakfast-brunch': 'ארוחות בוקר',
+  'snacks': 'חטיפים',
+  'beverages': 'משקאות',
+};
+
 function createRecipeContent(recipe) {
   const container = document.createElement('div');
   container.innerHTML = `
-      <p>קטגוריה: ${recipe.category}</p>
+      <p>קטגוריה: ${categoryMapping[recipe.category]}</p>
       <p>זמן הכנה: ${recipe.prepTime + recipe.waitTime} דקות</p>
       <button class="edit-recipe" data-id="${recipe.id}">ערוך</button>
   `;

@@ -46,6 +46,17 @@ document.addEventListener('DOMContentLoaded', function() {
             // Handle potential errors during data fetching
         });
 
+    const categoryMapping = {
+      'appetizers': 'מנות ראשונות',
+      'main-courses': 'מנות עיקריות',
+      'side-dishes': 'תוספות',
+      'soups-stews': 'מרקים ותבשילים',
+      'salads': 'סלטים',
+      'breakfast-brunch': 'ארוחות בוקר',
+      'snacks': 'חטיפים',
+      'beverages': 'משקאות',
+    };
+    
     // Functions to populate Recipe Page:
     function populateRecipeDetails(recipe){
       document.title = `${recipe.name} - Our Kitchen Chronicles`;
@@ -53,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('prep-time').textContent = `זמן הכנה: ${cookingTime(recipe.prepTime)}`;
       document.getElementById('wait-time').textContent = `זמן המתנה: ${cookingTime(recipe.waitTime)}`;
       document.getElementById('recipe-difficulty').textContent = `רמת קושי: ${recipe.difficulty}`;
-      document.getElementById('recipe-category').textContent = `קטגוריה: ${recipe.category}`;
+      document.getElementById('recipe-category').textContent = `קטגוריה: ${categoryMapping[recipe.category]}`;
     }
     
     async function setRecipeImage(recipe) {
