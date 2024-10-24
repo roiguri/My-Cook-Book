@@ -81,7 +81,8 @@
   }
 
   .home-page .category-jars {
-    gap: 20px;
+    row-gap: 20px;
+    column-gap: 40px;
     margin-bottom: 4rem;
   }
 
@@ -171,15 +172,20 @@
     flex-wrap:nowrap;
   }
 
+  .menu-title-container {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
   .nav-toggle {
     display: block;
-    order: 1;
-    align-self: start;
+    align-self: center;
   }
 
   .logo {
     flex-grow: 1;
-    order: 0;
+    font-size: 2.5rem;
   }
 
   .nav-search-container {
@@ -234,10 +240,6 @@
   .header-container {
     flex-direction: column;
     align-items: center;
-  }
-
-  .logo {
-    margin-bottom: 1rem;
   }
 
   .search-container {
