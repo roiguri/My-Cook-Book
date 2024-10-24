@@ -103,9 +103,9 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  :root { 
+  /* :root {
     font-size: 12px;
-  }
+  } */
   .manager-dashboard {
       padding: 10px;
   }
