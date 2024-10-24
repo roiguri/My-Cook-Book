@@ -162,6 +162,11 @@
   .propose-recipe-form h2 {
     font-size: 2rem;
   }
+
+  /* documents */
+  .documents .documents-container {
+    margin-top: 20px;
+  }
 }
 
 

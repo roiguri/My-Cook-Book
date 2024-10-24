@@ -200,3 +200,48 @@
   font-size: 3.5rem;
   margin-bottom: 0.5rem;
 }
+
+
+
+
+
+/*------------------------------------*\
+    #documents-page
+\*------------------------------------*/
+.documents {
+  flex-grow: 1;
+  width: 90vw;
+}
+
+.documents .documents-container {
+  width: auto;
+  height: 100%;
+}
+
+.documents #pdf-viewer {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.documents #pdf-iframe {
+  height: 100%;
+}
+
+.documents #loading-message,
+.documents #error-message {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  padding: 2rem;
+}
+
+.documents #error-message {
+  color: #bb6016;
+}

@@ -60,6 +60,7 @@ function createContent(user) {
   const select = document.createElement('select');
   select.innerHTML = `
       <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+      <option value="approved" ${user.role === 'approved' ? 'selected' : ''}>approved</option>
       <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option>
   `;
   const saveButton = document.createElement('button');
@@ -172,7 +173,7 @@ function filterRecipes(recipes) {
 
 function populateFilterOptions(recipes) {
   const filterSelect = document.getElementById('recipe-filter');
-  const categories = [...new Set(recipes.map(recipe => recipe.category))];
+  const categories = [...new Set(recipes.map(recipe => categoryMapping[recipe.category]))];
   
   categories.forEach(category => {
       const option = document.createElement('option');

@@ -283,19 +283,47 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateUIForUser(user, showModal = false) {
     const authTrigger = document.getElementById('auth-trigger');
     if (user.photoURL) {
-      authTrigger.innerHTML = `<img src="${user.photoURL}" alt="User Avatar" class="avatar">`;
+        authTrigger.innerHTML = `<img src="${user.photoURL}" alt="User Avatar" class="avatar">`;
     } else {
-      authTrigger.innerHTML = `<div class="avatar">${user.email[0].toUpperCase()}</div>`;
+        authTrigger.innerHTML = `<div class="avatar">${user.email[0].toUpperCase()}</div>`;
     }
 
-    // Check if the user is a manager and add a dashboard tab if they are
-    checkManagerStatus(user).then((isManager) => {
-      updateDashboardTab(isManager);
+    // Check roles and update navigation
+    checkUserRoles(user).then(({ isManager, isApproved }) => {
+        // Check if the user is a manager and add dashboard tab
+        if (isManager) {
+            const navMenu = document.querySelector('nav ul');
+            const existingDashboardTab = document.querySelector('#dashboard-tab');
+            if (!existingDashboardTab) {
+                const dashboardTab = document.createElement('li');
+                dashboardTab.id = 'dashboard-tab';
+                const dashboardLink = document.createElement('a');
+                dashboardLink.href = '/pages/manager-dashboard.html';
+                dashboardLink.textContent = 'Dashboard';
+                dashboardTab.appendChild(dashboardLink);
+                navMenu.appendChild(dashboardTab);
+            }
+        }
+
+        // Add documents tab for approved users or managers
+        if (isApproved || isManager) {
+            const navMenu = document.querySelector('nav ul');
+            const existingDocumentsTab = document.querySelector('#documents-tab');
+            if (!existingDocumentsTab) {
+                const documentsTab = document.createElement('li');
+                documentsTab.id = 'documents-tab';
+                const documentsLink = document.createElement('a');
+                documentsLink.href = '/pages/documents.html';
+                documentsLink.textContent = "Grandma's Cookbook";
+                documentsTab.appendChild(documentsLink);
+                navMenu.appendChild(documentsTab);
+            }
+        }
     });
 
     if (showModal) {
-      populateSignedUserContent(user);
-      modal.style.display = "block";
+        populateSignedUserContent(user);
+        modal.style.display = "block";
     }
   }
   
@@ -360,18 +388,17 @@ document.addEventListener('DOMContentLoaded', function() {
   } 
 
   // Function to check if a user has manager status
-  function checkManagerStatus(user) {
+  function checkUserRoles(user) {
     return db.collection('users').doc(user.uid).get()
         .then((doc) => {
-            if (doc.exists && doc.data().role === 'manager') {
-                return true;
+            if (doc.exists) {
+                const role = doc.data().role;
+                return {
+                    isManager: role === 'manager',
+                    isApproved: role === 'approved' || role === 'manager'
+                };
             }
-            return false;
-        })
-        .catch((error) => {
-            console.error("Error checking manager status:", error);
-            return false;
+            return { isManager: false, isApproved: false };
         });
   }
-
 });
