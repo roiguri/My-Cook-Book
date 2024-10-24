@@ -298,7 +298,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const dashboardTab = document.createElement('li');
                 dashboardTab.id = 'dashboard-tab';
                 const dashboardLink = document.createElement('a');
-                dashboardLink.href = '/pages/manager-dashboard.html';
+                if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+                  dashboardLink.href = './pages/manager-dashboard.html';
+                } else {
+                  dashboardLink.href = './manager-dashboard.html';
+                }
                 dashboardLink.textContent = 'Dashboard';
                 dashboardTab.appendChild(dashboardLink);
                 navMenu.appendChild(dashboardTab);
@@ -313,7 +317,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const documentsTab = document.createElement('li');
                 documentsTab.id = 'documents-tab';
                 const documentsLink = document.createElement('a');
-                documentsLink.href = '/pages/documents.html';
+                if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+                  dashboardLink.href = './pages/documents.html';
+                } else {
+                  dashboardLink.href = './documents.html';
+                }
                 documentsLink.textContent = "Grandma's Cookbook";
                 documentsTab.appendChild(documentsLink);
                 navMenu.appendChild(documentsTab);
