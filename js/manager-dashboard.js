@@ -221,7 +221,7 @@ function createPendingRecipeHeader(recipe) {
   header.style.justifyContent = 'space-between';
   header.style.alignItems = 'center';
   header.innerHTML = `
-    <span>${recipe.name} | ${recipe.category || 'No category'}</span>
+    <span>${recipe.name} | ${categoryMapping[recipe.category] || 'No category'}</span>
     <button class="preview-recipe" data-id="${recipe.id}">הצג</button>
   `;
 
