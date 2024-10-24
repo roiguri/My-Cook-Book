@@ -62,21 +62,26 @@
 
 
   .category-jar {
-    width: 120px;
+    width: 90px;
   }
 
     .jar-img {
-      height: 160px;
+      height: 120px;
     }
 
   /* page specific - home-page */ 
-  .home-page .hero h1 {
+  .home-page .hero,
+  .home-page .quick-links h2 {
     display: none;
   }
 
 
   .home-page .featured-recipes h2, .home-page .quick-links h2 {
     font-size: 2.5rem;
+  }
+
+  .home-page .category-jars {
+    gap: 20px;
   }
 
   /* page specific - category-page */
