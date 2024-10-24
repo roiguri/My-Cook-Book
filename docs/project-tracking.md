@@ -3,10 +3,6 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
-- Manager dashboard:
-  * Preview and edit recipes
-  * Improve page style
-  * Add message and confiramtion modals
 - New Feature: Automation of propose a recipe
 - Personal component library
 - Focus on users
@@ -45,6 +41,7 @@
 ### Manager dashboard
 - Medium: Improve page style
 - Medium: Manage multiple image suggestion
+- Medium: add confirmation modals for dashboard operations
 - Low: Remove users/recipes
 - Low: combine pending recipes/images with tabs
 
