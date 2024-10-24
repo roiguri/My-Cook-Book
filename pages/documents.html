@@ -77,11 +77,25 @@
   <main class="documents" role="main">
     <div class="documents-container">
       <div id="pdf-viewer">
+        <div class="recipe-search">
+            <div class="search-box">
+              <button id="search-button">חפש</button>
+              <input type="text" id="recipe-search" placeholder="חפש מתכון..." list="recipe-list">
+              <select id="category-select">
+                  <option value="all">כל המתכונים</option>
+                  <option value="מנות ראשונות">מנות ראשונות</option>
+                  <option value="מנות עיקריות">מנות עיקריות</option>
+                  <option value="קינוחים">קינוחים</option>
+              </select>
+              <datalist id="recipe-list"></datalist>
+            </div>
+          </div>
           <div id="loading-message">טוען מסמך...</div>
           <div id="error-message" style="display: none;">
               אין לך הרשאה לצפות במסמך זה
           </div>
-          <iframe id="pdf-iframe" style="display: none;" width="100%" height="600px"></iframe>
+          
+          <iframe id="pdf-iframe" style="display: none;"></iframe>
       </div>
     </div>
   </main>
