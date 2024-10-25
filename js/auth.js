@@ -293,6 +293,14 @@ document.addEventListener('DOMContentLoaded', function() {
     firebase.auth().signOut().then(() => {
       modal.style.display = "none";
       updateUIForUnsignedUser();
+
+      // Array of specific pages where you want the redirect
+      const redirectPages = ['documents.html', 'manager-dashboard.html']; 
+
+      // Check if the current page is in the redirectPages array
+      if (redirectPages.some(page => window.location.pathname.endsWith(page))) {
+        window.location.href = '../index.html'; // Redirect to home page
+      }
     }).catch((error) => {
       console.error('Sign out error:', error);
     });
