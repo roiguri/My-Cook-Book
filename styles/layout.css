@@ -45,7 +45,7 @@
       box-shadow: h-offset v-offset blur spread color;
     }
 
-      nav ul li:last-child {
+      nav ul li:first-child {
         margin-right: 0;
       }
 

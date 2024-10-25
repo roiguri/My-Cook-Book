@@ -320,25 +320,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check roles and update navigation
     checkUserRoles(user).then(({ isManager, isApproved }) => {
-        // Check if the user is a manager and add dashboard tab
-        if (isManager) {
-            const navMenu = document.querySelector('nav ul');
-            const existingDashboardTab = document.querySelector('#dashboard-tab');
-            if (!existingDashboardTab) {
-                const dashboardTab = document.createElement('li');
-                dashboardTab.id = 'dashboard-tab';
-                const dashboardLink = document.createElement('a');
-                if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
-                  dashboardLink.href = './pages/manager-dashboard.html';
-                } else {
-                  dashboardLink.href = './manager-dashboard.html';
-                }
-                dashboardLink.textContent = 'Dashboard';
-                dashboardTab.appendChild(dashboardLink);
-                navMenu.appendChild(dashboardTab);
-            }
-        }
-
         // Add documents tab for approved users or managers
         if (isApproved || isManager) {
             const navMenu = document.querySelector('nav ul');
@@ -352,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                   documentsLink.href = './documents.html';
                 }
-                documentsLink.textContent = "Grandma's Cookbook";
+                documentsLink.textContent = "המטעמים של סבתא";
                 documentsTab.appendChild(documentsLink);
                 navMenu.appendChild(documentsTab);
             }
@@ -362,7 +343,26 @@ document.addEventListener('DOMContentLoaded', function() {
           if (existingDocumentsTab) {
               existingDocumentsTab.remove();
           }
-      }
+        }
+
+        // Check if the user is a manager and add dashboard tab
+        if (isManager) {
+          const navMenu = document.querySelector('nav ul');
+          const existingDashboardTab = document.querySelector('#dashboard-tab');
+          if (!existingDashboardTab) {
+              const dashboardTab = document.createElement('li');
+              dashboardTab.id = 'dashboard-tab';
+              const dashboardLink = document.createElement('a');
+              if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+                dashboardLink.href = './pages/manager-dashboard.html';
+              } else {
+                dashboardLink.href = './manager-dashboard.html';
+              }
+              dashboardLink.textContent = 'ממשק ניהול';
+              dashboardTab.appendChild(dashboardLink);
+              navMenu.appendChild(dashboardTab);
+          }
+        }
     });
 
     if (showModal) {
