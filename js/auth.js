@@ -293,14 +293,6 @@ document.addEventListener('DOMContentLoaded', function() {
     firebase.auth().signOut().then(() => {
       modal.style.display = "none";
       updateUIForUnsignedUser();
-
-      // Array of specific pages where you want the redirect
-      const redirectPages = ['documents.html', 'manager-dashboard.html']; 
-
-      // Check if the current page is in the redirectPages array
-      if (redirectPages.some(page => window.location.pathname.endsWith(page))) {
-        window.location.href = '../index.html'; // Redirect to home page
-      }
     }).catch((error) => {
       console.error('Sign out error:', error);
     });
@@ -364,7 +356,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 documentsTab.appendChild(documentsLink);
                 navMenu.appendChild(documentsTab);
             }
-        }
+        } else {
+          // Remove documents tab if user is not approved and not a manager
+          const existingDocumentsTab = document.querySelector('#documents-tab');
+          if (existingDocumentsTab) {
+              existingDocumentsTab.remove();
+          }
+      }
     });
 
     if (showModal) {
@@ -387,6 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Ensure the dashboard tab is removed for unsigned users
     updateDashboardTab(false);
+    updateCookbookTab(false);
   }
 
 
@@ -396,8 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   firebase.auth().onAuthStateChanged((user) => {
     // User is signed in
-    const uid = user.uid;
-    console.log("Current user UID:", uid);
     if (user) {
       updateUIForUser(user);
     } else {
