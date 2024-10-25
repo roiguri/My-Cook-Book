@@ -81,8 +81,7 @@
   }
 
   .home-page .category-jars {
-    row-gap: 20px;
-    column-gap: 40px;
+    gap: 40px;
     margin: 4rem auto;
   }
 
