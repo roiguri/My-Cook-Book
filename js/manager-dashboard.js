@@ -3,16 +3,18 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Check if the user is authenticated and has manager privileges
   firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
+    const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/'; // Adjust 'My-Cook-Book' if your GitHub Pages repo name is different
+    
+    if (user) {
           checkManagerStatus(user).then(function(isManager) {
               if (isManager) {
                   initializeDashboard();
               } else {
-                  window.location.href = '/'; // Redirect to home if not a manager
+                  window.location.href = baseUrl; // Redirect to home if not a manager
               }
           });
       } else {
-          window.location.href = '/'; // Redirect to home if not logged in
+          window.location.href = baseUrl; // Redirect to home if not logged in
       }
   });
   const imageApprovalComponent = document.querySelector('image-approval-component');
