@@ -46,13 +46,12 @@
 - Low: combine pending recipes/images with tabs
 
 ### Users
-- High: Fix user log in and sign up
 - High: Add more information for user sign up and add settings/profile page
 - High: Add favorites page for user (and all recipes becomes discover)\
 - High: Make favorites available offline
 - Medium: Upload personal recipes
 - Medium: Enhance form validation and error handling (notice fitting the modal size)
-- Medium: Check email verification + google sign in
+- Medium: Check email verification
 - Medium: Change auth modal to independent component
 - Medium: only present choose avatar to new users + upload avatar.
 - Low: Implement protected routes for authenticated users
@@ -116,3 +115,5 @@
   * change layout for mobile (card size according to list size)
   * Fix position of preview-recipe modal
 - create message and confirmation modal.
+- Fix user log in and sign up
+- fix google log in
