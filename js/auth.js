@@ -357,6 +357,9 @@ document.addEventListener('DOMContentLoaded', function() {
   let isInitialLoad = true;
   
   firebase.auth().onAuthStateChanged((user) => {
+    // User is signed in
+    const uid = user.uid;
+    console.log("Current user UID:", uid);
     if (user) {
       updateUIForUser(user);
     } else {
