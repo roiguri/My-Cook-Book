@@ -215,6 +215,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: none;
 }
 
 .documents h1 {
