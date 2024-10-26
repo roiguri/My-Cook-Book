@@ -38,7 +38,25 @@
   <script defer src="../../js/auth.js"></script>
 </head>
 <body>
-  <edit-preview-recipe 
+  <!-- filter modal -->
+  <button id="open-filter-modal">Filter Recipes</button>
+  <recipe-filter-component
+    cooking-time-filter="true"
+    difficulty-filter="true"
+    ingredient-filter="true"
+    tags-filter="true">
+  </recipe-filter-component>  
+  <script src="../filter_modal/filter_modal.js"></script>
+  <script>
+    const filter_modal = document.querySelector('recipe-filter-component')
+    const open_button = document.getElementById('open-filter-modal');
+    open_button.addEventListener('click', ()=> {
+      filter_modal.open();
+    })
+  </script>
+
+
+  <!-- <edit-preview-recipe 
     path-to-icon="../../img/icon/other/"
     recipe-id="4lJ3JBIBrFBJanj9o33p" 
     start-mode="edit">
@@ -53,7 +71,7 @@
       console.log("clicked");
       editPreviewModal.openModal();
     });
-  </script>
+  </script> -->
 
   <!-- Edit a recipe -->
   <!-- <h3>edit a recipe</h3>
@@ -85,7 +103,7 @@
   <script src="../recipe_component/recipe_component.js"></script> -->
 
   <!-- custom modal -->
-  <h3>custom modal</h3>
+  <!-- <h3>custom modal</h3>
 
   <custom-modal></custom-modal>
   <button class="custom-modal">open modal</button>
@@ -94,10 +112,10 @@
     const custom_modal = document.querySelector('custom-modal');
     const openCustomModal = document.querySelector('.custom-modal');
     openCustomModal.addEventListener('click', () => custom_modal.open());
-  </script>
+  </script> -->
 
   <!-- missing image modal -->
-  <h3>missing image upload</h3>
+  <!-- <h3>missing image upload</h3>
 
   <missing-image-upload></missing-image-upload>
   <button class="upload-missing-image-button" data-recipe-id="123">Upload Image</button>
@@ -109,10 +127,10 @@
     const uploadComponent = document.querySelector('missing-image-upload');
     uploadComponent.openModalForRecipe(recipeId);
   });
-  </script>
+  </script> -->
 
   <!-- scrolling list -->
-  <h3>scrolling list</h3>
+  <!-- <h3>scrolling list</h3>
 
   <scrolling-list dir="rtl" id="myList" height="200px" width="300px" expandable-items="true" ></scrolling-list>
 
@@ -192,7 +210,7 @@
     document.getElementById('openConfirmModalButton').addEventListener('click', () => {
       confirm_modal.confirm('Confirm Action', 'Are you sure you want to proceed?', 'Yes', 'No');
     });
-  </script>
+  </script> -->
 
 
 </body>
