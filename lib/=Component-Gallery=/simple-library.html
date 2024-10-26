@@ -53,6 +53,10 @@
     open_button.addEventListener('click', ()=> {
       filter_modal.open();
     })
+
+    filter_modal.addEventListener('filter-applied', (e) => {
+      console.log(e.detail.recipes)
+    })
   </script>
 
 
