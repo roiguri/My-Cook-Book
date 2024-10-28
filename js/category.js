@@ -49,8 +49,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       // Filter modal
       filterButton.addEventListener('click', () => {
-        filterModal.setAttribute('category', currentCategory === 'all' ? null : currentCategory);
-        filterModal.open();
+        if (currentCategory !== 'all') {
+          filterModal.setAttribute('category', currentCategory);
+        } else {
+            filterModal.removeAttribute('category');
+        }        filterModal.open();
       });
 
       // Filter events
@@ -82,8 +85,11 @@ document.addEventListener('DOMContentLoaded', async function() {
       await displayCurrentPageRecipes();
       
       // Reset filter modal for new category
-      filterModal.setAttribute('category', category === 'all' ? null : category);
-    }
+      if (category === 'all') {
+        filterModal.removeAttribute('category');
+      } else {
+          filterModal.setAttribute('category', category);
+      }    }
 
   // Filter Handlers
   async function handleFilterApplied(event) {
