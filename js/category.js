@@ -1,132 +1,193 @@
-// category.js
-
 document.addEventListener('DOMContentLoaded', async function() {
-    // DOM elements
-    const categoryTabs = document.querySelector('.category-tabs ul');
-    const categoryDropdown = document.getElementById('category-select');
-    const recipeGrid = document.getElementById('recipe-grid');
-    const cookingTimeFilter = document.getElementById('cooking-time');
-    const difficultyFilter = document.getElementById('difficulty');
-    const mainIngredientFilter = document.getElementById('main-ingredient');
-    const pageTitle = document.querySelector('h1');
+  // DOM elements
+  const categoryTabs = document.querySelector('.category-tabs ul');
+  const categoryDropdown = document.getElementById('category-select');
+  const recipeGrid = document.getElementById('recipe-grid');
+  const filterButton = document.getElementById('open-filter-modal');
+  const filterModal = document.getElementById('recipe-filter');
+  const pageTitle = document.querySelector('h1');
 
-    let currentCategory;
-    if (window.location.hash) {
-        currentCategory = window.location.hash.slice(1);
+  // State
+  let currentCategory = window.location.hash ? window.location.hash.slice(1) : 'all';
+  let currentPage = 1;
+  const recipesPerPage = 4;
+  let displayedRecipes = [];
+
+  // Initial setup
+  async function initialize() {
+      await loadInitialRecipes();
+      setupEventListeners();
+      updateActiveTab();
+      updatePageTitle();
+      await displayCurrentPageRecipes();
+  }
+
+  // Load initial recipes
+  async function loadInitialRecipes() {
+      const query = currentCategory === 'all' 
+          ? db.collection('recipes').where('approved', '==', true)
+          : db.collection('recipes').where('approved', '==', true).where('category', '==', currentCategory);
+          
+      const snapshot = await query.get();
+      displayedRecipes = snapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data() 
+      }));
+  }
+
+  // Event Listeners
+  function setupEventListeners() {
+      // Category navigation
+      categoryTabs.addEventListener('click', handleCategoryClick);
+      if (categoryDropdown) {
+          categoryDropdown.addEventListener('change', handleCategoryChange);
+      }
+
+      // Pagination
+      document.getElementById('prev-page').addEventListener('click', () => goToPage(currentPage - 1));
+      document.getElementById('next-page').addEventListener('click', () => goToPage(currentPage + 1));
+
+      // Filter modal
+      filterButton.addEventListener('click', () => {
+        filterModal.setAttribute('category', currentCategory === 'all' ? null : currentCategory);
+        filterModal.open();
+      });
+
+      // Filter events
+      filterModal.addEventListener('filter-applied', handleFilterApplied);
+      filterModal.addEventListener('filter-reset', handleFilterReset);
+  }
+
+  // Category Handlers
+  async function handleCategoryClick(e) {
+      if (e.target.tagName === 'A') {
+          e.preventDefault();
+          const newCategory = e.target.getAttribute('href').slice(1);
+          await switchCategory(newCategory);
+      }
+  }
+
+  async function handleCategoryChange(e) {
+      await switchCategory(e.target.value);
+  }
+
+  async function switchCategory(category) {
+      currentCategory = category;
+      currentPage = 1;
+      window.location.hash = category;
+      
+      updateActiveTab();
+      updatePageTitle();
+      await loadInitialRecipes();
+      await displayCurrentPageRecipes();
+      
+      // Reset filter modal for new category
+      filterModal.setAttribute('category', category === 'all' ? null : category);
+    }
+
+  // Filter Handlers
+  async function handleFilterApplied(event) {
+      const { recipes } = event.detail;
+      displayedRecipes = recipes;
+      currentPage = 1;
+      await displayCurrentPageRecipes();
+      updateFilterBadge(event.detail.filters);
+  }
+
+  async function handleFilterReset() {
+      await loadInitialRecipes();
+      currentPage = 1;
+      await displayCurrentPageRecipes();
+      updateFilterBadge();
+  }
+
+  // Display Functions
+  async function displayCurrentPageRecipes() {
+      const startIndex = (currentPage - 1) * recipesPerPage;
+      const paginatedRecipes = displayedRecipes.slice(startIndex, startIndex + recipesPerPage);
+      await displayRecipes(paginatedRecipes);
+      updatePagination();
+  }
+
+  async function displayRecipes(recipes) {
+      const recipeCards = await Promise.all(recipes.map(async (recipe) => {
+          const imageUrl = await getImageUrl(recipe);
+          return `
+              <a href="./recipe-page.html?id=${recipe.id}" class="recipe-card-link">
+                  <div class="recipe-card recipe-card-base">
+                      <img src="${imageUrl}" alt="${recipe.name}" onerror="this.src='../img/placeholder.jpg';">
+                      <h3>${recipe.name}</h3>
+                      <p>זמן בישול: ${formatCookingTime(recipe.prepTime + recipe.waitTime)}</p>
+                      <p>רמת קושי: ${recipe.difficulty}</p>
+                  </div>
+              </a>
+          `;
+      }));
+      recipeGrid.innerHTML = recipeCards.join('');
+  }
+
+  // UI Update Functions
+  function updateActiveTab() {
+      categoryTabs.querySelectorAll('a').forEach(tab => {
+          if (tab.getAttribute('href').slice(1) === currentCategory) {
+              tab.classList.add('active');
+          } else {
+              tab.classList.remove('active');
+          }
+      });
+      if (categoryDropdown) {
+          categoryDropdown.value = currentCategory;
+      }
+  }
+
+  function updatePageTitle() {
+      const categoryName = currentCategory === 'all' 
+          ? 'All Recipes' 
+          : currentCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      pageTitle.textContent = categoryName;
+  }
+
+  function updatePagination() {
+      const totalPages = Math.ceil(displayedRecipes.length / recipesPerPage);
+      const prevButton = document.getElementById('prev-page');
+      const nextButton = document.getElementById('next-page');
+      const pageInfo = document.getElementById('page-info');
+
+      prevButton.disabled = currentPage <= 1;
+      nextButton.disabled = currentPage >= totalPages;
+      pageInfo.textContent = totalPages > 0 
+          ? `עמוד ${currentPage} מתוך ${totalPages}` 
+          : 'אין תוצאות';
+  }
+
+  function updateFilterBadge(filters = null) {
+    const badge = document.getElementById('filter-badge');
+    
+    // If no filters or filters is null, hide badge
+    if (!filters) {
+        badge.style.display = 'none';
+        return;
+    }
+
+    // Count active filters
+    const activeFilters = [
+        filters.cookingTime,
+        filters.difficulty,
+        filters.mainIngredient,
+        filters.tags?.length > 0
+    ].filter(Boolean).length;
+
+    // Update badge visibility and count
+    if (activeFilters > 0) {
+        badge.textContent = activeFilters;
+        badge.style.display = 'inline';
     } else {
-        currentCategory = 'all';
+        badge.style.display = 'none';
     }
-    
-    let currentPage = 1;
-    const recipesPerPage = 4;
-    let allRecipes = [];
+  }
 
-    // Fetch approved recipes from Firestore
-    async function fetchAllRecipes() {
-        const recipesRef = db.collection('recipes').where('approved', '==', true);
-        const snapshot = await recipesRef.get();
-        allRecipes = snapshot.docs.map(doc => ({ FirestoreID: doc.id, ...doc.data() }));
-    }
-
-    // Function to switch categories
-    function switchCategory(category) {
-        currentCategory = category;
-        currentPage = 1;
-        updateActiveTab();
-        updatePageTitle();
-        populateMainIngredientFilter();
-        populateTagFilter();
-        syncCategoryDropdown();
-        filterAndDisplayRecipes();
-    }
-
-    // Function to update active tab
-    function updateActiveTab() {
-        categoryTabs.querySelectorAll('a').forEach(tab => {
-            if (tab.getAttribute('href').slice(1) === currentCategory) {
-                tab.classList.add('active');
-            } else {
-                tab.classList.remove('active');
-            }
-        });
-        categoryDropdown.value = currentCategory;
-    }
-
-    // Function to update page title
-    function updatePageTitle() {
-        const categoryName = currentCategory === 'all' ? 'All Recipes' : currentCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-        pageTitle.textContent = categoryName;
-    }
-
-    // Function to filter and display recipes
-    async function filterAndDisplayRecipes() {
-        let filteredRecipes = allRecipes;
-
-        // Apply category filter (if not 'all')
-        if (currentCategory !== 'all') {
-            filteredRecipes = filteredRecipes.filter(recipe => recipe.category === currentCategory);
-        }   
-
-        // Apply cooking time filter
-        if (cookingTimeFilter.value) {
-            let min, max;
-            if (cookingTimeFilter.value.endsWith('+')) {
-                min = parseInt(cookingTimeFilter.value);
-                max = Infinity;
-            } else {
-                [min, max] = cookingTimeFilter.value.split('-').map(Number);
-            }
-            
-            filteredRecipes = filteredRecipes.filter(recipe => 
-                (recipe.preptime + recipe.waitTime) >= min && (max === Infinity || (recipe.preptime + recipe.waitTime) <= max)
-            );
-        }
-    
-        // Apply difficulty filter
-        if (difficultyFilter.value) {
-            filteredRecipes = filteredRecipes.filter(recipe => recipe.difficulty === difficultyFilter.value);
-        }
-    
-        // Apply main ingredient filter
-        if (mainIngredientFilter.value) {
-            filteredRecipes = filteredRecipes.filter(recipe => recipe.mainIngredient === mainIngredientFilter.value);
-        }
-    
-        // Apply tag filter
-        if (selectedTags.length > 0) {
-            filteredRecipes = filteredRecipes.filter(recipe => 
-                selectedTags.every(tag => recipe.tags.includes(tag))
-            );
-        }
-    
-        // Pagination
-        const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
-        const startIndex = (currentPage - 1) * recipesPerPage;
-        const paginatedRecipes = filteredRecipes.slice(startIndex, startIndex + recipesPerPage);    
-        
-        await displayRecipes(paginatedRecipes);
-        updatePagination(filteredRecipes.length);
-    }
-
-    // Function to display recipes
-    async function displayRecipes(recipes) {
-        const recipeCards = await Promise.all(recipes.map(async (recipe) => {
-            const imageUrl = await getImageUrl(recipe);
-            return `
-                <a href="./recipe-page.html?id=${recipe.FirestoreID}" class="recipe-card-link">
-                    <div class="recipe-card recipe-card-base">
-                        <img src="${imageUrl}" alt="${recipe.name}" onerror="this.src='../img/placeholder.jpg';">
-                        <h3>${recipe.name}</h3>
-                        <p>זמן בישול: ${cookingTime(recipe.prepTime + recipe.waitTime)}</p>
-                        <p>רמת קושי: ${recipe.difficulty}</p>
-                    </div>
-                </a>
-            `;
-        }));
-        recipeGrid.innerHTML = recipeCards.join('');
-    }
-    // Function to get image URL from Firebase Storage
-    async function getImageUrl(recipe) {
+  // Utility Functions
+  async function getImageUrl(recipe) {
       try {
           let imagePath;
           if (recipe.pendingImage && recipe.pendingImage.compressed) {
@@ -141,221 +202,31 @@ document.addEventListener('DOMContentLoaded', async function() {
           const imageRef = storage.ref().child(imagePath);
           return await imageRef.getDownloadURL();
       }
-    }
+  }
 
-    // Create a time string:
-    function cookingTime(time) {
-        let finalTime;
-        if (time <= 60){
-            finalTime = `${time} דקות`;
-        }
-        else if (time > 60 && time < 120){
-            finalTime = `שעה ו-${time%60} דקות`;
-        }
-        else if (time == 120){
-            finalTime = "שעתיים";
-        }
-        else if (time > 120 && time < 180){
-            finalTime = `שעתיים ו-${time%60} דקות`;;
-        }
-        else if (time % 60 == 0) {
-            finalTime = `${time/60} שעות`
-        }
-        else {
-            finalTime = `${~~(time/60)} שעות ו-${time%60} דקות`;
-        }
-        return finalTime;
-    }
-   
-    // Function to update pagination
-    function updatePagination(totalRecipes) {
-        const prevButton = document.getElementById('prev-page');
-        const nextButton = document.getElementById('next-page');
-        const pageInfo = document.getElementById('page-info');
-        const totalPages = Math.ceil(totalRecipes / recipesPerPage);
-    
-        currentPage = Math.max(1, Math.min(currentPage, totalPages));
+  function formatCookingTime(time) {
+      if (time <= 60) return `${time} דקות`;
+      if (time < 120) return `שעה ו-${time%60} דקות`;
+      if (time === 120) return "שעתיים";
+      if (time < 180) return `שעתיים ו-${time%60} דקות`;
+      if (time % 60 === 0) return `${time/60} שעות`;
+      return `${Math.floor(time/60)} שעות ו-${time%60} דקות`;
+  }
 
-        prevButton.disabled = currentPage <= 1;
-        nextButton.disabled = currentPage >= totalPages;
-    
-        pageInfo.textContent = totalPages > 0 ? 
-            `עמוד ${currentPage} מתוך ${totalPages}` : 
-            'אין תוצאות';
-    }
+  function goToPage(page) {
+      const totalPages = Math.ceil(displayedRecipes.length / recipesPerPage);
+      if (page > 0 && page <= totalPages) {
+          currentPage = page;
+          displayCurrentPageRecipes();
 
-    function goToPage(page) {
-        const totalRecipes = currentCategory === 'all' ? 
-            allRecipes.length : 
-            allRecipes.filter(recipe => recipe.category === currentCategory).length;
-        const totalPages = Math.ceil(totalRecipes / recipesPerPage);
-    
-        if (page > 0 && page <= totalPages) {
-            currentPage = page;
-            filterAndDisplayRecipes();
-        } else {
-            console.warn(`Attempted to go to invalid page: ${page}. Total pages: ${totalPages}`);
-        }
-    }
+          // Scroll to top of page smoothly
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+      }
+  }
 
-    function populateMainIngredientFilter() {
-        const relevantRecipes = currentCategory === 'all' ? allRecipes : allRecipes.filter(recipe => recipe.category === currentCategory);
-        const mainIngredients = [...new Set(relevantRecipes.map(recipe => recipe.mainIngredient))];
-        
-        mainIngredientFilter.innerHTML = '<option value="">All</option>' + 
-            mainIngredients.map(ingredient => `
-                <option value="${ingredient}">${ingredient}</option>
-            `).join('');
-    }
-
-    function populateDifficultyFilter() {
-        const difficulties = ["קלה", "בינונית", "קשה"];
-        
-        difficultyFilter.innerHTML = '<option value="">All</option>' + 
-            difficulties.map(difficulty => `
-                <option value="${difficulty}">${difficulty}</option>
-            `).join('');
-    }
-
-    function populateCookingTimeFilter() {
-        cookingTimeFilter.innerHTML = `
-            <option value="">כל זמני הבישול</option>
-            <option value="0-30">0-30 דקות</option>
-            <option value="31-60">31-60 דקות</option>
-            <option value="61">61+ דקות</option>
-        `;
-    }
-
-    /* tag filter */
-    let allTags = [];
-    let selectedTags = [];
-
-    function populateTagFilter() {
-        const relevantRecipes = currentCategory === 'all' ? allRecipes : allRecipes.filter(recipe => recipe.category === currentCategory);
-        allTags = [...new Set(relevantRecipes.flatMap(recipe => recipe.tags))];
-        allTags.sort((a, b) => a.localeCompare(b, 'he'));
-        
-        const tagSearchInput = document.getElementById('tag-filter');
-        const tagSuggestions = document.getElementById('tag-suggestions');
-        const selectedTagsContainer = document.getElementById('selected-tags');
-    
-        // Clear existing tags
-        selectedTags = [];
-        updateSelectedTags();
-    }
-
-    function handleTagSearch(event) {
-        const searchTerm = event.target.value.toLowerCase();
-        const tagSuggestions = document.getElementById('tag-suggestions');
-        
-        if (searchTerm.length === 0) {
-            tagSuggestions.style.display = 'none';
-            return;
-        }
-
-        const filteredTags = allTags.filter(tag => 
-            tag.toLowerCase().includes(searchTerm) && !selectedTags.includes(tag)
-        );
-
-        tagSuggestions.innerHTML = filteredTags.map(tag => `<div>${tag}</div>`).join('');
-        tagSuggestions.style.display = filteredTags.length > 0 ? 'block' : 'none';
-    }
-
-    function handleTagSelection(event) {
-        if (event.target.tagName === 'DIV') {
-            const selectedTag = event.target.textContent;
-            selectedTags.push(selectedTag);
-            updateSelectedTags();
-            filterAndDisplayRecipes();
-            document.getElementById('tag-filter').value = '';
-            document.getElementById('tag-suggestions').style.display = 'none';
-        }
-    }
-
-    function handleTagRemoval(event) {
-        if (event.target.classList.contains('remove-tag')) {
-            const tagToRemove = event.target.parentElement.textContent.slice(0, -1);
-            selectedTags = selectedTags.filter(tag => tag !== tagToRemove);
-            updateSelectedTags();
-            filterAndDisplayRecipes();
-        }
-    }
-
-    function updateSelectedTags() {
-        const selectedTagsContainer = document.getElementById('selected-tags');
-        selectedTagsContainer.innerHTML = selectedTags.map(tag => 
-            `<div class="selected-tag">${tag}<span class="remove-tag">×</span></div>`
-        ).join('');
-    }
-
-    function syncCategoryDropdown() {
-        const dropdown = document.getElementById('category-select');
-        if (dropdown) {
-            dropdown.value = currentCategory;
-        }
-    }
-
-    // Event listeners
-    categoryTabs.addEventListener('click', (e) => {
-        if (e.target.tagName === 'A') {
-            e.preventDefault();
-            switchCategory(e.target.getAttribute('href').slice(1));
-        }
-    });
-
-    if (categoryDropdown) {
-        categoryDropdown.addEventListener('change', (e) => {
-            switchCategory(e.target.value);
-        });
-    }
-
-    categoryDropdown.addEventListener('change', (e) => {
-        switchCategory(e.target.value);
-    });
-
-    [cookingTimeFilter, difficultyFilter, mainIngredientFilter].forEach(filter => {
-        if (filter) {  // Add a null check
-            filter.addEventListener('change', filterAndDisplayRecipes);
-        }
-    });
-    
-    // Add event listeners for our new tag filter elements
-    const tagSearchInput = document.getElementById('tag-filter');
-    const tagSuggestions = document.getElementById('tag-suggestions');
-    const selectedTagsContainer = document.getElementById('selected-tags');
-    
-    if (tagSearchInput) {
-        tagSearchInput.addEventListener('input', handleTagSearch);
-    }
-    if (tagSuggestions) {
-        tagSuggestions.addEventListener('click', handleTagSelection);
-    }
-    if (selectedTagsContainer) {
-        selectedTagsContainer.addEventListener('click', handleTagRemoval);
-    }
-    
-    // Check if the page was reached from the navigation bar
-    if (window.location.hash) {
-        currentCategory = window.location.hash.slice(1);
-    } else {
-        pageTitle.textContent = "Recipes";
-    }
-    // pagination listeners
-    document.getElementById('prev-page').addEventListener('click', () => {
-        goToPage(currentPage - 1);
-    });
-    
-    document.getElementById('next-page').addEventListener('click', () => {
-        goToPage(currentPage + 1);
-    });
-
-    // Initial setup
-    await fetchAllRecipes();
-    populateMainIngredientFilter();
-    populateTagFilter();
-    populateDifficultyFilter();
-    updateActiveTab();
-    updatePageTitle();
-    syncCategoryDropdown();
-    await filterAndDisplayRecipes();
+  // Initialize the page
+  initialize();
 });

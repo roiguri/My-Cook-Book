@@ -135,10 +135,6 @@
 }
 
 /* Styles for the categories search bar */
-.categories-search {
-  margin-bottom: 20px;
-}
-
 .categories-search .search-form {
   border: 1px solid #ccc;
   flex-grow: 1;
@@ -219,6 +215,8 @@
 
 .category-tabs li {
   flex-grow: 1;
+  display: flex;
+  margin-right: 0;
 }
 
 .category-tabs a {
@@ -230,6 +228,7 @@
   text-decoration: none;
   border-radius: 4px;
   transition: background-color 0.3s;
+  flex-grow: 1;
 }
 
 .category-tabs a:hover,.category-tabs a.active {

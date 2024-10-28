@@ -11,6 +11,7 @@
 
   <!-- Icon for Android Chrome -->
   <link rel="manifest" href="/My-Cook-Book/site.webmanifest.json">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   <!-- Icon for iOS -->
   <link rel="apple-touch-icon" sizes="128x128" href="../img/icon/wooden-spoon-16.png">
@@ -21,7 +22,11 @@
 
   <!-- scripts -->
   <script src="sw-register.js"></script>
-  
+
+  <!-- components -->
+  <script src="../lib/filter_modal/filter_modal.js"></script>
+  <script src="../lib/modal/modal.js"></script>
+
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -73,78 +78,47 @@
   <main>
     <h1 id = "category-header">Recipes</h1>
       
-    <div class="search-bar categories-search">
-      <form class = "search-form">
-        <input class = "search-input" type="text" placeholder="Search recipes...">
-        <button class = "search-button">Search</button>
-      </form>
-    </div>
+    <div class="filters-container">
+      <div class="search-bar categories-search">
+        <form class = "search-form">
+          <input class = "search-input" type="text" placeholder="Search recipes...">
+          <button class = "search-button">Search</button>
+        </form>
+      </div>
+      <button id="open-filter-modal" class="filter-button">
+        <i class="fas fa-filter"></i>
+        <span id="filter-badge" class="filter-badge"></span>
+      </button>
       
-    <nav class="category-tabs">
-      <ul>
-        <li><a href="#all" class="active">All</a></li>
-        <li><a href="#appetizers" class="active">Appetizers</a></li>
-        <li><a href="#main-courses">Main Courses</a></li>
-        <li><a href="#side-dishes">Side Dishes</a></li>
-        <li><a href="#soups-stews">Soups & Stews</a></li>
-        <li><a href="#salads">Salads</a></li>
-        <li><a href="#desserts">Desserts</a></li>
-        <li><a href="#breakfast-brunch">Breakfast & Brunch</a></li>
-        <li><a href="#snacks">Snacks</a></li>
-        <li><a href="#beverages">Beverages</a></li>
-      </ul>
-    </nav>
-
-    <div class="category-dropdown">
-      <select id="category-select">
-        <option value="all">All Recipes</option>
-        <option value="appetizers">Appetizers</option>
-        <option value="main-courses">Main Courses</option>
-        <option value="side-dishes">Side Dishes</option>
-        <option value="soups-stews">Soups & Stews</option>
-        <option value="salads">Salads</option>
-        <option value="desserts">Desserts</option>
-        <option value="breakfast-brunch">Breakfast & Brunch</option>
-        <option value="snacks">Snacks</option>
-        <option value="beverages">Beverages</option>
-      </select>
+      <nav class="category-tabs">
+        <ul>
+          <li><a href="#all" class="active">All</a></li>
+          <li><a href="#appetizers" class="active">Appetizers</a></li>
+          <li><a href="#main-courses">Main Courses</a></li>
+          <li><a href="#side-dishes">Side Dishes</a></li>
+          <li><a href="#soups-stews">Soups & Stews</a></li>
+          <li><a href="#salads">Salads</a></li>
+          <li><a href="#desserts">Desserts</a></li>
+          <li><a href="#breakfast-brunch">Breakfast & Brunch</a></li>
+          <li><a href="#snacks">Snacks</a></li>
+          <li><a href="#beverages">Beverages</a></li>
+        </ul>
+      </nav>
+      <div class="category-dropdown">
+        <select id="category-select">
+          <option value="all">All Recipes</option>
+          <option value="appetizers">Appetizers</option>
+          <option value="main-courses">Main Courses</option>
+          <option value="side-dishes">Side Dishes</option>
+          <option value="soups-stews">Soups & Stews</option>
+          <option value="salads">Salads</option>
+          <option value="desserts">Desserts</option>
+          <option value="breakfast-brunch">Breakfast & Brunch</option>
+          <option value="snacks">Snacks</option>
+          <option value="beverages">Beverages</option>
+        </select>
+      </div>
     </div>
-      
-    <section class="filters">
-      <div class="filter-group">
-        <label for="cooking-time">Cooking Time:</label>
-        <select id="cooking-time">
-          <option value="">All</option>
-          <option value="0-30">0-30 minutes</option>
-          <option value="30-60">30-60 minutes</option>
-          <option value="60+">60+ minutes</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="difficulty">Difficulty:</label>
-        <select id="difficulty">
-          <option value="">All</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label for="main-ingredient">Main Ingredient:</label>
-        <select id="main-ingredient">
-          <option value="">All</option>
-          <!-- Options will be populated dynamically -->
-        </select>
-      </div>
-      <div class="filter-group tag-filter">
-        <label for="tag-search"> Tags:</label>
-        <!-- disable password manager -->
-        <input name="disable-pwd-mgr-1" type="password" id="disable-pwd-mgr-1" style="display: none;" value="disable-pwd-mgr-1" />
-        <input name="disable-pwd-mgr-2" type="password" id="disable-pwd-mgr-2" style="display: none;" value="disable-pwd-mgr-2" />
-        <input name="disable-pwd-mgr-3" type="password" id="disable-pwd-mgr-3" style="display: none;" value="disable-pwd-mgr-3" />
-        
-        <input name="tag-filter" type="search" id="tag-filter" placeholder="הקלד לחיפוש תגיות">
-        <div id="tag-suggestions"></div>
-        <div id="selected-tags"></div>
-      </div>
-    </section>
       
     <section class="recipe-grid" id="recipe-grid">
       <!-- Recipe cards will be dynamically added here -->
@@ -161,6 +135,8 @@
     <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
   </footer>
 
+
+  <recipe-filter-component id="recipe-filter"></recipe-filter-component>
   <div id="auth-modal" class="modal">
     <div class="modal-content">
       <!-- modal content will be dynamically inserted here -->
