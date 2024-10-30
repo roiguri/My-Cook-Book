@@ -19,14 +19,17 @@
     }
   </style>
   <!-- component scripts -->
-  <script src="../modal/modal.js"></script>
-  <script src="../missing_image_upload/missing_image_upload.js"></script>
-  <script src="../recipe_preview_modal/recipe_preview_modal.js"></script>
-  <script src="../recipe_form_component/recipe_form_component.js"></script>
-  <script src="../recipe_form_component/propose_recipe_component.js"></script>
-  <script src="../recipe_form_component/edit_recipe_component.js"></script>
-  <script src="../recipe_preview_modal/edit_preview_recipe.js"></script>
-  <script src="../recipe_component/recipe_component.js"></script>
+    <script src="../modal/modal.js"></script>
+    <script src="../missing_image_upload/missing_image_upload.js"></script>
+    <script src="../recipe_preview_modal/recipe_preview_modal.js"></script>
+    <script src="../recipe_form_component/recipe_form_component.js"></script>
+    <script src="../recipe_form_component/propose_recipe_component.js"></script>
+    <script src="../recipe_form_component/edit_recipe_component.js"></script>
+    <script src="../recipe_preview_modal/edit_preview_recipe.js"></script>
+    <script src="../recipe_component/recipe_component.js"></script>
+    <script src="../recipe-card/recipe-card.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   
   <!-- firebase -->
@@ -38,6 +41,17 @@
   <script defer src="../../js/auth.js"></script>
 </head>
 <body>
+
+  
+  
+  <!-- recipe card -->
+  <h3>recipe card</h3>
+  <recipe-card has-more-info-icon recipe-id="4lJ3JBIBrFBJanj9o33p" isCollapsed layout="horizontal" is-collapsible hasMoreInfoIcon></recipe-card>
+  <div style="height: 20px;"></div>
+  <recipe-card has-more-info-icon recipe-id="4lJ3JBIBrFBJanj9o33p" layout="vertical" is-collapsible hasMoreInfoIcon></recipe-card>
+  <div style="height: 20px;"></div>
+
+
   <!-- filter modal -->
   <button id="open-filter-modal">Filter Recipes</button>
   <recipe-filter-component
