@@ -109,27 +109,34 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Display Functions
   async function displayCurrentPageRecipes() {
-      const startIndex = (currentPage - 1) * recipesPerPage;
-      const paginatedRecipes = displayedRecipes.slice(startIndex, startIndex + recipesPerPage);
-      await displayRecipes(paginatedRecipes);
-      updatePagination();
+    const startIndex = (currentPage - 1) * recipesPerPage;
+    const paginatedRecipes = displayedRecipes.slice(startIndex, startIndex + recipesPerPage);
+    await displayRecipes(paginatedRecipes);
+    updatePagination();
   }
 
   async function displayRecipes(recipes) {
-      const recipeCards = await Promise.all(recipes.map(async (recipe) => {
-          const imageUrl = await getImageUrl(recipe);
-          return `
-              <a href="./recipe-page.html?id=${recipe.id}" class="recipe-card-link">
-                  <div class="recipe-card recipe-card-base">
-                      <img src="${imageUrl}" alt="${recipe.name}" onerror="this.src='../img/placeholder.jpg';">
-                      <h3>${recipe.name}</h3>
-                      <p>זמן בישול: ${formatCookingTime(recipe.prepTime + recipe.waitTime)}</p>
-                      <p>רמת קושי: ${recipe.difficulty}</p>
-                  </div>
-              </a>
-          `;
-      }));
-      recipeGrid.innerHTML = recipeCards.join('');
+    // Clear existing recipe cards
+    recipeGrid.innerHTML = '';
+    
+    // Create and append new recipe cards
+    recipes.forEach(recipe => {
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'recipe-card-container';
+        
+        const recipeCard = document.createElement('recipe-card');
+        recipeCard.setAttribute('recipe-id', recipe.id);
+        recipeCard.setAttribute('layout', 'vertical');
+        recipeCard.style.width = '100%';
+        recipeCard.style.height = '100%';
+        
+        recipeCard.addEventListener('recipe-card-open', (event) => {
+            window.location.href = `./recipe-page.html?id=${event.detail.recipeId}`;
+        });
+        
+        cardContainer.appendChild(recipeCard);
+        recipeGrid.appendChild(cardContainer);
+    });
   }
 
   // UI Update Functions

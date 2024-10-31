@@ -64,6 +64,10 @@
 /*------------------------------------*\
     #category-page
 \*------------------------------------*/
+.category-page main {
+  flex-grow: 1;
+}
+
 .category-page h1 {
   text-align: center;
   margin-bottom: 20px;
@@ -123,6 +127,8 @@
   .category-page .filters-container {
     grid-template-columns: 1fr auto; /* Search bar on top, filter and category below */
     grid-template-rows: auto auto; /* Two rows */
+    width: 80%;
+    margin: 0 auto;
   }
 
   .category-page .categories-search {

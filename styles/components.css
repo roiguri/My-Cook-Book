@@ -406,8 +406,16 @@
   direction: rtl;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  gap: 2rem;
   margin-bottom: 20px;
+  width: 80%;
+  margin: 0 auto;
+  justify-content: start;
+}
+
+.recipe-card-container {
+    width: 100%;
+    aspect-ratio: 3/4; /* This maintains a consistent card shape */
 }
 
   .category-page .recipe-card {
