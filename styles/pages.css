@@ -127,7 +127,7 @@
   .category-page .filters-container {
     grid-template-columns: 1fr auto; /* Search bar on top, filter and category below */
     grid-template-rows: auto auto; /* Two rows */
-    width: 80%;
+    width: 70%;
     margin: 0 auto;
   }
 
