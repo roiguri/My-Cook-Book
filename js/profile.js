@@ -1,95 +1,53 @@
 document.addEventListener('DOMContentLoaded', async function() {
   // DOM elements
-  const categoryTabs = document.querySelector('.category-tabs ul');
-  const categoryDropdown = document.getElementById('category-select');
-  const recipeGrid = document.getElementById('recipe-grid');
+  const recipeGrid = document.getElementById('favorite-recipes');
   const filterButton = document.getElementById('open-filter-modal');
   const filterModal = document.getElementById('recipe-filter');
   const pageTitle = document.querySelector('h1');
 
   // State
-  let currentCategory = window.location.hash ? window.location.hash.slice(1) : 'all';
   let currentPage = 1;
   const recipesPerPage = 4;
   let displayedRecipes = [];
 
   // Initial setup
   async function initialize() {
-      await loadInitialRecipes();
-      setupEventListeners();
-      updateActiveTab();
-      updatePageTitle();
-      await displayCurrentPageRecipes();
+      firebase.auth().onAuthStateChanged(async function(user) {
+          if (user) {
+              // User is signed in
+              await loadFavoriteRecipes();
+              setupEventListeners();
+              await displayCurrentPageRecipes(); // Call the function to load favorites
+          } else {
+              // User is signed out
+              // Handle the case where the user is not logged in
+              console.log("User not logged in");
+              // You might want to redirect to the login page or display a message
+          }
+      });
   }
 
-  // Load initial recipes
-  async function loadInitialRecipes() {
-      const query = currentCategory === 'all' 
-          ? db.collection('recipes').where('approved', '==', true)
-          : db.collection('recipes').where('approved', '==', true).where('category', '==', currentCategory);
-          
-      const snapshot = await query.get();
-      displayedRecipes = snapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data() 
-      }));
+  // Load favorite recipes
+  async function loadFavoriteRecipes() {
+      const favoriteRecipes = await fetchFavoriteRecipes();
+      displayedRecipes = favoriteRecipes;
   }
 
   // Event Listeners
   function setupEventListeners() {
-      // Category navigation
-      categoryTabs.addEventListener('click', handleCategoryClick);
-      if (categoryDropdown) {
-          categoryDropdown.addEventListener('change', handleCategoryChange);
-      }
-
       // Pagination
       document.getElementById('prev-page').addEventListener('click', () => goToPage(currentPage - 1));
       document.getElementById('next-page').addEventListener('click', () => goToPage(currentPage + 1));
 
       // Filter modal
       filterButton.addEventListener('click', () => {
-        if (currentCategory !== 'all') {
-          filterModal.setAttribute('category', currentCategory);
-        } else {
-            filterModal.removeAttribute('category');
-        }        filterModal.open();
+        filterModal.open();
       });
 
       // Filter events
       filterModal.addEventListener('filter-applied', handleFilterApplied);
       filterModal.addEventListener('filter-reset', handleFilterReset);
   }
-
-  // Category Handlers
-  async function handleCategoryClick(e) {
-      if (e.target.tagName === 'A') {
-          e.preventDefault();
-          const newCategory = e.target.getAttribute('href').slice(1);
-          await switchCategory(newCategory);
-      }
-  }
-
-  async function handleCategoryChange(e) {
-      await switchCategory(e.target.value);
-  }
-
-  async function switchCategory(category) {
-      currentCategory = category;
-      currentPage = 1;
-      window.location.hash = category;
-      
-      updateActiveTab();
-      updatePageTitle();
-      await loadInitialRecipes();
-      await displayCurrentPageRecipes();
-      
-      // Reset filter modal for new category
-      if (category === 'all') {
-        filterModal.removeAttribute('category');
-      } else {
-          filterModal.setAttribute('category', category);
-      }    }
 
   // Filter Handlers
   async function handleFilterApplied(event) {
@@ -101,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   async function handleFilterReset() {
-      await loadInitialRecipes();
+      await loadFavoriteRecipes();
       currentPage = 1;
       await displayCurrentPageRecipes();
       updateFilterBadge();
@@ -141,26 +99,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   // UI Update Functions
-  function updateActiveTab() {
-      categoryTabs.querySelectorAll('a').forEach(tab => {
-          if (tab.getAttribute('href').slice(1) === currentCategory) {
-              tab.classList.add('active');
-          } else {
-              tab.classList.remove('active');
-          }
-      });
-      if (categoryDropdown) {
-          categoryDropdown.value = currentCategory;
-      }
-  }
-
-  function updatePageTitle() {
-      const categoryName = currentCategory === 'all' 
-          ? 'All Recipes' 
-          : currentCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-      pageTitle.textContent = categoryName;
-  }
-
   function updatePagination() {
       const totalPages = Math.ceil(displayedRecipes.length / recipesPerPage);
       const prevButton = document.getElementById('prev-page');
@@ -200,33 +138,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
 
-  // Utility Functions
-  async function getImageUrl(recipe) {
-      try {
-          let imagePath;
-          if (recipe.pendingImage && recipe.pendingImage.compressed) {
-              imagePath = recipe.pendingImage.compressed;
-          } else {
-              imagePath = `img/recipes/compressed/${recipe.category}/${recipe.image}`;
-          }
-          const imageRef = storage.ref().child(imagePath);
-          return await imageRef.getDownloadURL();
-      } catch (error) {
-          const imagePath = `img/recipes/compressed/place-holder-missing.png`;
-          const imageRef = storage.ref().child(imagePath);
-          return await imageRef.getDownloadURL();
-      }
-  }
-
-  function formatCookingTime(time) {
-      if (time <= 60) return `${time} דקות`;
-      if (time < 120) return `שעה ו-${time%60} דקות`;
-      if (time === 120) return "שעתיים";
-      if (time < 180) return `שעתיים ו-${time%60} דקות`;
-      if (time % 60 === 0) return `${time/60} שעות`;
-      return `${Math.floor(time/60)} שעות ו-${time%60} דקות`;
-  }
-
   function goToPage(page) {
       const totalPages = Math.ceil(displayedRecipes.length / recipesPerPage);
       if (page > 0 && page <= totalPages) {
@@ -239,6 +150,22 @@ document.addEventListener('DOMContentLoaded', async function() {
             behavior: 'smooth'
           });
       }
+  }
+
+  // Fetch favorite recipes from Firestore
+  async function fetchFavoriteRecipes() {
+    const userId = firebase.auth().currentUser.uid; // Assuming you're using Firebase Authentication
+    const userDoc = await firebase.firestore().collection('users').doc(userId).get();
+    const favoriteRecipeIds = userDoc.data().favorites || [];
+    const favoriteRecipes = [];
+    for (const recipeId of favoriteRecipeIds) {
+        const recipeDoc = await firebase.firestore().collection('recipes').doc(recipeId).get();
+        if (recipeDoc.exists) {
+            favoriteRecipes.push({id: recipeId, ...recipeDoc.data()});
+        }
+    }
+    console.log(favoriteRecipes);
+    return favoriteRecipes;
   }
 
   // Initialize the page

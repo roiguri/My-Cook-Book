@@ -1,0 +1,15 @@
+# Ignore .copilotrc file
+.copilotrc
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore build output
+dist/
+build/
+
+# Ignore environment variables
+.env

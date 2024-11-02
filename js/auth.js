@@ -321,6 +321,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check roles and update navigation
     checkUserRoles(user).then(({ isManager, isApproved }) => {
         // Add documents tab for approved users or managers
+        const navMenu = document.querySelector('nav ul');
+        const existingProfileTab = document.querySelector('#profile-tab');
+        if (!existingProfileTab) {
+            const profileTab = document.createElement('li');
+            profileTab.id = 'profile-tab';
+            const profileLink = document.createElement('a');
+            if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+              profileLink.href = './pages/profile.html';
+            } else {
+              profileLink.href = './profile.html';
+            }
+            profileLink.textContent = 'פרופיל';
+            profileTab.appendChild(profileLink);
+            navMenu.appendChild(profileTab);
+        }
         if (isApproved || isManager) {
             const navMenu = document.querySelector('nav ul');
             const existingDocumentsTab = document.querySelector('#documents-tab');
@@ -382,10 +397,6 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
 
     populateUnsignedUserContent();
-
-    // Ensure the dashboard tab is removed for unsigned users
-    updateDashboardTab(false);
-    updateCookbookTab(false);
   }
 
 
