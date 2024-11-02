@@ -27,10 +27,14 @@ document.addEventListener('DOMContentLoaded', async function() {
               window.addEventListener('remove-favorite', async () => {
                 // Update the displayed recipes
                 await loadFavoriteRecipes();
-                await displayCurrentPageRecipes();
-                currentCategory = 'all';
-                updateActiveTab();
-            });
+                // Get the filter component
+                const filterComponent = document.querySelector('recipe-filter-component');
+
+                // Reapply the filter
+                if (filterComponent) {
+                    filterComponent.applyFilters();
+                }
+              });
           } else {
               // User is signed out
               // Handle the case where the user is not logged in
