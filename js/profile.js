@@ -18,6 +18,12 @@ document.addEventListener('DOMContentLoaded', async function() {
               await loadFavoriteRecipes();
               setupEventListeners();
               await displayCurrentPageRecipes(); // Call the function to load favorites
+
+              window.addEventListener('remove-favorite', async () => {
+                // Update the displayed recipes
+                await loadFavoriteRecipes();
+                await displayCurrentPageRecipes();
+            });
           } else {
               // User is signed out
               // Handle the case where the user is not logged in
