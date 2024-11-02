@@ -7,6 +7,13 @@ document.addEventListener('DOMContentLoaded', async function() {
   const filterModal = document.getElementById('recipe-filter');
   const pageTitle = document.querySelector('h1');
 
+  // Repopulate recipes on authentication change
+  firebase.auth().onAuthStateChanged(async (user) => {
+    // Repopulate recipes when the authentication state changes
+    await loadInitialRecipes();
+    await displayCurrentPageRecipes();
+  });
+  
   // State
   let currentCategory = window.location.hash ? window.location.hash.slice(1) : 'all';
   let currentPage = 1;
@@ -118,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   async function displayRecipes(recipes) {
     // Clear existing recipe cards
     recipeGrid.innerHTML = '';
-    
+    const authenticated = firebase.auth().currentUser;
     // Create and append new recipe cards
     recipes.forEach(recipe => {
         const cardContainer = document.createElement('div');
@@ -127,7 +134,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         const recipeCard = document.createElement('recipe-card');
         recipeCard.setAttribute('recipe-id', recipe.id);
         recipeCard.setAttribute('layout', 'vertical');
-        recipeCard.setAttribute('show-favorites', true);
+        if (authenticated) {
+          recipeCard.setAttribute('show-favorites', true);
+        }
         recipeCard.style.width = '100%';
         recipeCard.style.height = '100%';
         
