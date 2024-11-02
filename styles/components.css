@@ -373,66 +373,6 @@
 /*------------------------------------*\
     #recipe-cards
 \*------------------------------------*/    
-/* Base styles for recipe cards */
-.recipe-card-base {
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: transform 0.3s ease;
-  direction: rtl;
-  color: var(--text-color);
-}
-
-  .recipe-card-base:hover {
-    transform: translateY(-5px);
-  }
-
-  .recipe-card-base img {
-    object-fit: cover;
-    border-radius: 5%;
-  }
-
-  .recipe-card-base h3 {
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    margin: 1rem;
-    text-align: center;
-  }
-
-
-/* Styles for recipe cards on categories page */
-.category-page .recipe-grid {
-  direction: rtl;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 2rem;
-  margin-bottom: 20px;
-  width: 80%;
-  margin: 0 auto;
-  justify-content: start;
-}
-
-.recipe-card-container {
-    width: 100%;
-    aspect-ratio: 3/4; /* This maintains a consistent card shape */
-}
-
-  .category-page .recipe-card {
-    padding: 20px;
-    flex-grow: 1;
-  }
-
-  .category-page .recipe-card img {
-    width: 100%;
-    height: 200px;
-  }
-
-  .category-page .recipe-card-link {
-    display: flex;
-  }
-
-
 /* Styles for favorite cards on home page */
 .home-page .favorites-grid {
   display: flex;
