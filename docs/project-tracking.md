@@ -46,8 +46,9 @@
 - Low: combine pending recipes/images with tabs
 
 ### Users
+- High: Update entry point for favorites to be the user avatar.
+- High: Add confirmation before removing a recipe from favorites.
 - High: Add more information for user sign up and add settings/profile page
-- High: Add favorites page for user (and all recipes becomes discover)\
 - High: Make favorites available offline
 - Medium: Upload personal recipes
 - Medium: Enhance form validation and error handling (notice fitting the modal size)
