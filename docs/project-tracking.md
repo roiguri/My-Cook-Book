@@ -86,8 +86,6 @@
 - Medium: save recipe images with recipe ID
 
 ### Recipe specific
-- Creme brule: 8 dishes
-- Add image for נשיקות - improve explanation + 48 dishes
 
 
 ### ✅ Completed
@@ -119,3 +117,5 @@
 - Fix user log in and sign up
 - fix google log in
 - Update filter modal to only show user relevant recipes for user page.
+- Creme brule: 8 dishes
+- Add image for נשיקות - improve explanation + 48 dishes
