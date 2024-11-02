@@ -46,7 +46,6 @@
 - Low: combine pending recipes/images with tabs
 
 ### Users
-- High: Update filter modal to only show user relevant recipes for user page.
 - High: Update entry point for favorites to be the user avatar.
 - High: Add confirmation before removing a recipe from favorites. make sure to reload the recipes before closing the modal/show loafing bar.
 - High: Add more information for user sign up and add settings/profile page
@@ -119,3 +118,4 @@
 - create message and confirmation modal.
 - Fix user log in and sign up
 - fix google log in
+- Update filter modal to only show user relevant recipes for user page.
