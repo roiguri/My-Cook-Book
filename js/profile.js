@@ -4,11 +4,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   const filterButton = document.getElementById('open-filter-modal');
   const filterModal = document.getElementById('recipe-filter');
   const pageTitle = document.querySelector('h1');
+  const categoryTabs = document.querySelector('.category-tabs ul');
+  const categoryDropdown = document.getElementById('category-select');
 
   // State
   let currentPage = 1;
   const recipesPerPage = 4;
   let displayedRecipes = [];
+  let currentCategory = 'all';
 
   // Initial setup
   async function initialize() {
@@ -18,11 +21,15 @@ document.addEventListener('DOMContentLoaded', async function() {
               await loadFavoriteRecipes();
               setupEventListeners();
               await displayCurrentPageRecipes(); // Call the function to load favorites
+              currentCategory = 'all';
+              updateActiveTab();
 
               window.addEventListener('remove-favorite', async () => {
                 // Update the displayed recipes
                 await loadFavoriteRecipes();
                 await displayCurrentPageRecipes();
+                currentCategory = 'all';
+                updateActiveTab();
             });
           } else {
               // User is signed out
@@ -34,9 +41,16 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   // Load favorite recipes
-  async function loadFavoriteRecipes() {
-      const favoriteRecipes = await fetchFavoriteRecipes();
+  async function loadFavoriteRecipes(category = null) {
+    const favoriteRecipes = await fetchFavoriteRecipes();
+    if (category == 'all') {
+      category = null;
+    }
+    if (category) {
+      displayedRecipes = favoriteRecipes.filter(recipe => recipe.category === category);
+    } else {
       displayedRecipes = favoriteRecipes;
+    }
   }
 
   // Event Listeners
@@ -53,6 +67,20 @@ document.addEventListener('DOMContentLoaded', async function() {
       // Filter events
       filterModal.addEventListener('filter-applied', handleFilterApplied);
       filterModal.addEventListener('filter-reset', handleFilterReset);
+
+      categoryTabs.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+          e.preventDefault();
+          const newCategory = e.target.getAttribute('href').slice(1);
+          switchCategory(newCategory);
+        }
+      });
+    
+      if (categoryDropdown) {
+        categoryDropdown.addEventListener('change', (e) => {
+          switchCategory(e.target.value);
+        });
+      }
   }
 
   // Filter Handlers
@@ -102,6 +130,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         cardContainer.appendChild(recipeCard);
         recipeGrid.appendChild(cardContainer);
     });
+  }
+
+  async function switchCategory(category) {
+    currentCategory = category;
+    currentPage = 1;
+    updateActiveTab(); // Assuming you have this function
+    await loadFavoriteRecipes(category); // Load favorites for the category
+    await displayCurrentPageRecipes();
+  }
+
+  function updateActiveTab() {
+    categoryTabs.querySelectorAll('a').forEach(tab => {
+        if (tab.getAttribute('href').slice(1) === currentCategory) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+    if (categoryDropdown) {
+        categoryDropdown.value = currentCategory;
+    }
   }
 
   // UI Update Functions
