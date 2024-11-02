@@ -46,6 +46,7 @@
 - Low: combine pending recipes/images with tabs
 
 ### Users
+- High: Improve loading speed for favorites
 - High: Update entry point for favorites to be the user avatar.
 - High: Add confirmation before removing a recipe from favorites. make sure to reload the recipes before closing the modal/show loafing bar.
 - High: Add more information for user sign up and add settings/profile page
