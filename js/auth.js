@@ -332,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
               profileLink.href = './profile.html';
             }
-            profileLink.textContent = 'פרופיל';
+            profileLink.textContent = 'מועדפים';
             profileTab.appendChild(profileLink);
             navMenu.appendChild(profileTab);
         }
