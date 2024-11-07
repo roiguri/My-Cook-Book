@@ -24,6 +24,8 @@
   --size-header2-mobile: 1.2rem;
   --size-body-mobile: 0.9rem;
   --size-icon-mobile: 1.0rem;
+
+  --background: url('../img/background/stone-counter-top.jpg');
 }
 
 
@@ -45,7 +47,7 @@ body {
   line-height: 1.6;
   margin: 0;
   padding: 0;
-  background: url('../img/background/stone-counter-top.jpg') repeat center center;
+  background: var(--background) repeat center center;
   background-size: cover;
 
   display: flex;
