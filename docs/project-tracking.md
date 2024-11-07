@@ -3,9 +3,10 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
+- Fix authentication
+- Library component
+- Change website theme colors
 - New Feature: Automation of propose a recipe
-- Personal component library
-- Focus on users
 - Simple tweeks
 
 ### ⏸️ On Hold

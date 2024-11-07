@@ -1,71 +1,53 @@
 our-kitchen-chronicles/
 │
+├── .vscode/
+│   └── settings.json
+├── config/
+│   └── firebase-config.js
+├── docs/
+│   ├── directory-structure.md
+│   ├── project-tracking.md
+│   └── site-plan.md
+├── img/
+│   ├── background/
+│   ├── category-jars/
+│   └── icon/
 ├── index.html
-├── site.webmanifest.json
-├── README.md
-├── pages/
-│   ├── categories.html
-│   ├── propose-recipe.html
-│   └── recipe-page.html
-│
-├── css/
-│   ├── base.css
-│   ├── components.css
-│   ├── layout.css
-│   ├── main.css
-│   ├── pages.css
-│   └── responsive.css
-│
 ├── js/
 │   ├── auth.js
 │   ├── category.js
+│   ├── documents.js
 │   ├── featured-recipes.js
+│   ├── manager-dashboard.js
 │   ├── navigation-script.js
-│   ├── propose-recipe.js
+│   ├── profile.js
 │   └── recipe-script.js
-│
-├── img/
-│   ├── background/
-│   │   ├── stone-counter-top.jpg
-│   │   └── wood-texture.jpg
-│   ├── category-jars/
-│   │   └── optimized/
-│   │       ├── appetizers.jpg
-│   │       ├── main-course.webp
-│   │       └── ...
-│   ├── recipes/
-│   │   ├── full/
-│   │   │   ├── main-courses/
-│   │   │   │   ├── bolognese.jpg
-│   │   │   │   ├── stir-fried-noodles-with-salmon.jpg
-│   │   │   │   └── ...
-│   │   │   ├── desserts/
-│   │   │   │   ├── brownies.jpg
-│   │   │   │   └── ...
-│   │   │   └── ...
-│   │   └── compressed/
-│   │       ├── main-courses/
-│   │       │   ├── bolognese.jpg
-│   │       │   ├── stir-fried-noodles-with-salmon.jpg
-│   │       │   └── ...
-│   │       ├── desserts/
-│   │       │   ├── brownies.jpg
-│   │       │   └── ...
-│   │       └── ...
-│   └── icon/
-│       ├── wooden-spoon-16.png
+├── lib/
+│   ├── =Component-Gallery=/
+│   ├── confirmation_modal/
+│   ├── filter_modal/
+│   ├── image_approval/
+│   └── ...
+├── pages/
+│   ├── categories.html
+│   ├── documents.html
+│   ├── manager-dashboard.html
+│   ├── profile.html
+│   ├── propose-recipe.html
+│   └── recipe-page.html
+├── README.md
+├── service-worker.js
+├── site.webmanifest.json
+├── sw-register.js
+├── styles/
+│   ├── base.css
+│   ├── main.css
+│   ├── pages.css
+│   ├── components
+│   │   ├── auth.css
+│   │   ├── base_button.css
+│   │   └── ...
+│   └── pages
+│       ├── categories.css
+│       ├── documents.css
 │       └── ...
-│
-├── fonts/
-│   └── (any custom fonts if used)
-│
-└── docs/
-│   ├── add-recipe-manual.md
-│   ├── coding-standards.md
-│   ├── directory-structure.md
-│   ├── project-tracking.md
-│   ├── site-plan.md
-│   └── style-guide.md
-│
-└── config/
-│   └── firebase-config.js
