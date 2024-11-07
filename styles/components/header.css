@@ -150,13 +150,13 @@ header {
                     }
                     
                     header .search-button .icon-search {
-                      color: white;
+                      color: var(--button-color);
                       font-size: var(--size-icon);
                     }
 
                     /* Styles for the search input */
                     header .search-input {
-                      background: white;
+                      background: var(--button-color);
                       border: none;
                       font-family: var(--body-font);
                       font-size: var(--size-body);
@@ -195,7 +195,7 @@ header {
                   padding: 0;
                   border: none;
                   background-color: var(--primary-color);
-                  color: white;
+                  color: var(--button-color);
                   cursor: pointer;
 
                   /* Set precise dimensions */

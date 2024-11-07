@@ -28,13 +28,13 @@
 
                 .category-page .categories-search .search-button {
                   background-color: var(--submenu-color);
-                  color: white;
+                  color: var(--button-color);
                   border-radius: 0 4px 4px 0;
                   font-size: var(--size-body);
                 }
 
             .category-page .filter-button {
-              background-color: white; /* Example background color */
+              background-color: var(--button-color); /* Example background color */
               color: black;            /* Text color */
               border: none;             /* Remove default border */
               padding: 10px 15px;      /* Adjust padding as needed */
@@ -53,7 +53,6 @@
                   top: -8px;
                   right: -8px;
                   background-color: var(--primary-color);
-                  color: white;
                   border-radius: 50%;
                   padding: 2px 6px;
                   width: 10px;
@@ -84,7 +83,7 @@
                           display: block;
                           padding: 10px;
                           text-align: center;
-                          background-color: white;
+                          background-color: var(--tabs-color);
                           color: var(--text-color);
                           text-decoration: none;
                           border-radius: 4px;
@@ -95,7 +94,7 @@
                         .category-page .category-tabs a:hover,
                         .category-page .category-tabs a.active {
                           background-color: var(--submenu-color);
-                          color: white;
+                          color: var(--button-color);
                         }
 
             .category-page .category-dropdown {
@@ -111,7 +110,7 @@
                   border: 1px solid #ccc;
                   border-radius: 4px;
                   appearance: none;
-                  background-color: #fff;
+                  background-color: var(--tabs-color);
                   background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
                   background-repeat: no-repeat;
                   background-position: right 10px top 50%;
@@ -142,7 +141,7 @@
 
         .category-page .pagination button {
           background-color: var(--primary-color);
-          color: white;
+          color: var(--button-color);
           border: none;
           padding: 10px 15px;
           margin: 0 5px;
@@ -153,8 +152,8 @@
 
             .category-page .pagination button:hover,
             .category-page .pagination button.active {
-              background-color: var(--submenu-color);
-              color: white;
+              background-color: var(--primary-hover);
+              color: var(--button-color);
             }
           
             .category-page .pagination button:disabled {

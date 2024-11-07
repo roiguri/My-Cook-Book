@@ -2,17 +2,21 @@
     #CSS-Variables
 \*------------------------------------*/
 :root {
+  /* fonts */
   --heading-font: 'Amatic SC', cursive;
   --body-font: 'Lora', serif;
   --nav-font: 'Source Sans Pro', sans-serif;
+  /* colors */
   --primary-color: #bb6016;
   --primary-hover: #5c4033;
   --secondary-color: #e6dfd1;
   --secondary-hover: #d1c5b8;
   --text-color: #3a3a3a;
+  --button-color: white;
   --background-color: #f5f2e9;
   --submenu-color: #4CAF50;
   --disabled-color: #cccccc;
+  --tabs-color: white;
   /* sizes */
   --size-xxl: 4.5rem;
   --size-header1: 3rem;

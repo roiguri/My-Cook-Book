@@ -2,7 +2,7 @@
   display: block;
   padding: 12px;
   background-color: var(--primary-color);
-  color: white;
+  color: var(--button-color);
   border: none;
   border-radius: 5px;
   font-family: var(--body-font);

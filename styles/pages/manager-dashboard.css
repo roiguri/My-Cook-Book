@@ -85,7 +85,7 @@
 /* Button Styles */
 .manager-dashboard button {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--button-color);
   border: none;
   padding: 8px 12px;
   border-radius: 4px;
