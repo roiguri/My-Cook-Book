@@ -1,11 +1,15 @@
 /* Styles for the header container */
+:root {
+  --header-background: url('../../img/background/wood-texture.jpg') repeat-x;
+}
+
 header {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: url('../../img/background/wood-texture.jpg') repeat-x;
+  background: var(--header-background);
   background-size: auto 100%;
   border-bottom: 3px solid var(--primary-color);
   gap: 0.5rem;
