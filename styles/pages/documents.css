@@ -11,6 +11,7 @@
 .documents h1 {
   color: var(--primary-color);
   margin-bottom: 0.5rem;
+  
 }
 
 @media (max-width: 768px) {
