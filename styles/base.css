@@ -8,6 +8,7 @@
   --primary-color: #bb6016;
   --primary-hover: #5c4033;
   --secondary-color: #e6dfd1;
+  --secondary-hover: #d1c5b8;
   --text-color: #3a3a3a;
   --background-color: #f5f2e9;
   --submenu-color: #4CAF50;
@@ -67,4 +68,5 @@ main {
 
   max-width: 1200px;
   margin: 2rem auto;
+  padding: 0 1rem;
 }

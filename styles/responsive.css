@@ -2,53 +2,6 @@
     #mobile-size
 \*------------------------------------*/
 @media (max-width: 768px) {
-  /* page specific - category-page */
-  .category-page main {
-    min-width: 200px;
-  }
-  .category-page .category-tabs ul {
-    flex-direction: column;
-    display: none;
-  }
-
-  .category-page .category-dropdown {
-    display: block;
-  }
-
-  .category-page .filters {
-    flex-direction: column;
-  }
-
-  .category-page .filter-group {
-    width: 100%;
-  }
-
-  .category-page .recipe-grid {
-    width: 80%;
-  }
-
-  .category-page .filters-container {
-    grid-template-columns: 1fr auto; 
-    grid-template-rows: auto auto; 
-    width: 80%;
-    min-width: 200px;
-    margin: 0 auto;
-  }
-
-  .category-page .categories-search {
-    order: 1;
-    grid-column: span 2;
-  }
-  
-  .category-page .filter-button {
-    order: 3;
-    margin-bottom: 20px;
-  }
-
-  .category-page .category-dropdown {
-    order: 2;  
-  }
-
   /* recipe page */
   .recipe-page .recipe-container{
     padding: 30px;
