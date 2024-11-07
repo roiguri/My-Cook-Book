@@ -20,6 +20,7 @@
   height: 100%;
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
+  min-width: 0;
 }
 
 .search-button {
