@@ -24,28 +24,6 @@
   .recipe-details, .recipe-image-container {
     width: 100%;
   }
-  
-
-  /* propose-recipe */
-  .propose-recipe .form-row {
-    flex-direction: column;
-  }
-
-  .propose-recipe .form-group {
-    width: 100%;
-  }
-
-  .propose-recipe-hero h1 {
-    font-size: 2.5rem;
-  }
-
-  .propose-recipe-hero p {
-    font-size: 1rem;
-  }
-
-  .propose-recipe-form h2 {
-    font-size: 2rem;
-  }
 
   /* documents */
   .documents .documents-container {
