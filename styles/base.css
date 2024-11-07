@@ -13,6 +13,7 @@
   --submenu-color: #4CAF50;
   --disabled-color: #cccccc;
   /* sizes */
+  --size-xxl: 4.5rem;
   --size-header1: 3rem;
   --size-body: 1rem;
   --size-icon: 1.2rem;
@@ -62,4 +63,7 @@ a {
 
 main {
   flex-grow: 1;
+
+  max-width: 1200px;
+  margin: 2rem auto;
 }

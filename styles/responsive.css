@@ -2,40 +2,6 @@
     #mobile-size
 \*------------------------------------*/
 @media (max-width: 768px) {
-  .category-jar {
-    width: 90px;
-  }
-
-    .jar-img {
-      height: 120px;
-    }
-
-  /* page specific - home-page */ 
-  .home-page .hero,
-  .home-page .quick-links h2 {
-    display: none;
-  }
-
-
-  .home-page .featured-recipes h2, .home-page .quick-links h2 {
-    font-size: 2.5rem;
-  }
-
-  .home-page .category-jars {
-    gap: 40px;
-    margin: 4rem auto;
-  }
-
-  .home-page .category-jars span {
-    white-space: nowrap;
-    display: flex;
-    justify-content: center;
-  }
-
-  .home-page main {
-    margin: 0 auto;
-  }
-
   /* page specific - category-page */
   .category-page main {
     min-width: 200px;
