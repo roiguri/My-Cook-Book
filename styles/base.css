@@ -12,6 +12,14 @@
   --background-color: #f5f2e9;
   --submenu-color: #4CAF50;
   --disabled-color: #cccccc;
+  /* sizes */
+  --size-header1: 3rem;
+  --size-body: 1rem;
+  --size-icon: 1.2rem;
+
+  --size-header1-mobile: 2.5rem;
+  --size-body-mobile: 0.9rem;
+  --size-icon-mobile: 1.0rem;
 }
 
 
@@ -50,4 +58,8 @@ h1, h2, h3 {
 a {
   color: var(--primary-color);
   text-decoration: none;
+}
+
+main {
+  flex-grow: 1;
 }
