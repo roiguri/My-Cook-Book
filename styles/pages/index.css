@@ -87,20 +87,6 @@
           justify-content: center;
         }
 
-    /* Styles for the quote section */
-    .home-page .quote-section {
-      background-color: var(--secondary-color);
-      padding: 2rem;
-      text-align: center;
-      font-style: italic;
-      margin-top: 2rem;
-    }
-
-        .home-page .quote-section blockquote {
-          font-size: var(--size-header2);
-          margin-bottom: 1rem;
-        }
-
 /*------------------------------------*\
     #mobile-size
 \*------------------------------------*/

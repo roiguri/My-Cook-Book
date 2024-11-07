@@ -1,0 +1,19 @@
+/* Styles for the quote section */
+.quote-section {
+  background-color: var(--secondary-color);
+  padding: 2rem;
+  text-align: center;
+  font-style: italic;
+  margin-top: 2rem;
+}
+
+    .quote-section blockquote {
+      font-size: var(--size-header2);
+      margin-bottom: 1rem;
+    }
+
+@media (max-width: 768px) {
+  .quote-section blockquote {
+    font-size: var(--size-header2-mobile);
+  }
+}

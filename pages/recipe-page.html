@@ -17,7 +17,7 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="../styles/main.css">
-  <link rel="stylesheet" href="../styles/pages/temporary-recipe.css">
+  <link rel="stylesheet" href="../styles/pages/recipe_page.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
   <!-- scripts -->
@@ -32,7 +32,7 @@
   <script defer src="../js/auth.js"></script>
 </head>
 <body class = "recipe-page">
-  <div class="header-container">
+  <header class="header-container">
     <div class="menu-title-container">
       <button class="nav-toggle" aria-label="Toggle navigation">
         <span class="hamburger"></span>
@@ -69,56 +69,11 @@
         </div>
       </div>
     </div>  
-  </div>
+  </header>
 
-  <main class="recipe-container">
-    <h1 id="recipe-name" class="recipe-title"></h1>
-      
-    <div class="recipe-meta">
-      <span id="prep-time" class="prep-time"></span>
-      <span id="wait-time" class="wait-time"></span>
-      <span id="recipe-difficulty" class="recipe-difficulty"></span>
-      <span id="recipe-category" class="recipe-category"></span>
-    </div>
-
-    <div class="recipe-content">
-      <div class="recipe-details">
-        <div class="serving-adjuster">
-          <!-- disable password manager -->
-          <input name="disable-pwd-mgr-1" type="password" id="disable-pwd-mgr-1" style="display: none;" value="disable-pwd-mgr-1" />
-          <input name="disable-pwd-mgr-2" type="password" id="disable-pwd-mgr-2" style="display: none;" value="disable-pwd-mgr-2" />
-          <input name="disable-pwd-mgr-3" type="password" id="disable-pwd-mgr-3" style="display: none;" value="disable-pwd-mgr-3" />
-          
-          <label for="servings">מספר מנות:</label>
-          <input type="number" id="servings" name="servings" value="4" min="1" max="20">
-        </div>
-
-        <h2>מצרכים:</h2>
-        <ul id="ingredients-list" class="ingredients-list">
-          <!-- Ingredients will be populated here -->
-        </ul>
-      </div>
-
-      <div class="recipe-image-container">
-        <img id="recipe-image" src="" alt="" class="recipe-image">
-      </div>
-    </div>
-
-    <div class="recipe-instructions">
-      <h2>הוראות הכנה:</h2>
-      <ol id="instructions-list">
-        <!-- Instructions will be populated here -->
-      </ol>
-    </div>
-
-    <div class="recipe-comments">
-      <h2>הערות:</h2>
-      <ol id="comments-list">
-        <!-- Instructions will be populated here -->
-      </ol>
-    </div>
-
-    <button id="print-recipe" class="base-button print-button">הדפס מתכון</button>
+  <main class="recipe-container" role="main">
+    <!-- recipe component will be dynamically inserted here -->
+    <!-- TODO - add print/share button -->
   </main>
 
   <footer>
@@ -139,5 +94,6 @@
   <missing-image-upload></missing-image-upload>
   <script src="../lib/missing_image_upload/missing_image_upload.js"></script>
   <script src="../lib/modal/modal.js"></script>
+  <script src="../lib/recipe_component/recipe_component.js"></script>
 </body>
 </html>
