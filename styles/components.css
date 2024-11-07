@@ -1,138 +1,8 @@
-
-/*------------------------------------*\
-    #site-logo
-\*------------------------------------*/
-.logo {
-  font-family: var(--heading-font);
-  font-weight: bolder;
-  font-size: 3rem;
-  color: var(--background-color);
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-
-
-
-
-/*------------------------------------*\
-    #hamburger-Menu
-\*------------------------------------*/ 
-.nav-toggle {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-}
-
-.hamburger {
-  display: block;
-  width: 30px;
-  height: 3px;
-  background-color: var(--background-color);
-  position: relative;
-  transition: background-color 0.3s;
-}
-
-.hamburger::before,
-.hamburger::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: var(--background-color);
-  transition: transform 0.3s;
-}
-
-.hamburger::before {
-  transform: translateY(-8px);
-}
-
-.hamburger::after {
-  transform: translateY(8px);
-}
-
-/* Animation for hamburger menu */
-.nav-toggle.active .hamburger {
-  background-color: transparent;
-}
-
-.nav-toggle.active .hamburger::before {
-  transform: rotate(45deg);
-}
-
-.nav-toggle.active .hamburger::after {
-  transform: rotate(-45deg);
-}
-
-
-
-
-
+/* TODO - check if needs to be removed */
 /*------------------------------------*\
     #search-bar
 \*------------------------------------*/
-.search-bar {
 
-  align-items: center;
-}
-
-.search-form {
-  display: flex;
-  align-items: center;
-  border-radius: 5px;
-  overflow: hidden;
-  height: 40px;
-}
-
-.search-input {
-  border: none;
-  font-family: var(--body-font);
-  font-size: 1rem;
-  padding: 0 10px;
-  flex-grow: 1;
-  outline: none;
-  height: 100%;
-}
-
-.search-button {
-  border: none;
-  cursor: pointer;
-  padding: 0 15px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Styles for the header search bar */
-.header-search .search-form {
-  border: 2px solid var(--primary-color);
-  background-color: var(--primary-color);
-  transition: background-color 0.3s
-}
-
-.header-search .search-input {
-  background: white;
-}
-
-.header-search .search-button {
-  background: var(--primary-color);
-}
-
-.header-search .search-form:hover {
-  background-color: var(--primary-hover);
-  border: 2px solid var(--primary-hover);
-}
-
-.header-search .search-form:hover .search-button {
-  background-color:  var(--primary-hover);
-}
-
-.header-search .search-button .icon-search {
-  color: #fff;
-  font-size: 1.2rem;
-}
 
 /* Styles for the categories search bar */
 .categories-search .search-form {
@@ -472,25 +342,6 @@ select {
   }
 
 /* buttons */ 
-.base-button {
-  display: block;
-  padding: 12px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-family: var(--body-font);
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-bottom: 10px;
-}
-
-  .base-button:hover {
-    background-color: var(--primary-hover);
-  }
-
   /* print button */
   .print-button {
       margin: 40px auto;
@@ -500,40 +351,6 @@ select {
   .submit-button {
     width: 100%;
   }
-
-  /* auth button */
-  .auth-button {
-    /* Reset any inherited styles that might be causing issues */
-    margin: 0;
-    padding: 0;
-    border: none;
-    background-color: var(--primary-color);
-    color: white;
-    cursor: pointer;
-
-    /* Set precise dimensions */
-    width: 40px;
-    height: 44px;
-
-    /* Center the icon */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    /* Ensure the button doesn't grow or shrink */
-    flex: 0 0 auto;
-
-    /* Match border-radius with design */
-    border-radius: 5px;
-  }
-
-    .auth-button svg {
-      width: 24px;
-      height: 24px;
-    }
-
-
-/* form specific */
 
 
 
@@ -636,7 +453,7 @@ select {
 
 
 
-
+/* TODO - extract to component */
 /*------------------------------------*\
     #avatar
 \*------------------------------------*/
@@ -656,7 +473,7 @@ select {
 
 
 
-
+/* TODO - extract to component */
 /*------------------------------------*\
     #sign-up-modal
 \*------------------------------------*/
