@@ -47,11 +47,20 @@
 - Low: combine pending recipes/images with tabs
 
 ### Users
+- High: Show avatar for signed users when modal openes.
+- HIgh: add name and email for the user doc.
 - High: Improve loading speed for favorites
 - High: Update entry point for favorites to be the user avatar.
 - High: Add confirmation before removing a recipe from favorites. make sure to reload the recipes before closing the modal/show loafing bar.
-- High: Add more information for user sign up and add settings/profile page
 - High: Make favorites available offline
+- High: Email Verification: 
+  * Add verification step after signup
+  * Email verification status check
+  * Resend verification email option
+- High: Proper Password Reset Flow:
+  * Handle reset password link
+  * Password reset page
+  * Success/error notifications
 - Medium: Upload personal recipes
 - Medium: Enhance form validation and error handling (notice fitting the modal size)
 - Medium: Check email verification
