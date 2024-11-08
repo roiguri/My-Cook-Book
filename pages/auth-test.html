@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auth Controller Test</title>
+    <title>Auth System Test</title>
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -12,73 +13,61 @@
     <!-- Your Firebase config -->
     <script src="../../config/firebase-config.js"></script>
     
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="../../styles/base.css">
+    
     <!-- Components -->
     <script src="../lib/modal/modal.js"></script>
     <script src="../lib/auth/auth-controller.js"></script>
+    <script src="../lib/auth/components/auth-content.js"></script>
+    <script src="../lib/auth/components/login-form.js"></script>
+    <script src="../lib/auth/components/signup-form.js"></script>
+    <script src="../lib/auth/components/forgot-password.js"></script>
 
     <style>
-        .status-box {
-            margin: 20px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
         .test-buttons {
             margin: 20px;
             display: flex;
             gap: 10px;
         }
-        button {
-            padding: 10px;
-            cursor: pointer;
-        }
         #authStatus {
             white-space: pre-wrap;
+            text-align: left;
+            margin: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="status-box">
-        <h3>Auth Status:</h3>
-        <pre id="authStatus">Not initialized</pre>
-    </div>
-
+    <!-- Test Controls -->
     <div class="test-buttons">
         <button id="openModal">Open Auth Modal</button>
-        <button id="testGoogleSignIn">Test Google Sign In</button>
-        <button id="testSignOut">Test Sign Out</button>
+        <button id="testSignOut">Sign Out</button>
     </div>
 
-    <auth-controller id="authController"></auth-controller>
+    <pre id="authStatus">Not initialized</pre>
+
+    <auth-controller id="authController">
+        <auth-content>
+            <!-- Class 'active' controls initial visibility -->
+            <login-form slot="login-form" class="active"></login-form>
+            <signup-form slot="signup-form"></signup-form>
+            <forgot-password slot="forgot-password"></forgot-password>
+        </auth-content>
+    </auth-controller>
 
     <script>
-        // Get elements
         const authController = document.getElementById('authController');
-        const authStatus = document.getElementById('authStatus');
         const openModalBtn = document.getElementById('openModal');
-        const googleSignInBtn = document.getElementById('testGoogleSignIn');
         const signOutBtn = document.getElementById('testSignOut');
-
-        // Update status display
-        function updateStatus(event) {
-            const detail = event.detail;
-            authStatus.textContent = JSON.stringify(detail, null, 2);
-        }
-
-        // Event listeners
-        authController.addEventListener('auth-state-changed', updateStatus);
+        const authContent = document.querySelector('auth-content');
+        const loginForm = document.querySelector('login-form');
+        const signupForm = document.querySelector('signup-form');
+        const forgotPasswordForm = document.querySelector('forgot-password');
+        const authStatus = document.getElementById('authStatus');
         
+        // Event listeners for test buttons
         openModalBtn.addEventListener('click', () => {
             authController.openModal();
-        });
-
-        googleSignInBtn.addEventListener('click', async () => {
-            try {
-                await authController.handleGoogleSignIn();
-            } catch (error) {
-                console.error('Google sign in error:', error);
-                authStatus.textContent = `Error: ${error.message}`;
-            }
         });
 
         signOutBtn.addEventListener('click', async () => {
@@ -86,8 +75,54 @@
                 await authController.handleLogout();
             } catch (error) {
                 console.error('Sign out error:', error);
-                authStatus.textContent = `Error: ${error.message}`;
             }
+        });
+
+        // Listen for auth state changes
+        authController.addEventListener('auth-state-changed', (event) => {
+            authStatus.textContent = JSON.stringify(event.detail, null, 2);
+        });
+
+        // Listen for forgot password request
+        loginForm.addEventListener('switch-to-forgot-password', (event) => {
+            // Hide all forms
+            loginForm.classList.remove('active');
+            signupForm.classList.remove('active');
+            // Show forgot password form
+            forgotPasswordForm.classList.add('active');
+            
+            // If email was provided, pre-fill it
+            if (event.detail?.email) {
+                const emailInput = forgotPasswordForm.shadowRoot.querySelector('#email');
+                if (emailInput) {
+                    emailInput.value = event.detail.email;
+                }
+            }
+        });
+
+        // Listen for back to login request
+        forgotPasswordForm.addEventListener('back-to-login', () => {
+            // Hide all forms
+            forgotPasswordForm.classList.remove('active');
+            signupForm.classList.remove('active');
+            // Show login form
+            loginForm.classList.add('active');
+            // Reset forgot password form
+            forgotPasswordForm.reset();
+        });
+
+        // Clear forms when modal closes
+        const modal = authController.shadowRoot.querySelector('custom-modal');
+        modal.addEventListener('modal-closed', () => {
+            setTimeout(() => {
+                loginForm.reset();
+                signupForm.reset();
+                forgotPasswordForm.reset();
+                // Return to login form
+                loginForm.classList.add('active');
+                signupForm.classList.remove('active');
+                forgotPasswordForm.classList.remove('active');
+            }, 300); // Wait for close animation
         });
     </script>
 </body>
