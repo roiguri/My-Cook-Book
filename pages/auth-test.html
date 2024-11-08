@@ -25,44 +25,72 @@
     <script src="../lib/auth/components/signup-form.js"></script>
     <script src="../lib/auth/components/forgot-password.js"></script>
     <script src="../lib/auth/components/user-profile.js"></script>
+    <script src="../lib/auth/components/auth-avatar.js"></script>
 
     <style>
-        .test-buttons {
-            margin: 20px;
+        /* Simulate header styling */
+        .header {
+            background-color: var(--nav-background-color, #C4915D);
+            padding: 1rem 2rem;
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
         }
-        #authStatus {
-            white-space: pre-wrap;
-            text-align: left;
-            margin: 20px;
-        }
-        /* Test header avatar style */
-        #headerAvatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: var(--primary-color);
+
+        .logo {
             color: white;
+            font-family: var(--heading-font);
+            font-size: 1.5rem;
+        }
+
+        .auth-section {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
+            gap: 1rem;
+        }
+
+        /* Debug section */
+        .debug-section {
+            margin: 2rem;
+            padding: 1rem;
+            border: 1px solid var(--secondary-color);
+            border-radius: 5px;
+        }
+
+        .debug-section h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+
+        #authStatus {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        .flow-test {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--secondary-color);
         }
     </style>
 </head>
 <body>
-    <!-- Test Controls -->
-    <div class="test-buttons">
-        <button id="openModal">Open Auth Modal</button>
-        <button id="testSignOut">Sign Out</button>
-        <div id="headerAvatar"></div>
-    </div>
+    <!-- Simulated Header -->
+    <header class="header">
+        <div class="logo">Our Kitchen Chronicles</div>
+        <div class="auth-section">
+            <auth-avatar></auth-avatar>
+        </div>
+    </header>
 
-    <pre id="authStatus">Not initialized</pre>
-
-    <auth-controller id="authController">
+    <!-- Auth Components -->
+    <auth-controller>
         <auth-content>
             <login-form slot="login-form" class="active"></login-form>
             <signup-form slot="signup-form"></signup-form>
@@ -71,95 +99,43 @@
         </auth-content>
     </auth-controller>
 
-    <script>
-        const authController = document.getElementById('authController');
-        const openModalBtn = document.getElementById('openModal');
-        const signOutBtn = document.getElementById('testSignOut');
-        const headerAvatar = document.getElementById('headerAvatar');
-        const authContent = document.querySelector('auth-content');
-        const loginForm = document.querySelector('login-form');
-        const signupForm = document.querySelector('signup-form');
-        const forgotPasswordForm = document.querySelector('forgot-password');
-        const userProfile = document.querySelector('user-profile');
-        const authStatus = document.getElementById('authStatus');
+    <!-- Debug Section -->
+    <div class="debug-section">
+        <h3>Auth Status:</h3>
+        <pre id="authStatus">Initializing...</pre>
         
-        // Test button handlers
-        openModalBtn.addEventListener('click', () => {
-            authController.openModal();
-        });
+        <div class="flow-test">
+            <h3>Test Flows:</h3>
+            <ol>
+                <li>Click avatar → Should open login form</li>
+                <li>Try login → Should close modal and update avatar</li>
+                <li>Click avatar again → Should show profile</li>
+                <li>Sign out and try signup → Should show profile after signup</li>
+                <li>Try forgot password → Should show reset form</li>
+            </ol>
+        </div>
+    </div>
 
-        signOutBtn.addEventListener('click', async () => {
-            try {
-                await authController.handleLogout();
-            } catch (error) {
-                console.error('Sign out error:', error);
-            }
-        });
+    <script>
+        // Debug helpers
+        function updateStatus(detail) {
+            const authStatus = document.getElementById('authStatus');
+            authStatus.textContent = JSON.stringify(detail, null, 2);
+        }
 
-        // Header avatar click handler
-        headerAvatar.addEventListener('click', () => {
-            const authContent = document.querySelector('auth-content');
-            authContent.showUserProfile();
-            authController.openModal();
-        });
-
-        // Auth state change handler
+        // Event listeners
+        const authController = document.querySelector('auth-controller');
         authController.addEventListener('auth-state-changed', (event) => {
-            const { user, isAuthenticated } = event.detail;
-            authStatus.textContent = JSON.stringify(event.detail, null, 2);
-
-            // Update header avatar
-            if (isAuthenticated && user) {
-                if (user.photoURL) {
-                    headerAvatar.innerHTML = `<img src="${user.photoURL}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 5px;">`;
-                } else {
-                    headerAvatar.innerHTML = user.email[0].toUpperCase();
-                }
-                headerAvatar.style.display = 'flex';
-            } else {
-                headerAvatar.style.display = 'none';
-            }
+            updateStatus(event.detail);
         });
 
-        // Handle forgot password flow
-        loginForm.addEventListener('switch-to-forgot-password', (event) => {
-            loginForm.classList.remove('active');
-            signupForm.classList.remove('active');
-            userProfile.classList.remove('active');
-            forgotPasswordForm.classList.add('active');
-            
-            if (event.detail?.email) {
-                const emailInput = forgotPasswordForm.shadowRoot.querySelector('#email');
-                if (emailInput) {
-                    emailInput.value = event.detail.email;
-                }
-            }
+        // Log all important events for debugging
+        document.addEventListener('signup-success', () => {
+            console.log('Signup success event received');
         });
 
-        // Handle back to login
-        forgotPasswordForm.addEventListener('back-to-login', () => {
-            forgotPasswordForm.classList.remove('active');
-            signupForm.classList.remove('active');
-            userProfile.classList.remove('active');
-            loginForm.classList.add('active');
-            forgotPasswordForm.reset();
-        });
-
-        // Clear forms when modal closes
-        const modal = authController.shadowRoot.querySelector('custom-modal');
-        modal.addEventListener('modal-closed', () => {
-            setTimeout(() => {
-                loginForm.reset();
-                signupForm.reset();
-                forgotPasswordForm.reset();
-                // Return to login form if not authenticated
-                if (!authController.isAuthenticated) {
-                    loginForm.classList.add('active');
-                    signupForm.classList.remove('active');
-                    forgotPasswordForm.classList.remove('active');
-                    userProfile.classList.remove('active');
-                }
-            }, 300);
+        document.addEventListener('profile-updated', () => {
+            console.log('Profile updated event received');
         });
     </script>
 </body>
