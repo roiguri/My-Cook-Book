@@ -4,8 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Our Kitchen Chronicles</title>
+    <!-- Favicon for browsers -->
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/icon/wooden-spoon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../img/icon/wooden-spoon-16.png">
+
+    <!-- Icon for Android Chrome -->
+    <link rel="manifest" href="/My-Cook-Book/site.webmanifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Icon for iOS -->
+    <link rel="apple-touch-icon" sizes="128x128" href="../img/icon/wooden-spoon-16.png">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="../styles/main.css">
     <link rel="stylesheet" href="../styles/pages/manager-dashboard.css">
+
+    <!-- scripts -->
+    <script src="../sw-register.js"></script>
+
+    <!-- Auth Components -->
+    <script src="../lib/auth/auth-controller.js"></script>
+    <script src="../lib/auth/components/auth-content.js"></script>
+    <script src="../lib/auth/components/auth-avatar.js"></script>
+    <script src="../lib/auth/components/login-form.js"></script>
+    <script src="../lib/auth/components/signup-form.js"></script>
+    <script src="../lib/auth/components/forgot-password.js"></script>
+    <script src="../lib/auth/components/user-profile.js"></script>
+
+    <!-- firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="../config/firebase-config.js"></script>
 </head>
 <body>
     <header class="header-container">
@@ -36,13 +67,7 @@
               </button>
             </form>
           </div>
-          <div id="auth-container">
-            <button id="auth-trigger" class="auth-button base-button" aria-label="Login or Signup">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-              </svg>
-            </button>
-          </div>
+          <auth-avatar></auth-avatar>
         </div>
       </div>      
     </header>
@@ -91,19 +116,18 @@
     </div>
     <image-approval-component></image-approval-component>
     <div class="edit-preview-container"></div>
-    <div id="auth-modal" class="modal">
-      <div class="modal-content">
-        <!-- modal content will be dynamically inserted here -->
-      </div>
-    </div>
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-    <script src="../config/firebase-config.js"></script>
+    
+    <!-- Auth Components -->
+    <auth-controller>
+      <auth-content>
+          <login-form slot="login-form" class="active"></login-form>
+          <signup-form slot="signup-form"></signup-form>
+          <forgot-password slot="forgot-password"></forgot-password>
+          <user-profile slot="user-profile"></user-profile>
+      </auth-content>
+    </auth-controller>
+
     <!-- scripts -->
-    <script src="../js/auth.js"></script>
     <script src="../js/manager-dashboard.js"></script>
     <script defer src="../js/navigation-script.js"></script>
     <!-- components -->
