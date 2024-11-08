@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
     
     <!-- Your Firebase config -->
     <script src="../../config/firebase-config.js"></script>
@@ -23,6 +24,7 @@
     <script src="../lib/auth/components/login-form.js"></script>
     <script src="../lib/auth/components/signup-form.js"></script>
     <script src="../lib/auth/components/forgot-password.js"></script>
+    <script src="../lib/auth/components/user-profile.js"></script>
 
     <style>
         .test-buttons {
@@ -35,6 +37,19 @@
             text-align: left;
             margin: 20px;
         }
+        /* Test header avatar style */
+        #headerAvatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -42,16 +57,17 @@
     <div class="test-buttons">
         <button id="openModal">Open Auth Modal</button>
         <button id="testSignOut">Sign Out</button>
+        <div id="headerAvatar"></div>
     </div>
 
     <pre id="authStatus">Not initialized</pre>
 
     <auth-controller id="authController">
         <auth-content>
-            <!-- Class 'active' controls initial visibility -->
             <login-form slot="login-form" class="active"></login-form>
             <signup-form slot="signup-form"></signup-form>
             <forgot-password slot="forgot-password"></forgot-password>
+            <user-profile slot="user-profile"></user-profile>
         </auth-content>
     </auth-controller>
 
@@ -59,13 +75,15 @@
         const authController = document.getElementById('authController');
         const openModalBtn = document.getElementById('openModal');
         const signOutBtn = document.getElementById('testSignOut');
+        const headerAvatar = document.getElementById('headerAvatar');
         const authContent = document.querySelector('auth-content');
         const loginForm = document.querySelector('login-form');
         const signupForm = document.querySelector('signup-form');
         const forgotPasswordForm = document.querySelector('forgot-password');
+        const userProfile = document.querySelector('user-profile');
         const authStatus = document.getElementById('authStatus');
         
-        // Event listeners for test buttons
+        // Test button handlers
         openModalBtn.addEventListener('click', () => {
             authController.openModal();
         });
@@ -78,20 +96,38 @@
             }
         });
 
-        // Listen for auth state changes
-        authController.addEventListener('auth-state-changed', (event) => {
-            authStatus.textContent = JSON.stringify(event.detail, null, 2);
+        // Header avatar click handler
+        headerAvatar.addEventListener('click', () => {
+            const authContent = document.querySelector('auth-content');
+            authContent.showUserProfile();
+            authController.openModal();
         });
 
-        // Listen for forgot password request
+        // Auth state change handler
+        authController.addEventListener('auth-state-changed', (event) => {
+            const { user, isAuthenticated } = event.detail;
+            authStatus.textContent = JSON.stringify(event.detail, null, 2);
+
+            // Update header avatar
+            if (isAuthenticated && user) {
+                if (user.photoURL) {
+                    headerAvatar.innerHTML = `<img src="${user.photoURL}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 5px;">`;
+                } else {
+                    headerAvatar.innerHTML = user.email[0].toUpperCase();
+                }
+                headerAvatar.style.display = 'flex';
+            } else {
+                headerAvatar.style.display = 'none';
+            }
+        });
+
+        // Handle forgot password flow
         loginForm.addEventListener('switch-to-forgot-password', (event) => {
-            // Hide all forms
             loginForm.classList.remove('active');
             signupForm.classList.remove('active');
-            // Show forgot password form
+            userProfile.classList.remove('active');
             forgotPasswordForm.classList.add('active');
             
-            // If email was provided, pre-fill it
             if (event.detail?.email) {
                 const emailInput = forgotPasswordForm.shadowRoot.querySelector('#email');
                 if (emailInput) {
@@ -100,14 +136,12 @@
             }
         });
 
-        // Listen for back to login request
+        // Handle back to login
         forgotPasswordForm.addEventListener('back-to-login', () => {
-            // Hide all forms
             forgotPasswordForm.classList.remove('active');
             signupForm.classList.remove('active');
-            // Show login form
+            userProfile.classList.remove('active');
             loginForm.classList.add('active');
-            // Reset forgot password form
             forgotPasswordForm.reset();
         });
 
@@ -118,11 +152,14 @@
                 loginForm.reset();
                 signupForm.reset();
                 forgotPasswordForm.reset();
-                // Return to login form
-                loginForm.classList.add('active');
-                signupForm.classList.remove('active');
-                forgotPasswordForm.classList.remove('active');
-            }, 300); // Wait for close animation
+                // Return to login form if not authenticated
+                if (!authController.isAuthenticated) {
+                    loginForm.classList.add('active');
+                    signupForm.classList.remove('active');
+                    forgotPasswordForm.classList.remove('active');
+                    userProfile.classList.remove('active');
+                }
+            }, 300);
         });
     </script>
 </body>
