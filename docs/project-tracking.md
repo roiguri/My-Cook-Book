@@ -3,7 +3,8 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
-- Library component
+- Add all components to library
+- Create loading spinner and image carousel component
 - Change website theme colors
 - New Feature: Automation of propose a recipe
 - Simple tweeks
@@ -129,3 +130,4 @@
 - Update filter modal to only show user relevant recipes for user page.
 - Creme brule: 8 dishes
 - Add image for נשיקות - improve explanation + 48 dishes
+- Create library component
