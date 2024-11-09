@@ -17,6 +17,8 @@
   --submenu-color: #4CAF50;
   --disabled-color: #cccccc;
   --tabs-color: white;
+  --card-bg: white;
+  --recipe-bg: var(--background-color);
   /* sizes */
   --size-xxl: 4.5rem;
   --size-header1: 3rem;
