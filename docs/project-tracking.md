@@ -3,7 +3,6 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
-- Fix authentication
 - Library component
 - Change website theme colors
 - New Feature: Automation of propose a recipe

@@ -1,0 +1,204 @@
+/* General layout */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header styles */
+header {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Main content layout */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Navigation sidebar */
+.nav-sidebar {
+  width: 200px;
+  background-color: #f0f0f0;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Component display area */
+.component-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Customization sidebar */
+.customization-sidebar {
+  width: 250px;
+  background-color: #e0e0e0;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+/* Component sections */
+.component-section {
+  display: none;
+}
+
+.component-section.active {
+  display: block;
+}
+
+/* Demo area */
+.demo-area {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Code snippets */
+.code-snippet {
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+/* Documentation */
+.documentation {
+  border-top: 1px solid #ddd;
+  padding-top: 1rem;
+}
+
+/* Customization controls */
+.customization-control {
+  margin-bottom: 1rem;
+}
+
+.customization-control label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Navigation Sidebar */
+.nav-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-sidebar li {
+  margin: 2px 0;
+}
+
+.nav-sidebar a {
+  display: block;
+  padding: 8px 12px;
+  color: var(--text-color);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.nav-sidebar a:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Folder Styles */
+.folder {
+  margin: 2px 0;
+}
+
+.folder-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-color);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.folder-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.folder-icon {
+  display: inline-block;
+  width: 20px;
+  transition: transform 0.2s;
+  font-size: 12px;
+}
+
+.folder-name {
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+/* Folder Content */
+.folder-content {
+  display: none;
+  margin-left: 20px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.folder-content.open {
+  display: block;
+}
+
+/* Active States */
+.nav-sidebar a.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.folder-toggle.open {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Animation for folder icon */
+.folder-toggle.open .folder-icon {
+  transform: rotate(90deg);
+}
+
+.nav-search {
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.nav-search input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--secondary-color);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.nav-search input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Highlight search results */
+.folder.search-active > .folder-toggle {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.folder.search-active > .folder-content {
+  display: block;
+}

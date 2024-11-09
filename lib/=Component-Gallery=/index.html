@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Gallery</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <header>
+        <h1>Component Gallery</h1>
+    </header>
+    <div class="main-content">
+        <nav class="nav-sidebar">
+            <h2>Components</h2>
+            <div class="nav-search">
+                <input type="text" placeholder="Search components..." id="component-search">
+            </div>
+            <ul>
+                <!-- Navigation will be dynamically populated -->
+            </ul>
+        </nav>
+        
+        <main class="component-area">
+            <div id="modal-section" class="component-section"></div>
+        </main>
+
+        <aside class="customization-sidebar">
+            <h3>Customize</h3>
+            <!-- Customization controls will be loaded here -->
+        </aside>
+    </div>
+
+    <script src="gallery.js"></script>
+
+    <!-- components -->
+    <script src="../utilities/modal/modal.js"></script>
+</body>
+</html>
