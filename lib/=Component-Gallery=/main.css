@@ -69,12 +69,12 @@ header {
   border: 1px solid #ddd;
   padding: 1rem;
   margin-bottom: 1rem;
-  background-color: #f5f5f5;
+  background-color: #e4b9b9;
 }
 
 /* Code snippets */
 .code-snippet {
-  background-color: #f8f8f8;
+  background-color: #e4b9b9;
   border: 1px solid #ddd;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -190,7 +190,7 @@ header {
 }
 
 .nav-search input {
-  width: 100%;
+  width: 90%;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -235,17 +235,18 @@ header {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
+  background-color: #e4b9b9;
 }
 
 .attributes-table th,
 .events-table th,
 .methods-table th {
-  background-color: #f5f5f5;
+  background-color: #f3a5a5;
 }
 
 /* Event Monitor */
 .event-log {
-  background-color: #f8f8f8;
+  background-color: #e4b9b9;
   border: 1px solid #ddd;
   padding: 10px;
   min-height: 100px;
