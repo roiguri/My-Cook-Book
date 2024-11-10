@@ -1,0 +1,128 @@
+<!-- image-approval-demo.html -->
+<section class="component-docs">
+  <h2>Image Approval Modal</h2>
+  
+  <!-- Component Description -->
+  <div class="component-description">
+      <p>A modal interface for approving or rejecting recipe images with Firebase integration. Features RTL support and image preview functionality.</p>
+  </div>
+
+  <!-- Live Demo -->
+  <div class="component-demo">
+    <h3>Live Demo</h3>
+    <div class="demo-area">
+        <button class="open-demo">Open Approval Modal</button>
+        <image-approval-component id="demo-approval"></image-approval-component>
+    </div>
+  </div>
+
+  <!-- Events Documentation -->
+  <div class="component-events">
+      <h3>Events</h3>
+      <table class="events-table">
+          <thead>
+              <tr>
+                  <th>Event Name</th>
+                  <th>Description</th>
+                  <th>Detail</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td>image-approved</td>
+                  <td>Fired when image is approved</td>
+                  <td>{ recipeId: string }</td>
+              </tr>
+              <tr>
+                  <td>image-rejected</td>
+                  <td>Fired when image is rejected</td>
+                  <td>{ recipeId: string }</td>
+              </tr>
+              <tr>
+                  <td>modal-opened</td>
+                  <td>Inherited: Fired when modal opens</td>
+                  <td>None</td>
+              </tr>
+              <tr>
+                  <td>modal-closed</td>
+                  <td>Inherited: Fired when modal closes</td>
+                  <td>None</td>
+              </tr>
+          </tbody>
+      </table>
+  </div>
+
+  <!-- Methods Documentation -->
+  <div class="component-methods">
+      <h3>Methods</h3>
+      <table class="methods-table">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>Parameters</th>
+                  <th>Description</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td>openModalForImage()</td>
+                  <td>imageData: Object</td>
+                  <td>Opens modal with specified image data</td>
+              </tr>
+              <tr>
+                  <td>closeModal()</td>
+                  <td>None</td>
+                  <td>Closes the modal and resets state</td>
+              </tr>
+          </tbody>
+      </table>
+  </div>
+
+  <!-- Code Example -->
+  <div class="component-code">
+      <h3>Code Example</h3>
+      <pre class="code-snippet" id="image-approval-code-snippet">
+const approvalModal = document.querySelector('image-approval-component');
+
+// Open modal with image data
+approvalModal.openModalForImage({
+    imageUrl: 'path/to/image.jpg',
+    recipeId: 'recipe123',
+    recipeName: 'Chocolate Cake'
+});
+
+// Handle approval/rejection events
+approvalModal.addEventListener('image-approved', (e) => {
+    console.log('Image approved for recipe:', e.detail.recipeId);
+});
+
+approvalModal.addEventListener('image-rejected', (e) => {
+    console.log('Image rejected for recipe:', e.detail.recipeId);
+});</pre>
+  </div>
+
+  <!-- Customization Controls -->
+  <div class="customization-controls">
+      <h3>Demo Settings</h3>
+      <div class="customization-control">
+          <label for="demo-recipe-name">Recipe Name:</label>
+          <input type="text" id="demo-recipe-name" value="Sample Recipe">
+      </div>
+      <div class="customization-control">
+          <label for="demo-image-url">Image URL:</label>
+          <select id="demo-image-url">
+              <option value="/api/placeholder/400/300">Sample Image 1</option>
+              <option value="/api/placeholder/400/300">Sample Image 2</option>
+          </select>
+      </div>
+      <button class="apply-customization">Open With Settings</button>
+  </div>
+
+  <!-- Event Monitor -->
+  <div class="event-monitor">
+      <h3>Event Monitor</h3>
+      <div class="event-log" id="approval-event-log">
+          <p class="event-log-empty">Events will be displayed here...</p>
+      </div>
+  </div>
+</section>

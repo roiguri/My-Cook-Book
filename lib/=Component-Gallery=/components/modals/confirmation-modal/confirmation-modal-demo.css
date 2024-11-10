@@ -1,0 +1,65 @@
+.example {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.example button {
+    padding: 8px 16px;
+    background-color: var(--primary-color, #bb6016);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.example button:hover {
+    background-color: var(--primary-hover, #5c4033);
+}
+
+.improvements-note {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-left: 4px solid #ffc107;
+    border-radius: 0 4px 4px 0;
+}
+
+.improvements-list {
+    margin: 10px 0;
+    padding-left: 20px;
+    color: #666;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.control-group label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.control-group input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.control-group button {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: var(--primary-color, #bb6016);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.control-group button:hover {
+    background-color: var(--primary-hover, #5c4033);
+}

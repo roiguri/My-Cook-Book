@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Component Gallery</title>
     <link rel="stylesheet" href="main.css">
+
+    <!-- firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="../../config/firebase-config.js"></script>
 </head>
 <body>
     <header>
@@ -22,11 +29,7 @@
         </nav>
         
         <main class="component-area">
-            <div id="playground-section" class="component-section"></div>
-          <!-- Utilities -->
-            <div id="modal-section" class="component-section"></div>
-          <!-- modals -->
-
+            <!-- Sections will be created dynamically -->
         </main>
 
         <aside class="customization-sidebar">
@@ -38,6 +41,14 @@
     <script src="gallery.js"></script>
 
     <!-- components -->
+     
+    <!-- utilities -->
     <script src="../utilities/modal/modal.js"></script>
+    <!-- modals -->
+    <script src="../modals/confirmation_modal/confirmation_modal.js"></script>
+    <script src="../modals/filter_modal/filter_modal.js"></script>
+    <script src="../modals/image_approval/image_approval.js"></script>
+    <script src="../modals/message-modal/message-modal.js"></script>
+    <script src="../modals/missing_image_upload/missing_image_upload.js"></script>
 </body>
 </html>

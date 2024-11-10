@@ -1,0 +1,216 @@
+<!-- recipe-filter-demo.html -->
+<section class="component-docs">
+  <h2>Recipe Filter Component</h2>
+  
+  <!-- Component Description -->
+  <div class="component-description">
+      <p>A modal interface component for filtering recipes with multiple criteria. Features RTL support, real-time updates, and integrates with Firebase/Firestore for data management.</p>
+  </div>
+
+  <!-- Live Demo -->
+  <div class="component-demo">
+    <h3>Live Demo</h3>
+    <div class="demo-area">
+        <button class="open-filter-default">Open Default Filter</button>
+        <button class="open-filter-custom">Open With Custom Filters</button>
+        <recipe-filter-component id="demo-filter"
+            cooking-time-filter="true"
+            difficulty-filter="true"
+            ingredient-filter="true"
+            tags-filter="true">
+        </recipe-filter-component>
+    </div>
+  </div>
+
+  <!-- Attributes Documentation -->
+  <div class="component-attributes">
+      <h3>Attributes</h3>
+      <table class="attributes-table">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td>category</td>
+                  <td>string</td>
+                  <td>null</td>
+                  <td>Optional category to filter recipes by</td>
+              </tr>
+              <tr>
+                  <td>cooking-time-filter</td>
+                  <td>boolean</td>
+                  <td>true</td>
+                  <td>Enable/disable cooking time filter</td>
+              </tr>
+              <tr>
+                  <td>difficulty-filter</td>
+                  <td>boolean</td>
+                  <td>true</td>
+                  <td>Enable/disable difficulty filter</td>
+              </tr>
+              <tr>
+                  <td>ingredient-filter</td>
+                  <td>boolean</td>
+                  <td>true</td>
+                  <td>Enable/disable main ingredient filter</td>
+              </tr>
+              <tr>
+                  <td>tags-filter</td>
+                  <td>boolean</td>
+                  <td>true</td>
+                  <td>Enable/disable tags filter</td>
+              </tr>
+              <tr>
+                  <td>favorites-only</td>
+                  <td>boolean</td>
+                  <td>false</td>
+                  <td>When true, only shows user's favorite recipes</td>
+              </tr>
+          </tbody>
+      </table>
+  </div>
+
+  <!-- Events Documentation -->
+  <div class="component-events">
+      <h3>Events</h3>
+      <table class="events-table">
+          <thead>
+              <tr>
+                  <th>Event Name</th>
+                  <th>Description</th>
+                  <th>Detail</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td>filter-applied</td>
+                  <td>Fired when filters are applied</td>
+                  <td>{ recipes: Array, filters: Object }</td>
+              </tr>
+              <tr>
+                  <td>filter-reset</td>
+                  <td>Fired when filters are reset</td>
+                  <td>{ category: string }</td>
+              </tr>
+              <tr>
+                  <td>modal-opened</td>
+                  <td>Inherited: Fired when modal opens</td>
+                  <td>None</td>
+              </tr>
+              <tr>
+                  <td>modal-closed</td>
+                  <td>Inherited: Fired when modal closes</td>
+                  <td>None</td>
+              </tr>
+          </tbody>
+      </table>
+  </div>
+
+  <!-- Methods Documentation -->
+  <div class="component-methods">
+      <h3>Methods</h3>
+      <table class="methods-table">
+          <thead>
+              <tr>
+                  <th>Name</th>
+                  <th>Parameters</th>
+                  <th>Description</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td>open()</td>
+                  <td>None</td>
+                  <td>Opens the filter modal</td>
+              </tr>
+              <tr>
+                  <td>close()</td>
+                  <td>None</td>
+                  <td>Closes the filter modal</td>
+              </tr>
+              <tr>
+                  <td>clearFilters()</td>
+                  <td>None</td>
+                  <td>Resets all filters to default state</td>
+              </tr>
+          </tbody>
+      </table>
+  </div>
+
+  <!-- Code Example -->
+  <div class="component-code">
+      <h3>Code Example</h3>
+      <pre class="code-snippet" id="recipe-filter-code-snippet">
+<recipe-filter-component
+  category="main-courses"
+  cooking-time-filter="true"
+  difficulty-filter="true"
+  ingredient-filter="true"
+  tags-filter="true">
+</recipe-filter-component>
+
+<script>
+  const filter = document.querySelector('recipe-filter-component');
+  
+  // Open filter modal
+  filter.open();
+
+  // Listen for filter events
+  filter.addEventListener('filter-applied', (e) => {
+    const { recipes, filters } = e.detail;
+    // Handle filtered recipes
+  });
+</script></pre>
+  </div>
+
+  <!-- Customization Controls -->
+  <div class="customization-controls">
+      <h3>Customize</h3>
+      <div class="customization-control">
+          <label for="filter-category">Category:</label>
+          <select id="filter-category">
+              <option value="">All Categories</option>
+              <option value="main-courses">Main Courses</option>
+              <option value="desserts">Desserts</option>
+              <option value="appetizers">Appetizers</option>
+          </select>
+      </div>
+      <div class="customization-control">
+          <label>Enabled Filters:</label>
+          <div>
+              <input type="checkbox" id="cooking-time-enabled" checked>
+              <label for="cooking-time-enabled">Cooking Time</label>
+          </div>
+          <div>
+              <input type="checkbox" id="difficulty-enabled" checked>
+              <label for="difficulty-enabled">Difficulty</label>
+          </div>
+          <div>
+              <input type="checkbox" id="ingredient-enabled" checked>
+              <label for="ingredient-enabled">Ingredients</label>
+          </div>
+          <div>
+              <input type="checkbox" id="tags-enabled" checked>
+              <label for="tags-enabled">Tags</label>
+          </div>
+      </div>
+      <div class="customization-control">
+          <input type="checkbox" id="favorites-only">
+          <label for="favorites-only">Favorites Only</label>
+      </div>
+      <button class="apply-customization">Apply Changes</button>
+  </div>
+
+  <!-- Event Monitor -->
+  <div class="event-monitor">
+      <h3>Event Monitor</h3>
+      <div class="event-log" id="filter-event-log">
+          <p class="event-log-empty">Events will be displayed here...</p>
+      </div>
+  </div>
+</section>
