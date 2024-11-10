@@ -9,6 +9,10 @@ body {
   background-color: #ecf39e;
 }
 
+main {
+  background-color: #dbf3db;
+}
+
 /* Header styles */
 header {
   background-color: #4f772d;
@@ -39,14 +43,14 @@ header {
   flex-direction: column;
   padding: 1rem;
   overflow-y: auto;
-  background-color: #ffffff;
+  background-color: #dbf3db;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Customization sidebar */
 .customization-sidebar {
   width: 250px;
-  background-color: #e0e0e0;
+  background-color: #dbf3db;
   padding: 1rem;
   overflow-y: auto;
 }
