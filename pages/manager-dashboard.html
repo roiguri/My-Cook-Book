@@ -22,6 +22,9 @@
     <!-- scripts -->
     <script src="../sw-register.js"></script>
 
+    <!-- components -->
+    <script src="../lib/search/header-search-bar/header-search-bar.js"></script>
+
     <!-- Auth Components -->
     <script src="../lib/auth/auth-controller.js"></script>
     <script src="../lib/auth/components/auth-content.js"></script>
@@ -60,12 +63,7 @@
         </nav>
         <div class="search-auth-container">
           <div class="search-bar header-search">
-            <form class="search-form" action="#" method="get">
-              <input type="text" class="search-input" placeholder="Search recipes...">
-              <button type="submit" class="search-button">
-                  <i class="icon-search">🔍</i>
-              </button>
-            </form>
+            <header-search-bar></header-search-bar>
           </div>
           <auth-avatar></auth-avatar>
         </div>

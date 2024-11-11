@@ -36,6 +36,7 @@
   <script src="../lib/modals/message-modal/message-modal.js"></script>
   <script src="../lib/recipes/recipe_form_component/recipe_form_component.js"></script>
   <script src="../lib/recipes/recipe_form_component/propose_recipe_component.js"></script>
+  <script src="../lib/search/header-search-bar/header-search-bar.js"></script>
 
   <!-- Auth Components -->
   <script src="../lib/auth/auth-controller.js"></script>
@@ -68,12 +69,7 @@
       </nav>
       <div class="search-auth-container">
         <div class="search-bar header-search">
-          <form class="search-form" action="#" method="get">
-            <input type="text" class="search-input" placeholder="Search recipes...">
-            <button type="submit" class="search-button">
-                <i class="icon-search">🔍</i>
-            </button>
-          </form>
+          <header-search-bar></header-search-bar>
         </div>
         <auth-avatar></auth-avatar>
       </div>
