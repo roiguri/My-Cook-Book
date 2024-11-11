@@ -75,6 +75,7 @@
     }
 
         .home-page .featured-recipes h2 {
+          font-family: var(--heading-font);
           font-size: var(--size-header1);
           text-align: center;
           margin-bottom: 1.5rem;
@@ -123,5 +124,6 @@
         white-space: nowrap;
         display: flex;
         justify-content: center;
+        font-size: var(--size-header2-mobile);
       }
 }

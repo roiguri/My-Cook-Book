@@ -13,7 +13,12 @@
     }
 
 @media (max-width: 768px) {
+  .quote-section {
+    padding: 1rem;
+  }
+
   .quote-section blockquote {
-    font-size: var(--size-header2-mobile);
+    font-size: var(--size-body);
+    margin: 0 1rem 1rem 1rem;
   }
 }
