@@ -261,7 +261,7 @@ header {
       header .menu-title-container {
         display: flex;
         align-items: center;
-        gap: 30px;
+        gap: 15px;
         justify-content: center;
         flex-wrap: nowrap;
       }
