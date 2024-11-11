@@ -3,8 +3,11 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
+- create filters parent component
+- integrate component to favorites and categories page.
+- implement search to favorites and categories page.
+- Integrate loading spinner to favorites page
 - Add all components to library
-- Create loading spinner and image carousel component
 - Change website theme colors
 - New Feature: Automation of propose a recipe
 - Simple tweeks
@@ -131,3 +134,6 @@
 - Creme brule: 8 dishes
 - Add image for נשיקות - improve explanation + 48 dishes
 - Create library component
+- implement search
+- Create loading spinner and image carousel component
+
