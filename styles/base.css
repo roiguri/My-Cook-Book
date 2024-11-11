@@ -71,7 +71,7 @@ body {
 
 
 h1, h2, h3 {
-  font-family: var(--heading-font);
+  font-family: var(--heading-font-he);
   font-weight: 700;
 }
 
