@@ -1,3 +1,34 @@
+:root {
+  /* fonts */
+  --heading-font: 'Amatic SC', cursive;
+  --body-font: 'Lora', serif;
+  --nav-font: 'Source Sans Pro', sans-serif;
+  /* colors */
+  --primary-color: #bb6016;
+  --primary-hover: #5c4033;
+  --secondary-color: #e6dfd1;
+  --secondary-hover: #d1c5b8;
+  --text-color: #3a3a3a;
+  --button-color: white;
+  --background-color: #f5f2e9;
+  --submenu-color: #4CAF50;
+  --disabled-color: #cccccc;
+  --tabs-color: white;
+  --card-bg: white;
+  --recipe-bg: var(--background-color);
+  /* sizes */
+  --size-xxl: 4.5rem;
+  --size-header1: 3rem;
+  --size-header2: 1.5rem;
+  --size-body: 1rem;
+  --size-icon: 1.2rem;
+
+  --size-header1-mobile: 2.5rem;
+  --size-header2-mobile: 1.2rem;
+  --size-body-mobile: 0.9rem;
+  --size-icon-mobile: 1.0rem;
+}
+
 /* General layout */
 body {
   font-family: Arial, sans-serif;

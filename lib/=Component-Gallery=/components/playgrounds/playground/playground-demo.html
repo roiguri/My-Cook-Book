@@ -12,17 +12,20 @@
     <div class="demo-area">
       <!-- Here you can add your test component -->
         <h3>Placeholder</h3>
-        <div style="width: 200px">
-          <image-carousel 
-          images='[
-            "../../../../../img/category-jars/appetizers.jpg",
-            "./../../../../img/category-jars/appetizers.jpg",
-            "./../../../../img/category-jars/appetizers.jpg"
-          ]'
-          image-ratio="16:9"
-          auto-rotate="false"
-          border-radius="30px">
-        </image-carousel>
+        <div>
+          <media-scroller 
+          title="My Vacation Photos" 
+          visible-items="3" 
+          continuous="false" 
+          media-data='[{
+            "path": "../../../../../img/category-jars/appetizers.jpg", "caption": "Beautiful beach"}, 
+            {"path": "../../../../../img/category-jars/main-course.webp", "caption": "Hiking in the mountains"}, 
+            {"path": "../../../../../img/category-jars/dessert.jpg", "caption": "Exploring the city"},
+            {
+              "path": "../../../../../img/category-jars/appetizers.jpg", "caption": "Beautiful beach"}, 
+              {"path": "../../../../../img/category-jars/main-course.webp", "caption": "Hiking in the mountains"}, 
+              {"path": "../../../../../img/category-jars/dessert.jpg", "caption": "Exploring the city"}]'>
+        </media-scroller>
         </div>
 
       </div>
