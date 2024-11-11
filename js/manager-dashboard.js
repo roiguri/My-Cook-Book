@@ -132,6 +132,10 @@ const categoryMapping = {
   'desserts': 'קינוחים',
 };
 
+const reverseCategoryMapping = Object.fromEntries(
+  Object.entries(categoryMapping).map(([key, value]) => [value, key])
+);
+
 function createRecipeContent(recipe) {
   const container = document.createElement('div');
   container.innerHTML = `
@@ -167,7 +171,7 @@ function filterRecipes(recipes) {
 
   const filteredRecipes = recipes.filter(recipe => 
       recipe.name.toLowerCase().includes(searchTerm) &&
-      (filterCategory === '' || recipe.category === filterCategory)
+      (filterCategory === '' || recipe.category === reverseCategoryMapping[filterCategory])
   );
 
   updateRecipeList(filteredRecipes);
