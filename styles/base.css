@@ -10,18 +10,18 @@
   --secondary: #bc4749;
 
   /* fonts */
-  --heading-font: 'Amatic SC', cursive;
-  --body-font: 'Lora', serif;
+  --heading-font: 'Cormorant Garamond', 'Amatic SC', cursive;
+  --body-font: 'Assistant','Lora', serif;
   --nav-font: 'Source Sans Pro', sans-serif;
   /* colors */
   --primary-color: var(--primary);
   --primary-hover: var(--primary-dark);
-  --secondary-color: #e6dfd1;
-  --secondary-hover: #d1c5b8;
+  --secondary-color: var(--neutral);
+  --secondary-hover: darken(var(--neutral), 10%);
   --header-color: var(--neutral);
   --text-color: #3a3a3a;
   --button-color: white;
-  --background-color: #f5f2e9;
+  --background-color: var(--neutral);
   --submenu-color: var(--secondary);
   --disabled-color: #cccccc;
   --tabs-color: white;

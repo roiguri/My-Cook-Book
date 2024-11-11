@@ -61,10 +61,12 @@
                     }
 
                 .home-page .category-jar span {
-                  display: block;
+                  display: flex;
+                  justify-content: center;
                   margin-top: 0.5rem;
                   font-family: var(--heading-font);
                   font-size: var(--size-header2);
+                  white-space: nowrap;
                 }
 
     /* Styles for the featured recipes section */
