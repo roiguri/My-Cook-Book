@@ -19,9 +19,29 @@ document.addEventListener('DOMContentLoaded', async function() {
   let currentPage = 1;
   const recipesPerPage = 4;
   let displayedRecipes = [];
+  let currentSearchQuery = '';
+
+  // Parse URL parameters for search
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchQuery = urlParams.get('q');
+
+  // Initialize search service
+  const searchService = document.createElement('search-service');
+  searchService.id = 'mainSearch';
+  document.body.appendChild(searchService);
 
   // Initial setup
   async function initialize() {
+      if (searchQuery) {
+        currentSearchQuery = searchQuery;
+        // Update header search bar if exists
+        const searchBar = document.querySelector('header-search-bar');
+        if (searchBar) {
+            searchBar.setSearchText(searchQuery);
+        }
+        updatePageTitle();
+      }
+
       await loadInitialRecipes();
       setupEventListeners();
       updateActiveTab();
@@ -31,15 +51,36 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Load initial recipes
   async function loadInitialRecipes() {
-      const query = currentCategory === 'all' 
-          ? db.collection('recipes').where('approved', '==', true)
-          : db.collection('recipes').where('approved', '==', true).where('category', '==', currentCategory);
-          
+      let query = db.collection('recipes').where('approved', '==', true);
+        
+      if (currentCategory !== 'all') {
+          query = query.where('category', '==', currentCategory);
+      }  
+
       const snapshot = await query.get();
       displayedRecipes = snapshot.docs.map(doc => ({ 
           id: doc.id, 
           ...doc.data() 
       }));
+
+      // Apply search filter if exists
+      if (currentSearchQuery) {
+        displayedRecipes = filterRecipesBySearch(displayedRecipes, currentSearchQuery);
+      }
+  }
+
+  function filterRecipesBySearch(recipes, searchText) {
+    const searchTerms = searchText.toLowerCase().trim().split(/\s+/);
+    
+    return recipes.filter(recipe => {
+        const searchableText = [
+            recipe.name,
+            recipe.category,
+            ...(recipe.tags || [])
+        ].join(' ').toLowerCase();
+
+        return searchTerms.every(term => searchableText.includes(term));
+    });
   }
 
   // Event Listeners
@@ -66,6 +107,30 @@ document.addEventListener('DOMContentLoaded', async function() {
       // Filter events
       filterModal.addEventListener('filter-applied', handleFilterApplied);
       filterModal.addEventListener('filter-reset', handleFilterReset);
+
+      const searchBar = document.querySelector('header-search-bar');
+      if (searchBar) {
+          searchBar.addEventListener('search-input', handleSearch);
+      }
+  }
+
+  async function handleSearch(e) {
+    const { searchText } = e.detail;
+    currentSearchQuery = searchText;
+    
+    // Update URL without page reload
+    const newUrl = new URL(window.location);
+    if (searchText) {
+        newUrl.searchParams.set('q', searchText);
+    } else {
+        newUrl.searchParams.delete('q');
+    }
+    window.history.pushState({}, '', newUrl);
+
+    updatePageTitle();
+    await loadInitialRecipes();
+    currentPage = 1; // Reset to first page
+    await displayCurrentPageRecipes();
   }
 
   // Category Handlers
@@ -123,10 +188,33 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   async function displayRecipes(recipes) {
-    // Clear existing recipe cards
     recipeGrid.innerHTML = '';
+    
+    if (recipes.length === 0) {
+      // Set grid to display flex for centering
+      recipeGrid.style.display = 'flex';
+      recipeGrid.style.justifyContent = 'center';
+      recipeGrid.style.alignItems = 'center';
+      recipeGrid.style.minHeight = '200px'; // Give some vertical space
+      
+      const noResultsMessage = document.createElement('div');
+      noResultsMessage.className = 'no-results';
+      noResultsMessage.style.textAlign = 'center';
+      noResultsMessage.innerHTML = `
+          <p>לא נמצאו מתכונים ${currentSearchQuery ? 'תואמים' : 'בקטגוריה זו'}</p>
+          ${currentSearchQuery ? '<p>נסה לשנות את מילות החיפוש</p>' : ''}
+      `;
+      recipeGrid.appendChild(noResultsMessage);
+      return;
+    }
+
+    // Reset grid to original layout for recipes
+    recipeGrid.style.display = 'grid';
+    recipeGrid.style.justifyContent = '';
+    recipeGrid.style.alignItems = '';
+    recipeGrid.style.minHeight = '';
+
     const authenticated = firebase.auth().currentUser;
-    // Create and append new recipe cards
     recipes.forEach(recipe => {
         const cardContainer = document.createElement('div');
         cardContainer.className = 'recipe-card-container';
@@ -135,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         recipeCard.setAttribute('recipe-id', recipe.id);
         recipeCard.setAttribute('layout', 'vertical');
         if (authenticated) {
-          recipeCard.setAttribute('show-favorites', true);
+            recipeCard.setAttribute('show-favorites', true);
         }
         recipeCard.style.width = '100%';
         recipeCard.style.height = '100%';
@@ -164,10 +252,32 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   function updatePageTitle() {
-      const categoryName = currentCategory === 'all' 
-          ? 'All Recipes' 
-          : currentCategory.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-      pageTitle.textContent = categoryName;
+    if (currentSearchQuery) {
+        pageTitle.textContent = `תוצאות חיפוש`;
+        if (currentCategory !== 'all') {
+            pageTitle.textContent += ` - ${getCategoryName(currentCategory)}`;
+        }
+    } else {
+        pageTitle.textContent = currentCategory === 'all' 
+            ? 'כל המתכונים' 
+            : `${getCategoryName(currentCategory)}`;
+    }
+  }
+
+  // Helper function for category names
+  function getCategoryName(categoryId) {
+      const categoryMap = {
+          'appetizers': 'מנות ראשונות',
+          'main-courses': 'מנות עיקריות',
+          'side-dishes': 'תוספות',
+          'soups-stews': 'מרקים ותבשילים',
+          'salads': 'סלטים',
+          'desserts': 'קינוחים',
+          'breakfast-brunch': 'ארוחות בוקר',
+          'snacks': 'חטיפים',
+          'beverages': 'משקאות'
+      };
+      return categoryMap[categoryId] || categoryId;
   }
 
   function updatePagination() {

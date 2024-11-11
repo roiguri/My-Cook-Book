@@ -130,6 +130,20 @@
               width: 100%;
             }
 
+            .no-results {
+                text-align: center;
+                padding: 2rem;
+                color: var(--text-color);
+                align-self: start;
+                font-family: var(--body-font);
+            }
+
+            .no-results p {
+                margin: 0.5rem 0;
+                white-space: nowrap;
+                font-size: var(--size-header2)
+            }
+
     /* Styles for the pagination */
     .category-page .pagination {
       display: flex;
@@ -200,5 +214,9 @@
 
   .category-page .recipe-grid {
     width: 80%;
+  }
+
+  .no-results p {
+    font-size: var(--size-body-mobile)
   }
 }
