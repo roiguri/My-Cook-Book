@@ -18,4 +18,8 @@
   .documents .documents-container {
     margin-top: 20px;
   }
+
+  .documents h1 {
+    font-size: var(--size-header1-mobile);
+  }
 }
