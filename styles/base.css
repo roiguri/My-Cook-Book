@@ -2,19 +2,27 @@
     #CSS-Variables
 \*------------------------------------*/
 :root {
+  /* chosen pallete */
+  --primary-dark: #386641;
+  --primary: #6a994e;
+  --primary-bright: #a7c957;
+  --neutral: #f2e8cf;
+  --secondary: #bc4749;
+
   /* fonts */
   --heading-font: 'Amatic SC', cursive;
   --body-font: 'Lora', serif;
   --nav-font: 'Source Sans Pro', sans-serif;
   /* colors */
-  --primary-color: #bb6016;
-  --primary-hover: #5c4033;
+  --primary-color: var(--primary);
+  --primary-hover: var(--primary-dark);
   --secondary-color: #e6dfd1;
   --secondary-hover: #d1c5b8;
+  --header-color: var(--neutral);
   --text-color: #3a3a3a;
   --button-color: white;
   --background-color: #f5f2e9;
-  --submenu-color: #4CAF50;
+  --submenu-color: var(--secondary);
   --disabled-color: #cccccc;
   --tabs-color: white;
   --card-bg: white;

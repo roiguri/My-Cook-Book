@@ -8,6 +8,7 @@
       margin-bottom: 20px;
       margin-top: 0;
       font-size: var(--size-header1);
+      color: var(--header-color);
     }
 
     /* Styles for the categories content */

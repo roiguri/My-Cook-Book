@@ -75,7 +75,7 @@ header {
           font-family: var(--heading-font);
           font-weight: bolder;
           font-size: var(--size-header1);
-          color: var(--background-color);
+          color: var(--header-color);
           text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 

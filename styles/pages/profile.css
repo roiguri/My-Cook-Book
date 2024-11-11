@@ -7,7 +7,7 @@
   gap: 10px;
   margin-bottom: 20px;
   font-size: var(--size-header1);
-  color: var(--primary-color);
+  color: var(--header-color);
 }
 
 @media (max-width: 768px) {

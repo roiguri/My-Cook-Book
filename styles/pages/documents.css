@@ -9,9 +9,9 @@
 }
 
 .documents h1 {
-  color: var(--primary-color);
+  color: var(--header-color);
+  font-size: var(--size-header1);
   margin-bottom: 0.5rem;
-  
 }
 
 @media (max-width: 768px) {

@@ -7,7 +7,7 @@
 
 .propose-recipe .propose-recipe-hero p {
   font-size: var(--size-header2);
-  color: var(--primary-color);
+  color: var(--header-color);
 }
 
 .propose-recipe .propose-recipe-hero {
@@ -24,7 +24,7 @@
 }
 
 .propose-recipe .propose-recipe-hero h1 {
-  color: var(--primary-color);
+  color: var(--header-color);
   font-size: var(--size-header1);
   margin-bottom: 0.5rem;
 }
