@@ -101,7 +101,10 @@ document.addEventListener('DOMContentLoaded', async function() {
           filterModal.setAttribute('category', currentCategory);
         } else {
             filterModal.removeAttribute('category');
-        }        filterModal.open();
+        }        
+        // Set current recipes before opening modal
+        filterModal.setInitialRecipes(displayedRecipes);
+        filterModal.open();
       });
 
       // Filter events
