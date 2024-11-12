@@ -8,6 +8,7 @@
 - implement search to favorites and categories page.
 - Integrate loading spinner to favorites page
 - Add all components to library
+- improve button styles
 - Change website theme colors
 - New Feature: Automation of propose a recipe
 - Simple tweeks
