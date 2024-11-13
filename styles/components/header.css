@@ -11,7 +11,7 @@ header {
   padding: 1rem;
   background: var(--header-background);
   background-size: auto 100%;
-  border-bottom: 3px solid var(--primary-color);
+  border-bottom: 8px solid var(--primary-color);
   gap: 0.5rem;
 }
 
@@ -115,10 +115,6 @@ header {
             display: inline-block;
             white-space: nowrap;
           }
-      
-              header nav ul li a:hover {
-                background-color: var(--primary-hover);
-              }
 
         /* Styles for the search and authentication container */
         header .search-auth-container {
@@ -295,7 +291,7 @@ header {
 
 
           header .search-auth-container {
-            gap: 1rem;
+            gap: 10px;
             order: -1; /* Move search and auth to the top in mobile view */
           }
 
