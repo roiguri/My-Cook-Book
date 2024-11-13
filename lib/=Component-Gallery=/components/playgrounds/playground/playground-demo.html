@@ -13,21 +13,20 @@
       <!-- Here you can add your test component -->
         <h3>Placeholder</h3>
         <div style="width: 500px">
-          <media-scroller
-            visible-items="2" 
-            collapsible="true"
-            continuous="false" 
-            item-height="300px"
-            item-width="100px"
-            background-color="none"
-            media-data='[
-              {"path": "../../../../../img/category-jars/appetizers.jpg", "caption": "Beautiful beach"}, 
-              {"path": "../../../../../img/category-jars/main-course.webp", "caption": "Hiking in the mountains"}, 
-              {"path": "../../../../../img/category-jars/dessert.jpg", "caption": "Exploring the city"},
-              {"path": "../../../../../img/category-jars/appetizers.jpg", "caption": "Beautiful beach"}, 
-              {"path": "../../../../../img/category-jars/main-course.webp", "caption": "Hiking in the mountains"}, 
-              {"path": "../../../../../img/category-jars/dessert.jpg", "caption": "Exploring the city"}]'>
-          </media-scroller>
+          <element-scroller 
+              title="My Items" 
+              visible-items="3" 
+              collapsible="true" 
+              continuous="true" 
+              background-color="#f5f5f5">
+              <div slot="items">
+                  <recipe-card card-width="200px" recipe-id="36NIHY4bOxuQuwBqD9IU"></recipe-card>
+                  <recipe-card card-width="200px" recipe-id="36NIHY4bOxuQuwBqD9IU"></recipe-card>
+                  <recipe-card card-width="200px" recipe-id="36NIHY4bOxuQuwBqD9IU"></recipe-card>
+                  <recipe-card card-width="200px" recipe-id="36NIHY4bOxuQuwBqD9IU"></recipe-card>
+                  <recipe-card card-width="200px" recipe-id="36NIHY4bOxuQuwBqD9IU"></recipe-card>
+              </div>
+          </element-scroller>
         </div>
 
       </div>
