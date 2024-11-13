@@ -3,12 +3,13 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
-- create filters panel component
-- integrate search component to favorites.
+- 
+- Create filters panel component
+- Integrate search component to favorites.
 - Integrate loading spinner to favorites page
 - Add all components to library
-- improve button styles
-- change header navigation buttons on hover
+- Improve button styles
+- Change header navigation buttons on hover
 - Change website theme colors
 - New Feature: Automation of propose a recipe
 - Simple tweeks
@@ -28,7 +29,7 @@
 - Medium: Implement search functionality for navigation bar and recipes page
 - Medium: Refine print styles for better recipe printouts
 - Low: Implement a dark mode option
-- Low: add footnote for logo on all pages
+- Low: Add footnote for logo on all pages
 
 ### Recipes
 - High: Add component for carousel of images

@@ -6,18 +6,28 @@ document.addEventListener('DOMContentLoaded', async function() {
   const pageTitle = document.querySelector('h1');
   const categoryTabs = document.querySelector('.category-tabs ul');
   const categoryDropdown = document.getElementById('category-select');
+  const filterSearchBar = document.querySelector('filter-search-bar');
 
+  // Initialize search service
+  const searchService = document.createElement('search-service');
+  searchService.id = 'profileSearch';
+  document.body.appendChild(searchService);
+  
   // State
   let currentPage = 1;
   const recipesPerPage = 4;
   let displayedRecipes = [];
   let currentCategory = 'all';
+  let currentSearchQuery = '';
 
   // Initial setup
   async function initialize() {
       firebase.auth().onAuthStateChanged(async function(user) {
           if (user) {
               // User is signed in
+              if (filterSearchBar) {
+                filterSearchBar.setValue(''); // Reset search bar
+              }
               await loadFavoriteRecipes();
               setupEventListeners();
               await displayCurrentPageRecipes(); // Call the function to load favorites
@@ -37,9 +47,8 @@ document.addEventListener('DOMContentLoaded', async function() {
               });
           } else {
               // User is signed out
-              // Handle the case where the user is not logged in
               console.log("User not logged in");
-              // You might want to redirect to the login page or display a message
+              // TODO - redirect to login page
           }
       });
   }
@@ -50,11 +59,30 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (category == 'all') {
       category = null;
     }
-    if (category) {
-      displayedRecipes = favoriteRecipes.filter(recipe => recipe.category === category);
-    } else {
-      displayedRecipes = favoriteRecipes;
+
+    // Filter by category if specified
+    displayedRecipes = category 
+      ? favoriteRecipes.filter(recipe => recipe.category === category)
+      : favoriteRecipes;
+    
+    // Apply search filter if exists
+    if (currentSearchQuery) {
+      displayedRecipes = filterRecipesBySearch(displayedRecipes, currentSearchQuery);
     }
+  }
+
+  function filterRecipesBySearch(recipes, searchText) {
+    const searchTerms = searchText.toLowerCase().trim().split(/\s+/);
+    
+    return recipes.filter(recipe => {
+      const searchableText = [
+        recipe.name,
+        recipe.category,
+        ...(recipe.tags || [])
+      ].join(' ').toLowerCase();
+
+      return searchTerms.every(term => searchableText.includes(term));
+    });
   }
 
   // Event Listeners
@@ -65,6 +93,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       // Filter modal
       filterButton.addEventListener('click', () => {
+        filterModal.setInitialRecipes(displayedRecipes);
         filterModal.open();
       });
 
@@ -72,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       filterModal.addEventListener('filter-applied', handleFilterApplied);
       filterModal.addEventListener('filter-reset', handleFilterReset);
 
+      // Category events
       categoryTabs.addEventListener('click', (e) => {
         if (e.target.tagName === 'A') {
           e.preventDefault();
@@ -85,22 +115,48 @@ document.addEventListener('DOMContentLoaded', async function() {
           switchCategory(e.target.value);
         });
       }
+
+      // Search events
+      if (filterSearchBar) {
+        filterSearchBar.addEventListener('search-input', handleFilterSearch);
+      }
   }
 
-  // Filter Handlers
-  async function handleFilterApplied(event) {
-      const { recipes } = event.detail;
-      displayedRecipes = recipes;
+  // Search handler
+  async function handleFilterSearch(e) {
+    const { searchText } = e.detail;
+    if (currentSearchQuery !== searchText) {
+      currentSearchQuery = searchText;
+      await loadFavoriteRecipes(currentCategory);
       currentPage = 1;
       await displayCurrentPageRecipes();
-      updateFilterBadge(event.detail.filters);
+    }
+  }
+  
+  // Filter Handlers
+  async function handleFilterApplied(event) {
+    const { recipes } = event.detail;
+    displayedRecipes = recipes;
+
+    if (currentSearchQuery) {
+      displayedRecipes = filterRecipesBySearch(displayedRecipes, currentSearchQuery);
+    }
+
+    currentPage = 1;
+    await displayCurrentPageRecipes();
+    updateFilterBadge(event.detail.filters);
   }
 
   async function handleFilterReset() {
-      await loadFavoriteRecipes();
-      currentPage = 1;
-      await displayCurrentPageRecipes();
-      updateFilterBadge();
+    await loadFavoriteRecipes(currentCategory);
+
+    if (currentSearchQuery) {
+      displayedRecipes = filterRecipesBySearch(displayedRecipes, currentSearchQuery);
+    }
+
+    currentPage = 1;
+    await displayCurrentPageRecipes();
+    updateFilterBadge();
   }
 
   // Display Functions
@@ -139,8 +195,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   async function switchCategory(category) {
     currentCategory = category;
     currentPage = 1;
-    updateActiveTab(); // Assuming you have this function
-    await loadFavoriteRecipes(category); // Load favorites for the category
+    updateActiveTab();
+
+    if (filterSearchBar) {
+      filterSearchBar.clear();
+    }
+    currentSearchQuery = '';
+
+    await loadFavoriteRecipes(category);
     await displayCurrentPageRecipes();
   }
 
@@ -213,18 +275,24 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Fetch favorite recipes from Firestore
   async function fetchFavoriteRecipes() {
-    const userId = firebase.auth().currentUser.uid; // Assuming you're using Firebase Authentication
-    const userDoc = await firebase.firestore().collection('users').doc(userId).get();
-    const favoriteRecipeIds = userDoc.data().favorites || [];
-    const favoriteRecipes = [];
-    for (const recipeId of favoriteRecipeIds) {
+    try {
+      const userId = firebase.auth().currentUser.uid;
+      const userDoc = await firebase.firestore().collection('users').doc(userId).get();
+      const favoriteRecipeIds = userDoc.data().favorites || [];
+      const favoriteRecipes = [];
+
+      for (const recipeId of favoriteRecipeIds) {
         const recipeDoc = await firebase.firestore().collection('recipes').doc(recipeId).get();
         if (recipeDoc.exists) {
-            favoriteRecipes.push({id: recipeId, ...recipeDoc.data()});
+          favoriteRecipes.push({id: recipeId, ...recipeDoc.data()});
         }
+      }
+
+      return favoriteRecipes;
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+      return [];
     }
-    console.log(favoriteRecipes);
-    return favoriteRecipes;
   }
 
   // Initialize the page
