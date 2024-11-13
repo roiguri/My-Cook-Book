@@ -35,6 +35,7 @@
                 }
 
             .category-page .filter-button {
+              --border-color: #ccc;
               display: block;
               background-color: var(--tabs-color);
               color: var(--text-color);            
@@ -112,16 +113,26 @@
 
                 .category-page .category-dropdown select {
                   width: 100%;
+                  display: block;
                   padding: 10px;
                   font-size: var(--size-body);
-                  border: 1px solid #ccc;
-                  border-radius: 4px;
+                  border: 2px solid var(--border-color, #ccc);
+                  border-radius: 5px;
                   appearance: none;
+                  color: var(--text-color);
+                  cursor: pointer;
+                  text-decoration: none;
+                  transition: background-color 0.3s;
                   background-color: var(--tabs-color);
-                  background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-                  background-repeat: no-repeat;
-                  background-position: right 10px top 50%;
                 }
+
+                    .category-page .category-dropdown select:hover {
+                      --border-color: var(--secondary);
+                    }
+
+                    .category-page .category-dropdown select:focus-visible {
+                      outline: none;
+                    }
 
         /* Styles for the recipe grid */
         .category-page .recipe-grid {
