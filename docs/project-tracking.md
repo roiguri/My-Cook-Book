@@ -4,7 +4,6 @@
 
 ## 📋 Next Steps
 - Change close button color for modal
-- Change 
 - Create filters panel component
 - Add all components to library
 - Improve button styles
