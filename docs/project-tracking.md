@@ -7,7 +7,6 @@
 - Create filters panel component
 - Add all components to library
 - Improve button styles
-- Change website theme colors
 - New Feature: Automation of propose a recipe
 - Simple tweeks
 
@@ -137,5 +136,6 @@
 - Create loading spinner and image carousel component
 - Change header navigation buttons on hover
 - Change close button color for modal
+- Change website theme colors
 
 

@@ -94,6 +94,14 @@
   box-shadow: 0 4px 8px rgba(var(--primary), 0.3);
 }
 
+.btn-gradient:disabled {
+  background: linear-gradient(135deg, gray, var(--primary-bright));
+  color: white;
+  opacity: 0.5;
+  transform: translateY(0);
+
+}
+
 /* Style 6: 3D Button */
 .btn-3d {
   background: var(--primary);
