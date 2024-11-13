@@ -2,6 +2,7 @@
 .home-page {
   /* Add your styles here */
 }
+
     /* Styles for the hero section */
     .home-page .hero {
       height: 200px;
@@ -16,6 +17,7 @@
 
         .home-page .hero div {
           font-family: var(--heading-font);
+          color: var(--text-color);
           font-size: var(--size-xxl);
           margin-bottom: 1rem;
           font-weight: 700;
@@ -24,6 +26,7 @@
     /* Styles for the quick links section */
     .home-page .quick-links {
       margin-top: 2rem;
+      flex-grow: 1;
     }
 
         .home-page .quick-links h2 {
