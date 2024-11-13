@@ -3,13 +3,11 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
-- 
+- Change close button color for modal
+- Change 
 - Create filters panel component
-- Integrate search component to favorites.
-- Integrate loading spinner to favorites page
 - Add all components to library
 - Improve button styles
-- Change header navigation buttons on hover
 - Change website theme colors
 - New Feature: Automation of propose a recipe
 - Simple tweeks
@@ -136,6 +134,8 @@
 - Creme brule: 8 dishes
 - Add image for נשיקות - improve explanation + 48 dishes
 - Create library component
-- implement search
+- implement search - header + categories + favorites
 - Create loading spinner and image carousel component
+- Change header navigation buttons on hover
+
 
