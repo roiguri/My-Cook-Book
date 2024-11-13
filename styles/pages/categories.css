@@ -35,17 +35,22 @@
                 }
 
             .category-page .filter-button {
-              background-color: var(--button-color); /* Example background color */
-              color: black;            /* Text color */
-              border: none;             /* Remove default border */
-              padding: 10px 15px;      /* Adjust padding as needed */
-              border-radius: 5px;       /* Add rounded corners */
+              display: block;
+              background-color: var(--tabs-color);
+              color: var(--text-color);            
+              border: none;
+              text-decoration: none;
+              border: 2px solid var(--border-color, #ccc);      
+              padding: 10px 15px;      
+              border-radius: 5px;       
               cursor: pointer; 
+              transition: background-color 0.3s;
               font-size: var(--size-body);
+              align-self: stretch;
             }
 
                 .category-page .filter-button:hover {
-                  background-color: var(--secondary-hover); /* Slightly darker background on hover */
+                  --border-color: var(--secondary); /* Slightly darker background on hover */
                 }
 
                 .category-page .filter-badge {
@@ -72,6 +77,7 @@
                   display: flex;
                   flex-wrap: wrap;
                   gap: 10px;
+                  margin: 0;
                 }
 
                     .category-page .category-tabs ul li {

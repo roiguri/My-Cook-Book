@@ -11,10 +11,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   let initialAuthSetup = false;
   // Repopulate recipes on authentication change
   firebase.auth().onAuthStateChanged(async (user) => {
-    if (!initialAuthSetup) {
-      initialAuthSetup = true;
-      return;  // Skip the first automatic auth state
-    }
     // Repopulate recipes when the authentication state changes
     await loadInitialRecipes();
     await displayCurrentPageRecipes();
