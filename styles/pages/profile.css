@@ -6,8 +6,9 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
+  font-family: var(--heading-font);
   font-size: var(--size-header1);
-  color: var(--header-color);
+  color: var(--text-color);
 }
 
 @media (max-width: 768px) {

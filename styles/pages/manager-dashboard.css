@@ -10,7 +10,8 @@
 
 .manager-dashboard h1 {
   font-size: 2.5rem;
-  color: var(--primary-color);
+  color: var(--text-color);
+  font-family: var(--heading-font);
   margin-bottom: 30px;
   text-align: center;
 

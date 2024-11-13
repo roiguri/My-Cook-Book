@@ -7,10 +7,10 @@
 
 .propose-recipe .propose-recipe-hero p {
   font-size: var(--size-header2);
-  color: var(--header-color);
 }
 
 .propose-recipe .propose-recipe-hero {
+  color: var(--text-color);
   background-size: cover;
   height: 200px;
   display: flex;
@@ -24,8 +24,8 @@
 }
 
 .propose-recipe .propose-recipe-hero h1 {
-  color: var(--header-color);
   font-size: var(--size-header1);
+  font-family: var(--heading-font);
   margin-bottom: 0.5rem;
 }
 

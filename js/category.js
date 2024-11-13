@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     } else {
         pageTitle.textContent = currentCategory === 'all' 
-            ? 'כל המתכונים' 
+            ? 'מתכונים' 
             : `${getCategoryName(currentCategory)}`;
     }
   }
