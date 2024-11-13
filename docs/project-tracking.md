@@ -3,12 +3,12 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
-- create filters parent component
-- integrate component to favorites and categories page.
-- implement search to favorites and categories page.
+- create filters panel component
+- integrate search component to favorites.
 - Integrate loading spinner to favorites page
 - Add all components to library
 - improve button styles
+- change header navigation buttons on hover
 - Change website theme colors
 - New Feature: Automation of propose a recipe
 - Simple tweeks
