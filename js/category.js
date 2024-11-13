@@ -6,9 +6,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   const filterButton = document.getElementById('open-filter-modal');
   const filterModal = document.getElementById('recipe-filter');
   const pageTitle = document.querySelector('h1');
+  const filterSearchBar = document.querySelector('filter-search-bar');
 
+  let initialAuthSetup = false;
   // Repopulate recipes on authentication change
   firebase.auth().onAuthStateChanged(async (user) => {
+    if (!initialAuthSetup) {
+      initialAuthSetup = true;
+      return;  // Skip the first automatic auth state
+    }
     // Repopulate recipes when the authentication state changes
     await loadInitialRecipes();
     await displayCurrentPageRecipes();
@@ -34,12 +40,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   async function initialize() {
       if (searchQuery) {
         currentSearchQuery = searchQuery;
-        // Update header search bar if exists
-        const searchBar = document.querySelector('header-search-bar');
-        if (searchBar) {
-            searchBar.setSearchText(searchQuery);
-        }
         updatePageTitle();
+      }
+      
+      if (filterSearchBar) {
+          filterSearchBar.setValue(currentSearchQuery);
       }
 
       await loadInitialRecipes();
@@ -110,30 +115,19 @@ document.addEventListener('DOMContentLoaded', async function() {
       // Filter events
       filterModal.addEventListener('filter-applied', handleFilterApplied);
       filterModal.addEventListener('filter-reset', handleFilterReset);
-
-      const searchBar = document.querySelector('header-search-bar');
-      if (searchBar) {
-          searchBar.addEventListener('search-input', handleSearch);
+      if (filterSearchBar) {
+        filterSearchBar.addEventListener('search-input', handleFilterSearch);
       }
   }
 
-  async function handleSearch(e) {
+  async function handleFilterSearch(e) {
     const { searchText } = e.detail;
-    currentSearchQuery = searchText;
-    
-    // Update URL without page reload
-    const newUrl = new URL(window.location);
-    if (searchText) {
-        newUrl.searchParams.set('q', searchText);
-    } else {
-        newUrl.searchParams.delete('q');
+    if (currentSearchQuery !== searchText) {  // Only update if value changed
+        currentSearchQuery = searchText;
+        await loadInitialRecipes();
+        currentPage = 1;
+        await displayCurrentPageRecipes();
     }
-    window.history.pushState({}, '', newUrl);
-
-    updatePageTitle();
-    await loadInitialRecipes();
-    currentPage = 1; // Reset to first page
-    await displayCurrentPageRecipes();
   }
 
   // Category Handlers
@@ -157,6 +151,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       updateActiveTab();
       updatePageTitle();
       await loadInitialRecipes();
+
+      if (filterSearchBar) {
+        filterSearchBar.clear(); // Reset search bar when switching categories
+      }
+      currentSearchQuery = ''; // Reset search query
+
       await displayCurrentPageRecipes();
       
       // Reset filter modal for new category
@@ -164,19 +164,30 @@ document.addEventListener('DOMContentLoaded', async function() {
         filterModal.removeAttribute('category');
       } else {
           filterModal.setAttribute('category', category);
-      }    }
+      }    
+  }
 
   // Filter Handlers
   async function handleFilterApplied(event) {
       const { recipes } = event.detail;
       displayedRecipes = recipes;
       currentPage = 1;
+
+      if (currentSearchQuery) {
+        displayedRecipes = filterRecipesBySearch(displayedRecipes, currentSearchQuery);
+      }
+
       await displayCurrentPageRecipes();
       updateFilterBadge(event.detail.filters);
   }
 
   async function handleFilterReset() {
       await loadInitialRecipes();
+
+      if (currentSearchQuery) {
+        displayedRecipes = filterRecipesBySearch(displayedRecipes, currentSearchQuery);
+      }
+
       currentPage = 1;
       await displayCurrentPageRecipes();
       updateFilterBadge();
@@ -328,8 +339,11 @@ document.addEventListener('DOMContentLoaded', async function() {
           let imagePath;
           if (recipe.pendingImage && recipe.pendingImage.compressed) {
               imagePath = recipe.pendingImage.compressed;
-          } else {
+          } else if (recipe.image) {  // Check if image exists
               imagePath = `img/recipes/compressed/${recipe.category}/${recipe.image}`;
+          } else {
+              // If no image property exists, throw error to use placeholder
+              throw new Error('No image defined');
           }
           const imageRef = storage.ref().child(imagePath);
           return await imageRef.getDownloadURL();

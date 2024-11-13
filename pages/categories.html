@@ -28,6 +28,9 @@
   <script src="../lib/utilities/modal/modal.js"></script>
   <script src="../lib/recipes/recipe-card/recipe-card.js"></script>
   <script src="../lib/search/header-search-bar/header-search-bar.js"></script>
+  <script src="../lib/search/filter-search-bar/filter-search-bar.js"></script>
+  <script src="../lib/search/search-service/search-service.js"></script>
+
   <!-- Auth Components -->
   <script src="../lib/auth/auth-controller.js"></script>
   <script src="../lib/auth/components/auth-content.js"></script>
@@ -78,12 +81,7 @@
       
     <div class="categories-content">
       <div class="filters-container">
-        <div class="search-bar categories-search">
-          <form class = "search-form">
-            <input class = "search-input" type="text" placeholder="Search recipes...">
-            <button class = "search-button">Search</button>
-          </form>
-        </div>
+        <filter-search-bar class="categories-search"></filter-search-bar>
         <button id="open-filter-modal" class="filter-button">
           <i class="fas fa-filter"></i>
           <span id="filter-badge" class="filter-badge"></span>
