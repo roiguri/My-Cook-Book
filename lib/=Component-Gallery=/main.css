@@ -13,6 +13,10 @@ main {
   background-color: #dbf3db;
 }
 
+.component-area {
+  margin: 0;
+}
+
 /* Header styles */
 header {
   background-color: #4f772d;
