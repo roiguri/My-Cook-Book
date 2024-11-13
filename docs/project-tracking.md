@@ -3,7 +3,7 @@
 ## 🚀 Master List
 
 ## 📋 Next Steps
-- Change close button color for modal
+- Add filter indication on filter button (amount of filters)
 - Create filters panel component
 - Add all components to library
 - Improve button styles
@@ -136,5 +136,6 @@
 - implement search - header + categories + favorites
 - Create loading spinner and image carousel component
 - Change header navigation buttons on hover
+- Change close button color for modal
 
 

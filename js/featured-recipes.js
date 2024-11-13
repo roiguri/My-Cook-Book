@@ -5,9 +5,11 @@ async function displayFeaturedRecipes() {
     featuredRecipesGrid.innerHTML = '<p>טוען מתכונים מומלצים...</p>';
 
     try {
-        // Fetch the recipes to get their IDs
-        const recipesRef = db.collection('recipes');
-        const snapshot = await recipesRef.where('name', 'in', featuredRecipeNames).get();
+        // Get most recent approved recipes
+        const recipesRef = db.collection('recipes')
+            .where('approved', '==', true);
+            
+        const snapshot = await recipesRef.get();
 
         if (snapshot.empty) {
             console.log('No matching documents.');
@@ -15,11 +17,27 @@ async function displayFeaturedRecipes() {
             return;
         }
 
+        // Convert to array for sorting
+        const recipes = [];
+        snapshot.forEach(doc => {
+            recipes.push(doc);
+        });
+
+        // Sort by creationTime if exists, newest first
+        recipes.sort((a, b) => {
+            const timeA = a.data().creationTime?.seconds || 0;
+            const timeB = b.data().creationTime?.seconds || 0;
+            return timeB - timeA;
+        });
+
+        // Take only first 4
+        const recentRecipes = recipes.slice(0, 3);
+
         // Clear loading message
         featuredRecipesGrid.innerHTML = '';
 
         // Create recipe-card elements
-        snapshot.forEach(doc => {
+        recentRecipes.forEach(doc => {
             const recipeCard = document.createElement('recipe-card');
             recipeCard.setAttribute('recipe-id', doc.id);
             recipeCard.setAttribute('layout', 'vertical');
