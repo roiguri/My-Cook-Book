@@ -17,6 +17,14 @@ async function displayFeaturedRecipes() {
             return;
         }
 
+        // Create element scroller
+        const elementScroller = document.createElement('element-scroller');
+        elementScroller.setAttribute('visible-items', '3');
+
+        // Create container for recipe cards
+        const recipesContainer = document.createElement('div');
+        recipesContainer.setAttribute('slot', 'items');
+
         // Convert to array for sorting
         const recipes = [];
         snapshot.forEach(doc => {
@@ -33,16 +41,18 @@ async function displayFeaturedRecipes() {
         // Take only first 4
         const recentRecipes = recipes.slice(0, 3);
 
-        // Clear loading message
-        featuredRecipesGrid.innerHTML = '';
-
         // Create recipe-card elements
         recentRecipes.forEach(doc => {
-            const recipeCard = document.createElement('recipe-card');
-            recipeCard.setAttribute('recipe-id', doc.id);
-            recipeCard.setAttribute('layout', 'vertical');
-            featuredRecipesGrid.appendChild(recipeCard);
+          const recipeCard = document.createElement('recipe-card');
+          recipeCard.setAttribute('recipe-id', doc.id);
+          recipeCard.setAttribute('layout', 'vertical');
+          recipesContainer.appendChild(recipeCard);
         });
+
+
+
+        // Add container to scroller
+        elementScroller.appendChild(recipesContainer);
 
         // Add event listener for recipe card clicks
         featuredRecipesGrid.addEventListener('recipe-card-open', (event) => {
