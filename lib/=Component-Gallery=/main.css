@@ -301,3 +301,10 @@ header {
   margin: 5px 0;
   line-height: 1.4;
 }
+
+/* playground */
+.item {
+  background-color: var(--primary-color);
+  height: 100px;
+  border-radius: 5px;
+}
