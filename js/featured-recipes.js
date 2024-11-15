@@ -1,10 +1,16 @@
-const featuredRecipeNames = ["מוקפץ עם סלמון וברוקולי", "בולונז", "אורז לבן פרסי"];
-
 async function displayFeaturedRecipes() {
     const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
+
+    // create a message container
+    const sectionContainer = document.querySelector('.featured-recipes');
     const messageContainer = document.createElement('p');
-    messageContainer.innerHTML = 'טוען מתכונים מומלצים...';
-    featuredRecipesGrid.appendChild(messageContainer);
+    messageContainer.dir = 'rtl';
+    messageContainer.style.fontSize = "var(--size-header2)";
+    sectionContainer.insertBefore(messageContainer, featuredRecipesGrid);
+    // Add loading message
+    messageContainer.innerHTML = 'טוען את המתכונים הכי חדשים...';
+
+    // Get the recipes container
     const elementScroller = document.querySelector('element-scroller');
     const recipesContainer = elementScroller.querySelector('[slot="items"]');
 
