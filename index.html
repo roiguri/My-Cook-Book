@@ -127,9 +127,13 @@
       
     <section class="featured-recipes">
       <h2>Recently Added</h2>
-      <div id="featured-recipes-grid" class="favorites-grid">
-        <!-- Featured recipes will be dynamically inserted here -->
-      </div>
+      <element-scroller id="featured-recipes-grid" class="favorites-grid"
+        item-width="200"
+        background-color="none">
+        <div slot="items">
+          <!-- Content will be dynamically added here -->
+        </div>
+      </element-scroller> 
     </section>
   </main>
 

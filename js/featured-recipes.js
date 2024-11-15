@@ -2,7 +2,11 @@ const featuredRecipeNames = ["מוקפץ עם סלמון וברוקולי", "ב�
 
 async function displayFeaturedRecipes() {
     const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
-    featuredRecipesGrid.innerHTML = '<p>טוען מתכונים מומלצים...</p>';
+    const messageContainer = document.createElement('p');
+    messageContainer.innerHTML = 'טוען מתכונים מומלצים...';
+    featuredRecipesGrid.appendChild(messageContainer);
+    const elementScroller = document.querySelector('element-scroller');
+    const recipesContainer = elementScroller.querySelector('[slot="items"]');
 
     try {
         // Get most recent approved recipes
@@ -13,17 +17,9 @@ async function displayFeaturedRecipes() {
 
         if (snapshot.empty) {
             console.log('No matching documents.');
-            featuredRecipesGrid.innerHTML = '<p>לא נמצאו מתכונים מומלצים.</p>';
+            messageContainer.innerHTML = 'לא נמצאו מתכונים מומלצים.';
             return;
         }
-
-        // Create element scroller
-        const elementScroller = document.createElement('element-scroller');
-        elementScroller.setAttribute('visible-items', '3');
-
-        // Create container for recipe cards
-        const recipesContainer = document.createElement('div');
-        recipesContainer.setAttribute('slot', 'items');
 
         // Convert to array for sorting
         const recipes = [];
@@ -41,18 +37,18 @@ async function displayFeaturedRecipes() {
         // Take only first 4
         const recentRecipes = recipes.slice(0, 3);
 
+        // Remove loading message
+        messageContainer.remove();
+        
         // Create recipe-card elements
         recentRecipes.forEach(doc => {
           const recipeCard = document.createElement('recipe-card');
           recipeCard.setAttribute('recipe-id', doc.id);
-          recipeCard.setAttribute('layout', 'vertical');
+          recipeCard.setAttribute('layout', 'vettical');
+          recipeCard.setAttribute('card-width', '200px');
+          recipeCard.setAttribute('card-height', '300px');
           recipesContainer.appendChild(recipeCard);
         });
-
-
-
-        // Add container to scroller
-        elementScroller.appendChild(recipesContainer);
 
         // Add event listener for recipe card clicks
         featuredRecipesGrid.addEventListener('recipe-card-open', (event) => {
@@ -60,9 +56,20 @@ async function displayFeaturedRecipes() {
             window.location.href = `pages/recipe-page.html?id=${recipeId}`;
         });
 
+        // Initialize the element-scroller after content is loaded
+        const scroller = document.querySelector('element-scroller');
+        if (scroller) {
+            // Force recalculation of scroller dimensions
+            scroller.setAttribute('item-width', '200');
+            scroller.setAttribute('padding', '20');
+            setTimeout(() => {
+                scroller.handleResize();
+            }, 100);
+        }
+
     } catch (error) {
         console.error("Error fetching featured recipes:", error);
-        featuredRecipesGrid.innerHTML = '<p>Error loading featured recipes. Please try again later.</p>';
+        messageContainer.innerHTML = 'Error loading featured recipes. Please try again later.';
     }
 }
 

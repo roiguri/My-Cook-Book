@@ -75,6 +75,7 @@
     /* Styles for the featured recipes section */
     .home-page .featured-recipes {
       margin-top: 2rem;
+      width: 90vw;
     }
 
         .home-page .featured-recipes h2 {
@@ -84,14 +85,15 @@
           margin-bottom: 1.5rem;
         }
 
-
-        .favorites-grid {
+        #featured-recipes-grid {
           display: flex;
-          flex-wrap: wrap;
-          gap: 2rem;
-          direction: rtl;
-          justify-content: center;
+          gap: 20px;
         }
+
+        .recipe-card {
+          width: 200px;
+        }
+
 
 /*------------------------------------*\
     #mobile-size
