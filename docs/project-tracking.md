@@ -33,10 +33,13 @@
 ### Recipes
 - High: Add component for carousel of images
 - High: Change image names on database (recipeId based)
+- Medium: Add sorting for recipes.
 - 
 
 ### Propose a recipe
 - High: fix layout for ingredient input
+- High: better managment for upload (loading spinner/indicative error messages)
+- High: maintain data for recipes when logging in
 - High: Implement the option to add multiple images
 - Medium: Use Enter key to move between focus elements
 - Medium: Add preview option
