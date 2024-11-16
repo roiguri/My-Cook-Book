@@ -2,16 +2,19 @@
 
 ## 🚀 Master List
 
-## 📋 Next Steps
+## 📋 Next Steps - High Priority
+- Add multiple image support for recipes
+- Add media instructions for recipes
+- Fix stages in propose a recipe (adding a stage deleted content)
+- Add division to parts for ingredients
+
+## 📋 Next Steps - Low Priority
 - Add filter indication on filter button (amount of filters)
 - Create filters panel component
 - Add all components to library
 - Improve button styles
 - New Feature: Automation of propose a recipe
 - Simple tweeks
-
-### ⏸️ On Hold
-- 
 
 ---
 
