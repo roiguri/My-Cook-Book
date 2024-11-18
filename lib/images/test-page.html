@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../../styles/main.css">
+
+  <title>Image Handler Test Page</title>
+  <style>
+
+      body {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+          font-family: Arial, sans-serif;
+      }
+
+      .test-section {
+          margin: 20px 0;
+          padding: 20px;
+          background: #f5f5f5;
+          border-radius: 8px;
+      }
+
+      .test-controls {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 10px;
+          margin-bottom: 15px;
+      }
+
+      .test-controls button {
+          padding: 8px 16px;
+          background: var(--primary-color);
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+      }
+
+      .test-controls button:hover {
+          opacity: 0.9;
+      }
+
+      .checklist {
+          background: white;
+          padding: 15px;
+          border-radius: 4px;
+          margin-top: 15px;
+      }
+
+      .checklist h3 {
+          margin-top: 0;
+      }
+
+      .checklist-item {
+          display: flex;
+          align-items: center;
+          margin: 8px 0;
+      }
+
+      .checklist-item input[type="checkbox"] {
+          margin-left: 10px;
+      }
+
+      #eventLog {
+          margin-top: 20px;
+          padding: 10px;
+          background: #f0f0f0;
+          border-radius: 4px;
+          max-height: 200px;
+          overflow-y: auto;
+          font-family: monospace;
+      }
+
+      .log-entry {
+          margin: 5px 0;
+          padding: 5px;
+          border-bottom: 1px solid #ddd;
+      }
+
+      .log-entry.event {
+          color: #2a6099;
+      }
+
+      .log-entry.error {
+          color: #cc0000;
+      }
+
+      .log-entry.success {
+          color: #007700;
+      }
+
+      #imageDetails {
+          margin-top: 10px;
+          font-family: monospace;
+          white-space: pre-wrap;
+          background: white;
+          padding: 10px;
+          border-radius: 4px;
+      }
+  </style>
+</head>
+<body>
+    <h1>Image Handler Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <div class="test-controls">
+          <button onclick="logImages()">הצג תמונות נוכחיות</button>
+          <button onclick="clearImages()">נקה תמונות</button>
+          <button onclick="setMaxImages()">שנה מספר מקסימלי</button>
+          <button onclick="simulateUpload()">סימולציית העלאה</button>
+          <button onclick="simulateError()">סימולציית שגיאה</button>
+          <button onclick="clearLog()">נקה יומן</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Image Handler Component</h2>
+      <image-handler></image-handler>
+    </div>
+
+    <div class="test-section">
+        <h2>מידע נוכחי</h2>
+        <div id="imageDetails">No images added yet</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Checklist</h2>
+        <div class="checklist">
+            <h3>File Upload Tests</h3>
+            <div class="checklist-item">
+                <input type="checkbox" id="test1">
+                <label for="test1">העלאת קובץ דרך כפתור</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="test2">
+                <label for="test2">העלאת קובץ דרך גרירה</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="test3">
+                <label for="test3">ניסיון העלאת קובץ גדול מ-5MB</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="test4">
+                <label for="test4">ניסיון העלאת סוג קובץ לא חוקי</label>
+            </div>
+            
+            <h3>Image Management Tests</h3>
+            <div class="checklist-item">
+                <input type="checkbox" id="test5">
+                <label for="test5">מחיקת תמונה בודדת</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="test6">
+                <label for="test6">ניסיון העלאת יותר מהמקסימום המותר</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="test7">
+                <label for="test7">שינוי תמונה ראשית</label>
+            </div>
+            
+            <h3>Ordering Tests</h3>
+            <div class="checklist-item">
+                <input type="checkbox" id="test8">
+                <label for="test8">גרירת תמונה לשינוי סדר</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="test9">
+                <label for="test9">וידוא שהתמונה הראשונה היא ראשית כברירת מחדל</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Event Log</h2>
+        <div id="eventLog"></div>
+    </div>
+
+    <script src="image-handler.js"></script>
+    <script>
+        const imageHandler = document.querySelector('image-handler');
+        const eventLog = document.getElementById('eventLog');
+        let lastAddedImage = null;
+
+        function logEvent(message) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            eventLog.insertBefore(entry, eventLog.firstChild);
+        }
+
+        function clearLog() {
+            eventLog.innerHTML = '';
+        }
+
+        function updateImageDetails() {
+            const details = document.getElementById('imageDetails');
+            const images = imageHandler.getImages();
+            
+            if (images.length === 0) {
+                details.textContent = 'No images added yet';
+                return;
+            }
+
+            const imagesList = images.map((img, index) => 
+                `${index + 1}. ${img.file.name} (${Math.round(img.file.size / 1024)}KB)${img.isPrimary ? ' [Primary]' : ''}`
+            ).join('\n');
+
+            details.textContent = `Total Images: ${images.length}\n\n${imagesList}`;
+        }
+
+        function logImages() {
+            const images = imageHandler.getImages();
+            logEvent(`Current images: ${images.length} images`);
+            images.forEach((img, index) => {
+                logEvent(`Image ${index + 1}: ${img.file.name} (${Math.round(img.file.size / 1024)}KB)`);
+            });
+        }
+
+        function clearImages() {
+            imageHandler.clearImages();
+            logEvent('Images cleared');
+            lastAddedImage = null;
+            updateImageDetails();
+        }
+
+        function setMaxImages() {
+            const count = prompt('Enter new maximum image count:', '5');
+            if (count && !isNaN(count)) {
+                imageHandler.setMaxImages(parseInt(count));
+                logEvent(`Max images set to: ${count}`);
+            }
+        }
+
+        function simulateUpload() {
+            if (!lastAddedImage) {
+                logEvent('No image to simulate upload for', 'error');
+                return;
+            }
+
+            imageHandler.setImageUploading(lastAddedImage.id, true);
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += 10;
+                imageHandler.setImageProgress(lastAddedImage.id, progress);
+                logEvent(`Upload progress: ${progress}%`);
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    imageHandler.setImageUploaded(lastAddedImage.id, 'https://example.com/fake-url');
+                    logEvent('Upload completed', 'success');
+                }
+            }, 500);
+        }
+
+        function simulateError() {
+            if (!lastAddedImage) {
+                logEvent('No image to simulate error for', 'error');
+                return;
+            }
+
+            imageHandler.setImageError(lastAddedImage.id, 'שגיאה בהעלאת התמונה');
+            logEvent('Upload error simulated', 'error');
+        }
+
+        // Event listeners
+        imageHandler.addEventListener('file-added', (e) => {
+            lastAddedImage = e.detail.imageData;
+            logEvent(`New file added: ${lastAddedImage.file.name}`);
+            updateImageDetails();
+        });
+
+        imageHandler.addEventListener('images-cleared', () => {
+            logEvent('All images cleared');
+            updateImageDetails();
+        });
+
+        imageHandler.addEventListener('images-reordered', () => {
+            logEvent('Images reordered');
+            updateImageDetails();
+        });
+
+        imageHandler.addEventListener('primary-image-changed', (e) => {
+            logEvent(`Primary image changed: ${e.detail.imageId}`);
+            updateImageDetails();
+        });
+    </script>
+</body>
+</html>
