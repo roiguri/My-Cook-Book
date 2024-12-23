@@ -74,3 +74,71 @@ async function deleteRecipeImages(recipeId) {
       throw new Error(`Failed to delete recipe images: ${error.message}`);
   }
 }
+
+/**
+ * Uploads a batch of proposed images for a recipe
+ * @param {string} recipeId - The ID of the recipe
+ * @param {Array} images - Array of image data from ImageHandler
+ * @param {string} userId - The ID of the user proposing the images
+ * @returns {Promise<Object>} The pending images data to be stored in Firestore
+ */
+async function uploadProposedImages(recipeId, images, userId) {
+  const storage = firebase.storage();
+  const batchId = Math.random().toString(36).substring(2);
+  const pendingBatch = {
+    batchId,
+    submittedBy: userId,
+    status: 'pending',
+    images: []
+  };
+
+  try {
+    // Get recipe data for category
+    const recipeDoc = await firebase.firestore().collection('recipes').doc(recipeId).get();
+    if (!recipeDoc.exists) throw new Error('Recipe not found');
+    
+    const recipeData = recipeDoc.data();
+    const pendingImages = recipeData.pendingImages || [];
+
+    // Upload each image
+    for (const image of images) {
+      const imageId = Math.random().toString(36).substring(2);
+      const fileExtension = image.file.name.split('.').pop();
+      
+      // Define paths
+      const fullPath = `img/recipes/pending/${recipeId}/${batchId}/full/${imageId}.${fileExtension}`;
+      const compressedPath = `img/recipes/pending/${recipeId}/${batchId}/compressed/${imageId}.${fileExtension}`;
+
+      // Upload full size
+      await storage.ref(fullPath).put(image.file);
+      
+      // For now, use the same file for compressed version
+      // TODO: Implement actual image compression
+      await storage.ref(compressedPath).put(image.file);
+
+      // Add image data to batch
+      pendingBatch.images.push({
+        id: imageId,
+        full: fullPath,
+        compressed: compressedPath,
+        isPrimary: image.isPrimary,
+        fileExtension
+      });
+    }
+
+    // Add timestamp just before the update
+    pendingBatch.timestamp = firebase.firestore.Timestamp.now();
+
+    // Update Firestore with the new array
+    const updatedPendingImages = [...pendingImages, pendingBatch];
+    await firebase.firestore().collection('recipes').doc(recipeId).update({
+      pendingImages: updatedPendingImages
+    });
+
+    return pendingBatch;
+
+  } catch (error) {
+    console.error('Error uploading proposed images:', error);
+    throw error;
+  }
+}
