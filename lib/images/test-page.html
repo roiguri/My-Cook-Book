@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Proposal Test</title>
+    <link rel="stylesheet" href="../../styles/main.css">
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="../../config/firebase-config.js"></script>
+
+    <!-- Components -->
+    <script src="../../lib/utilities/modal/modal.js"></script>
+    <script src="../../lib/images/image-handler.js"></script>
+    <script src="../../lib/utilities/loading-spinner/loading-spinner.js"></script>
+    <script src="../../lib/images/image-proposal-modal.js"></script>
+    <script src="../../js/utilities/firebase-storage-utils.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Proposal Test</h1>
+    <button id="openModal">Open Image Proposal Modal</button>
+    <image-proposal-modal width="600px"></image-proposal-modal>
+
+    <script>
+        document.getElementById('openModal').addEventListener('click', () => {
+            const modal = document.querySelector('image-proposal-modal');
+            modal.openForRecipe('b9BCEdwlM6p1mhZpN7GY');
+        });
+
+        // Listen for the images-proposed event
+        document.querySelector('image-proposal-modal').addEventListener('images-proposed', (event) => {
+            console.log('Images proposed successfully:', event.detail);
+            alert('Images uploaded successfully!');
+        });
+    </script>
+</body>
+</html>
