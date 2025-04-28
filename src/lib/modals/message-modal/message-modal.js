@@ -1,3 +1,5 @@
+import { Modal } from '../../utilities/modal/modal.js';
+
 /**
  * Message Modal Component
  * @class

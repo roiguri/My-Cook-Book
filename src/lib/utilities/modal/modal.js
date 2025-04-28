@@ -52,7 +52,7 @@
  * @attr {string} background-color - Sets the background color of the modal.
  */
 
-class Modal extends HTMLElement {
+export class Modal extends HTMLElement {
   /**
    * ##Set-up
    */
