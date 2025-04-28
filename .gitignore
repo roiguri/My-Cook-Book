@@ -13,3 +13,6 @@ build/
 
 # Ignore environment variables
 .env
+
+# Ignore planning docs
+.plan/

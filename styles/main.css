@@ -5,7 +5,6 @@
 /* reusable components */
 @import 'components/header.css';
 @import 'components/footer.css';
-@import 'components/auth.css';
 @import 'components/base_button.css';
 @import 'components/search_bar.css';
 @import 'components/quote.css';
