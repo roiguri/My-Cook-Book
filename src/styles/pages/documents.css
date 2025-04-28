@@ -1,0 +1,25 @@
+.documents {
+  margin: 0;
+  padding: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: none;
+}
+
+.documents h1 {
+  color: var(--text-color);
+  font-size: var(--size-header1);
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .documents .documents-container {
+    margin-top: 20px;
+  }
+
+  .documents h1 {
+    font-size: var(--size-header1-mobile);
+  }
+}

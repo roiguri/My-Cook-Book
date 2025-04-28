@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "vite --config vite.config.js",
     "build": "vite build",
-    "serve": "vite preview",
+    "serve": "vite preview"
   },
   "repository": {
     "type": "git",

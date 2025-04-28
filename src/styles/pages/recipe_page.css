@@ -1,0 +1,17 @@
+.recipe-page .recipe-container {
+  width: 600px;
+  margin: 0 auto;
+  padding: 100px;
+  font-family: var(--body-font);
+  background-color: var(--background-color);
+  direction: rtl;
+  flex-grow: 1;
+}
+
+@media (max-width: 768px) {
+  .recipe-page .recipe-container{
+    padding: 30px;
+    width: auto;
+    min-width: 200px; 
+  }
+}
