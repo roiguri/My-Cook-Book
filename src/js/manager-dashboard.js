@@ -1,4 +1,4 @@
-// manager-dashboard.js
+import { auth, db, storage } from '../js/config/firebase-config.js';
 
 document.addEventListener('DOMContentLoaded', function() {
   // Check if the user is authenticated and has manager privileges
