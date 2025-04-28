@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Kitchen Chronicles - Recipes</title>
+
+  <!-- Favicon for browsers -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/wooden-spoon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/wooden-spoon-16.png">
+
+  <!-- Icon for Android Chrome -->
+  <link rel="manifest" href="/My-Cook-Book/site.webmanifest.json">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Icon for iOS -->
+  <link rel="apple-touch-icon" sizes="128x128" href="/img/icon/wooden-spoon-16.png">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="src/styles/main.css">
+  <link rel="stylesheet" href="src/styles/pages/categories.css">
+
+  <!-- firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+  <script type="module" src="/src/pages/vite-categories.js" defer></script>
+</head>
+<body class="category-page">
+  <header class="header-container">
+    <div class="menu-title-container">
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span class="hamburger"></span>
+      </button>
+      <a href="../index.html">
+        <div class="logo">
+          Our Kitchen Chronicles
+        </div>
+      </a>
+    </div>
+    <div class="nav-search-container">
+      <nav dir="rtl">
+        <ul>
+          <li><a class="btn-3d" href="../index.html">דף הבית</a></li>
+          <li><a class="btn-3d" href="../pages/categories.html">מתכונים</a></li>
+          <li><a class="btn-3d" href="../pages/propose-recipe.html">הצעת מתכון</a></li>
+        </ul>
+      </nav>
+      <div class="search-auth-container">
+        <div class="search-bar header-search">
+          <header-search-bar></header-search-bar>
+        </div>
+        <auth-avatar class="btn-3d"></auth-avatar>
+      </div>
+    </div> 
+  </header>
+  
+  <main>
+    <h1 id="category-header">מתכונים</h1>
+      
+    <div class="categories-content">
+      <div class="filters-container">
+        <filter-search-bar class="categories-search"></filter-search-bar>
+        <button id="open-filter-modal" class="filter-button">
+          <i class="fas fa-filter"></i>
+          <span id="filter-badge" class="filter-badge"></span>
+        </button>
+      
+        <nav dir="rtl" class="category-tabs">
+          <ul>
+            <li><a href="#all" class="active">כל הקטגוריות</a></li>
+            <li><a href="#appetizers" class="active">מנות ראשונות</a></li>
+            <li><a href="#main-courses">מנות עיקריות</a></li>
+            <li><a href="#side-dishes">תוספות</a></li>
+            <li><a href="#soups-stews">מרקים ותבשילים</a></li>
+            <li><a href="#salads">סלטים</a></li>
+            <li><a href="#desserts">קינוחים</a></li>
+            <li><a href="#breakfast-brunch">ארוחות בוקר</a></li>
+            <li><a href="#snacks">חטיפים</a></li>
+            <li><a href="#beverages">משקאות</a></li>
+          </ul>
+        </nav>
+        <div class="category-dropdown">
+          <select dir="rtl" id="category-select">
+            <option value="all">כל הקטגוריות</option>
+            <option value="appetizers">מנות ראשונות</option>
+            <option value="main-courses">מנות עיקריות</option>
+            <option value="side-dishes">תוספות</option>
+            <option value="soups-stews">מרקים ותבשילים</option>
+            <option value="salads">סלטים</option>
+            <option value="desserts">קינוחים</option>
+            <option value="breakfast-brunch">ארוחות בוקר</option>
+            <option value="snacks">חטיפים</option>
+            <option value="beverages">משקאות</option>
+          </select>
+        </div>
+      </div>
+      
+      <section dir="rtl" class="recipe-grid" id="recipe-grid">
+        <!-- Recipe cards will be dynamically added here -->
+      </section>   
+    </div>
+  </main>
+
+  <div class="pagination">
+    <button class="btn-gradient" id="next-page">הבא</button>
+    <span id="page-info"></span>
+    <button class="btn-gradient" id="prev-page">הקודם</button>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+  </footer>
+
+
+  <recipe-filter-component id="recipe-filter"></recipe-filter-component>
+  <!-- Auth Components -->
+  <auth-controller>
+    <auth-content>
+        <login-form slot="login-form" class="active"></login-form>
+        <signup-form slot="signup-form"></signup-form>
+        <forgot-password slot="forgot-password"></forgot-password>
+        <user-profile slot="user-profile"></user-profile>
+    </auth-content>
+  </auth-controller>
+</body>
+</html>

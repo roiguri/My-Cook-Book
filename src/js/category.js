@@ -1,3 +1,5 @@
+import { auth, db, storage } from '../js/config/firebase-config.js';
+
 document.addEventListener('DOMContentLoaded', async function() {
   // DOM elements
   const categoryTabs = document.querySelector('.category-tabs ul');
