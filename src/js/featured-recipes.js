@@ -1,3 +1,5 @@
+import { auth, db, storage } from '../js/config/firebase-config.js';
+
 async function displayFeaturedRecipes() {
     const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
 
