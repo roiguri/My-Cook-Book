@@ -1,6 +1,6 @@
 /* Styles for the header container */
 :root {
-  --header-background: url('../../img/background/wood-texture.jpg') repeat-x;
+  --header-background: url('/img/background/wood-texture.jpg') repeat-x;
 }
 
 header {

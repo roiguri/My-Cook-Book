@@ -717,7 +717,7 @@ class RecipeCard extends HTMLElement {
                   src="${this._imageUrl}" 
                   alt="${name}"
                   onload="this.classList.add('loaded')"
-                  onerror="this.src='../img/placeholder.jpg'; this.classList.add('loaded')">
+                  onerror="this.src='/img/placeholder.jpg'; this.classList.add('loaded')">
             ` : ''}
             <div class="recipe-content">
                 <h3 class="recipe-title">

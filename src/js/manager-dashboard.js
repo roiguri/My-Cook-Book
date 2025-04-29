@@ -153,7 +153,7 @@ function editRecipe(recipe) {
   editPreviewContainer.innerHTML = '';
   editPreviewContainer.innerHTML = `
     <edit-preview-recipe
-      path-to-icon="../../img/icon/other/"
+      path-to-icon="/img/icon/other/"
       recipe-id="${recipe.id}" 
       start-mode="edit">
     </edit-preview-recipe>
