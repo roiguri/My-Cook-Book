@@ -1,3 +1,7 @@
+// Import styles
+import '../styles/main.css';
+import '../styles/pages/documents.css';
+
 // For all pages
 import '../js/sw-register.js';
 import '../js/config/firebase-config.js'

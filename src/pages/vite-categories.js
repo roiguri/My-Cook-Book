@@ -1,3 +1,7 @@
+// Import styles
+import '../styles/main.css';
+import '../styles/pages/categories.css';
+
 import { auth, db, storage } from '../js/config/firebase-config.js';
 
 // For all pages
@@ -20,8 +24,6 @@ import '../js/category.js'
 // Page Specific Components
 import '../lib/utilities/modal/modal.js';
 import '../lib/modals/filter_modal/filter_modal.js';
-import '../lib/utilities/modal/modal.js';
 import '../lib/recipes/recipe-card/recipe-card.js';
-import '../lib/search/header-search-bar/header-search-bar.js';
 import '../lib/search/filter-search-bar/filter-search-bar.js';
 import '../lib/search/search-service/search-service.js';

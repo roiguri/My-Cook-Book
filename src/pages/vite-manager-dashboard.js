@@ -1,3 +1,7 @@
+// Import styles
+import '../styles/main.css';
+import '../styles/pages/manager-dashboard.css';
+
 import { auth, db, storage } from '../js/config/firebase-config.js';
 
 // For all pages
@@ -23,7 +27,6 @@ import '../js/utilities/firebase-storage-utils.js';
 // Page Specific Components
 import '../lib/utilities/scrolling_list/scroll_list.js';
 import '../lib/modals/image_approval/image_approval.js';
-import '../lib/utilities/modal/modal.js';
 import '../lib/recipes/recipe_preview_modal/recipe_preview_modal.js';
 import '../lib/recipes/recipe_component/recipe_component.js';
 import '../lib/recipes/recipe_preview_modal/edit_preview_recipe.js';

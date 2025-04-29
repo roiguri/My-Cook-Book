@@ -1,3 +1,8 @@
+// Import styles
+import '../styles/main.css';
+import '../styles/pages/categories.css';
+import '../styles/pages/profile.css';
+
 // Import Firebase instances
 import { auth, db, storage } from '../js/config/firebase-config.js';
 
@@ -21,11 +26,6 @@ import '../lib/auth/components/user-profile.js';
 // Import page-specific scripts
 import '../js/navigation-script.js';
 import '../js/profile.js';
-
-// Import styles
-import '../styles/main.css';
-import '../styles/pages/categories.css';
-import '../styles/pages/profile.css';
 
 // Register service worker
 import '../js/sw-register.js';
