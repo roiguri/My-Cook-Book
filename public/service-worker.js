@@ -2,16 +2,16 @@ const CACHE_NAME = 'our-kitchen-chronicles-2024.10.08,22:23';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/styles/',
+  '/src/styles/',
   '/img/category-jars/optimized/',
   '/img/background/stone-counter-top.jpg',
   '/img/background/wood-texture.jpg',
-  '/styles/main.css',
-  '/styles/base.css',
-  '/styles/layout.css',
-  '/styles/components.css',
-  '/styles/pages.css',
-  '/styles/responsive.css',
+  '/src/styles/main.css',
+  '/src/styles/base.css',
+  '/src/styles/layout.css',
+  '/src/styles/components.css',
+  '/src/styles/pages.css',
+  '/src/styles/responsive.css',
   // Add other critical assets here
 ];
 
