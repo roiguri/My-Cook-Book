@@ -6,47 +6,24 @@
   <title>My Profile - Our Kitchen Chronicles</title>
 
   <!-- Favicon for browsers -->
-  <link rel="icon" type="image/png" sizes="32x32" href="../img/icon/wooden-spoon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../img/icon/wooden-spoon-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/icon/wooden-spoon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/icon/wooden-spoon-16.png">
 
   <!-- Icon for Android Chrome -->
-  <link rel="manifest" href="/My-Cook-Book/site.webmanifest.json">
+  <link rel="manifest" href="/site.webmanifest.json">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   <!-- Icon for iOS -->
-  <link rel="apple-touch-icon" sizes="128x128" href="../img/icon/wooden-spoon-16.png">
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="../styles/main.css">
-  <link rel="stylesheet" href="../styles/pages/categories.css">
-  <link rel="stylesheet" href="../styles/pages/profile.css">
-
-  <!-- scripts -->
-  <script src="sw-register.js"></script>
-
-  <!-- components -->
-  <script src="../lib/modals/filter_modal/filter_modal.js"></script>
-  <script src="../lib/utilities/modal/modal.js"></script>
-  <script src="../lib/recipes/recipe-card/recipe-card.js"></script>
-  <script src="../lib/search/header-search-bar/header-search-bar.js"></script>
-  <script src="../lib/search/filter-search-bar/filter-search-bar.js"></script>
-  <script src="../lib/search/search-service/search-service.js"></script>
-
-  <!-- Auth Components -->
-  <script src="../lib/auth/auth-controller.js"></script>
-  <script src="../lib/auth/components/auth-content.js"></script>
-  <script src="../lib/auth/components/auth-avatar.js"></script>
-  <script src="../lib/auth/components/login-form.js"></script>
-  <script src="../lib/auth/components/signup-form.js"></script>
-  <script src="../lib/auth/components/forgot-password.js"></script>
-  <script src="../lib/auth/components/user-profile.js"></script>
+  <link rel="apple-touch-icon" sizes="128x128" href="/img/icon/wooden-spoon-16.png">
 
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-  <script src="../config/firebase-config.js"></script>
+
+  <!-- Vite entry point -->
+  <script type="module" src="/src/pages/vite-profile.js"></script>
 </head>
 <body class="category-page">
   <header class="header-container">
@@ -54,7 +31,7 @@
       <button class="nav-toggle" aria-label="Toggle navigation">
         <span class="hamburger"></span>
       </button>
-      <a href="../index.html">
+      <a href="index.html">
         <div class="logo">
           Our Kitchen Chronicles
         </div>
@@ -64,8 +41,8 @@
       <nav dir="rtl">
         <ul>
           <li><a class="btn-3d" href="../index.html">דף הבית</a></li>
-          <li><a class="btn-3d" href="../pages/categories.html">מתכונים</a></li>
-          <li><a class="btn-3d" href="../pages/propose-recipe.html">הצעת מתכון</a></li>
+          <li><a class="btn-3d" href="categories.html">מתכונים</a></li>
+          <li><a class="btn-3d" href="propose-recipe.html">הצעת מתכון</a></li>
         </ul>
       </nav>
       <div class="search-auth-container">

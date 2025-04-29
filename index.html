@@ -6,8 +6,6 @@
   <title>Our Kitchen Chronicles</title>
   
   <!-- Styles -->
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/pages/index.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
   
   <!-- Favicon for browsers -->
@@ -19,34 +17,15 @@
 
   <!-- Icon for iOS -->
   <link rel="apple-touch-icon" sizes="128x128" href="img/icon/wooden-spoon-16.png">
-  
-  <!-- Scripts -->
-  <script src="sw-register.js"></script>
-  <script defer src="js/navigation-script.js"></script>
-  <script defer src="js/featured-recipes.js"></script>
+
 
   <!-- firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-  <script src="config/firebase-config.js"></script>
-
-  <!-- Components -->
-  <script src="lib/recipes/recipe-card/recipe-card.js"></script>
-  <script src="lib/utilities/modal/modal.js"></script>
-  <script src="lib/search/header-search-bar/header-search-bar.js"></script>
-  <script src="lib/utilities/element-scroller/element-scroller.js"></script>
-
-  <!-- Auth Components -->
-  <script src="lib/auth/auth-controller.js"></script>
-  <script src="lib/auth/components/auth-content.js"></script>
-  <script src="lib/auth/components/auth-avatar.js"></script>
-  <script src="lib/auth/components/login-form.js"></script>
-  <script src="lib/auth/components/signup-form.js"></script>
-  <script src="lib/auth/components/forgot-password.js"></script>
-  <script src="lib/auth/components/user-profile.js"></script>
   
+  <script type="module" src="/src/pages/vite-index.js" defer></script>
 </head>
 <body class="home-page">
   <header class="header-container">
@@ -63,9 +42,9 @@
     <div class="nav-search-container">
       <nav dir="rtl">
         <ul>
-          <li><a class="btn-3d" href="./index.html">דף הבית</a></li>
-          <li><a class="btn-3d" href="./pages/categories.html">מתכונים</a></li>
-          <li><a class="btn-3d" href="./pages/propose-recipe.html">הצעת מתכון</a></li>
+          <li><a class="btn-3d" href="index.html">דף הבית</a></li>
+          <li><a class="btn-3d" href="pages/categories.html">מתכונים</a></li>
+          <li><a class="btn-3d" href="pages/propose-recipe.html">הצעת מתכון</a></li>
         </ul>
       </nav>
       <div class="search-auth-container">
@@ -86,39 +65,39 @@
       <h2>Explore Recipes</h2>
       <div class="category-jars">
         <a href="pages/categories.html#appetizers" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/appetizers.jpg');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/appetizers.jpg');"></div>
           <span>Appetizers</span>
         </a>
         <a href="pages/categories.html#main-courses" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/main-course.webp');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/main-course.webp');"></div>
           <span>Main Courses</span>
         </a>
         <a href="pages/categories.html#side-dishes" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/side-dishes.jpeg');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/side-dishes.jpeg');"></div>
           <span>Side Dishes</span>
         </a>
         <a href="pages/categories.html#soups-stews" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/soups&stews.jpg');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/soups&stews.jpg');"></div>
           <span>Soups & Stews</span>
         </a>
         <a href="pages/categories.html#salads" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/salad.jpg');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/salad.jpg');"></div>
           <span>Salads</span>
         </a>
         <a href="pages/categories.html#desserts" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/dessert.jpg');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/dessert.jpg');"></div>
           <span>Desserts</span>
         </a>
         <a href="pages/categories.html#breakfast-brunch" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/breakfast.jpeg');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/breakfast.jpeg');"></div>
           <span>Breakfast & Brunch</span>
         </a>
         <a href="pages/categories.html#snacks" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/snacks.jpg');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/snacks.jpg');"></div>
           <span>Snacks</span>
         </a>
         <a href="pages/categories.html#beverages" class="category-jar">
-          <div class="jar-img" style="background-image: url('img/category-jars/optimized/beverages.jpg');"></div>
+          <div class="jar-img" style="background-image: url('/img/category-jars/optimized/beverages.jpg');"></div>
           <span>Beverages</span>
         </a>
         <!-- Add more category jars as needed -->
