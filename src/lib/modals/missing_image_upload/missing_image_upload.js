@@ -1,3 +1,5 @@
+import { Modal } from '../../utilities/modal/modal.js';
+
 /**
  * MissingImageUpload Component
  * @class
@@ -63,7 +65,6 @@ class MissingImageUpload extends HTMLElement {
           </div>
         </form>
       </custom-modal>
-      <script src="../lib/utilities/modal/modal.js"></script>
     `;
   }
 

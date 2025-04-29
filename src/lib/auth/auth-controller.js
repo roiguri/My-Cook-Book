@@ -130,20 +130,20 @@ class AuthController extends HTMLElement {
 
     // Add Favorites tab for all logged in users
     navMenu.appendChild(
-        createNavItem('profile-tab', 'מועדפים', '/pages/profile.html')
+        createNavItem('profile-tab', 'מועדפים', 'vite-profile.html')
     );
 
     // Add Grandmother's Recipes for approved users and managers
     if (roles.isApproved || roles.isManager) {
         navMenu.appendChild(
-            createNavItem('documents-tab', 'המטעמים של סבתא', '/pages/documents.html')
+            createNavItem('documents-tab', 'המטעמים של סבתא', 'vite-documents.html')
         );
     }
 
     // Add Management Interface for managers
     if (roles.isManager) {
         navMenu.appendChild(
-            createNavItem('dashboard-tab', 'ממשק ניהול', '/pages/manager-dashboard.html')
+            createNavItem('dashboard-tab', 'ממשק ניהול', 'vite-manager-dashboard.html')
         );
     }
   }

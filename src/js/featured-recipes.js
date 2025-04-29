@@ -61,7 +61,7 @@ async function displayFeaturedRecipes() {
         // Add event listener for recipe card clicks
         featuredRecipesGrid.addEventListener('recipe-card-open', (event) => {
             const recipeId = event.detail.recipeId;
-            window.location.href = `pages/recipe-page.html?id=${recipeId}`;
+            window.location.href = `vite-recipe-page.html?id=${recipeId}`;
         });
 
         // Initialize the element-scroller after content is loaded
