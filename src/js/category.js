@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         recipeCard.style.height = '100%';
         
         recipeCard.addEventListener('recipe-card-open', (event) => {
-            window.location.href = `vite-recipe-page.html?id=${event.detail.recipeId}`;
+            window.location.href = `recipe-page.html?id=${event.detail.recipeId}`;
         });
         
         cardContainer.appendChild(recipeCard);

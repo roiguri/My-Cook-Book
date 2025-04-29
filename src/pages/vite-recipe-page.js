@@ -1,3 +1,7 @@
+// Import styles
+import '../styles/main.css';
+import '../styles/pages/recipe_page.css';
+
 // Import Firebase instances
 import { auth, db, storage } from '../js/config/firebase-config.js';
 
@@ -21,10 +25,6 @@ import '../lib/auth/components/user-profile.js';
 import '../js/recipe-script.js';
 import '../js/navigation-script.js';
 import '../js/category.js';
-
-// Import styles
-import '../styles/main.css';
-import '../styles/pages/recipe_page.css';
 
 // Register service worker
 import '../js/sw-register.js';

@@ -1,3 +1,7 @@
+// Import styles
+import '../styles/main.css';
+import '../styles/pages/propose_recipe.css';
+
 // Import Firebase instances
 import { auth, db, storage } from '../js/config/firebase-config.js';
 
@@ -20,10 +24,6 @@ import '../lib/auth/components/user-profile.js';
 
 // Import page-specific scripts
 import '../js/navigation-script.js';
-
-// Import styles
-import '../styles/main.css';
-import '../styles/pages/propose_recipe.css';
 
 // Register service worker
 import '../js/sw-register.js';
