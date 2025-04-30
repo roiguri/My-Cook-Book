@@ -1,4 +1,8 @@
+// TODO: test before re-use
 import { Modal } from '../../utilities/modal/modal.js';
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 /**
  * MissingImageUpload Component
@@ -227,48 +231,40 @@ class MissingImageUpload extends HTMLElement {
     if (!this.recipeId) {
       throw new Error('Recipe ID is not set');
     }
-  
-    const db = firebase.firestore();
-    const storage = firebase.storage();
-    
+    const db = getFirestoreInstance();
+    const storage = getStorageInstance();
     try {
       // Fetch the recipe document to get the category
-      const recipeDoc = await db.collection('recipes').doc(this.recipeId).get();
-      if (!recipeDoc.exists) {
+      const recipeDocSnap = await getDoc(doc(db, 'recipes', this.recipeId));
+      if (!recipeDocSnap.exists()) {
         throw new Error('Recipe not found');
       }
-      const category = recipeDoc.data().category;
+      const category = recipeDocSnap.data().category;
       if (!category) {
         throw new Error('Recipe category not found');
       }
-  
       const fileExtension = file.name.split('.').pop();
       const fileName = `${this.recipeId}.${fileExtension}`;
-  
       // Upload full-size image
-      const fullSizeRef = storage.ref(`img/recipes/full/${category}/${fileName}`);
-      const fullSizeSnapshot = await fullSizeRef.put(file);
-      const fullSizeUrl = await fullSizeSnapshot.ref.getDownloadURL();
-  
+      const fullSizeRef = ref(storage, `img/recipes/full/${category}/${fileName}`);
+      await uploadBytes(fullSizeRef, file);
+      const fullSizeUrl = await getDownloadURL(fullSizeRef);
       // TODO: Implement image compression
       // For now, upload the same image to the compressed location
-      const compressedRef = storage.ref(`img/recipes/compressed/${category}/${fileName}`);
-      const compressedSnapshot = await compressedRef.put(file);
-      const compressedUrl = await compressedSnapshot.ref.getDownloadURL();
-  
+      const compressedRef = ref(storage, `img/recipes/compressed/${category}/${fileName}`);
+      await uploadBytes(compressedRef, file);
+      const compressedUrl = await getDownloadURL(compressedRef);
       // Update Firestore document
-      await db.collection('recipes').doc(this.recipeId).update({
+      await updateDoc(doc(db, 'recipes', this.recipeId), {
         pendingImage: {
           full: fullSizeUrl,
           compressed: compressedUrl,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          timestamp: serverTimestamp(),
           fileExtension: fileExtension
         }
       });
-          
       // TODO: Display a success message to the user indicating the image is pending approval
-      console.log('Image uploaded successfully and pending approval!'); 
-
+      console.log('Image uploaded successfully and pending approval!');
       return { fullSizeUrl, compressedUrl };
     } catch (error) {
       console.error('Error uploading to Firebase Storage:', error);

@@ -49,6 +49,10 @@
  * - This component relies on firebase-storage-utils.js for the `deleteRecipeImages` function.
  */
 
+import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
+import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { deleteRecipeImages } from '../../../js/utilities/firebase-storage-utils';
+
 class RecipePreviewModal extends HTMLElement {
   constructor() {
     super();
@@ -310,17 +314,17 @@ class RecipePreviewModal extends HTMLElement {
   }
 
   async handleRecipeApproval(recipeId) {
-    await firebase.firestore().collection('recipes').doc(recipeId).update({ approved: true });
+    const db = getFirestoreInstance();
+    await updateDoc(doc(db, 'recipes', recipeId), { approved: true });
   }
 
   async handleRecipeRejection(recipeId) {
     try {
       // First delete all associated images
       await deleteRecipeImages(recipeId);
-      
       // Then delete the recipe document
-      await firebase.firestore().collection('recipes').doc(recipeId).delete();
-      
+      const db = getFirestoreInstance();
+      await deleteDoc(doc(db, 'recipes', recipeId));
     } catch (error) {
       console.error('Error in handleRecipeRejection:', error);
       throw new Error('Failed to reject recipe: ' + error.message);

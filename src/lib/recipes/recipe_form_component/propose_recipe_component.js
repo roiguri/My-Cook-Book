@@ -14,6 +14,10 @@
  *
  */
 
+import { getFirestoreInstance, getAuthInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { collection, doc, addDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { ref, uploadBytes } from 'firebase/storage';
+
 class ProposeRecipeComponent extends HTMLElement {
   constructor() {
       super();
@@ -44,22 +48,19 @@ class ProposeRecipeComponent extends HTMLElement {
 
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
-
     try {
+        const db = getFirestoreInstance();
+        const auth = getAuthInstance();
         // Store images separately
         const imagesToUpload = recipeData.images || [];
-        
         // Create a copy of recipe data without images
         const recipeDataForFirestore = { ...recipeData };
         delete recipeDataForFirestore.images;  // Remove images array
-
         // Add timestamp and user info
-        recipeDataForFirestore.creationTime = firebase.firestore.Timestamp.now();
-        recipeDataForFirestore.userId = firebase.auth().currentUser?.uid || 'anonymous';
-        
+        recipeDataForFirestore.creationTime = Timestamp.now();
+        recipeDataForFirestore.userId = auth.currentUser?.uid || 'anonymous';
         // Save recipe to Firestore first to get the ID
-        const recipeRef = await firebase.firestore().collection('recipes').add(recipeDataForFirestore);
-        
+        const recipeRef = await addDoc(collection(db, 'recipes'), recipeDataForFirestore);
         // Upload images if provided
         if (imagesToUpload.length > 0) {
           const imageUploadResults = await this.uploadRecipeImages(
@@ -67,17 +68,14 @@ class ProposeRecipeComponent extends HTMLElement {
             imagesToUpload, 
             recipeDataForFirestore.category
           );
-          
           // Update recipe with image array that matches RecipeComponent expectations
-          await recipeRef.update({
+          await updateDoc(doc(db, 'recipes', recipeRef.id), {
             images: imageUploadResults,
             allowImageSuggestions: true // Add a flag to indicate images are present
           });
         }
-
         // Optionally, you can reset the form here
         this.clearForm();
-
         // Provide feedback to the user
         this.showSuccessMessage('Recipe proposed successfully!');
     } catch (error) {
@@ -86,48 +84,40 @@ class ProposeRecipeComponent extends HTMLElement {
   }
 
   // Helper function to upload image to Firebase Storage
-
   async uploadRecipeImages(recipeId, images, category) {
-    const storage = firebase.storage();
+    const storage = getStorageInstance();
+    const auth = getAuthInstance();
     const imageUploadResults = [];
-
     for (const imageData of images) {
       const { file, isPrimary } = imageData;
       const fileExtension = file.name.split('.').pop();
       const fileName = isPrimary ? 'primary.jpg' : `${Date.now()}.${fileExtension}`;
-
       try {
         const fullPath = `img/recipes/full/${category}/${recipeId}/${fileName}`;
         const compressedPath = `img/recipes/compressed/${category}/${recipeId}/${fileName}`;
-
         // Upload full-size image
-        const fullSizeRef = storage.ref(fullPath);
-        await fullSizeRef.put(file);
-
+        const fullSizeRef = ref(storage, fullPath);
+        await uploadBytes(fullSizeRef, file);
         // Create compressed version of the image
         const compressedFile = await this.compressImage(file);
-        
         // Upload compressed version
-        const compressedRef = storage.ref(compressedPath);
-        await compressedRef.put(compressedFile);
-
+        const compressedRef = ref(storage, compressedPath);
+        await uploadBytes(compressedRef, compressedFile);
         // Add image metadata to results
         imageUploadResults.push({
           full: fullPath,             // Store the full storage path
           compressed: compressedPath,  // Store the compressed storage path
           fileName,
           isPrimary,
-          uploadTimestamp: firebase.firestore.Timestamp.now(),
-          uploadedBy: firebase.auth().currentUser?.uid || 'anonymous',
+          uploadTimestamp: Timestamp.now(),
+          uploadedBy: auth.currentUser?.uid || 'anonymous',
           access: 'public'
         });
-
       } catch (error) {
         console.error('Error uploading image:', error);
         throw error;
       }
     }
-
     return imageUploadResults;
   }
 

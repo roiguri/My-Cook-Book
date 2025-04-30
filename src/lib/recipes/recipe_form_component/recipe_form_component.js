@@ -1,3 +1,7 @@
+import { getFirestoreInstance, getAuthInstance } from '../../../js/services/firebase-service.js';
+import { doc, getDoc } from 'firebase/firestore';
+import '../../images/image-handler.js';
+
 class RecipeFormComponent extends HTMLElement {
   constructor() {
     super();
@@ -765,7 +769,7 @@ class RecipeFormComponent extends HTMLElement {
       file: img.file,
       isPrimary: img.isPrimary,
       access: 'public', // Default access level
-      uploadedBy: firebase.auth().currentUser?.uid || 'anonymous'
+      uploadedBy: getAuthInstance().currentUser?.uid || 'anonymous'
     }));
   
     // Get comments if present
@@ -868,11 +872,11 @@ class RecipeFormComponent extends HTMLElement {
 
   async setRecipeData(recipeId) {
     try {
-      const db = firebase.firestore();
-      const doc = await db.collection('recipes').doc(recipeId).get();
+      const db = getFirestoreInstance();
+      const docSnap = await getDoc(doc(db, 'recipes', recipeId));
   
-      if (doc.exists) {
-        const data = doc.data();
+      if (docSnap.exists()) {
+        const data = docSnap.data();
         this.recipeData = data; // Store the fetched data
   
         // Populate basic input fields
@@ -992,6 +996,7 @@ class RecipeFormComponent extends HTMLElement {
     
     for (const image of images) {
       try {
+        // FIXME: missing implementation for fetchImageFromStorage
         const imageUrl = await this.fetchImageFromStorage(category, image.fileName);
         if (imageUrl) {
           // Convert URL to File object

@@ -8,6 +8,11 @@
  * password strength, and Google signup
  */
 
+import './auth-content.js';
+import '../../modals/message-modal/message-modal.js';
+import { getAuthInstance } from '../../../js/services/firebase-service.js';
+import { updateProfile } from 'firebase/auth';
+
 class SignupForm extends HTMLElement {
   constructor() {
     super();
@@ -306,10 +311,11 @@ class SignupForm extends HTMLElement {
     try {
       const authController = this.closest('auth-controller');
       await authController.handleSignup(email, password, fullName);
-      // Update user profile with full name
-      const user = firebase.auth().currentUser;
+      // Update user profile with full name using modular API
+      const auth = getAuthInstance();
+      const user = auth.currentUser;
       if (user) {
-        await user.updateProfile({ displayName: fullName });
+        await updateProfile(user, { displayName: fullName });
         // Dispatch signup success event
         this.dispatchEvent(new CustomEvent('signup-success', {
           bubbles: true,

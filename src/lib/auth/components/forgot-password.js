@@ -1,3 +1,6 @@
+import './auth-content.js';
+import '../../modals/message-modal/message-modal.js';
+
 /**
  * ForgotPassword Component
  * @class

@@ -1,3 +1,4 @@
+// TODO: test before using
 /**
  * ImageApprovalComponent
  * @class
@@ -58,6 +59,10 @@
  * - openModalForImage(imageData) - Opens modal with specified image data
  * - closeModal() - Closes the modal and resets state
  */
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
+
 class ImageApprovalComponent extends HTMLElement {
   constructor() {
     super();
@@ -163,75 +168,53 @@ class ImageApprovalComponent extends HTMLElement {
   async handleApprove() {
     console.log('Approve button clicked');
     try {
-      // Get references to Firebase services
-      const storage = firebase.storage();
-      const firestore = firebase.firestore();
-  
+      const db = getFirestoreInstance();
       // Get the recipe document from Firestore
-      const recipeDoc = await firestore.collection('recipes').doc(this.imageData.recipeId).get();
-      const recipeData = recipeDoc.data();
-
+      const recipeDocSnap = await getDoc(doc(db, 'recipes', this.imageData.recipeId));
+      const recipeData = recipeDocSnap.data();
       const fileExtension = recipeData.pendingImage.fileExtension;
-    
       // Update Firestore document to remove pendingImage and set the approved image URL
-      await firestore.collection('recipes').doc(this.imageData.recipeId).update({
+      await updateDoc(doc(db, 'recipes', this.imageData.recipeId), {
         image: this.imageData.recipeId + '.' + fileExtension,
-        pendingImage: null // Remove the pendingImage field
+        pendingImage: null
       });
-  
-      // Dispatch a custom event
       this.dispatchEvent(new CustomEvent('image-approved', {
         bubbles: true,
         composed: true,
         detail: { recipeId: this.imageData.recipeId }
       }));
-  
-      // Close the modal
       this.closeModal();
     } catch (error) {
       console.error('Error approving image:', error);
-      // You might want to show an error message to the user here
     }
   }
 
   async handleReject() {
     console.log('Reject button clicked');
     try {
-      // Get references to Firebase services
-      const storage = firebase.storage();
-      const firestore = firebase.firestore();
-  
+      const db = getFirestoreInstance();
+      const storage = getStorageInstance();
       // Get the recipe document from Firestore
-      const recipeDoc = await firestore.collection('recipes').doc(this.imageData.recipeId).get();
-      const recipeData = recipeDoc.data();
-  
-      // Get the file extension
-      const fileExtension = recipeData.pendingImage.fileExtension; 
-  
+      const recipeDocSnap = await getDoc(doc(db, 'recipes', this.imageData.recipeId));
+      const recipeData = recipeDocSnap.data();
+      const fileExtension = recipeData.pendingImage.fileExtension;
       // Delete the full-size and compressed images from Firebase Storage
-      const fullSizeRef = storage.ref(`img/recipes/full/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`);
-      await fullSizeRef.delete();
-  
-      const compressedRef = storage.ref(`img/recipes/compressed/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`);
-      await compressedRef.delete();
-  
-      // Update Firestore document to remove pendingImage 
-      await firestore.collection('recipes').doc(this.imageData.recipeId).update({
-        pendingImage: null // Remove the pendingImage field
+      const fullSizeRef = ref(storage, `img/recipes/full/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`);
+      await deleteObject(fullSizeRef);
+      const compressedRef = ref(storage, `img/recipes/compressed/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`);
+      await deleteObject(compressedRef);
+      // Update Firestore document to remove pendingImage
+      await updateDoc(doc(db, 'recipes', this.imageData.recipeId), {
+        pendingImage: null
       });
-  
-      // Dispatch a custom event
       this.dispatchEvent(new CustomEvent('image-rejected', {
         bubbles: true,
         composed: true,
         detail: { recipeId: this.imageData.recipeId }
       }));
-  
-      // Close the modal
       this.closeModal();
     } catch (error) {
       console.error('Error rejecting image:', error);
-      // You might want to show an error message to the user here
     }
   }
 
