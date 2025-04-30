@@ -8,10 +8,6 @@ import '../styles/main.css';
 import '../styles/pages/categories.css';
 import '../styles/pages/profile.css';
 
-// TODO: remove after completing migration to service
-// Import Firebase instances
-import { auth, db, storage } from '../js/config/firebase-config.js';
-
 // Import components
 import '../lib/utilities/modal/modal.js';
 import '../lib/recipes/recipe-card/recipe-card.js';
@@ -30,10 +26,10 @@ import('../lib/auth/components/user-profile.js');
 
 // Import page-specific scripts
 import '../js/navigation-script.js';
-import '../js/profile.js';
 
 // Register service worker
 import '../js/sw-register.js';
 
 // Dynamic imports
 import('../lib/modals/filter_modal/filter_modal.js');
+import('../js/profile.js');
