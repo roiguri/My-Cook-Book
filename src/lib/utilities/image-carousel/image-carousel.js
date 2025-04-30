@@ -1,3 +1,7 @@
+import { storage } from '../../../js/config/firebase-config.js';
+import { getStorageInstance } from '../../../js/services/firebase-service.js';
+import { ref, getDownloadURL } from 'firebase/storage';
+
 class ImageCarousel extends HTMLElement {
   constructor() {
     super();
@@ -68,14 +72,14 @@ class ImageCarousel extends HTMLElement {
             // Check if the image is a Firebase path
             if (typeof image === 'string' && image.startsWith('img/recipes/')) {
                 try {
-                    const storage = firebase.storage();
-                    const imageRef = storage.ref(image);
-                    img.src = await imageRef.getDownloadURL();
+                    const storage = getStorageInstance();
+                    const imageRef = ref(storage, image);
+                    img.src = await getDownloadURL(imageRef);
                 } catch (error) {
                     console.error('Error loading Firebase image:', error);
                     // Fallback to placeholder if Firebase image fails
-                    const placeholderRef = storage.ref('img/recipes/compressed/place-holder-add-new.png');
-                    img.src = await placeholderRef.getDownloadURL();
+                    const placeholderRef = ref(storage, 'img/recipes/compressed/place-holder-add-new.png');
+                    img.src = await getDownloadURL(placeholderRef);
                 }
             } else {
                 // Handle as direct URL or local path

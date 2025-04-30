@@ -313,6 +313,7 @@ class RecipePreviewModal extends HTMLElement {
     await firebase.firestore().collection('recipes').doc(recipeId).update({ approved: true });
   }
 
+  // FIXME: error: deleteRecipeImage not defined.
   async handleRecipeRejection(recipeId) {
     try {
       // First delete all associated images
