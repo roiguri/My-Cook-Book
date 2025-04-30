@@ -9,6 +9,10 @@
 
 import './auth-content.js';
 import '../../modals/message-modal/message-modal.js';
+import { getAuthInstance, getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { doc, getDoc } from 'firebase/firestore';
+import { ref, listAll, getDownloadURL } from 'firebase/storage';
+import { onAuthStateChanged } from 'firebase/auth';
 
 class UserProfile extends HTMLElement {
   constructor() {
@@ -23,16 +27,18 @@ class UserProfile extends HTMLElement {
     this.loadAvatars();
 
     // Re-render if user data loads after component mount
-    firebase.auth().onAuthStateChanged(user => {
+    const auth = getAuthInstance();
+    onAuthStateChanged(auth, user => {
       if (user) {
-          this.updateWelcomeText();
+        this.updateWelcomeText();
       }
     });
   }
 
   render() {
-    const user = firebase.auth().currentUser;
-    const displayName = user?.displayName || user?.email?.split('@')[0] || ''; // Fallback to email username if no display name
+    const auth = getAuthInstance();
+    const user = auth.currentUser;
+    const displayName = user?.displayName || user?.email?.split('@')[0] || '';
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -178,62 +184,53 @@ class UserProfile extends HTMLElement {
   }
 
   updateWelcomeText() {
-    const user = firebase.auth().currentUser;
+    const auth = getAuthInstance();
+    const user = auth.currentUser;
     const displayName = user?.displayName || user?.email?.split('@')[0] || '';
     const welcomeText = this.shadowRoot.querySelector('.welcome-text');
     if (welcomeText) {
-        welcomeText.textContent = `ברוך הבא ${displayName}!`;
+      welcomeText.textContent = `ברוך הבא ${displayName}!`;
     }
   }
 
   async loadAvatars() {
     try {
-        const user = firebase.auth().currentUser;
-        const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
-        
-        let currentAvatarUrl = null;
-        
-        // Only fetch from Firestore if user is logged in
-        if (user) {
-            const userDoc = await firebase.firestore()
-                .collection('users')
-                .doc(user.uid)
-                .get();
-            
-            currentAvatarUrl = userDoc.data()?.avatarUrl;
+      const auth = getAuthInstance();
+      const user = auth.currentUser;
+      const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
+      let currentAvatarUrl = null;
+      // Only fetch from Firestore if user is logged in
+      if (user) {
+        const db = getFirestoreInstance();
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        currentAvatarUrl = userDocSnap.data()?.avatarUrl;
+      }
+      // Get avatar URLs from Firebase Storage (modular)
+      const storage = getStorageInstance();
+      const avatarsRef = ref(storage, 'Avatars');
+      const avatarList = await listAll(avatarsRef);
+      // Clear loading message
+      avatarGrid.innerHTML = '';
+      // Store current avatar URL
+      this.selectedAvatarUrl = currentAvatarUrl || null;
+      // Add avatars to grid
+      for (const avatarRef of avatarList.items) {
+        const url = await getDownloadURL(avatarRef);
+        const button = document.createElement('button');
+        button.className = 'avatar-button';
+        // Check against Firestore avatarUrl
+        if (url === currentAvatarUrl) {
+          button.classList.add('selected');
+          this.selectedAvatarUrl = url;
         }
-        
-        // Get avatar URLs from Firebase Storage
-        const storage = firebase.storage();
-        const avatarsRef = storage.ref().child('Avatars');
-        const avatarList = await avatarsRef.listAll();
-        
-        // Clear loading message
-        avatarGrid.innerHTML = '';
-
-        // Store current avatar URL
-        this.selectedAvatarUrl = currentAvatarUrl || null;
-
-        // Add avatars to grid
-        for (const avatarRef of avatarList.items) {
-            const url = await avatarRef.getDownloadURL();
-            const button = document.createElement('button');
-            button.className = 'avatar-button';
-            
-            // Check against Firestore avatarUrl
-            if (url === currentAvatarUrl) {
-                button.classList.add('selected');
-                this.selectedAvatarUrl = url;
-            }
-            
-            button.innerHTML = `<img src="${url}" alt="Avatar" class="avatar-image">`;
-            button.addEventListener('click', () => this.selectAvatar(button, url));
-            
-            avatarGrid.appendChild(button);
-        }
+        button.innerHTML = `<img src="${url}" alt="Avatar" class="avatar-image">`;
+        button.addEventListener('click', () => this.selectAvatar(button, url));
+        avatarGrid.appendChild(button);
+      }
     } catch (error) {
-        console.error('Error loading avatars:', error);
-        this.showError('שגיאה בטעינת תמונות הפרופיל. אנא נסה שנית.');
+      console.error('Error loading avatars:', error);
+      this.showError('שגיאה בטעינת תמונות הפרופיל. אנא נסה שנית.');
     }
   }
 
@@ -242,7 +239,6 @@ class UserProfile extends HTMLElement {
     this.shadowRoot.querySelectorAll('.avatar-button').forEach(btn => {
       btn.classList.remove('selected');
     });
-    
     // Add selection to clicked button
     button.classList.add('selected');
     this.selectedAvatarUrl = url;
@@ -253,17 +249,14 @@ class UserProfile extends HTMLElement {
       this.showError('אנא בחר תמונת פרופיל');
       return;
     }
-
     try {
       const authController = this.closest('auth-controller');
       await authController.updateUserAvatar(this.selectedAvatarUrl);
-      
       // Dispatch success event
       this.dispatchEvent(new CustomEvent('profile-updated', {
         bubbles: true,
         composed: true
       }));
-
       // Close modal
       authController.closeModal();
     } catch (error) {
