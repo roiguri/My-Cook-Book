@@ -2,27 +2,27 @@
  * RecipeFilterComponent
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * A custom web component that provides a modal interface for filtering recipes
  * with multiple criteria. The component extends Modal functionality for the interface
  * and integrates with Firebase/Firestore for data management. Supports RTL (Right-to-Left)
  * layout by default.
- * 
+ *
  * @dependencies
  * - Requires Modal component (`custom-modal`)
  * - Firebase/Firestore for data fetching
  * - Firebase Authentication for user state
- * 
+ *
  * @cssVariables
  * - --primary-color: Primary color for buttons and highlights
  * - --primary-hover: Hover state color for buttons
  * - --secondary-color: Used for border colors and backgrounds
- * 
+ *
  * @example
  * // Basic Usage
  * <recipe-filter-component></recipe-filter-component>
- * 
+ *
  * // With specific category and selected filters
  * <recipe-filter-component
  *   category="main-courses"
@@ -32,13 +32,13 @@
  *   tags-filter="true"
  *   favorites-only="true">
  * </recipe-filter-component>
- * 
+ *
  * // JavaScript interaction
  * const filterComponent = document.querySelector('recipe-filter-component');
- * 
+ *
  * // Open the filter modal
  * filterComponent.open();
- * 
+ *
  * // Listen for filter events
  * filterComponent.addEventListener('filter-applied', (e) => {
  *   const { recipes, filters } = e.detail;
@@ -46,21 +46,21 @@
  *   console.log('Filtered recipes:', recipes);
  *   console.log('Applied filters:', filters);
  * });
- * 
+ *
  * @fires filter-applied - When filters are applied
  * @property {Object} detail.recipes - Array of filtered recipe objects
  * @property {Object} detail.filters - Current state of applied filters
- * 
+ *
  * @fires filter-reset - When filters are reset
  * @property {Object} detail.category - Current category if set
- * 
+ *
  * @attr {string} category - Optional category to filter recipes by
  * @attr {boolean} [cooking-time-filter=true] - Enable/disable cooking time filter
  * @attr {boolean} [difficulty-filter=true] - Enable/disable difficulty filter
  * @attr {boolean} [ingredient-filter=true] - Enable/disable main ingredient filter
  * @attr {boolean} [tags-filter=true] - Enable/disable tags filter
  * @attr {boolean} [favorites-only=false] - When true, only shows user's favorite recipes
- * 
+ *
  * @state
  * - isLoading: Boolean indicating loading state
  * - matchingCount: Number of recipes matching current filters
@@ -69,7 +69,7 @@
  *   - difficulty: String ('קלה', 'בינונית', 'קשה')
  *   - mainIngredient: String
  *   - tags: Array of strings
- * 
+ *
  * @methods
  * - open() - Opens the filter modal
  * - close() - Closes the filter modal
@@ -84,7 +84,7 @@ class RecipeFilterComponent extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    
+
     // Initialize state
     this.state = {
       isLoading: false,
@@ -93,13 +93,13 @@ class RecipeFilterComponent extends HTMLElement {
         cookingTime: '',
         difficulty: '',
         mainIngredient: '',
-        tags: []
+        tags: [],
       },
       availableFilters: {
         mainIngredients: [],
-        tags: []
+        tags: [],
       },
-      category: null
+      category: null,
     };
   }
 
@@ -109,24 +109,24 @@ class RecipeFilterComponent extends HTMLElement {
       'cooking-time-filter',
       'difficulty-filter',
       'ingredient-filter',
-      'tags-filter'
+      'tags-filter',
     ];
   }
 
   async connectedCallback() {
     const auth = getAuthInstance();
     if (auth.currentUser) {
-      await this.loadInitialData(); 
+      await this.loadInitialData();
     } else {
       // Listen for auth state changes
-      const unsubscribe = onAuthStateChanged(auth, user => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
-          this.loadInitialData(); 
+          this.loadInitialData();
           unsubscribe(); // Unsubscribe after loading data once
         }
       });
     }
-  
+
     this.render();
     this.setupEventListeners();
   }
@@ -422,11 +422,14 @@ class RecipeFilterComponent extends HTMLElement {
         <div class="filter-content" style="display: ${this.state.isLoading ? 'none' : 'block'}">
           <select id="main-ingredient">
             <option value="">הכל</option>
-            ${this.state.availableFilters.mainIngredients.map(ingredient => 
-              `<option value="${ingredient}" ${this.state.filters.mainIngredient === ingredient ? 'selected' : ''}>
+            ${this.state.availableFilters.mainIngredients
+              .map(
+                (ingredient) =>
+                  `<option value="${ingredient}" ${this.state.filters.mainIngredient === ingredient ? 'selected' : ''}>
                 ${ingredient}
-              </option>`
-            ).join('')}
+              </option>`,
+              )
+              .join('')}
           </select>
         </div>
       </div>
@@ -450,18 +453,22 @@ class RecipeFilterComponent extends HTMLElement {
             >
             <datalist id="tags-list">
               ${this.state.availableFilters.tags
-                .filter(tag => !this.state.filters.tags.includes(tag))
-                .map(tag => `<option value="${tag}">`)
+                .filter((tag) => !this.state.filters.tags.includes(tag))
+                .map((tag) => `<option value="${tag}">`)
                 .join('')}
             </datalist>
           </div>
           <div class="tags-container">
-            ${this.state.filters.tags.map(tag => `
+            ${this.state.filters.tags
+              .map(
+                (tag) => `
               <span class="tag">
                 ${tag}
                 <span class="tag-remove" data-tag="${tag}">×</span>
               </span>
-            `).join('')}
+            `,
+              )
+              .join('')}
           </div>
         </div>
       </div>
@@ -487,7 +494,7 @@ class RecipeFilterComponent extends HTMLElement {
     const modal = this.shadowRoot.querySelector('custom-modal');
 
     // Filter change listeners
-    ['cooking-time', 'difficulty', 'main-ingredient'].forEach(id => {
+    ['cooking-time', 'difficulty', 'main-ingredient'].forEach((id) => {
       const select = this.shadowRoot.getElementById(id);
       if (select) {
         select.addEventListener('change', () => this.handleFilterChange());
@@ -552,7 +559,7 @@ class RecipeFilterComponent extends HTMLElement {
   }
 
   removeTag(tag) {
-    this.state.filters.tags = this.state.filters.tags.filter(t => t !== tag);
+    this.state.filters.tags = this.state.filters.tags.filter((t) => t !== tag);
     this.handleFilterChange();
   }
 
@@ -568,31 +575,41 @@ class RecipeFilterComponent extends HTMLElement {
         const userDocSnap = await getDoc(doc(db, 'users', userId));
         const favoriteRecipeIds = userDocSnap.data().favorites || [];
         // Fetch favorite recipes only
-        const recipes = await Promise.all(favoriteRecipeIds.map(async (recipeId) => {
-          const recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
-          return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-        }));
-        this.state.availableFilters.mainIngredients = [...new Set(
-          recipes
-            .map(r => r.mainIngredient)
-            .filter(ingredient => ingredient && ingredient.trim())
-        )].sort((a, b) => a.localeCompare(b));
-        this.state.availableFilters.tags = [...new Set(recipes.flatMap(r => r.tags || []))];
+        const recipes = await Promise.all(
+          favoriteRecipeIds.map(async (recipeId) => {
+            const recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
+            return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
+          }),
+        );
+        this.state.availableFilters.mainIngredients = [
+          ...new Set(
+            recipes
+              .map((r) => r.mainIngredient)
+              .filter((ingredient) => ingredient && ingredient.trim()),
+          ),
+        ].sort((a, b) => a.localeCompare(b));
+        this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r.tags || []))];
         this.state.matchingCount = recipes.length;
       } else {
         // Previous logic for fetching all recipes
         let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
         if (this.state.category) {
-          recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true), where('category', '==', this.state.category));
+          recipesQuery = query(
+            collection(db, 'recipes'),
+            where('approved', '==', true),
+            where('category', '==', this.state.category),
+          );
         }
         const snapshot = await getDocs(recipesQuery);
-        const recipes = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-        this.state.availableFilters.mainIngredients = [...new Set(
-          recipes
-            .map(r => r.mainIngredient)
-            .filter(ingredient => ingredient && ingredient.trim())
-        )].sort((a, b) => a.localeCompare(b));
-        this.state.availableFilters.tags = [...new Set(recipes.flatMap(r => r.tags || []))];
+        const recipes = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        this.state.availableFilters.mainIngredients = [
+          ...new Set(
+            recipes
+              .map((r) => r.mainIngredient)
+              .filter((ingredient) => ingredient && ingredient.trim()),
+          ),
+        ].sort((a, b) => a.localeCompare(b));
+        this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r.tags || []))];
         this.state.matchingCount = recipes.length;
       }
     } catch (error) {
@@ -610,14 +627,14 @@ class RecipeFilterComponent extends HTMLElement {
 
   async handleTagSearch(event) {
     const searchTerm = event.target.value.toLowerCase();
-    const suggestions = this.state.availableFilters.tags.filter(tag => 
-      tag.toLowerCase().includes(searchTerm) && !this.state.filters.tags.includes(tag)
+    const suggestions = this.state.availableFilters.tags.filter(
+      (tag) => tag.toLowerCase().includes(searchTerm) && !this.state.filters.tags.includes(tag),
     );
 
     const suggestionsContainer = this.shadowRoot.getElementById('tag-suggestions');
-    suggestionsContainer.innerHTML = suggestions.map(tag => 
-      `<div class="tag-suggestion" data-tag="${tag}">${tag}</div>`
-    ).join('');
+    suggestionsContainer.innerHTML = suggestions
+      .map((tag) => `<div class="tag-suggestion" data-tag="${tag}">${tag}</div>`)
+      .join('');
   }
 
   updateFilterState() {
@@ -629,7 +646,7 @@ class RecipeFilterComponent extends HTMLElement {
       ...this.state.filters,
       cookingTime,
       difficulty,
-      mainIngredient
+      mainIngredient,
     };
   }
 
@@ -637,41 +654,47 @@ class RecipeFilterComponent extends HTMLElement {
     this.state.isLoading = true;
     this.updateUI();
     try {
-        const db = getFirestoreInstance();
-        const auth = getAuthInstance();
-        let recipes;
-        if (this.currentRecipes) {
-            recipes = this.currentRecipes;
-        } else if (this.hasAttribute('favorites-only') && auth.currentUser) {
-            const userId = auth.currentUser.uid;
-            const userDocSnap = await getDoc(doc(db, 'users', userId));
-            const favoriteRecipeIds = userDocSnap.data().favorites || [];
-            recipes = await Promise.all(favoriteRecipeIds.map(async (recipeId) => {
-                let recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
-                return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-            }));
-        } else {
-            let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
-            if (this.state.category) {
-                recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true), where('category', '==', this.state.category));
-            }
-            const snapshot = await getDocs(recipesQuery);
-            recipes = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      const db = getFirestoreInstance();
+      const auth = getAuthInstance();
+      let recipes;
+      if (this.currentRecipes) {
+        recipes = this.currentRecipes;
+      } else if (this.hasAttribute('favorites-only') && auth.currentUser) {
+        const userId = auth.currentUser.uid;
+        const userDocSnap = await getDoc(doc(db, 'users', userId));
+        const favoriteRecipeIds = userDocSnap.data().favorites || [];
+        recipes = await Promise.all(
+          favoriteRecipeIds.map(async (recipeId) => {
+            let recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
+            return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
+          }),
+        );
+      } else {
+        let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
+        if (this.state.category) {
+          recipesQuery = query(
+            collection(db, 'recipes'),
+            where('approved', '==', true),
+            where('category', '==', this.state.category),
+          );
         }
-        recipes = this.applyFiltersToRecipes(recipes);
-        this.state.matchingCount = recipes.length;
+        const snapshot = await getDocs(recipesQuery);
+        recipes = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+      }
+      recipes = this.applyFiltersToRecipes(recipes);
+      this.state.matchingCount = recipes.length;
     } catch (error) {
-        console.error('Error updating matching count:', error);
+      console.error('Error updating matching count:', error);
     } finally {
-        this.state.isLoading = false;
-        this.updateUI();
+      this.state.isLoading = false;
+      this.updateUI();
     }
   }
 
   applyFiltersToRecipes(recipes) {
     const { cookingTime, difficulty, mainIngredient, tags } = this.state.filters;
 
-    return recipes.filter(recipe => {
+    return recipes.filter((recipe) => {
       // Cooking time filter
       if (cookingTime) {
         const totalTime = recipe.prepTime + recipe.waitTime;
@@ -690,7 +713,7 @@ class RecipeFilterComponent extends HTMLElement {
       if (mainIngredient && recipe.mainIngredient !== mainIngredient) return false;
 
       // Tags filter
-      if (tags.length > 0 && !tags.every(tag => recipe.tags.includes(tag))) return false;
+      if (tags.length > 0 && !tags.every((tag) => recipe.tags.includes(tag))) return false;
 
       return true;
     });
@@ -709,27 +732,35 @@ class RecipeFilterComponent extends HTMLElement {
         const userId = auth.currentUser.uid;
         const userDocSnap = await getDoc(doc(db, 'users', userId));
         const favoriteRecipeIds = userDocSnap.data().favorites || [];
-        recipes = await Promise.all(favoriteRecipeIds.map(async (recipeId) => {
-          let recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
-          return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-        }));
+        recipes = await Promise.all(
+          favoriteRecipeIds.map(async (recipeId) => {
+            let recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
+            return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
+          }),
+        );
       } else {
         let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
         if (this.state.category) {
-          recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true), where('category', '==', this.state.category));
+          recipesQuery = query(
+            collection(db, 'recipes'),
+            where('approved', '==', true),
+            where('category', '==', this.state.category),
+          );
         }
         const snapshot = await getDocs(recipesQuery);
-        recipes = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        recipes = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
       }
       recipes = this.applyFiltersToRecipes(recipes);
-      this.dispatchEvent(new CustomEvent('filter-applied', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          recipes,
-          filters: { ...this.state.filters, category: this.state.category }
-        }
-      }));
+      this.dispatchEvent(
+        new CustomEvent('filter-applied', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            recipes,
+            filters: { ...this.state.filters, category: this.state.category },
+          },
+        }),
+      );
       this.close();
     } catch (error) {
       console.error('Error applying filters:', error);
@@ -738,39 +769,41 @@ class RecipeFilterComponent extends HTMLElement {
       this.updateUI();
     }
   }
-  
+
   clearFilters() {
     // Reset filter state
     this.state.filters = {
       cookingTime: '',
       difficulty: '',
       mainIngredient: '',
-      tags: []
+      tags: [],
     };
-  
+
     // Reset UI elements
     const selects = ['cooking-time', 'difficulty', 'main-ingredient'];
-    selects.forEach(id => {
+    selects.forEach((id) => {
       const select = this.shadowRoot.getElementById(id);
       if (select) select.value = '';
     });
-  
+
     // Clear tag search
     const tagSearch = this.shadowRoot.getElementById('tag-search');
     if (tagSearch) tagSearch.value = '';
-  
+
     // Update UI
     this.updateMatchingCount();
-  
+
     // Dispatch reset event with current recipes if available
-    this.dispatchEvent(new CustomEvent('filter-reset', {
-      bubbles: true,
-      composed: true,
-      detail: {
-        recipes: this.currentRecipes || null,
-        category: this.state.category
-      }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('filter-reset', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          recipes: this.currentRecipes || null,
+          category: this.state.category,
+        },
+      }),
+    );
   }
 
   updateUI() {
@@ -780,39 +813,39 @@ class RecipeFilterComponent extends HTMLElement {
     this.updateFilterValues();
     this.updateTagsDisplay();
     this.updateApplyButton();
-    this.updateIngredientSelect(); 
+    this.updateIngredientSelect();
   }
 
   updateLoadingState() {
     const loadingElements = this.shadowRoot.querySelectorAll('.loading-text');
-    loadingElements.forEach(element => {
+    loadingElements.forEach((element) => {
       element.style.display = this.state.isLoading ? 'block' : 'none';
     });
-  
+
     const contentElements = this.shadowRoot.querySelectorAll('.filter-content');
-    contentElements.forEach(element => {
+    contentElements.forEach((element) => {
       element.style.display = this.state.isLoading ? 'none' : 'block';
     });
   }
-  
+
   async updateCounter() {
     const counter = this.shadowRoot.querySelector('.results-counter');
     if (counter) {
-      counter.textContent = this.state.isLoading ? 
-        'טוען...' : 
-        `${this.state.matchingCount} מתכונים תואמים`;
+      counter.textContent = this.state.isLoading
+        ? 'טוען...'
+        : `${this.state.matchingCount} מתכונים תואמים`;
     }
   }
-  
+
   updateFilterValues() {
     const { cookingTime, difficulty, mainIngredient } = this.state.filters;
-    
+
     const selects = {
       'cooking-time': cookingTime,
-      'difficulty': difficulty,
-      'main-ingredient': mainIngredient
+      difficulty: difficulty,
+      'main-ingredient': mainIngredient,
     };
-  
+
     Object.entries(selects).forEach(([id, value]) => {
       const select = this.shadowRoot.getElementById(id);
       if (select && value) {
@@ -820,28 +853,32 @@ class RecipeFilterComponent extends HTMLElement {
       }
     });
   }
-  
+
   updateTagsDisplay() {
     const tagsContainer = this.shadowRoot.querySelector('.tags-container');
     if (tagsContainer) {
-      tagsContainer.innerHTML = this.state.filters.tags.map(tag => `
+      tagsContainer.innerHTML = this.state.filters.tags
+        .map(
+          (tag) => `
         <span class="tag">
           ${tag}
           <span class="tag-remove" data-tag="${tag}">×</span>
         </span>
-      `).join('');
+      `,
+        )
+        .join('');
     }
 
     // Update available options in datalist
     const datalist = this.shadowRoot.getElementById('tags-list');
     if (datalist) {
       datalist.innerHTML = this.state.availableFilters.tags
-        .filter(tag => !this.state.filters.tags.includes(tag))
-        .map(tag => `<option value="${tag}">`)
+        .filter((tag) => !this.state.filters.tags.includes(tag))
+        .map((tag) => `<option value="${tag}">`)
         .join('');
     }
   }
-  
+
   updateApplyButton() {
     const applyBtn = this.shadowRoot.querySelector('.apply-btn');
     if (applyBtn) {
@@ -854,37 +891,40 @@ class RecipeFilterComponent extends HTMLElement {
     if (select) {
       // Store current selection
       const currentValue = select.value;
-      
+
       // Clear and rebuild options
       select.innerHTML = `
         <option value="">הכל</option>
-        ${this.state.availableFilters.mainIngredients.map(ingredient => 
-          `<option value="${ingredient}" ${currentValue === ingredient ? 'selected' : ''}>
+        ${this.state.availableFilters.mainIngredients
+          .map(
+            (ingredient) =>
+              `<option value="${ingredient}" ${currentValue === ingredient ? 'selected' : ''}>
             ${ingredient}
-          </option>`
-        ).join('')}
+          </option>`,
+          )
+          .join('')}
       `;
     }
   }
 
   setInitialRecipes(recipes) {
     this.currentRecipes = recipes;
-    
+
     // Update available filters based on current recipes
-    this.state.availableFilters.mainIngredients = [...new Set(
-      recipes
-        .map(r => r.mainIngredient)
-        .filter(ingredient => ingredient && ingredient.trim())
-    )].sort((a, b) => a.localeCompare(b));
-  
-    this.state.availableFilters.tags = [...new Set(
-      recipes.flatMap(r => r.tags || [])
-    )];
-  
+    this.state.availableFilters.mainIngredients = [
+      ...new Set(
+        recipes
+          .map((r) => r.mainIngredient)
+          .filter((ingredient) => ingredient && ingredient.trim()),
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+
+    this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r.tags || []))];
+
     this.state.matchingCount = recipes.length;
     this.updateUI();
   }
-  
+
   // Public methods
   open() {
     const modal = this.shadowRoot.querySelector('custom-modal');
@@ -896,5 +936,5 @@ class RecipeFilterComponent extends HTMLElement {
     if (modal) modal.close();
   }
 }
-  
+
 customElements.define('recipe-filter-component', RecipeFilterComponent);

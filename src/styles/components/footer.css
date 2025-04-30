@@ -8,10 +8,10 @@ footer {
   flex-shrink: 0;
 }
 
-    footer p {
-      margin: 0;
-    }
+footer p {
+  margin: 0;
+}
 
-    #icon-attribute {
-      color: gray;
-    }
+#icon-attribute {
+  color: gray;
+}

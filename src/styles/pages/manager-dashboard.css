@@ -14,7 +14,6 @@
   font-family: var(--heading-font);
   margin-bottom: 30px;
   text-align: center;
-
 }
 
 .manager-dashboard section {
@@ -25,7 +24,6 @@
   flex-direction: column;
   gap: 10px;
 }
-
 
 .manager-dashboard .sections {
   display: flex;
@@ -108,15 +106,15 @@
     font-size: 12px;
   } */
   .manager-dashboard {
-      padding: 10px;
+    padding: 10px;
   }
 
   .manager-dashboard h1 {
-      font-size: 2rem;
+    font-size: 2rem;
   }
 
   .manager-dashboard h2 {
-      font-size: 1.5rem;
+    font-size: 1.5rem;
   }
 
   .manager-dashboard section {

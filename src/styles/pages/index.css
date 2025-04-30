@@ -3,109 +3,108 @@
   /* Add your styles here */
 }
 
-    /* Styles for the hero section */
-    .home-page .hero {
-      height: 200px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      color: #fff;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
+/* Styles for the hero section */
+.home-page .hero {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
 
-        .home-page .hero div {
-          font-family: var(--heading-font);
-          color: var(--text-color);
-          font-size: var(--size-xxl);
-          margin-bottom: 1rem;
-          font-weight: 700;
-        }
+.home-page .hero div {
+  font-family: var(--heading-font);
+  color: var(--text-color);
+  font-size: var(--size-xxl);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
 
-    /* Styles for the quick links section */
-    .home-page .quick-links {
-      margin-top: 2rem;
-      flex-grow: 1;
-    }
+/* Styles for the quick links section */
+.home-page .quick-links {
+  margin-top: 2rem;
+  flex-grow: 1;
+}
 
-        .home-page .quick-links h2 {
-          font-size: var(--size-header1);
-          text-align: center;
-          margin-bottom: 1.5rem;
-        }
+.home-page .quick-links h2 {
+  font-size: var(--size-header1);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
 
-        .home-page .category-jars {
-          display: flex;
-          justify-content: center;
-          flex-wrap: wrap;
-          gap: 2rem;
-        }
+.home-page .category-jars {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
 
-            .home-page .category-jar {
-              text-decoration: none;
-              color: inherit;
-              text-align: center;
-              width: 150px;
-            }
+.home-page .category-jar {
+  text-decoration: none;
+  color: inherit;
+  text-align: center;
+  width: 150px;
+}
 
-                .home-page .jar-img {
-                  width: 100%;
-                  height: 200px;
-                  background-size: cover;
-                  background-position: center;
-                  border-radius: 10px 10px 50% 50% / 10px 10px 25% 25%;
-                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                  transition: transform 0.3s ease;
-                }
+.home-page .jar-img {
+  width: 100%;
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px 10px 50% 50% / 10px 10px 25% 25%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
 
-                    .category-jar:hover .jar-img {
-                      transform: translateY(-5px);
-                    }
+.category-jar:hover .jar-img {
+  transform: translateY(-5px);
+}
 
-                .home-page .category-jar span {
-                  display: flex;
-                  justify-content: center;
-                  margin-top: 0.5rem;
-                  font-family: var(--heading-font);
-                  font-size: var(--size-header2);
-                  white-space: nowrap;
-                }
+.home-page .category-jar span {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+  font-family: var(--heading-font);
+  font-size: var(--size-header2);
+  white-space: nowrap;
+}
 
-    /* Styles for the featured recipes section */
-    .home-page .featured-recipes {
-      width: 90vw;
-      margin: 2rem auto;
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-        .featured-recipes > * {
-          max-width: 100%;
-          box-sizing: border-box;
-          margin: 0 auto;
-        }
+/* Styles for the featured recipes section */
+.home-page .featured-recipes {
+  width: 90vw;
+  margin: 2rem auto;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.featured-recipes > * {
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
 
-        .home-page .featured-recipes h2 {
-          font-family: var(--heading-font);
-          font-size: var(--size-header1);
-          text-align: center;
-        }
+.home-page .featured-recipes h2 {
+  font-family: var(--heading-font);
+  font-size: var(--size-header1);
+  text-align: center;
+}
 
-        element-scroller {
-          align-self: center;
-        }
+element-scroller {
+  align-self: center;
+}
 
-        #featured-recipes-grid {
-          display: flex;
-          gap: 20px;
-        }
+#featured-recipes-grid {
+  display: flex;
+  gap: 20px;
+}
 
-        .recipe-card {
-          width: 200px;
-        }
-
+.recipe-card {
+  width: 200px;
+}
 
 /*------------------------------------*\
     #mobile-size
@@ -120,27 +119,28 @@
     display: none;
   }
 
-  .home-page .featured-recipes h2, .home-page .quick-links h2 {
+  .home-page .featured-recipes h2,
+  .home-page .quick-links h2 {
     font-size: var(--size-header1-mobile);
   }
-  
+
   .home-page .category-jars {
     gap: 40px;
     margin: 4rem auto;
   }
 
-      .home-page .category-jar {
-        width: 90px;
-      }
+  .home-page .category-jar {
+    width: 90px;
+  }
 
-          .home-page .jar-img {
-            height: 120px;
-          }
+  .home-page .jar-img {
+    height: 120px;
+  }
 
-      .home-page .category-jars span {
-        white-space: nowrap;
-        display: flex;
-        justify-content: center;
-        font-size: var(--size-header2-mobile);
-      }
+  .home-page .category-jars span {
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    font-size: var(--size-header2-mobile);
+  }
 }

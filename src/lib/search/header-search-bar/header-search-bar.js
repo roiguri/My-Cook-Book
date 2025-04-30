@@ -2,7 +2,7 @@
  * HeaderSearchBar Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @attr {string} placeholder - Custom placeholder text for the search input
  */
 class HeaderSearchBar extends HTMLElement {
@@ -122,13 +122,15 @@ class HeaderSearchBar extends HTMLElement {
 
   handleInput(e) {
     const searchText = e.target.value.trim();
-    
+
     // Dispatch event for real-time search
-    this.dispatchEvent(new CustomEvent('search-input', {
-      bubbles: true,
-      composed: true,
-      detail: { searchText }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('search-input', {
+        bubbles: true,
+        composed: true,
+        detail: { searchText },
+      }),
+    );
   }
 
   navigateToSearch(searchText) {
@@ -139,9 +141,9 @@ class HeaderSearchBar extends HTMLElement {
     searchParams.set('q', searchText);
 
     // Determine if we're on the index page or in a subdirectory
-    const isIndexPage = window.location.pathname.endsWith('index.html') || 
-                       window.location.pathname.endsWith('/');
-    
+    const isIndexPage =
+      window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/');
+
     // Build the categories page URL
     const baseUrl = isIndexPage ? './pages/categories.html' : './categories.html';
     const searchUrl = `${baseUrl}?${searchParams.toString()}`;

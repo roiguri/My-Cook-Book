@@ -2,12 +2,12 @@
  * Modal Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * A custom web component that creates a flexible, accessible, and stylable modal dialog
  * that can be easily integrated into web pages. It provides open/close functionality,
  * customizable appearance, and event handling.
- * 
+ *
  * @example
  * // HTML
  * <custom-modal id="myModal" width="400px" height="300px" background-color="#f0f0f0">
@@ -15,38 +15,38 @@
  *   <p>This is a basic modal example.</p>
  *   <button onclick="document.getElementById('myModal').close()">Close</button>
  * </custom-modal>
- * 
+ *
  * // JavaScript
  * const modal = document.getElementById('myModal');
  * modal.addEventListener('modal-opened', () => console.log('Modal opened'));
  * modal.addEventListener('modal-closed', () => console.log('Modal closed'));
- * 
+ *
  * // Open the modal
  * modal.open();
- * 
+ *
  * @property {boolean} isOpen - Indicates whether the modal is currently open.
- * 
+ *
  * @method open
  * @description Opens the modal and dispatches the 'modal-opened' event.
- * 
+ *
  * @method close
  * @description Closes the modal and dispatches the 'modal-closed' event after the closing animation.
- * 
+ *
  * @method setWidth
  * @param {string} value - The width of the modal (e.g., '400px', '50%').
  * @description Sets the width of the modal.
- * 
+ *
  * @method setHeight
  * @param {string} value - The height of the modal (e.g., '300px', 'auto').
  * @description Sets the height of the modal.
- * 
+ *
  * @method setBackgroundColor
  * @param {string} value - The background color of the modal (e.g., '#ffffff', 'rgb(255, 255, 255)').
  * @description Sets the background color of the modal.
- * 
+ *
  * @fires modal-opened - When the modal is opened.
  * @fires modal-closed - When the modal is closed (after closing animation).
- * 
+ *
  * @attr {string} width - Sets the width of the modal.
  * @attr {string} height - Sets the height of the modal.
  * @attr {string} background-color - Sets the background color of the modal.
@@ -104,7 +104,7 @@ export class Modal extends HTMLElement {
       }
     `;
   }
-  
+
   existingStyles() {
     return `
       .modal {
@@ -181,7 +181,6 @@ export class Modal extends HTMLElement {
     `;
   }
 
-  
   /**
    * ##Functionality
    */
@@ -240,11 +239,11 @@ export class Modal extends HTMLElement {
   setWidth(value) {
     this.setCustomProperty('width', value);
   }
-  
+
   setHeight(value) {
     this.setCustomProperty('height', value);
   }
-  
+
   setBackgroundColor(value) {
     this.setCustomProperty('background-color', value);
   }
@@ -278,7 +277,8 @@ export class Modal extends HTMLElement {
   }
 
   setFocusableElements() {
-    const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusableSelectors =
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
     this.focusableElements = [...this.shadowRoot.querySelectorAll(focusableSelectors)];
     this.firstFocusableElement = this.focusableElements[0];
     this.lastFocusableElement = this.focusableElements[this.focusableElements.length - 1];
@@ -291,12 +291,12 @@ export class Modal extends HTMLElement {
     document.body.style.overflow = 'hidden';
     document.body.style.paddingRight = this.getScrollbarWidth() + 'px';
   }
-  
+
   unlockScroll() {
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
   }
-  
+
   getScrollbarWidth() {
     return window.innerWidth - document.documentElement.clientWidth;
   }

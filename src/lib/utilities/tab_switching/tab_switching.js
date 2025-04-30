@@ -3,9 +3,11 @@ class TabSwitching extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.tabs = [];
-    this.activeTab = 0; 
+    this.activeTab = 0;
     this.tabsColor = this.hasAttribute('tabs-color') ? this.getAttribute('tabs-color') : '#f0f0f0';
-    this.contentWindowColor = this.hasAttribute('content-window-color') ? this.getAttribute('content-window-color') : '#ffffff';
+    this.contentWindowColor = this.hasAttribute('content-window-color')
+      ? this.getAttribute('content-window-color')
+      : '#ffffff';
   }
 
   connectedCallback() {
@@ -89,11 +91,15 @@ class TabSwitching extends HTMLElement {
   }
 
   renderTabs() {
-    return Array.from(this.tabs).map((tab, index) => `
+    return Array.from(this.tabs)
+      .map(
+        (tab, index) => `
       <div class="tab-switching__tab ${index === this.activeTab ? 'active' : ''}" data-index="${index}">
         ${tab.getAttribute('name')}
       </div>
-    `).join('');
+    `,
+      )
+      .join('');
   }
 
   renderContent() {
@@ -104,7 +110,7 @@ class TabSwitching extends HTMLElement {
   }
 
   setupEventListeners() {
-    this.shadowRoot.querySelectorAll('.tab-switching__tab').forEach(tab => {
+    this.shadowRoot.querySelectorAll('.tab-switching__tab').forEach((tab) => {
       tab.addEventListener('click', () => {
         this.setActiveTab(parseInt(tab.dataset.index));
       });
@@ -113,8 +119,8 @@ class TabSwitching extends HTMLElement {
 
   setActiveTab(index) {
     this.activeTab = index;
-    this.render(); 
-    this.setupEventListeners(); 
+    this.render();
+    this.setupEventListeners();
   }
 }
 

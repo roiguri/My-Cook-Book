@@ -1,6 +1,6 @@
 /**
  * Firebase Storage Utilities
- * 
+ *
  * A collection of utility functions for handling Firebase Storage operations,
  * particularly focusing on image management for recipes.
  */
@@ -17,67 +17,70 @@ import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
  */
 async function deleteRecipeImages(recipeId) {
   try {
-      // Get recipe data first
-      const db = getFirestoreInstance();
-      const recipeDocRef = doc(db, 'recipes', recipeId);
-      const recipeDocSnap = await getDoc(recipeDocRef);
-      if (!recipeDocSnap.exists()) {
-          console.warn('Recipe not found for deletion:', recipeId);
-          return;
-      }
+    // Get recipe data first
+    const db = getFirestoreInstance();
+    const recipeDocRef = doc(db, 'recipes', recipeId);
+    const recipeDocSnap = await getDoc(recipeDocRef);
+    if (!recipeDocSnap.exists()) {
+      console.warn('Recipe not found for deletion:', recipeId);
+      return;
+    }
 
-      const recipeData = recipeDocSnap.data();
-      const storage = getStorageInstance();
-      const deletePromises = [];
+    const recipeData = recipeDocSnap.data();
+    const storage = getStorageInstance();
+    const deletePromises = [];
 
-      // Handle approved images array
-      if (recipeData.images && Array.isArray(recipeData.images)) {
-          recipeData.images.forEach(image => {
-              if (image.full) {
-                  deletePromises.push(
-                      deleteObject(ref(storage, image.full))
-                          .catch(err => console.warn(`Error deleting full image ${image.id}:`, err))
-                  );
-              }
-              
-              if (image.compressed) {
-                  deletePromises.push(
-                      deleteObject(ref(storage, image.compressed))
-                          .catch(err => console.warn(`Error deleting compressed image ${image.id}:`, err))
-                  );
-              }
+    // Handle approved images array
+    if (recipeData.images && Array.isArray(recipeData.images)) {
+      recipeData.images.forEach((image) => {
+        if (image.full) {
+          deletePromises.push(
+            deleteObject(ref(storage, image.full)).catch((err) =>
+              console.warn(`Error deleting full image ${image.id}:`, err),
+            ),
+          );
+        }
+
+        if (image.compressed) {
+          deletePromises.push(
+            deleteObject(ref(storage, image.compressed)).catch((err) =>
+              console.warn(`Error deleting compressed image ${image.id}:`, err),
+            ),
+          );
+        }
+      });
+    }
+
+    // Handle pending images if they exist
+    if (recipeData.pendingImages && Array.isArray(recipeData.pendingImages)) {
+      recipeData.pendingImages.forEach((pendingBatch) => {
+        if (pendingBatch.images && Array.isArray(pendingBatch.images)) {
+          pendingBatch.images.forEach((image) => {
+            if (image.full) {
+              deletePromises.push(
+                deleteObject(ref(storage, image.full)).catch((err) =>
+                  console.warn(`Error deleting pending full image ${image.id}:`, err),
+                ),
+              );
+            }
+            if (image.compressed) {
+              deletePromises.push(
+                deleteObject(ref(storage, image.compressed)).catch((err) =>
+                  console.warn(`Error deleting pending compressed image ${image.id}:`, err),
+                ),
+              );
+            }
           });
-      }
+        }
+      });
+    }
 
-      // Handle pending images if they exist
-      if (recipeData.pendingImages && Array.isArray(recipeData.pendingImages)) {
-          recipeData.pendingImages.forEach(pendingBatch => {
-              if (pendingBatch.images && Array.isArray(pendingBatch.images)) {
-                  pendingBatch.images.forEach(image => {
-                      if (image.full) {
-                          deletePromises.push(
-                              deleteObject(ref(storage, image.full))
-                                  .catch(err => console.warn(`Error deleting pending full image ${image.id}:`, err))
-                          );
-                      }
-                      if (image.compressed) {
-                          deletePromises.push(
-                            deleteObject(ref(storage, image.compressed))
-                                  .catch(err => console.warn(`Error deleting pending compressed image ${image.id}:`, err))
-                          );
-                      }
-                  });
-              }
-          });
-      }
-
-      // Wait for all deletions to complete
-      await Promise.all(deletePromises);
-      console.log('Successfully deleted all images for recipe:', recipeId);
-
+    // Wait for all deletions to complete
+    await Promise.all(deletePromises);
+    console.log('Successfully deleted all images for recipe:', recipeId);
   } catch (error) {
-      console.error('Error in deleteRecipeImages:', error);
-      throw new Error(`Failed to delete recipe images: ${error.message}`);
+    console.error('Error in deleteRecipeImages:', error);
+    throw new Error(`Failed to delete recipe images: ${error.message}`);
   }
 }
 
@@ -96,7 +99,7 @@ async function uploadProposedImages(recipeId, images, userId) {
     batchId,
     submittedBy: userId,
     status: 'pending',
-    images: []
+    images: [],
   };
 
   try {
@@ -125,7 +128,7 @@ async function uploadProposedImages(recipeId, images, userId) {
         full: fullPath,
         compressed: compressedPath,
         isPrimary: image.isPrimary,
-        fileExtension
+        fileExtension,
       });
     }
     // Add timestamp just before the update

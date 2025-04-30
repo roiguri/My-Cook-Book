@@ -8,35 +8,35 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
  * MissingImageUpload Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * A modal interface for uploading missing recipe images with Firebase integration.
  * Features image preview, file validation, and automatic image processing.
  * Supports RTL (Right-to-Left) layout by default.
- * 
+ *
  * @dependencies
  * - Requires Modal component (`custom-modal`)
  * - Firebase Storage for image upload
  * - Firebase Firestore for data management
- * 
+ *
  * @cssVariables
  * - --primary-color: Used for buttons and borders
  * - --primary-hover: Hover state for buttons
  * - --secondary-color: Used for form background
- * 
+ *
  * @example
  * // HTML
  * <missing-image-upload></missing-image-upload>
- * 
+ *
  * // JavaScript
  * const uploader = document.querySelector('missing-image-upload');
  * uploader.openModalForRecipe('recipe-123');
- * 
+ *
  * @property {string} recipeId - ID of the recipe for image upload
- * 
+ *
  * @method openModalForRecipe
  * @param {string} recipeId - ID of the recipe
- * 
+ *
  * @fires modal-opened - When modal opens
  * @fires modal-closed - When modal closes
  */
@@ -135,14 +135,22 @@ class MissingImageUpload extends HTMLElement {
   }
 
   setupEventListeners() {
-    this.shadowRoot.getElementById('clear-image').addEventListener('click', () => this.clearFileInput());
-    this.shadowRoot.getElementById('recipe-image').addEventListener('change', (event) => this.handleFileSelect(event));
-    this.shadowRoot.getElementById('image-upload-form').addEventListener('submit', (event) => this.handleSubmit(event));
+    this.shadowRoot
+      .getElementById('clear-image')
+      .addEventListener('click', () => this.clearFileInput());
+    this.shadowRoot
+      .getElementById('recipe-image')
+      .addEventListener('change', (event) => this.handleFileSelect(event));
+    this.shadowRoot
+      .getElementById('image-upload-form')
+      .addEventListener('submit', (event) => this.handleSubmit(event));
 
     const modal = this.shadowRoot.querySelector('custom-modal');
-    modal.addEventListener('modal-closed', () =>   setTimeout(() => {
-      this.clearFileInput();
-    }, 300));
+    modal.addEventListener('modal-closed', () =>
+      setTimeout(() => {
+        this.clearFileInput();
+      }, 300),
+    );
   }
 
   get recipeId() {
@@ -180,7 +188,7 @@ class MissingImageUpload extends HTMLElement {
   handleFileSelect(event) {
     const file = event.target.files[0];
     const fileInput = event.target;
-    
+
     if (file) {
       if (file.type.startsWith('image/')) {
         this.previewImage(file);
@@ -260,8 +268,8 @@ class MissingImageUpload extends HTMLElement {
           full: fullSizeUrl,
           compressed: compressedUrl,
           timestamp: serverTimestamp(),
-          fileExtension: fileExtension
-        }
+          fileExtension: fileExtension,
+        },
       });
       // TODO: Display a success message to the user indicating the image is pending approval
       console.log('Image uploaded successfully and pending approval!');

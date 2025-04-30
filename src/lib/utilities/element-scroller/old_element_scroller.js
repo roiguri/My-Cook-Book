@@ -1,13 +1,13 @@
 /**
  * ElementScroller Component
  * A horizontal scroller that can contain any HTML elements
- * 
+ *
  * @attribute {string} title - Optional title for the scroller
  * @attribute {boolean} collapsible - Whether the scroller can be collapsed
  * @attribute {string} background-color - Custom background color
  * @attribute {number} visible-items - Number of items visible at once (default: 3)
  * @attribute {boolean} continuous - Enable continuous scrolling (default: false)
- * 
+ *
  * Usage example:
  * <element-scroller visible-items="3" title="My Items">
  *   <div slot="items">
@@ -20,73 +20,73 @@
 
 class ElementScroller extends HTMLElement {
   constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
+    super();
+    this.attachShadow({ mode: 'open' });
 
-      this.collapsible = false;
-      this.backgroundColor = null;
-      this.visibleItems = 3;
-      this.continuous = false;
-      this.initialState = 'open';
-      this.currentIndex = 0;
-      this.isCollapsed = false;
+    this.collapsible = false;
+    this.backgroundColor = null;
+    this.visibleItems = 3;
+    this.continuous = false;
+    this.initialState = 'open';
+    this.currentIndex = 0;
+    this.isCollapsed = false;
   }
 
   static get observedAttributes() {
-      return [
-          'title',
-          'visible-items',
-          'continuous',
-          'collapsible',
-          'background-color',
-          'item-height',
-      ];
+    return [
+      'title',
+      'visible-items',
+      'continuous',
+      'collapsible',
+      'background-color',
+      'item-height',
+    ];
   }
 
   connectedCallback() {
-      this.render();
-      this.initScroller();
+    this.render();
+    this.initScroller();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue !== newValue) {
-          switch (name) {
-              case 'title':
-                  this.title = newValue || undefined;
-                  break;
-              case 'visible-items':
-                  this.visibleItems = parseInt(newValue, 10) || 3;
-                  break;
-              case 'continuous':
-                  this.continuous = newValue === 'true';
-                  break;
-              case 'collapsible':
-                  this.collapsible = newValue === 'true';
-                  break;
-              case 'background-color':
-                  this.backgroundColor = newValue;
-                  break;
-              case 'item-height':
-                this.itemHeight = newValue;
-                break;
-          }
-          if (this.isConnected) {
-              this.render();
-              this.initScroller();
-          }
+    if (oldValue !== newValue) {
+      switch (name) {
+        case 'title':
+          this.title = newValue || undefined;
+          break;
+        case 'visible-items':
+          this.visibleItems = parseInt(newValue, 10) || 3;
+          break;
+        case 'continuous':
+          this.continuous = newValue === 'true';
+          break;
+        case 'collapsible':
+          this.collapsible = newValue === 'true';
+          break;
+        case 'background-color':
+          this.backgroundColor = newValue;
+          break;
+        case 'item-height':
+          this.itemHeight = newValue;
+          break;
       }
+      if (this.isConnected) {
+        this.render();
+        this.initScroller();
+      }
+    }
   }
 
   toggleCollapse() {
-      this.isCollapsed = !this.isCollapsed;
-      this.updateCollapseState();
-      this.updateNavigation();
+    this.isCollapsed = !this.isCollapsed;
+    this.updateCollapseState();
+    this.updateNavigation();
   }
 
   updateCollapseState() {
     const container = this.shadowRoot.querySelector('.element-scroller__container');
     const dropdown = this.shadowRoot.querySelector('.element-scroller__dropdown');
-    
+
     if (this.isCollapsed) {
       container.classList.add('collapsed');
       dropdown.innerHTML = '◀'; // Right arrow
@@ -97,53 +97,53 @@ class ElementScroller extends HTMLElement {
   }
 
   initScroller() {
-      this.scroller = this.shadowRoot.querySelector('.element-scroller__container');
-      this.itemsContainer = this.shadowRoot.querySelector('.element-scroller__items');
-      this.leftArrow = this.shadowRoot.querySelector('.element-scroller__arrow--left');
-      this.rightArrow = this.shadowRoot.querySelector('.element-scroller__arrow--right');
+    this.scroller = this.shadowRoot.querySelector('.element-scroller__container');
+    this.itemsContainer = this.shadowRoot.querySelector('.element-scroller__items');
+    this.leftArrow = this.shadowRoot.querySelector('.element-scroller__arrow--left');
+    this.rightArrow = this.shadowRoot.querySelector('.element-scroller__arrow--right');
 
-      if (!this.scroller || !this.itemsContainer) return;
+    if (!this.scroller || !this.itemsContainer) return;
 
+    this.updateScrollerWidth();
+    this.updateNavigation();
+
+    // Arrow navigation
+    this.leftArrow?.addEventListener('click', () => this.scroll('left'));
+    this.rightArrow?.addEventListener('click', () => this.scroll('right'));
+
+    // Touch support
+    let touchStartX = 0;
+    this.itemsContainer.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    });
+
+    this.itemsContainer.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      if (touchEndX < touchStartX) {
+        this.scroll('right');
+      } else if (touchEndX > touchStartX) {
+        this.scroll('left');
+      }
+    });
+
+    // Add resize listener for responsiveness
+    window.addEventListener('resize', this.updateScrollerWidth.bind(this));
+
+    // Collapse functionality
+    if (this.collapsible) {
+      const dropdown = this.shadowRoot.querySelector('.element-scroller__dropdown');
+      if (dropdown) {
+        dropdown.addEventListener('click', () => this.toggleCollapse());
+      }
+      this.updateCollapseState();
+    }
+
+    // Observe slot changes
+    const slot = this.shadowRoot.querySelector('slot');
+    slot?.addEventListener('slotchange', () => {
       this.updateScrollerWidth();
       this.updateNavigation();
-
-      // Arrow navigation
-      this.leftArrow?.addEventListener('click', () => this.scroll('left'));
-      this.rightArrow?.addEventListener('click', () => this.scroll('right'));
-
-      // Touch support
-      let touchStartX = 0;
-      this.itemsContainer.addEventListener('touchstart', (e) => {
-          touchStartX = e.touches[0].clientX;
-      });
-
-      this.itemsContainer.addEventListener('touchend', (e) => {
-          const touchEndX = e.changedTouches[0].clientX;
-          if (touchEndX < touchStartX) {
-              this.scroll('right');
-          } else if (touchEndX > touchStartX) {
-              this.scroll('left');
-          }
-      });
-
-      // Add resize listener for responsiveness
-      window.addEventListener('resize', this.updateScrollerWidth.bind(this));
-
-      // Collapse functionality
-      if (this.collapsible) {
-          const dropdown = this.shadowRoot.querySelector('.element-scroller__dropdown');
-          if (dropdown) {
-              dropdown.addEventListener('click', () => this.toggleCollapse());
-          }
-          this.updateCollapseState();
-      }
-      
-      // Observe slot changes
-      const slot = this.shadowRoot.querySelector('slot');
-      slot?.addEventListener('slotchange', () => {
-          this.updateScrollerWidth();
-          this.updateNavigation();
-      });
+    });
   }
 
   updateScrollerWidth() {
@@ -163,14 +163,14 @@ class ElementScroller extends HTMLElement {
 
     const items = container.children;
     const containerWidth = this.scroller.offsetWidth;
-    console.log("offsetWidth: " + containerWidth);
+    console.log('offsetWidth: ' + containerWidth);
 
     if (direction === 'left') {
-        this.currentIndex = Math.max(0, this.currentIndex - 1);
+      this.currentIndex = Math.max(0, this.currentIndex - 1);
     } else {
-        this.currentIndex = this.continuous
-            ? (this.currentIndex + 1) % items.length
-            : Math.min(items.length - this.visibleItems, this.currentIndex + 1);
+      this.currentIndex = this.continuous
+        ? (this.currentIndex + 1) % items.length
+        : Math.min(items.length - this.visibleItems, this.currentIndex + 1);
     }
     console.log(this.currentIndex);
 
@@ -184,33 +184,33 @@ class ElementScroller extends HTMLElement {
 
     // If collapsed, hide arrows
     if (this.isCollapsed) {
-        this.leftArrow.classList.remove('navigation-visible');
-        this.rightArrow.classList.remove('navigation-visible');
-        return;
+      this.leftArrow.classList.remove('navigation-visible');
+      this.rightArrow.classList.remove('navigation-visible');
+      return;
     }
 
     const container = this.itemsContainer.assignedElements()[0];
     if (!container) return;
-    
+
     const items = container.children;
 
     // Show left arrow only if we're not at the start (and not in continuous mode)
     if (this.continuous && this.currentIndex <= 0) {
-        this.leftArrow.classList.remove('navigation-visible');
+      this.leftArrow.classList.remove('navigation-visible');
     } else {
-        this.leftArrow.classList.add('navigation-visible');
+      this.leftArrow.classList.add('navigation-visible');
     }
 
     // Show right arrow only if we have more items to show (and not in continuous mode)
     if (this.continuous && this.currentIndex >= items.length - this.visibleItems) {
-        this.rightArrow.classList.remove('navigation-visible');
+      this.rightArrow.classList.remove('navigation-visible');
     } else {
-        this.rightArrow.classList.add('navigation-visible');
+      this.rightArrow.classList.add('navigation-visible');
     }
   }
 
   render() {
-      this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
           <style>
               .element-scroller {
                   background-color: ${this.backgroundColor || 'var(--background-color)'};
@@ -277,8 +277,8 @@ class ElementScroller extends HTMLElement {
 
               /* Fix for slotted items */
               ::slotted(*) > * {
-                  flex: 0 0 calc(${100/this.visibleItems}% - ${(20 * (this.visibleItems-1))/this.visibleItems}px);
-                  max-width: calc(${100/this.visibleItems}% - ${(20 * (this.visibleItems-1))/this.visibleItems}px);
+                  flex: 0 0 calc(${100 / this.visibleItems}% - ${(20 * (this.visibleItems - 1)) / this.visibleItems}px);
+                  max-width: calc(${100 / this.visibleItems}% - ${(20 * (this.visibleItems - 1)) / this.visibleItems}px);
                   box-sizing: border-box;
               }
 
@@ -337,14 +337,20 @@ class ElementScroller extends HTMLElement {
           </style>
           <div class="element-scroller">
               <div class="element-scroller__container">
-                  ${this.hasAttribute('title') ? `
+                  ${
+                    this.hasAttribute('title')
+                      ? `
                       <div class="element-scroller__title">
                           <span>${this.getAttribute('title')}</span>
-                          ${this.collapsible ? 
-                              `<span class="element-scroller__dropdown">&#9660;</span>` : 
-                              ''}
+                          ${
+                            this.collapsible
+                              ? `<span class="element-scroller__dropdown">&#9660;</span>`
+                              : ''
+                          }
                       </div>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                   <div class="element-scroller__items-wrapper">
                       <slot name="items" class="element-scroller__items"></slot>
                   </div>

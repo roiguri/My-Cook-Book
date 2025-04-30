@@ -2,14 +2,18 @@
  * UserProfile Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * Handles user profile view with avatar selection
  */
 
 import './auth-content.js';
 import '../../modals/message-modal/message-modal.js';
-import { getAuthInstance, getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import {
+  getAuthInstance,
+  getFirestoreInstance,
+  getStorageInstance,
+} from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -28,7 +32,7 @@ class UserProfile extends HTMLElement {
 
     // Re-render if user data loads after component mount
     const auth = getAuthInstance();
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         this.updateWelcomeText();
       }
@@ -236,7 +240,7 @@ class UserProfile extends HTMLElement {
 
   selectAvatar(button, url) {
     // Remove selection from all buttons
-    this.shadowRoot.querySelectorAll('.avatar-button').forEach(btn => {
+    this.shadowRoot.querySelectorAll('.avatar-button').forEach((btn) => {
       btn.classList.remove('selected');
     });
     // Add selection to clicked button
@@ -253,10 +257,12 @@ class UserProfile extends HTMLElement {
       const authController = this.closest('auth-controller');
       await authController.updateUserAvatar(this.selectedAvatarUrl);
       // Dispatch success event
-      this.dispatchEvent(new CustomEvent('profile-updated', {
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('profile-updated', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
       // Close modal
       authController.closeModal();
     } catch (error) {

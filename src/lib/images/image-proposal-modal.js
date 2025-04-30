@@ -3,21 +3,21 @@
  * ImageProposalModal Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * A modal interface for proposing new images for existing recipes.
  * Features multiple image upload, preview, and submission handling.
- * 
+ *
  * @dependencies
  * - Requires Modal component (`custom-modal`)
  * - Requires ImageHandler component (`image-handler`)
  * - Firebase Storage for image upload
  * - Firebase Firestore for data management
- * 
+ *
  * @example
  * // HTML
  * <image-proposal-modal></image-proposal-modal>
- * 
+ *
  * // JavaScript
  * const modal = document.querySelector('image-proposal-modal');
  * modal.openForRecipe('recipe-123');
@@ -146,7 +146,7 @@ class ImageProposalModal extends HTMLElement {
     const modal = this.shadowRoot.querySelector('custom-modal');
     const form = this.shadowRoot.querySelector('.proposal-form');
     const cancelButton = this.shadowRoot.querySelector('.cancel-button');
-    
+
     form.addEventListener('submit', (e) => this.handleSubmit(e));
     cancelButton.addEventListener('click', () => this.close());
   }
@@ -180,13 +180,15 @@ class ImageProposalModal extends HTMLElement {
       if (!currentUser) throw new Error('User not authenticated');
 
       const result = await uploadProposedImages(this.recipeId, images, currentUser.uid);
-      
+
       // Dispatch success event
-      this.dispatchEvent(new CustomEvent('images-proposed', {
-        detail: { recipeId: this.recipeId, batch: result },
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('images-proposed', {
+          detail: { recipeId: this.recipeId, batch: result },
+          bubbles: true,
+          composed: true,
+        }),
+      );
 
       this.close();
     } catch (error) {

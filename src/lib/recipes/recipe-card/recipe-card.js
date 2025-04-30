@@ -1,10 +1,10 @@
 /**
  * Recipe Card Web Component
  * A customizable card component for displaying recipe information
- * 
+ *
  * @dependencies
  * - Font Awesome 6.4.2 (CDN): <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
- * 
+ *
  * @attributes
  * - recipe-id: ID of the recipe to fetch from Firestore
  * - layout: 'vertical' (default) or 'horizontal'
@@ -13,12 +13,16 @@
  * - has-more-info-icon: Whether to show the ingredients tooltip
  * - card-width: Width of the card (default: 300px)
  * - card-height: Height of the card (default: 400px)
- * 
+ *
  * @events
  * - recipe-card-open: Emitted when the card is clicked
  *   detail: { recipeId: string }
  */
-import { getFirestoreInstance, getAuthInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import {
+  getFirestoreInstance,
+  getAuthInstance,
+  getStorageInstance,
+} from '../../../js/services/firebase-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -26,101 +30,99 @@ import { arrayUnion, arrayRemove } from 'firebase/firestore';
 class RecipeCard extends HTMLElement {
   // Define observed attributes
   static get observedAttributes() {
-      return [
-          'recipe-id',
-          'layout',
-          'is-collapsed',
-          'is-collapsible',
-          'has-more-info-icon',
-          'card-width',
-          'card-height'
-      ];
+    return [
+      'recipe-id',
+      'layout',
+      'is-collapsed',
+      'is-collapsible',
+      'has-more-info-icon',
+      'card-width',
+      'card-height',
+    ];
   }
 
   constructor() {
-      super();
-      // Create shadow DOM
-      this.attachShadow({ mode: 'open' });
-      
-      this._categoryMap = {
-        'appetizers': 'מנות ראשונות',
-        'main-courses': 'מנות עיקריות',
-        'side-dishes': 'תוספות',
-        'soups-stews': 'מרקים ותבשילים',
-        'salads': 'סלטים',
-        'desserts': 'קינוחים',
-        'breakfast-brunch': 'ארוחות בוקר',
-        'snacks': 'חטיפים',
-        'beverages': 'משקאות'
-      };
+    super();
+    // Create shadow DOM
+    this.attachShadow({ mode: 'open' });
 
-      // Initialize default values
-      this._defaults = {
-        vertical: {
-            width: '200px',
-            height: '300px'
-        },
-        horizontal: {
-            width: '300px',
-            height: '200px'
-        }
-      };
-      
-      this._currentLayout = 'vertical';
-      this._isLoading = true;
-      this._recipeData = null;
-      this._imageUrl = null;
-      this._error = null;
-      
-      
-      
-      // Bind methods
-      this._handleArrowClick = this._handleArrowClick.bind(this);
-      this._handleCardClick = this._handleCardClick.bind(this);
+    this._categoryMap = {
+      appetizers: 'מנות ראשונות',
+      'main-courses': 'מנות עיקריות',
+      'side-dishes': 'תוספות',
+      'soups-stews': 'מרקים ותבשילים',
+      salads: 'סלטים',
+      desserts: 'קינוחים',
+      'breakfast-brunch': 'ארוחות בוקר',
+      snacks: 'חטיפים',
+      beverages: 'משקאות',
+    };
 
-      this._userFavorites = new Set();
+    // Initialize default values
+    this._defaults = {
+      vertical: {
+        width: '200px',
+        height: '300px',
+      },
+      horizontal: {
+        width: '300px',
+        height: '200px',
+      },
+    };
+
+    this._currentLayout = 'vertical';
+    this._isLoading = true;
+    this._recipeData = null;
+    this._imageUrl = null;
+    this._error = null;
+
+    // Bind methods
+    this._handleArrowClick = this._handleArrowClick.bind(this);
+    this._handleCardClick = this._handleCardClick.bind(this);
+
+    this._userFavorites = new Set();
   }
 
   // Getters for attribute values
   get recipeId() {
-      return this.getAttribute('recipe-id');
+    return this.getAttribute('recipe-id');
   }
 
   get layout() {
-      return this.getAttribute('layout') || 'vertical';
+    return this.getAttribute('layout') || 'vertical';
   }
 
   get isCollapsed() {
-      return this.hasAttribute('is-collapsed');
+    return this.hasAttribute('is-collapsed');
   }
 
   get isCollapsible() {
-      return this.hasAttribute('is-collapsible');
+    return this.hasAttribute('is-collapsible');
   }
 
   get hasMoreInfoIcon() {
-      return this.hasAttribute('has-more-info-icon');
+    return this.hasAttribute('has-more-info-icon');
   }
 
   get cardWidth() {
-      return this.getAttribute('card-width') || this._defaultWidth;
+    return this.getAttribute('card-width') || this._defaultWidth;
   }
 
   get cardHeight() {
-      return this.getAttribute('card-height') || this._defaultHeight;
+    return this.getAttribute('card-height') || this._defaultHeight;
   }
 
   _getCurrentDimensions() {
     const layout = this.getAttribute('layout') || 'vertical';
     return {
-        width: this.getAttribute('card-width') || this._defaults[layout].width,
-        height: this.getAttribute('card-height') || this._defaults[layout].height
+      width: this.getAttribute('card-width') || this._defaults[layout].width,
+      height: this.getAttribute('card-height') || this._defaults[layout].height,
     };
   }
 
   // Lifecycle methods
   connectedCallback() {
-      this._initialize();
+    this._initialize();
   }
 
   disconnectedCallback() {
@@ -128,31 +130,31 @@ class RecipeCard extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-      if (oldValue === newValue) return;
+    if (oldValue === newValue) return;
 
-      switch (name) {
-          case 'recipe-id':
-              if (this.isConnected) this._fetchRecipeData();
-              break;
-          case 'layout':
-              this._updateLayout();
-              break;
-          case 'is-collapsed':
-              if (this.isCollapsible) this._updateCollapseState();
-              break;
-          case 'card-width':
-          case 'card-height':
-              this._updateDimensions();
-              break;
-      }
+    switch (name) {
+      case 'recipe-id':
+        if (this.isConnected) this._fetchRecipeData();
+        break;
+      case 'layout':
+        this._updateLayout();
+        break;
+      case 'is-collapsed':
+        if (this.isCollapsible) this._updateCollapseState();
+        break;
+      case 'card-width':
+      case 'card-height':
+        this._updateDimensions();
+        break;
+    }
   }
 
   // Initialization
   async _initialize() {
-      this._setupStyles();
-      await Promise.all([this._fetchRecipeData(), this._fetchUserFavorites()]);
-      this._render();
-      this._setupEventListeners();
+    this._setupStyles();
+    await Promise.all([this._fetchRecipeData(), this._fetchUserFavorites()]);
+    this._render();
+    this._setupEventListeners();
   }
 
   _setupEventListeners() {
@@ -163,11 +165,11 @@ class RecipeCard extends HTMLElement {
     const arrow = this.shadowRoot.querySelector('.collapse-arrow');
 
     if (card) {
-        card.addEventListener('click', this._handleCardClick);
+      card.addEventListener('click', this._handleCardClick);
     }
 
     if (arrow) {
-        arrow.addEventListener('click', this._handleArrowClick);
+      arrow.addEventListener('click', this._handleArrowClick);
     }
 
     // Store references for cleanup
@@ -175,63 +177,65 @@ class RecipeCard extends HTMLElement {
     this._arrow = arrow;
 
     const favoriteBtn = this.shadowRoot.querySelector('.favorite-btn');
-    if (favoriteBtn && !favoriteBtn.hasAttribute('listener-attached')) {       
-        favoriteBtn.setAttribute('listener-attached', 'true');
-        favoriteBtn.addEventListener('click', async (e) => {
-            console.log('Favorite button clicked');
-            e.stopPropagation(); // Prevent card click
-            
-            const isFavorite = favoriteBtn.classList.contains('active');
-            favoriteBtn.classList.toggle('active');
+    if (favoriteBtn && !favoriteBtn.hasAttribute('listener-attached')) {
+      favoriteBtn.setAttribute('listener-attached', 'true');
+      favoriteBtn.addEventListener('click', async (e) => {
+        console.log('Favorite button clicked');
+        e.stopPropagation(); // Prevent card click
 
-            await this._toggleFavorite();
+        const isFavorite = favoriteBtn.classList.contains('active');
+        favoriteBtn.classList.toggle('active');
 
-            this.dispatchEvent(new CustomEvent(isFavorite ? 'remove-favorite' : 'add-favorite', {
-              bubbles: true,
-              composed: true,
-              detail: {
-                  recipeId: this.recipeId
-              }
-            }));
-        });
+        await this._toggleFavorite();
+
+        this.dispatchEvent(
+          new CustomEvent(isFavorite ? 'remove-favorite' : 'add-favorite', {
+            bubbles: true,
+            composed: true,
+            detail: {
+              recipeId: this.recipeId,
+            },
+          }),
+        );
+      });
     }
   }
 
   _removeEventListeners() {
     if (this._card) {
-        this._card.removeEventListener('click', this._handleCardClick);
+      this._card.removeEventListener('click', this._handleCardClick);
     }
     if (this._arrow) {
-        this._arrow.removeEventListener('click', this._handleArrowClick);
+      this._arrow.removeEventListener('click', this._handleArrowClick);
     }
   }
 
   _handleCardClick(event) {
     // Prevent handling if clicking the arrow
     if (event.target.closest('.collapse-arrow')) {
-        return;
+      return;
     }
 
     console.log('Card clicked, emitting event for recipe:', this.recipeId);
-    
+
     // Emit recipe-card-open event for the modal
     const customEvent = new CustomEvent('recipe-card-open', {
-        detail: { recipeId: this.recipeId },
-        bubbles: true,
-        composed: true
+      detail: { recipeId: this.recipeId },
+      bubbles: true,
+      composed: true,
     });
     this.dispatchEvent(customEvent);
   }
 
   _handleArrowClick(event) {
     console.log('Arrow clicked, current collapsed state:', this.isCollapsed);
-    
+
     // Stop event propagation to prevent card click
     event.stopPropagation();
-    
+
     if (this.isCollapsible) {
-        this.toggleAttribute('is-collapsed');
-        this._updateCollapseState();
+      this.toggleAttribute('is-collapsed');
+      this._updateCollapseState();
     }
   }
 
@@ -242,77 +246,77 @@ class RecipeCard extends HTMLElement {
   }
 
   _translateCategory(category) {
-      return this._categoryMap[category] || category; // fallback to original if not found
+    return this._categoryMap[category] || category; // fallback to original if not found
   }
 
   // Data fetching
   async _fetchRecipeData() {
-      if (!this.recipeId) {
-          this._handleError('No recipe ID provided');
-          return;
+    if (!this.recipeId) {
+      this._handleError('No recipe ID provided');
+      return;
+    }
+
+    try {
+      this._isLoading = true;
+      this._render();
+
+      const db = getFirestoreInstance();
+      const recipeDoc = await getDoc(doc(db, 'recipes', this.recipeId));
+
+      if (!recipeDoc.exists()) {
+        throw new Error('Recipe not found');
       }
 
-      try {
-          this._isLoading = true;
-          this._render();
+      this._recipeData = {
+        id: recipeDoc.id,
+        ...recipeDoc.data(),
+      };
 
-          const db = getFirestoreInstance();
-          const recipeDoc = await getDoc(doc(db, 'recipes', this.recipeId));
+      await this._fetchRecipeImage();
 
-          if (!recipeDoc.exists()) {
-              throw new Error('Recipe not found');
-          }
-
-          this._recipeData = {
-              id: recipeDoc.id,
-              ...recipeDoc.data()
-          };
-
-          await this._fetchRecipeImage();
-
-          this._isLoading = false;
-          this._render();
-      } catch (error) {
-          this._handleError(error);
-      }
+      this._isLoading = false;
+      this._render();
+    } catch (error) {
+      this._handleError(error);
+    }
   }
 
   async _fetchRecipeImage() {
     try {
-        const storage = getStorageInstance();
-        // First check if recipe has an image defined
-        if (this._recipeData.image) {
-            const imagePath = `img/recipes/compressed/${this._recipeData.category}/${this._recipeData.image}`;
-            const imageRef = ref(storage, imagePath);
-            this._imageUrl = await getDownloadURL(imageRef);
-            return;
-        }
-        // If no image, use placeholder without throwing an error
-        const placeholderPath = 'img/recipes/compressed/place-holder-missing.png';
-        const placeholderRef = ref(storage, placeholderPath);
-        this._imageUrl = await getDownloadURL(placeholderRef);
+      const storage = getStorageInstance();
+      // First check if recipe has an image defined
+      if (this._recipeData.image) {
+        const imagePath = `img/recipes/compressed/${this._recipeData.category}/${this._recipeData.image}`;
+        const imageRef = ref(storage, imagePath);
+        this._imageUrl = await getDownloadURL(imageRef);
+        return;
+      }
+      // If no image, use placeholder without throwing an error
+      const placeholderPath = 'img/recipes/compressed/place-holder-missing.png';
+      const placeholderRef = ref(storage, placeholderPath);
+      this._imageUrl = await getDownloadURL(placeholderRef);
     } catch (error) {
-        // Only catch actual storage errors
-        const storage = getStorageInstance();
-        const placeholderPath = 'img/recipes/compressed/place-holder-missing.png';
-        const placeholderRef = ref(storage, placeholderPath);
-        this._imageUrl = await getDownloadURL(placeholderRef);
+      // Only catch actual storage errors
+      const storage = getStorageInstance();
+      const placeholderPath = 'img/recipes/compressed/place-holder-missing.png';
+      const placeholderRef = ref(storage, placeholderPath);
+      this._imageUrl = await getDownloadURL(placeholderRef);
     }
   }
 
   // Error handling
   _handleError(error) {
-      console.error('Recipe Card Error:', error);
-      this._isLoading = false;
-      this._error = error.message;
-      this._render();
+    console.error('Recipe Card Error:', error);
+    this._isLoading = false;
+    this._error = error.message;
+    this._render();
   }
 
   // Styles
   _setupStyles() {
-      const style = document.createElement('style');
-      style.textContent = this._getStyles();
-      this.shadowRoot.appendChild(style);
+    const style = document.createElement('style');
+    style.textContent = this._getStyles();
+    this.shadowRoot.appendChild(style);
   }
 
   _getStyles() {
@@ -326,7 +330,7 @@ class RecipeCard extends HTMLElement {
   }
 
   _getBaseStyles() {
-      return `
+    return `
         :host {
               display: block;
               width: var(--card-width, ${this._defaultWidth});
@@ -592,7 +596,7 @@ class RecipeCard extends HTMLElement {
   }
 
   _getLoadingStyles() {
-      return `
+    return `
           .recipe-card.loading {
               position: relative;
               min-height: 200px;
@@ -618,7 +622,7 @@ class RecipeCard extends HTMLElement {
   }
 
   _getErrorStyles() {
-      return `
+    return `
           .error-state {
               padding: 1rem;
               text-align: center;
@@ -635,7 +639,7 @@ class RecipeCard extends HTMLElement {
   }
 
   _getCollapseStyles() {
-      return `
+    return `
           .recipe-card.collapsed .recipe-content > *:not(.recipe-title) {
               display: none;
           }
@@ -663,30 +667,30 @@ class RecipeCard extends HTMLElement {
 
   // Rendering
   _render() {
-      if (this._isLoading) {
-          this._renderLoadingState();
-          return;
-      }
+    if (this._isLoading) {
+      this._renderLoadingState();
+      return;
+    }
 
-      if (this._error) {
-          this._renderErrorState();
-          return;
-      }
+    if (this._error) {
+      this._renderErrorState();
+      return;
+    }
 
-      if (this._recipeData) {
-          this._renderRecipe();
-      }
+    if (this._recipeData) {
+      this._renderRecipe();
+    }
   }
 
   _renderLoadingState() {
-      this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
           <style>${this._getStyles()}</style>
           <div class="recipe-card loading"></div>
       `;
   }
 
   _renderErrorState() {
-      this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
           <style>${this._getStyles()}</style>
           <div class="error-state">
               ${this._error}
@@ -699,8 +703,9 @@ class RecipeCard extends HTMLElement {
     const totalTime = prepTime + waitTime;
     const timeClass = this._getTimeClass(totalTime);
     const difficultyClass = this._getDifficultyClass(difficulty);
-    const ingredients = this._recipeData.ingredients.map(i => i.item).join(', ');
-    const favoriteButton = this.hasAttribute('show-favorites') ? `
+    const ingredients = this._recipeData.ingredients.map((i) => i.item).join(', ');
+    const favoriteButton = this.hasAttribute('show-favorites')
+      ? `
         <button class="favorite-btn ${this._isFavorite() ? 'active' : ''}" 
                 aria-label="Add to favorites">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -708,28 +713,41 @@ class RecipeCard extends HTMLElement {
                       stroke-width="2" />
             </svg>
         </button>
-    ` : '';
+    `
+      : '';
     this.shadowRoot.innerHTML = `
         <style>${this._getStyles()}</style>
         <div class="recipe-card ${this.isCollapsed ? 'collapsed' : ''}" 
              data-layout="${this.layout}">
             ${favoriteButton}
-            ${this.isCollapsible ? `
+            ${
+              this.isCollapsible
+                ? `
                 <div class="collapse-arrow"></div>
-            ` : ''}
-            ${!this.isCollapsed ? `
+            `
+                : ''
+            }
+            ${
+              !this.isCollapsed
+                ? `
                 <img class="recipe-image" 
                   src="${this._imageUrl}" 
                   alt="${name}"
                   onload="this.classList.add('loaded')"
                   onerror="this.src='/img/placeholder.jpg'; this.classList.add('loaded')">
-            ` : ''}
+            `
+                : ''
+            }
             <div class="recipe-content">
                 <h3 class="recipe-title">
                     ${name}
-                    ${this.hasMoreInfoIcon ? `
+                    ${
+                      this.hasMoreInfoIcon
+                        ? `
                         <span class="more-info" title="${ingredients}">ℹ️</span>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                 </h3>
                 <div class="recipe-details">
                     <div class="recipe-meta">
@@ -757,42 +775,42 @@ class RecipeCard extends HTMLElement {
 
   async _fetchUserFavorites() {
     try {
-        const auth = getAuthInstance();
-        const userId = auth.currentUser?.uid;
-        if (!userId) return; // No user logged in
-        const db = getFirestoreInstance();
-        const userDoc = await getDoc(doc(db, 'users', userId));
-        const favoriteRecipeIds = userDoc.data()?.favorites || [];
-        this._userFavorites = new Set(favoriteRecipeIds);
+      const auth = getAuthInstance();
+      const userId = auth.currentUser?.uid;
+      if (!userId) return; // No user logged in
+      const db = getFirestoreInstance();
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      const favoriteRecipeIds = userDoc.data()?.favorites || [];
+      this._userFavorites = new Set(favoriteRecipeIds);
     } catch (error) {
-        console.error('Error fetching favorites:', error);
+      console.error('Error fetching favorites:', error);
     }
   }
 
   async _toggleFavorite() {
     try {
-        const auth = getAuthInstance();
-        const userId = auth.currentUser?.uid;
-        if (!userId) return; // No user logged in
-        const db = getFirestoreInstance();
-        const userDocRef = doc(db, 'users', userId);
-        if (this._isFavorite()) {
-            // Remove from favorites
-            await updateDoc(userDocRef, {
-                favorites: arrayRemove(this.recipeId)
-            });
-            this._userFavorites.delete(this.recipeId);
-        } else {
-            // Add to favorites
-            await updateDoc(userDocRef, {
-                favorites: arrayUnion(this.recipeId)
-            });
-            this._userFavorites.add(this.recipeId);
-        }
-        this._renderRecipe(); // Re-render to reflect the change
+      const auth = getAuthInstance();
+      const userId = auth.currentUser?.uid;
+      if (!userId) return; // No user logged in
+      const db = getFirestoreInstance();
+      const userDocRef = doc(db, 'users', userId);
+      if (this._isFavorite()) {
+        // Remove from favorites
+        await updateDoc(userDocRef, {
+          favorites: arrayRemove(this.recipeId),
+        });
+        this._userFavorites.delete(this.recipeId);
+      } else {
+        // Add to favorites
+        await updateDoc(userDocRef, {
+          favorites: arrayUnion(this.recipeId),
+        });
+        this._userFavorites.add(this.recipeId);
+      }
+      this._renderRecipe(); // Re-render to reflect the change
     } catch (error) {
-        console.error('Error toggling favorite:', error);
-        // Consider adding user-facing error handling
+      console.error('Error toggling favorite:', error);
+      // Consider adding user-facing error handling
     }
   }
 
@@ -807,68 +825,68 @@ class RecipeCard extends HTMLElement {
 
   _getDifficultyClass(difficulty) {
     const difficultyMap = {
-        'קלה': 'easy',
-        'בינונית': 'medium',
-        'קשה': 'hard'
+      קלה: 'easy',
+      בינונית: 'medium',
+      קשה: 'hard',
     };
     return difficultyMap[difficulty] || 'medium';
   }
 
   _getCategoryIcon(category) {
-      const icons = {
-          'appetizers': '🥗',
-          'main-courses': '🍖',
-          'side-dishes': '🥔',
-          'soups-stews': '🥘',
-          'salads': '🥬',
-          'desserts': '🍰',
-          'breakfast-brunch': '🍳',
-          'snacks': '🥨',
-          'beverages': '🥤',
-          'else': '🍽️'
-      };
-      return '';
+    const icons = {
+      appetizers: '🥗',
+      'main-courses': '🍖',
+      'side-dishes': '🥔',
+      'soups-stews': '🥘',
+      salads: '🥬',
+      desserts: '🍰',
+      'breakfast-brunch': '🍳',
+      snacks: '🥨',
+      beverages: '🥤',
+      else: '🍽️',
+    };
+    return '';
   }
 
   _getTimeIcon() {
-    const icon = '⏰';  
+    const icon = '⏰';
     return '';
   }
 
   // Utility methods
   _updateCollapseState() {
-      const card = this.shadowRoot.querySelector('.recipe-card');
-      if (card) {
-          card.classList.toggle('collapsed', this.isCollapsed);
-      }
+    const card = this.shadowRoot.querySelector('.recipe-card');
+    if (card) {
+      card.classList.toggle('collapsed', this.isCollapsed);
+    }
   }
 
   _updateLayout() {
     const layout = this.getAttribute('layout') || 'vertical';
     this._currentLayout = layout;
     const dimensions = this._getCurrentDimensions();
-    
+
     this.style.setProperty('--card-width', dimensions.width);
     this.style.setProperty('--card-height', dimensions.height);
-    
+
     const card = this.shadowRoot.querySelector('.recipe-card');
     if (card) {
-        card.setAttribute('data-layout', layout);
+      card.setAttribute('data-layout', layout);
     }
   }
 
   _updateDimensions() {
-      this.style.setProperty('--card-width', this.cardWidth);
-      this.style.setProperty('--card-height', this.cardHeight);
+    this.style.setProperty('--card-width', this.cardWidth);
+    this.style.setProperty('--card-height', this.cardHeight);
   }
 
   _formatCookingTime(time) {
     if (time <= 60) return `${time} דקות`;
-    if (time < 120) return `שעה ו-${time%60} דקות`;
-    if (time === 120) return "שעתיים";
-    if (time < 180) return `שעתיים ו-${time%60} דקות`;
-    if (time % 60 === 0) return `${time/60} שעות`;
-    return `${Math.floor(time/60)} שעות ו-${time%60} דקות`;
+    if (time < 120) return `שעה ו-${time % 60} דקות`;
+    if (time === 120) return 'שעתיים';
+    if (time < 180) return `שעתיים ו-${time % 60} דקות`;
+    if (time % 60 === 0) return `${time / 60} שעות`;
+    return `${Math.floor(time / 60)} שעות ו-${time % 60} דקות`;
   }
 }
 

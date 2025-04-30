@@ -1,18 +1,18 @@
-  /**
-   * @attribute {string} title - Sets the title of the media scroller. Default: "Media Scroller".
-   * @attribute {number} visible-items - Sets the number of media items visible at a time. Default: 3.
-   * @attribute {boolean} continuous - Enables continuous scrolling. Default: false.
-   * @attribute {string} initial-state - Sets the initial state of the media scroller ("open" or "collapsed"). Default: "open".
-   * @attribute {string} media-data - Provides the media data as a JSON string. Each item should have a 'path' and an optional 'caption'.
-   *
-   * @example
-   * <media-scroller
-   *   title="My Vacation Photos"
-   *   visible-items="2"
-   *   continuous="true"
-   *   media-data='[{"path": "images/beach.jpg", "caption": "Beautiful beach"}, {"path": "images/mountain.jpg", "caption": "Hiking in the mountains"}]'>
-   * </media-scroller>
-   */
+/**
+ * @attribute {string} title - Sets the title of the media scroller. Default: "Media Scroller".
+ * @attribute {number} visible-items - Sets the number of media items visible at a time. Default: 3.
+ * @attribute {boolean} continuous - Enables continuous scrolling. Default: false.
+ * @attribute {string} initial-state - Sets the initial state of the media scroller ("open" or "collapsed"). Default: "open".
+ * @attribute {string} media-data - Provides the media data as a JSON string. Each item should have a 'path' and an optional 'caption'.
+ *
+ * @example
+ * <media-scroller
+ *   title="My Vacation Photos"
+ *   visible-items="2"
+ *   continuous="true"
+ *   media-data='[{"path": "images/beach.jpg", "caption": "Beautiful beach"}, {"path": "images/mountain.jpg", "caption": "Hiking in the mountains"}]'>
+ * </media-scroller>
+ */
 
 class MediaScroller extends HTMLElement {
   constructor() {
@@ -20,7 +20,7 @@ class MediaScroller extends HTMLElement {
     this.attachShadow({ mode: 'open' });
 
     // Default values
-    this.backgroundColor = "var(--background-color)";
+    this.backgroundColor = 'var(--background-color)';
     this.visibleItems = 3;
     this.continuous = false;
     this.initialState = 'open'; // 'open' or 'collapsed'
@@ -86,7 +86,7 @@ class MediaScroller extends HTMLElement {
           break;
         case 'collapsible':
           this.collapsible = newValue === 'true';
-          break;            
+          break;
         case 'background-color':
           this.backgroundColor = newValue;
           break;
@@ -101,11 +101,11 @@ class MediaScroller extends HTMLElement {
     this.updateCollapseState();
     this.updateNavigation();
   }
-  
+
   updateCollapseState() {
     const container = this.shadowRoot.querySelector('.media-scroller__container');
     const dropdown = this.shadowRoot.querySelector('.media-scroller__dropdown');
-    
+
     if (this.isCollapsed) {
       container.classList.add('collapsed');
       dropdown.innerHTML = '◀'; // Right arrow
@@ -117,13 +117,9 @@ class MediaScroller extends HTMLElement {
 
   initScroller() {
     this.scroller = this.shadowRoot.querySelector('.media-scroller__container');
-    this.itemsContainer = this.shadowRoot.querySelector(
-      '.media-scroller__items'
-    );
+    this.itemsContainer = this.shadowRoot.querySelector('.media-scroller__items');
     this.leftArrow = this.shadowRoot.querySelector('.media-scroller__arrow--left');
-    this.rightArrow = this.shadowRoot.querySelector(
-      '.media-scroller__arrow--right'
-    );
+    this.rightArrow = this.shadowRoot.querySelector('.media-scroller__arrow--right');
 
     this.updateScrollerWidth();
     this.updateNavigation();
@@ -152,7 +148,7 @@ class MediaScroller extends HTMLElement {
     if (this.collapsible) {
       const dropdown = this.shadowRoot.querySelector('.media-scroller__dropdown');
       if (dropdown) {
-          dropdown.addEventListener('click', () => this.toggleCollapse());
+        dropdown.addEventListener('click', () => this.toggleCollapse());
       }
       this.updateCollapseState();
     }
@@ -161,9 +157,7 @@ class MediaScroller extends HTMLElement {
   updateScrollerWidth() {
     const containerWidth = this.scroller.offsetWidth;
     const itemWidth = containerWidth / this.visibleItems;
-    this.itemsContainer.style.width = `${
-      this.mediaItems.length * itemWidth
-    }px`;
+    this.itemsContainer.style.width = `${this.mediaItems.length * itemWidth}px`;
     const items = this.shadowRoot.querySelectorAll('.media-scroller__item');
     items.forEach((item) => (item.style.width = `${itemWidth}px`));
   }
@@ -176,36 +170,31 @@ class MediaScroller extends HTMLElement {
     } else {
       this.currentIndex = this.continuous
         ? (this.currentIndex + 1) % this.mediaItems.length
-        : Math.min(
-            this.mediaItems.length - this.visibleItems,
-            this.currentIndex + 1
-          );
+        : Math.min(this.mediaItems.length - this.visibleItems, this.currentIndex + 1);
     }
-    this.itemsContainer.style.transform = `translateX(-${
-      this.currentIndex * scrollAmount
-    }px)`;
+    this.itemsContainer.style.transform = `translateX(-${this.currentIndex * scrollAmount}px)`;
     this.updateNavigation();
   }
 
   updateNavigation() {
     // If collapsed, don't show arrows regardless of scroll position
     if (this.isCollapsed) {
-        this.leftArrow.classList.remove('navigation-visible');
-        this.rightArrow.classList.remove('navigation-visible');
-        return;
+      this.leftArrow.classList.remove('navigation-visible');
+      this.rightArrow.classList.remove('navigation-visible');
+      return;
     }
 
     // Only update arrow visibility if not collapsed
     if (this.continuous || this.currentIndex > 0) {
-        this.leftArrow.classList.add('navigation-visible');
+      this.leftArrow.classList.add('navigation-visible');
     } else {
-        this.leftArrow.classList.remove('navigation-visible');
+      this.leftArrow.classList.remove('navigation-visible');
     }
 
     if (this.continuous || this.currentIndex < this.mediaItems.length - this.visibleItems) {
-        this.rightArrow.classList.add('navigation-visible');
+      this.rightArrow.classList.add('navigation-visible');
     } else {
-        this.rightArrow.classList.remove('navigation-visible');
+      this.rightArrow.classList.remove('navigation-visible');
     }
   }
 
@@ -345,14 +334,20 @@ class MediaScroller extends HTMLElement {
       </style>
       <div class="media-scroller">
         <div class="media-scroller__container">
-          ${this.hasAttribute('title') ? `
+          ${
+            this.hasAttribute('title')
+              ? `
                     <div class="media-scroller__title">
                         <span>${this.title}</span>
-                        ${this.collapsible ? 
-                            `<span class="media-scroller__dropdown">&#9660;</span>` : 
-                            ''}
+                        ${
+                          this.collapsible
+                            ? `<span class="media-scroller__dropdown">&#9660;</span>`
+                            : ''
+                        }
                     </div>
-                ` : ''}
+                `
+              : ''
+          }
           <div class="media-scroller__items">
             ${this.mediaItems
               .map(
@@ -365,13 +360,9 @@ class MediaScroller extends HTMLElement {
                       </video>`
                     : `<img class="media-scroller__media" src="${item.path}" alt="${item.caption}">`
                 }
-                ${
-                  item.caption
-                    ? `<div class="media-scroller__caption">${item.caption}</div>`
-                    : ''
-                }
+                ${item.caption ? `<div class="media-scroller__caption">${item.caption}</div>` : ''}
               </div>
-            `
+            `,
               )
               .join('')}
           </div>

@@ -2,7 +2,7 @@
 import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, deleteObject } from 'firebase/storage';
-import '../../modals/message-modal/message-modal.js'
+import '../../modals/message-modal/message-modal.js';
 
 class EditRecipeComponent extends HTMLElement {
   constructor() {
@@ -11,19 +11,22 @@ class EditRecipeComponent extends HTMLElement {
   }
 
   connectedCallback() {
-      this.recipeId = this.getAttribute('recipe-id');
-      this.render();
-      this.formComponent = this.shadowRoot.querySelector('recipe-form-component');
+    this.recipeId = this.getAttribute('recipe-id');
+    this.render();
+    this.formComponent = this.shadowRoot.querySelector('recipe-form-component');
 
-      // Listen for form submission event from the base component
-      this.formComponent.addEventListener('recipe-data-collected', this.handleRecipeData.bind(this));
+    // Listen for form submission event from the base component
+    this.formComponent.addEventListener('recipe-data-collected', this.handleRecipeData.bind(this));
 
-      // Listen for clear button click event from the base component (you'll need to add this in the base component)
-      this.formComponent.addEventListener('clear-button-clicked', this.resetFormToCurrentData.bind(this)); 
+    // Listen for clear button click event from the base component (you'll need to add this in the base component)
+    this.formComponent.addEventListener(
+      'clear-button-clicked',
+      this.resetFormToCurrentData.bind(this),
+    );
   }
 
   render() {
-      this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
           <style>
               /* Add your component-specific styles here */
           </style>
@@ -35,24 +38,28 @@ class EditRecipeComponent extends HTMLElement {
   }
 
   async handleRecipeData(event) {
-      const recipeData = event.detail.recipeData;
-      try {
-          // Update the recipe data in Firestore
-          await this.updateRecipeInFirestore(this.recipeId, recipeData);
+    const recipeData = event.detail.recipeData;
+    try {
+      // Update the recipe data in Firestore
+      await this.updateRecipeInFirestore(this.recipeId, recipeData);
 
-          // Handle image update if a new image is provided
-          if (recipeData.imageFile) {
-              const fileExtension = recipeData.imageFile.name.split('.').pop();
-              const imageName = `${this.recipeId}.${fileExtension}`;
-              const imageUrl = await this.uploadImage(recipeData.imageFile, recipeData.category, imageName);
-              recipeData.image = imageName;
-              await this.updateRecipeInFirestore(this.recipeId, { image: imageName });
-          }
-
-          this.showSuccessMessage('Recipe updated successfully!');
-      } catch (error) {
-          this.showErrorMessage(`Error updating recipe: ${error}`);
+      // Handle image update if a new image is provided
+      if (recipeData.imageFile) {
+        const fileExtension = recipeData.imageFile.name.split('.').pop();
+        const imageName = `${this.recipeId}.${fileExtension}`;
+        const imageUrl = await this.uploadImage(
+          recipeData.imageFile,
+          recipeData.category,
+          imageName,
+        );
+        recipeData.image = imageName;
+        await this.updateRecipeInFirestore(this.recipeId, { image: imageName });
       }
+
+      this.showSuccessMessage('Recipe updated successfully!');
+    } catch (error) {
+      this.showErrorMessage(`Error updating recipe: ${error}`);
+    }
   }
 
   // FIXME: currently can't edit recipes with images
@@ -93,7 +100,7 @@ class EditRecipeComponent extends HTMLElement {
       console.error('Error uploading new images:', error);
     }
   }
-  
+
   // Helper function to compress image (replace with your actual compression logic)
   async compressImage(imageFile) {
     // ... Your image compression logic here ...
@@ -104,18 +111,18 @@ class EditRecipeComponent extends HTMLElement {
   showSuccessMessage(message) {
     // Show the success message in the modal
     const editRecipeModal = this.shadowRoot.querySelector('message-modal');
-    editRecipeModal.show(message, "Success!");
+    editRecipeModal.show(message, 'Success!');
   }
 
   showErrorMessage(message, error) {
-      // Show the error message in the modal
-      const editRecipeModal = this.shadowRoot.querySelector('message-modal');
-      editRecipeModal.show(message, "Error!");
+    // Show the error message in the modal
+    const editRecipeModal = this.shadowRoot.querySelector('message-modal');
+    editRecipeModal.show(message, 'Error!');
   }
 
   resetFormToCurrentData() {
-      // Reset the form to the current recipe data
-      this.formComponent.setRecipeData(this.recipeId);
+    // Reset the form to the current recipe data
+    this.formComponent.setRecipeData(this.recipeId);
   }
 }
 

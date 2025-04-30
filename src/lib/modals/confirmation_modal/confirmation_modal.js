@@ -2,36 +2,36 @@
  * Confirmation Modal Component
  * @class
  * @extends Modal
- * 
+ *
  * @description
  * A custom web component that extends the Modal component to display a confirmation
  * dialog in RTL (Right-to-Left) layout. Provides customizable title, message, and button text.
- * 
+ *
  * @dependencies
  * - Requires Modal component as parent class
- * - Uses CSS variables: 
+ * - Uses CSS variables:
  *   - --primary-color (default: #bb6016)
  *   - --primary-hover (default: #5c4033)
  *   - --secondary-color (default: #e6dfd1)
- * 
+ *
  * @example
  * // HTML
  * <confirmation-modal></confirmation-modal>
- * 
+ *
  * // JavaScript
  * const modal = document.querySelector('confirmation-modal');
- * 
+ *
  * modal.addEventListener('confirm-approved', () => {
  *   console.log('Action approved!');
  * });
- * 
+ *
  * modal.addEventListener('confirm-rejected', () => {
  *   console.log('Action rejected!');
  * });
- * 
+ *
  * // Basic usage with default Hebrew text
  * modal.confirm();
- * 
+ *
  * // Custom text usage
  * modal.confirm(
  *   'Delete this item?',    // message
@@ -39,21 +39,21 @@
  *   'Delete',              // approve button
  *   'Cancel'               // reject button
  * );
- * 
+ *
  * @method confirm(message?, title?, approveButtonText?, rejectButtonText?)
  * @param {string} [message='האם אתה בטוח?'] - The confirmation message to display
  * @param {string} [title=''] - Modal title. If empty, title section is hidden
  * @param {string} [approveButtonText='כן'] - Text for the approve button (default: "Yes" in Hebrew)
  * @param {string} [rejectButtonText='לא'] - Text for the reject button (default: "No" in Hebrew)
- * 
+ *
  * @event confirm-approved - Fired when the approve button is clicked
  * @event confirm-rejected - Fired when the reject button is clicked
- * 
+ *
  * @cssProperties
  * - --primary-color: Primary color for approve button and text
  * - --primary-hover: Hover color for buttons
  * - --secondary-color: Background color for reject button
- * 
+ *
  * @notes
  * - Component uses RTL layout by default
  * - Inherits modal backdrop and close button functionality from Modal component
@@ -122,7 +122,12 @@ class ConfirmationModal extends Modal {
     `;
   }
 
-  confirm(message='האם אתה בטוח?', title = '', approveButtonText = 'כן', rejectButtonText = 'לא') {
+  confirm(
+    message = 'האם אתה בטוח?',
+    title = '',
+    approveButtonText = 'כן',
+    rejectButtonText = 'לא',
+  ) {
     this.shadowRoot.getElementById('modal-message').textContent = message;
 
     const titleDiv = this.shadowRoot.getElementById('modal-title');

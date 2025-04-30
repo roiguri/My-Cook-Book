@@ -1,7 +1,7 @@
 /**
  * Recipe Preview Modal Component
  *
- * This web component displays a recipe preview in a modal dialog. It combines the functionality 
+ * This web component displays a recipe preview in a modal dialog. It combines the functionality
  * of the `recipe-component` to show recipe details and the `custom-modal` for the modal structure.
  *
  * Usage:
@@ -23,12 +23,12 @@
  *
  * ```html
  * <recipe-preview-modal id="recipe-preview" recipe-id="recipe123" recipe-name="Delicious Cake" show-buttons="true"></recipe-preview-modal>
- * <button id="preview-button">Preview Recipe</button> 
+ * <button id="preview-button">Preview Recipe</button>
  * <script>
  *   const previewButton = document.getElementById('preview-button');
  *   const recipePreviewModal = document.getElementById('recipe-preview');
  *   previewButton.addEventListener('click', () => {
- *     recipePreviewModal.openModal(); 
+ *     recipePreviewModal.openModal();
  *   });
  * </script>
  * ```
@@ -40,8 +40,8 @@
  * - `recipe-approved`: Dispatched when the Approve button is clicked.
  * - `recipe-rejected`: Dispatched when the Reject button is clicked.
  *
- * Both events include an object with the `recipeId` in the `detail` property. You can listen 
- * for these events on the `<recipe-preview-modal>` element to handle the approval or rejection 
+ * Both events include an object with the `recipeId` in the `detail` property. You can listen
+ * for these events on the `<recipe-preview-modal>` element to handle the approval or rejection
  * logic in your parent component.
  */
 
@@ -60,10 +60,10 @@ class EditPreviewRecipe extends HTMLElement {
     this.showButtons = false;
     this.recipeName = this.getAttribute('recipe-name');
     this.mode = this.getAttribute('start-mode') || 'preview'; // Get start mode or default to 'preview'
-    this.path = '/My-Cook-Book/img/icon/other/'
+    this.path = '/My-Cook-Book/img/icon/other/';
     this.render();
     this.modal = this.shadowRoot.querySelector('custom-modal');
-    this.setupModeToggle()
+    this.setupModeToggle();
 
     // Initial check on page load
     this.handleResize();
@@ -186,16 +186,18 @@ class EditPreviewRecipe extends HTMLElement {
       <div class="recipe-preview-modal">
         <custom-modal height="90vh" width="60vw">
           <button class="mode-toggle">
-            ${this.mode === 'preview' ? 
-              `<img src="${this.path}pencil.png" class="toggle-icon">` : 
-              `<img src="${this.path}eye.png" class="toggle-icon">`
+            ${
+              this.mode === 'preview'
+                ? `<img src="${this.path}pencil.png" class="toggle-icon">`
+                : `<img src="${this.path}eye.png" class="toggle-icon">`
             } 
           </button>
           <h3> Recipe Preview </h3>
           <div class="modal-content">
-            ${this.mode === 'preview' ? 
-              `<recipe-component recipe-id="${this.recipeId}"></recipe-component>` : 
-              `<edit-recipe-component recipe-id="${this.recipeId}"></edit-recipe-component>`
+            ${
+              this.mode === 'preview'
+                ? `<recipe-component recipe-id="${this.recipeId}"></recipe-component>`
+                : `<edit-recipe-component recipe-id="${this.recipeId}"></edit-recipe-component>`
             }          
           </div>
         </custom-modal>
@@ -208,37 +210,36 @@ class EditPreviewRecipe extends HTMLElement {
     const modalContent = this.shadowRoot.querySelector('.modal-content'); // Get the container
     const toggleImage = this.shadowRoot.querySelector('.toggle-icon');
     modeToggleButton.addEventListener('click', (event) => {
-      console.log("another click")
+      console.log('another click');
       if (this.mode === 'preview') {
         this.mode = 'edit';
-  
+
         // Remove recipe-component
         const recipeComponent = modalContent.querySelector('recipe-component');
         if (recipeComponent) modalContent.removeChild(recipeComponent);
-  
+
         // Add edit-recipe-component
         const editRecipeComponent = document.createElement('edit-recipe-component');
         editRecipeComponent.setAttribute('recipe-id', this.recipeId);
         modalContent.appendChild(editRecipeComponent);
-        
-        toggleImage.src = this.path + "eye.png"
+
+        toggleImage.src = this.path + 'eye.png';
       } else {
         this.mode = 'preview';
-  
+
         // Remove edit-recipe-component
         const editRecipeComponent = modalContent.querySelector('edit-recipe-component');
         if (editRecipeComponent) modalContent.removeChild(editRecipeComponent);
-  
+
         // Add recipe-component
         const recipeComponent = document.createElement('recipe-component');
         recipeComponent.setAttribute('recipe-id', this.recipeId);
         modalContent.appendChild(recipeComponent);
 
-        toggleImage.src = this.path + "pencil.png"
+        toggleImage.src = this.path + 'pencil.png';
       }
     });
-  }  
-  
+  }
 
   openModal() {
     this.modal.open();
@@ -280,16 +281,17 @@ class EditPreviewRecipe extends HTMLElement {
       this.handleError(error);
     }
   }
-  
+
   handleError(error) {
     // TODO: add error handling
-    return
+    return;
   }
 
   // Handle recipe preview size for different layouts
   handleResize() {
     const element = this.shadowRoot.querySelector('custom-modal'); // Replace with your element ID
-    if (window.innerWidth < 768) { // Adjust breakpoint as needed
+    if (window.innerWidth < 768) {
+      // Adjust breakpoint as needed
       this.modal.setHeight('100vh');
       this.modal.setWidth('100vw');
     } else {
@@ -297,6 +299,6 @@ class EditPreviewRecipe extends HTMLElement {
       this.modal.setWidth('60vw');
     }
   }
-  }
+}
 
 customElements.define('edit-preview-recipe', EditPreviewRecipe);
