@@ -29,7 +29,9 @@ import '../js/category.js'
 
 // Page Specific Components
 import '../lib/utilities/modal/modal.js';
-import '../lib/modals/filter_modal/filter_modal.js';
 import '../lib/recipes/recipe-card/recipe-card.js';
 import '../lib/search/filter-search-bar/filter-search-bar.js';
 import '../lib/search/search-service/search-service.js';
+
+// Dynamic imports (uses services)
+import('../lib/modals/filter_modal/filter_modal.js');
