@@ -30,7 +30,6 @@ import('../lib/auth/components/user-profile.js');
 // Import page-specific scripts
 import '../js/recipe-script.js';
 import '../js/navigation-script.js';
-import '../js/category.js';
 
 // Register service worker
 import '../js/sw-register.js';
