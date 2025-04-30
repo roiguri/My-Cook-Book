@@ -5,6 +5,10 @@
  * particularly focusing on image management for recipes.
  */
 
+import { getStorageInstance, getFirestoreInstance } from '../services/firebase-service.js';
+import { ref, uploadBytes, deleteObject } from 'firebase/storage';
+import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+
 /**
  * Deletes all images associated with a recipe from Firebase Storage
  * @param {string} recipeId - The ID of the recipe
@@ -14,14 +18,16 @@
 async function deleteRecipeImages(recipeId) {
   try {
       // Get recipe data first
-      const recipeDoc = await firebase.firestore().collection('recipes').doc(recipeId).get();
-      if (!recipeDoc.exists) {
+      const db = getFirestoreInstance();
+      const recipeDocRef = doc(db, 'recipes', recipeId);
+      const recipeDocSnap = await getDoc(recipeDocRef);
+      if (!recipeDocSnap.exists()) {
           console.warn('Recipe not found for deletion:', recipeId);
           return;
       }
 
-      const recipeData = recipeDoc.data();
-      const storage = firebase.storage();
+      const recipeData = recipeDocSnap.data();
+      const storage = getStorageInstance();
       const deletePromises = [];
 
       // Handle approved images array
@@ -29,14 +35,14 @@ async function deleteRecipeImages(recipeId) {
           recipeData.images.forEach(image => {
               if (image.full) {
                   deletePromises.push(
-                      storage.ref(image.full).delete()
+                      deleteObject(ref(storage, image.full))
                           .catch(err => console.warn(`Error deleting full image ${image.id}:`, err))
                   );
               }
               
               if (image.compressed) {
                   deletePromises.push(
-                      storage.ref(image.compressed).delete()
+                      deleteObject(ref(storage, image.compressed))
                           .catch(err => console.warn(`Error deleting compressed image ${image.id}:`, err))
                   );
               }
@@ -50,13 +56,13 @@ async function deleteRecipeImages(recipeId) {
                   pendingBatch.images.forEach(image => {
                       if (image.full) {
                           deletePromises.push(
-                              storage.ref(image.full).delete()
+                              deleteObject(ref(storage, image.full))
                                   .catch(err => console.warn(`Error deleting pending full image ${image.id}:`, err))
                           );
                       }
                       if (image.compressed) {
                           deletePromises.push(
-                              storage.ref(image.compressed).delete()
+                            deleteObject(ref(storage, image.compressed))
                                   .catch(err => console.warn(`Error deleting pending compressed image ${image.id}:`, err))
                           );
                       }
@@ -83,7 +89,8 @@ async function deleteRecipeImages(recipeId) {
  * @returns {Promise<Object>} The pending images data to be stored in Firestore
  */
 async function uploadProposedImages(recipeId, images, userId) {
-  const storage = firebase.storage();
+  const storage = getStorageInstance();
+  const db = getFirestoreInstance();
   const batchId = Math.random().toString(36).substring(2);
   const pendingBatch = {
     batchId,
@@ -94,28 +101,24 @@ async function uploadProposedImages(recipeId, images, userId) {
 
   try {
     // Get recipe data for category
-    const recipeDoc = await firebase.firestore().collection('recipes').doc(recipeId).get();
-    if (!recipeDoc.exists) throw new Error('Recipe not found');
-    
-    const recipeData = recipeDoc.data();
+    const recipeDocRef = doc(db, 'recipes', recipeId);
+    const recipeDocSnap = await getDoc(recipeDocRef);
+    if (!recipeDocSnap.exists()) throw new Error('Recipe not found');
+    const recipeData = recipeDocSnap.data();
     const pendingImages = recipeData.pendingImages || [];
 
     // Upload each image
     for (const image of images) {
       const imageId = Math.random().toString(36).substring(2);
       const fileExtension = image.file.name.split('.').pop();
-      
       // Define paths
       const fullPath = `img/recipes/pending/${recipeId}/${batchId}/full/${imageId}.${fileExtension}`;
       const compressedPath = `img/recipes/pending/${recipeId}/${batchId}/compressed/${imageId}.${fileExtension}`;
-
       // Upload full size
-      await storage.ref(fullPath).put(image.file);
-      
+      await uploadBytes(ref(storage, fullPath), image.file);
       // For now, use the same file for compressed version
       // TODO: Implement actual image compression
-      await storage.ref(compressedPath).put(image.file);
-
+      await uploadBytes(ref(storage, compressedPath), image.file);
       // Add image data to batch
       pendingBatch.images.push({
         id: imageId,
@@ -125,20 +128,16 @@ async function uploadProposedImages(recipeId, images, userId) {
         fileExtension
       });
     }
-
     // Add timestamp just before the update
-    pendingBatch.timestamp = firebase.firestore.Timestamp.now();
-
+    pendingBatch.timestamp = Timestamp.now();
     // Update Firestore with the new array
     const updatedPendingImages = [...pendingImages, pendingBatch];
-    await firebase.firestore().collection('recipes').doc(recipeId).update({
-      pendingImages: updatedPendingImages
-    });
-
+    await updateDoc(recipeDocRef, { pendingImages: updatedPendingImages });
     return pendingBatch;
-
   } catch (error) {
     console.error('Error uploading proposed images:', error);
     throw error;
   }
 }
+
+export { uploadProposedImages, deleteRecipeImages };

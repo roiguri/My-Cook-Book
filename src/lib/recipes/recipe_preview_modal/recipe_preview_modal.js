@@ -49,6 +49,8 @@
  * - This component relies on firebase-storage-utils.js for the `deleteRecipeImages` function.
  */
 
+import { deleteRecipeImages } from '../../../js/utilities/firebase-storage-utils';
+
 class RecipePreviewModal extends HTMLElement {
   constructor() {
     super();
@@ -313,7 +315,6 @@ class RecipePreviewModal extends HTMLElement {
     await firebase.firestore().collection('recipes').doc(recipeId).update({ approved: true });
   }
 
-  // FIXME: error: deleteRecipeImage not defined.
   async handleRecipeRejection(recipeId) {
     try {
       // First delete all associated images
