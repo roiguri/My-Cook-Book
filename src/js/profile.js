@@ -294,13 +294,8 @@ function goToPage(page) {
 // Batch fetching favorite recipes from Firestore
 async function fetchFavoriteRecipes() {
   try {
-      const authInstance = getAuthInstance();
-      console.log('authInstance:', authInstance);
-      const user = authInstance.currentUser;
-      console.log('user:', user);
       const db = getFirestoreInstance();
-      console.log('db:', db);
-      const userId = user.uid;
+      const userId = getAuthInstance().currentUser.uid;
       const userDocRef = doc(db, 'users', userId);
       const userDocSnap = await getDoc(userDocRef);
       const userData = userDocSnap.data();
@@ -312,8 +307,6 @@ async function fetchFavoriteRecipes() {
           chunks.push(favoriteRecipeIds.slice(i, i + 10));
       }
 
-      console.log('favoriteRecipeIds:', favoriteRecipeIds);
-      console.log('chunks:', chunks);
       // Fetch recipes for each chunk in parallel
       const fetchPromises = chunks.map(chunk => {
         const recipesQuery = query(
