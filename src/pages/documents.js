@@ -1,3 +1,8 @@
+import { initFirebase } from '../js/services/firebase-service.js';
+import firebaseConfig from '../js/config/firebase-config.js';
+
+initFirebase(firebaseConfig);
+
 // Import styles
 import '../styles/main.css';
 import '../styles/pages/documents.css';
@@ -21,5 +26,7 @@ import '../lib/auth/components/user-profile.js';
 import '../js/navigation-script.js';
 import '../js/documents.js';
 
-// Specific page components
-import '../lib/utilities/pdf_viewer/pdf_viewer.js'
+// Dynamic imports (uses services)
+import('../lib/utilities/pdf_viewer/pdf_viewer.js');
+
+
