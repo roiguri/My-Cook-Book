@@ -1,3 +1,4 @@
+// FIXME: leave favorites page when a user logs out
 /**
  * AuthController Component
  * @class
