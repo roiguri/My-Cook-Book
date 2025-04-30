@@ -9,9 +9,9 @@
 }
 
 @media (max-width: 768px) {
-  .recipe-page .recipe-container{
+  .recipe-page .recipe-container {
     padding: 30px;
     width: auto;
-    min-width: 200px; 
+    min-width: 200px;
   }
 }

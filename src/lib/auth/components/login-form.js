@@ -237,7 +237,7 @@ class LoginForm extends HTMLElement {
 
   async handleSubmit(e) {
     e.preventDefault();
-    
+
     const email = this.shadowRoot.getElementById('email').value;
     const password = this.shadowRoot.getElementById('password').value;
     const remember = this.shadowRoot.getElementById('remember').checked;
@@ -254,7 +254,7 @@ class LoginForm extends HTMLElement {
         code: error.code,
         message: error.message,
         name: error.name,
-        stack: error.stack
+        stack: error.stack,
       });
       this.showError(error);
     }
@@ -262,15 +262,17 @@ class LoginForm extends HTMLElement {
 
   handleForgotPassword(e) {
     e.preventDefault();
-    
+
     // Dispatch event to show forgot password form
-    this.dispatchEvent(new CustomEvent('switch-to-forgot-password', {
-      bubbles: true,
-      composed: true,
-      detail: {
-        email: this.shadowRoot.getElementById('email').value // Pass current email if entered
-      }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('switch-to-forgot-password', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          email: this.shadowRoot.getElementById('email').value, // Pass current email if entered
+        },
+      }),
+    );
   }
 
   async handleGoogleSignIn() {
@@ -287,40 +289,41 @@ class LoginForm extends HTMLElement {
   showError(error) {
     const AUTH_ERROR_MESSAGES = {
       // Email/Password Sign In Errors
-      'INVALID_LOGIN_CREDENTIALS': 'שם משתמש או סיסמה שגויים',
+      INVALID_LOGIN_CREDENTIALS: 'שם משתמש או סיסמה שגויים',
       'auth/invalid-email': 'כתובת המייל אינה תקינה',
       'auth/user-disabled': 'המשתמש חסום. אנא פנה לתמיכה',
       'auth/user-not-found': 'משתמש לא קיים במערכת',
       'auth/wrong-password': 'סיסמה שגויה',
       'auth/too-many-requests': 'נסיונות כניסה רבים מדי. אנא נסה שוב מאוחר יותר',
       'auth/network-request-failed': 'בעיית תקשורת. אנא בדוק את חיבור האינטרנט',
-      
+
       // Google Sign In Errors
       'auth/popup-closed-by-user': 'החלון נסגר לפני השלמת ההתחברות',
       'auth/popup-blocked': 'החלון נחסם על ידי הדפדפן. אנא אפשר חלונות קופצים ונסה שנית',
       'auth/cancelled-popup-request': 'בקשת ההתחברות בוטלה',
-      'auth/account-exists-with-different-credential': 'קיים משתמש עם אותה כתובת מייל. אנא נסה להתחבר בדרך אחרת',
-      
+      'auth/account-exists-with-different-credential':
+        'קיים משתמש עם אותה כתובת מייל. אנא נסה להתחבר בדרך אחרת',
+
       'auth/wrong-password': 'סיסמה שגויה',
       'auth/user-not-found': 'משתמש לא קיים במערכת',
       'auth/invalid-email': 'כתובת המייל אינה תקינה',
       'auth/internal-error': 'שגיאת מערכת. אנא נסה שנית',
       // Default error
-      'default': 'שגיאה בהתחברות. אנא נסה שנית'
+      default: 'שגיאה בהתחברות. אנא נסה שנית',
     };
 
     const errorElement = this.shadowRoot.getElementById('login-error');
     let errorCode = error.code;
-    
+
     // Try to parse the internal error message if it exists
     if (error.code === 'auth/internal-error' && error.message) {
-        try {
-            const parsedError = JSON.parse(error.message);
-            errorCode = parsedError.error.message;
-        } catch (e) {
-            // If parsing fails, use the original error code
-            console.log('Error parsing message:', e);
-        }
+      try {
+        const parsedError = JSON.parse(error.message);
+        errorCode = parsedError.error.message;
+      } catch (e) {
+        // If parsing fails, use the original error code
+        console.log('Error parsing message:', e);
+      }
     }
 
     const errorMessage = AUTH_ERROR_MESSAGES[errorCode] || AUTH_ERROR_MESSAGES.default;

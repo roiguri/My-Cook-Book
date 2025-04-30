@@ -100,7 +100,7 @@ class AuthContent extends HTMLElement {
   setupEventListeners() {
     // Tab switching
     const tabs = this.shadowRoot.querySelectorAll('.auth-tab');
-    tabs.forEach(tab => {
+    tabs.forEach((tab) => {
       tab.addEventListener('click', () => this.switchForm(tab.dataset.form));
     });
 
@@ -119,31 +119,31 @@ class AuthContent extends HTMLElement {
     const authController = this.closest('auth-controller');
     const modal = authController?.shadowRoot?.querySelector('custom-modal');
     if (modal) {
-        modal.addEventListener('modal-closed', () => {
-            // Wait for close animation
-            setTimeout(() => {
-                // Reset all forms
-                const loginForm = this.querySelector('[slot="login-form"]');
-                const signupForm = this.querySelector('[slot="signup-form"]');
-                const forgotPasswordForm = this.querySelector('[slot="forgot-password"]');
-                
-                loginForm?.reset();
-                signupForm?.reset();
-                forgotPasswordForm?.reset();
+      modal.addEventListener('modal-closed', () => {
+        // Wait for close animation
+        setTimeout(() => {
+          // Reset all forms
+          const loginForm = this.querySelector('[slot="login-form"]');
+          const signupForm = this.querySelector('[slot="signup-form"]');
+          const forgotPasswordForm = this.querySelector('[slot="forgot-password"]');
 
-                // Clear any visible error messages
-                const forms = [loginForm, signupForm, forgotPasswordForm];
-                forms.forEach(form => {
-                    const errorElement = form?.shadowRoot.querySelector('.error-message');
-                    if (errorElement) {
-                        errorElement.classList.remove('visible');
-                    }
-                });
+          loginForm?.reset();
+          signupForm?.reset();
+          forgotPasswordForm?.reset();
 
-                // Reset to default state
-                this.showAuthForms();
-            }, 300);
-        });
+          // Clear any visible error messages
+          const forms = [loginForm, signupForm, forgotPasswordForm];
+          forms.forEach((form) => {
+            const errorElement = form?.shadowRoot.querySelector('.error-message');
+            if (errorElement) {
+              errorElement.classList.remove('visible');
+            }
+          });
+
+          // Reset to default state
+          this.showAuthForms();
+        }, 300);
+      });
     }
   }
 
@@ -157,8 +157,8 @@ class AuthContent extends HTMLElement {
 
     // Reset tab states - make login tab active
     const tabs = this.shadowRoot.querySelectorAll('.auth-tab');
-    tabs.forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.form === 'login');
+    tabs.forEach((tab) => {
+      tab.classList.toggle('active', tab.dataset.form === 'login');
     });
 
     // Show login form by default
@@ -196,13 +196,13 @@ class AuthContent extends HTMLElement {
 
   hideAllForms() {
     const forms = this.querySelectorAll('[slot]');
-    forms.forEach(form => form.classList.remove('active'));
+    forms.forEach((form) => form.classList.remove('active'));
   }
 
   switchForm(formId) {
     // Update tabs
     const tabs = this.shadowRoot.querySelectorAll('.auth-tab');
-    tabs.forEach(tab => {
+    tabs.forEach((tab) => {
       tab.classList.toggle('active', tab.dataset.form === formId);
     });
 

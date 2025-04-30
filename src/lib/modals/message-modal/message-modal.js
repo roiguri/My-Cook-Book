@@ -4,26 +4,26 @@ import { Modal } from '../../utilities/modal/modal.js';
  * Message Modal Component
  * @class
  * @extends Modal
- * 
+ *
  * @description
  * A simple modal component for displaying messages with optional title.
  * Extends Modal functionality and supports RTL (Right-to-Left) layout by default.
- * 
+ *
  * @dependencies
  * - Requires Modal component (`custom-modal`)
- * 
+ *
  * @example
  * // HTML
  * <message-modal></message-modal>
- * 
+ *
  * // JavaScript
  * const modal = document.querySelector('message-modal');
  * modal.show('Your message here', 'Optional Title');
- * 
+ *
  * @method show(message, title)
  * @param {string} message - The message to display
  * @param {string} [title=''] - Optional title for the message
- * 
+ *
  * @fires modal-opened - Inherited from Modal component
  * @fires modal-closed - Inherited from Modal component
  */
@@ -61,7 +61,7 @@ class MessageModal extends Modal {
 
   show(message, title = '') {
     this.shadowRoot.getElementById('modal-message').textContent = message;
-  
+
     const titleDiv = this.shadowRoot.getElementById('modal-title');
     if (title) {
       titleDiv.textContent = title;
@@ -69,7 +69,7 @@ class MessageModal extends Modal {
     } else {
       titleDiv.style.display = 'none'; // Hide the title if it's empty
     }
-  
+
     this.open();
   }
 }

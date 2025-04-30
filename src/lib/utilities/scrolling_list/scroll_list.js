@@ -106,9 +106,15 @@ class ScrollingList extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['height', 'width', 'expandable-items', 
-      'header-background-color', 'header-text-color', 
-      'content-background-color', 'content-text-color'];
+    return [
+      'height',
+      'width',
+      'expandable-items',
+      'header-background-color',
+      'header-text-color',
+      'content-background-color',
+      'content-text-color',
+    ];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -145,7 +151,7 @@ class ScrollingList extends HTMLElement {
     this.setupEventListeners();
     this.setupIntersectionObserver();
 
-    this.dispatchEvent(new CustomEvent('scrolling-list-ready')); 
+    this.dispatchEvent(new CustomEvent('scrolling-list-ready'));
   }
 
   render() {
@@ -226,7 +232,7 @@ class ScrollingList extends HTMLElement {
     const options = {
       root: this.shadowRoot.querySelector('.scrolling-list'),
       rootMargin: '100px',
-      threshold: 0.1
+      threshold: 0.1,
     };
 
     this.intersectionObserver = new IntersectionObserver((entries) => {
@@ -240,7 +246,6 @@ class ScrollingList extends HTMLElement {
   }
 
   loadMoreItems() {
-
     if (this.isLoading || this.displayedItems.length >= this.items.length) {
       return;
     }
@@ -256,13 +261,12 @@ class ScrollingList extends HTMLElement {
   }
 
   renderNewItems(newItems) {
-
     const fragment = document.createDocumentFragment();
 
-    newItems.forEach(item => {
+    newItems.forEach((item) => {
       const listItem = document.createElement('div');
       listItem.classList.add('list-item');
-      
+
       const headerContent = typeof item.header === 'string' ? item.header : '';
       const contentHtml = typeof item.content === 'string' ? item.content : '';
 
@@ -280,9 +284,6 @@ class ScrollingList extends HTMLElement {
       fragment.appendChild(listItem);
     });
     this.listContainer.appendChild(fragment);
-
-
-
   }
 
   setItems(items) {

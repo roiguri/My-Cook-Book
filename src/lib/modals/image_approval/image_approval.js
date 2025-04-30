@@ -3,58 +3,58 @@
  * ImageApprovalComponent
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * A modal interface for approving or rejecting recipe images. Extends Modal component
  * functionality and integrates with Firebase for image and data management.
  * Features RTL (Right-to-Left) layout support.
- * 
+ *
  * @dependencies
  * - Requires Modal component (`custom-modal`)
  * - Firebase Storage for image operations
  * - Firebase Firestore for data management
- * 
+ *
  * @cssVariables
  * - Uses default button colors
  * - Customizable through base-button class
- * 
+ *
  * @example
  * // HTML
  * <image-approval-component></image-approval-component>
- * 
+ *
  * // JavaScript
  * const approvalModal = document.querySelector('image-approval-component');
- * 
+ *
  * // Open modal with image data
  * approvalModal.openModalForImage({
  *   imageUrl: 'path/to/image.jpg',
  *   recipeId: 'recipe123',
  *   recipeName: 'Chocolate Cake'
  * });
- * 
+ *
  * // Listen for approval/rejection events
  * approvalModal.addEventListener('image-approved', (e) => {
  *   console.log('Image approved for recipe:', e.detail.recipeId);
  * });
- * 
+ *
  * approvalModal.addEventListener('image-rejected', (e) => {
  *   console.log('Image rejected for recipe:', e.detail.recipeId);
  * });
- * 
+ *
  * @fires image-approved - When an image is approved
  * @property {Object} detail.recipeId - ID of the recipe whose image was approved
- * 
+ *
  * @fires image-rejected - When an image is rejected
  * @property {Object} detail.recipeId - ID of the recipe whose image was rejected
- * 
+ *
  * @fires modal-opened - Inherited from Modal component
  * @fires modal-closed - Inherited from Modal component
- * 
+ *
  * @property {Object} imageData - Current image data being reviewed
  * @property {string} imageData.imageUrl - URL of the image
  * @property {string} imageData.recipeId - Associated recipe ID
  * @property {string} imageData.recipeName - Name of the recipe
- * 
+ *
  * @methods
  * - openModalForImage(imageData) - Opens modal with specified image data
  * - closeModal() - Closes the modal and resets state
@@ -142,8 +142,12 @@ class ImageApprovalComponent extends HTMLElement {
   }
 
   setupEventListeners() {
-    this.shadowRoot.getElementById('approve-button').addEventListener('click', () => this.handleApprove());
-    this.shadowRoot.getElementById('reject-button').addEventListener('click', () => this.handleReject());
+    this.shadowRoot
+      .getElementById('approve-button')
+      .addEventListener('click', () => this.handleApprove());
+    this.shadowRoot
+      .getElementById('reject-button')
+      .addEventListener('click', () => this.handleReject());
   }
 
   openModalForImage(imageData) {
@@ -176,13 +180,15 @@ class ImageApprovalComponent extends HTMLElement {
       // Update Firestore document to remove pendingImage and set the approved image URL
       await updateDoc(doc(db, 'recipes', this.imageData.recipeId), {
         image: this.imageData.recipeId + '.' + fileExtension,
-        pendingImage: null
+        pendingImage: null,
       });
-      this.dispatchEvent(new CustomEvent('image-approved', {
-        bubbles: true,
-        composed: true,
-        detail: { recipeId: this.imageData.recipeId }
-      }));
+      this.dispatchEvent(
+        new CustomEvent('image-approved', {
+          bubbles: true,
+          composed: true,
+          detail: { recipeId: this.imageData.recipeId },
+        }),
+      );
       this.closeModal();
     } catch (error) {
       console.error('Error approving image:', error);
@@ -199,19 +205,27 @@ class ImageApprovalComponent extends HTMLElement {
       const recipeData = recipeDocSnap.data();
       const fileExtension = recipeData.pendingImage.fileExtension;
       // Delete the full-size and compressed images from Firebase Storage
-      const fullSizeRef = ref(storage, `img/recipes/full/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`);
+      const fullSizeRef = ref(
+        storage,
+        `img/recipes/full/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`,
+      );
       await deleteObject(fullSizeRef);
-      const compressedRef = ref(storage, `img/recipes/compressed/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`);
+      const compressedRef = ref(
+        storage,
+        `img/recipes/compressed/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`,
+      );
       await deleteObject(compressedRef);
       // Update Firestore document to remove pendingImage
       await updateDoc(doc(db, 'recipes', this.imageData.recipeId), {
-        pendingImage: null
+        pendingImage: null,
       });
-      this.dispatchEvent(new CustomEvent('image-rejected', {
-        bubbles: true,
-        composed: true,
-        detail: { recipeId: this.imageData.recipeId }
-      }));
+      this.dispatchEvent(
+        new CustomEvent('image-rejected', {
+          bubbles: true,
+          composed: true,
+          detail: { recipeId: this.imageData.recipeId },
+        }),
+      );
       this.closeModal();
     } catch (error) {
       console.error('Error rejecting image:', error);

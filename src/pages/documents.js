@@ -9,7 +9,7 @@ import '../styles/pages/documents.css';
 
 // For all pages
 import '../js/sw-register.js';
-import '../js/config/firebase-config.js'
+import '../js/config/firebase-config.js';
 import '../lib/search/header-search-bar/header-search-bar.js';
 
 // Authentication Components
@@ -28,5 +28,3 @@ import '../lib/utilities/modal/modal.js';
 
 // Dynamic imports (uses services)
 import('../lib/utilities/pdf_viewer/pdf_viewer.js');
-
-

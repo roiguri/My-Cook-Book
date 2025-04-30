@@ -14,19 +14,23 @@
  *
  */
 
-import { getFirestoreInstance, getAuthInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import {
+  getFirestoreInstance,
+  getAuthInstance,
+  getStorageInstance,
+} from '../../../js/services/firebase-service.js';
 import { collection, doc, addDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
 
 class ProposeRecipeComponent extends HTMLElement {
   constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
+    super();
+    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
-      this.render();
-      this.setupEventListeners();
+    this.render();
+    this.setupEventListeners();
   }
 
   setupEventListeners() {
@@ -35,7 +39,7 @@ class ProposeRecipeComponent extends HTMLElement {
   }
 
   render() {
-      this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
       <style>
         
       </style>
@@ -49,37 +53,37 @@ class ProposeRecipeComponent extends HTMLElement {
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
     try {
-        const db = getFirestoreInstance();
-        const auth = getAuthInstance();
-        // Store images separately
-        const imagesToUpload = recipeData.images || [];
-        // Create a copy of recipe data without images
-        const recipeDataForFirestore = { ...recipeData };
-        delete recipeDataForFirestore.images;  // Remove images array
-        // Add timestamp and user info
-        recipeDataForFirestore.creationTime = Timestamp.now();
-        recipeDataForFirestore.userId = auth.currentUser?.uid || 'anonymous';
-        // Save recipe to Firestore first to get the ID
-        const recipeRef = await addDoc(collection(db, 'recipes'), recipeDataForFirestore);
-        // Upload images if provided
-        if (imagesToUpload.length > 0) {
-          const imageUploadResults = await this.uploadRecipeImages(
-            recipeRef.id, 
-            imagesToUpload, 
-            recipeDataForFirestore.category
-          );
-          // Update recipe with image array that matches RecipeComponent expectations
-          await updateDoc(doc(db, 'recipes', recipeRef.id), {
-            images: imageUploadResults,
-            allowImageSuggestions: true // Add a flag to indicate images are present
-          });
-        }
-        // Optionally, you can reset the form here
-        this.clearForm();
-        // Provide feedback to the user
-        this.showSuccessMessage('Recipe proposed successfully!');
+      const db = getFirestoreInstance();
+      const auth = getAuthInstance();
+      // Store images separately
+      const imagesToUpload = recipeData.images || [];
+      // Create a copy of recipe data without images
+      const recipeDataForFirestore = { ...recipeData };
+      delete recipeDataForFirestore.images; // Remove images array
+      // Add timestamp and user info
+      recipeDataForFirestore.creationTime = Timestamp.now();
+      recipeDataForFirestore.userId = auth.currentUser?.uid || 'anonymous';
+      // Save recipe to Firestore first to get the ID
+      const recipeRef = await addDoc(collection(db, 'recipes'), recipeDataForFirestore);
+      // Upload images if provided
+      if (imagesToUpload.length > 0) {
+        const imageUploadResults = await this.uploadRecipeImages(
+          recipeRef.id,
+          imagesToUpload,
+          recipeDataForFirestore.category,
+        );
+        // Update recipe with image array that matches RecipeComponent expectations
+        await updateDoc(doc(db, 'recipes', recipeRef.id), {
+          images: imageUploadResults,
+          allowImageSuggestions: true, // Add a flag to indicate images are present
+        });
+      }
+      // Optionally, you can reset the form here
+      this.clearForm();
+      // Provide feedback to the user
+      this.showSuccessMessage('Recipe proposed successfully!');
     } catch (error) {
-        this.showErrorMessage('Error proposing recipe:', error);
+      this.showErrorMessage('Error proposing recipe:', error);
     }
   }
 
@@ -105,13 +109,13 @@ class ProposeRecipeComponent extends HTMLElement {
         await uploadBytes(compressedRef, compressedFile);
         // Add image metadata to results
         imageUploadResults.push({
-          full: fullPath,             // Store the full storage path
-          compressed: compressedPath,  // Store the compressed storage path
+          full: fullPath, // Store the full storage path
+          compressed: compressedPath, // Store the compressed storage path
           fileName,
           isPrimary,
           uploadTimestamp: Timestamp.now(),
           uploadedBy: auth.currentUser?.uid || 'anonymous',
-          access: 'public'
+          access: 'public',
         });
       } catch (error) {
         console.error('Error uploading image:', error);
@@ -123,9 +127,9 @@ class ProposeRecipeComponent extends HTMLElement {
 
   // Helper function to compress image (replace with your actual compression logic)
   async compressImage(imageFile) {
-      // TODO: ... Your image compression logic here ...
-      // For now, it returns the original image
-      return imageFile;
+    // TODO: ... Your image compression logic here ...
+    // For now, it returns the original image
+    return imageFile;
   }
 
   // Helper functions for showing success/error messages
@@ -139,7 +143,6 @@ class ProposeRecipeComponent extends HTMLElement {
     // proposeRecipeModal.show('חלה שגיאה בהעלאת המתכון, אנא נסה שנית מאוחר יותר.', '', 'Close');
     proposeRecipeModal.show(error.message + error.stack, message, 'Close');
   }
-
 
   clearForm() {
     const formComponent = this.shadowRoot.querySelector('recipe-form-component');

@@ -1,7 +1,7 @@
 /**
  * Loading Spinner Web Component
  * A customizable loading spinner component
- * 
+ *
  * @attributes
  * - size: The size of the spinner (default: 40px)
  * - line-width: The width of the spinner line (default: 4px)
@@ -65,7 +65,7 @@ class LoadingSpinner extends HTMLElement {
       .spinner {
         border: ${this.lineWidth} solid ${this.color};
         border-top-color: transparent;
-        border-right-color: ${(this.length === 'half' || this.length ==='quarter') ? 'transparent' : this.color};
+        border-right-color: ${this.length === 'half' || this.length === 'quarter' ? 'transparent' : this.color};
         border-bottom-color: ${this.length === 'quarter' ? 'transparent' : this.color};
         border-radius: 50%;
         width: 100%;

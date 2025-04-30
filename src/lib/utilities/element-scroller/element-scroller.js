@@ -1,34 +1,34 @@
 class ElementScroller extends HTMLElement {
   constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
+    super();
+    this.attachShadow({ mode: 'open' });
 
-      // Default values
-      this.itemWidth = 200;
-      this.gap = 20;
-      this.bgColor = `var(--background-color)`;
-      this.borderRadius = 10;
-      this.showScrollbar = false;
+    // Default values
+    this.itemWidth = 200;
+    this.gap = 20;
+    this.bgColor = `var(--background-color)`;
+    this.borderRadius = 10;
+    this.showScrollbar = false;
 
-      // scrolling variables
-      this.scrollableWidth = 0;
-      this.currentIndex = 0;
-      this.handleResize = this.handleResize.bind(this);
+    // scrolling variables
+    this.scrollableWidth = 0;
+    this.currentIndex = 0;
+    this.handleResize = this.handleResize.bind(this);
 
-      // Create observer
-      this.contentObserver = new MutationObserver(this.handleContentChanges.bind(this));
-      this.isUpdating = false; // Flag to prevent recursive updates
+    // Create observer
+    this.contentObserver = new MutationObserver(this.handleContentChanges.bind(this));
+    this.isUpdating = false; // Flag to prevent recursive updates
 
-      // Touch handling state
-      this.touchState = {
-        startX: 0,
-        startY: 0,
-        startTime: 0,
-        currentX: 0,
-        isDragging: false,
-        currentTranslate: 0,
-        prevTranslate: 0,
-        animationID: null
+    // Touch handling state
+    this.touchState = {
+      startX: 0,
+      startY: 0,
+      startTime: 0,
+      currentX: 0,
+      isDragging: false,
+      currentTranslate: 0,
+      prevTranslate: 0,
+      animationID: null,
     };
 
     // Bind touch handlers
@@ -38,17 +38,17 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
-  * Setup content observer for dynamic changes
-  */
+   * Setup content observer for dynamic changes
+   */
   setupContentObserver() {
     const slot = this.shadowRoot.querySelector('slot');
     const element = slot.assignedElements()[0];
     if (!element) return;
 
     this.contentObserver.observe(element, {
-        childList: true,    // Track only added/removed children
-        subtree: false,     // Don't watch descendants
-        attributes: false   // Don't watch attributes
+      childList: true, // Track only added/removed children
+      subtree: false, // Don't watch descendants
+      attributes: false, // Don't watch attributes
     });
   }
 
@@ -59,43 +59,37 @@ class ElementScroller extends HTMLElement {
   handleContentChanges(mutations) {
     if (this.isUpdating) return;
     try {
-        this.isUpdating = true;
-        
-        // Apply styles first
-        this.applyItemStyles();
-        
-        // Then recalculate everything
-        this.calculateVisibleWidth();
-        this.calculateTotalWidth();
-        
-        const maxScroll = this.getMaxScroll();
-        if (this.currentIndex > maxScroll) {
-            this.currentIndex = maxScroll;
-        }
-        
-        this.updateLayout();
-        this.updateArrowVisibility();
+      this.isUpdating = true;
+
+      // Apply styles first
+      this.applyItemStyles();
+
+      // Then recalculate everything
+      this.calculateVisibleWidth();
+      this.calculateTotalWidth();
+
+      const maxScroll = this.getMaxScroll();
+      if (this.currentIndex > maxScroll) {
+        this.currentIndex = maxScroll;
+      }
+
+      this.updateLayout();
+      this.updateArrowVisibility();
     } finally {
-        this.isUpdating = false;
+      this.isUpdating = false;
     }
   }
 
   static get observedAttributes() {
-    return [
-      'padding',
-      'item-width',
-      'background-color',
-      'border-radius',
-      'title',
-    ];
+    return ['padding', 'item-width', 'background-color', 'border-radius', 'title'];
   }
 
   /**
-  * Handle attribute changes
-  * @param {string} name - Attribute name
-  * @param {string} oldValue - Old value
-  * @param {string} newValue - New value
-  */
+   * Handle attribute changes
+   * @param {string} name - Attribute name
+   * @param {string} oldValue - Old value
+   * @param {string} newValue - New value
+   */
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case 'item-width':
@@ -137,26 +131,26 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
-  * Lifecycle method: Setup event listeners and initial calculations
-  */
+   * Lifecycle method: Setup event listeners and initial calculations
+   */
   connectedCallback() {
-      this.render();
-      this.setupSlotted();
-      this.setupArrowHandlers();
-      this.calculateVisibleWidth();
-      window.addEventListener('resize', this.handleResize);
-      this.updateArrowVisibility();
-      this.setupContentObserver(); // Add observer setup
-      this.setupTouchEvents();
-      // Setup scrollbar
-      this.updateScrollbarWidth();
-      this.setupScrollbarClick();
-      this.setupScrollbarDrag();
+    this.render();
+    this.setupSlotted();
+    this.setupArrowHandlers();
+    this.calculateVisibleWidth();
+    window.addEventListener('resize', this.handleResize);
+    this.updateArrowVisibility();
+    this.setupContentObserver(); // Add observer setup
+    this.setupTouchEvents();
+    // Setup scrollbar
+    this.updateScrollbarWidth();
+    this.setupScrollbarClick();
+    this.setupScrollbarDrag();
   }
 
   /**
-  * Lifecycle method: Clean up event listeners
-  */
+   * Lifecycle method: Clean up event listeners
+   */
   disconnectedCallback() {
     window.removeEventListener('resize', this.handleResize);
     this.contentObserver.disconnect(); // Cleanup observer
@@ -164,8 +158,8 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
-  * Handle window resize event
-  */
+   * Handle window resize event
+   */
   handleResize() {
     this.calculateVisibleWidth();
     this.isScrollNeeded();
@@ -173,8 +167,8 @@ class ElementScroller extends HTMLElement {
     // Recalculate current index based on new visible items
     const maxScroll = this.getMaxScroll();
     if (this.currentIndex > maxScroll) {
-        this.currentIndex = maxScroll;
-        this.updateScroll();
+      this.currentIndex = maxScroll;
+      this.updateScroll();
     }
 
     this.updateLayout();
@@ -184,35 +178,35 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
-  * Calculate the visible width of the container
-  * @returns {number} Width in pixels
-  */
+   * Calculate the visible width of the container
+   * @returns {number} Width in pixels
+   */
   calculateVisibleWidth() {
     const container = this.shadowRoot.querySelector('.scroller-container');
     return container?.offsetWidth || 0;
   }
 
   /**
-  * Calculate total width of all items including gaps
-  * @returns {number} Total width in pixels
-  */
+   * Calculate total width of all items including gaps
+   * @returns {number} Total width in pixels
+   */
   calculateTotalWidth() {
     const slot = this.shadowRoot.querySelector('slot');
     const element = slot.assignedElements()[0];
     if (!element) return 0;
-      
+
     const itemCount = element.children.length;
     const gap = 20; // Gap between items
-    const totalItemsWidth = (this.itemWidth * itemCount) + (gap * (itemCount - 1));
+    const totalItemsWidth = this.itemWidth * itemCount + gap * (itemCount - 1);
     const paddingWidth = this.containerPadding * 2;
-      
+
     return totalItemsWidth + paddingWidth;
   }
 
   /**
-  * Determine if scrolling is needed
-  * @returns {boolean} True if content exceeds container width
-  */
+   * Determine if scrolling is needed
+   * @returns {boolean} True if content exceeds container width
+   */
   isScrollNeeded() {
     const visibleWidth = this.calculateVisibleWidth();
     const totalWidth = this.calculateTotalWidth();
@@ -220,8 +214,8 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
-  * Setup slotted content and apply styles
-  */
+   * Setup slotted content and apply styles
+   */
   setupSlotted() {
     const slot = this.shadowRoot.querySelector('slot');
     slot.addEventListener('slotchange', () => {
@@ -234,8 +228,8 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
-  * Apply styles to items regardless of count
-  */
+   * Apply styles to items regardless of count
+   */
   applyItemStyles() {
     const slot = this.shadowRoot.querySelector('slot');
     const element = slot.assignedElements()[0];
@@ -246,16 +240,16 @@ class ElementScroller extends HTMLElement {
     element.style.gap = `${this.gap}px`;
 
     // Ensure styles are applied to each child
-    Array.from(element.children).forEach(child => {
-        child.style.width = `${this.itemWidth}px`;
-        child.style.flexShrink = '0';
+    Array.from(element.children).forEach((child) => {
+      child.style.width = `${this.itemWidth}px`;
+      child.style.flexShrink = '0';
     });
   }
 
   /**
-     * Get current scroll index
-     * @returns {number} Current item index
-     */
+   * Get current scroll index
+   * @returns {number} Current item index
+   */
   getCurrentIndex() {
     return this.currentIndex;
   }
@@ -263,7 +257,7 @@ class ElementScroller extends HTMLElement {
   getVisibleItems() {
     const containerWidth = this.calculateVisibleWidth();
     const padding = this.containerPadding || 20;
-    const effectiveWidth = containerWidth - (padding * 2);
+    const effectiveWidth = containerWidth - padding * 2;
     return Math.floor((effectiveWidth + this.gap) / (this.itemWidth + this.gap));
   }
 
@@ -275,7 +269,7 @@ class ElementScroller extends HTMLElement {
     const slot = this.shadowRoot.querySelector('slot');
     const element = slot.assignedElements()[0];
     if (!element) return 0;
-    
+
     const totalItems = element.children.length;
     const visibleItems = this.getVisibleItems();
     return Math.max(0, totalItems - visibleItems);
@@ -287,31 +281,31 @@ class ElementScroller extends HTMLElement {
    * @returns {number} Valid index within bounds
    */
   validateScroll(index) {
-      return Math.min(Math.max(0, index), this.getMaxScroll());
+    return Math.min(Math.max(0, index), this.getMaxScroll());
   }
 
   /**
-  * Setup arrow click handlers
-  */
+   * Setup arrow click handlers
+   */
   setupArrowHandlers() {
     const leftArrow = this.shadowRoot.querySelector('.scroller-arrow--left');
     const rightArrow = this.shadowRoot.querySelector('.scroller-arrow--right');
-    
+
     leftArrow.addEventListener('click', () => this.scrollLeft());
     rightArrow.addEventListener('click', () => this.scrollRight());
   }
 
   /**
-  * Scroll to specific index
-  * @param {number} index - Target index
-  */
+   * Scroll to specific index
+   * @param {number} index - Target index
+   */
   scrollToIndex(index) {
     const validIndex = this.validateScroll(index);
     if (validIndex !== this.currentIndex) {
-        this.currentIndex = validIndex;
-        this.updateScroll();
-        this.updateArrowVisibility();
-        this.updateScrollbarPosition();
+      this.currentIndex = validIndex;
+      this.updateScroll();
+      this.updateArrowVisibility();
+      this.updateScrollbarPosition();
     }
   }
 
@@ -319,16 +313,16 @@ class ElementScroller extends HTMLElement {
    * Scroll one position left
    */
   scrollLeft() {
-      this.scrollToIndex(this.currentIndex - 1);
-      this.updateScrollbarPosition();
+    this.scrollToIndex(this.currentIndex - 1);
+    this.updateScrollbarPosition();
   }
 
   /**
    * Scroll one position right
    */
   scrollRight() {
-      this.scrollToIndex(this.currentIndex + 1);
-      this.updateScrollbarPosition();
+    this.scrollToIndex(this.currentIndex + 1);
+    this.updateScrollbarPosition();
   }
 
   /**
@@ -345,16 +339,16 @@ class ElementScroller extends HTMLElement {
 
     let scrollAmount;
     if (this.currentIndex === this.getMaxScroll()) {
-        // Last position - adjust to show last item fully
-        scrollAmount = maxScrollDistance;
+      // Last position - adjust to show last item fully
+      scrollAmount = maxScrollDistance;
     } else if (this.currentIndex === 0) {
-        // First position - show from start
-        scrollAmount = 0;
+      // First position - show from start
+      scrollAmount = 0;
     } else {
-        // Fixed scroll amount for middle positions
-        scrollAmount = this.currentIndex * standardScrollAmount;
+      // Fixed scroll amount for middle positions
+      scrollAmount = this.currentIndex * standardScrollAmount;
     }
-    
+
     itemsContainer.style.transform = `translateX(-${scrollAmount}px)`;
     itemsContainer.style.transition = 'transform 0.3s ease';
   }
@@ -370,7 +364,7 @@ class ElementScroller extends HTMLElement {
     container.addEventListener('touchstart', this.handleTouchStart, { passive: false });
     container.addEventListener('touchmove', this.handleTouchMove, { passive: false });
     container.addEventListener('touchend', this.handleTouchEnd);
-    
+
     // Add mouse event listeners for desktop dragging
     container.addEventListener('mousedown', this.handleTouchStart);
     window.addEventListener('mousemove', this.handleTouchMove);
@@ -378,139 +372,136 @@ class ElementScroller extends HTMLElement {
   }
 
   removeTouchEvents() {
-      const container = this.shadowRoot.querySelector('.items-wrapper');
-      if (!container) return;
+    const container = this.shadowRoot.querySelector('.items-wrapper');
+    if (!container) return;
 
-      container.removeEventListener('touchstart', this.handleTouchStart);
-      container.removeEventListener('touchmove', this.handleTouchMove);
-      container.removeEventListener('touchend', this.handleTouchEnd);
-      
-      container.removeEventListener('mousedown', this.handleTouchStart);
-      window.removeEventListener('mousemove', this.handleTouchMove);
-      window.removeEventListener('mouseup', this.handleTouchEnd);
+    container.removeEventListener('touchstart', this.handleTouchStart);
+    container.removeEventListener('touchmove', this.handleTouchMove);
+    container.removeEventListener('touchend', this.handleTouchEnd);
+
+    container.removeEventListener('mousedown', this.handleTouchStart);
+    window.removeEventListener('mousemove', this.handleTouchMove);
+    window.removeEventListener('mouseup', this.handleTouchEnd);
   }
 
   handleTouchStart(e) {
-      if (e.type === 'mousedown') {
-          e.preventDefault(); // Prevent text selection during drag
-      }
-      
-      const point = e.touches ? e.touches[0] : e;
-      
-      this.touchState = {
-          ...this.touchState,
-          startX: point.clientX,
-          startY: point.clientY,
-          startTime: Date.now(),
-          isDragging: true,
-          currentTranslate: this.touchState.prevTranslate
-      };
+    if (e.type === 'mousedown') {
+      e.preventDefault(); // Prevent text selection during drag
+    }
 
-      // Stop any ongoing animation
-      if (this.touchState.animationID) {
-          cancelAnimationFrame(this.touchState.animationID);
-      }
+    const point = e.touches ? e.touches[0] : e;
 
-      // Get the current container position
-      const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
-      if (container) {
-          const transform = window.getComputedStyle(container).transform;
-          if (transform !== 'none') {
-              this.touchState.prevTranslate = parseFloat(transform.split(',')[4]) || 0;
-          }
+    this.touchState = {
+      ...this.touchState,
+      startX: point.clientX,
+      startY: point.clientY,
+      startTime: Date.now(),
+      isDragging: true,
+      currentTranslate: this.touchState.prevTranslate,
+    };
+
+    // Stop any ongoing animation
+    if (this.touchState.animationID) {
+      cancelAnimationFrame(this.touchState.animationID);
+    }
+
+    // Get the current container position
+    const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
+    if (container) {
+      const transform = window.getComputedStyle(container).transform;
+      if (transform !== 'none') {
+        this.touchState.prevTranslate = parseFloat(transform.split(',')[4]) || 0;
       }
+    }
   }
 
   handleTouchMove(e) {
-      if (!this.touchState.isDragging) return;
-      e.preventDefault(); // Prevent scrolling while dragging
-      
-      const point = e.touches ? e.touches[0] : e;
-      const currentX = point.clientX;
-      const currentY = point.clientY;
-      
-      // Calculate distance moved
-      const deltaX = currentX - this.touchState.startX;
-      
-      // Update current position
-      this.touchState.currentTranslate = this.touchState.prevTranslate + deltaX;
-      
-      // Apply constraints
-      const maxTranslate = this.calculateMaxTranslate();
-      this.touchState.currentTranslate = Math.max(
-          -maxTranslate,
-          Math.min(0, this.touchState.currentTranslate)
-      );
-      
-      // Apply the transform
-      this.applyTransform(this.touchState.currentTranslate);
+    if (!this.touchState.isDragging) return;
+    e.preventDefault(); // Prevent scrolling while dragging
 
-      // Update currentIndex in parallel
-      const itemWidth = this.itemWidth + this.gap;
-      const newIndex = Math.round(Math.abs(this.touchState.currentTranslate) / itemWidth);
-      if (this.currentIndex !== newIndex) {
-          this.currentIndex = this.validateScroll(newIndex);
-          this.updateArrowVisibility();
-      }
+    const point = e.touches ? e.touches[0] : e;
+    const currentX = point.clientX;
+    const currentY = point.clientY;
 
-      // Add scrollbar update
-      const scrollRatio = Math.abs(this.touchState.currentTranslate) / maxTranslate;
-      const indicator = this.shadowRoot.querySelector('.scroll-indicator');
-      const { trackWidth } = this.calculateScrollbarDimensions();
-      
-      if (indicator) {
-        const position = scrollRatio * (trackWidth - indicator.offsetWidth);
-        indicator.style.transform = `translateX(${position}px)`;
-      }
+    // Calculate distance moved
+    const deltaX = currentX - this.touchState.startX;
+
+    // Update current position
+    this.touchState.currentTranslate = this.touchState.prevTranslate + deltaX;
+
+    // Apply constraints
+    const maxTranslate = this.calculateMaxTranslate();
+    this.touchState.currentTranslate = Math.max(
+      -maxTranslate,
+      Math.min(0, this.touchState.currentTranslate),
+    );
+
+    // Apply the transform
+    this.applyTransform(this.touchState.currentTranslate);
+
+    // Update currentIndex in parallel
+    const itemWidth = this.itemWidth + this.gap;
+    const newIndex = Math.round(Math.abs(this.touchState.currentTranslate) / itemWidth);
+    if (this.currentIndex !== newIndex) {
+      this.currentIndex = this.validateScroll(newIndex);
+      this.updateArrowVisibility();
+    }
+
+    // Add scrollbar update
+    const scrollRatio = Math.abs(this.touchState.currentTranslate) / maxTranslate;
+    const indicator = this.shadowRoot.querySelector('.scroll-indicator');
+    const { trackWidth } = this.calculateScrollbarDimensions();
+
+    if (indicator) {
+      const position = scrollRatio * (trackWidth - indicator.offsetWidth);
+      indicator.style.transform = `translateX(${position}px)`;
+    }
   }
 
   handleTouchEnd() {
     if (!this.touchState.isDragging) return;
-    
+
     const movedDistance = this.touchState.currentTranslate - this.touchState.prevTranslate;
     const timeTaken = Date.now() - this.touchState.startTime;
-    
+
     // Calculate velocity for momentum scrolling
     const velocity = movedDistance / timeTaken;
-    
+
     // Get current item index from touch position
     const itemWidth = this.itemWidth + this.gap;
     const currentPosition = Math.abs(this.touchState.currentTranslate);
     let targetIndex = Math.round(currentPosition / itemWidth);
-    
+
     // Determine if this was a swipe
     if (Math.abs(velocity) > 0.5) {
-        const itemsToScroll = Math.min(
-            Math.ceil(Math.abs(velocity) * 2),
-            this.getVisibleItems()
-        );
-        
-        if (velocity < 0) {
-            targetIndex += itemsToScroll;
-        } else {
-            targetIndex -= itemsToScroll;
-        }
+      const itemsToScroll = Math.min(Math.ceil(Math.abs(velocity) * 2), this.getVisibleItems());
+
+      if (velocity < 0) {
+        targetIndex += itemsToScroll;
+      } else {
+        targetIndex -= itemsToScroll;
+      }
     }
-    
+
     // Reset touch state
     this.touchState.isDragging = false;
-    
+
     // Use the arrow-based scrolling system to finish the movement
     this.scrollToIndex(targetIndex);
   }
 
   snapToNearestItem() {
-      const itemWidth = this.currentItemWidth + this.gap;
-      const currentOffset = this.touchState.currentTranslate;
-      
-      // Calculate nearest item index
-      const nearestIndex = Math.round(Math.abs(currentOffset) / itemWidth);
-      
-      // Calculate target position
-      const targetPosition = -nearestIndex * itemWidth;
-      
-      // Animate to target position
-      this.animateToPosition(targetPosition);
+    const itemWidth = this.currentItemWidth + this.gap;
+    const currentOffset = this.touchState.currentTranslate;
+
+    // Calculate nearest item index
+    const nearestIndex = Math.round(Math.abs(currentOffset) / itemWidth);
+
+    // Calculate target position
+    const targetPosition = -nearestIndex * itemWidth;
+
+    // Animate to target position
+    this.animateToPosition(targetPosition);
   }
 
   animateToPosition(targetPosition) {
@@ -520,65 +511,65 @@ class ElementScroller extends HTMLElement {
     const duration = 300;
 
     const animate = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const currentPosition = startPosition + (distance * easeOut);
-        this.applyTransform(currentPosition);
-        
-        // Update index based on current position
-        const itemWidth = this.itemWidth + this.gap;
-        const newIndex = Math.round(Math.abs(currentPosition) / itemWidth);
-        if (this.currentIndex !== newIndex) {
-            this.currentIndex = this.validateScroll(newIndex);
-            this.updateArrowVisibility();
-        }
-        
-        if (progress < 1) {
-            this.touchState.animationID = requestAnimationFrame(animate);
-        } else {
-            this.touchState.prevTranslate = targetPosition;
-            this.touchState.currentTranslate = targetPosition;
-            this.updateArrowVisibility();
-        }
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const currentPosition = startPosition + distance * easeOut;
+      this.applyTransform(currentPosition);
+
+      // Update index based on current position
+      const itemWidth = this.itemWidth + this.gap;
+      const newIndex = Math.round(Math.abs(currentPosition) / itemWidth);
+      if (this.currentIndex !== newIndex) {
+        this.currentIndex = this.validateScroll(newIndex);
+        this.updateArrowVisibility();
+      }
+
+      if (progress < 1) {
+        this.touchState.animationID = requestAnimationFrame(animate);
+      } else {
+        this.touchState.prevTranslate = targetPosition;
+        this.touchState.currentTranslate = targetPosition;
+        this.updateArrowVisibility();
+      }
     };
 
     this.touchState.animationID = requestAnimationFrame(animate);
-}
+  }
 
   applyTransform(x) {
-      const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
-      if (container) {
-          container.style.transform = `translateX(${x}px)`;
-          container.style.transition = 'none'; // Remove transition during touch/drag
-      }
+    const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
+    if (container) {
+      container.style.transform = `translateX(${x}px)`;
+      container.style.transition = 'none'; // Remove transition during touch/drag
+    }
   }
 
   calculateMaxTranslate() {
-      const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
-      if (!container) return 0;
-      
-      const containerWidth = this.calculateVisibleWidth();
-      const totalWidth = this.calculateTotalWidth();
-      
-      return Math.max(0, totalWidth - containerWidth);
+    const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
+    if (!container) return 0;
+
+    const containerWidth = this.calculateVisibleWidth();
+    const totalWidth = this.calculateTotalWidth();
+
+    return Math.max(0, totalWidth - containerWidth);
   }
 
   /**
-  * Update arrow visibility based on scroll position
-  */
+   * Update arrow visibility based on scroll position
+   */
   updateArrowVisibility() {
     console.log('updateArrowVisibility');
     const leftArrow = this.shadowRoot.querySelector('.scroller-arrow--left');
     const rightArrow = this.shadowRoot.querySelector('.scroller-arrow--right');
-    
+
     if (this.isScrollNeeded()) {
-        leftArrow.classList.toggle('visible', this.currentIndex > 0);
-        rightArrow.classList.toggle('visible', this.currentIndex < this.getMaxScroll());
+      leftArrow.classList.toggle('visible', this.currentIndex > 0);
+      rightArrow.classList.toggle('visible', this.currentIndex < this.getMaxScroll());
     } else {
-        leftArrow.classList.remove('visible');
-        rightArrow.classList.remove('visible');
+      leftArrow.classList.remove('visible');
+      rightArrow.classList.remove('visible');
     }
   }
 
@@ -590,26 +581,26 @@ class ElementScroller extends HTMLElement {
     if (!itemsContainer) return;
 
     if (!this.isScrollNeeded()) {
-        // Apply centered layout
-        itemsContainer.style.display = 'flex';
-        itemsContainer.style.justifyContent = 'center';
-        itemsContainer.style.transform = '';
+      // Apply centered layout
+      itemsContainer.style.display = 'flex';
+      itemsContainer.style.justifyContent = 'center';
+      itemsContainer.style.transform = '';
     } else {
-        // Reapply original scroll layout
-        itemsContainer.style = ''; // Clear all styles
-        itemsContainer.style.display = 'flex';
-        itemsContainer.style.gap = '20px';
-        Array.from(itemsContainer.children).forEach(child => {
-            child.style.width = '${this.itemWidth}px';
-            child.style.flexShrink = '0';
-        });
-        this.updateScroll(); // Apply scroll position
+      // Reapply original scroll layout
+      itemsContainer.style = ''; // Clear all styles
+      itemsContainer.style.display = 'flex';
+      itemsContainer.style.gap = '20px';
+      Array.from(itemsContainer.children).forEach((child) => {
+        child.style.width = '${this.itemWidth}px';
+        child.style.flexShrink = '0';
+      });
+      this.updateScroll(); // Apply scroll position
     }
   }
 
   /**
-  * Update styles with new padding
-  */
+   * Update styles with new padding
+   */
   updatePadding() {
     const wrapper = this.shadowRoot.querySelector('.items-wrapper');
     if (wrapper) {
@@ -618,8 +609,8 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
-  * Update container background color
-  */
+   * Update container background color
+   */
   updateContainerStyles() {
     const container = this.shadowRoot.querySelector('.scroller-container');
     if (container) {
@@ -628,8 +619,8 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
-  * Update container border radius
-  */
+   * Update container border radius
+   */
   updateBorderRadius() {
     const container = this.shadowRoot.querySelector('.scroller-container');
     if (container) {
@@ -638,7 +629,7 @@ class ElementScroller extends HTMLElement {
   }
 
   render() {
-      this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
           <style>
               .scroller-container {
                   width: 100%;
@@ -730,11 +721,15 @@ class ElementScroller extends HTMLElement {
           </style>
 
           <div class="scroller-container">
-              ${this.hasAttribute('title') ? `
+              ${
+                this.hasAttribute('title')
+                  ? `
                   <div class="element-scroller__title">
                       <span>${this.getAttribute('title')}</span>
                   </div>
-              ` : ''}
+              `
+                  : ''
+              }
               <div class="items-wrapper">
                   <slot name="items"></slot>
               </div>
@@ -749,11 +744,15 @@ class ElementScroller extends HTMLElement {
                       <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
               </div>
-              ${this.hasAttribute('show-scrollbar') ? `
+              ${
+                this.hasAttribute('show-scrollbar')
+                  ? `
                 <div class="scroll-indicator-container">
                     <div class="scroll-indicator"></div>
                 </div>
-            ` : ''}
+            `
+                  : ''
+              }
           </div>
       `;
   }
@@ -763,32 +762,33 @@ class ElementScroller extends HTMLElement {
    */
   calculateScrollbarDimensions() {
     // Total content width excluding padding
-    const contentWidth = this.itemWidth * this.getItemCount() + (this.gap * (this.getItemCount() - 1));
-    
+    const contentWidth =
+      this.itemWidth * this.getItemCount() + this.gap * (this.getItemCount() - 1);
+
     // Visible width excluding padding
-    const containerWidth = this.calculateVisibleWidth() - (this.containerPadding * 2);
-    
+    const containerWidth = this.calculateVisibleWidth() - this.containerPadding * 2;
+
     // Calculate ratio based on content only
     const ratio = Math.min(containerWidth / contentWidth, 1);
-    
+
     const scrollTrack = this.shadowRoot.querySelector('.scroll-indicator-container');
     const trackWidth = scrollTrack ? scrollTrack.offsetWidth : 0;
-    
+
     const indicatorWidth = Math.max(ratio * trackWidth, 20);
-    
+
     return {
       ratio,
       trackWidth,
       indicatorWidth,
       contentWidth,
-      containerWidth
+      containerWidth,
     };
   }
-  
+
   updateScrollbarWidth() {
     const indicator = this.shadowRoot.querySelector('.scroll-indicator');
     if (!indicator) return;
-    
+
     const { indicatorWidth } = this.calculateScrollbarDimensions();
     indicator.style.width = `${indicatorWidth}px`;
   }
@@ -805,34 +805,34 @@ class ElementScroller extends HTMLElement {
   setupScrollbarClick() {
     const scrollTrack = this.shadowRoot.querySelector('.scroll-indicator-container');
     if (!scrollTrack) return;
-  
+
     scrollTrack.addEventListener('click', (e) => {
       // Ignore clicks on the indicator itself
       if (e.target.classList.contains('scroll-indicator')) return;
-      
+
       const trackRect = scrollTrack.getBoundingClientRect();
       const clickPosition = e.clientX - trackRect.left;
       const clickRatio = clickPosition / trackRect.width;
-      
+
       this.scrollToRatio(clickRatio);
     });
   }
-  
+
   scrollToRatio(ratio) {
     const maxIndex = this.getMaxScroll();
     const targetIndex = Math.round(ratio * maxIndex);
     this.scrollToIndex(targetIndex);
     this.updateScrollbarPosition();
   }
-  
+
   updateScrollbarPosition() {
     const indicator = this.shadowRoot.querySelector('.scroll-indicator');
     if (!indicator) return;
-  
+
     const { trackWidth } = this.calculateScrollbarDimensions();
     const maxScroll = this.getMaxScroll();
     const position = (this.currentIndex / maxScroll) * (trackWidth - indicator.offsetWidth);
-    
+
     indicator.style.transform = `translateX(${position}px)`;
   }
 
@@ -841,67 +841,67 @@ class ElementScroller extends HTMLElement {
     const scrollTrack = this.shadowRoot.querySelector('.scroll-indicator-container');
     const container = this.shadowRoot.querySelector('.scroller-container');
     if (!indicator || !scrollTrack) return;
-  
+
     let isDragging = false;
     let startX = 0;
     let scrollbarPosition = 0;
-  
+
     const handleDragStart = (e) => {
       isDragging = true;
       startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
       scrollbarPosition = parseFloat(getComputedStyle(indicator).transform.split(',')[4]) || 0;
-      
+
       indicator.style.transition = 'none';
       document.addEventListener('mousemove', handleDragMove);
       document.addEventListener('mouseup', handleDragEnd);
       document.addEventListener('touchmove', handleDragMove);
       document.addEventListener('touchend', handleDragEnd);
     };
-  
+
     const handleDragMove = (e) => {
       if (!isDragging) return;
       e.preventDefault();
-  
+
       const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
       const deltaX = currentX - startX;
-      
+
       const { trackWidth } = this.calculateScrollbarDimensions();
       const maxScroll = trackWidth - indicator.offsetWidth;
       let newPosition = Math.max(0, Math.min(maxScroll, scrollbarPosition + deltaX));
-      
+
       indicator.style.transform = `translateX(${newPosition}px)`;
-      
+
       const scrollRatio = newPosition / maxScroll;
       const maxIndex = this.getMaxScroll();
       this.currentIndex = Math.round(scrollRatio * maxIndex);
       this.updateScroll();
       this.updateArrowVisibility();
     };
-  
+
     const handleDragEnd = () => {
       if (!isDragging) return;
       isDragging = false;
-      
+
       indicator.style.transition = 'transform 0.3s ease';
-      
+
       const { trackWidth } = this.calculateScrollbarDimensions();
       const maxScroll = trackWidth - indicator.offsetWidth;
       const currentPosition = parseFloat(getComputedStyle(indicator).transform.split(',')[4]) || 0;
       const scrollRatio = currentPosition / maxScroll;
-      
+
       const maxIndex = this.getMaxScroll();
       this.currentIndex = Math.round(scrollRatio * maxIndex);
-      
+
       this.updateScroll();
       this.updateScrollbarPosition();
       this.updateArrowVisibility();
-      
+
       document.removeEventListener('mousemove', handleDragMove);
       document.removeEventListener('mouseup', handleDragEnd);
       document.removeEventListener('touchmove', handleDragMove);
       document.removeEventListener('touchend', handleDragEnd);
     };
-  
+
     indicator.addEventListener('mousedown', handleDragStart);
     indicator.addEventListener('touchstart', handleDragStart);
   }

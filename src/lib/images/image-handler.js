@@ -6,7 +6,7 @@ class ImageHandler extends HTMLElement {
     this.allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     this.images = [];
     this.maxImages = 5;
-    this.draggedImage = null;   
+    this.draggedImage = null;
   }
 
   connectedCallback() {
@@ -264,10 +264,10 @@ class ImageHandler extends HTMLElement {
     uploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
       uploadArea.classList.remove('drag-over');
-      
+
       if (uploadArea.getAttribute('data-disabled') !== 'true') {
-        const files = Array.from(e.dataTransfer.files).filter(file => 
-          this.allowedTypes.includes(file.type)
+        const files = Array.from(e.dataTransfer.files).filter((file) =>
+          this.allowedTypes.includes(file.type),
         );
         this.handleFiles(files);
       }
@@ -278,7 +278,7 @@ class ImageHandler extends HTMLElement {
     const dropIndicator = document.createElement('div');
     dropIndicator.className = 'drop-indicator';
     previewContainer.appendChild(dropIndicator);
-    
+
     previewContainer.addEventListener('dragstart', (e) => {
       const preview = e.target.closest('.image-preview');
       if (preview) {
@@ -302,18 +302,18 @@ class ImageHandler extends HTMLElement {
     previewContainer.addEventListener('dragover', (e) => {
       e.preventDefault();
       const target = e.target.closest('.image-preview');
-      
+
       if (target && this.draggedImage && target !== this.draggedImage) {
         e.dataTransfer.dropEffect = 'move';
-        
+
         const allPreviews = [...previewContainer.querySelectorAll('.image-preview')];
         const targetIndex = allPreviews.indexOf(target);
         const draggedIndex = allPreviews.indexOf(this.draggedImage);
-        
+
         dropIndicator.style.display = 'block';
         const targetRect = target.getBoundingClientRect();
         const containerRect = previewContainer.getBoundingClientRect();
-        
+
         // Calculate position for drop indicator
         if (targetIndex > draggedIndex) {
           dropIndicator.style.transform = `translateY(${targetRect.bottom - containerRect.top}px)`;
@@ -336,14 +336,14 @@ class ImageHandler extends HTMLElement {
     previewContainer.addEventListener('drop', (e) => {
       e.preventDefault();
       dropIndicator.style.display = 'none';
-      
+
       const target = e.target.closest('.image-preview');
       if (!target || !this.draggedImage || target === this.draggedImage) return;
-      
+
       const allPreviews = [...previewContainer.querySelectorAll('.image-preview')];
       const fromIndex = allPreviews.indexOf(this.draggedImage);
       const toIndex = allPreviews.indexOf(target);
-      
+
       // Perform the reorder
       this.reorderImages(fromIndex, toIndex);
     });
@@ -351,17 +351,17 @@ class ImageHandler extends HTMLElement {
 
   async handleFiles(files) {
     const remainingSlots = this.maxImages - this.images.length;
-    
+
     if (remainingSlots <= 0) {
       this.showError(`לא ניתן להעלות יותר מ-${this.maxImages} תמונות`);
       return;
     }
 
     const filesToProcess = files.slice(0, remainingSlots);
-    
+
     for (const file of filesToProcess) {
       const validation = this.validateFile(file);
-      
+
       if (!validation.valid) {
         this.showError(validation.error);
         continue;
@@ -372,17 +372,19 @@ class ImageHandler extends HTMLElement {
         const imageData = {
           file,
           preview,
-          id: Math.random().toString(36).substr(2, 9)
+          id: Math.random().toString(36).substr(2, 9),
         };
-        
+
         this.addImage(imageData);
-        
+
         // Dispatch event for new file
-        this.dispatchEvent(new CustomEvent('file-added', {
-          detail: { imageData },
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('file-added', {
+            detail: { imageData },
+            bubbles: true,
+            composed: true,
+          }),
+        );
       } catch (error) {
         this.showError('שגיאה בטעינת התמונה');
       }
@@ -395,14 +397,14 @@ class ImageHandler extends HTMLElement {
     if (!this.allowedTypes.includes(file.type)) {
       return {
         valid: false,
-        error: 'סוג הקובץ לא נתמך. נא להעלות תמונות מסוג JPEG, PNG או WebP בלבד'
+        error: 'סוג הקובץ לא נתמך. נא להעלות תמונות מסוג JPEG, PNG או WebP בלבד',
       };
     }
 
     if (file.size > this.maxFileSize) {
       return {
         valid: false,
-        error: 'התמונה גדולה מדי. הגודל המקסימלי המותר הוא 5MB'
+        error: 'התמונה גדולה מדי. הגודל המקסימלי המותר הוא 5MB',
       };
     }
 
@@ -416,7 +418,7 @@ class ImageHandler extends HTMLElement {
       return;
     }
 
-    const fileNames = this.images.map(img => img.file.name);
+    const fileNames = this.images.map((img) => img.file.name);
     filesArea.textContent = `קבצים נבחרו: ${fileNames.join(', ')}`;
   }
 
@@ -424,18 +426,20 @@ class ImageHandler extends HTMLElement {
     const image = this.images.splice(fromIndex, 1)[0];
     this.images.splice(toIndex, 0, image);
     this.updatePreviewContainer();
-    
-    this.dispatchEvent(new CustomEvent('images-reordered', {
-      detail: { images: this.images },
-      bubbles: true,
-      composed: true
-    }));
+
+    this.dispatchEvent(
+      new CustomEvent('images-reordered', {
+        detail: { images: this.images },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   createImagePreview(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
+      reader.onload = (e) => resolve(e.target.result);
       reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsDataURL(file);
     });
@@ -444,7 +448,7 @@ class ImageHandler extends HTMLElement {
   addImage(imageData) {
     this.images.push({
       ...imageData,
-      isPrimary: this.images.length === 0 // First image is primary by default
+      isPrimary: this.images.length === 0, // First image is primary by default
     });
     this.updatePreviewContainer();
     this.updateUploadAreaState();
@@ -453,43 +457,47 @@ class ImageHandler extends HTMLElement {
 
   removeImage(imageId) {
     const wasOnlyImage = this.images.length === 1;
-    const removedImage = this.images.find(img => img.id === imageId);
+    const removedImage = this.images.find((img) => img.id === imageId);
     const wasPrimary = removedImage?.isPrimary;
-    
-    this.images = this.images.filter(img => img.id !== imageId);
-    
+
+    this.images = this.images.filter((img) => img.id !== imageId);
+
     // If we removed the primary image and there are other images, make the first one primary
     if (wasPrimary && this.images.length > 0) {
       this.images[0].isPrimary = true;
     }
-    
+
     this.updatePreviewContainer();
     this.updateUploadAreaState();
-    
+
     // Clear the selected files if no images remain
     if (wasOnlyImage) {
       this.updateSelectedFiles();
     }
 
-    this.dispatchEvent(new CustomEvent('images-changed', {
-      detail: { images: this.images },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('images-changed', {
+        detail: { images: this.images },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   setPrimaryImage(imageId) {
-    this.images = this.images.map(img => ({
+    this.images = this.images.map((img) => ({
       ...img,
-      isPrimary: img.id === imageId
+      isPrimary: img.id === imageId,
     }));
     this.updatePreviewContainer();
-    
-    this.dispatchEvent(new CustomEvent('primary-image-changed', {
-      detail: { imageId },
-      bubbles: true,
-      composed: true
-    }));
+
+    this.dispatchEvent(
+      new CustomEvent('primary-image-changed', {
+        detail: { imageId },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   updatePreviewContainer() {
@@ -501,7 +509,7 @@ class ImageHandler extends HTMLElement {
       preview.className = `image-preview${image.isPrimary ? ' primary' : ''}`;
       preview.draggable = true;
       preview.setAttribute('data-id', image.id);
-      
+
       preview.innerHTML = `
         <img src="${image.preview}" alt="Image preview">
         ${image.isPrimary ? '<div class="primary-label">תמונה ראשית</div>' : ''}
@@ -538,7 +546,7 @@ class ImageHandler extends HTMLElement {
     const errorContainer = this.shadowRoot.querySelector('.error-container');
     errorContainer.textContent = message;
     errorContainer.style.display = 'block';
-    
+
     setTimeout(() => {
       errorContainer.style.display = 'none';
     }, 5000);
@@ -583,7 +591,7 @@ class ImageHandler extends HTMLElement {
    * @param {string} uploadedUrl - The URL of the uploaded image
    */
   setImageUploaded(imageId, uploadedUrl) {
-    const imageData = this.images.find(img => img.id === imageId);
+    const imageData = this.images.find((img) => img.id === imageId);
     if (imageData) {
       imageData.uploadedUrl = uploadedUrl;
       this.setImageUploading(imageId, false);
@@ -628,7 +636,7 @@ class ImageHandler extends HTMLElement {
    */
   setMaxImages(count) {
     this.maxImages = count;
-    this.shadowRoot.querySelector('.status-message').textContent = 
+    this.shadowRoot.querySelector('.status-message').textContent =
       `(מקסימום ${this.maxImages} תמונות, גודל מקסימלי 5MB לתמונה)`;
     this.updateUploadAreaState();
   }

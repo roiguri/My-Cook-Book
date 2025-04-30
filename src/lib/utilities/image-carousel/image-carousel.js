@@ -34,7 +34,7 @@ class ImageCarousel extends HTMLElement {
     }
     if (name === 'border-radius' && newValue) {
       this.borderRadius = newValue;
-      this.updateCarousel(); 
+      this.updateCarousel();
     }
     this.updateCarousel();
   }
@@ -63,44 +63,44 @@ class ImageCarousel extends HTMLElement {
 
     // Process all images (could be URLs or Firebase paths)
     const processedImages = await Promise.all(
-        this.images.map(async (image, index) => {
-            const listItem = document.createElement('li');
-            listItem.classList.add('image-carousel__item');
-            const img = document.createElement('img');
-            
-            // Check if the image is a Firebase path
-            if (typeof image === 'string' && image.startsWith('img/recipes/')) {
-                try {
-                    const storage = getStorageInstance();
-                    const imageRef = ref(storage, image);
-                    img.src = await getDownloadURL(imageRef);
-                } catch (error) {
-                    console.error('Error loading Firebase image:', error);
-                    // Fallback to placeholder if Firebase image fails
-                    const placeholderRef = ref(storage, 'img/recipes/compressed/place-holder-add-new.png');
-                    img.src = await getDownloadURL(placeholderRef);
-                }
-            } else {
-                // Handle as direct URL or local path
-                img.src = image;
-            }
+      this.images.map(async (image, index) => {
+        const listItem = document.createElement('li');
+        listItem.classList.add('image-carousel__item');
+        const img = document.createElement('img');
 
-            img.alt = `Image ${index + 1}`;
-            img.classList.add('image-carousel__image');
-            listItem.appendChild(img);
-            this.carouselList.appendChild(listItem);
+        // Check if the image is a Firebase path
+        if (typeof image === 'string' && image.startsWith('img/recipes/')) {
+          try {
+            const storage = getStorageInstance();
+            const imageRef = ref(storage, image);
+            img.src = await getDownloadURL(imageRef);
+          } catch (error) {
+            console.error('Error loading Firebase image:', error);
+            // Fallback to placeholder if Firebase image fails
+            const placeholderRef = ref(storage, 'img/recipes/compressed/place-holder-add-new.png');
+            img.src = await getDownloadURL(placeholderRef);
+          }
+        } else {
+          // Handle as direct URL or local path
+          img.src = image;
+        }
 
-            const dot = document.createElement('div');
-            dot.classList.add('image-carousel__dot');
-            dot.addEventListener('click', () => this.goToSlide(index));
-            this.dotsContainer.appendChild(dot);
-        })
+        img.alt = `Image ${index + 1}`;
+        img.classList.add('image-carousel__image');
+        listItem.appendChild(img);
+        this.carouselList.appendChild(listItem);
+
+        const dot = document.createElement('div');
+        dot.classList.add('image-carousel__dot');
+        dot.addEventListener('click', () => this.goToSlide(index));
+        this.dotsContainer.appendChild(dot);
+      }),
     );
 
     // Apply border-radius if specified
     if (this.borderRadius) {
-        this.carouselContainer.style.borderRadius = this.borderRadius;
-        this.carouselContainer.style.overflow = 'hidden';
+      this.carouselContainer.style.borderRadius = this.borderRadius;
+      this.carouselContainer.style.overflow = 'hidden';
     }
 
     this.goToSlide(this.currentIndex);

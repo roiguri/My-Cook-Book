@@ -2,7 +2,7 @@
  * FilterSearchBar Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * A search bar component specifically designed for filtering recipes in category/profile pages,
  * providing real-time search functionality.
@@ -85,13 +85,15 @@ class FilterSearchBar extends HTMLElement {
     // Real-time search as user types
     input.addEventListener('input', (e) => {
       const searchText = e.target.value.trim();
-      
+
       // Dispatch custom event for real-time search
-      this.dispatchEvent(new CustomEvent('search-input', {
-        bubbles: true,
-        composed: true,
-        detail: { searchText }
-      }));
+      this.dispatchEvent(
+        new CustomEvent('search-input', {
+          bubbles: true,
+          composed: true,
+          detail: { searchText },
+        }),
+      );
     });
   }
 
@@ -108,12 +110,14 @@ class FilterSearchBar extends HTMLElement {
     const input = this.shadowRoot.querySelector('.search-input');
     // Only dispatch event if value actually changed
     if (input.value !== '') {
-        input.value = '';
-        this.dispatchEvent(new CustomEvent('search-input', {
-            bubbles: true,
-            composed: true,
-            detail: { searchText: '' }
-        }));
+      input.value = '';
+      this.dispatchEvent(
+        new CustomEvent('search-input', {
+          bubbles: true,
+          composed: true,
+          detail: { searchText: '' },
+        }),
+      );
     }
   }
 }

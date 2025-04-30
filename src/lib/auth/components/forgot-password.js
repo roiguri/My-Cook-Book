@@ -5,7 +5,7 @@ import '../../modals/message-modal/message-modal.js';
  * ForgotPassword Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * Handles password reset functionality
  */
@@ -157,7 +157,7 @@ class ForgotPassword extends HTMLElement {
       const authController = this.closest('auth-controller');
       await authController.handlePasswordReset(email);
       this.showSuccess('קישור לאיפוס סיסמה נשלח לכתובת המייל שלך');
-      
+
       // Automatically return to login after 3 seconds
       setTimeout(() => {
         this.handleBackToLogin();
@@ -169,16 +169,18 @@ class ForgotPassword extends HTMLElement {
 
   handleBackToLogin(e) {
     e?.preventDefault();
-    this.dispatchEvent(new CustomEvent('back-to-login', {
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('back-to-login', {
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   showError(message) {
     const errorElement = this.shadowRoot.getElementById('reset-error');
     const successElement = this.shadowRoot.getElementById('reset-success');
-    
+
     errorElement.textContent = message;
     errorElement.classList.add('visible');
     successElement.classList.remove('visible');
@@ -187,7 +189,7 @@ class ForgotPassword extends HTMLElement {
   showSuccess(message) {
     const errorElement = this.shadowRoot.getElementById('reset-error');
     const successElement = this.shadowRoot.getElementById('reset-success');
-    
+
     successElement.textContent = message;
     successElement.classList.add('visible');
     errorElement.classList.remove('visible');
@@ -196,7 +198,7 @@ class ForgotPassword extends HTMLElement {
   clearMessages() {
     const errorElement = this.shadowRoot.getElementById('reset-error');
     const successElement = this.shadowRoot.getElementById('reset-success');
-    
+
     errorElement.classList.remove('visible');
     successElement.classList.remove('visible');
   }

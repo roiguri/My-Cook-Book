@@ -2,7 +2,7 @@
  * AuthAvatar Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * Header avatar component that serves as the main entry point for authentication
  */
@@ -94,21 +94,21 @@ class AuthAvatar extends HTMLElement {
     document.addEventListener('profile-updated', () => {
       const user = getAuthInstance().currentUser;
       if (user) {
-          this.updateAvatar(user);
+        this.updateAvatar(user);
       }
     });
   }
 
   initializeAuthListener() {
     const auth = getAuthInstance();
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged((user) => {
       this.updateAvatar(user);
     });
   }
 
   updateAvatar(user) {
     const avatar = this.shadowRoot.getElementById('auth-trigger');
-    
+
     if (user) {
       avatar.classList.remove('signed-out');
       if (user.photoURL) {
@@ -130,7 +130,7 @@ class AuthAvatar extends HTMLElement {
     const user = getAuthInstance().currentUser;
     const authController = document.querySelector('auth-controller');
     const authContent = document.querySelector('auth-content');
-    
+
     if (!authController || !authContent) {
       console.error('Required components not found');
       return;
@@ -143,7 +143,7 @@ class AuthAvatar extends HTMLElement {
       // Show login form for non-authenticated user
       authContent.showAuthForms();
     }
-    
+
     authController.openModal();
   }
 }

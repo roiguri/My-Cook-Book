@@ -2,15 +2,15 @@
  * SearchService Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * A core search service component that handles search functionality across the website.
  * Supports filtering by name, category, and tags, and integrates with the filter modal.
- * 
+ *
  * @fires search-results-updated - When search results are updated
  * @property {Object} detail.results - Array of filtered recipe objects
  * @property {Object} detail.searchParams - Current search parameters
- * 
+ *
  * @example
  * <search-service id="mainSearch">
  *   <input type="text" slot="search-input">
@@ -20,14 +20,14 @@ class SearchService extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    
+
     // Initialize state
     this.state = {
       searchText: '',
       currentFilters: null,
       category: null,
       favoritesOnly: false,
-      isLoading: false
+      isLoading: false,
     };
 
     // Bind methods
@@ -62,8 +62,8 @@ class SearchService extends HTMLElement {
     const slot = this.shadowRoot.querySelector('slot');
     slot.addEventListener('slotchange', (e) => {
       const elements = slot.assignedElements();
-      const searchInput = elements.find(el => el.tagName === 'INPUT');
-      
+      const searchInput = elements.find((el) => el.tagName === 'INPUT');
+
       if (searchInput) {
         searchInput.addEventListener('input', (e) => {
           this.state.searchText = e.target.value;
@@ -96,24 +96,26 @@ class SearchService extends HTMLElement {
    */
   async handleSearch() {
     if (this.state.isLoading) return;
-    
+
     this.state.isLoading = true;
     try {
       let recipes = await this.fetchRecipes();
       recipes = this.filterRecipes(recipes);
-      
-      this.dispatchEvent(new CustomEvent('search-results-updated', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          results: recipes,
-          searchParams: {
-            text: this.state.searchText,
-            category: this.state.category,
-            filters: this.state.currentFilters
-          }
-        }
-      }));
+
+      this.dispatchEvent(
+        new CustomEvent('search-results-updated', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            results: recipes,
+            searchParams: {
+              text: this.state.searchText,
+              category: this.state.category,
+              filters: this.state.currentFilters,
+            },
+          },
+        }),
+      );
     } catch (error) {
       console.error('Search error:', error);
     } finally {
@@ -130,7 +132,11 @@ class SearchService extends HTMLElement {
 
     // Apply category filter if set
     if (this.state.category) {
-      q = query(collection(db, 'recipes'), where('approved', '==', true), where('category', '==', this.state.category));
+      q = query(
+        collection(db, 'recipes'),
+        where('approved', '==', true),
+        where('category', '==', this.state.category),
+      );
     }
 
     // Handle favorites-only mode
@@ -142,16 +148,14 @@ class SearchService extends HTMLElement {
       const userDoc = await getDoc(doc(db, 'users', userId));
       const favoriteIds = userDoc.data()?.favorites || [];
       // Fetch all favorite recipes
-      const recipeDocs = await Promise.all(
-        favoriteIds.map(id => getDoc(doc(db, 'recipes', id)))
-      );
+      const recipeDocs = await Promise.all(favoriteIds.map((id) => getDoc(doc(db, 'recipes', id))));
       return recipeDocs
-        .filter(docSnap => docSnap.exists() && docSnap.data().approved)
-        .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        .filter((docSnap) => docSnap.exists() && docSnap.data().approved)
+        .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
     }
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+    return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
   }
 
   /**
@@ -165,15 +169,13 @@ class SearchService extends HTMLElement {
     // Apply text search if present
     if (this.state.searchText) {
       const searchTerms = this.state.searchText.toLowerCase().trim().split(/\s+/);
-      
-      filtered = filtered.filter(recipe => {
-        const searchableText = [
-          recipe.name,
-          recipe.category,
-          ...(recipe.tags || [])
-        ].join(' ').toLowerCase();
 
-        return searchTerms.every(term => searchableText.includes(term));
+      filtered = filtered.filter((recipe) => {
+        const searchableText = [recipe.name, recipe.category, ...(recipe.tags || [])]
+          .join(' ')
+          .toLowerCase();
+
+        return searchTerms.every((term) => searchableText.includes(term));
       });
     }
 
@@ -186,17 +188,15 @@ class SearchService extends HTMLElement {
       }
 
       if (difficulty) {
-        filtered = filtered.filter(recipe => recipe.difficulty === difficulty);
+        filtered = filtered.filter((recipe) => recipe.difficulty === difficulty);
       }
 
       if (mainIngredient) {
-        filtered = filtered.filter(recipe => recipe.mainIngredient === mainIngredient);
+        filtered = filtered.filter((recipe) => recipe.mainIngredient === mainIngredient);
       }
 
       if (tags?.length) {
-        filtered = filtered.filter(recipe => 
-          tags.every(tag => recipe.tags?.includes(tag))
-        );
+        filtered = filtered.filter((recipe) => tags.every((tag) => recipe.tags?.includes(tag)));
       }
     }
 
@@ -208,8 +208,8 @@ class SearchService extends HTMLElement {
    */
   filterByCookingTime(recipes, timeRange) {
     const [min, max] = timeRange.split('-').map(Number);
-    
-    return recipes.filter(recipe => {
+
+    return recipes.filter((recipe) => {
       const totalTime = (recipe.prepTime || 0) + (recipe.waitTime || 0);
       if (max) {
         return totalTime >= min && totalTime <= max;

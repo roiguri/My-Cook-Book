@@ -1,7 +1,7 @@
 /**
  * Recipe Preview Modal Component
  *
- * This web component displays a recipe preview in a modal dialog. It combines the functionality 
+ * This web component displays a recipe preview in a modal dialog. It combines the functionality
  * of the `recipe-component` to show recipe details and the `custom-modal` for the modal structure.
  *
  * Usage:
@@ -23,12 +23,12 @@
  *
  * ```html
  * <recipe-preview-modal id="recipe-preview" recipe-id="recipe123" recipe-name="Delicious Cake" show-buttons="true"></recipe-preview-modal>
- * <button id="preview-button">Preview Recipe</button> 
+ * <button id="preview-button">Preview Recipe</button>
  * <script>
  *   const previewButton = document.getElementById('preview-button');
  *   const recipePreviewModal = document.getElementById('recipe-preview');
  *   previewButton.addEventListener('click', () => {
- *     recipePreviewModal.openModal(); 
+ *     recipePreviewModal.openModal();
  *   });
  * </script>
  * ```
@@ -40,10 +40,10 @@
  * - `recipe-approved`: Dispatched when the Approve button is clicked.
  * - `recipe-rejected`: Dispatched when the Reject button is clicked.
  *
- * Both events include an object with the `recipeId` in the `detail` property. You can listen 
- * for these events on the `<recipe-preview-modal>` element to handle the approval or rejection 
+ * Both events include an object with the `recipeId` in the `detail` property. You can listen
+ * for these events on the `<recipe-preview-modal>` element to handle the approval or rejection
  * logic in your parent component.
- * 
+ *
  * Dependencies:
  * - This component relies on the `custom-modal` and `recipe-component` components.
  * - This component relies on firebase-storage-utils.js for the `deleteRecipeImages` function.
@@ -273,11 +273,13 @@ class RecipePreviewModal extends HTMLElement {
     try {
       this.setLoading(true);
       await this.handleRecipeApproval(this.recipeId);
-      this.dispatchEvent(new CustomEvent('recipe-approved', {
-        detail: { recipeId: this.recipeId },
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('recipe-approved', {
+          detail: { recipeId: this.recipeId },
+          bubbles: true,
+          composed: true,
+        }),
+      );
       this.modal.close();
     } catch (error) {
       console.error('Error approving recipe:', error);
@@ -292,11 +294,13 @@ class RecipePreviewModal extends HTMLElement {
     try {
       this.setLoading(true);
       await this.handleRecipeRejection(this.recipeId);
-      this.dispatchEvent(new CustomEvent('recipe-rejected', {
-        detail: { recipeId: this.recipeId },
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('recipe-rejected', {
+          detail: { recipeId: this.recipeId },
+          bubbles: true,
+          composed: true,
+        }),
+      );
       this.modal.close();
     } catch (error) {
       console.error('Error rejecting recipe:', error);

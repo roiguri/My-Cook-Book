@@ -7,10 +7,10 @@
   margin-top: 2rem;
 }
 
-    .quote-section blockquote {
-      font-size: var(--size-header2);
-      margin-bottom: 1rem;
-    }
+.quote-section blockquote {
+  font-size: var(--size-header2);
+  margin-bottom: 1rem;
+}
 
 @media (max-width: 768px) {
   .quote-section {

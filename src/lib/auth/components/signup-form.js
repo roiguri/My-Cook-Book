@@ -2,7 +2,7 @@
  * SignupForm Component
  * @class
  * @extends HTMLElement
- * 
+ *
  * @description
  * Handles the signup form functionality including validation,
  * password strength, and Google signup
@@ -262,7 +262,7 @@ class SignupForm extends HTMLElement {
   checkPasswordStrength() {
     const password = this.shadowRoot.getElementById('password').value;
     const strengthMeter = this.shadowRoot.querySelector('.strength-meter');
-    
+
     // Remove all classes first
     strengthMeter.classList.remove('weak', 'medium', 'strong');
 
@@ -282,7 +282,7 @@ class SignupForm extends HTMLElement {
   checkPasswordsMatch() {
     const password = this.shadowRoot.getElementById('password').value;
     const confirmPassword = this.shadowRoot.getElementById('confirmPassword').value;
-    
+
     if (confirmPassword && password !== confirmPassword) {
       this.showError('הסיסמאות אינן תואמות');
     } else {
@@ -292,7 +292,7 @@ class SignupForm extends HTMLElement {
 
   async handleSubmit(e) {
     e.preventDefault();
-    
+
     const fullName = this.shadowRoot.getElementById('fullName').value;
     const email = this.shadowRoot.getElementById('email').value;
     const password = this.shadowRoot.getElementById('password').value;
@@ -317,10 +317,12 @@ class SignupForm extends HTMLElement {
       if (user) {
         await updateProfile(user, { displayName: fullName });
         // Dispatch signup success event
-        this.dispatchEvent(new CustomEvent('signup-success', {
-          bubbles: true,
-          composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent('signup-success', {
+            bubbles: true,
+            composed: true,
+          }),
+        );
       }
     } catch (error) {
       this.showError(error.message);
@@ -331,10 +333,12 @@ class SignupForm extends HTMLElement {
     try {
       const authController = this.closest('auth-controller');
       await authController.handleGoogleSignIn();
-      this.dispatchEvent(new CustomEvent('signup-success', {
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('signup-success', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
     } catch (error) {
       this.showError(error.message);
     }

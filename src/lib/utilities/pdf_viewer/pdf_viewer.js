@@ -1,21 +1,21 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
-import { doc, getDoc} from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 class PDFViewer extends HTMLElement {
   constructor() {
-      super();
-      this.attachShadow({mode: 'open'});
-      this.pdfPath = this.getAttribute('pdf-path');
-      this.currentPage = this.getAttribute('start-page') || 1;
-      this.totalPages = parseInt(this.getAttribute('total-pages')) || 92;
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.pdfPath = this.getAttribute('pdf-path');
+    this.currentPage = this.getAttribute('start-page') || 1;
+    this.totalPages = parseInt(this.getAttribute('total-pages')) || 92;
   }
 
   async connectedCallback() {
     this.hasPageIndex = this.hasAttribute('page-index');
 
     if (this.hasPageIndex) {
-        this.pageIndex = await this.fetchPageIndex();
-        this.categories = Object.keys(this.pageIndex.categories);
+      this.pageIndex = await this.fetchPageIndex();
+      this.categories = Object.keys(this.pageIndex.categories);
     }
 
     this.render();
@@ -24,26 +24,25 @@ class PDFViewer extends HTMLElement {
 
   async fetchPageIndex() {
     try {
-        const db = getFirestoreInstance();
-        if (!db) {
-          console.error('Firestore not initialized');
-          return {};
-        }
-        const [collectionName, fileName] = this.getAttribute('page-index').split('/'); // Split the attribute value
-        const pageIndexRef = doc(db, collectionName, fileName);
-        const pageIndexDocSnap = await getDoc(pageIndexRef);
-        return pageIndexDocSnap.data();
-    } catch (error) {
-        console.error('Error fetching page index:', error);
+      const db = getFirestoreInstance();
+      if (!db) {
+        console.error('Firestore not initialized');
         return {};
+      }
+      const [collectionName, fileName] = this.getAttribute('page-index').split('/'); // Split the attribute value
+      const pageIndexRef = doc(db, collectionName, fileName);
+      const pageIndexDocSnap = await getDoc(pageIndexRef);
+      return pageIndexDocSnap.data();
+    } catch (error) {
+      console.error('Error fetching page index:', error);
+      return {};
     }
   }
 
   render() {
-
-      // Initial rendering (only once)
-      if (!this.shadowRoot.querySelector('.pdf_viewer')) {
-          this.shadowRoot.innerHTML = `
+    // Initial rendering (only once)
+    if (!this.shadowRoot.querySelector('.pdf_viewer')) {
+      this.shadowRoot.innerHTML = `
               <style>
                 .pdf_viewer {
                     width: 100%;
@@ -104,16 +103,20 @@ class PDFViewer extends HTMLElement {
                 }
               </style>
               <div class="pdf_viewer">
-                  ${this.hasPageIndex ? `
+                  ${
+                    this.hasPageIndex
+                      ? `
                     <div dir="rtl" class="recipe-search">  
                       <select id="category-select" class="category-select">
                           <option value="">כל הקטגוריות</option>
-                          ${this.categories.map(category => `<option value="${category}">${category}</option>`).join('')}
+                          ${this.categories.map((category) => `<option value="${category}">${category}</option>`).join('')}
                       </select>
                       <input list="recipe-list" type="text" class="search-input" id="search-input" placeholder="חיפוש...">
                       <datalist id="recipe-list"></datalist>
                     </div>
-                  ` : ''}
+                  `
+                      : ''
+                  }
                   <div class="pdf_viewer__pdf-page">
                       <img id="pdf_viewer__pdfImage" src="${this.getImageSrc(this.currentPage)}" alt="Page ${this.currentPage}">
                   </div>
@@ -124,42 +127,51 @@ class PDFViewer extends HTMLElement {
                   </div>
               </div>
           `;
-          this.addEventListeners(); // Attach event listeners after initial rendering
-      } else {
-          // Update only the necessary parts
-          this.shadowRoot.getElementById('pdf_viewer__pdfImage').src = this.getImageSrc(this.currentPage);
-          this.shadowRoot.getElementById('pdf_viewer__pageNumber').textContent = `עמוד ${this.currentPage}`;
-      }
+      this.addEventListeners(); // Attach event listeners after initial rendering
+    } else {
+      // Update only the necessary parts
+      this.shadowRoot.getElementById('pdf_viewer__pdfImage').src = this.getImageSrc(
+        this.currentPage,
+      );
+      this.shadowRoot.getElementById('pdf_viewer__pageNumber').textContent =
+        `עמוד ${this.currentPage}`;
+    }
   }
 
   addEventListeners() {
     if (!this.shadowRoot.querySelector('#pdf_viewer__prevPage').hasAttribute('listener')) {
-        this.shadowRoot.getElementById('pdf_viewer__prevPage').addEventListener('click', () => this.goToPage(this.currentPage - 1));
-        this.shadowRoot.getElementById('pdf_viewer__prevPage').setAttribute('listener', 'true');
-        this.shadowRoot.getElementById('pdf_viewer__nextPage').addEventListener('click', () => this.goToPage(this.currentPage + 1));
-        this.shadowRoot.getElementById('pdf_viewer__nextPage').setAttribute('listener', 'true');
+      this.shadowRoot
+        .getElementById('pdf_viewer__prevPage')
+        .addEventListener('click', () => this.goToPage(this.currentPage - 1));
+      this.shadowRoot.getElementById('pdf_viewer__prevPage').setAttribute('listener', 'true');
+      this.shadowRoot
+        .getElementById('pdf_viewer__nextPage')
+        .addEventListener('click', () => this.goToPage(this.currentPage + 1));
+      this.shadowRoot.getElementById('pdf_viewer__nextPage').setAttribute('listener', 'true');
 
-        // Moved search-related event listeners here
-        if (this.hasPageIndex) {
-            this.searchInput = this.shadowRoot.getElementById('search-input');
-            this.searchResults = this.shadowRoot.getElementById('recipe-list');
-            this.categorySelect = this.shadowRoot.getElementById('category-select');
-            this.searchInput.addEventListener('input', this.performSearch.bind(this));
-            this.categorySelect.addEventListener('change', this.performSearch.bind(this));
+      // Moved search-related event listeners here
+      if (this.hasPageIndex) {
+        this.searchInput = this.shadowRoot.getElementById('search-input');
+        this.searchResults = this.shadowRoot.getElementById('recipe-list');
+        this.categorySelect = this.shadowRoot.getElementById('category-select');
+        this.searchInput.addEventListener('input', this.performSearch.bind(this));
+        this.categorySelect.addEventListener('change', this.performSearch.bind(this));
 
-            // Add event listener for search suggestions
-            this.searchInput.addEventListener('input', () => {
-                // Find the selected option in the datalist
-                const selectedOption = this.searchResults.querySelector(`option[value="${this.searchInput.value}"]`);
-                if (selectedOption) {
-                    // Get the page number from the selected option's data attribute (if available)
-                    const pageNumber = selectedOption.dataset.pageNumber;
-                    if (pageNumber) {
-                        this.goToPage(pageNumber);
-                    }
-                }
-            });
-        }
+        // Add event listener for search suggestions
+        this.searchInput.addEventListener('input', () => {
+          // Find the selected option in the datalist
+          const selectedOption = this.searchResults.querySelector(
+            `option[value="${this.searchInput.value}"]`,
+          );
+          if (selectedOption) {
+            // Get the page number from the selected option's data attribute (if available)
+            const pageNumber = selectedOption.dataset.pageNumber;
+            if (pageNumber) {
+              this.goToPage(pageNumber);
+            }
+          }
+        });
+      }
     }
   }
 
@@ -167,24 +179,24 @@ class PDFViewer extends HTMLElement {
     const searchTerm = this.searchInput.value.toLowerCase();
     const selectedCategory = this.categorySelect.value;
     let recipes = Object.entries(this.pageIndex.recipes);
-  
+
     if (selectedCategory) {
       recipes = recipes.filter(([recipeName, pageNumber]) => {
         const recipeCategory = this.getCategoryForPage(pageNumber);
         return recipeCategory === selectedCategory;
       });
     }
-  
+
     const matchedRecipes = recipes.filter(([recipeName]) => {
       return recipeName.toLowerCase().includes(searchTerm);
     });
-  
+
     this.updateSearchResults(matchedRecipes);
   }
-  
+
   updateSearchResults(results) {
     this.searchResults.innerHTML = ''; // Clear previous results
-  
+
     results.forEach(([recipeName, pageNumber]) => {
       const option = document.createElement('option');
       option.value = recipeName;
@@ -195,9 +207,9 @@ class PDFViewer extends HTMLElement {
 
   getCategoryForPage(pageNumber) {
     for (const [categoryName, categoryData] of Object.entries(this.pageIndex.categories)) {
-        if (pageNumber >= categoryData.startPage && pageNumber <= categoryData.endPage) {
-            return categoryName;
-        }
+      if (pageNumber >= categoryData.startPage && pageNumber <= categoryData.endPage) {
+        return categoryName;
+      }
     }
     return null; // Or a default category if needed
   }

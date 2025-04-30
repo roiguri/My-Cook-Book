@@ -9,7 +9,7 @@ import '../styles/pages/manager-dashboard.css';
 
 // For all pages
 import '../js/sw-register.js';
-import '../js/config/firebase-config.js'
+import '../js/config/firebase-config.js';
 import '../lib/search/header-search-bar/header-search-bar.js';
 
 // Authentication Components
@@ -38,4 +38,3 @@ import '../lib/recipes/recipe_form_component/recipe_form_component.js';
 // Dynamic imports (uses services)
 import('../lib/modals/image_approval/image_approval.js');
 import('../lib/utilities/image-carousel/image-carousel.js');
-

@@ -9,7 +9,7 @@ import '../styles/pages/categories.css';
 
 // For all pages
 import '../js/sw-register.js';
-import '../js/config/firebase-config.js'
+import '../js/config/firebase-config.js';
 import '../lib/search/header-search-bar/header-search-bar.js';
 
 // Authentication Components
@@ -22,7 +22,7 @@ import('../lib/auth/components/forgot-password.js');
 import('../lib/auth/components/user-profile.js');
 
 // Page Specific Scripts
-import '../js/category.js'
+import '../js/category.js';
 
 // Page Specific Components
 import '../lib/utilities/modal/modal.js';

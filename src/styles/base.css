@@ -11,8 +11,8 @@
 
   /* fonts */
   --heading-font: 'Cormorant Garamond', 'Amatic SC', cursive;
-  --heading-font-he: 'Fredoka','Amatic SC', cursive;
-  --body-font: 'Assistant','Lora', serif;
+  --heading-font-he: 'Fredoka', 'Amatic SC', cursive;
+  --body-font: 'Assistant', 'Lora', serif;
   --nav-font: 'Source Sans Pro', sans-serif;
   /* colors */
   --primary-color: var(--primary);
@@ -38,19 +38,16 @@
   --size-header1-mobile: 2.5rem;
   --size-header2-mobile: 1.2rem;
   --size-body-mobile: 0.9rem;
-  --size-icon-mobile: 1.0rem;
+  --size-icon-mobile: 1rem;
 
   --background: url('/img/background/stone-counter-top.jpg');
 }
 
-
-
-
-
 /*------------------------------------*\
     #Basic-Elements
 \*------------------------------------*/
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
 }
@@ -69,12 +66,12 @@ body {
   flex-direction: column;
 }
 
-
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: var(--heading-font-he);
   font-weight: 700;
 }
-
 
 a {
   color: var(--primary-color);
