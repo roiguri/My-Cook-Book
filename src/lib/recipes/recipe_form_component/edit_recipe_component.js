@@ -2,6 +2,7 @@
 import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, deleteObject } from 'firebase/storage';
+import '../../modals/message-modal/message-modal.js'
 
 class EditRecipeComponent extends HTMLElement {
   constructor() {
@@ -54,6 +55,7 @@ class EditRecipeComponent extends HTMLElement {
       }
   }
 
+  // FIXME: currently can't edit recipes with images
   async updateRecipeInFirestore(recipeId, recipeData) {
     const db = getFirestoreInstance();
     // Remove the imageFile property before saving to Firestore

@@ -1,5 +1,6 @@
 import { getFirestoreInstance, getAuthInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
+import '../../images/image-handler.js';
 
 class RecipeFormComponent extends HTMLElement {
   constructor() {
