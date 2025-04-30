@@ -1,8 +1,14 @@
+import { initFirebase } from '../js/services/firebase-service.js';
+import firebaseConfig from '../js/config/firebase-config.js';
+
+initFirebase(firebaseConfig);
+
 // Import styles
 import '../styles/main.css';
 import '../styles/pages/categories.css';
 import '../styles/pages/profile.css';
 
+// TODO: remove after completing migration to service
 // Import Firebase instances
 import { auth, db, storage } from '../js/config/firebase-config.js';
 
