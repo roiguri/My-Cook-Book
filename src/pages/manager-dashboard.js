@@ -7,9 +7,6 @@ initFirebase(firebaseConfig);
 import '../styles/main.css';
 import '../styles/pages/manager-dashboard.css';
 
-// TODO: remove after completing migration to service
-import { auth, db, storage } from '../js/config/firebase-config.js';
-
 // For all pages
 import '../js/sw-register.js';
 import '../js/config/firebase-config.js'

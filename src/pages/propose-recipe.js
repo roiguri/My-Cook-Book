@@ -7,10 +7,6 @@ initFirebase(firebaseConfig);
 import '../styles/main.css';
 import '../styles/pages/propose_recipe.css';
 
-// TODO: remove after completing migration to service
-// Import Firebase instances
-import { auth, db, storage } from '../js/config/firebase-config.js';
-
 // Import components
 import '../lib/utilities/modal/modal.js';
 import '../lib/modals/message-modal/message-modal.js';

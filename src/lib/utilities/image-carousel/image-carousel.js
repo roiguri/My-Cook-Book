@@ -1,4 +1,3 @@
-import { storage } from '../../../js/config/firebase-config.js';
 import { getStorageInstance } from '../../../js/services/firebase-service.js';
 import { ref, getDownloadURL } from 'firebase/storage';
 
