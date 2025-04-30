@@ -1,21 +1,24 @@
-import { auth, db, storage } from '../js/config/firebase-config.js';
+import { getAuthInstance, getFirestoreInstance } from '../js/services/firebase-service.js';
+import { collection, doc, getDoc, getDocs, updateDoc, query, where } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 document.addEventListener('DOMContentLoaded', function() {
   // Check if the user is authenticated and has manager privileges
-  firebase.auth().onAuthStateChanged(function(user) {
-    const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/'; // Adjust 'My-Cook-Book' if your GitHub Pages repo name is different
-    
+  const auth = getAuthInstance();
+  const db = getFirestoreInstance();
+  onAuthStateChanged(auth, function(user) {
+    const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/';
     if (user) {
-          checkManagerStatus(user).then(function(isManager) {
-              if (isManager) {
-                  initializeDashboard();
-              } else {
-                  window.location.href = baseUrl; // Redirect to home if not a manager
-              }
-          });
-      } else {
-          window.location.href = baseUrl; // Redirect to home if not logged in
-      }
+      checkManagerStatus(db, user).then(function(isManager) {
+        if (isManager) {
+          initializeDashboard();
+        } else {
+          window.location.href = baseUrl; // Redirect to home if not a manager
+        }
+      });
+    } else {
+      window.location.href = baseUrl; // Redirect to home if not logged in
+    }
   });
   const imageApprovalComponent = document.querySelector('image-approval-component');
   imageApprovalComponent.addEventListener('image-approved', handleImageApproved);
@@ -29,25 +32,22 @@ function initializeDashboard() {
   loadPendingImages();
 }
 
-
 /**
  * User Management
  *  */ 
 function loadUserList() {
+  const db = getFirestoreInstance();
   const userList = document.getElementById('user-list');
-  
-  db.collection('users').get().then((snapshot) => {
-      const users = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-      }));
-      
-      const userItems = users.map(user => ({
-          header: createHeader(user.email),
-          content: createContent(user)
-      }));
-
-      userList.setItems(userItems);
+  getDocs(collection(db, 'users')).then((snapshot) => {
+    const users = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    const userItems = users.map(user => ({
+      header: createHeader(user.email),
+      content: createContent(user)
+    }));
+    userList.setItems(userItems);
   }).catch(handleError);
 }
 
@@ -79,16 +79,18 @@ function createContent(user) {
 }
 
 function updateUserRole(userId, newRole) {
-  db.collection('users').doc(userId).update({ role: newRole })
-      .then(() => showSuccessMessage('תפקיד המשתמש עודכן בהצלחה'))
-      .catch(handleError);
+  const db = getFirestoreInstance();
+  const userDocRef = doc(db, 'users', userId);
+  updateDoc(userDocRef, { role: newRole })
+    .then(() => showSuccessMessage('תפקיד המשתמש עודכן בהצלחה'))
+    .catch(handleError);
 }
-
 
 /**
  * All Recipes
  */
 function loadAllRecipes() {
+  const db = getFirestoreInstance();
   const recipeList = document.getElementById('all-recipes-list');
   recipeList.setItems([]);
   
@@ -97,14 +99,13 @@ function loadAllRecipes() {
 
   let allRecipes = [];
 
-  db.collection('recipes').where('approved', '==', true).get().then((snapshot) => {
-      allRecipes = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-      }));
-      
-      updateRecipeList(allRecipes);
-      populateFilterOptions(allRecipes);
+  getDocs(query(collection(db, 'recipes'), where('approved', '==', true))).then((snapshot) => {
+    allRecipes = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    updateRecipeList(allRecipes);
+    populateFilterOptions(allRecipes);
   }).catch(handleError);
 
   searchInput.addEventListener('input', () => filterRecipes(allRecipes));
@@ -193,24 +194,22 @@ function populateFilterOptions(recipes) {
  * Pending Recipes
  */
 function loadPendingRecipes() {
+  const db = getFirestoreInstance();
   const pendingRecipesList = document.getElementById('pending-recipes-list');
   console.log("loading recipes");
-  db.collection('recipes').where('approved', '==', false).get().then((snapshot) => {
+  getDocs(query(collection(db, 'recipes'), where('approved', '==', false))).then((snapshot) => {
     const pendingRecipes = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-    
     const recipeItems = pendingRecipes.map(recipe => ({
       header: createPendingRecipeHeader(recipe),
       content: createPendingRecipeContent(recipe)
     }));
-
     if (recipeItems.length == 0) {
       const pendingRecipeSection = document.getElementById("pending-recipes");
       pendingRecipeSection.querySelector(".no-pending-message").textContent = "אין מתכונים הממתינים לאישור";
     }
-
     // Use the shadowRoot to access the scrolling-list's setItems method
     if (pendingRecipesList) {
       console.log(recipeItems);
@@ -298,7 +297,7 @@ async function loadPendingImages() {
   pendingImagesList.setItems([]);
 
   try {
-    const recipesSnapshot = await db.collection('recipes').where('pendingImage', '!=', null).get();
+    const recipesSnapshot = await getDocs(query(collection(getFirestoreInstance(), 'recipes'), where('pendingImage', '!=', null)));
     const pendingImages = [];
 
     // Extract relevant data from each recipe with a pending image
@@ -335,10 +334,9 @@ async function loadPendingImages() {
 }
 
 function fetchRecipeNames(recipeIds) {
-  const db = firebase.firestore();
+  const db = getFirestoreInstance();
   const promises = recipeIds.map(id => 
-    db.collection('recipes').doc(id).get()
-      .then(doc => doc.exists ? { [id]: doc.data().name } : { [id]: 'Unknown Recipe' })
+    getDoc(doc(db, 'recipes', id)).then(doc => doc.exists ? { [id]: doc.data().name } : { [id]: 'Unknown Recipe' })
   );
 
   return Promise.all(promises)
@@ -420,13 +418,14 @@ function handleError(error) {
   console.error('Error:', error);
   alert('אירעה שגיאה. אנא נסה שנית.'); // Replace with a more user-friendly error handling system
 }
-// Add this function to your auth.js file if it's not already there
-function checkManagerStatus(user) {
-  return db.collection('users').doc(user.uid).get().then((doc) => {
-      if (doc.exists) {
-          return doc.data().role === 'manager';
-      }
-      return false;
+
+function checkManagerStatus(db, user) {
+  const userDocRef = doc(db, 'users', user.uid);
+  return getDoc(userDocRef).then((docSnap) => {
+    if (docSnap.exists()) {
+      return docSnap.data().role === 'manager';
+    }
+    return false;
   });
 }
 
