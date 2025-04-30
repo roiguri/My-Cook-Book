@@ -17,14 +17,14 @@ import '../lib/utilities/modal/modal.js';
 import '../lib/recipes/recipe-card/recipe-card.js';
 import '../lib/utilities/element-scroller/element-scroller.js';
 
-// Import Auth Components
-import '../lib/auth/auth-controller.js';
-import '../lib/auth/components/auth-content.js';
-import '../lib/auth/components/auth-avatar.js';
-import '../lib/auth/components/login-form.js';
-import '../lib/auth/components/signup-form.js';
-import '../lib/auth/components/forgot-password.js';
-import '../lib/auth/components/user-profile.js';
+// Authentication Components
+import('../lib/auth/auth-controller.js');
+import('../lib/auth/components/auth-content.js');
+import('../lib/auth/components/auth-avatar.js');
+import('../lib/auth/components/login-form.js');
+import('../lib/auth/components/signup-form.js');
+import('../lib/auth/components/forgot-password.js');
+import('../lib/auth/components/user-profile.js');
 
 // Import page-specific scripts
 import '../js/navigation-script.js';

@@ -8,6 +8,9 @@
  * password strength, and Google signup
  */
 
+import './auth-content.js';
+import '../../modals/message-modal/message-modal.js';
+
 class SignupForm extends HTMLElement {
   constructor() {
     super();

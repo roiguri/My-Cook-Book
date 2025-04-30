@@ -7,6 +7,9 @@
  * Handles user profile view with avatar selection
  */
 
+import './auth-content.js';
+import '../../modals/message-modal/message-modal.js';
+
 class UserProfile extends HTMLElement {
   constructor() {
     super();

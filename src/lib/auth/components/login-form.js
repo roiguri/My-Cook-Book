@@ -1,3 +1,6 @@
+import './auth-content.js';
+import '../../modals/message-modal/message-modal.js';
+
 class LoginForm extends HTMLElement {
   constructor() {
     super();
