@@ -1,4 +1,9 @@
 // edit-recipe-component.js
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { doc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, deleteObject } from 'firebase/storage';
+import '../../modals/message-modal/message-modal.js'
+
 class EditRecipeComponent extends HTMLElement {
   constructor() {
     super();
@@ -50,53 +55,42 @@ class EditRecipeComponent extends HTMLElement {
       }
   }
 
+  // FIXME: currently can't edit recipes with images
   async updateRecipeInFirestore(recipeId, recipeData) {
-    const db = firebase.firestore();
-    const recipeRef = db.collection('recipes').doc(recipeId);
-
+    const db = getFirestoreInstance();
     // Remove the imageFile property before saving to Firestore
     const { imageFile, ...recipeDataWithoutImage } = recipeData;
-
-    await recipeRef.update(recipeDataWithoutImage);
+    await updateDoc(doc(db, 'recipes', recipeId), recipeDataWithoutImage);
     console.log('Recipe updated in Firestore with ID:', recipeId);
   }
 
   async uploadImage(imageFile, category, imageName, oldImageName = null) {
-    const storageRef = firebase.storage().ref();
-  
+    const storage = getStorageInstance();
     // Remove old image if it exists and has changed
     if (oldImageName && oldImageName !== imageName) {
       try {
-        await storageRef.child(`img/recipes/full/${category}/${oldImageName}`).delete();
-        await storageRef.child(`img/recipes/compressed/${category}/${oldImageName}`).delete();
+        await deleteObject(ref(storage, `img/recipes/full/${category}/${oldImageName}`));
+        await deleteObject(ref(storage, `img/recipes/compressed/${category}/${oldImageName}`));
         console.log('Removed old images from Firebase Storage');
       } catch (error) {
         console.error('Error removing old images:', error);
-        // You might want to handle this error more gracefully, 
-        // e.g., by showing a message to the user
       }
     }
-  
     // Upload new image (both full and compressed)
     try {
-      const compressedImageRef = storageRef.child(`img/recipes/compressed/${category}/${imageName}`);
-      const fullImageRef = storageRef.child(`img/recipes/full/${category}/${imageName}`);
-  
+      const compressedImageRef = ref(storage, `img/recipes/compressed/${category}/${imageName}`);
+      const fullImageRef = ref(storage, `img/recipes/full/${category}/${imageName}`);
       // Compress the image (replace with your compression logic)
       const compressedImageBlob = await this.compressImage(imageFile);
-  
       // Upload the compressed image
-      await compressedImageRef.put(compressedImageBlob);
+      await uploadBytes(compressedImageRef, compressedImageBlob);
       console.log('Uploaded compressed image to Firebase Storage');
-  
       // Upload the full-size image
-      await fullImageRef.put(imageFile);
+      await uploadBytes(fullImageRef, imageFile);
       console.log('Uploaded full-size image to Firebase Storage');
-  
-      return await compressedImageRef.getDownloadURL(); // Return download URL of compressed image
+      // No need to return download URL for now
     } catch (error) {
       console.error('Error uploading new images:', error);
-      // Handle the error gracefully
     }
   }
   

@@ -116,7 +116,8 @@ class AuthContent extends HTMLElement {
     });
 
     // Reset fields on modal close
-    const modal = this.closest('auth-controller')?.shadowRoot.querySelector('custom-modal');
+    const authController = this.closest('auth-controller');
+    const modal = authController?.shadowRoot?.querySelector('custom-modal');
     if (modal) {
         modal.addEventListener('modal-closed', () => {
             // Wait for close animation

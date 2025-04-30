@@ -1,4 +1,5 @@
-import { auth, db, storage } from '../js/config/firebase-config.js';
+import { getFirestoreInstance } from '../js/services/firebase-service.js';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 async function displayFeaturedRecipes() {
     const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
@@ -17,11 +18,13 @@ async function displayFeaturedRecipes() {
     const recipesContainer = elementScroller.querySelector('[slot="items"]');
 
     try {
-        // Get most recent approved recipes
-        const recipesRef = db.collection('recipes')
-            .where('approved', '==', true);
-            
-        const snapshot = await recipesRef.get();
+        // Get most recent approved recipes using modular API
+        const db = getFirestoreInstance();
+        const recipesQuery = query(
+            collection(db, 'recipes'),
+            where('approved', '==', true)
+        );
+        const snapshot = await getDocs(recipesQuery);
 
         if (snapshot.empty) {
             console.log('No matching documents.');
@@ -52,7 +55,7 @@ async function displayFeaturedRecipes() {
         recentRecipes.forEach(doc => {
           const recipeCard = document.createElement('recipe-card');
           recipeCard.setAttribute('recipe-id', doc.id);
-          recipeCard.setAttribute('layout', 'vettical');
+          recipeCard.setAttribute('layout', 'vertical');
           recipeCard.setAttribute('card-width', '200px');
           recipeCard.setAttribute('card-height', '300px');
           recipesContainer.appendChild(recipeCard);

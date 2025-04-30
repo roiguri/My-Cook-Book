@@ -1,3 +1,5 @@
+// FIXME: leave favorites page when a user logs out
+// FIXME: when user logging in with different account, when opening modal for the first time, it shows the previous user's profile
 /**
  * AuthController Component
  * @class
@@ -24,6 +26,10 @@
  * @requires firebase
  * @requires ./modal.js
  */
+
+import { getAuthInstance, getFirestoreInstance } from '../../js/services/firebase-service.js';
+import { onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 class AuthController extends HTMLElement {
   constructor() {
@@ -60,12 +66,12 @@ class AuthController extends HTMLElement {
   }
 
   setupAuthStateObserver() {
-    firebase.auth().onAuthStateChanged(async (user) => {
+    const auth = getAuthInstance();
+    onAuthStateChanged(auth, async (user) => {
       this.isAuthenticated = !!user;
       this.currentUser = user;
 
       if (user) {
-        // User is signed in
         const roles = await this.checkUserRoles(user);
         this.updateNavigation(user, roles);
         this.dispatchAuthStateChanged({ 
@@ -74,7 +80,6 @@ class AuthController extends HTMLElement {
           ...roles
         });
       } else {
-        // User is signed out
         this.updateNavigation(null);
         this.dispatchAuthStateChanged({ 
           user: null, 
@@ -88,9 +93,10 @@ class AuthController extends HTMLElement {
 
   async checkUserRoles(user) {
     try {
-      const doc = await firebase.firestore().collection('users').doc(user.uid).get();
-      if (doc.exists) {
-        const role = doc.data().role;
+      const db = getFirestoreInstance();
+      const docSnap = await getDoc(doc(db, 'users', user.uid));
+      if (docSnap.exists()) {
+        const role = docSnap.data().role;
         return {
           isManager: role === 'manager',
           isApproved: role === 'approved' || role === 'manager'
@@ -169,23 +175,19 @@ class AuthController extends HTMLElement {
   // Authentication Methods
   async handleLogin(email, password, remember = false) {
     try {
-        const persistence = remember 
-            ? firebase.auth.Auth.Persistence.LOCAL 
-            : firebase.auth.Auth.Persistence.SESSION;
-        
-        console.log('Setting persistence:', persistence);
-        await firebase.auth().setPersistence(persistence);
-        
-        console.log('Attempting login with:', { email });
-        return await firebase.auth().signInWithEmailAndPassword(email, password);
+      const auth = getAuthInstance();
+      const persistence = remember 
+        ? browserLocalPersistence 
+        : browserSessionPersistence;
+      await setPersistence(auth, persistence);
+      return await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-        // Log the complete error object
-        console.log('Firebase Error:', {
-            code: error.code,
-            message: error.message,
-            fullError: error
-        });
-        throw error;  // Re-throw the original error
+      console.log('Firebase Error:', {
+        code: error.code,
+        message: error.message,
+        fullError: error
+      });
+      throw error;
     }
   }
 
@@ -193,21 +195,18 @@ class AuthController extends HTMLElement {
 
   async handleSignup(email, password, fullName) {
     try {
-      const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      const auth = getAuthInstance();
+      const db = getFirestoreInstance();
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
-      // Update Auth Profile and create Firestore document
       await Promise.all([
-          // Update Auth Profile
-          user.updateProfile({ displayName: fullName }),
-          
-          // Create Firestore Document
-          firebase.firestore().collection('users').doc(user.uid).set({
-              email: email,
-              fullName: fullName,
-              role: 'user',
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          })
+        updateProfile(user, { displayName: fullName }),
+        setDoc(doc(db, 'users', user.uid), {
+          email: email,
+          fullName: fullName,
+          role: 'user',
+          createdAt: serverTimestamp()
+        })
       ]);
       return user;
     } catch (error) {
@@ -217,23 +216,20 @@ class AuthController extends HTMLElement {
 
   async handleGoogleSignIn() {
     try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const userCredential = await firebase.auth().signInWithPopup(provider);
+      const auth = getAuthInstance();
+      const db = getFirestoreInstance();
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
       const user = userCredential.user;
-
-      // Check if user document exists
-      const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
-      
-      // Only create document if it doesn't exist
-      if (!userDoc.exists) {
-          await firebase.firestore().collection('users').doc(user.uid).set({
-              email: user.email,
-              fullName: user.displayName,
-              role: 'user',
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, 'users', user.uid), {
+          email: user.email,
+          fullName: user.displayName,
+          role: 'user',
+          createdAt: serverTimestamp()
+        });
       }
-
       return user;
     } catch (error) {
       throw error;
@@ -242,7 +238,8 @@ class AuthController extends HTMLElement {
 
   async handlePasswordReset(email) {
     try {
-      await firebase.auth().sendPasswordResetEmail(email);
+      const auth = getAuthInstance();
+      await sendPasswordResetEmail(auth, email);
     } catch (error) {
       throw error;
     }
@@ -250,7 +247,8 @@ class AuthController extends HTMLElement {
 
   async handleLogout() {
     try {
-      await firebase.auth().signOut();
+      const auth = getAuthInstance();
+      await signOut(auth);
     } catch (error) {
       throw error;
     }
@@ -258,16 +256,17 @@ class AuthController extends HTMLElement {
 
   async updateUserAvatar(avatarUrl) {
     try {
-      const user = firebase.auth().currentUser;
+      const user = getAuthInstance().currentUser;
       if (!user) throw new Error('No user is currently signed in');
 
-      await user.updateProfile({ photoURL: avatarUrl });
-      await firebase.firestore().collection('users').doc(user.uid).set({
+      await updateProfile(user, { photoURL: avatarUrl });
+      const db = getFirestoreInstance();
+      await updateDoc(doc(db, 'users', user.uid), {
         avatarUrl
-      }, { merge: true });
+      });
 
       this.dispatchAuthStateChanged({
-        user: firebase.auth().currentUser,
+        user: getAuthInstance().currentUser,
         isAuthenticated: true
       });
     } catch (error) {

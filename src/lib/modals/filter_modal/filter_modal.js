@@ -76,6 +76,10 @@
  * - clearFilters() - Resets all filters to default state
  */
 
+import { getFirestoreInstance, getAuthInstance } from '../../../js/services/firebase-service.js';
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+
 class RecipeFilterComponent extends HTMLElement {
   constructor() {
     super();
@@ -110,11 +114,12 @@ class RecipeFilterComponent extends HTMLElement {
   }
 
   async connectedCallback() {
-    if (firebase.auth().currentUser) {
+    const auth = getAuthInstance();
+    if (auth.currentUser) {
       await this.loadInitialData(); 
     } else {
       // Listen for auth state changes
-      const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      const unsubscribe = onAuthStateChanged(auth, user => {
         if (user) {
           this.loadInitialData(); 
           unsubscribe(); // Unsubscribe after loading data once
@@ -554,48 +559,40 @@ class RecipeFilterComponent extends HTMLElement {
   async loadInitialData() {
     this.state.isLoading = true;
     this.updateUI();
-
     try {
-      const db = firebase.firestore();
+      const db = getFirestoreInstance();
+      const auth = getAuthInstance();
       // Check if favorites-only attribute is present
       if (this.hasAttribute('favorites-only')) {
-        const userId = firebase.auth().currentUser.uid;
-        const userDoc = await db.collection('users').doc(userId).get();
-        const favoriteRecipeIds = userDoc.data().favorites || [];
-
+        const userId = auth.currentUser.uid;
+        const userDocSnap = await getDoc(doc(db, 'users', userId));
+        const favoriteRecipeIds = userDocSnap.data().favorites || [];
         // Fetch favorite recipes only
         const recipes = await Promise.all(favoriteRecipeIds.map(async (recipeId) => {
-          const recipeDoc = await db.collection('recipes').doc(recipeId).get();
-          return { id: recipeDoc.id, ...recipeDoc.data() };
+          const recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
+          return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
         }));
-
         this.state.availableFilters.mainIngredients = [...new Set(
           recipes
             .map(r => r.mainIngredient)
             .filter(ingredient => ingredient && ingredient.trim())
         )].sort((a, b) => a.localeCompare(b));
-
         this.state.availableFilters.tags = [...new Set(recipes.flatMap(r => r.tags || []))];
-
         this.state.matchingCount = recipes.length;
       } else {
         // Previous logic for fetching all recipes
-        let query = db.collection('recipes').where('approved', '==', true);
+        let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
         if (this.state.category) {
-          query = query.where('category', '==', this.state.category);
+          recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true), where('category', '==', this.state.category));
         }
-
-        const snapshot = await query.get();
-        const recipes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
+        const snapshot = await getDocs(recipesQuery);
+        const recipes = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
         this.state.availableFilters.mainIngredients = [...new Set(
           recipes
             .map(r => r.mainIngredient)
             .filter(ingredient => ingredient && ingredient.trim())
         )].sort((a, b) => a.localeCompare(b));
-
         this.state.availableFilters.tags = [...new Set(recipes.flatMap(r => r.tags || []))];
-
         this.state.matchingCount = recipes.length;
       }
     } catch (error) {
@@ -623,11 +620,6 @@ class RecipeFilterComponent extends HTMLElement {
     ).join('');
   }
 
-  removeTag(tag) {
-    this.state.filters.tags = this.state.filters.tags.filter(t => t !== tag);
-    this.handleFilterChange();
-  }
-
   updateFilterState() {
     const cookingTime = this.shadowRoot.getElementById('cooking-time')?.value;
     const difficulty = this.shadowRoot.getElementById('difficulty')?.value;
@@ -644,40 +636,28 @@ class RecipeFilterComponent extends HTMLElement {
   async updateMatchingCount() {
     this.state.isLoading = true;
     this.updateUI();
-
     try {
+        const db = getFirestoreInstance();
+        const auth = getAuthInstance();
         let recipes;
-        
         if (this.currentRecipes) {
-            // Use current recipes (search results) if available
             recipes = this.currentRecipes;
-        } else if (this.hasAttribute('favorites-only') && firebase.auth().currentUser) {
-            // Existing favorites logic...
-            const userId = firebase.auth().currentUser.uid;
-            const userDoc = await firebase.firestore().collection('users').doc(userId).get();
-            const favoriteRecipeIds = userDoc.data().favorites || [];
+        } else if (this.hasAttribute('favorites-only') && auth.currentUser) {
+            const userId = auth.currentUser.uid;
+            const userDocSnap = await getDoc(doc(db, 'users', userId));
+            const favoriteRecipeIds = userDocSnap.data().favorites || [];
             recipes = await Promise.all(favoriteRecipeIds.map(async (recipeId) => {
-                let query = firebase.firestore().collection('recipes').doc(recipeId);
-                if (this.state.category) {
-                    query = query.where('category', '==', this.state.category);
-                }
-                const recipeDoc = await query.get();
-                return { id: recipeDoc.id, ...recipeDoc.data() };
+                let recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
+                return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
             }));
         } else {
-            // Existing all recipes logic
-            let query = firebase.firestore().collection('recipes')
-                .where('approved', '==', true);
-
+            let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
             if (this.state.category) {
-                query = query.where('category', '==', this.state.category);
+                recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true), where('category', '==', this.state.category));
             }
-
-            const snapshot = await query.get();
-            recipes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const snapshot = await getDocs(recipesQuery);
+            recipes = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
         }
-
-        // Apply filters
         recipes = this.applyFiltersToRecipes(recipes);
         this.state.matchingCount = recipes.length;
     } catch (error) {
@@ -719,43 +699,29 @@ class RecipeFilterComponent extends HTMLElement {
   async applyFilters() {
     this.state.isLoading = true;
     this.updateUI();
-  
     try {
+      const db = getFirestoreInstance();
+      const auth = getAuthInstance();
       let recipes;
-  
       if (this.currentRecipes) {
-        // Use current recipes (search results) if available
         recipes = this.currentRecipes;
-      } else if (this.hasAttribute('favorites-only') && firebase.auth().currentUser) {
-        // Existing favorites logic...
-        const userId = firebase.auth().currentUser.uid;
-        const userDoc = await firebase.firestore().collection('users').doc(userId).get();
-        const favoriteRecipeIds = userDoc.data().favorites || [];
+      } else if (this.hasAttribute('favorites-only') && auth.currentUser) {
+        const userId = auth.currentUser.uid;
+        const userDocSnap = await getDoc(doc(db, 'users', userId));
+        const favoriteRecipeIds = userDocSnap.data().favorites || [];
         recipes = await Promise.all(favoriteRecipeIds.map(async (recipeId) => {
-          let query = firebase.firestore().collection('recipes').doc(recipeId);
-          if (this.state.category) {
-            query = query.where('category', '==', this.state.category);
-          }
-          const recipeDoc = await query.get();
-          return { id: recipeDoc.id, ...recipeDoc.data() };
+          let recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
+          return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
         }));
       } else {
-        // Existing all recipes logic...
-        let query = firebase.firestore().collection('recipes')
-          .where('approved', '==', true);
-  
+        let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
         if (this.state.category) {
-          query = query.where('category', '==', this.state.category);
+          recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true), where('category', '==', this.state.category));
         }
-  
-        const snapshot = await query.get();
-        recipes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const snapshot = await getDocs(recipesQuery);
+        recipes = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
       }
-  
-      // Apply filters
       recipes = this.applyFiltersToRecipes(recipes);
-  
-      // Dispatch event with filtered recipes
       this.dispatchEvent(new CustomEvent('filter-applied', {
         bubbles: true,
         composed: true,

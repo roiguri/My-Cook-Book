@@ -1,3 +1,7 @@
+import { getFirestoreInstance, getAuthInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { doc, getDoc } from 'firebase/firestore';
+import { ref, getDownloadURL } from 'firebase/storage';
+
 // TODO - add support for missing image upload
 
 /**
@@ -230,11 +234,11 @@ class RecipeComponent extends HTMLElement {
   }
 
   fetchAndPopulateRecipeData() {
-      const db = firebase.firestore();
-      db.collection('recipes').doc(this.recipeId).get()
-          .then((doc) => {
-              if (doc.exists) {
-                  const recipe = doc.data();
+      const db = getFirestoreInstance();
+      getDoc(doc(db, 'recipes', this.recipeId))
+          .then((docSnap) => {
+              if (docSnap.exists()) {
+                  const recipe = docSnap.data();
                   this.populateRecipeDetails(recipe);
                   this.setRecipeImage(recipe);
                   this.populateIngredientsList(recipe);
@@ -264,30 +268,22 @@ class RecipeComponent extends HTMLElement {
   async setRecipeImage(recipe) {
     try {
         const imageContainer = this.shadowRoot.querySelector('.Recipe_component__image-container');
-        
         // Get user role
-        const user = firebase.auth().currentUser;
+        const auth = getAuthInstance();
+        const db = getFirestoreInstance();
+        const user = auth.currentUser;
         let userRole = 'public';  // Default to public access
-        
         if (user) {
-            const userDoc = await firebase.firestore()
-                .collection('users')
-                .doc(user.uid)
-                .get();
-            
-            if (userDoc.exists) {
-                userRole = userDoc.data().role || 'public';
-                // Handle backward compatibility
+            const userDocSnap = await getDoc(doc(db, 'users', user.uid));
+            if (userDocSnap.exists()) {
+                userRole = userDocSnap.data().role || 'public';
                 if (userRole === 'user') userRole = 'public';
             }
         }
-
         // Get accessible images
         const accessibleImages = this.getAccessibleImages(recipe.images || [], userRole);
-
         // Clear container
         imageContainer.innerHTML = '';
-
         // Handle display based on number of accessible images
         if (accessibleImages.length === 0) {
             this.showPlaceholder(imageContainer);
@@ -296,7 +292,7 @@ class RecipeComponent extends HTMLElement {
         } else {
             this.showCarousel(imageContainer, accessibleImages);
         }
-
+        // TODO: add fallback to previous load system
     } catch (error) {
         console.error("Error setting recipe images:", error);
         this.showPlaceholder(imageContainer);
@@ -370,10 +366,10 @@ class RecipeComponent extends HTMLElement {
   }
 
   async getImageUrl(path) {
-    const storage = firebase.storage();
-    const imageRef = storage.ref(path);
+    const storage = getStorageInstance();
+    const imageRef = ref(storage, path);
     try {
-        return await imageRef.getDownloadURL();
+        return await getDownloadURL(imageRef);
     } catch (error) {
         console.error("Error getting image URL:", error);
         return null;

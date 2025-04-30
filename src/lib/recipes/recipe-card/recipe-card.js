@@ -18,6 +18,11 @@
  * - recipe-card-open: Emitted when the card is clicked
  *   detail: { recipeId: string }
  */
+import { getFirestoreInstance, getAuthInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, getDownloadURL } from 'firebase/storage';
+import { arrayUnion, arrayRemove } from 'firebase/firestore';
+
 class RecipeCard extends HTMLElement {
   // Define observed attributes
   static get observedAttributes() {
@@ -251,12 +256,10 @@ class RecipeCard extends HTMLElement {
           this._isLoading = true;
           this._render();
 
-          const recipeDoc = await firebase.firestore()
-              .collection('recipes')
-              .doc(this.recipeId)
-              .get();
+          const db = getFirestoreInstance();
+          const recipeDoc = await getDoc(doc(db, 'recipes', this.recipeId));
 
-          if (!recipeDoc.exists) {
+          if (!recipeDoc.exists()) {
               throw new Error('Recipe not found');
           }
 
@@ -276,22 +279,24 @@ class RecipeCard extends HTMLElement {
 
   async _fetchRecipeImage() {
     try {
+        const storage = getStorageInstance();
         // First check if recipe has an image defined
         if (this._recipeData.image) {
             const imagePath = `img/recipes/compressed/${this._recipeData.category}/${this._recipeData.image}`;
-            const imageRef = firebase.storage().ref().child(imagePath);
-            this._imageUrl = await imageRef.getDownloadURL();
+            const imageRef = ref(storage, imagePath);
+            this._imageUrl = await getDownloadURL(imageRef);
             return;
         }
         // If no image, use placeholder without throwing an error
         const placeholderPath = 'img/recipes/compressed/place-holder-missing.png';
-        const placeholderRef = firebase.storage().ref().child(placeholderPath);
-        this._imageUrl = await placeholderRef.getDownloadURL();
+        const placeholderRef = ref(storage, placeholderPath);
+        this._imageUrl = await getDownloadURL(placeholderRef);
     } catch (error) {
         // Only catch actual storage errors
+        const storage = getStorageInstance();
         const placeholderPath = 'img/recipes/compressed/place-holder-missing.png';
-        const placeholderRef = firebase.storage().ref().child(placeholderPath);
-        this._imageUrl = await placeholderRef.getDownloadURL();
+        const placeholderRef = ref(storage, placeholderPath);
+        this._imageUrl = await getDownloadURL(placeholderRef);
     }
   }
 
@@ -752,10 +757,12 @@ class RecipeCard extends HTMLElement {
 
   async _fetchUserFavorites() {
     try {
-        const userId = firebase.auth().currentUser.uid;
+        const auth = getAuthInstance();
+        const userId = auth.currentUser?.uid;
         if (!userId) return; // No user logged in
-        const userDoc = await firebase.firestore().collection('users').doc(userId).get();
-        const favoriteRecipeIds = userDoc.data().favorites || [];
+        const db = getFirestoreInstance();
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        const favoriteRecipeIds = userDoc.data()?.favorites || [];
         this._userFavorites = new Set(favoriteRecipeIds);
     } catch (error) {
         console.error('Error fetching favorites:', error);
@@ -764,19 +771,21 @@ class RecipeCard extends HTMLElement {
 
   async _toggleFavorite() {
     try {
-        const userId = firebase.auth().currentUser.uid;
+        const auth = getAuthInstance();
+        const userId = auth.currentUser?.uid;
         if (!userId) return; // No user logged in
-        const userDocRef = firebase.firestore().collection('users').doc(userId);
+        const db = getFirestoreInstance();
+        const userDocRef = doc(db, 'users', userId);
         if (this._isFavorite()) {
             // Remove from favorites
-            await userDocRef.update({
-                favorites: firebase.firestore.FieldValue.arrayRemove(this.recipeId)
+            await updateDoc(userDocRef, {
+                favorites: arrayRemove(this.recipeId)
             });
             this._userFavorites.delete(this.recipeId);
         } else {
             // Add to favorites
-            await userDocRef.update({
-                favorites: firebase.firestore.FieldValue.arrayUnion(this.recipeId)
+            await updateDoc(userDocRef, {
+                favorites: arrayUnion(this.recipeId)
             });
             this._userFavorites.add(this.recipeId);
         }

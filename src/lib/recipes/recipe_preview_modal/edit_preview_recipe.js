@@ -45,6 +45,10 @@
  * logic in your parent component.
  */
 
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
+
 class EditPreviewRecipe extends HTMLElement {
   constructor() {
     super();
@@ -246,43 +250,34 @@ class EditPreviewRecipe extends HTMLElement {
 
   async handleRecipeApproval(recipeId) {
     try {
-      await db.collection('recipes').doc(recipeId).update({ approved: true });
-      // You may want to add a success message here (e.g., an alert)
+      const db = getFirestoreInstance();
+      await updateDoc(doc(db, 'recipes', recipeId), { approved: true });
       console.log('Recipe approved:', recipeId);
     } catch (error) {
-      this.handleError(error); // You already have this error handling function
+      this.handleError(error);
     }
   }
 
   async handleRecipeRejection(recipeId) {
     try {
-      // 1. Remove images from Firebase Storage (if they exist)
-      const recipeRef = db.collection('recipes').doc(recipeId);
-      const recipeSnapshot = await recipeRef.get();
+      const db = getFirestoreInstance();
+      const storage = getStorageInstance();
+      const recipeRef = doc(db, 'recipes', recipeId);
+      const recipeSnapshot = await getDoc(recipeRef);
       const recipeData = recipeSnapshot.data();
-  
-      const imageName = recipeData.image; // Get the image name from the recipe data
-      
-      // Construct the full paths
+      const imageName = recipeData.image;
       const compressedImagePath = `img/recipes/compressed/${recipeData.category}/${imageName}`;
       const fullImagePath = `img/recipes/full/${recipeData.category}/${imageName}`;
-  
       try {
-        // Attempt to delete the images
-        await storage.ref(compressedImagePath).delete();
-        await storage.ref(fullImagePath).delete();
+        await deleteObject(ref(storage, compressedImagePath));
+        await deleteObject(ref(storage, fullImagePath));
       } catch (imageError) {
-        // Log the error, but don't stop the recipe rejection
-        console.error('Error deleting images:', imageError); 
+        console.error('Error deleting images:', imageError);
       }
-  
-      // 2. Remove the recipe from Firestore
-      await recipeRef.delete();
-  
-      // You may want to add a success message here
+      await deleteDoc(recipeRef);
       console.log('Recipe rejected:', recipeId);
     } catch (error) {
-      handleError(error);
+      this.handleError(error);
     }
   }
   

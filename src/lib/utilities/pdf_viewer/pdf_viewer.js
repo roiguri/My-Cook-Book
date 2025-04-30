@@ -1,3 +1,6 @@
+import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
+import { doc, getDoc} from 'firebase/firestore';
+
 class PDFViewer extends HTMLElement {
   constructor() {
       super();
@@ -21,10 +24,15 @@ class PDFViewer extends HTMLElement {
 
   async fetchPageIndex() {
     try {
-        const db = firebase.firestore();
+        const db = getFirestoreInstance();
+        if (!db) {
+          console.error('Firestore not initialized');
+          return {};
+        }
         const [collectionName, fileName] = this.getAttribute('page-index').split('/'); // Split the attribute value
-        const pageIndexDoc = await db.collection(collectionName).doc(fileName).get();
-        return pageIndexDoc.data();
+        const pageIndexRef = doc(db, collectionName, fileName);
+        const pageIndexDocSnap = await getDoc(pageIndexRef);
+        return pageIndexDocSnap.data();
     } catch (error) {
         console.error('Error fetching page index:', error);
         return {};

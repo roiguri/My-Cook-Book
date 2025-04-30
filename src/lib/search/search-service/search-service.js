@@ -125,34 +125,33 @@ class SearchService extends HTMLElement {
    * Fetches recipes based on current state
    */
   async fetchRecipes() {
-    const db = firebase.firestore();
-    let query = db.collection('recipes').where('approved', '==', true);
+    const db = getFirestoreInstance();
+    let q = query(collection(db, 'recipes'), where('approved', '==', true));
 
     // Apply category filter if set
     if (this.state.category) {
-      query = query.where('category', '==', this.state.category);
+      q = query(collection(db, 'recipes'), where('approved', '==', true), where('category', '==', this.state.category));
     }
 
     // Handle favorites-only mode
     if (this.state.favoritesOnly) {
-      const userId = firebase.auth().currentUser?.uid;
+      const auth = getAuthInstance();
+      const userId = auth.currentUser?.uid;
       if (!userId) return [];
 
-      const userDoc = await db.collection('users').doc(userId).get();
+      const userDoc = await getDoc(doc(db, 'users', userId));
       const favoriteIds = userDoc.data()?.favorites || [];
-      
       // Fetch all favorite recipes
       const recipeDocs = await Promise.all(
-        favoriteIds.map(id => db.collection('recipes').doc(id).get())
+        favoriteIds.map(id => getDoc(doc(db, 'recipes', id)))
       );
-      
       return recipeDocs
-        .filter(doc => doc.exists && doc.data().approved)
-        .map(doc => ({ id: doc.id, ...doc.data() }));
+        .filter(docSnap => docSnap.exists() && docSnap.data().approved)
+        .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
     }
 
-    const snapshot = await query.get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
   }
 
   /**

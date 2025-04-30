@@ -1,3 +1,4 @@
+// TODO: test component before using
 /**
  * ImageProposalModal Component
  * @class
@@ -21,6 +22,9 @@
  * const modal = document.querySelector('image-proposal-modal');
  * modal.openForRecipe('recipe-123');
  */
+import { getAuthInstance } from '../../js/services/firebase-service.js';
+import { uploadProposedImages } from '../../js/utilities/firebase-storage-utils.js';
+
 class ImageProposalModal extends HTMLElement {
   constructor() {
     super();
@@ -172,7 +176,7 @@ class ImageProposalModal extends HTMLElement {
     loadingOverlay.classList.add('active');
 
     try {
-      const currentUser = firebase.auth().currentUser;
+      const currentUser = getAuthInstance().currentUser;
       if (!currentUser) throw new Error('User not authenticated');
 
       const result = await uploadProposedImages(this.recipeId, images, currentUser.uid);

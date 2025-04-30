@@ -1,13 +1,16 @@
-
-import { auth, db, storage } from '../js/config/firebase-config.js';
+import { getAuthInstance, getFirestoreInstance } from '../js/services/firebase-service.js';
+import { doc, getDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 document.addEventListener('DOMContentLoaded', function () {
+  const auth = getAuthInstance();
+  const db = getFirestoreInstance();
   // Check if the user is authenticated and has manager or approved privileges
-  firebase.auth().onAuthStateChanged(function (user) {
+  onAuthStateChanged(auth, function (user) {
       const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/'; // Adjust 'My-Cook-Book' if your GitHub Pages repo name is different
   
       if (user) {
-          checkDocumentAccessStatus(user).then(function (hasAccess) {
+          checkDocumentAccessStatus(db, user).then(function (hasAccess) {
               if (!hasAccess) {
                   // Redirect to home if not authorized
                   window.location.href = baseUrl;
@@ -20,12 +23,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-function checkDocumentAccessStatus(user) {
-  return db.collection('users').doc(user.uid).get().then((doc) => {
-      if (doc.exists) {
-          const userRole = doc.data().role;
-          return userRole === 'manager' || userRole === 'approved';
-      }
-      return false;
-  });
+async function checkDocumentAccessStatus(db, user) {
+  const userDocRef = doc(db, 'users', user.uid);
+  const userDocSnap = await getDoc(userDocRef);
+  if (userDocSnap.exists()) {
+      const userRole = userDocSnap.data().role;
+      return userRole === 'manager' || userRole === 'approved';
+  }
+  return false;
 }
