@@ -1,4 +1,6 @@
-import { auth, db, storage } from '../js/config/firebase-config.js';
+import { getFirestoreInstance, getAuthInstance } from '../js/services/firebase-service.js';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 document.addEventListener('DOMContentLoaded', async function() {
   // DOM elements
@@ -12,7 +14,8 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   let initialAuthSetup = false;
   // Repopulate recipes on authentication change
-  firebase.auth().onAuthStateChanged(async (user) => {
+  const auth = getAuthInstance();
+  onAuthStateChanged(auth, async (user) => {
     // Repopulate recipes when the authentication state changes
     await loadInitialRecipes();
     await displayCurrentPageRecipes();
@@ -54,13 +57,21 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Load initial recipes
   async function loadInitialRecipes() {
-      let query = db.collection('recipes').where('approved', '==', true);
-        
+      const db = getFirestoreInstance();
+      let recipesQuery = query(
+        collection(db, 'recipes'),
+        where('approved', '==', true)
+      );
+      
       if (currentCategory !== 'all') {
-          query = query.where('category', '==', currentCategory);
-      }  
+          recipesQuery = query(
+            collection(db, 'recipes'),
+            where('approved', '==', true),
+            where('category', '==', currentCategory)
+          );
+      }
 
-      const snapshot = await query.get();
+      const snapshot = await getDocs(recipesQuery);
       displayedRecipes = snapshot.docs.map(doc => ({ 
           id: doc.id, 
           ...doc.data() 
@@ -226,7 +237,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     recipeGrid.style.alignItems = '';
     recipeGrid.style.minHeight = '';
 
-    const authenticated = firebase.auth().currentUser;
+    const auth = getAuthInstance();
+    const authenticated = auth.currentUser;
     recipes.forEach(recipe => {
         const cardContainer = document.createElement('div');
         cardContainer.className = 'recipe-card-container';
