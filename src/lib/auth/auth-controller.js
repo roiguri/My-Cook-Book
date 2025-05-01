@@ -42,6 +42,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import authService from '../../js/services/auth-service.js';
 
 class AuthController extends HTMLElement {
   constructor() {
@@ -54,6 +55,9 @@ class AuthController extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupAuthStateObserver();
+    authService.initialize();
+    // WIP: Remove this after testing
+    console.log('[AuthController] AuthService initialized:', authService);
   }
 
   render() {

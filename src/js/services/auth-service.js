@@ -23,7 +23,7 @@
  *   - removeAuthObserver(observer): Removes a previously added auth observer.
  */
 import { getAuthInstance, getFirestoreInstance } from './firebase-service.js';
-import { serverTimestamp } from 'firebase/firestore';
+import { serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import {
   browserLocalPersistence,
   browserSessionPersistence,
@@ -150,12 +150,12 @@ class AuthService {
 
       // Check if user document exists in Firestore
       const db = getFirestoreInstance();
-      const userDocRef = db.collection('users').doc(user.uid);
-      const userDoc = await userDocRef.get();
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
 
       // If user doesn't exist in Firestore, create a new document
       if (!userDoc.exists) {
-        await userDocRef.set({
+        await setDoc(userDocRef, {
           email: user.email,
           fullName: user.displayName,
           role: 'user',
@@ -191,7 +191,8 @@ class AuthService {
       });
 
       // Create user document in Firestore
-      await db.collection('users').doc(user.uid).set({
+      const userDocRef = doc(db, 'users', user.uid);
+      await setDoc(userDocRef, {
         email: email,
         fullName: fullName,
         role: 'user',
@@ -252,13 +253,11 @@ class AuthService {
         });
       }
       // Update user document in Firestore
-      await db
-        .collection('users')
-        .doc(user.uid)
-        .update({
-          ...profileData,
-          updatedAt: serverTimestamp(),
-        });
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        ...profileData,
+        updatedAt: serverTimestamp(),
+      });
       // Dispatch profile updated event
       const event = new CustomEvent('profile-updated', {
         detail: {
@@ -286,7 +285,8 @@ class AuthService {
       if (!user) throw new Error('No user is signed in');
       const db = getFirestoreInstance();
       // Delete user document from Firestore
-      await db.collection('users').doc(user.uid).delete();
+      const userDocRef = doc(db, 'users', user.uid);
+      await deleteDoc(userDocRef);
       // Delete user from Firebase Auth
       await user.delete();
     } catch (error) {
@@ -377,9 +377,10 @@ class AuthService {
   async _fetchUserRoles(user) {
     try {
       const db = getFirestoreInstance();
-      const doc = await db.collection('users').doc(user.uid).get();
-      if (doc.exists) {
-        return doc.data();
+      const userDocRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists) {
+        return docSnap.data();
       }
       return { role: 'user' }; // Default role
     } catch (error) {

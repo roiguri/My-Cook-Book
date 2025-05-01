@@ -1,6 +1,8 @@
 // auth-service.test.js
 import { jest } from '@jest/globals';
 
+const mockDocRef = {};
+
 // ESM-compliant mocking for all Firebase modules
 jest.unstable_mockModule('../../src/js/services/firebase-service.js', () => {
   const authMock = {
@@ -15,8 +17,8 @@ jest.unstable_mockModule('../../src/js/services/firebase-service.js', () => {
     set: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    exists: false,
-    data: jest.fn(),
+    exists: true,
+    data: jest.fn().mockReturnValue({ role: 'user' }),
   };
   const userCollectionMock = {
     doc: jest.fn(() => userDocMock),
@@ -48,6 +50,17 @@ jest.unstable_mockModule('firebase/auth', () => ({
 
 jest.unstable_mockModule('firebase/firestore', () => ({
   serverTimestamp: jest.fn(() => 'server-timestamp'),
+  doc: jest.fn(() => mockDocRef),
+  getDoc: jest.fn().mockImplementation(() => {
+    return Promise.resolve({
+      exists: () => firebaseService._mockUserDoc.exists,
+      data: () => firebaseService._mockUserDoc.data(),
+      id: firebaseService._mockUserDoc.id,
+    });
+  }),
+  setDoc: jest.fn(),
+  updateDoc: jest.fn(),
+  deleteDoc: jest.fn(),
 }));
 
 // Mock document dispatch event
@@ -96,6 +109,8 @@ describe('AuthService', () => {
       browserLocalPersistence,
       browserSessionPersistence,
     } = await import('firebase/auth'));
+
+    ({ deleteDoc, updateDoc, setDoc, getDoc } = await import('firebase/firestore'));
 
     // Create mock user
     mockUser = {
@@ -146,7 +161,7 @@ describe('AuthService', () => {
   describe('Authentication state handling', () => {
     test('should update internal state when auth state changes', async () => {
       // Mock user roles for authenticated user
-      mockUserDoc.get.mockResolvedValue({
+      getDoc.mockResolvedValue({
         exists: true,
         data: () => ({ role: 'user' }),
       });
@@ -199,9 +214,9 @@ describe('AuthService', () => {
       authService.addAuthObserver(observer);
 
       // Simulate auth state change
-      mockUserDoc.get.mockResolvedValue({
+      getDoc.mockResolvedValue({
         exists: true,
-        data: () => ({ role: 'manager' }),
+        data: jest.fn().mockReturnValue({ role: 'manager' }),
       });
 
       await mockAuthStateCallback(mockUser);
@@ -305,13 +320,14 @@ describe('AuthService', () => {
       signInWithPopup.mockResolvedValue(userCredential);
 
       // User doesn't exist in Firestore
-      mockUserDoc.get.mockResolvedValue({ exists: false });
+      getDoc.mockResolvedValue({ exists: false });
 
       const result = await authService.loginWithGoogle();
 
       expect(GoogleAuthProvider).toHaveBeenCalled();
       expect(signInWithPopup).toHaveBeenCalledWith(mockAuth, expect.any(Object));
-      expect(mockUserDoc.set).toHaveBeenCalledWith(
+      expect(setDoc).toHaveBeenCalledWith(
+        mockDocRef,
         expect.objectContaining({
           email: mockUser.email,
           fullName: mockUser.displayName,
@@ -326,11 +342,11 @@ describe('AuthService', () => {
       signInWithPopup.mockResolvedValue(userCredential);
 
       // User exists in Firestore
-      mockUserDoc.get.mockResolvedValue({ exists: true });
+      getDoc.mockResolvedValue({ exists: true });
 
       await authService.loginWithGoogle();
 
-      expect(mockUserDoc.set).not.toHaveBeenCalled();
+      expect(setDoc).not.toHaveBeenCalled();
     });
 
     test('signup should create new user account and Firestore document', async () => {
@@ -345,7 +361,8 @@ describe('AuthService', () => {
 
       expect(createUserWithEmailAndPassword).toHaveBeenCalledWith(mockAuth, email, password);
       expect(mockUser.updateProfile).toHaveBeenCalledWith({ displayName: fullName });
-      expect(mockUserDoc.set).toHaveBeenCalledWith(
+      expect(setDoc).toHaveBeenCalledWith(
+        mockDocRef,
         expect.objectContaining({
           email,
           fullName,
@@ -386,7 +403,7 @@ describe('AuthService', () => {
         favoriteFood: 'Pizza',
       };
 
-      mockUserDoc.update.mockResolvedValue(undefined);
+      updateDoc.mockResolvedValue(undefined);
 
       await authService.updateProfile(profileData);
 
@@ -395,7 +412,8 @@ describe('AuthService', () => {
         photoURL: 'https://example.com/photo.jpg',
       });
 
-      expect(mockUserDoc.update).toHaveBeenCalledWith(
+      expect(updateDoc).toHaveBeenCalledWith(
+        mockDocRef, // First argument is the docRef, which we can check with anything
         expect.objectContaining({
           displayName: 'Updated Name',
           photoURL: 'https://example.com/photo.jpg',
@@ -428,7 +446,7 @@ describe('AuthService', () => {
 
       await authService.deleteAccount();
 
-      expect(mockUserDoc.delete).toHaveBeenCalled();
+      expect(deleteDoc).toHaveBeenCalled();
       expect(mockUser.delete).toHaveBeenCalled();
     });
 
