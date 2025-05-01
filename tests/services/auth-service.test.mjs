@@ -63,14 +63,22 @@ describe('AuthService', () => {
   let mockUserDoc;
   let mockAuthStateCallback;
   let mockUser;
-  let setPersistence, signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, browserLocalPersistence, browserSessionPersistence;
-  
+  let setPersistence,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signOut,
+    sendPasswordResetEmail,
+    GoogleAuthProvider,
+    browserLocalPersistence,
+    browserSessionPersistence;
+
   // README: This is a workaround to prevent console.log and console.error from being printed to the console
   beforeAll(() => {
     jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
-  
+
   beforeEach(async () => {
     jest.resetModules();
     firebaseService = await import('../../src/js/services/firebase-service.js');
@@ -140,25 +148,25 @@ describe('AuthService', () => {
       // Mock user roles for authenticated user
       mockUserDoc.get.mockResolvedValue({
         exists: true,
-        data: () => ({ role: 'user' })
+        data: () => ({ role: 'user' }),
       });
-      
+
       // Simulate auth state change
       await mockAuthStateCallback(mockUser);
-      
+
       expect(authService._currentUser).toBe(mockUser);
       expect(authService._userRoles).toEqual({ role: 'user' });
       expect(document.dispatchEvent).toHaveBeenCalledWith(
-        expect.objectContaining({ 
+        expect.objectContaining({
           type: 'auth-state-changed',
           detail: expect.objectContaining({
             user: mockUser,
             isAuthenticated: true,
             roles: { role: 'user' },
             isManager: false,
-            isApproved: false
-          })
-        })
+            isApproved: false,
+          }),
+        }),
       );
     });
 
@@ -166,38 +174,38 @@ describe('AuthService', () => {
       // Set initial state as logged in
       authService._currentUser = mockUser;
       authService._userRoles = { role: 'user' };
-      
+
       // Simulate auth state change to null (logout)
       await mockAuthStateCallback(null);
-      
+
       expect(authService._currentUser).toBeNull();
       expect(authService._userRoles).toBeNull();
       expect(document.dispatchEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'auth-state-changed', 
+          type: 'auth-state-changed',
           detail: expect.objectContaining({
             user: null,
             isAuthenticated: false,
             roles: null,
             isManager: false,
-            isApproved: false
-          })
-        })
+            isApproved: false,
+          }),
+        }),
       );
     });
 
     test('should notify observers when auth state changes', async () => {
       const observer = jest.fn();
       authService.addAuthObserver(observer);
-      
+
       // Simulate auth state change
       mockUserDoc.get.mockResolvedValue({
         exists: true,
-        data: () => ({ role: 'manager' })
+        data: () => ({ role: 'manager' }),
       });
-      
+
       await mockAuthStateCallback(mockUser);
-      
+
       // The observer is called twice: first with initial state, then with updated state
       expect(observer).toHaveBeenCalledTimes(2);
       expect(observer.mock.calls[1][0]).toEqual(
@@ -206,8 +214,8 @@ describe('AuthService', () => {
           isAuthenticated: true,
           roles: { role: 'manager' },
           isManager: true,
-          isApproved: true
-        })
+          isApproved: true,
+        }),
       );
       expect(observer.mock.calls[1][0].previousUser).toBeNull();
     });
@@ -215,34 +223,34 @@ describe('AuthService', () => {
     test('should immediately notify new observers of current state', () => {
       authService._currentUser = mockUser;
       authService._userRoles = { role: 'approved' };
-      
+
       const observer = jest.fn();
       authService.addAuthObserver(observer);
-      
+
       expect(observer).toHaveBeenCalledWith(
         expect.objectContaining({
           user: mockUser,
           isAuthenticated: true,
           roles: { role: 'approved' },
           isManager: false,
-          isApproved: true
-        })
+          isApproved: true,
+        }),
       );
     });
 
     test('should remove observer when requested', async () => {
       const observer = jest.fn();
       authService.addAuthObserver(observer);
-      
+
       // Clear initial call
       observer.mockClear();
-      
+
       // Remove the observer
       authService.removeAuthObserver(observer);
-      
+
       // Simulate auth state change
       await mockAuthStateCallback(mockUser);
-      
+
       // Observer should not be called
       expect(observer).not.toHaveBeenCalled();
     });
@@ -253,12 +261,12 @@ describe('AuthService', () => {
       const email = 'user@example.com';
       const password = 'password123';
       const userCredential = { user: mockUser };
-      
+
       setPersistence.mockResolvedValue(undefined);
       signInWithEmailAndPassword.mockResolvedValue(userCredential);
-      
+
       const result = await authService.login(email, password, true);
-      
+
       expect(setPersistence).toHaveBeenCalledWith(mockAuth, 'local');
       expect(signInWithEmailAndPassword).toHaveBeenCalledWith(mockAuth, email, password);
       expect(result).toBe(mockUser);
@@ -267,48 +275,48 @@ describe('AuthService', () => {
     test('login should use session persistence when remember is false', async () => {
       setPersistence.mockResolvedValue(undefined);
       signInWithEmailAndPassword.mockResolvedValue({ user: mockUser });
-      
+
       await authService.login('user@example.com', 'password123', false);
-      
+
       expect(setPersistence).toHaveBeenCalledWith(mockAuth, 'session');
     });
 
     test('login should handle errors properly', async () => {
       const error = new Error('Invalid credentials');
       error.code = 'auth/wrong-password';
-      
+
       signInWithEmailAndPassword.mockRejectedValue(error);
-      
+
       await expect(authService.login('user@example.com', 'wrong-password')).rejects.toThrow(error);
-      
+
       expect(document.dispatchEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'auth-error',
           detail: expect.objectContaining({
             operation: 'login',
-            code: 'auth/wrong-password'
-          })
-        })
+            code: 'auth/wrong-password',
+          }),
+        }),
       );
     });
 
     test('loginWithGoogle should work properly', async () => {
       const userCredential = { user: mockUser };
       signInWithPopup.mockResolvedValue(userCredential);
-      
+
       // User doesn't exist in Firestore
       mockUserDoc.get.mockResolvedValue({ exists: false });
-      
+
       const result = await authService.loginWithGoogle();
-      
+
       expect(GoogleAuthProvider).toHaveBeenCalled();
       expect(signInWithPopup).toHaveBeenCalledWith(mockAuth, expect.any(Object));
       expect(mockUserDoc.set).toHaveBeenCalledWith(
         expect.objectContaining({
           email: mockUser.email,
           fullName: mockUser.displayName,
-          role: 'user'
-        })
+          role: 'user',
+        }),
       );
       expect(result).toBe(mockUser);
     });
@@ -316,12 +324,12 @@ describe('AuthService', () => {
     test('loginWithGoogle should not create document for existing users', async () => {
       const userCredential = { user: mockUser };
       signInWithPopup.mockResolvedValue(userCredential);
-      
+
       // User exists in Firestore
       mockUserDoc.get.mockResolvedValue({ exists: true });
-      
+
       await authService.loginWithGoogle();
-      
+
       expect(mockUserDoc.set).not.toHaveBeenCalled();
     });
 
@@ -330,37 +338,37 @@ describe('AuthService', () => {
       const password = 'newpassword123';
       const fullName = 'New User';
       const userCredential = { user: mockUser };
-      
+
       createUserWithEmailAndPassword.mockResolvedValue(userCredential);
-      
+
       const result = await authService.signup(email, password, fullName);
-      
+
       expect(createUserWithEmailAndPassword).toHaveBeenCalledWith(mockAuth, email, password);
       expect(mockUser.updateProfile).toHaveBeenCalledWith({ displayName: fullName });
       expect(mockUserDoc.set).toHaveBeenCalledWith(
         expect.objectContaining({
           email,
           fullName,
-          role: 'user'
-        })
+          role: 'user',
+        }),
       );
       expect(result).toBe(mockUser);
     });
 
     test('logout should sign out current user', async () => {
       signOut.mockResolvedValue(undefined);
-      
+
       await authService.logout();
-      
+
       expect(signOut).toHaveBeenCalledWith(mockAuth);
     });
 
     test('resetPassword should send reset email', async () => {
       const email = 'user@example.com';
       sendPasswordResetEmail.mockResolvedValue(undefined);
-      
+
       await authService.resetPassword(email);
-      
+
       expect(sendPasswordResetEmail).toHaveBeenCalledWith(mockAuth, email);
     });
   });
@@ -375,72 +383,72 @@ describe('AuthService', () => {
       const profileData = {
         displayName: 'Updated Name',
         photoURL: 'https://example.com/photo.jpg',
-        favoriteFood: 'Pizza'
+        favoriteFood: 'Pizza',
       };
-      
+
       mockUserDoc.update.mockResolvedValue(undefined);
-      
+
       await authService.updateProfile(profileData);
-      
+
       expect(mockUser.updateProfile).toHaveBeenCalledWith({
         displayName: 'Updated Name',
-        photoURL: 'https://example.com/photo.jpg'
+        photoURL: 'https://example.com/photo.jpg',
       });
-      
+
       expect(mockUserDoc.update).toHaveBeenCalledWith(
         expect.objectContaining({
           displayName: 'Updated Name',
           photoURL: 'https://example.com/photo.jpg',
           favoriteFood: 'Pizza',
-          updatedAt: 'server-timestamp'
-        })
+          updatedAt: 'server-timestamp',
+        }),
       );
-      
+
       expect(document.dispatchEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'profile-updated',
           detail: expect.objectContaining({
             user: mockUser,
-            updatedFields: ['displayName', 'photoURL', 'favoriteFood']
-          })
-        })
+            updatedFields: ['displayName', 'photoURL', 'favoriteFood'],
+          }),
+        }),
       );
     });
 
     test('updateProfile should throw error if no user is signed in', async () => {
       authService._currentUser = null;
-      
-      await expect(authService.updateProfile({ displayName: 'Test' }))
-        .rejects.toThrow('No user is signed in');
+
+      await expect(authService.updateProfile({ displayName: 'Test' })).rejects.toThrow(
+        'No user is signed in',
+      );
     });
 
     test('deleteAccount should delete user and Firestore document', async () => {
       mockUserDoc.delete.mockResolvedValue(undefined);
-      
+
       await authService.deleteAccount();
-      
+
       expect(mockUserDoc.delete).toHaveBeenCalled();
       expect(mockUser.delete).toHaveBeenCalled();
     });
 
     test('deleteAccount should throw error if no user is signed in', async () => {
       authService._currentUser = null;
-      
-      await expect(authService.deleteAccount())
-        .rejects.toThrow('No user is signed in');
+
+      await expect(authService.deleteAccount()).rejects.toThrow('No user is signed in');
     });
   });
 
   describe('Role checking methods', () => {
     test('hasRole should check for specific role', () => {
       authService._currentUser = mockUser;
-      
+
       // Test with user role
       authService._userRoles = { role: 'user' };
       expect(authService.hasRole('user')).toBe(true);
       expect(authService.hasRole('approved')).toBe(false);
       expect(authService.hasRole('manager')).toBe(false);
-      
+
       // Test with manager role
       authService._userRoles = { role: 'manager' };
       expect(authService.hasRole('manager')).toBe(true);
@@ -450,17 +458,17 @@ describe('AuthService', () => {
     test('hasRole should return false when not authenticated', () => {
       authService._currentUser = null;
       authService._userRoles = null;
-      
+
       expect(authService.hasRole('user')).toBe(false);
     });
 
     test('isManager should check for manager role', () => {
       authService._currentUser = mockUser;
-      
+
       // Test with user role
       authService._userRoles = { role: 'user' };
       expect(authService.isManager()).toBe(false);
-      
+
       // Test with manager role
       authService._userRoles = { role: 'manager' };
       expect(authService.isManager()).toBe(true);
@@ -468,15 +476,15 @@ describe('AuthService', () => {
 
     test('isApproved should check for approved or manager role', () => {
       authService._currentUser = mockUser;
-      
+
       // Test with user role
       authService._userRoles = { role: 'user' };
       expect(authService.isApproved()).toBe(false);
-      
+
       // Test with approved role
       authService._userRoles = { role: 'approved' };
       expect(authService.isApproved()).toBe(true);
-      
+
       // Test with manager role
       authService._userRoles = { role: 'manager' };
       expect(authService.isApproved()).toBe(true);
@@ -487,23 +495,20 @@ describe('AuthService', () => {
     test('should handle Firestore errors when fetching user roles', async () => {
       // Make Firestore throw an error
       mockUserDoc.get.mockRejectedValue(new Error('Firestore error'));
-      
+
       // Mock console.error
       const originalConsoleError = console.error;
       console.error = jest.fn();
-      
+
       // Trigger auth state change
       await mockAuthStateCallback(mockUser);
-      
+
       // Verify error was logged
-      expect(console.error).toHaveBeenCalledWith(
-        'Error fetching user roles:',
-        expect.any(Error)
-      );
-      
+      expect(console.error).toHaveBeenCalledWith('Error fetching user roles:', expect.any(Error));
+
       // Verify default role was used
       expect(authService._userRoles).toEqual({ role: 'user' });
-      
+
       // Restore console.error
       console.error = originalConsoleError;
     });
@@ -513,10 +518,10 @@ describe('AuthService', () => {
     test('should handle non-existing user document gracefully', async () => {
       // Make Firestore return non-existing document
       mockUserDoc.get.mockResolvedValue({ exists: false });
-      
+
       // Trigger auth state change
       await mockAuthStateCallback(mockUser);
-      
+
       // Should default to user role
       expect(authService._userRoles).toEqual({ role: 'user' });
     });
