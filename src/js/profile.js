@@ -1,5 +1,5 @@
-import { getAuthInstance, getFirestoreInstance } from '../js/services/firebase-service.js';
-import { onAuthStateChanged } from 'firebase/auth';
+import { getFirestoreInstance } from '../js/services/firebase-service.js';
+import authService from '../js/services/auth-service.js';
 import { collection, doc, getDoc, getDocs, query, where, documentId } from 'firebase/firestore';
 
 // DOM elements
@@ -26,9 +26,8 @@ let currentSearchQuery = '';
 
 // Initial setup
 async function initialize() {
-  const auth = getAuthInstance();
-  onAuthStateChanged(auth, async function (user) {
-    if (user) {
+  authService.addAuthObserver(async (state) => {
+    if (state.user) {
       if (filterSearchBar) {
         filterSearchBar.setValue(''); // Reset search bar
       }
@@ -52,7 +51,9 @@ async function initialize() {
     } else {
       // User is signed out
       console.log('User not logged in');
-      // TODO - redirect to login page
+      // Redirect to home page
+      const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/';
+      window.location.href = baseUrl;
     }
   });
 }
@@ -291,7 +292,7 @@ function goToPage(page) {
 async function fetchFavoriteRecipes() {
   try {
     const db = getFirestoreInstance();
-    const userId = getAuthInstance().currentUser.uid;
+    const userId = authService.getCurrentUser().uid;
     const userDocRef = doc(db, 'users', userId);
     const userDocSnap = await getDoc(userDocRef);
     const userData = userDocSnap.data();
