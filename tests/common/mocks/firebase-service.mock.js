@@ -1,5 +1,18 @@
 import { jest } from '@jest/globals';
 
+/**
+ * Mock for your app's Firebase service abstraction (src/js/services/firebase-service.js).
+ *
+ * Purpose: Prevents real Firebase SDK calls and allows control over your app's
+ * Firebase logic in tests by mocking:
+ *   - getAuthInstance, getFirestoreInstance, getStorageInstance, initFirebase
+ *
+ * Exports:
+ *   - firebaseServiceMocks: contains mock objects for auth, Firestore, and storage
+ *
+ * Use this mock when your code or tests import from your own service abstraction.
+ */
+
 const authMock = {
   onAuthStateChanged: jest.fn(),
   signInWithPopup: jest.fn(),
