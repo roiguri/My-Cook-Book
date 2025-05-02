@@ -210,21 +210,7 @@ class AuthController extends HTMLElement {
 
   async handleGoogleSignIn() {
     try {
-      const auth = getAuthInstance();
-      const db = getFirestoreInstance();
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      const user = userCredential.user;
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, 'users', user.uid), {
-          email: user.email,
-          fullName: user.displayName,
-          role: 'user',
-          createdAt: serverTimestamp(),
-        });
-      }
-      return user;
+      return await authService.loginWithGoogle();
     } catch (error) {
       throw error;
     }
