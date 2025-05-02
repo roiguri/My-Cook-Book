@@ -1,6 +1,6 @@
-import { getFirestoreInstance, getAuthInstance } from '../js/services/firebase-service.js';
+import { getFirestoreInstance } from '../js/services/firebase-service.js';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import authService from '../js/services/auth-service.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
   // DOM elements
@@ -14,8 +14,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   let initialAuthSetup = false;
   // Repopulate recipes on authentication change
-  const auth = getAuthInstance();
-  onAuthStateChanged(auth, async (user) => {
+  authService.addAuthObserver(async (state) => {
     // Repopulate recipes when the authentication state changes
     await loadInitialRecipes();
     await displayCurrentPageRecipes();
@@ -233,8 +232,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     recipeGrid.style.alignItems = '';
     recipeGrid.style.minHeight = '';
 
-    const auth = getAuthInstance();
-    const authenticated = auth.currentUser;
+    const authenticated = authService.getCurrentUser();
     recipes.forEach((recipe) => {
       const cardContainer = document.createElement('div');
       cardContainer.className = 'recipe-card-container';
