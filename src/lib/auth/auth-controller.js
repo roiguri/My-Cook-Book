@@ -27,21 +27,6 @@
  * @requires ./modal.js
  */
 
-import { getAuthInstance, getFirestoreInstance } from '../../js/services/firebase-service.js';
-import {
-  onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence,
-  browserSessionPersistence,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendPasswordResetEmail,
-  signOut,
-} from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import authService from '../../js/services/auth-service.js';
 
 class AuthController extends HTMLElement {
