@@ -34,6 +34,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
+  updateProfile,
 } from 'firebase/auth';
 
 class AuthService {
@@ -185,10 +186,8 @@ class AuthService {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Update user profile
-      await user.updateProfile({
-        displayName: fullName,
-      });
+      // Update user profile (modular API)
+      await updateProfile(user, { displayName: fullName });
 
       // Create user document in Firestore
       const userDocRef = doc(db, 'users', user.uid);

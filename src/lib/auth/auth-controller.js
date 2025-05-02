@@ -202,20 +202,7 @@ class AuthController extends HTMLElement {
 
   async handleSignup(email, password, fullName) {
     try {
-      const auth = getAuthInstance();
-      const db = getFirestoreInstance();
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      await Promise.all([
-        updateProfile(user, { displayName: fullName }),
-        setDoc(doc(db, 'users', user.uid), {
-          email: email,
-          fullName: fullName,
-          role: 'user',
-          createdAt: serverTimestamp(),
-        }),
-      ]);
-      return user;
+      return await authService.signup(email, password, fullName);
     } catch (error) {
       throw error;
     }
