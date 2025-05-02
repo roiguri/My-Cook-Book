@@ -52,8 +52,9 @@ async function initialize() {
       // User is signed out
       console.log('User not logged in');
       // Redirect to home page
-      const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/';
-      window.location.href = baseUrl;
+      // FIXME: redirects to home page even though is not logged in
+      // const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/';
+      // window.location.href = baseUrl;
     }
   });
 }

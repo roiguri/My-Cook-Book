@@ -354,7 +354,7 @@ describe('AuthService', () => {
 
       await authService.updateProfile(profileData);
 
-      expect(mockUser.updateProfile).toHaveBeenCalledWith({
+      expect(updateProfile).toHaveBeenCalledWith(mockUser, {
         displayName: 'Updated Name',
         photoURL: 'https://example.com/photo.jpg',
       });
