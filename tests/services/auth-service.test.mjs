@@ -1,70 +1,12 @@
 // auth-service.test.js
 import { jest } from '@jest/globals';
 
-const mockDocRef = {};
-
-// ESM-compliant mocking for all Firebase modules
-jest.unstable_mockModule('../../src/js/services/firebase-service.js', () => {
-  const authMock = {
-    onAuthStateChanged: jest.fn(),
-    signInWithPopup: jest.fn(),
-    createUserWithEmailAndPassword: jest.fn(),
-    signOut: jest.fn(),
-    sendPasswordResetEmail: jest.fn(),
-  };
-  const userDocMock = {
-    get: jest.fn(),
-    set: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    exists: true,
-    data: jest.fn().mockReturnValue({ role: 'user' }),
-  };
-  const userCollectionMock = {
-    doc: jest.fn(() => userDocMock),
-  };
-  const dbMock = {
-    collection: jest.fn(() => userCollectionMock),
-  };
-  const storageMock = {};
-  return {
-    getAuthInstance: jest.fn(() => authMock),
-    getFirestoreInstance: jest.fn(() => dbMock),
-    getStorageInstance: jest.fn(() => storageMock),
-    initFirebase: jest.fn(),
-  };
-});
-
-jest.unstable_mockModule('firebase/auth', () => ({
-  browserLocalPersistence: 'local',
-  browserSessionPersistence: 'session',
-  GoogleAuthProvider: jest.fn().mockImplementation(() => ({ addScope: jest.fn() })),
-  setPersistence: jest.fn(),
-  signInWithEmailAndPassword: jest.fn(),
-  signInWithPopup: jest.fn(),
-  createUserWithEmailAndPassword: jest.fn(),
-  signOut: jest.fn(),
-  sendPasswordResetEmail: jest.fn(),
-  setPersistence: jest.fn(),
-}));
-
-jest.unstable_mockModule('firebase/firestore', () => ({
-  serverTimestamp: jest.fn(() => 'server-timestamp'),
-  doc: jest.fn(() => mockDocRef),
-  getDoc: jest.fn().mockImplementation(() => {
-    return Promise.resolve({
-      exists: () => firebaseService._mockUserDoc.exists,
-      data: () => firebaseService._mockUserDoc.data(),
-      id: firebaseService._mockUserDoc.id,
-    });
-  }),
-  setDoc: jest.fn(),
-  updateDoc: jest.fn(),
-  deleteDoc: jest.fn(),
-}));
-
-// Mock document dispatch event
-document.dispatchEvent = jest.fn();
+// Import mocks
+import '../common/mocks/firebase-service.mock.js';
+import '../common/mocks/firebase-auth.mock.js';
+import '../common/mocks/firebase-firestore.mock.js';
+import '../common/mocks/document.mock.js';
+import { mockDocRef } from '../common/mocks/firebase-firestore.mock.js';
 
 describe('AuthService', () => {
   let AuthService;
