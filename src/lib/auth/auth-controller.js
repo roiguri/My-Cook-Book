@@ -82,18 +82,20 @@ class AuthController extends HTMLElement {
   }
 
   setupAuthStateObserver() {
-    const auth = getAuthInstance();
-    onAuthStateChanged(auth, async (user) => {
-      this.isAuthenticated = !!user;
-      this.currentUser = user;
+    authService.addAuthObserver((state) => {
+      this.isAuthenticated = !!state.user;
+      this.currentUser = state.user;
 
-      if (user) {
-        const roles = await this.checkUserRoles(user);
-        this.updateNavigation(user, roles);
+      if (state.user) {
+        this.updateNavigation(state.user, {
+          isManager: state.isManager,
+          isApproved: state.isApproved,
+        });
         this.dispatchAuthStateChanged({
-          user,
+          user: state.user,
           isAuthenticated: true,
-          ...roles,
+          isManager: state.isManager,
+          isApproved: state.isApproved,
         });
       } else {
         this.updateNavigation(null);
