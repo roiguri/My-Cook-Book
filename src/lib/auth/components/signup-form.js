@@ -10,8 +10,6 @@
 
 import './auth-content.js';
 import '../../modals/message-modal/message-modal.js';
-import { getAuthInstance } from '../../../js/services/firebase-service.js';
-import { updateProfile } from 'firebase/auth';
 
 class SignupForm extends HTMLElement {
   constructor() {
@@ -311,19 +309,13 @@ class SignupForm extends HTMLElement {
     try {
       const authController = this.closest('auth-controller');
       await authController.handleSignup(email, password, fullName);
-      // Update user profile with full name using modular API
-      const auth = getAuthInstance();
-      const user = auth.currentUser;
-      if (user) {
-        await updateProfile(user, { displayName: fullName });
-        // Dispatch signup success event
-        this.dispatchEvent(
-          new CustomEvent('signup-success', {
-            bubbles: true,
-            composed: true,
-          }),
-        );
-      }
+      // Dispatch signup success event
+      this.dispatchEvent(
+        new CustomEvent('signup-success', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
     } catch (error) {
       this.showError(error.message);
     }

@@ -37,6 +37,7 @@ class EditRecipeComponent extends HTMLElement {
       `;
   }
 
+  // TODO: scroll page to top after update
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
     try {

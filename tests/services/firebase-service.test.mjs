@@ -1,18 +1,9 @@
 import { jest } from '@jest/globals';
-
-jest.unstable_mockModule('firebase/app', () => ({
-  initializeApp: jest.fn(() => 'mockApp'),
-  getApps: jest.fn(() => []),
-}));
-jest.unstable_mockModule('firebase/auth', () => ({
-  getAuth: jest.fn(() => 'mockAuth'),
-}));
-jest.unstable_mockModule('firebase/firestore', () => ({
-  getFirestore: jest.fn(() => 'mockFirestore'),
-}));
-jest.unstable_mockModule('firebase/storage', () => ({
-  getStorage: jest.fn(() => 'mockStorage'),
-}));
+// Import extracted mocks
+import '../common/mocks/firebase-app.mock.js';
+import '../common/mocks/firebase-auth.mock.js';
+import '../common/mocks/firebase-firestore.mock.js';
+import '../common/mocks/firebase-storage.mock.js';
 
 describe('firebase-service', () => {
   let firebaseService;

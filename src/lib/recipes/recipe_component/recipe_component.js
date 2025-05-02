@@ -1,10 +1,10 @@
 import {
   getFirestoreInstance,
-  getAuthInstance,
   getStorageInstance,
 } from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
+import authService from '../../../js/services/auth-service.js';
 
 // TODO - add support for missing image upload
 
@@ -277,9 +277,8 @@ class RecipeComponent extends HTMLElement {
     try {
       const imageContainer = this.shadowRoot.querySelector('.Recipe_component__image-container');
       // Get user role
-      const auth = getAuthInstance();
       const db = getFirestoreInstance();
-      const user = auth.currentUser;
+      const user = authService.getCurrentUser();
       let userRole = 'public'; // Default to public access
       if (user) {
         const userDocSnap = await getDoc(doc(db, 'users', user.uid));

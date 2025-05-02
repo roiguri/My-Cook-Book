@@ -1,15 +1,14 @@
-import { getAuthInstance, getFirestoreInstance } from '../js/services/firebase-service.js';
+import { getFirestoreInstance } from '../js/services/firebase-service.js';
 import { collection, doc, getDoc, getDocs, updateDoc, query, where } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import authService from '../js/services/auth-service.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   // Check if the user is authenticated and has manager privileges
-  const auth = getAuthInstance();
   const db = getFirestoreInstance();
-  onAuthStateChanged(auth, function (user) {
+  authService.addAuthObserver((state) => {
     const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/';
-    if (user) {
-      checkManagerStatus(db, user).then(function (isManager) {
+    if (state.user) {
+      checkManagerStatus(db, state.user).then(function (isManager) {
         if (isManager) {
           initializeDashboard();
         } else {

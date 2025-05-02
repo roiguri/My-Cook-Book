@@ -7,7 +7,7 @@
  * Header avatar component that serves as the main entry point for authentication
  */
 
-import { getAuthInstance } from '../../../js/services/firebase-service.js';
+import authService from '../../../js/services/auth-service.js';
 import './auth-content.js';
 
 class AuthAvatar extends HTMLElement {
@@ -92,7 +92,7 @@ class AuthAvatar extends HTMLElement {
 
     // Add listener for profile updates
     document.addEventListener('profile-updated', () => {
-      const user = getAuthInstance().currentUser;
+      const user = authService.getCurrentUser();
       if (user) {
         this.updateAvatar(user);
       }
@@ -100,9 +100,8 @@ class AuthAvatar extends HTMLElement {
   }
 
   initializeAuthListener() {
-    const auth = getAuthInstance();
-    auth.onAuthStateChanged((user) => {
-      this.updateAvatar(user);
+    authService.addAuthObserver((state) => {
+      this.updateAvatar(state.user);
     });
   }
 
@@ -127,7 +126,7 @@ class AuthAvatar extends HTMLElement {
   }
 
   handleClick() {
-    const user = getAuthInstance().currentUser;
+    const user = authService.getCurrentUser();
     const authController = document.querySelector('auth-controller');
     const authContent = document.querySelector('auth-content');
 
