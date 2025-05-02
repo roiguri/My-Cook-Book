@@ -9,14 +9,10 @@
 
 import './auth-content.js';
 import '../../modals/message-modal/message-modal.js';
-import {
-  getAuthInstance,
-  getFirestoreInstance,
-  getStorageInstance,
-} from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
 import { ref, listAll, getDownloadURL } from 'firebase/storage';
-import { onAuthStateChanged } from 'firebase/auth';
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import authService from '../../../js/services/auth-service.js';
 
 class UserProfile extends HTMLElement {
   constructor() {
@@ -31,17 +27,15 @@ class UserProfile extends HTMLElement {
     this.loadAvatars();
 
     // Re-render if user data loads after component mount
-    const auth = getAuthInstance();
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
+    authService.addAuthObserver((state) => {
+      if (state.user) {
         this.updateWelcomeText();
       }
     });
   }
 
   render() {
-    const auth = getAuthInstance();
-    const user = auth.currentUser;
+    const user = authService.getCurrentUser();
     const displayName = user?.displayName || user?.email?.split('@')[0] || '';
 
     this.shadowRoot.innerHTML = `
@@ -188,8 +182,7 @@ class UserProfile extends HTMLElement {
   }
 
   updateWelcomeText() {
-    const auth = getAuthInstance();
-    const user = auth.currentUser;
+    const user = authService.getCurrentUser();
     const displayName = user?.displayName || user?.email?.split('@')[0] || '';
     const welcomeText = this.shadowRoot.querySelector('.welcome-text');
     if (welcomeText) {
@@ -199,8 +192,7 @@ class UserProfile extends HTMLElement {
 
   async loadAvatars() {
     try {
-      const auth = getAuthInstance();
-      const user = auth.currentUser;
+      const user = authService.getCurrentUser();
       const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
       let currentAvatarUrl = null;
       // Only fetch from Firestore if user is logged in

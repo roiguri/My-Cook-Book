@@ -20,12 +20,12 @@
  */
 import {
   getFirestoreInstance,
-  getAuthInstance,
   getStorageInstance,
 } from '../../../js/services/firebase-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { arrayUnion, arrayRemove } from 'firebase/firestore';
+import authService from '../../../js/services/auth-service.js';
 
 class RecipeCard extends HTMLElement {
   // Define observed attributes
@@ -775,8 +775,8 @@ class RecipeCard extends HTMLElement {
 
   async _fetchUserFavorites() {
     try {
-      const auth = getAuthInstance();
-      const userId = auth.currentUser?.uid;
+      const user = authService.getCurrentUser();
+      const userId = user?.uid;
       if (!userId) return; // No user logged in
       const db = getFirestoreInstance();
       const userDoc = await getDoc(doc(db, 'users', userId));
@@ -789,8 +789,8 @@ class RecipeCard extends HTMLElement {
 
   async _toggleFavorite() {
     try {
-      const auth = getAuthInstance();
-      const userId = auth.currentUser?.uid;
+      const user = authService.getCurrentUser();
+      const userId = user?.uid;
       if (!userId) return; // No user logged in
       const db = getFirestoreInstance();
       const userDocRef = doc(db, 'users', userId);

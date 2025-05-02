@@ -27,21 +27,7 @@
  * @requires ./modal.js
  */
 
-import { getAuthInstance, getFirestoreInstance } from '../../js/services/firebase-service.js';
-import {
-  onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence,
-  browserSessionPersistence,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  GoogleAuthProvider,
-  signInWithPopup,
-  sendPasswordResetEmail,
-  signOut,
-} from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import authService from '../../js/services/auth-service.js';
 
 class AuthController extends HTMLElement {
   constructor() {
@@ -54,6 +40,7 @@ class AuthController extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupAuthStateObserver();
+    authService.initialize();
   }
 
   render() {
@@ -78,18 +65,20 @@ class AuthController extends HTMLElement {
   }
 
   setupAuthStateObserver() {
-    const auth = getAuthInstance();
-    onAuthStateChanged(auth, async (user) => {
-      this.isAuthenticated = !!user;
-      this.currentUser = user;
+    authService.addAuthObserver((state) => {
+      this.isAuthenticated = !!state.user;
+      this.currentUser = state.user;
 
-      if (user) {
-        const roles = await this.checkUserRoles(user);
-        this.updateNavigation(user, roles);
+      if (state.user) {
+        this.updateNavigation(state.user, {
+          isManager: state.isManager,
+          isApproved: state.isApproved,
+        });
         this.dispatchAuthStateChanged({
-          user,
+          user: state.user,
           isAuthenticated: true,
-          ...roles,
+          isManager: state.isManager,
+          isApproved: state.isApproved,
         });
       } else {
         this.updateNavigation(null);
@@ -101,24 +90,6 @@ class AuthController extends HTMLElement {
         });
       }
     });
-  }
-
-  async checkUserRoles(user) {
-    try {
-      const db = getFirestoreInstance();
-      const docSnap = await getDoc(doc(db, 'users', user.uid));
-      if (docSnap.exists()) {
-        const role = docSnap.data().role;
-        return {
-          isManager: role === 'manager',
-          isApproved: role === 'approved' || role === 'manager',
-        };
-      }
-      return { isManager: false, isApproved: false };
-    } catch (error) {
-      console.error('Error checking user roles:', error);
-      return { isManager: false, isApproved: false };
-    }
   }
 
   updateNavigation(user, roles = { isManager: false, isApproved: false }) {
@@ -183,12 +154,9 @@ class AuthController extends HTMLElement {
   // Authentication Methods
   async handleLogin(email, password, remember = false) {
     try {
-      const auth = getAuthInstance();
-      const persistence = remember ? browserLocalPersistence : browserSessionPersistence;
-      await setPersistence(auth, persistence);
-      return await signInWithEmailAndPassword(auth, email, password);
+      return await authService.login(email, password, remember);
     } catch (error) {
-      console.log('Firebase Error:', {
+      console.log('AuthService Error:', {
         code: error.code,
         message: error.message,
         fullError: error,
@@ -199,20 +167,7 @@ class AuthController extends HTMLElement {
 
   async handleSignup(email, password, fullName) {
     try {
-      const auth = getAuthInstance();
-      const db = getFirestoreInstance();
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      await Promise.all([
-        updateProfile(user, { displayName: fullName }),
-        setDoc(doc(db, 'users', user.uid), {
-          email: email,
-          fullName: fullName,
-          role: 'user',
-          createdAt: serverTimestamp(),
-        }),
-      ]);
-      return user;
+      return await authService.signup(email, password, fullName);
     } catch (error) {
       throw error;
     }
@@ -220,21 +175,7 @@ class AuthController extends HTMLElement {
 
   async handleGoogleSignIn() {
     try {
-      const auth = getAuthInstance();
-      const db = getFirestoreInstance();
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      const user = userCredential.user;
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, 'users', user.uid), {
-          email: user.email,
-          fullName: user.displayName,
-          role: 'user',
-          createdAt: serverTimestamp(),
-        });
-      }
-      return user;
+      return await authService.loginWithGoogle();
     } catch (error) {
       throw error;
     }
@@ -242,8 +183,7 @@ class AuthController extends HTMLElement {
 
   async handlePasswordReset(email) {
     try {
-      const auth = getAuthInstance();
-      await sendPasswordResetEmail(auth, email);
+      await authService.resetPassword(email);
     } catch (error) {
       throw error;
     }
@@ -251,8 +191,7 @@ class AuthController extends HTMLElement {
 
   async handleLogout() {
     try {
-      const auth = getAuthInstance();
-      await signOut(auth);
+      await authService.logout();
     } catch (error) {
       throw error;
     }
@@ -260,17 +199,9 @@ class AuthController extends HTMLElement {
 
   async updateUserAvatar(avatarUrl) {
     try {
-      const user = getAuthInstance().currentUser;
-      if (!user) throw new Error('No user is currently signed in');
-
-      await updateProfile(user, { photoURL: avatarUrl });
-      const db = getFirestoreInstance();
-      await updateDoc(doc(db, 'users', user.uid), {
-        avatarUrl,
-      });
-
+      await authService.updateProfile({ photoURL: avatarUrl });
       this.dispatchAuthStateChanged({
-        user: getAuthInstance().currentUser,
+        user: authService.getCurrentUser(),
         isAuthenticated: true,
       });
     } catch (error) {

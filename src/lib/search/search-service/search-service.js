@@ -141,8 +141,8 @@ class SearchService extends HTMLElement {
 
     // Handle favorites-only mode
     if (this.state.favoritesOnly) {
-      const auth = getAuthInstance();
-      const userId = auth.currentUser?.uid;
+      const user = authService.getCurrentUser();
+      const userId = user?.uid;
       if (!userId) return [];
 
       const userDoc = await getDoc(doc(db, 'users', userId));
