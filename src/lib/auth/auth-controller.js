@@ -226,8 +226,7 @@ class AuthController extends HTMLElement {
 
   async handleLogout() {
     try {
-      const auth = getAuthInstance();
-      await signOut(auth);
+      await authService.logout();
     } catch (error) {
       throw error;
     }
