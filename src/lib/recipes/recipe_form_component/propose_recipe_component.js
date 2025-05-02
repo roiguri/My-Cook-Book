@@ -16,11 +16,11 @@
 
 import {
   getFirestoreInstance,
-  getAuthInstance,
   getStorageInstance,
 } from '../../../js/services/firebase-service.js';
 import { collection, doc, addDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
+import authService from '../../../js/services/auth-service.js';
 
 class ProposeRecipeComponent extends HTMLElement {
   constructor() {
@@ -54,7 +54,7 @@ class ProposeRecipeComponent extends HTMLElement {
     const recipeData = event.detail.recipeData;
     try {
       const db = getFirestoreInstance();
-      const auth = getAuthInstance();
+      const user = authService.getCurrentUser();
       // Store images separately
       const imagesToUpload = recipeData.images || [];
       // Create a copy of recipe data without images
@@ -62,7 +62,7 @@ class ProposeRecipeComponent extends HTMLElement {
       delete recipeDataForFirestore.images; // Remove images array
       // Add timestamp and user info
       recipeDataForFirestore.creationTime = Timestamp.now();
-      recipeDataForFirestore.userId = auth.currentUser?.uid || 'anonymous';
+      recipeDataForFirestore.userId = user?.uid || 'anonymous';
       // Save recipe to Firestore first to get the ID
       const recipeRef = await addDoc(collection(db, 'recipes'), recipeDataForFirestore);
       // Upload images if provided
@@ -90,7 +90,7 @@ class ProposeRecipeComponent extends HTMLElement {
   // Helper function to upload image to Firebase Storage
   async uploadRecipeImages(recipeId, images, category) {
     const storage = getStorageInstance();
-    const auth = getAuthInstance();
+    const user = authService.getCurrentUser();
     const imageUploadResults = [];
     for (const imageData of images) {
       const { file, isPrimary } = imageData;
@@ -114,7 +114,7 @@ class ProposeRecipeComponent extends HTMLElement {
           fileName,
           isPrimary,
           uploadTimestamp: Timestamp.now(),
-          uploadedBy: auth.currentUser?.uid || 'anonymous',
+          uploadedBy: user?.uid || 'anonymous',
           access: 'public',
         });
       } catch (error) {

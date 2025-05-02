@@ -1,4 +1,5 @@
-import { getFirestoreInstance, getAuthInstance } from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
+import authService from '../../../js/services/auth-service.js';
 import { doc, getDoc } from 'firebase/firestore';
 import '../../images/image-handler.js';
 
@@ -792,7 +793,7 @@ class RecipeFormComponent extends HTMLElement {
       file: img.file,
       isPrimary: img.isPrimary,
       access: 'public', // Default access level
-      uploadedBy: getAuthInstance().currentUser?.uid || 'anonymous',
+      uploadedBy: authService.getCurrentUser()?.uid || 'anonymous',
     }));
 
     // Get comments if present

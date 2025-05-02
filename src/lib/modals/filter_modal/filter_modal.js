@@ -76,9 +76,9 @@
  * - clearFilters() - Resets all filters to default state
  */
 
-import { getFirestoreInstance, getAuthInstance } from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
+import authService from '../../../js/services/auth-service.js';
 import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
 
 class RecipeFilterComponent extends HTMLElement {
   constructor() {
@@ -114,19 +114,10 @@ class RecipeFilterComponent extends HTMLElement {
   }
 
   async connectedCallback() {
-    const auth = getAuthInstance();
-    if (auth.currentUser) {
+    const user = authService.getCurrentUser();
+    if (user) {
       await this.loadInitialData();
-    } else {
-      // Listen for auth state changes
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          this.loadInitialData();
-          unsubscribe(); // Unsubscribe after loading data once
-        }
-      });
     }
-
     this.render();
     this.setupEventListeners();
   }
@@ -568,10 +559,10 @@ class RecipeFilterComponent extends HTMLElement {
     this.updateUI();
     try {
       const db = getFirestoreInstance();
-      const auth = getAuthInstance();
+      const user = authService.getCurrentUser();
       // Check if favorites-only attribute is present
       if (this.hasAttribute('favorites-only')) {
-        const userId = auth.currentUser.uid;
+        const userId = user.uid;
         const userDocSnap = await getDoc(doc(db, 'users', userId));
         const favoriteRecipeIds = userDocSnap.data().favorites || [];
         // Fetch favorite recipes only
@@ -655,12 +646,12 @@ class RecipeFilterComponent extends HTMLElement {
     this.updateUI();
     try {
       const db = getFirestoreInstance();
-      const auth = getAuthInstance();
+      const user = authService.getCurrentUser();
       let recipes;
       if (this.currentRecipes) {
         recipes = this.currentRecipes;
-      } else if (this.hasAttribute('favorites-only') && auth.currentUser) {
-        const userId = auth.currentUser.uid;
+      } else if (this.hasAttribute('favorites-only') && user) {
+        const userId = user.uid;
         const userDocSnap = await getDoc(doc(db, 'users', userId));
         const favoriteRecipeIds = userDocSnap.data().favorites || [];
         recipes = await Promise.all(
@@ -724,12 +715,12 @@ class RecipeFilterComponent extends HTMLElement {
     this.updateUI();
     try {
       const db = getFirestoreInstance();
-      const auth = getAuthInstance();
+      const user = authService.getCurrentUser();
       let recipes;
       if (this.currentRecipes) {
         recipes = this.currentRecipes;
-      } else if (this.hasAttribute('favorites-only') && auth.currentUser) {
-        const userId = auth.currentUser.uid;
+      } else if (this.hasAttribute('favorites-only') && user) {
+        const userId = user.uid;
         const userDocSnap = await getDoc(doc(db, 'users', userId));
         const favoriteRecipeIds = userDocSnap.data().favorites || [];
         recipes = await Promise.all(
