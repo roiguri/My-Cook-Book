@@ -147,6 +147,7 @@ class RecipeFilterComponent extends HTMLElement {
     `;
   }
 
+  // FIXME: filter counter location is not good
   styles() {
     return `
       .filter-container {
