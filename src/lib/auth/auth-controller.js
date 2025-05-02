@@ -56,8 +56,6 @@ class AuthController extends HTMLElement {
     this.render();
     this.setupAuthStateObserver();
     authService.initialize();
-    // WIP: Remove this after testing
-    console.log('[AuthController] AuthService initialized:', authService);
   }
 
   render() {
@@ -107,24 +105,6 @@ class AuthController extends HTMLElement {
         });
       }
     });
-  }
-
-  async checkUserRoles(user) {
-    try {
-      const db = getFirestoreInstance();
-      const docSnap = await getDoc(doc(db, 'users', user.uid));
-      if (docSnap.exists()) {
-        const role = docSnap.data().role;
-        return {
-          isManager: role === 'manager',
-          isApproved: role === 'approved' || role === 'manager',
-        };
-      }
-      return { isManager: false, isApproved: false };
-    } catch (error) {
-      console.error('Error checking user roles:', error);
-      return { isManager: false, isApproved: false };
-    }
   }
 
   updateNavigation(user, roles = { isManager: false, isApproved: false }) {
@@ -234,17 +214,9 @@ class AuthController extends HTMLElement {
 
   async updateUserAvatar(avatarUrl) {
     try {
-      const user = getAuthInstance().currentUser;
-      if (!user) throw new Error('No user is currently signed in');
-
-      await updateProfile(user, { photoURL: avatarUrl });
-      const db = getFirestoreInstance();
-      await updateDoc(doc(db, 'users', user.uid), {
-        avatarUrl,
-      });
-
+      await authService.updateProfile({ photoURL: avatarUrl });
       this.dispatchAuthStateChanged({
-        user: getAuthInstance().currentUser,
+        user: authService.getCurrentUser(),
         isAuthenticated: true,
       });
     } catch (error) {

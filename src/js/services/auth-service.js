@@ -246,7 +246,7 @@ class AuthService {
       const db = getFirestoreInstance();
       // Update auth profile if displayName or photoURL provided
       if (profileData.displayName || profileData.photoURL) {
-        await user.updateProfile({
+        await updateProfile(user, {
           displayName: profileData.displayName || user.displayName,
           photoURL: profileData.photoURL || user.photoURL,
         });
