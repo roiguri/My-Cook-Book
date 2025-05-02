@@ -189,12 +189,9 @@ class AuthController extends HTMLElement {
   // Authentication Methods
   async handleLogin(email, password, remember = false) {
     try {
-      const auth = getAuthInstance();
-      const persistence = remember ? browserLocalPersistence : browserSessionPersistence;
-      await setPersistence(auth, persistence);
-      return await signInWithEmailAndPassword(auth, email, password);
+      return await authService.login(email, password, remember);
     } catch (error) {
-      console.log('Firebase Error:', {
+      console.log('AuthService Error:', {
         code: error.code,
         message: error.message,
         fullError: error,
