@@ -24,4 +24,5 @@ jest.unstable_mockModule('firebase/auth', () => ({
   sendPasswordResetEmail: jest.fn(),
   setPersistence: jest.fn(),
   getAuth: jest.fn(() => 'mockAuth'),
+  updateProfile: jest.fn(),
 })); 

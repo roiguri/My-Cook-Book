@@ -155,7 +155,7 @@ class AuthService {
       const userDoc = await getDoc(userDocRef);
 
       // If user doesn't exist in Firestore, create a new document
-      if (!userDoc.exists) {
+      if (!userDoc.exists()) {
         await setDoc(userDocRef, {
           email: user.email,
           fullName: user.displayName,

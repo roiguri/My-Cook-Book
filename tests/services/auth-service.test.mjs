@@ -50,6 +50,7 @@ describe('AuthService', () => {
       GoogleAuthProvider,
       browserLocalPersistence,
       browserSessionPersistence,
+      updateProfile,
     } = await import('firebase/auth'));
 
     ({ deleteDoc, updateDoc, setDoc, getDoc } = await import('firebase/firestore'));
@@ -104,7 +105,7 @@ describe('AuthService', () => {
     test('should update internal state when auth state changes', async () => {
       // Mock user roles for authenticated user
       getDoc.mockResolvedValue({
-        exists: true,
+        exists: () => true,
         data: () => ({ role: 'user' }),
       });
 
@@ -157,7 +158,7 @@ describe('AuthService', () => {
 
       // Simulate auth state change
       getDoc.mockResolvedValue({
-        exists: true,
+        exists: () => true,
         data: jest.fn().mockReturnValue({ role: 'manager' }),
       });
 
@@ -262,7 +263,9 @@ describe('AuthService', () => {
       signInWithPopup.mockResolvedValue(userCredential);
 
       // User doesn't exist in Firestore
-      getDoc.mockResolvedValue({ exists: false });
+      getDoc.mockResolvedValue({   
+        exists: () => false,
+      });
 
       const result = await authService.loginWithGoogle();
 
@@ -284,7 +287,9 @@ describe('AuthService', () => {
       signInWithPopup.mockResolvedValue(userCredential);
 
       // User exists in Firestore
-      getDoc.mockResolvedValue({ exists: true });
+      getDoc.mockResolvedValue({ 
+        exists: () => true,
+      });
 
       await authService.loginWithGoogle();
 
@@ -302,7 +307,7 @@ describe('AuthService', () => {
       const result = await authService.signup(email, password, fullName);
 
       expect(createUserWithEmailAndPassword).toHaveBeenCalledWith(mockAuth, email, password);
-      expect(mockUser.updateProfile).toHaveBeenCalledWith({ displayName: fullName });
+      expect(updateProfile).toHaveBeenCalledWith(mockUser, { displayName: fullName });
       expect(setDoc).toHaveBeenCalledWith(
         mockDocRef,
         expect.objectContaining({
@@ -477,7 +482,9 @@ describe('AuthService', () => {
   describe('Non-existing user document handling', () => {
     test('should handle non-existing user document gracefully', async () => {
       // Make Firestore return non-existing document
-      mockUserDoc.get.mockResolvedValue({ exists: false });
+      mockUserDoc.get.mockResolvedValue({ 
+        exists: () => false,  
+      });
 
       // Trigger auth state change
       await mockAuthStateCallback(mockUser);
