@@ -218,8 +218,7 @@ class AuthController extends HTMLElement {
 
   async handlePasswordReset(email) {
     try {
-      const auth = getAuthInstance();
-      await sendPasswordResetEmail(auth, email);
+      await authService.resetPassword(email);
     } catch (error) {
       throw error;
     }
