@@ -1,8 +1,8 @@
 // TODO: test before re-use
 import { Modal } from '../../utilities/modal/modal.js';
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
+import { StorageService } from '../../../js/services/storage-service.js';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 /**
  * MissingImageUpload Component
@@ -240,7 +240,6 @@ class MissingImageUpload extends HTMLElement {
       throw new Error('Recipe ID is not set');
     }
     const db = getFirestoreInstance();
-    const storage = getStorageInstance();
     try {
       // Fetch the recipe document to get the category
       const recipeDocSnap = await getDoc(doc(db, 'recipes', this.recipeId));
@@ -254,14 +253,14 @@ class MissingImageUpload extends HTMLElement {
       const fileExtension = file.name.split('.').pop();
       const fileName = `${this.recipeId}.${fileExtension}`;
       // Upload full-size image
-      const fullSizeRef = ref(storage, `img/recipes/full/${category}/${fileName}`);
-      await uploadBytes(fullSizeRef, file);
-      const fullSizeUrl = await getDownloadURL(fullSizeRef);
+      const fullSizePath = `img/recipes/full/${category}/${fileName}`;
+      await StorageService.uploadFile(file, fullSizePath);
+      const fullSizeUrl = await StorageService.getFileUrl(fullSizePath);
       // TODO: Implement image compression
       // For now, upload the same image to the compressed location
-      const compressedRef = ref(storage, `img/recipes/compressed/${category}/${fileName}`);
-      await uploadBytes(compressedRef, file);
-      const compressedUrl = await getDownloadURL(compressedRef);
+      const compressedPath = `img/recipes/compressed/${category}/${fileName}`;
+      await StorageService.uploadFile(file, compressedPath);
+      const compressedUrl = await StorageService.getFileUrl(compressedPath);
       // Update Firestore document
       await updateDoc(doc(db, 'recipes', this.recipeId), {
         pendingImage: {
