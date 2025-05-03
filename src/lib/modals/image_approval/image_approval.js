@@ -59,9 +59,9 @@
  * - openModalForImage(imageData) - Opens modal with specified image data
  * - closeModal() - Closes the modal and resets state
  */
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
+import { StorageService } from '../../../js/services/storage-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, deleteObject } from 'firebase/storage';
 
 class ImageApprovalComponent extends HTMLElement {
   constructor() {
@@ -199,22 +199,15 @@ class ImageApprovalComponent extends HTMLElement {
     console.log('Reject button clicked');
     try {
       const db = getFirestoreInstance();
-      const storage = getStorageInstance();
       // Get the recipe document from Firestore
       const recipeDocSnap = await getDoc(doc(db, 'recipes', this.imageData.recipeId));
       const recipeData = recipeDocSnap.data();
       const fileExtension = recipeData.pendingImage.fileExtension;
       // Delete the full-size and compressed images from Firebase Storage
-      const fullSizeRef = ref(
-        storage,
-        `img/recipes/full/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`,
-      );
-      await deleteObject(fullSizeRef);
-      const compressedRef = ref(
-        storage,
-        `img/recipes/compressed/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`,
-      );
-      await deleteObject(compressedRef);
+      const fullSizePath = `img/recipes/full/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`;
+      await StorageService.deleteFile(fullSizePath);
+      const compressedPath = `img/recipes/compressed/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`;
+      await StorageService.deleteFile(compressedPath);
       // Update Firestore document to remove pendingImage
       await updateDoc(doc(db, 'recipes', this.imageData.recipeId), {
         pendingImage: null,
