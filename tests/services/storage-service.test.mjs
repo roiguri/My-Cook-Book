@@ -73,4 +73,46 @@ describe('StorageService', () => {
       await expect(StorageService.deleteFile(mockPath)).rejects.toThrow('Failed to delete file');
     });
   });
+
+  describe('listFiles', () => {
+    it('lists all files and folders under a given path', async () => {
+      const mockItems = [{ name: 'file1' }, { name: 'file2' }];
+      const mockPrefixes = [{ name: 'folder1' }];
+      const mockResult = { items: mockItems, prefixes: mockPrefixes };
+      const listAll = (await import('firebase/storage')).listAll;
+      listAll.mockResolvedValue(mockResult);
+
+      const result = await StorageService.listFiles('uploads/');
+      expect(firebaseService.getStorageInstance).toHaveBeenCalled();
+      expect(ref).toHaveBeenCalledWith(mockStorage, 'uploads/');
+      expect(listAll).toHaveBeenCalledWith({ storage: mockStorage, path: 'uploads/' });
+      expect(result).toEqual(mockResult);
+    });
+
+    it('throws an error if listAll fails', async () => {
+      const listAll = (await import('firebase/storage')).listAll;
+      listAll.mockRejectedValue(new Error('fail'));
+      await expect(StorageService.listFiles('uploads/')).rejects.toThrow('Failed to list files');
+    });
+  });
+
+  describe('getMetadata', () => {
+    it('returns metadata for a file', async () => {
+      const mockMetadata = { name: 'test.txt', size: 123 };
+      const getMetadata = (await import('firebase/storage')).getMetadata;
+      getMetadata.mockResolvedValue(mockMetadata);
+
+      const result = await StorageService.getMetadata(mockPath);
+      expect(firebaseService.getStorageInstance).toHaveBeenCalled();
+      expect(ref).toHaveBeenCalledWith(mockStorage, mockPath);
+      expect(getMetadata).toHaveBeenCalledWith({ storage: mockStorage, path: mockPath });
+      expect(result).toEqual(mockMetadata);
+    });
+
+    it('throws an error if getMetadata fails', async () => {
+      const getMetadata = (await import('firebase/storage')).getMetadata;
+      getMetadata.mockRejectedValue(new Error('fail'));
+      await expect(StorageService.getMetadata(mockPath)).rejects.toThrow('Failed to get file metadata');
+    });
+  });
 }); 

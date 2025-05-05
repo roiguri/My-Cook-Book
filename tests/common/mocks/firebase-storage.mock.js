@@ -9,6 +9,8 @@ import { jest } from '@jest/globals';
  *   - uploadBytes: mock upload function
  *   - getDownloadURL: mock download URL function
  *   - deleteObject: mock delete function
+ *   - listAll: mock listAll function
+ *   - getMetadata: mock getMetadata function
  *
  * Use this mock when your code or tests import from 'firebase/storage'.
  */
@@ -18,4 +20,6 @@ jest.unstable_mockModule('firebase/storage', () => ({
   uploadBytes: jest.fn(),
   getDownloadURL: jest.fn(),
   deleteObject: jest.fn(),
+  listAll: jest.fn(),
+  getMetadata: jest.fn(),
 })); 
