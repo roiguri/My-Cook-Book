@@ -13,7 +13,7 @@ import {
   updateDoc,
   deleteDoc,
   writeBatch,
-  setDoc
+  setDoc,
 } from 'firebase/firestore';
 import { getFirestoreInstance } from './firebase-service.js';
 
@@ -81,7 +81,7 @@ export class FirestoreService {
         q = query(q, ...filters);
       }
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
     } catch (error) {
       console.error('Error querying documents:', error);
       throw new Error('Failed to query documents');
@@ -169,4 +169,4 @@ export class FirestoreService {
 }
 
 // Optionally, export a singleton instance
-export const firestoreService = FirestoreService; 
+export const firestoreService = FirestoreService;

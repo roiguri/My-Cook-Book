@@ -50,4 +50,4 @@ export const firebaseServiceMocks = {
   userCollectionMock,
   dbMock,
   storageMock,
-}; 
+};

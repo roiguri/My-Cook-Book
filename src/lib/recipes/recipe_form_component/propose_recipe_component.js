@@ -14,10 +14,7 @@
  *
  */
 
-import {
-  getFirestoreInstance,
-  getStorageInstance,
-} from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
 import { collection, doc, addDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
 import authService from '../../../js/services/auth-service.js';

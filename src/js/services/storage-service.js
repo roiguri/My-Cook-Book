@@ -1,7 +1,14 @@
 // src/js/services/storage-service.js
 
 // 1. External dependencies
-import { ref, uploadBytes, getDownloadURL, deleteObject, listAll, getMetadata } from 'firebase/storage';
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+  listAll,
+  getMetadata,
+} from 'firebase/storage';
 // 2. Internal modules/services
 import { getStorageInstance } from './firebase-service.js';
 
@@ -71,7 +78,7 @@ export class StorageService {
       const result = await listAll(storageRef);
       return {
         items: result.items, // Array of StorageReference for files
-        prefixes: result.prefixes // Array of StorageReference for folders
+        prefixes: result.prefixes, // Array of StorageReference for folders
       };
     } catch (error) {
       console.error('Error listing files:', error);
@@ -97,4 +104,4 @@ export class StorageService {
 }
 
 // Optionally, export a singleton instance
-export const storageService = StorageService; 
+export const storageService = StorageService;

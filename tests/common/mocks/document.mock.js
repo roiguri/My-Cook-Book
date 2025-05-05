@@ -8,4 +8,4 @@ import { jest } from '@jest/globals';
  *
  * Use this mock when your code dispatches custom events on the document object.
  */
-document.dispatchEvent = jest.fn(); 
+document.dispatchEvent = jest.fn();

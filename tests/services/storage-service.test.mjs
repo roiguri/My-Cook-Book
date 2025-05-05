@@ -40,7 +40,9 @@ describe('StorageService', () => {
     it('throws an error if upload fails', async () => {
       uploadBytes.mockRejectedValue(new Error('fail'));
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      await expect(StorageService.uploadFile(mockFile, mockPath)).rejects.toThrow('Failed to upload file');
+      await expect(StorageService.uploadFile(mockFile, mockPath)).rejects.toThrow(
+        'Failed to upload file',
+      );
       errorSpy.mockRestore();
     });
   });
@@ -121,8 +123,10 @@ describe('StorageService', () => {
       const getMetadata = (await import('firebase/storage')).getMetadata;
       getMetadata.mockRejectedValue(new Error('fail'));
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      await expect(StorageService.getMetadata(mockPath)).rejects.toThrow('Failed to get file metadata');
+      await expect(StorageService.getMetadata(mockPath)).rejects.toThrow(
+        'Failed to get file metadata',
+      );
       errorSpy.mockRestore();
     });
   });
-}); 
+});
