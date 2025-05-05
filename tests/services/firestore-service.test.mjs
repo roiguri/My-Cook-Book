@@ -58,7 +58,9 @@ describe('FirestoreService', () => {
     });
     it('throws on error', async () => {
       getDocs.mockRejectedValue(new Error('fail'));
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await expect(FirestoreService.queryDocuments('users', {})).rejects.toThrow('Failed to query documents');
+      errorSpy.mockRestore();
     });
   });
 
@@ -70,7 +72,9 @@ describe('FirestoreService', () => {
     });
     it('throws on error', async () => {
       addDoc.mockRejectedValue(new Error('fail'));
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await expect(FirestoreService.addDocument('users', { foo: 'bar' })).rejects.toThrow('Failed to add document');
+      errorSpy.mockRestore();
     });
   });
 
@@ -82,7 +86,9 @@ describe('FirestoreService', () => {
     });
     it('throws on error', async () => {
       updateDoc.mockRejectedValue(new Error('fail'));
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await expect(FirestoreService.updateDocument('users', 'id', { foo: 1 })).rejects.toThrow('Failed to update document');
+      errorSpy.mockRestore();
     });
   });
 
@@ -94,7 +100,9 @@ describe('FirestoreService', () => {
     });
     it('throws on error', async () => {
       deleteDoc.mockRejectedValue(new Error('fail'));
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await expect(FirestoreService.deleteDocument('users', 'id')).rejects.toThrow('Failed to delete document');
+      errorSpy.mockRestore();
     });
   });
 
@@ -117,7 +125,9 @@ describe('FirestoreService', () => {
     });
     it('throws on error', async () => {
       writeBatch.mockReturnValue({ commit: jest.fn().mockRejectedValue(new Error('fail')), set: jest.fn(), update: jest.fn(), delete: jest.fn() });
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await expect(FirestoreService.batchWrite([{ type: 'set', collection: 'users', id: '1', data: { foo: 1 } }])).rejects.toThrow('Failed to perform batch write');
+      errorSpy.mockRestore();
     });
   });
 }); 
