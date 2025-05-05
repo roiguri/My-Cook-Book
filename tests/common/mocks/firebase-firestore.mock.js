@@ -35,4 +35,12 @@ jest.unstable_mockModule('firebase/firestore', () => ({
   updateDoc: jest.fn(),
   deleteDoc: jest.fn(),
   getFirestore: jest.fn(() => 'mockFirestore'),
+  getDocs: jest.fn(),
+  addDoc: jest.fn(),
+  writeBatch: jest.fn(),
+  query: jest.fn(),
+  where: jest.fn(),
+  orderBy: jest.fn(),
+  limit: jest.fn(),
+  collection: jest.fn(),
 })); 
