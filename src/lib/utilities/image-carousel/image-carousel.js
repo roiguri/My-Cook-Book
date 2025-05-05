@@ -1,5 +1,4 @@
-import { getStorageInstance } from '../../../js/services/firebase-service.js';
-import { ref, getDownloadURL } from 'firebase/storage';
+import { StorageService } from '../../../js/services/storage-service.js';
 
 class ImageCarousel extends HTMLElement {
   constructor() {
@@ -62,7 +61,7 @@ class ImageCarousel extends HTMLElement {
     this.dotsContainer.innerHTML = '';
 
     // Process all images (could be URLs or Firebase paths)
-    const processedImages = await Promise.all(
+    await Promise.all(
       this.images.map(async (image, index) => {
         const listItem = document.createElement('li');
         listItem.classList.add('image-carousel__item');
@@ -71,14 +70,16 @@ class ImageCarousel extends HTMLElement {
         // Check if the image is a Firebase path
         if (typeof image === 'string' && image.startsWith('img/recipes/')) {
           try {
-            const storage = getStorageInstance();
-            const imageRef = ref(storage, image);
-            img.src = await getDownloadURL(imageRef);
+            img.src = await StorageService.getFileUrl(image);
           } catch (error) {
             console.error('Error loading Firebase image:', error);
             // Fallback to placeholder if Firebase image fails
-            const placeholderRef = ref(storage, 'img/recipes/compressed/place-holder-add-new.png');
-            img.src = await getDownloadURL(placeholderRef);
+            try {
+              img.src = await StorageService.getFileUrl('img/recipes/compressed/place-holder-add-new.png');
+            } catch (placeholderError) {
+              console.error('Error loading placeholder image:', placeholderError);
+              img.src = '';
+            }
           }
         } else {
           // Handle as direct URL or local path

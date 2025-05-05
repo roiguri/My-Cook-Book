@@ -5,8 +5,8 @@
  * particularly focusing on image management for recipes.
  */
 
-import { getStorageInstance, getFirestoreInstance } from '../services/firebase-service.js';
-import { ref, uploadBytes, deleteObject } from 'firebase/storage';
+import { getFirestoreInstance } from '../services/firebase-service.js';
+import { StorageService } from '../services/storage-service.js';
 import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 
 /**
@@ -27,7 +27,6 @@ async function deleteRecipeImages(recipeId) {
     }
 
     const recipeData = recipeDocSnap.data();
-    const storage = getStorageInstance();
     const deletePromises = [];
 
     // Handle approved images array
@@ -35,15 +34,14 @@ async function deleteRecipeImages(recipeId) {
       recipeData.images.forEach((image) => {
         if (image.full) {
           deletePromises.push(
-            deleteObject(ref(storage, image.full)).catch((err) =>
+            StorageService.deleteFile(image.full).catch((err) =>
               console.warn(`Error deleting full image ${image.id}:`, err),
             ),
           );
         }
-
         if (image.compressed) {
           deletePromises.push(
-            deleteObject(ref(storage, image.compressed)).catch((err) =>
+            StorageService.deleteFile(image.compressed).catch((err) =>
               console.warn(`Error deleting compressed image ${image.id}:`, err),
             ),
           );
@@ -58,14 +56,14 @@ async function deleteRecipeImages(recipeId) {
           pendingBatch.images.forEach((image) => {
             if (image.full) {
               deletePromises.push(
-                deleteObject(ref(storage, image.full)).catch((err) =>
+                StorageService.deleteFile(image.full).catch((err) =>
                   console.warn(`Error deleting pending full image ${image.id}:`, err),
                 ),
               );
             }
             if (image.compressed) {
               deletePromises.push(
-                deleteObject(ref(storage, image.compressed)).catch((err) =>
+                StorageService.deleteFile(image.compressed).catch((err) =>
                   console.warn(`Error deleting pending compressed image ${image.id}:`, err),
                 ),
               );
@@ -92,7 +90,6 @@ async function deleteRecipeImages(recipeId) {
  * @returns {Promise<Object>} The pending images data to be stored in Firestore
  */
 async function uploadProposedImages(recipeId, images, userId) {
-  const storage = getStorageInstance();
   const db = getFirestoreInstance();
   const batchId = Math.random().toString(36).substring(2);
   const pendingBatch = {
@@ -118,10 +115,10 @@ async function uploadProposedImages(recipeId, images, userId) {
       const fullPath = `img/recipes/pending/${recipeId}/${batchId}/full/${imageId}.${fileExtension}`;
       const compressedPath = `img/recipes/pending/${recipeId}/${batchId}/compressed/${imageId}.${fileExtension}`;
       // Upload full size
-      await uploadBytes(ref(storage, fullPath), image.file);
+      await StorageService.uploadFile(image.file, fullPath);
       // For now, use the same file for compressed version
       // TODO: Implement actual image compression
-      await uploadBytes(ref(storage, compressedPath), image.file);
+      await StorageService.uploadFile(image.file, compressedPath);
       // Add image data to batch
       pendingBatch.images.push({
         id: imageId,
