@@ -18,10 +18,7 @@
  * - recipe-card-open: Emitted when the card is clicked
  *   detail: { recipeId: string }
  */
-import {
-  getFirestoreInstance,
-  getStorageInstance,
-} from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { arrayUnion, arrayRemove } from 'firebase/firestore';

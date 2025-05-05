@@ -25,4 +25,4 @@ jest.unstable_mockModule('firebase/auth', () => ({
   setPersistence: jest.fn(),
   getAuth: jest.fn(() => 'mockAuth'),
   updateProfile: jest.fn(),
-})); 
+}));

@@ -75,7 +75,9 @@ class ImageCarousel extends HTMLElement {
             console.error('Error loading Firebase image:', error);
             // Fallback to placeholder if Firebase image fails
             try {
-              img.src = await StorageService.getFileUrl('img/recipes/compressed/place-holder-add-new.png');
+              img.src = await StorageService.getFileUrl(
+                'img/recipes/compressed/place-holder-add-new.png',
+              );
             } catch (placeholderError) {
               console.error('Error loading placeholder image:', placeholderError);
               img.src = '';

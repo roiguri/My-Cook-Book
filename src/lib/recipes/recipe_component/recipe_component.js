@@ -1,7 +1,4 @@
-import {
-  getFirestoreInstance,
-  getStorageInstance,
-} from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 import authService from '../../../js/services/auth-service.js';
