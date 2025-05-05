@@ -39,7 +39,11 @@ describe('StorageService', () => {
 
     it('throws an error if upload fails', async () => {
       uploadBytes.mockRejectedValue(new Error('fail'));
-      await expect(StorageService.uploadFile(mockFile, mockPath)).rejects.toThrow('Failed to upload file');
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      await expect(StorageService.uploadFile(mockFile, mockPath)).rejects.toThrow(
+        'Failed to upload file',
+      );
+      errorSpy.mockRestore();
     });
   });
 
@@ -55,7 +59,9 @@ describe('StorageService', () => {
 
     it('throws an error if getDownloadURL fails', async () => {
       getDownloadURL.mockRejectedValue(new Error('fail'));
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await expect(StorageService.getFileUrl(mockPath)).rejects.toThrow('Failed to get file URL');
+      errorSpy.mockRestore();
     });
   });
 
@@ -70,7 +76,9 @@ describe('StorageService', () => {
 
     it('throws an error if deleteObject fails', async () => {
       deleteObject.mockRejectedValue(new Error('fail'));
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await expect(StorageService.deleteFile(mockPath)).rejects.toThrow('Failed to delete file');
+      errorSpy.mockRestore();
     });
   });
 
@@ -92,7 +100,9 @@ describe('StorageService', () => {
     it('throws an error if listAll fails', async () => {
       const listAll = (await import('firebase/storage')).listAll;
       listAll.mockRejectedValue(new Error('fail'));
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       await expect(StorageService.listFiles('uploads/')).rejects.toThrow('Failed to list files');
+      errorSpy.mockRestore();
     });
   });
 
@@ -112,7 +122,11 @@ describe('StorageService', () => {
     it('throws an error if getMetadata fails', async () => {
       const getMetadata = (await import('firebase/storage')).getMetadata;
       getMetadata.mockRejectedValue(new Error('fail'));
-      await expect(StorageService.getMetadata(mockPath)).rejects.toThrow('Failed to get file metadata');
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      await expect(StorageService.getMetadata(mockPath)).rejects.toThrow(
+        'Failed to get file metadata',
+      );
+      errorSpy.mockRestore();
     });
   });
-}); 
+});

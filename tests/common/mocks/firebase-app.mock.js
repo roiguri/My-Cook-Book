@@ -13,4 +13,4 @@ import { jest } from '@jest/globals';
 jest.unstable_mockModule('firebase/app', () => ({
   initializeApp: jest.fn(() => 'mockApp'),
   getApps: jest.fn(() => []),
-})); 
+}));

@@ -263,7 +263,7 @@ describe('AuthService', () => {
       signInWithPopup.mockResolvedValue(userCredential);
 
       // User doesn't exist in Firestore
-      getDoc.mockResolvedValue({   
+      getDoc.mockResolvedValue({
         exists: () => false,
       });
 
@@ -287,7 +287,7 @@ describe('AuthService', () => {
       signInWithPopup.mockResolvedValue(userCredential);
 
       // User exists in Firestore
-      getDoc.mockResolvedValue({ 
+      getDoc.mockResolvedValue({
         exists: () => true,
       });
 
@@ -482,8 +482,8 @@ describe('AuthService', () => {
   describe('Non-existing user document handling', () => {
     test('should handle non-existing user document gracefully', async () => {
       // Make Firestore return non-existing document
-      mockUserDoc.get.mockResolvedValue({ 
-        exists: () => false,  
+      mockUserDoc.get.mockResolvedValue({
+        exists: () => false,
       });
 
       // Trigger auth state change

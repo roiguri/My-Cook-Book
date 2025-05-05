@@ -22,4 +22,4 @@ jest.unstable_mockModule('firebase/storage', () => ({
   deleteObject: jest.fn(),
   listAll: jest.fn(),
   getMetadata: jest.fn(),
-})); 
+}));
