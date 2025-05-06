@@ -21,6 +21,32 @@ import { FirestoreService } from '../../services/firestore-service.js';
  * @property {Date|string|number} [updatedAt]
  */
 
+// Category mapping and icons
+const CATEGORY_MAP = {
+  appetizers: 'מנות ראשונות',
+  'main-courses': 'מנות עיקריות',
+  'side-dishes': 'תוספות',
+  'soups-stews': 'מרקים ותבשילים',
+  salads: 'סלטים',
+  desserts: 'קינוחים',
+  'breakfast-brunch': 'ארוחות בוקר',
+  snacks: 'חטיפים',
+  beverages: 'משקאות',
+};
+
+const CATEGORY_ICONS = {
+  appetizers: '🥗',
+  'main-courses': '🍖',
+  'side-dishes': '🥔',
+  'soups-stews': '🥘',
+  salads: '🥬',
+  desserts: '🍰',
+  'breakfast-brunch': '🍳',
+  snacks: '🥨',
+  beverages: '🥤',
+  else: '🍽️',
+};
+
 /**
  * Formats raw recipe data from Firestore for display
  * @param {Object} rawData - Raw recipe data from Firestore
@@ -281,32 +307,6 @@ export function getDifficultyClass(difficulty) {
   };
   return difficultyMap[difficulty] || 'medium';
 }
-
-// Category mapping and icons
-const CATEGORY_MAP = {
-  appetizers: 'מנות ראשונות',
-  'main-courses': 'מנות עיקריות',
-  'side-dishes': 'תוספות',
-  'soups-stews': 'מרקים ותבשילים',
-  salads: 'סלטים',
-  desserts: 'קינוחים',
-  'breakfast-brunch': 'ארוחות בוקר',
-  snacks: 'חטיפים',
-  beverages: 'משקאות',
-};
-
-const CATEGORY_ICONS = {
-  appetizers: '🥗',
-  'main-courses': '🍖',
-  'side-dishes': '🥔',
-  'soups-stews': '🥘',
-  salads: '🥬',
-  desserts: '🍰',
-  'breakfast-brunch': '🍳',
-  snacks: '🥨',
-  beverages: '🥤',
-  else: '🍽️',
-};
 
 /**
  * Maps category ID to display name
