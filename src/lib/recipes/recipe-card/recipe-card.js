@@ -44,15 +44,15 @@ class RecipeCard extends HTMLElement {
     this.attachShadow({ mode: 'open' });
 
     this._categoryMap = {
-      appetizers: 'מנות ראשונות',
+      'appetizers': 'מנות ראשונות',
       'main-courses': 'מנות עיקריות',
       'side-dishes': 'תוספות',
       'soups-stews': 'מרקים ותבשילים',
-      salads: 'סלטים',
-      desserts: 'קינוחים',
+      'salads': 'סלטים',
+      'desserts': 'קינוחים',
       'breakfast-brunch': 'ארוחות בוקר',
-      snacks: 'חטיפים',
-      beverages: 'משקאות',
+      'snacks': 'חטיפים',
+      'beverages': 'משקאות',
     };
 
     // Initialize default values
