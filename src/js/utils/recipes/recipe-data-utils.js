@@ -82,12 +82,20 @@ export function validateRecipeData(recipeData) {
   }
 
   // Difficulty
-  if (!recipeData.difficulty || typeof recipeData.difficulty !== 'string' || !recipeData.difficulty.trim()) {
+  if (
+    !recipeData.difficulty ||
+    typeof recipeData.difficulty !== 'string' ||
+    !recipeData.difficulty.trim()
+  ) {
     errors.difficulty = 'Difficulty is required.';
   }
 
   // Main Ingredient
-  if (!recipeData.mainIngredient || typeof recipeData.mainIngredient !== 'string' || !recipeData.mainIngredient.trim()) {
+  if (
+    !recipeData.mainIngredient ||
+    typeof recipeData.mainIngredient !== 'string' ||
+    !recipeData.mainIngredient.trim()
+  ) {
     errors.mainIngredient = 'Main ingredient is required.';
   }
 
@@ -122,7 +130,8 @@ export function validateRecipeData(recipeData) {
   }
 
   // Instructions vs Stages (mutual exclusivity)
-  const hasInstructions = Array.isArray(recipeData.instructions) && recipeData.instructions.length > 0;
+  const hasInstructions =
+    Array.isArray(recipeData.instructions) && recipeData.instructions.length > 0;
   const hasStages = Array.isArray(recipeData.stages) && recipeData.stages.length > 0;
   if (hasInstructions && hasStages) {
     errors.instructions = 'Cannot have both instructions and stages.';
@@ -159,17 +168,26 @@ export function validateRecipeData(recipeData) {
 
   // Optional fields type validation
   if ('tags' in recipeData && recipeData.tags !== undefined) {
-    if (!Array.isArray(recipeData.tags) || !recipeData.tags.every(tag => typeof tag === 'string')) {
+    if (
+      !Array.isArray(recipeData.tags) ||
+      !recipeData.tags.every((tag) => typeof tag === 'string')
+    ) {
       errors.tags = 'Tags must be an array of strings.';
     }
   }
   if ('images' in recipeData && recipeData.images !== undefined) {
-    if (!Array.isArray(recipeData.images) || !recipeData.images.every(img => typeof img === 'object' && img !== null)) {
+    if (
+      !Array.isArray(recipeData.images) ||
+      !recipeData.images.every((img) => typeof img === 'object' && img !== null)
+    ) {
       errors.images = 'Images must be an array of objects.';
     }
   }
   if ('comments' in recipeData && recipeData.comments !== undefined) {
-    if (!Array.isArray(recipeData.comments) || !recipeData.comments.every(c => typeof c === 'string')) {
+    if (
+      !Array.isArray(recipeData.comments) ||
+      !recipeData.comments.every((c) => typeof c === 'string')
+    ) {
       errors.comments = 'Comments must be an array of strings.';
     }
   }
@@ -178,13 +196,33 @@ export function validateRecipeData(recipeData) {
       errors.approved = 'Approved must be a boolean.';
     }
   }
-  if ('createdAt' in recipeData && recipeData.createdAt !== undefined && recipeData.createdAt !== null) {
-    if (!(typeof recipeData.createdAt === 'number' || typeof recipeData.createdAt === 'string' || recipeData.createdAt instanceof Date)) {
+  if (
+    'createdAt' in recipeData &&
+    recipeData.createdAt !== undefined &&
+    recipeData.createdAt !== null
+  ) {
+    if (
+      !(
+        typeof recipeData.createdAt === 'number' ||
+        typeof recipeData.createdAt === 'string' ||
+        recipeData.createdAt instanceof Date
+      )
+    ) {
       errors.createdAt = 'createdAt must be a number, string, or Date.';
     }
   }
-  if ('updatedAt' in recipeData && recipeData.updatedAt !== undefined && recipeData.updatedAt !== null) {
-    if (!(typeof recipeData.updatedAt === 'number' || typeof recipeData.updatedAt === 'string' || recipeData.updatedAt instanceof Date)) {
+  if (
+    'updatedAt' in recipeData &&
+    recipeData.updatedAt !== undefined &&
+    recipeData.updatedAt !== null
+  ) {
+    if (
+      !(
+        typeof recipeData.updatedAt === 'number' ||
+        typeof recipeData.updatedAt === 'string' ||
+        recipeData.updatedAt instanceof Date
+      )
+    ) {
       errors.updatedAt = 'updatedAt must be a number, string, or Date.';
     }
   }
@@ -237,37 +275,37 @@ export function getTimeClass(totalMinutes) {
  */
 export function getDifficultyClass(difficulty) {
   const difficultyMap = {
-    'קלה': 'easy',
-    'בינונית': 'medium',
-    'קשה': 'hard',
+    קלה: 'easy',
+    בינונית: 'medium',
+    קשה: 'hard',
   };
   return difficultyMap[difficulty] || 'medium';
 }
 
 // Category mapping and icons
 const CATEGORY_MAP = {
-  'appetizers': 'מנות ראשונות',
+  appetizers: 'מנות ראשונות',
   'main-courses': 'מנות עיקריות',
   'side-dishes': 'תוספות',
   'soups-stews': 'מרקים ותבשילים',
-  'salads': 'סלטים',
-  'desserts': 'קינוחים',
+  salads: 'סלטים',
+  desserts: 'קינוחים',
   'breakfast-brunch': 'ארוחות בוקר',
-  'snacks': 'חטיפים',
-  'beverages': 'משקאות',
+  snacks: 'חטיפים',
+  beverages: 'משקאות',
 };
 
 const CATEGORY_ICONS = {
-  'appetizers': '🥗',
+  appetizers: '🥗',
   'main-courses': '🍖',
   'side-dishes': '🥔',
   'soups-stews': '🥘',
-  'salads': '🥬',
-  'desserts': '🍰',
+  salads: '🥬',
+  desserts: '🍰',
   'breakfast-brunch': '🍳',
-  'snacks': '🥨',
-  'beverages': '🥤',
-  'else': '🍽️',
+  snacks: '🥨',
+  beverages: '🥤',
+  else: '🍽️',
 };
 
 /**
@@ -316,4 +354,4 @@ export async function getRecipesForCards(options = {}) {
 export async function getRecipeById(recipeId) {
   const doc = await FirestoreService.getDocument('recipes', recipeId);
   return doc ? formatRecipeData(doc) : null;
-} 
+}

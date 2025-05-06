@@ -10,7 +10,16 @@ jest.unstable_mockModule('../../../src/js/services/firestore-service.js', () => 
   },
 }));
 
-let calculateTotalTime, formatCookingTime, getTimeClass, getDifficultyClass, getLocalizedCategoryName, getCategoryIcon, formatRecipeData, validateRecipeData, getRecipesForCards, getRecipeById;
+let calculateTotalTime,
+  formatCookingTime,
+  getTimeClass,
+  getDifficultyClass,
+  getLocalizedCategoryName,
+  getCategoryIcon,
+  formatRecipeData,
+  validateRecipeData,
+  getRecipesForCards,
+  getRecipeById;
 
 describe('recipe-data-utils', () => {
   beforeEach(async () => {
@@ -278,7 +287,15 @@ describe('recipe-data-utils', () => {
 
     it('validates optional fields types (tags, images, comments, approved, createdAt, updatedAt)', () => {
       // Valid types
-      let r = { ...baseRecipe, tags: ['a', 'b'], images: [{}], comments: ['c'], approved: true, createdAt: 123, updatedAt: new Date() };
+      let r = {
+        ...baseRecipe,
+        tags: ['a', 'b'],
+        images: [{}],
+        comments: ['c'],
+        approved: true,
+        createdAt: 123,
+        updatedAt: new Date(),
+      };
       let result = validateRecipeData(r);
       expect(result.isValid).toBe(true);
       // Invalid tags
@@ -318,14 +335,43 @@ describe('recipe-data-utils', () => {
     it('fetches and normalizes recipes with options', async () => {
       // Arrange
       const mockDocs = [
-        { id: '1', name: 'A', category: 'desserts', prepTime: 1, waitTime: 2, difficulty: 'קלה', mainIngredient: 'sugar', servings: 1, ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }], instructions: ['Mix'] },
-        { id: '2', name: 'B', category: 'appetizers', prepTime: 2, waitTime: 3, difficulty: 'קשה', mainIngredient: 'salt', servings: 2, ingredients: [{ amount: '2', unit: 'tbsp', item: 'salt' }], instructions: ['Stir'] },
+        {
+          id: '1',
+          name: 'A',
+          category: 'desserts',
+          prepTime: 1,
+          waitTime: 2,
+          difficulty: 'קלה',
+          mainIngredient: 'sugar',
+          servings: 1,
+          ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }],
+          instructions: ['Mix'],
+        },
+        {
+          id: '2',
+          name: 'B',
+          category: 'appetizers',
+          prepTime: 2,
+          waitTime: 3,
+          difficulty: 'קשה',
+          mainIngredient: 'salt',
+          servings: 2,
+          ingredients: [{ amount: '2', unit: 'tbsp', item: 'salt' }],
+          instructions: ['Stir'],
+        },
       ];
       mockQueryDocuments.mockResolvedValue(mockDocs);
       // Act
-      const result = await getRecipesForCards({ category: 'desserts', approvedOnly: true, limit: 1 });
+      const result = await getRecipesForCards({
+        category: 'desserts',
+        approvedOnly: true,
+        limit: 1,
+      });
       // Assert
-      expect(mockQueryDocuments).toHaveBeenCalledWith('recipes', expect.objectContaining({ where: expect.any(Array), limit: 1 }));
+      expect(mockQueryDocuments).toHaveBeenCalledWith(
+        'recipes',
+        expect.objectContaining({ where: expect.any(Array), limit: 1 }),
+      );
       expect(result[0].name).toBe('A');
       expect(result[0].category).toBe('desserts');
     });
@@ -344,7 +390,18 @@ describe('recipe-data-utils', () => {
   describe('getRecipeById', () => {
     it('fetches and normalizes a recipe by id', async () => {
       // Arrange
-      const mockDoc = { id: '1', name: 'A', category: 'desserts', prepTime: 1, waitTime: 2, difficulty: 'קלה', mainIngredient: 'sugar', servings: 1, ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }], instructions: ['Mix'] };
+      const mockDoc = {
+        id: '1',
+        name: 'A',
+        category: 'desserts',
+        prepTime: 1,
+        waitTime: 2,
+        difficulty: 'קלה',
+        mainIngredient: 'sugar',
+        servings: 1,
+        ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }],
+        instructions: ['Mix'],
+      };
       mockGetDocument.mockResolvedValue(mockDoc);
       // Act
       const result = await getRecipeById('1');
@@ -363,4 +420,4 @@ describe('recipe-data-utils', () => {
       expect(result).toBeNull();
     });
   });
-}); 
+});
