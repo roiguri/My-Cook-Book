@@ -36,7 +36,7 @@ const dbMock = {
 };
 const storageMock = {};
 
-jest.unstable_mockModule('../../src/js/services/firebase-service.js', () => ({
+jest.unstable_mockModule('src/js/services/firebase-service.js', () => ({
   getAuthInstance: jest.fn(() => authMock),
   getFirestoreInstance: jest.fn(() => dbMock),
   getStorageInstance: jest.fn(() => storageMock),
