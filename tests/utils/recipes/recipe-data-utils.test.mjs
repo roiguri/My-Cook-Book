@@ -5,6 +5,7 @@ import {
   getDifficultyClass,
   getLocalizedCategoryName,
   getCategoryIcon,
+  formatRecipeData,
 } from '../../../src/js/utils/recipes/recipe-data-utils.js';
 
 describe('recipe-data-utils', () => {
@@ -85,6 +86,78 @@ describe('recipe-data-utils', () => {
     });
     it('returns default icon for unknown category', () => {
       expect(getCategoryIcon('unknown')).toBe('🍽️');
+    });
+  });
+
+  describe('formatRecipeData', () => {
+    it('returns null for non-object input', () => {
+      expect(formatRecipeData(null)).toBeNull();
+      expect(formatRecipeData(undefined)).toBeNull();
+      expect(formatRecipeData(123)).toBeNull();
+    });
+
+    it('normalizes a complete recipe object', () => {
+      const raw = {
+        id: 'abc',
+        name: 'Cake',
+        category: 'desserts',
+        prepTime: 10,
+        waitTime: 20,
+        difficulty: 'קלה',
+        mainIngredient: 'flour',
+        tags: ['sweet'],
+        servings: 8,
+        ingredients: [{ amount: '1', unit: 'cup', item: 'flour' }],
+        stages: [{ title: 'Mix', instructions: ['Do this'] }],
+        instructions: ['Step 1'],
+        images: [{ file: 'cake.jpg', isPrimary: true, access: 'public', uploadedBy: 'user1' }],
+        comments: ['Yum!'],
+        approved: true,
+        createdAt: 1234567890,
+        updatedAt: 1234567891,
+      };
+      const formatted = formatRecipeData(raw);
+      expect(formatted).toEqual(raw);
+    });
+
+    it('fills in defaults for missing fields', () => {
+      const raw = { name: 'Bread' };
+      const formatted = formatRecipeData(raw);
+      expect(formatted).toEqual({
+        id: '',
+        name: 'Bread',
+        category: '',
+        prepTime: 0,
+        waitTime: 0,
+        difficulty: '',
+        mainIngredient: '',
+        tags: [],
+        servings: 1,
+        ingredients: [],
+        stages: undefined,
+        instructions: undefined,
+        images: [],
+        comments: [],
+        approved: false,
+        createdAt: null,
+        updatedAt: null,
+      });
+    });
+
+    it('handles arrays and booleans correctly', () => {
+      const raw = {
+        tags: 'not-an-array',
+        ingredients: undefined,
+        images: null,
+        comments: 0,
+        approved: 'yes',
+      };
+      const formatted = formatRecipeData(raw);
+      expect(formatted.tags).toEqual([]);
+      expect(formatted.ingredients).toEqual([]);
+      expect(formatted.images).toEqual([]);
+      expect(formatted.comments).toEqual([]);
+      expect(formatted.approved).toBe(false);
     });
   });
 }); 
