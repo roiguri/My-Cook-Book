@@ -1,3 +1,5 @@
+import { FirestoreService } from '../../services/firestore-service.js';
+
 /**
  * @typedef {Object} Recipe
  * @property {string} [id]
@@ -291,11 +293,27 @@ export function getCategoryIcon(category) {
  * @param {Object} options - Query options (category, limit, approved only, etc.)
  * @returns {Promise<Array>} Array of recipe card data objects
  */
-export async function getRecipesForCards(options = {}) {}
+export async function getRecipesForCards(options = {}) {
+  const queryParams = { where: [], orderBy: ['createdAt', 'desc'] };
+  if (options.category) {
+    queryParams.where.push(['category', '==', options.category]);
+  }
+  if (options.approvedOnly) {
+    queryParams.where.push(['approved', '==', true]);
+  }
+  if (options.limit) {
+    queryParams.limit = options.limit;
+  }
+  const docs = await FirestoreService.queryDocuments('recipes', queryParams);
+  return docs.map(formatRecipeData);
+}
 
 /**
  * Fetch a single complete recipe by ID
  * @param {string} recipeId - Recipe ID
  * @returns {Promise<Object>} Complete recipe object
  */
-export async function getRecipeById(recipeId) {} 
+export async function getRecipeById(recipeId) {
+  const doc = await FirestoreService.getDocument('recipes', recipeId);
+  return doc ? formatRecipeData(doc) : null;
+} 

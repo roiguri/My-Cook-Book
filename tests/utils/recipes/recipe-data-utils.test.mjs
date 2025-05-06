@@ -1,15 +1,35 @@
-import {
-  calculateTotalTime,
-  formatCookingTime,
-  getTimeClass,
-  getDifficultyClass,
-  getLocalizedCategoryName,
-  getCategoryIcon,
-  formatRecipeData,
-  validateRecipeData,
-} from '../../../src/js/utils/recipes/recipe-data-utils.js';
+import { jest } from '@jest/globals';
+
+// Inline FirestoreService mock for this test file
+export const mockQueryDocuments = jest.fn();
+export const mockGetDocument = jest.fn();
+jest.unstable_mockModule('../../../src/js/services/firestore-service.js', () => ({
+  FirestoreService: {
+    queryDocuments: mockQueryDocuments,
+    getDocument: mockGetDocument,
+  },
+}));
+
+let calculateTotalTime, formatCookingTime, getTimeClass, getDifficultyClass, getLocalizedCategoryName, getCategoryIcon, formatRecipeData, validateRecipeData, getRecipesForCards, getRecipeById;
 
 describe('recipe-data-utils', () => {
+  beforeEach(async () => {
+    jest.resetModules();
+    const utils = await import('../../../src/js/utils/recipes/recipe-data-utils.js');
+    calculateTotalTime = utils.calculateTotalTime;
+    formatCookingTime = utils.formatCookingTime;
+    getTimeClass = utils.getTimeClass;
+    getDifficultyClass = utils.getDifficultyClass;
+    getLocalizedCategoryName = utils.getLocalizedCategoryName;
+    getCategoryIcon = utils.getCategoryIcon;
+    formatRecipeData = utils.formatRecipeData;
+    validateRecipeData = utils.validateRecipeData;
+    getRecipesForCards = utils.getRecipesForCards;
+    getRecipeById = utils.getRecipeById;
+    mockQueryDocuments.mockReset();
+    mockGetDocument.mockReset();
+  });
+
   describe('calculateTotalTime', () => {
     it('returns the sum of prepTime and waitTime', () => {
       expect(calculateTotalTime(10, 20)).toBe(30);
@@ -291,6 +311,56 @@ describe('recipe-data-utils', () => {
       result = validateRecipeData(r);
       expect(result.isValid).toBe(false);
       expect(result.errors.updatedAt).toBeDefined();
+    });
+  });
+
+  describe('getRecipesForCards', () => {
+    it('fetches and normalizes recipes with options', async () => {
+      // Arrange
+      const mockDocs = [
+        { id: '1', name: 'A', category: 'desserts', prepTime: 1, waitTime: 2, difficulty: 'קלה', mainIngredient: 'sugar', servings: 1, ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }], instructions: ['Mix'] },
+        { id: '2', name: 'B', category: 'appetizers', prepTime: 2, waitTime: 3, difficulty: 'קשה', mainIngredient: 'salt', servings: 2, ingredients: [{ amount: '2', unit: 'tbsp', item: 'salt' }], instructions: ['Stir'] },
+      ];
+      mockQueryDocuments.mockResolvedValue(mockDocs);
+      // Act
+      const result = await getRecipesForCards({ category: 'desserts', approvedOnly: true, limit: 1 });
+      // Assert
+      expect(mockQueryDocuments).toHaveBeenCalledWith('recipes', expect.objectContaining({ where: expect.any(Array), limit: 1 }));
+      expect(result[0].name).toBe('A');
+      expect(result[0].category).toBe('desserts');
+    });
+
+    it('returns empty array if no docs', async () => {
+      // Arrange
+      mockQueryDocuments.mockResolvedValue([]);
+      // Act
+      const result = await getRecipesForCards({});
+      // Assert
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(0);
+    });
+  });
+
+  describe('getRecipeById', () => {
+    it('fetches and normalizes a recipe by id', async () => {
+      // Arrange
+      const mockDoc = { id: '1', name: 'A', category: 'desserts', prepTime: 1, waitTime: 2, difficulty: 'קלה', mainIngredient: 'sugar', servings: 1, ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }], instructions: ['Mix'] };
+      mockGetDocument.mockResolvedValue(mockDoc);
+      // Act
+      const result = await getRecipeById('1');
+      // Assert
+      expect(mockGetDocument).toHaveBeenCalledWith('recipes', '1');
+      expect(result.name).toBe('A');
+      expect(result.category).toBe('desserts');
+    });
+
+    it('returns null if recipe not found', async () => {
+      // Arrange
+      mockGetDocument.mockResolvedValue(null);
+      // Act
+      const result = await getRecipeById('notfound');
+      // Assert
+      expect(result).toBeNull();
     });
   });
 }); 
