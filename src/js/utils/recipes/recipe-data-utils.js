@@ -52,7 +52,146 @@ export function formatRecipeData(rawData) {
  * @param {Object} recipeData - Recipe data to validate
  * @returns {Object} Validation result with isValid flag and error messages
  */
-export function validateRecipeData(recipeData) {}
+export function validateRecipeData(recipeData) {
+  const errors = {};
+  if (!recipeData || typeof recipeData !== 'object') {
+    return { isValid: false, errors: { general: 'Invalid recipe data object.' } };
+  }
+
+  // Name
+  if (!recipeData.name || typeof recipeData.name !== 'string' || !recipeData.name.trim()) {
+    errors.name = 'Recipe name is required.';
+  }
+
+  // Category
+  const validCategories = Object.keys(CATEGORY_MAP);
+  if (!recipeData.category || !validCategories.includes(recipeData.category)) {
+    errors.category = 'Category is required and must be a valid option.';
+  }
+
+  // Prep Time
+  if (typeof recipeData.prepTime !== 'number' || recipeData.prepTime < 0) {
+    errors.prepTime = 'Preparation time must be a non-negative number.';
+  }
+
+  // Wait Time
+  if (typeof recipeData.waitTime !== 'number' || recipeData.waitTime < 0) {
+    errors.waitTime = 'Waiting time must be a non-negative number.';
+  }
+
+  // Difficulty
+  if (!recipeData.difficulty || typeof recipeData.difficulty !== 'string' || !recipeData.difficulty.trim()) {
+    errors.difficulty = 'Difficulty is required.';
+  }
+
+  // Main Ingredient
+  if (!recipeData.mainIngredient || typeof recipeData.mainIngredient !== 'string' || !recipeData.mainIngredient.trim()) {
+    errors.mainIngredient = 'Main ingredient is required.';
+  }
+
+  // Servings
+  if (
+    typeof recipeData.servings !== 'number' ||
+    !Number.isInteger(recipeData.servings) ||
+    recipeData.servings < 1
+  ) {
+    errors.servings = 'Servings must be an integer greater than or equal to 1.';
+  }
+
+  // Ingredients
+  if (!Array.isArray(recipeData.ingredients) || recipeData.ingredients.length === 0) {
+    errors.ingredients = 'At least one ingredient is required.';
+  } else {
+    recipeData.ingredients.forEach((ing, idx) => {
+      if (!ing || typeof ing !== 'object') {
+        errors[`ingredients[${idx}]`] = 'Ingredient must be an object.';
+        return;
+      }
+      if (!ing.amount || typeof ing.amount !== 'string' || !ing.amount.trim()) {
+        errors[`ingredients[${idx}].amount`] = 'Amount is required.';
+      }
+      if (!ing.unit || typeof ing.unit !== 'string' || !ing.unit.trim()) {
+        errors[`ingredients[${idx}].unit`] = 'Unit is required.';
+      }
+      if (!ing.item || typeof ing.item !== 'string' || !ing.item.trim()) {
+        errors[`ingredients[${idx}].item`] = 'Item is required.';
+      }
+    });
+  }
+
+  // Instructions vs Stages (mutual exclusivity)
+  const hasInstructions = Array.isArray(recipeData.instructions) && recipeData.instructions.length > 0;
+  const hasStages = Array.isArray(recipeData.stages) && recipeData.stages.length > 0;
+  if (hasInstructions && hasStages) {
+    errors.instructions = 'Cannot have both instructions and stages.';
+    errors.stages = 'Cannot have both instructions and stages.';
+  } else if (!hasInstructions && !hasStages) {
+    errors.instructions = 'Either instructions or stages are required.';
+    errors.stages = 'Either instructions or stages are required.';
+  } else if (hasInstructions) {
+    recipeData.instructions.forEach((step, idx) => {
+      if (!step || typeof step !== 'string' || !step.trim()) {
+        errors[`instructions[${idx}]`] = 'Instruction step is required.';
+      }
+    });
+  } else if (hasStages) {
+    recipeData.stages.forEach((stage, sIdx) => {
+      if (!stage || typeof stage !== 'object') {
+        errors[`stages[${sIdx}]`] = 'Stage must be an object.';
+        return;
+      }
+      if (!stage.title || typeof stage.title !== 'string' || !stage.title.trim()) {
+        errors[`stages[${sIdx}].title`] = 'Stage title is required.';
+      }
+      if (!Array.isArray(stage.instructions) || stage.instructions.length === 0) {
+        errors[`stages[${sIdx}].instructions`] = 'Each stage must have at least one instruction.';
+      } else {
+        stage.instructions.forEach((step, iIdx) => {
+          if (!step || typeof step !== 'string' || !step.trim()) {
+            errors[`stages[${sIdx}].instructions[${iIdx}]`] = 'Instruction step is required.';
+          }
+        });
+      }
+    });
+  }
+
+  // Optional fields type validation
+  if ('tags' in recipeData && recipeData.tags !== undefined) {
+    if (!Array.isArray(recipeData.tags) || !recipeData.tags.every(tag => typeof tag === 'string')) {
+      errors.tags = 'Tags must be an array of strings.';
+    }
+  }
+  if ('images' in recipeData && recipeData.images !== undefined) {
+    if (!Array.isArray(recipeData.images) || !recipeData.images.every(img => typeof img === 'object' && img !== null)) {
+      errors.images = 'Images must be an array of objects.';
+    }
+  }
+  if ('comments' in recipeData && recipeData.comments !== undefined) {
+    if (!Array.isArray(recipeData.comments) || !recipeData.comments.every(c => typeof c === 'string')) {
+      errors.comments = 'Comments must be an array of strings.';
+    }
+  }
+  if ('approved' in recipeData && recipeData.approved !== undefined) {
+    if (typeof recipeData.approved !== 'boolean') {
+      errors.approved = 'Approved must be a boolean.';
+    }
+  }
+  if ('createdAt' in recipeData && recipeData.createdAt !== undefined && recipeData.createdAt !== null) {
+    if (!(typeof recipeData.createdAt === 'number' || typeof recipeData.createdAt === 'string' || recipeData.createdAt instanceof Date)) {
+      errors.createdAt = 'createdAt must be a number, string, or Date.';
+    }
+  }
+  if ('updatedAt' in recipeData && recipeData.updatedAt !== undefined && recipeData.updatedAt !== null) {
+    if (!(typeof recipeData.updatedAt === 'number' || typeof recipeData.updatedAt === 'string' || recipeData.updatedAt instanceof Date)) {
+      errors.updatedAt = 'updatedAt must be a number, string, or Date.';
+    }
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+}
 
 /**
  * Calculates total recipe time from prep and cooking times

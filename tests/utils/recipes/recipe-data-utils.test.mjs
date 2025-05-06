@@ -6,6 +6,7 @@ import {
   getLocalizedCategoryName,
   getCategoryIcon,
   formatRecipeData,
+  validateRecipeData,
 } from '../../../src/js/utils/recipes/recipe-data-utils.js';
 
 describe('recipe-data-utils', () => {
@@ -158,6 +159,138 @@ describe('recipe-data-utils', () => {
       expect(formatted.images).toEqual([]);
       expect(formatted.comments).toEqual([]);
       expect(formatted.approved).toBe(false);
+    });
+  });
+
+  describe('validateRecipeData', () => {
+    const baseRecipe = {
+      name: 'Test',
+      category: 'desserts',
+      prepTime: 10,
+      waitTime: 5,
+      difficulty: 'קלה',
+      mainIngredient: 'sugar',
+      servings: 2,
+      ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }],
+      instructions: ['Mix'],
+    };
+
+    it('validates a correct recipe', () => {
+      const result = validateRecipeData(baseRecipe);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual({});
+    });
+
+    it('fails if name is missing', () => {
+      const r = { ...baseRecipe, name: '' };
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.name).toBeDefined();
+    });
+
+    it('fails if category is invalid', () => {
+      const r = { ...baseRecipe, category: 'invalid' };
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.category).toBeDefined();
+    });
+
+    it('fails if servings is not an integer >= 1', () => {
+      expect(validateRecipeData({ ...baseRecipe, servings: 0 }).isValid).toBe(false);
+      expect(validateRecipeData({ ...baseRecipe, servings: 1.5 }).isValid).toBe(false);
+      expect(validateRecipeData({ ...baseRecipe, servings: '2' }).isValid).toBe(false);
+    });
+
+    it('fails if both instructions and stages exist', () => {
+      const r = { ...baseRecipe, stages: [{ title: 'Stage', instructions: ['Do'] }] };
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.instructions).toBeDefined();
+      expect(result.errors.stages).toBeDefined();
+    });
+
+    it('fails if neither instructions nor stages exist', () => {
+      const r = { ...baseRecipe };
+      delete r.instructions;
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.instructions).toBeDefined();
+      expect(result.errors.stages).toBeDefined();
+    });
+
+    it('fails if ingredients are missing or invalid', () => {
+      expect(validateRecipeData({ ...baseRecipe, ingredients: [] }).isValid).toBe(false);
+      expect(validateRecipeData({ ...baseRecipe, ingredients: undefined }).isValid).toBe(false);
+      const r = { ...baseRecipe, ingredients: [{ amount: '', unit: '', item: '' }] };
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors['ingredients[0].amount']).toBeDefined();
+      expect(result.errors['ingredients[0].unit']).toBeDefined();
+      expect(result.errors['ingredients[0].item']).toBeDefined();
+    });
+
+    it('validates a recipe with stages and no instructions', () => {
+      const r = { ...baseRecipe };
+      delete r.instructions;
+      r.stages = [{ title: 'Stage 1', instructions: ['Do this'] }];
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(true);
+    });
+
+    it('fails if a stage is missing title or instructions', () => {
+      const r = { ...baseRecipe };
+      delete r.instructions;
+      r.stages = [{ title: '', instructions: [] }];
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors['stages[0].title']).toBeDefined();
+      expect(result.errors['stages[0].instructions']).toBeDefined();
+    });
+
+    it('fails if a stage instruction is empty', () => {
+      const r = { ...baseRecipe };
+      delete r.instructions;
+      r.stages = [{ title: 'Stage', instructions: [''] }];
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors['stages[0].instructions[0]']).toBeDefined();
+    });
+
+    it('validates optional fields types (tags, images, comments, approved, createdAt, updatedAt)', () => {
+      // Valid types
+      let r = { ...baseRecipe, tags: ['a', 'b'], images: [{}], comments: ['c'], approved: true, createdAt: 123, updatedAt: new Date() };
+      let result = validateRecipeData(r);
+      expect(result.isValid).toBe(true);
+      // Invalid tags
+      r = { ...baseRecipe, tags: [1, 2] };
+      result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.tags).toBeDefined();
+      // Invalid images
+      r = { ...baseRecipe, images: [1, 2] };
+      result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.images).toBeDefined();
+      // Invalid comments
+      r = { ...baseRecipe, comments: [1, 2] };
+      result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.comments).toBeDefined();
+      // Invalid approved
+      r = { ...baseRecipe, approved: 'yes' };
+      result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.approved).toBeDefined();
+      // Invalid createdAt
+      r = { ...baseRecipe, createdAt: {} };
+      result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.createdAt).toBeDefined();
+      // Invalid updatedAt
+      r = { ...baseRecipe, updatedAt: [] };
+      result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.updatedAt).toBeDefined();
     });
   });
 }); 
