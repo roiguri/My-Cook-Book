@@ -250,18 +250,13 @@ describe('recipe-image-utils', () => {
 
   describe('getPrimaryImage', () => {
     it('returns the primary image if present', () => {
-      const recipe = { images: [
-        { id: '1', isPrimary: false },
-        { id: '2', isPrimary: true },
-        { id: '3' }
-      ]};
+      const recipe = {
+        images: [{ id: '1', isPrimary: false }, { id: '2', isPrimary: true }, { id: '3' }],
+      };
       expect(getPrimaryImage(recipe)).toEqual({ id: '2', isPrimary: true });
     });
     it('returns the first image if no primary', () => {
-      const recipe = { images: [
-        { id: '1' },
-        { id: '2' }
-      ]};
+      const recipe = { images: [{ id: '1' }, { id: '2' }] };
       expect(getPrimaryImage(recipe)).toEqual({ id: '1' });
     });
     it('returns undefined if no images', () => {
@@ -274,17 +269,13 @@ describe('recipe-image-utils', () => {
   describe('getPrimaryImageUrl', () => {
     it('returns the download URL for the primary image', async () => {
       getFileUrlMock.mockResolvedValue('img-url');
-      const recipe = { images: [
-        { id: '1', isPrimary: true, compressed: 'img-path' }
-      ]};
+      const recipe = { images: [{ id: '1', isPrimary: true, compressed: 'img-path' }] };
       await expect(getPrimaryImageUrl(recipe)).resolves.toBe('img-url');
       expect(getFileUrlMock).toHaveBeenCalledWith('img-path');
     });
     it('returns the download URL for the first image if no primary', async () => {
       getFileUrlMock.mockResolvedValue('img-url2');
-      const recipe = { images: [
-        { id: '1', compressed: 'img-path2' }
-      ]};
+      const recipe = { images: [{ id: '1', compressed: 'img-path2' }] };
       await expect(getPrimaryImageUrl(recipe)).resolves.toBe('img-url2');
       expect(getFileUrlMock).toHaveBeenCalledWith('img-path2');
     });

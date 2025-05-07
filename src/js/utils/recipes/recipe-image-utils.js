@@ -216,7 +216,7 @@ export async function getPlaceholderImageUrl() {
 export function getPrimaryImage(recipe) {
   console.log('recipe', recipe);
   if (!recipe || !Array.isArray(recipe.images) || recipe.images.length === 0) return undefined;
-  const primary = recipe.images.find(img => img.isPrimary);
+  const primary = recipe.images.find((img) => img.isPrimary);
   return primary || recipe.images[0];
 }
 

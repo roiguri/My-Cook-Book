@@ -1,7 +1,18 @@
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
-import { doc, getDoc } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
 import authService from '../../../js/services/auth-service.js';
+import {
+  getRecipeById,
+  getLocalizedCategoryName,
+  formatCookingTime,
+} from '../../../js/utils/recipes/recipe-data-utils.js';
+import {
+  getRecipeImages,
+  getImageUrl,
+  getPlaceholderImageUrl,
+} from '../../../js/utils/recipes/recipe-image-utils.js';
+import {
+  formatIngredientAmount,
+  scaleIngredients,
+} from '../../../js/utils/recipes/recipe-ingredients-utils.js';
 
 // TODO - add support for missing image upload
 
@@ -29,24 +40,7 @@ class RecipeComponent extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
 
-    this.categoryMapping = {
-      appetizers: 'מנות ראשונות',
-      'main-courses': 'מנות עיקריות',
-      'side-dishes': 'תוספות',
-      'soups-stews': 'מרקים ותבשילים',
-      salads: 'סלטים',
-      'breakfast-brunch': 'ארוחות בוקר',
-      snacks: 'חטיפים',
-      beverages: 'משקאות',
-      desserts: 'קינוחים',
-    };
-
-    this.ACCESS_LEVELS = {
-      manager: ['manager', 'approved', 'public'],
-      approved: ['approved', 'public'],
-      user: ['public'],
-      public: ['public'],
-    };
+    this._originalIngredients = null;
   }
 
   connectedCallback() {
@@ -92,7 +86,7 @@ class RecipeComponent extends HTMLElement {
           <h2>הוראות הכנה:</h2>
           <ol id="Recipe_component__instructions-list"></ol>
         </div>
-        <div class="Recipe_component__comments">
+        <div class="Recipe_component__comments" style="display: none;">
           <h2>הערות:</h2>
           <ol id="Recipe_component__comments-list"></ol>
         </div>
@@ -234,107 +228,81 @@ class RecipeComponent extends HTMLElement {
     `;
   }
 
-  fetchAndPopulateRecipeData() {
-    const db = getFirestoreInstance();
-    getDoc(doc(db, 'recipes', this.recipeId))
-      .then((docSnap) => {
-        if (docSnap.exists()) {
-          const recipe = docSnap.data();
-          this.populateRecipeDetails(recipe);
-          this.setRecipeImage(recipe);
-          this.populateIngredientsList(recipe);
-          this.populateInstructions(recipe);
-          this.populateCommentList(recipe);
-          this.setupServingsAdjuster(recipe);
-        } else {
-          console.warn('No such document!');
-          // TODO: Handle the case where the recipe doesn't exist
-        }
-      })
-      .catch((error) => {
-        console.error('Error getting recipe: ', error);
-        // TODO: Handle potential errors during data fetching
-      });
+  async fetchAndPopulateRecipeData() {
+    try {
+      const recipe = await getRecipeById(this.recipeId);
+      if (recipe) {
+        this.populateRecipeDetails(recipe);
+        this.setRecipeImage(recipe);
+        this.populateIngredientsList(recipe);
+        this.populateInstructions(recipe);
+        this.populateCommentList(recipe);
+        this.setupServingsAdjuster(recipe);
+        this._originalIngredients = recipe.ingredients;
+      } else {
+        console.warn('No such document!');
+        // TODO: Handle the case where the recipe doesn't exist
+      }
+    } catch (error) {
+      console.error('Error getting recipe: ', error);
+      // TODO: Handle potential errors during data fetching
+    }
   }
 
   populateRecipeDetails(recipe) {
-    console.log(`query test: ${this.shadowRoot.getElementById}`);
     this.shadowRoot.getElementById('Recipe_component__name').textContent = recipe.name;
     this.shadowRoot.getElementById('Recipe_component__prepTime').textContent =
-      `זמן הכנה: ${this.cookingTime(recipe.prepTime)}`;
+      `זמן הכנה: ${formatCookingTime(recipe.prepTime)}`;
     this.shadowRoot.getElementById('Recipe_component__waitTime').textContent =
-      `זמן המתנה: ${this.cookingTime(recipe.waitTime)}`;
+      `זמן המתנה: ${formatCookingTime(recipe.waitTime)}`;
     this.shadowRoot.getElementById('Recipe_component__difficulty').textContent =
       `רמת קושי: ${recipe.difficulty}`;
     this.shadowRoot.getElementById('Recipe_component__category').textContent =
-      `קטגוריה: ${this.categoryMapping[recipe.category]}`;
+      `קטגוריה: ${getLocalizedCategoryName(recipe.category)}`;
   }
 
   async setRecipeImage(recipe) {
     try {
       const imageContainer = this.shadowRoot.querySelector('.Recipe_component__image-container');
-      // Get user role
-      const db = getFirestoreInstance();
-      const user = authService.getCurrentUser();
-      let userRole = 'public'; // Default to public access
-      if (user) {
-        const userDocSnap = await getDoc(doc(db, 'users', user.uid));
-        if (userDocSnap.exists()) {
-          userRole = userDocSnap.data().role || 'public';
-          if (userRole === 'user') userRole = 'public';
-        }
-      }
-      // Get accessible images
-      const accessibleImages = this.getAccessibleImages(recipe.images || [], userRole);
-      // Clear container
+
+      let userRole = await authService.getCurrentUserRole();
+      if (userRole === 'user') userRole = 'public';
+      const accessibleImages = getRecipeImages(recipe, userRole);
+
       imageContainer.innerHTML = '';
-      // Handle display based on number of accessible images
       if (accessibleImages.length === 0) {
-        this.showPlaceholder(imageContainer);
+        await this.showPlaceholder(imageContainer);
       } else if (accessibleImages.length === 1) {
-        this.showSingleImage(imageContainer, accessibleImages[0]);
+        await this.showSingleImage(imageContainer, accessibleImages[0]);
       } else {
         this.showCarousel(imageContainer, accessibleImages);
       }
       // TODO: add fallback to previous load system
     } catch (error) {
       console.error('Error setting recipe images:', error);
-      this.showPlaceholder(imageContainer);
+      await this.showPlaceholder(
+        this.shadowRoot.querySelector('.Recipe_component__image-container'),
+      );
     }
   }
 
-  getAccessibleImages(images, userRole) {
-    const allowedLevels = this.ACCESS_LEVELS[userRole] || ['public'];
-    return images.filter((img) => allowedLevels.includes(img.access));
-  }
-
-  showPlaceholder(container) {
-    const placeholderPath = 'img/recipes/compressed/place-holder-add-new.png';
+  async showPlaceholder(container) {
     const img = document.createElement('img');
     img.className = 'Recipe_component__image';
     img.alt = 'תמונת מתכון לא זמינה';
-
-    // Get download URL from Firebase Storage
-    this.getImageUrl(placeholderPath)
-      .then((url) => {
-        if (url) {
-          img.src = url;
-        } else {
-          console.error('Could not load placeholder image');
-        }
-      })
-      .catch((error) => {
-        console.error('Error loading placeholder:', error);
-      });
-
+    try {
+      img.src = await getPlaceholderImageUrl();
+    } catch (error) {
+      console.error('Could not load placeholder image', error);
+    }
     container.appendChild(img);
   }
 
   async showSingleImage(container, image) {
     const img = document.createElement('img');
     try {
-      // Get download URL from Firebase Storage
-      const url = await this.getImageUrl(image.full);
+      // Get download URL from util
+      const url = await getImageUrl(image.full);
       if (!url) {
         throw new Error('Failed to get image URL');
       }
@@ -344,7 +312,7 @@ class RecipeComponent extends HTMLElement {
       container.appendChild(img);
     } catch (error) {
       console.error('Error loading image:', error);
-      this.showPlaceholder(container);
+      await this.showPlaceholder(container);
     }
   }
 
@@ -365,26 +333,21 @@ class RecipeComponent extends HTMLElement {
       container.appendChild(carousel);
     } catch (error) {
       console.error('Error setting up carousel:', error);
-      this.showPlaceholder(container);
+      await this.showPlaceholder(container);
     }
   }
 
-  async getImageUrl(path) {
-    const storage = getStorageInstance();
-    const imageRef = ref(storage, path);
-    try {
-      return await getDownloadURL(imageRef);
-    } catch (error) {
-      console.error('Error getting image URL:', error);
-      return null;
-    }
-  }
-
+  // TODO: add bullets and grid layout (align amounts)
   populateIngredientsList(recipe) {
     const ingredientsList = this.shadowRoot.getElementById('Recipe_component__ingredients-list');
+    ingredientsList.innerHTML = '';
     recipe.ingredients.forEach((ingredient) => {
       const li = document.createElement('li');
-      li.innerHTML = `<span class="amount">${ingredient.amount}</span> <span class="unit">${ingredient.unit}</span> <span class="item">${ingredient.item}</span>`;
+      li.innerHTML = `
+        <span class="amount">${formatIngredientAmount(ingredient.amount)}</span>
+        <span class="unit">${ingredient.unit}</span>
+        <span class="item">${ingredient.item}</span>
+      `;
       ingredientsList.appendChild(li);
     });
   }
@@ -424,62 +387,32 @@ class RecipeComponent extends HTMLElement {
 
   populateCommentList(recipe) {
     const commentsList = this.shadowRoot.getElementById('Recipe_component__comments-list');
-    if ('comments' in recipe) {
+    const commentsSection = commentsList.parentNode;
+    if (Array.isArray(recipe.comments) && recipe.comments.length > 0) {
+      commentsList.innerHTML = '';
       recipe.comments.forEach((comment) => {
         const li = document.createElement('li');
         li.textContent = comment;
         commentsList.appendChild(li);
       });
-    } else {
-      commentsList.parentNode.style.display = 'none';
+      commentsSection.style.display = '';
     }
   }
 
   setupServingsAdjuster(recipe) {
     const servingsInput = this.shadowRoot.getElementById('Recipe_component__servings');
     servingsInput.setAttribute('value', recipe.servings);
-    const originalServings = parseInt(servingsInput.value);
-    let amountSpans = this.shadowRoot.querySelectorAll('.amount');
-    const originalAmounts = Array.from(amountSpans).map((span) => parseFloat(span.textContent));
+    this._originalIngredients = recipe.ingredients;
 
     servingsInput.addEventListener('change', () => {
       const newServings = parseInt(servingsInput.value);
-      const scalingFactor = newServings / originalServings;
-      amountSpans.forEach((span, index) => {
-        const originalAmount = originalAmounts[index];
-        const newAmount = originalAmount * scalingFactor;
-        span.textContent = this.formatNumber(newAmount);
-      });
+      const scaledIngredients = scaleIngredients(
+        this._originalIngredients,
+        recipe.servings,
+        newServings,
+      );
+      this.populateIngredientsList({ ingredients: scaledIngredients });
     });
-  }
-
-  // Helper function
-  cookingTime(time) {
-    let finalTime;
-    if (time <= 60) {
-      finalTime = `${time} דקות`;
-    } else if (time > 60 && time < 120) {
-      finalTime = `שעה ו-${time % 60} דקות`;
-    } else if (time == 120) {
-      finalTime = 'שעתיים';
-    } else if (time > 120 && time < 180) {
-      finalTime = `שעתיים ו-${time % 60} דקות`;
-    } else if (time % 60 == 0) {
-      finalTime = `${~~(time / 60)} שעות`;
-    } else {
-      finalTime = `${~~(time / 60)} שעות ו-${time % 60} דקות`;
-    }
-    return finalTime;
-  }
-
-  formatNumber(number) {
-    // If the number has no decimal part, return it as is
-    if (Number.isInteger(number)) {
-      return number.toString();
-    }
-
-    // Otherwise, format to a maximum of 2 decimal places
-    return number.toFixed(2).replace(/\.?0+$/, '');
   }
 }
 

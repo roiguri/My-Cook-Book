@@ -22,8 +22,17 @@ import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
-import { getLocalizedCategoryName, formatCookingTime, getTimeClass, getDifficultyClass, getRecipeById } from '../../../js/utils/recipes/recipe-data-utils.js';
-import { getPrimaryImageUrl, getPlaceholderImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
+import {
+  getLocalizedCategoryName,
+  formatCookingTime,
+  getTimeClass,
+  getDifficultyClass,
+  getRecipeById,
+} from '../../../js/utils/recipes/recipe-data-utils.js';
+import {
+  getPrimaryImageUrl,
+  getPlaceholderImageUrl,
+} from '../../../js/utils/recipes/recipe-image-utils.js';
 import { extractIngredientNames } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
 
 class RecipeCard extends HTMLElement {
