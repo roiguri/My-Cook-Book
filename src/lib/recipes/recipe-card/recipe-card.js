@@ -18,13 +18,13 @@
  * - recipe-card-open: Emitted when the card is clicked
  *   detail: { recipeId: string }
  */
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
 import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
-import { getLocalizedCategoryName, getCategoryIcon, formatCookingTime, getTimeClass, getDifficultyClass, getRecipeById } from '../../../js/utils/recipes/recipe-data-utils.js';
+import { getLocalizedCategoryName, formatCookingTime, getTimeClass, getDifficultyClass, getRecipeById } from '../../../js/utils/recipes/recipe-data-utils.js';
 import { getPrimaryImageUrl, getPlaceholderImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
+import { extractIngredientNames } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
 
 class RecipeCard extends HTMLElement {
   // Define observed attributes
@@ -235,7 +235,6 @@ class RecipeCard extends HTMLElement {
     try {
       this._isLoading = true;
       this._render();
-      // Use recipe-data-utils.js
       this._recipeData = await getRecipeById(this.recipeId);
       if (!this._recipeData) {
         throw new Error('Recipe not found');
@@ -651,12 +650,13 @@ class RecipeCard extends HTMLElement {
       `;
   }
 
+  // TODO: improve more info icon
   _renderRecipe() {
     const { name, category, prepTime, waitTime, difficulty } = this._recipeData;
     const totalTime = prepTime + waitTime;
     const timeClass = getTimeClass(totalTime);
     const difficultyClass = getDifficultyClass(difficulty);
-    const ingredients = this._recipeData.ingredients.map((i) => i.item).join(', ');
+    const ingredients = extractIngredientNames(this._recipeData.ingredients).join(', ');
     const favoriteButton = this.hasAttribute('show-favorites')
       ? `
         <button class="favorite-btn ${this._isFavorite() ? 'active' : ''}" 
@@ -726,6 +726,7 @@ class RecipeCard extends HTMLElement {
     this._setupEventListeners();
   }
 
+  // TODO: create and extract to favorites-utils file
   async _fetchUserFavorites() {
     try {
       const user = authService.getCurrentUser();
