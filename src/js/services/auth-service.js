@@ -21,6 +21,7 @@
  *   - onAuthStateChanged(callback): Registers a callback for authentication state changes.
  *   - addAuthObserver(observer): Adds an observer function for auth state changes.
  *   - removeAuthObserver(observer): Removes a previously added auth observer.
+ *   - getCurrentUserRole(): Gets the current user's role.
  */
 import { getAuthInstance, getFirestoreInstance } from './firebase-service.js';
 import { serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -363,6 +364,16 @@ class AuthService {
     if (index !== -1) {
       this._observers.splice(index, 1);
     }
+  }
+
+  /**
+   * Get the current user's role
+   * @returns {string} The current user's role
+   */
+  async getCurrentUserRole() {
+    // FIXME: remove this once state management is implemented
+    this._userRoles = await this._fetchUserRoles(this._currentUser);
+    return this._userRoles?.role || 'public';
   }
 
   /* ===== PRIVATE METHODS ===== */
