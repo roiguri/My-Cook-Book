@@ -16,7 +16,9 @@ let validateImageFile,
   getRecipeImages,
   getPendingImage,
   getImageUrl,
-  getPlaceholderImageUrl;
+  getPlaceholderImageUrl,
+  getPrimaryImage,
+  getPrimaryImageUrl;
 
 // Mock StorageService and FirestoreService
 const uploadFileMock = jest.fn();
@@ -70,6 +72,8 @@ describe('recipe-image-utils', () => {
     getPendingImage = utils.getPendingImage;
     getImageUrl = utils.getImageUrl;
     getPlaceholderImageUrl = utils.getPlaceholderImageUrl;
+    getPrimaryImage = utils.getPrimaryImage;
+    getPrimaryImageUrl = utils.getPrimaryImageUrl;
   });
 
   describe('validateImageFile', () => {
@@ -241,6 +245,54 @@ describe('recipe-image-utils', () => {
       expect(getFileUrlMock).toHaveBeenCalledWith(
         'img/recipes/compressed/place-holder-add-new.png',
       );
+    });
+  });
+
+  describe('getPrimaryImage', () => {
+    it('returns the primary image if present', () => {
+      const recipe = { images: [
+        { id: '1', isPrimary: false },
+        { id: '2', isPrimary: true },
+        { id: '3' }
+      ]};
+      expect(getPrimaryImage(recipe)).toEqual({ id: '2', isPrimary: true });
+    });
+    it('returns the first image if no primary', () => {
+      const recipe = { images: [
+        { id: '1' },
+        { id: '2' }
+      ]};
+      expect(getPrimaryImage(recipe)).toEqual({ id: '1' });
+    });
+    it('returns undefined if no images', () => {
+      expect(getPrimaryImage({ images: [] })).toBeUndefined();
+      expect(getPrimaryImage({})).toBeUndefined();
+      expect(getPrimaryImage(null)).toBeUndefined();
+    });
+  });
+
+  describe('getPrimaryImageUrl', () => {
+    it('returns the download URL for the primary image', async () => {
+      getFileUrlMock.mockResolvedValue('img-url');
+      const recipe = { images: [
+        { id: '1', isPrimary: true, compressed: 'img-path' }
+      ]};
+      await expect(getPrimaryImageUrl(recipe)).resolves.toBe('img-url');
+      expect(getFileUrlMock).toHaveBeenCalledWith('img-path');
+    });
+    it('returns the download URL for the first image if no primary', async () => {
+      getFileUrlMock.mockResolvedValue('img-url2');
+      const recipe = { images: [
+        { id: '1', compressed: 'img-path2' }
+      ]};
+      await expect(getPrimaryImageUrl(recipe)).resolves.toBe('img-url2');
+      expect(getFileUrlMock).toHaveBeenCalledWith('img-path2');
+    });
+    it('returns the placeholder URL if no images', async () => {
+      getFileUrlMock.mockResolvedValue('placeholder-url');
+      await expect(getPrimaryImageUrl({ images: [] })).resolves.toBe('placeholder-url');
+      await expect(getPrimaryImageUrl({})).resolves.toBe('placeholder-url');
+      await expect(getPrimaryImageUrl(null)).resolves.toBe('placeholder-url');
     });
   });
 });

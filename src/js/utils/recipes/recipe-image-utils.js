@@ -207,3 +207,28 @@ export async function getImageUrl(storagePath) {
 export async function getPlaceholderImageUrl() {
   return await StorageService.getFileUrl('img/recipes/compressed/place-holder-add-new.png');
 }
+
+/**
+ * Returns the primary image object for a recipe
+ * @param {Object} recipe - Recipe object with images array
+ * @returns {RecipeImage|undefined} The primary image object or undefined
+ */
+export function getPrimaryImage(recipe) {
+  console.log('recipe', recipe);
+  if (!recipe || !Array.isArray(recipe.images) || recipe.images.length === 0) return undefined;
+  const primary = recipe.images.find(img => img.isPrimary);
+  return primary || recipe.images[0];
+}
+
+/**
+ * Returns the download URL for the primary image's compressed version, or the placeholder if none
+ * @param {Object} recipe - Recipe object with images array
+ * @returns {Promise<string>} Download URL for the primary image or placeholder
+ */
+export async function getPrimaryImageUrl(recipe) {
+  const primary = getPrimaryImage(recipe);
+  if (primary && primary.compressed) {
+    return await StorageService.getFileUrl(primary.compressed);
+  }
+  return await getPlaceholderImageUrl();
+}
