@@ -36,6 +36,7 @@
 .category-page .filter-button {
   --border-color: #ccc;
   display: block;
+  position: relative;
   background-color: var(--tabs-color);
   color: var(--text-color);
   border: none;
@@ -58,12 +59,13 @@
   position: absolute;
   top: -8px;
   right: -8px;
-  background-color: var(--primary-color);
+  background-color: var(--secondary);
   border-radius: 50%;
   padding: 2px 6px;
   width: 10px;
   height: 16px;
   text-align: center;
+  font-weight: 700
 }
 
 .category-page .category-tabs {
