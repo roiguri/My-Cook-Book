@@ -1,6 +1,7 @@
 import { getFirestoreInstance } from '../js/services/firebase-service.js';
 import { collection, doc, getDoc, getDocs, updateDoc, query, where } from 'firebase/firestore';
 import authService from '../js/services/auth-service.js';
+import { FirestoreService } from '../js/services/firestore-service.js';
 
 document.addEventListener('DOMContentLoaded', function () {
   // Check if the user is authenticated and has manager privileges
@@ -8,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
   authService.addAuthObserver((state) => {
     const baseUrl = window.location.pathname.includes('My-Cook-Book') ? '/My-Cook-Book/' : '/';
     if (state.user) {
-      checkManagerStatus(db, state.user).then(function (isManager) {
+      checkManagerStatus(state.user).then(function (isManager) {
         if (isManager) {
           initializeDashboard();
         } else {
@@ -35,21 +36,14 @@ function initializeDashboard() {
  * User Management
  *  */
 function loadUserList() {
-  const db = getFirestoreInstance();
-  const userList = document.getElementById('user-list');
-  getDocs(collection(db, 'users'))
-    .then((snapshot) => {
-      const users = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      const userItems = users.map((user) => ({
-        header: createHeader(user.email),
-        content: createContent(user),
-      }));
-      userList.setItems(userItems);
-    })
-    .catch(handleError);
+  FirestoreService.queryDocuments('users').then((users) => {
+    const userList = document.getElementById('user-list');
+    const userItems = users.map((user) => ({
+      header: createHeader(user.email),
+      content: createContent(user),
+    }));
+    userList.setItems(userItems);
+  }).catch(handleError);
 }
 
 function createHeader(email) {
@@ -80,9 +74,7 @@ function createContent(user) {
 }
 
 function updateUserRole(userId, newRole) {
-  const db = getFirestoreInstance();
-  const userDocRef = doc(db, 'users', userId);
-  updateDoc(userDocRef, { role: newRole })
+  FirestoreService.updateDocument('users', userId, { role: newRole })
     .then(() => showSuccessMessage('תפקיד המשתמש עודכן בהצלחה'))
     .catch(handleError);
 }
@@ -91,26 +83,18 @@ function updateUserRole(userId, newRole) {
  * All Recipes
  */
 function loadAllRecipes() {
-  const db = getFirestoreInstance();
   const recipeList = document.getElementById('all-recipes-list');
   recipeList.setItems([]);
-
   const searchInput = document.getElementById('recipe-search');
   const filterSelect = document.getElementById('recipe-filter');
-
   let allRecipes = [];
-
-  getDocs(query(collection(db, 'recipes'), where('approved', '==', true)))
-    .then((snapshot) => {
-      allRecipes = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+  FirestoreService.queryDocuments('recipes', { where: [['approved', '==', true]] })
+    .then((recipes) => {
+      allRecipes = recipes;
       updateRecipeList(allRecipes);
       populateFilterOptions(allRecipes);
     })
     .catch(handleError);
-
   searchInput.addEventListener('input', () => filterRecipes(allRecipes));
   filterSelect.addEventListener('change', () => filterRecipes(allRecipes));
 }
@@ -197,15 +181,9 @@ function populateFilterOptions(recipes) {
  * Pending Recipes
  */
 function loadPendingRecipes() {
-  const db = getFirestoreInstance();
   const pendingRecipesList = document.getElementById('pending-recipes-list');
-  console.log('loading recipes');
-  getDocs(query(collection(db, 'recipes'), where('approved', '==', false)))
-    .then((snapshot) => {
-      const pendingRecipes = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+  FirestoreService.queryDocuments('recipes', { where: [['approved', '==', false]] })
+    .then((pendingRecipes) => {
       const recipeItems = pendingRecipes.map((recipe) => ({
         header: createPendingRecipeHeader(recipe),
         content: createPendingRecipeContent(recipe),
@@ -215,11 +193,8 @@ function loadPendingRecipes() {
         pendingRecipeSection.querySelector('.no-pending-message').textContent =
           'אין מתכונים הממתינים לאישור';
       }
-      // Use the shadowRoot to access the scrolling-list's setItems method
       if (pendingRecipesList) {
-        console.log(recipeItems);
         pendingRecipesList.setItems(recipeItems);
-        console.log('Items set in scrolling list');
       } else {
         console.error('Cannot find scrolling list element');
       }
@@ -301,56 +276,30 @@ function previewRecipe(recipeId) {
 async function loadPendingImages() {
   const pendingImagesList = document.getElementById('pending-images-list');
   pendingImagesList.setItems([]);
-
   try {
-    const recipesSnapshot = await getDocs(
-      query(collection(getFirestoreInstance(), 'recipes'), where('pendingImage', '!=', null)),
-    );
-    const pendingImages = [];
-
-    // Extract relevant data from each recipe with a pending image
-    recipesSnapshot.forEach((doc) => {
-      const recipe = doc.data();
-      pendingImages.push({
-        recipeId: doc.id,
-        recipeName: recipe.name,
-        imageUrl: recipe.pendingImage.full, // Assuming you want to display the full-size image
-      });
-    });
-
-    // Create list items for the scrolling list
+    const pendingRecipes = await FirestoreService.queryDocuments('recipes', { where: [['pendingImage', '!=', null]] });
+    const pendingImages = pendingRecipes.map((recipe) => ({
+      recipeId: recipe.id,
+      recipeName: recipe.name,
+      imageUrl: recipe.pendingImage.full,
+    }));
     const imageItems = pendingImages.map((image) => ({
       header: createPendingImageHeader(image),
       content: createPendingImageContent(image),
     }));
-
     if (imageItems.length == 0) {
       const pendingRecipeSection = document.getElementById('pending-images');
       pendingRecipeSection.querySelector('.no-pending-message').textContent =
         'אין תמונות הממתינות לאישור';
     }
-
-    // Populate the scrolling list
     if (pendingImagesList) {
       pendingImagesList.setItems(imageItems);
-      console.log('Pending images set in scrolling list');
     } else {
       console.error('Cannot find pending images list element');
     }
   } catch (error) {
     handleError(error);
   }
-}
-
-function fetchRecipeNames(recipeIds) {
-  const db = getFirestoreInstance();
-  const promises = recipeIds.map((id) =>
-    getDoc(doc(db, 'recipes', id)).then((doc) =>
-      doc.exists ? { [id]: doc.data().name } : { [id]: 'Unknown Recipe' },
-    ),
-  );
-
-  return Promise.all(promises).then((results) => Object.assign({}, ...results));
 }
 
 // Update the createPendingImageHeader function
@@ -429,11 +378,10 @@ function handleError(error) {
   alert('אירעה שגיאה. אנא נסה שנית.'); // Replace with a more user-friendly error handling system
 }
 
-function checkManagerStatus(db, user) {
-  const userDocRef = doc(db, 'users', user.uid);
-  return getDoc(userDocRef).then((docSnap) => {
-    if (docSnap.exists()) {
-      return docSnap.data().role === 'manager';
+function checkManagerStatus(user) {
+  return FirestoreService.getDocument('users', user.uid).then((userDoc) => {
+    if (userDoc) {
+      return userDoc.role === 'manager';
     }
     return false;
   });

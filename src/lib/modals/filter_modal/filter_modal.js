@@ -76,9 +76,8 @@
  * - clearFilters() - Resets all filters to default state
  */
 
-import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import authService from '../../../js/services/auth-service.js';
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { FirestoreService } from '../../../js/services/firestore-service.js';
 
 class RecipeFilterComponent extends HTMLElement {
   constructor() {
@@ -559,49 +558,43 @@ class RecipeFilterComponent extends HTMLElement {
     this.state.isLoading = true;
     this.updateUI();
     try {
-      const db = getFirestoreInstance();
       const user = authService.getCurrentUser();
-      // Check if favorites-only attribute is present
       if (this.hasAttribute('favorites-only')) {
         const userId = user.uid;
-        const userDocSnap = await getDoc(doc(db, 'users', userId));
-        const favoriteRecipeIds = userDocSnap.data().favorites || [];
+        const userDoc = await FirestoreService.getDocument('users', userId);
+        const favoriteRecipeIds = userDoc?.favorites || [];
         // Fetch favorite recipes only
         const recipes = await Promise.all(
           favoriteRecipeIds.map(async (recipeId) => {
-            const recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
-            return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-          }),
+            return await FirestoreService.getDocument('recipes', recipeId);
+          })
         );
         this.state.availableFilters.mainIngredients = [
           ...new Set(
             recipes
-              .map((r) => r.mainIngredient)
+              .map((r) => r?.mainIngredient)
               .filter((ingredient) => ingredient && ingredient.trim()),
           ),
         ].sort((a, b) => a.localeCompare(b));
-        this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r.tags || []))];
+        this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r?.tags || []))];
         this.state.matchingCount = recipes.length;
       } else {
-        // Previous logic for fetching all recipes
-        let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
+        // Build query params for FirestoreService
+        const queryParams = {
+          where: [['approved', '==', true]],
+        };
         if (this.state.category) {
-          recipesQuery = query(
-            collection(db, 'recipes'),
-            where('approved', '==', true),
-            where('category', '==', this.state.category),
-          );
+          queryParams.where.push(['category', '==', this.state.category]);
         }
-        const snapshot = await getDocs(recipesQuery);
-        const recipes = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        const recipes = await FirestoreService.queryDocuments('recipes', queryParams);
         this.state.availableFilters.mainIngredients = [
           ...new Set(
             recipes
-              .map((r) => r.mainIngredient)
+              .map((r) => r?.mainIngredient)
               .filter((ingredient) => ingredient && ingredient.trim()),
           ),
         ].sort((a, b) => a.localeCompare(b));
-        this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r.tags || []))];
+        this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r?.tags || []))];
         this.state.matchingCount = recipes.length;
       }
     } catch (error) {
@@ -646,32 +639,27 @@ class RecipeFilterComponent extends HTMLElement {
     this.state.isLoading = true;
     this.updateUI();
     try {
-      const db = getFirestoreInstance();
       const user = authService.getCurrentUser();
       let recipes;
       if (this.currentRecipes) {
         recipes = this.currentRecipes;
       } else if (this.hasAttribute('favorites-only') && user) {
         const userId = user.uid;
-        const userDocSnap = await getDoc(doc(db, 'users', userId));
-        const favoriteRecipeIds = userDocSnap.data().favorites || [];
+        const userDoc = await FirestoreService.getDocument('users', userId);
+        const favoriteRecipeIds = userDoc?.favorites || [];
         recipes = await Promise.all(
           favoriteRecipeIds.map(async (recipeId) => {
-            let recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
-            return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-          }),
+            return await FirestoreService.getDocument('recipes', recipeId);
+          })
         );
       } else {
-        let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
+        const queryParams = {
+          where: [['approved', '==', true]],
+        };
         if (this.state.category) {
-          recipesQuery = query(
-            collection(db, 'recipes'),
-            where('approved', '==', true),
-            where('category', '==', this.state.category),
-          );
+          queryParams.where.push(['category', '==', this.state.category]);
         }
-        const snapshot = await getDocs(recipesQuery);
-        recipes = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        recipes = await FirestoreService.queryDocuments('recipes', queryParams);
       }
       recipes = this.applyFiltersToRecipes(recipes);
       this.state.matchingCount = recipes.length;
@@ -715,32 +703,27 @@ class RecipeFilterComponent extends HTMLElement {
     this.state.isLoading = true;
     this.updateUI();
     try {
-      const db = getFirestoreInstance();
       const user = authService.getCurrentUser();
       let recipes;
       if (this.currentRecipes) {
         recipes = this.currentRecipes;
       } else if (this.hasAttribute('favorites-only') && user) {
         const userId = user.uid;
-        const userDocSnap = await getDoc(doc(db, 'users', userId));
-        const favoriteRecipeIds = userDocSnap.data().favorites || [];
+        const userDoc = await FirestoreService.getDocument('users', userId);
+        const favoriteRecipeIds = userDoc?.favorites || [];
         recipes = await Promise.all(
           favoriteRecipeIds.map(async (recipeId) => {
-            let recipeDocSnap = await getDoc(doc(db, 'recipes', recipeId));
-            return { id: recipeDocSnap.id, ...recipeDocSnap.data() };
-          }),
+            return await FirestoreService.getDocument('recipes', recipeId);
+          })
         );
       } else {
-        let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
+        const queryParams = {
+          where: [['approved', '==', true]],
+        };
         if (this.state.category) {
-          recipesQuery = query(
-            collection(db, 'recipes'),
-            where('approved', '==', true),
-            where('category', '==', this.state.category),
-          );
+          queryParams.where.push(['category', '==', this.state.category]);
         }
-        const snapshot = await getDocs(recipesQuery);
-        recipes = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        recipes = await FirestoreService.queryDocuments('recipes', queryParams);
       }
       recipes = this.applyFiltersToRecipes(recipes);
       this.dispatchEvent(
