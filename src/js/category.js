@@ -1,6 +1,5 @@
-import { getFirestoreInstance } from '../js/services/firebase-service.js';
-import { collection, query, where, getDocs } from 'firebase/firestore';
 import authService from '../js/services/auth-service.js';
+import { FirestoreService } from '../js/services/firestore-service.js';
 
 document.addEventListener('DOMContentLoaded', async function () {
   // DOM elements
@@ -56,23 +55,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // Load initial recipes
   async function loadInitialRecipes() {
-    const db = getFirestoreInstance();
-    let recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
-
+    let queryParams = { where: [['approved', '==', true]] };
     if (currentCategory !== 'all') {
-      recipesQuery = query(
-        collection(db, 'recipes'),
-        where('approved', '==', true),
-        where('category', '==', currentCategory),
-      );
+      queryParams.where.push(['category', '==', currentCategory]);
     }
-
-    const snapshot = await getDocs(recipesQuery);
-    displayedRecipes = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
+    displayedRecipes = await FirestoreService.queryDocuments('recipes', queryParams);
     // Apply search filter if exists
     if (currentSearchQuery) {
       displayedRecipes = filterRecipesBySearch(displayedRecipes, currentSearchQuery);
@@ -354,15 +341,6 @@ document.addEventListener('DOMContentLoaded', async function () {
       const imageRef = storage.ref().child(imagePath);
       return await imageRef.getDownloadURL();
     }
-  }
-
-  function formatCookingTime(time) {
-    if (time <= 60) return `${time} דקות`;
-    if (time < 120) return `שעה ו-${time % 60} דקות`;
-    if (time === 120) return 'שעתיים';
-    if (time < 180) return `שעתיים ו-${time % 60} דקות`;
-    if (time % 60 === 0) return `${time / 60} שעות`;
-    return `${Math.floor(time / 60)} שעות ו-${time % 60} דקות`;
   }
 
   function goToPage(page) {
