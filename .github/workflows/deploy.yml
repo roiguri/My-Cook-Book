@@ -1,0 +1,84 @@
+# .github/workflows/deploy.yml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, development]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [staging, production]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set environment variables
+        run: echo "VITE_BASE_URL=/My-Cook-Book/" >> $GITHUB_ENV
+      
+      - name: Debug environment variables
+        run: |
+          echo "Branch: ${{ github.ref }}"
+          echo "VITE_BASE_URL: ${{ env.VITE_BASE_URL }}"
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Update vite.config.js for multi-page
+        run: |
+          # Print the current config
+          echo "Current vite.config.js:"
+          cat vite.config.js
+          
+          # Ensure we're not using SPA rewrites in build
+          echo "Building with multi-page config"
+      
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BASE_URL: ${{ env.VITE_BASE_URL }}
+      
+      # Add .nojekyll file to disable Jekyll processing
+      - name: Create .nojekyll file
+        run: touch dist/.nojekyll
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+          
+  deploy:
+    environment:
+      name: github-pages
+      url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
