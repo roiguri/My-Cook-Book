@@ -46,7 +46,6 @@
  *
  * Dependencies:
  * - This component relies on the `custom-modal` and `recipe-component` components.
- * - This component relies on firebase-storage-utils.js for the `deleteRecipeImages` function.
  */
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { removeAllRecipeImages } from '../../../js/utils/recipes/recipe-image-utils.js';
