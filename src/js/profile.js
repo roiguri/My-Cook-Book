@@ -1,6 +1,7 @@
 import { getFirestoreInstance } from '../js/services/firebase-service.js';
 import authService from '../js/services/auth-service.js';
 import { collection, doc, getDoc, getDocs, query, where, documentId } from 'firebase/firestore';
+import { FirestoreService } from '../js/services/firestore-service.js';
 
 // DOM elements
 const recipeGrid = document.getElementById('favorite-recipes');
@@ -292,37 +293,24 @@ function goToPage(page) {
 // Batch fetching favorite recipes from Firestore
 async function fetchFavoriteRecipes() {
   try {
-    const db = getFirestoreInstance();
     const userId = authService.getCurrentUser().uid;
-    const userDocRef = doc(db, 'users', userId);
-    const userDocSnap = await getDoc(userDocRef);
-    const userData = userDocSnap.data();
-    const favoriteRecipeIds = userData?.favorites || [];
+    const userDoc = await FirestoreService.getDocument('users', userId);
+    const favoriteRecipeIds = userDoc?.favorites || [];
     if (favoriteRecipeIds.length === 0) return [];
-    // Split IDs into chunks of 10 (Firestore limit)
+    // Split IDs into chunks of 10 (Firestore 'in' query limit)
     const chunks = [];
     for (let i = 0; i < favoriteRecipeIds.length; i += 10) {
       chunks.push(favoriteRecipeIds.slice(i, i + 10));
     }
-
-    // Fetch recipes for each chunk in parallel
-    const fetchPromises = chunks.map((chunk) => {
-      const recipesQuery = query(collection(db, 'recipes'), where(documentId(), 'in', chunk));
-      return getDocs(recipesQuery);
-    });
-
-    const snapshots = await Promise.all(fetchPromises);
+    // Fetch recipes for each chunk in parallel using FirestoreService.queryDocuments
+    const fetchPromises = chunks.map((chunk) =>
+      FirestoreService.queryDocuments('recipes', {
+        where: [[FirestoreService.documentId ? FirestoreService.documentId() : '__name__', 'in', chunk]],
+      })
+    );
+    const results = await Promise.all(fetchPromises);
     // Combine all results
-    const recipes = [];
-    snapshots.forEach((snapshot) => {
-      snapshot.docs.forEach((docSnap) => {
-        recipes.push({
-          id: docSnap.id,
-          ...docSnap.data(),
-        });
-      });
-    });
-
+    const recipes = results.flat();
     // Sort recipes to match the original favorites order
     const recipesMap = new Map(recipes.map((recipe) => [recipe.id, recipe]));
     return favoriteRecipeIds
