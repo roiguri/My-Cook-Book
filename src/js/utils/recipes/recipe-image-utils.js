@@ -63,6 +63,15 @@ async function updateRecipeDoc(recipeId, data) {
   return await FirestoreService.updateDocument('recipes', recipeId, data);
 }
 
+// --- Image ID Helper ---
+/**
+ * Generates a unique image ID with 'img-' prefix
+ * @returns {string}
+ */
+export function generateImageId() {
+  return 'img-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+}
+
 // --- Image CRUD ---
 /**
  * Uploads a pending image for a recipe (to be approved by manager)
@@ -105,7 +114,7 @@ export async function approvePendingImage(recipeId) {
   const { full, compressed, fileExtension, uploadedBy } = recipe.pendingImage;
   const fileName = `${recipeId}.${fileExtension}`;
   const newImage = {
-    id: `${Date.now()}`,
+    id: generateImageId(),
     full,
     compressed,
     isPrimary: !recipe.images || recipe.images.length === 0,
@@ -290,4 +299,34 @@ export async function removeAllRecipeImages(recipeId) {
   await Promise.all(deletePromises);
   // Remove images and pendingImages from Firestore
   await updateRecipeDoc(recipeId, { images: [], pendingImages: [] });
+}
+
+/**
+ * Uploads a recipe image (full and compressed) and returns metadata
+ * @param {Object} params
+ * @param {string} recipeId
+ * @param {string} category
+ * @param {File} file
+ * @param {boolean} isPrimary
+ * @param {string} uploadedBy
+ * @returns {Promise<Object>} image metadata
+ */
+export async function uploadAndBuildImageMetadata({ recipeId, category, file, isPrimary, uploadedBy }) {
+  const fileExtension = file.name.split('.').pop();
+  const fileName = isPrimary ? 'primary.jpg' : `${Date.now()}.${fileExtension}`;
+  const fullPath = getImageStoragePath(recipeId, category, fileName, 'full');
+  const compressedPath = getImageStoragePath(recipeId, category, fileName, 'compressed');
+  await StorageService.uploadFile(file, fullPath);
+  const compressedFile = await compressImage(file);
+  await StorageService.uploadFile(compressedFile, compressedPath);
+  return {
+    id: generateImageId(),
+    full: fullPath,
+    compressed: compressedPath,
+    fileName,
+    isPrimary,
+    uploadedBy,
+    access: 'public',
+    uploadTimestamp: Timestamp.now(),
+  };
 }

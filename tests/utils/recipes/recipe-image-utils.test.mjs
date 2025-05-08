@@ -19,7 +19,8 @@ let validateImageFile,
   getPlaceholderImageUrl,
   getPrimaryImage,
   getPrimaryImageUrl,
-  removeAllRecipeImages;
+  removeAllRecipeImages,
+  uploadAndBuildImageMetadata;
 
 // Mock StorageService and FirestoreService
 const uploadFileMock = jest.fn();
@@ -77,6 +78,7 @@ describe('recipe-image-utils', () => {
     getPrimaryImage = utils.getPrimaryImage;
     getPrimaryImageUrl = utils.getPrimaryImageUrl;
     removeAllRecipeImages = utils.removeAllRecipeImages;
+    uploadAndBuildImageMetadata = utils.uploadAndBuildImageMetadata;
   });
 
   describe('validateImageFile', () => {
@@ -330,6 +332,48 @@ describe('recipe-image-utils', () => {
       await removeAllRecipeImages('rid');
       expect(deleteFileMock).not.toHaveBeenCalled();
       expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', { images: [], pendingImages: [] });
+    });
+  });
+
+  describe('uploadAndBuildImageMetadata', () => {
+    it('uploads full and compressed images and returns correct metadata', async () => {
+      uploadFileMock.mockResolvedValue('url');
+      // Mock compressImage to return a different blob
+      compressImage = jest.fn(async (file) => new Blob(['compressed'], { type: file.type }));
+      const file = createFakeFile('test.jpg', 'image/jpeg', 1234);
+      const meta = await uploadAndBuildImageMetadata({
+        recipeId: 'rid',
+        category: 'cat',
+        file,
+        isPrimary: true,
+        uploadedBy: 'user1',
+      });
+      // Should upload full and compressed
+      expect(uploadFileMock).toHaveBeenCalledTimes(2);
+      // Should return correct metadata
+      expect(meta).toHaveProperty('id');
+      expect(meta.full).toContain('img/recipes/full/cat/rid/');
+      expect(meta.compressed).toContain('img/recipes/compressed/cat/rid/');
+      expect(meta.fileName).toBe('primary.jpg');
+      expect(meta.isPrimary).toBe(true);
+      expect(meta.uploadedBy).toBe('user1');
+      expect(meta.access).toBe('public');
+      expect(meta.uploadTimestamp).toBeDefined();
+    });
+    it('uses a timestamped fileName for non-primary', async () => {
+      uploadFileMock.mockResolvedValue('url');
+      compressImage = jest.fn(async (file) => new Blob(['compressed'], { type: file.type }));
+      const file = createFakeFile('test2.jpg', 'image/jpeg', 1234);
+      const meta = await uploadAndBuildImageMetadata({
+        recipeId: 'rid',
+        category: 'cat',
+        file,
+        isPrimary: false,
+        uploadedBy: 'user2',
+      });
+      expect(meta.fileName).toMatch(/\.jpg$/);
+      expect(meta.isPrimary).toBe(false);
+      expect(meta.uploadedBy).toBe('user2');
     });
   });
 });
