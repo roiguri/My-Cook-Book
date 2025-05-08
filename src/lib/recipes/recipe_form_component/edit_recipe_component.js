@@ -1,7 +1,7 @@
 // edit-recipe-component.js
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
-import { doc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, deleteObject } from 'firebase/storage';
+import { FirestoreService } from '../../../js/services/firestore-service.js';
+import { StorageService } from '../../../js/services/storage-service.js';
+import { compressImage, getImageStoragePath, uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-image-utils.js';
 import '../../modals/message-modal/message-modal.js';
 
 class EditRecipeComponent extends HTMLElement {
@@ -41,21 +41,49 @@ class EditRecipeComponent extends HTMLElement {
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
     try {
-      // Update the recipe data in Firestore
-      await this.updateRecipeInFirestore(this.recipeId, recipeData);
-
-      // Handle image update if a new image is provided
-      if (recipeData.imageFile) {
-        const fileExtension = recipeData.imageFile.name.split('.').pop();
-        const imageName = `${this.recipeId}.${fileExtension}`;
-        const imageUrl = await this.uploadImage(
-          recipeData.imageFile,
-          recipeData.category,
-          imageName,
-        );
-        recipeData.image = imageName;
-        await this.updateRecipeInFirestore(this.recipeId, { image: imageName });
+      // 1. Delete images marked for removal
+      if (Array.isArray(recipeData.toDelete)) {
+        for (const img of recipeData.toDelete) {
+          if (img.full) await StorageService.deleteFile(img.full).catch(() => {});
+          if (img.compressed) await StorageService.deleteFile(img.compressed).catch(() => {});
+        }
       }
+
+      // 2. Upload new images and build the new images array
+      const newImages = [];
+      for (const img of recipeData.images) {
+        if (img.source === 'new' && img.file) {
+          const meta = await uploadAndBuildImageMetadata({
+            recipeId: this.recipeId,
+            category: recipeData.category,
+            file: img.file,
+            isPrimary: img.isPrimary,
+            uploadedBy: img.uploadedBy,
+          });
+          newImages.push(meta);
+        } else if (img.source === 'existing') {
+          // Keep existing image (exclude file/source)
+          newImages.push({
+            id: img.id,
+            full: img.full,
+            compressed: img.compressed,
+            isPrimary: img.isPrimary,
+            access: img.access,
+            uploadedBy: img.uploadedBy,
+            fileName: img.fileName,
+            uploadTimestamp: img.uploadTimestamp,
+          });
+        }
+      }
+
+      // 3. Update the recipe data in Firestore (exclude file/source/toDelete)
+      const { images, toDelete, ...rest } = recipeData;
+      console.log('Images to upload:', newImages);
+      console.log('Uploading recipe:', { ...rest, images: newImages });
+      await FirestoreService.updateDocument('recipes', this.recipeId, {
+        ...rest,
+        images: newImages,
+      });
 
       this.showSuccessMessage('Recipe updated successfully!');
     } catch (error) {
@@ -63,22 +91,21 @@ class EditRecipeComponent extends HTMLElement {
     }
   }
 
-  // FIXME: currently can't edit recipes with images
   async updateRecipeInFirestore(recipeId, recipeData) {
-    const db = getFirestoreInstance();
     // Remove the imageFile property before saving to Firestore
     const { imageFile, ...recipeDataWithoutImage } = recipeData;
-    await updateDoc(doc(db, 'recipes', recipeId), recipeDataWithoutImage);
+    await FirestoreService.updateDocument('recipes', recipeId, recipeDataWithoutImage);
     console.log('Recipe updated in Firestore with ID:', recipeId);
   }
 
   async uploadImage(imageFile, category, imageName, oldImageName = null) {
-    const storage = getStorageInstance();
     // Remove old image if it exists and has changed
     if (oldImageName && oldImageName !== imageName) {
       try {
-        await deleteObject(ref(storage, `img/recipes/full/${category}/${oldImageName}`));
-        await deleteObject(ref(storage, `img/recipes/compressed/${category}/${oldImageName}`));
+        const oldFullPath = getImageStoragePath(this.recipeId, category, oldImageName, 'full');
+        const oldCompressedPath = getImageStoragePath(this.recipeId, category, oldImageName, 'compressed');
+        await StorageService.deleteFile(oldFullPath);
+        await StorageService.deleteFile(oldCompressedPath);
         console.log('Removed old images from Firebase Storage');
       } catch (error) {
         console.error('Error removing old images:', error);
@@ -86,27 +113,20 @@ class EditRecipeComponent extends HTMLElement {
     }
     // Upload new image (both full and compressed)
     try {
-      const compressedImageRef = ref(storage, `img/recipes/compressed/${category}/${imageName}`);
-      const fullImageRef = ref(storage, `img/recipes/full/${category}/${imageName}`);
-      // Compress the image (replace with your compression logic)
-      const compressedImageBlob = await this.compressImage(imageFile);
+      const fullPath = getImageStoragePath(this.recipeId, category, imageName, 'full');
+      const compressedPath = getImageStoragePath(this.recipeId, category, imageName, 'compressed');
+      // Compress the image using shared utility
+      const compressedImageBlob = await compressImage(imageFile);
       // Upload the compressed image
-      await uploadBytes(compressedImageRef, compressedImageBlob);
+      await StorageService.uploadFile(compressedImageBlob, compressedPath);
       console.log('Uploaded compressed image to Firebase Storage');
       // Upload the full-size image
-      await uploadBytes(fullImageRef, imageFile);
+      await StorageService.uploadFile(imageFile, fullPath);
       console.log('Uploaded full-size image to Firebase Storage');
       // No need to return download URL for now
     } catch (error) {
       console.error('Error uploading new images:', error);
     }
-  }
-
-  // Helper function to compress image (replace with your actual compression logic)
-  async compressImage(imageFile) {
-    // ... Your image compression logic here ...
-    // For now, it returns the original image
-    return imageFile;
   }
 
   showSuccessMessage(message) {

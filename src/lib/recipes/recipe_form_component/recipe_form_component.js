@@ -775,13 +775,35 @@ class RecipeFormComponent extends HTMLElement {
     // Collect images
     const imageHandler = this.shadowRoot.getElementById('recipe-images');
     const images = imageHandler.getImages();
+    // Track removed images if the handler supports it
+    const toDelete = typeof imageHandler.getRemovedImages === 'function' ? imageHandler.getRemovedImages() : [];
 
-    this.recipeData.images = images.map((img) => ({
-      file: img.file,
-      isPrimary: img.isPrimary,
-      access: 'public', // Default access level
-      uploadedBy: authService.getCurrentUser()?.uid || 'anonymous',
-    }));
+    this.recipeData.images = images.map((img) => {
+      if (img.file) {
+        // New image to upload
+        return {
+          file: img.file,
+          isPrimary: img.isPrimary,
+          access: 'public',
+          uploadedBy: authService.getCurrentUser()?.uid || 'anonymous',
+          source: 'new',
+        };
+      } else {
+        // Existing image to keep
+        return {
+          id: img.id,
+          isPrimary: img.isPrimary,
+          full: img.full,
+          compressed: img.compressed,
+          access: img.access,
+          uploadedBy: img.uploadedBy,
+          fileName: img.fileName,
+          uploadTimestamp: img.uploadTimestamp,
+          source: 'existing',
+        };
+      }
+    });
+    this.recipeData.toDelete = toDelete;
 
     // Get comments if present
     const comments = this.shadowRoot.getElementById('comments').value.trim();
@@ -1035,6 +1057,13 @@ class RecipeFormComponent extends HTMLElement {
             preview: previewUrl,
             id: image.id,
             isPrimary: image.isPrimary,
+            full: image.full,
+            compressed: image.compressed,
+            access: image.access,
+            uploadedBy: image.uploadedBy,
+            fileName: image.fileName,
+            uploadTimestamp: image.uploadTimestamp,
+            source: 'existing',
           });
         }
       } catch (error) {

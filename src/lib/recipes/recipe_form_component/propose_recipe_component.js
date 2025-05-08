@@ -15,8 +15,8 @@
  */
 
 import { FirestoreService } from '../../../js/services/firestore-service.js';
-import { compressImage, getImageStoragePath } from '../../../js/utils/recipes/recipe-image-utils.js';
-import { StorageService } from '../../../js/services/storage-service.js';
+import { uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-image-utils.js';
+import { Timestamp } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
 
 class ProposeRecipeComponent extends HTMLElement {
@@ -54,7 +54,7 @@ class ProposeRecipeComponent extends HTMLElement {
       const imagesToUpload = recipeData.images || [];
       const recipeDataForFirestore = { ...recipeData };
       delete recipeDataForFirestore.images;
-      recipeDataForFirestore.creationTime = new Date().toISOString();
+      recipeDataForFirestore.creationTime = Timestamp.now();
       recipeDataForFirestore.userId = user?.uid || 'anonymous';
       // Add recipe to Firestore
       const recipeId = await FirestoreService.addDocument('recipes', recipeDataForFirestore);
@@ -82,22 +82,15 @@ class ProposeRecipeComponent extends HTMLElement {
     const imageUploadResults = [];
     for (const imageData of images) {
       const { file, isPrimary } = imageData;
-      const fileExtension = file.name.split('.').pop();
-      const fileName = isPrimary ? 'primary.jpg' : `${Date.now()}.${fileExtension}`;
       try {
-        const fullPath = getImageStoragePath(recipeId, category, fileName, 'full');
-        const compressedPath = getImageStoragePath(recipeId, category, fileName, 'compressed');
-        await StorageService.uploadFile(file, fullPath);
-        const compressedFile = await compressImage(file);
-        await StorageService.uploadFile(compressedFile, compressedPath);
-        imageUploadResults.push({
-          full: fullPath,
-          compressed: compressedPath,
-          fileName,
+        const meta = await uploadAndBuildImageMetadata({
+          recipeId,
+          category,
+          file,
           isPrimary,
           uploadedBy: uploader,
-          access: 'public',
         });
+        imageUploadResults.push(meta);
       } catch (error) {
         console.error('Error uploading image:', error);
         throw error;
