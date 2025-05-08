@@ -50,6 +50,9 @@
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { removeAllRecipeImages } from '../../../js/utils/recipes/recipe-image-utils.js';
 
+import '../recipe_component/recipe_component.js';
+import '../../utilities/modal/modal.js';
+
 class RecipePreviewModal extends HTMLElement {
   constructor() {
     super();

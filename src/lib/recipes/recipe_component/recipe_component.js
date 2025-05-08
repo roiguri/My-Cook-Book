@@ -14,6 +14,8 @@ import {
   scaleIngredients,
 } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
 
+import '../../utilities/image-carousel/image-carousel.js';
+
 // TODO - add support for missing image upload
 
 /**

@@ -9,7 +9,6 @@ import '../styles/pages/index.css';
 
 // Import components
 import '../lib/search/header-search-bar/header-search-bar.js';
-import '../lib/utilities/modal/modal.js';
 import '../lib/recipes/recipe-card/recipe-card.js';
 import '../lib/utilities/element-scroller/element-scroller.js';
 

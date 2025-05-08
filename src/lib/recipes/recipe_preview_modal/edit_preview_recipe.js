@@ -45,9 +45,9 @@
  * logic in your parent component.
  */
 
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
-import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
-import { ref, deleteObject } from 'firebase/storage';
+import '../recipe_component/recipe_component.js';
+import '../recipe_form_component/edit_recipe_component.js';
+import '../../utilities/modal/modal.js';
 
 class EditPreviewRecipe extends HTMLElement {
   constructor() {

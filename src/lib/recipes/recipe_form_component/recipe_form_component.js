@@ -1,9 +1,11 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import authService from '../../../js/services/auth-service.js';
 import { doc, getDoc } from 'firebase/firestore';
-import '../../images/image-handler.js';
 import { validateRecipeData } from '../../../js/utils/recipes/recipe-data-utils.js';
 import { getImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
+
+import '../../images/image-handler.js';
+import '../../modals/message-modal/message-modal.js';
 
 class RecipeFormComponent extends HTMLElement {
   constructor() {

@@ -19,6 +19,9 @@ import { uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-im
 import { Timestamp } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
 
+import './recipe_form_component.js';
+import '../../modals/message-modal/message-modal.js';
+
 class ProposeRecipeComponent extends HTMLElement {
   constructor() {
     super();

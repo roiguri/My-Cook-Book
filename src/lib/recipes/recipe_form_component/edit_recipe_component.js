@@ -2,7 +2,9 @@
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { StorageService } from '../../../js/services/storage-service.js';
 import { compressImage, getImageStoragePath, uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-image-utils.js';
+
 import '../../modals/message-modal/message-modal.js';
+import './recipe_form_component.js';
 
 class EditRecipeComponent extends HTMLElement {
   constructor() {
