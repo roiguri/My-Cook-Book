@@ -1,5 +1,4 @@
-import { getFirestoreInstance } from '../js/services/firebase-service.js';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { FirestoreService } from '../js/services/firestore-service.js';
 
 async function displayFeaturedRecipes() {
   const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
@@ -19,35 +18,23 @@ async function displayFeaturedRecipes() {
 
   try {
     // Get most recent approved recipes using modular API
-    const db = getFirestoreInstance();
-    const recipesQuery = query(collection(db, 'recipes'), where('approved', '==', true));
-    const snapshot = await getDocs(recipesQuery);
-
-    if (snapshot.empty) {
+    const queryParams = { where: [['approved', '==', true]] };
+    const recipes = await FirestoreService.queryDocuments('recipes', queryParams);
+    if (!recipes.length) {
       console.log('No matching documents.');
       messageContainer.innerHTML = 'לא נמצאו מתכונים מומלצים.';
       return;
     }
-
-    // Convert to array for sorting
-    const recipes = [];
-    snapshot.forEach((doc) => {
-      recipes.push(doc);
-    });
-
     // Sort by creationTime if exists, newest first
     recipes.sort((a, b) => {
-      const timeA = a.data().creationTime?.seconds || 0;
-      const timeB = b.data().creationTime?.seconds || 0;
+      const timeA = a.creationTime?.seconds || 0;
+      const timeB = b.creationTime?.seconds || 0;
       return timeB - timeA;
     });
-
-    // Take only first 4
+    // Take only first 3
     const recentRecipes = recipes.slice(0, 3);
-
     // Remove loading message
     messageContainer.remove();
-
     // Create recipe-card elements
     recentRecipes.forEach((doc) => {
       const recipeCard = document.createElement('recipe-card');
