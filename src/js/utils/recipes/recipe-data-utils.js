@@ -1,3 +1,32 @@
+/*
+ * Recipe Data Utilities
+ * --------------------
+ * This module provides helper functions for recipe data formatting, validation, and Firestore operations.
+ *
+ * Exported Methods:
+ *
+ *   - formatRecipeData(rawData):
+ *       Format raw Firestore recipe data for display/use in the app.
+ *   - validateRecipeData(recipeData):
+ *       Validate a recipe object before saving to Firestore.
+ *   - calculateTotalTime(prepTime, waitTime):
+ *       Calculate total recipe time from prep and wait times.
+ *   - formatCookingTime(minutes):
+ *       Format a time in minutes into a readable string.
+ *   - getTimeClass(totalMinutes):
+ *       Get a CSS class for quick/medium/long recipes by time.
+ *   - getDifficultyClass(difficulty):
+ *       Map difficulty to a CSS class.
+ *   - getLocalizedCategoryName(categoryId):
+ *       Get a localized display name for a category.
+ *   - getCategoryIcon(category):
+ *       Get an icon for a category.
+ *   - getRecipesForCards(options):
+ *       Fetch recipes for display in cards (with filters/options).
+ *   - getRecipeById(recipeId):
+ *       Fetch a single complete recipe by ID.
+ */
+
 import { FirestoreService } from '../../services/firestore-service.js';
 
 /**
@@ -88,23 +117,23 @@ export function validateRecipeData(recipeData) {
 
   // Name
   if (!recipeData.name || typeof recipeData.name !== 'string' || !recipeData.name.trim()) {
-    errors.name = 'Recipe name is required.';
+    errors.name = 'חובה למלא את שם המתכון.';
   }
 
   // Category
   const validCategories = Object.keys(CATEGORY_MAP);
   if (!recipeData.category || !validCategories.includes(recipeData.category)) {
-    errors.category = 'Category is required and must be a valid option.';
+    errors.category = 'חובה למלא את קטגוריית המתכון.';
   }
 
   // Prep Time
   if (typeof recipeData.prepTime !== 'number' || recipeData.prepTime < 0) {
-    errors.prepTime = 'Preparation time must be a non-negative number.';
+    errors.prepTime = 'חובה למלא את זמן ההכנה.';
   }
 
   // Wait Time
   if (typeof recipeData.waitTime !== 'number' || recipeData.waitTime < 0) {
-    errors.waitTime = 'Waiting time must be a non-negative number.';
+    errors.waitTime = 'חובה למלא את זמן ההמתנה.';
   }
 
   // Difficulty
@@ -113,7 +142,7 @@ export function validateRecipeData(recipeData) {
     typeof recipeData.difficulty !== 'string' ||
     !recipeData.difficulty.trim()
   ) {
-    errors.difficulty = 'Difficulty is required.';
+    errors.difficulty = 'חובה למלא את רמת הקושי.';
   }
 
   // Main Ingredient
@@ -122,7 +151,7 @@ export function validateRecipeData(recipeData) {
     typeof recipeData.mainIngredient !== 'string' ||
     !recipeData.mainIngredient.trim()
   ) {
-    errors.mainIngredient = 'Main ingredient is required.';
+    errors.mainIngredient = 'חובה למלא את המרכיב העיקרי.';
   }
 
   // Servings
@@ -131,26 +160,26 @@ export function validateRecipeData(recipeData) {
     !Number.isInteger(recipeData.servings) ||
     recipeData.servings < 1
   ) {
-    errors.servings = 'Servings must be an integer greater than or equal to 1.';
+    errors.servings = 'מספר המנות חייב להיות מספר שלם וחיובי.';
   }
 
   // Ingredients
   if (!Array.isArray(recipeData.ingredients) || recipeData.ingredients.length === 0) {
-    errors.ingredients = 'At least one ingredient is required.';
+    errors.ingredients = 'חובה למלא לפחות אחד מהמרכיבים.';
   } else {
     recipeData.ingredients.forEach((ing, idx) => {
       if (!ing || typeof ing !== 'object') {
-        errors[`ingredients[${idx}]`] = 'Ingredient must be an object.';
+        errors[`ingredients[${idx}]`] = 'חובה למלא את המרכיב.';
         return;
       }
       if (!ing.amount || typeof ing.amount !== 'string' || !ing.amount.trim()) {
-        errors[`ingredients[${idx}].amount`] = 'Amount is required.';
+        errors[`ingredients[${idx}].amount`] = 'חובה למלא את הכמות.';
       }
       if (!ing.unit || typeof ing.unit !== 'string' || !ing.unit.trim()) {
-        errors[`ingredients[${idx}].unit`] = 'Unit is required.';
+        errors[`ingredients[${idx}].unit`] = 'חובה למלא את היחידה.';
       }
       if (!ing.item || typeof ing.item !== 'string' || !ing.item.trim()) {
-        errors[`ingredients[${idx}].item`] = 'Item is required.';
+        errors[`ingredients[${idx}].item`] = 'חובה למלא את המרכיב.';
       }
     });
   }
@@ -160,32 +189,32 @@ export function validateRecipeData(recipeData) {
     Array.isArray(recipeData.instructions) && recipeData.instructions.length > 0;
   const hasStages = Array.isArray(recipeData.stages) && recipeData.stages.length > 0;
   if (hasInstructions && hasStages) {
-    errors.instructions = 'Cannot have both instructions and stages.';
-    errors.stages = 'Cannot have both instructions and stages.';
+    errors.instructions = 'לא ניתן להציג שני סוגי של הוראות.';
+    errors.stages = 'לא ניתן להציג שני סוגי של הוראות.';
   } else if (!hasInstructions && !hasStages) {
-    errors.instructions = 'Either instructions or stages are required.';
-    errors.stages = 'Either instructions or stages are required.';
+    errors.instructions = 'חובה למלא את הוראות או שלבים.';
+    errors.stages = 'חובה למלא את הוראות או שלבים.';
   } else if (hasInstructions) {
     recipeData.instructions.forEach((step, idx) => {
       if (!step || typeof step !== 'string' || !step.trim()) {
-        errors[`instructions[${idx}]`] = 'Instruction step is required.';
+        errors[`instructions[${idx}]`] = 'חובה למלא את השלב.';
       }
     });
   } else if (hasStages) {
     recipeData.stages.forEach((stage, sIdx) => {
       if (!stage || typeof stage !== 'object') {
-        errors[`stages[${sIdx}]`] = 'Stage must be an object.';
+        errors[`stages[${sIdx}]`] = 'חובה למלא את השלב.';
         return;
       }
       if (!stage.title || typeof stage.title !== 'string' || !stage.title.trim()) {
-        errors[`stages[${sIdx}].title`] = 'Stage title is required.';
+        errors[`stages[${sIdx}].title`] = 'חובה למלא את שם השלב.';
       }
       if (!Array.isArray(stage.instructions) || stage.instructions.length === 0) {
-        errors[`stages[${sIdx}].instructions`] = 'Each stage must have at least one instruction.';
+        errors[`stages[${sIdx}].instructions`] = 'חובה למלא לפחות אחת מההוראות.';
       } else {
         stage.instructions.forEach((step, iIdx) => {
           if (!step || typeof step !== 'string' || !step.trim()) {
-            errors[`stages[${sIdx}].instructions[${iIdx}]`] = 'Instruction step is required.';
+            errors[`stages[${sIdx}].instructions[${iIdx}]`] = 'חובה למלא את השלב.';
           }
         });
       }
@@ -198,7 +227,7 @@ export function validateRecipeData(recipeData) {
       !Array.isArray(recipeData.tags) ||
       !recipeData.tags.every((tag) => typeof tag === 'string')
     ) {
-      errors.tags = 'Tags must be an array of strings.';
+      errors.tags = 'פורמט שגוי עבור התגיות.';
     }
   }
   if ('images' in recipeData && recipeData.images !== undefined) {
@@ -206,7 +235,7 @@ export function validateRecipeData(recipeData) {
       !Array.isArray(recipeData.images) ||
       !recipeData.images.every((img) => typeof img === 'object' && img !== null)
     ) {
-      errors.images = 'Images must be an array of objects.';
+      errors.images = 'פורמט שגוי עבור התמונות.';
     }
   }
   if ('comments' in recipeData && recipeData.comments !== undefined) {
@@ -214,12 +243,12 @@ export function validateRecipeData(recipeData) {
       !Array.isArray(recipeData.comments) ||
       !recipeData.comments.every((c) => typeof c === 'string')
     ) {
-      errors.comments = 'Comments must be an array of strings.';
+      errors.comments = 'פורמט שגוי עבור ההערות.';
     }
   }
   if ('approved' in recipeData && recipeData.approved !== undefined) {
     if (typeof recipeData.approved !== 'boolean') {
-      errors.approved = 'Approved must be a boolean.';
+      errors.approved = 'פורמט שגוי עבור האישור.';
     }
   }
   if (
@@ -234,7 +263,7 @@ export function validateRecipeData(recipeData) {
         recipeData.createdAt instanceof Date
       )
     ) {
-      errors.createdAt = 'createdAt must be a number, string, or Date.';
+      errors.createdAt = 'טעות לא ידועה, אנא נסה שנית.';
     }
   }
   if (
@@ -249,7 +278,7 @@ export function validateRecipeData(recipeData) {
         recipeData.updatedAt instanceof Date
       )
     ) {
-      errors.updatedAt = 'updatedAt must be a number, string, or Date.';
+      errors.updatedAt = 'טעות לא ידועה, אנא נסה שנית.';
     }
   }
 

@@ -23,7 +23,8 @@
  * modal.openForRecipe('recipe-123');
  */
 import authService from '../../js/services/auth-service.js';
-import { uploadProposedImages } from '../../js/utilities/firebase-storage-utils.js';
+import { getRecipeById } from '../../js/utils/recipes/recipe-data-utils.js';
+import { addPendingImages } from '../../js/utils/recipes/recipe-image-utils.js';
 
 class ImageProposalModal extends HTMLElement {
   constructor() {
@@ -178,18 +179,18 @@ class ImageProposalModal extends HTMLElement {
     try {
       const currentUser = authService.getCurrentUser();
       if (!currentUser) throw new Error('User not authenticated');
-
-      const result = await uploadProposedImages(this.recipeId, images, currentUser.uid);
-
+      const recipe = await getRecipeById(this.recipeId);
+      if (!recipe) throw new Error('Recipe not found');
+      const files = images.map(img => img.file);
+      const pendingImages = await addPendingImages(this.recipeId, files, recipe.category, currentUser.uid);
       // Dispatch success event
       this.dispatchEvent(
         new CustomEvent('images-proposed', {
-          detail: { recipeId: this.recipeId, batch: result },
+          detail: { recipeId: this.recipeId, pendingImages },
           bubbles: true,
           composed: true,
         }),
       );
-
       this.close();
     } catch (error) {
       console.error('Error uploading images:', error);

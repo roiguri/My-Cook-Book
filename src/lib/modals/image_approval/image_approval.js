@@ -62,6 +62,7 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { StorageService } from '../../../js/services/storage-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { approvePendingImage, rejectPendingImage } from '../../../js/utils/recipes/recipe-image-utils.js';
 
 class ImageApprovalComponent extends HTMLElement {
   constructor() {
@@ -172,16 +173,7 @@ class ImageApprovalComponent extends HTMLElement {
   async handleApprove() {
     console.log('Approve button clicked');
     try {
-      const db = getFirestoreInstance();
-      // Get the recipe document from Firestore
-      const recipeDocSnap = await getDoc(doc(db, 'recipes', this.imageData.recipeId));
-      const recipeData = recipeDocSnap.data();
-      const fileExtension = recipeData.pendingImage.fileExtension;
-      // Update Firestore document to remove pendingImage and set the approved image URL
-      await updateDoc(doc(db, 'recipes', this.imageData.recipeId), {
-        image: this.imageData.recipeId + '.' + fileExtension,
-        pendingImage: null,
-      });
+      await approvePendingImage(this.imageData.recipeId);
       this.dispatchEvent(
         new CustomEvent('image-approved', {
           bubbles: true,
@@ -198,20 +190,7 @@ class ImageApprovalComponent extends HTMLElement {
   async handleReject() {
     console.log('Reject button clicked');
     try {
-      const db = getFirestoreInstance();
-      // Get the recipe document from Firestore
-      const recipeDocSnap = await getDoc(doc(db, 'recipes', this.imageData.recipeId));
-      const recipeData = recipeDocSnap.data();
-      const fileExtension = recipeData.pendingImage.fileExtension;
-      // Delete the full-size and compressed images from Firebase Storage
-      const fullSizePath = `img/recipes/full/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`;
-      await StorageService.deleteFile(fullSizePath);
-      const compressedPath = `img/recipes/compressed/${recipeData.category}/${this.imageData.recipeId}.${fileExtension}`;
-      await StorageService.deleteFile(compressedPath);
-      // Update Firestore document to remove pendingImage
-      await updateDoc(doc(db, 'recipes', this.imageData.recipeId), {
-        pendingImage: null,
-      });
+      await rejectPendingImage(this.imageData.recipeId);
       this.dispatchEvent(
         new CustomEvent('image-rejected', {
           bubbles: true,

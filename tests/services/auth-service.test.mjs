@@ -522,4 +522,28 @@ describe('AuthService', () => {
       expect(mockAuth.onAuthStateChanged).toHaveBeenCalledWith(callback);
     });
   });
+
+  describe('getCurrentUserRole', () => {
+    test('fetches and returns the user role if not set', async () => {
+      // Mock the fetch to resolve to a manager role
+      jest.spyOn(authService, '_fetchUserRoles').mockResolvedValue({ role: 'manager' });
+
+      const role = await authService.getCurrentUserRole();
+      expect(role).toBe('manager');
+      expect(authService._userRoles).toEqual({ role: 'manager' });
+    });
+
+    test('returns the cached role if already set', async () => {
+      jest.spyOn(authService, '_fetchUserRoles').mockResolvedValue({ role: 'approved' });
+      const role = await authService.getCurrentUserRole();
+      expect(role).toBe('approved');
+    });
+
+    test('returns public if no user and no roles', async () => {
+      jest.spyOn(authService, '_fetchUserRoles').mockResolvedValue();
+
+      const role = await authService.getCurrentUserRole();
+      expect(role).toBe('public');
+    });
+  });
 });

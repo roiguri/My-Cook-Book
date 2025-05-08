@@ -1,3 +1,5 @@
+import { generateImageId } from '../../js/utils/recipes/recipe-image-utils.js';
+
 class ImageHandler extends HTMLElement {
   constructor() {
     super();
@@ -7,6 +9,7 @@ class ImageHandler extends HTMLElement {
     this.images = [];
     this.maxImages = 5;
     this.draggedImage = null;
+    this.removedImages = [];
   }
 
   connectedCallback() {
@@ -372,7 +375,7 @@ class ImageHandler extends HTMLElement {
         const imageData = {
           file,
           preview,
-          id: Math.random().toString(36).substr(2, 9),
+          id: generateImageId(),
         };
 
         this.addImage(imageData);
@@ -418,7 +421,9 @@ class ImageHandler extends HTMLElement {
       return;
     }
 
-    const fileNames = this.images.map((img) => img.file.name);
+    const fileNames = this.images
+      .map((img) => img.file ? img.file.name : img.fileName || img.id || 'תמונה קיימת')
+      .filter(Boolean);
     filesArea.textContent = `קבצים נבחרו: ${fileNames.join(', ')}`;
   }
 
@@ -459,6 +464,15 @@ class ImageHandler extends HTMLElement {
     const wasOnlyImage = this.images.length === 1;
     const removedImage = this.images.find((img) => img.id === imageId);
     const wasPrimary = removedImage?.isPrimary;
+
+    // Track removed images if they have id/full/compressed (i.e., are existing images)
+    if (removedImage && (removedImage.id || removedImage.full || removedImage.compressed)) {
+      this.removedImages.push({
+        id: removedImage.id,
+        full: removedImage.full,
+        compressed: removedImage.compressed,
+      });
+    }
 
     this.images = this.images.filter((img) => img.id !== imageId);
 
@@ -621,10 +635,19 @@ class ImageHandler extends HTMLElement {
   }
 
   /**
+   * Get all removed images (for deletion)
+   * @returns {Array} Array of removed image data objects
+   */
+  getRemovedImages() {
+    return [...this.removedImages];
+  }
+
+  /**
    * Clear all images
    */
   clearImages() {
     this.images = [];
+    this.removedImages = [];
     this.updatePreviewContainer();
     this.updateUploadAreaState();
     this.dispatchEvent(new CustomEvent('images-cleared'));
