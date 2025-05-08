@@ -1,3 +1,32 @@
+/*
+ * Recipe Data Utilities
+ * --------------------
+ * This module provides helper functions for recipe data formatting, validation, and Firestore operations.
+ *
+ * Exported Methods:
+ *
+ *   - formatRecipeData(rawData):
+ *       Format raw Firestore recipe data for display/use in the app.
+ *   - validateRecipeData(recipeData):
+ *       Validate a recipe object before saving to Firestore.
+ *   - calculateTotalTime(prepTime, waitTime):
+ *       Calculate total recipe time from prep and wait times.
+ *   - formatCookingTime(minutes):
+ *       Format a time in minutes into a readable string.
+ *   - getTimeClass(totalMinutes):
+ *       Get a CSS class for quick/medium/long recipes by time.
+ *   - getDifficultyClass(difficulty):
+ *       Map difficulty to a CSS class.
+ *   - getLocalizedCategoryName(categoryId):
+ *       Get a localized display name for a category.
+ *   - getCategoryIcon(category):
+ *       Get an icon for a category.
+ *   - getRecipesForCards(options):
+ *       Fetch recipes for display in cards (with filters/options).
+ *   - getRecipeById(recipeId):
+ *       Fetch a single complete recipe by ID.
+ */
+
 import { FirestoreService } from '../../services/firestore-service.js';
 
 /**

@@ -1,3 +1,22 @@
+/*
+ * Recipe Ingredients Utilities
+ * ---------------------------
+ * This module provides helper functions for ingredient scaling, formatting, validation, and extraction.
+ *
+ * Exported Methods:
+ *
+ *   - scaleIngredients(ingredients, originalServings, newServings):
+ *       Adjust ingredient quantities for a new serving size.
+ *   - formatIngredientAmount(value):
+ *       Format a number for display in ingredient lists.
+ *   - extractIngredientNames(ingredientsArray):
+ *       Extract a plain list of ingredient names from an array.
+ *   - validateIngredient(ingredient):
+ *       Validate the structure and content of an ingredient object.
+ *   - createEmptyIngredient():
+ *       Create a blank ingredient object.
+ */
+
 /**
  * @typedef {Object} Ingredient
  * @property {string} amount - The quantity of the ingredient (as a string, e.g. "1", "1/2", "2.5")

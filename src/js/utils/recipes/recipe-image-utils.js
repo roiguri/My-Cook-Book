@@ -1,3 +1,42 @@
+/*
+ * Recipe Image Utilities
+ * ---------------------
+ * This module provides helper functions for image upload, management, and retrieval for recipes.
+ *
+ * Exported Methods:
+ *
+ * Validation & Compression:
+ *   - validateImageFile(file): Validate file type and size.
+ *   - compressImage(imageFile, quality): (Stub) Compress image file.
+ *
+ * Storage Path Helpers:
+ *   - getImageStoragePath(recipeId, category, fileName, type): Get storage path for image.
+ *   - generateImageId(): Generate a unique image ID.
+ *
+ * Single Pending Image (Legacy): // TODO: remove after multiple images is fully implemented
+ *   - addPendingImage(recipeId, file, category, uploader): Upload a single pending image.
+ *   - approvePendingImage(recipeId): Approve the single pending image.
+ *   - rejectPendingImage(recipeId): Reject/delete the single pending image.
+ *   - getPendingImage(recipeId): Get the single pending image.
+ *
+ * Multi Pending Images (Current):
+ *   - addPendingImages(recipeId, files, category, uploader): Upload multiple pending images.
+ *   - approvePendingImageById(recipeId, pendingImageId): Approve a specific pending image by ID.
+ *   - rejectPendingImageById(recipeId, pendingImageId): Reject/delete a specific pending image by ID.
+ *   - getPendingImages(recipeId): Get all pending images for a recipe.
+ *
+ * Approved Images:
+ *   - removeApprovedImage(recipeId, imageId): Remove an approved image.
+ *   - setPrimaryImage(recipeId, imageId): Set the primary image for a recipe.
+ *   - getRecipeImages(recipe, userRole): Get accessible images for a user role.
+ *   - getPrimaryImage(recipe): Get the primary image object.
+ *   - getPrimaryImageUrl(recipe): Get the download URL for the primary image or placeholder.
+ *   - getImageUrl(storagePath): Get the download URL for a storage path.
+ *   - getPlaceholderImageUrl(): Get the placeholder image URL.
+ *   - removeAllRecipeImages(recipeId): Remove all images (approved and pending) for a recipe.
+ *   - uploadAndBuildImageMetadata({ recipeId, category, file, isPrimary, uploadedBy }): Upload and return metadata for an image.
+ */
+
 /**
  * @typedef {Object} RecipeImage
  * @property {string} id
