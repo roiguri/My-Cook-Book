@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import path from 'path';
 
 export default defineConfig({
   base: '/My-Cook-Book/',
@@ -17,6 +18,11 @@ export default defineConfig({
         managerDashboard: resolve(__dirname, 'pages/manager-dashboard.html'),
         documents: resolve(__dirname, 'pages/documents.html'),
       },
+    },
+  },
+  resolve: {
+    alias: {
+      src: path.resolve(__dirname, 'src'),
     },
   },
 });
