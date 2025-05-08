@@ -330,3 +330,97 @@ export async function uploadAndBuildImageMetadata({ recipeId, category, file, is
     uploadTimestamp: Timestamp.now(),
   };
 }
+
+/**
+ * Uploads multiple pending images for a recipe (to be approved by manager)
+ * @param {string} recipeId
+ * @param {File[]} files
+ * @param {string} category
+ * @param {string} uploader
+ * @returns {Promise<Array>} Array of pending image objects
+ */
+export async function addPendingImages(recipeId, files, category, uploader) {
+  if (!Array.isArray(files) || files.length === 0) return [];
+  const recipe = await getRecipeDoc(recipeId);
+  const pendingImages = Array.isArray(recipe.pendingImages) ? [...recipe.pendingImages] : [];
+  const newPendingImages = [];
+  for (const file of files) {
+    const fileExtension = file.name.split('.').pop();
+    const id = generateImageId();
+    const fileName = `${id}.${fileExtension}`;
+    // Upload full-size
+    const fullPath = getImageStoragePath(recipeId, category, fileName, 'full');
+    await StorageService.uploadFile(file, fullPath);
+    // Compress and upload
+    const compressedFile = await compressImage(file);
+    const compressedPath = getImageStoragePath(recipeId, category, fileName, 'compressed');
+    await StorageService.uploadFile(compressedFile, compressedPath);
+    const pendingImage = {
+      id,
+      full: fullPath,
+      compressed: compressedPath,
+      fileExtension,
+      timestamp: serverTimestamp(),
+      uploadedBy: uploader,
+    };
+    pendingImages.push(pendingImage);
+    newPendingImages.push(pendingImage);
+  }
+  await updateRecipeDoc(recipeId, { pendingImages });
+  return newPendingImages;
+}
+
+/**
+ * Approves a specific pending image for a recipe, moving it to the images array
+ * @param {string} recipeId
+ * @param {string} pendingImageId
+ * @returns {Promise<void>}
+ */
+export async function approvePendingImageById(recipeId, pendingImageId) {
+  const recipe = await getRecipeDoc(recipeId);
+  if (!recipe || !Array.isArray(recipe.pendingImages)) throw new Error('No pending images to approve');
+  const idx = recipe.pendingImages.findIndex(img => img.id === pendingImageId);
+  if (idx === -1) throw new Error('Pending image not found');
+  const pendingImage = recipe.pendingImages[idx];
+  const newImage = {
+    id: generateImageId(),
+    full: pendingImage.full,
+    compressed: pendingImage.compressed,
+    isPrimary: !recipe.images || recipe.images.length === 0,
+    access: 'public',
+    uploadedBy: pendingImage.uploadedBy,
+    fileName: `${pendingImageId}.${pendingImage.fileExtension}`,
+    uploadTimestamp: Timestamp.now(),
+  };
+  const images = Array.isArray(recipe.images) ? [...recipe.images, newImage] : [newImage];
+  const pendingImages = recipe.pendingImages.filter(img => img.id !== pendingImageId);
+  await updateRecipeDoc(recipeId, { images, pendingImages });
+}
+
+/**
+ * Rejects a specific pending image for a recipe, deleting it from storage and Firestore
+ * @param {string} recipeId
+ * @param {string} pendingImageId
+ * @returns {Promise<void>}
+ */
+export async function rejectPendingImageById(recipeId, pendingImageId) {
+  const recipe = await getRecipeDoc(recipeId);
+  if (!recipe || !Array.isArray(recipe.pendingImages)) throw new Error('No pending images to reject');
+  const idx = recipe.pendingImages.findIndex(img => img.id === pendingImageId);
+  if (idx === -1) throw new Error('Pending image not found');
+  const pendingImage = recipe.pendingImages[idx];
+  await StorageService.deleteFile(pendingImage.full);
+  await StorageService.deleteFile(pendingImage.compressed);
+  const pendingImages = recipe.pendingImages.filter(img => img.id !== pendingImageId);
+  await updateRecipeDoc(recipeId, { pendingImages });
+}
+
+/**
+ * Returns the array of pending images for a recipe
+ * @param {string} recipeId
+ * @returns {Promise<Array>}
+ */
+export async function getPendingImages(recipeId) {
+  const recipe = await getRecipeDoc(recipeId);
+  return Array.isArray(recipe?.pendingImages) ? recipe.pendingImages : [];
+}

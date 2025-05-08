@@ -20,7 +20,11 @@ let validateImageFile,
   getPrimaryImage,
   getPrimaryImageUrl,
   removeAllRecipeImages,
-  uploadAndBuildImageMetadata;
+  uploadAndBuildImageMetadata,
+  addPendingImages,
+  approvePendingImageById,
+  rejectPendingImageById,
+  getPendingImages;
 
 // Mock StorageService and FirestoreService
 const uploadFileMock = jest.fn();
@@ -79,6 +83,10 @@ describe('recipe-image-utils', () => {
     getPrimaryImageUrl = utils.getPrimaryImageUrl;
     removeAllRecipeImages = utils.removeAllRecipeImages;
     uploadAndBuildImageMetadata = utils.uploadAndBuildImageMetadata;
+    addPendingImages = utils.addPendingImages;
+    approvePendingImageById = utils.approvePendingImageById;
+    rejectPendingImageById = utils.rejectPendingImageById;
+    getPendingImages = utils.getPendingImages;
   });
 
   describe('validateImageFile', () => {
@@ -374,6 +382,90 @@ describe('recipe-image-utils', () => {
       expect(meta.fileName).toMatch(/\.jpg$/);
       expect(meta.isPrimary).toBe(false);
       expect(meta.uploadedBy).toBe('user2');
+    });
+  });
+
+  describe('addPendingImages', () => {
+    it('uploads multiple files and appends to pendingImages', async () => {
+      uploadFileMock.mockResolvedValue('url');
+      updateDocumentMock.mockResolvedValue();
+      getDocumentMock.mockResolvedValue({ pendingImages: [] });
+      const files = [createFakeFile('a.jpg'), createFakeFile('b.jpg')];
+      const result = await addPendingImages('rid', files, 'cat', 'user1');
+      expect(uploadFileMock).toHaveBeenCalledTimes(4); // 2 files x (full+compressed)
+      expect(updateDocumentMock).toHaveBeenCalledWith(
+        'recipes',
+        'rid',
+        expect.objectContaining({ pendingImages: expect.any(Array) })
+      );
+      expect(result.length).toBe(2);
+      expect(result[0]).toHaveProperty('id');
+      expect(result[1]).toHaveProperty('id');
+    });
+    it('returns [] if no files', async () => {
+      getDocumentMock.mockResolvedValue({ pendingImages: [] });
+      const result = await addPendingImages('rid', [], 'cat', 'user1');
+      expect(result).toEqual([]);
+      expect(updateDocumentMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('approvePendingImageById', () => {
+    it('moves the correct pending image to images array', async () => {
+      const pending = { id: 'pid', full: 'f', compressed: 'c', fileExtension: 'jpg', uploadedBy: 'u' };
+      getDocumentMock.mockResolvedValue({ pendingImages: [pending], images: [] });
+      updateDocumentMock.mockResolvedValue();
+      await approvePendingImageById('rid', 'pid');
+      expect(updateDocumentMock).toHaveBeenCalledWith(
+        'recipes',
+        'rid',
+        expect.objectContaining({ images: expect.any(Array), pendingImages: [] })
+      );
+    });
+    it('throws if pending image not found', async () => {
+      getDocumentMock.mockResolvedValue({ pendingImages: [{ id: 'other' }] });
+      await expect(approvePendingImageById('rid', 'pid')).rejects.toThrow();
+    });
+    it('throws if no pendingImages', async () => {
+      getDocumentMock.mockResolvedValue({});
+      await expect(approvePendingImageById('rid', 'pid')).rejects.toThrow();
+    });
+  });
+
+  describe('rejectPendingImageById', () => {
+    it('deletes the correct pending image and removes from array', async () => {
+      const pending = { id: 'pid', full: 'f', compressed: 'c' };
+      getDocumentMock.mockResolvedValue({ pendingImages: [pending, { id: 'other' }] });
+      updateDocumentMock.mockResolvedValue();
+      await rejectPendingImageById('rid', 'pid');
+      expect(deleteFileMock).toHaveBeenCalledWith('f');
+      expect(deleteFileMock).toHaveBeenCalledWith('c');
+      expect(updateDocumentMock).toHaveBeenCalledWith(
+        'recipes',
+        'rid',
+        expect.objectContaining({ pendingImages: [{ id: 'other' }] })
+      );
+    });
+    it('throws if pending image not found', async () => {
+      getDocumentMock.mockResolvedValue({ pendingImages: [{ id: 'other' }] });
+      await expect(rejectPendingImageById('rid', 'pid')).rejects.toThrow();
+    });
+    it('throws if no pendingImages', async () => {
+      getDocumentMock.mockResolvedValue({});
+      await expect(rejectPendingImageById('rid', 'pid')).rejects.toThrow();
+    });
+  });
+
+  describe('getPendingImages', () => {
+    it('returns the pendingImages array', async () => {
+      getDocumentMock.mockResolvedValue({ pendingImages: [{ id: 'a' }, { id: 'b' }] });
+      const result = await getPendingImages('rid');
+      expect(result).toEqual([{ id: 'a' }, { id: 'b' }]);
+    });
+    it('returns [] if no pendingImages', async () => {
+      getDocumentMock.mockResolvedValue({});
+      const result = await getPendingImages('rid');
+      expect(result).toEqual([]);
     });
   });
 });
