@@ -1,6 +1,5 @@
-# Ignore chatbot rules files
+# Ignore .copilotrc file
 .copilotrc
-.cursor
 
 # Ignore VS Code settings
 .vscode/
@@ -14,32 +13,3 @@ build/
 
 # Ignore environment variables
 .env
-
-# Ignore planning docs
-.plan/
-
-# Build output
-coverage/
-
-# Vite cache
-.vite/
-
-# Jest cache
-jest-cache/
-jest-coverage/
-.cache/
-tmp/
-temp/
-
-# OS-specific
-.DS_Store
-Thumbs.db
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# IDE/editor
-.idea/
-*.swp
