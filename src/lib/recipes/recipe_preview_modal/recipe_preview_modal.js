@@ -48,10 +48,8 @@
  * - This component relies on the `custom-modal` and `recipe-component` components.
  * - This component relies on firebase-storage-utils.js for the `deleteRecipeImages` function.
  */
-
-import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
-import { doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { deleteRecipeImages } from '../../../js/utilities/firebase-storage-utils';
+import { FirestoreService } from '../../../js/services/firestore-service.js';
+import { removeAllRecipeImages } from '../../../js/utils/recipes/recipe-image-utils.js';
 
 class RecipePreviewModal extends HTMLElement {
   constructor() {
@@ -318,17 +316,13 @@ class RecipePreviewModal extends HTMLElement {
   }
 
   async handleRecipeApproval(recipeId) {
-    const db = getFirestoreInstance();
-    await updateDoc(doc(db, 'recipes', recipeId), { approved: true });
+    await FirestoreService.updateDocument('recipes', recipeId, { approved: true });
   }
 
   async handleRecipeRejection(recipeId) {
     try {
-      // First delete all associated images
-      await deleteRecipeImages(recipeId);
-      // Then delete the recipe document
-      const db = getFirestoreInstance();
-      await deleteDoc(doc(db, 'recipes', recipeId));
+      await removeAllRecipeImages(recipeId);
+      await FirestoreService.deleteDocument('recipes', recipeId);
     } catch (error) {
       console.error('Error in handleRecipeRejection:', error);
       throw new Error('Failed to reject recipe: ' + error.message);
