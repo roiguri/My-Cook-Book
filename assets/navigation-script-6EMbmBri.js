@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",function(){const e=document.querySelector(".nav-toggle"),t=document.querySelector(".nav-search-container");e.addEventListener("click",function(){this.classList.toggle("active"),t.classList.toggle("active")})});
