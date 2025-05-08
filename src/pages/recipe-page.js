@@ -9,9 +9,6 @@ import '../styles/pages/recipe_page.css';
 
 // Import components
 import '../lib/search/header-search-bar/header-search-bar.js';
-import '../lib/utilities/image-carousel/image-carousel.js';
-import '../lib/modals/missing_image_upload/missing_image_upload.js';
-import '../lib/utilities/modal/modal.js';
 import '../lib/recipes/recipe_component/recipe_component.js';
 
 // Authentication Components

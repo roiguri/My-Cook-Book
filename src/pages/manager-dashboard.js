@@ -24,16 +24,11 @@ import('../lib/auth/components/user-profile.js');
 // Page Specific Scripts
 import '../js/manager-dashboard.js';
 import '../js/navigation-script.js';
-import '../js/utilities/firebase-storage-utils.js';
 
 // Page Specific Components
-import '../lib/utilities/modal/modal.js';
 import '../lib/utilities/scrolling_list/scroll_list.js';
-import '../lib/recipes/recipe_preview_modal/recipe_preview_modal.js';
-import '../lib/recipes/recipe_component/recipe_component.js';
 import '../lib/recipes/recipe_preview_modal/edit_preview_recipe.js';
-import '../lib/recipes/recipe_form_component/edit_recipe_component.js';
-import '../lib/recipes/recipe_form_component/recipe_form_component.js';
+import '../lib/recipes/recipe_preview_modal/recipe_preview_modal.js';
 
 // Dynamic imports (uses services)
 import('../lib/modals/image_approval/image_approval.js');

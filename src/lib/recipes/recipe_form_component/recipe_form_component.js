@@ -1,7 +1,11 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import authService from '../../../js/services/auth-service.js';
 import { doc, getDoc } from 'firebase/firestore';
+import { validateRecipeData } from '../../../js/utils/recipes/recipe-data-utils.js';
+import { getImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
+
 import '../../images/image-handler.js';
+import '../../modals/message-modal/message-modal.js';
 
 class RecipeFormComponent extends HTMLElement {
   constructor() {
@@ -637,102 +641,87 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   /**
-   * Validate form
+   * Validate form using recipe-data-utils and ingredient utils
    */
   validateForm() {
-    let isValid = true;
-
-    const addValidationListener = (field) => {
-      field.addEventListener('input', () => {
-        if (field.value.trim()) {
-          field.classList.remove('recipe-form__input--invalid');
-        }
-      });
-    };
-
-    // 1. Check if mandatory fields are filled
-    const mandatoryFields = [
-      'name',
-      'dish-type',
-      'prep-time',
-      'wait-time',
-      'servings-form',
-      'difficulty',
-      'main-ingredient',
-    ];
-    mandatoryFields.forEach((fieldId) => {
-      const field = this.shadowRoot.getElementById(fieldId);
-      if (!field.value.trim()) {
-        isValid = false;
-        field.classList.add('recipe-form__input--invalid');
-        addValidationListener(field);
-      } else {
-        field.classList.remove('recipe-form__input--invalid');
-      }
+    this.collectFormData();
+    const { isValid, errors } = validateRecipeData(this.recipeData);
+    // Clear all previous error states
+    this.shadowRoot.querySelectorAll('.recipe-form__input, .recipe-form__select, .recipe-form__textarea').forEach((el) => {
+      el.classList.remove('recipe-form__input--invalid');
     });
-
-    // 2. Check if preparation and waiting times are numbers
-    const timeFields = ['prep-time', 'wait-time', 'servings-form'];
-    timeFields.forEach((fieldId) => {
-      const field = this.shadowRoot.getElementById(fieldId);
-      const value = parseInt(field.value);
-      if (isNaN(value) || value < 0) {
-        isValid = false;
-        field.classList.add('recipe-form__input--invalid');
-        field.addEventListener('input', function () {
-          const newValue = parseInt(this.value);
-          if (!isNaN(newValue) && newValue >= 0) {
-            this.classList.remove('recipe-form__input--invalid');
-          }
-        });
-      } else {
-        field.classList.remove('recipe-form__input--invalid');
-      }
-    });
-
-    // 3. Check if all ingredient fields are filled in all entries
-    const ingredientEntries = this.shadowRoot.querySelectorAll('.recipe-form__ingredient-entry');
-    ingredientEntries.forEach((entry) => {
-      const quantityInput = entry.querySelector('.recipe-form__input--quantity');
-      const unitInput = entry.querySelector('.recipe-form__input--unit');
-      const itemInput = entry.querySelector('.recipe-form__input--item');
-
-      [quantityInput, unitInput, itemInput].forEach((input) => {
-        if (!input.value.trim()) {
-          isValid = false;
-          input.classList.add('recipe-form__input--invalid');
-          addValidationListener(input);
-        } else {
-          input.classList.remove('recipe-form__input--invalid');
-        }
-      });
-    });
-
-    // 4. Check if all step fields are filled in all stages
-    const stagesContainers = this.shadowRoot.querySelectorAll('.recipe-form__steps');
-    stagesContainers.forEach((container) => {
-      container.querySelectorAll('.recipe-form__step input[type="text"]').forEach((input) => {
-        if (!input.value.trim()) {
-          isValid = false;
-          input.classList.add('recipe-form__input--invalid');
-          addValidationListener(input);
-        } else {
-          input.classList.remove('recipe-form__input--invalid');
-        }
-      });
-    });
-
-    const imageHandler = this.shadowRoot.getElementById('recipe-images');
-    const images = imageHandler.getImages();
-
+    // Show error messages and highlight invalid fields
     const errorMessage = this.shadowRoot.querySelector('.recipe-form__error-message');
     if (!isValid) {
-      errorMessage.textContent = `ישנם שגיאות בטופס. אנא תקן אותן.`;
+      let errorText = 'ישנם שגיאות בטופס. אנא תקן אותן.';
+      if (errors) {
+        // Highlight fields with errors
+        Object.keys(errors).forEach((key) => {
+          if (key.startsWith('ingredients[')) {
+            // Highlight ingredient fields
+            const match = key.match(/ingredients\[(\d+)\]\.(\w+)/);
+            if (match) {
+              const idx = parseInt(match[1], 10);
+              const field = match[2];
+              const entry = this.shadowRoot.querySelectorAll('.recipe-form__ingredient-entry')[idx];
+              if (entry) {
+                const input = entry.querySelector(`.recipe-form__input--${field}`);
+                if (input) input.classList.add('recipe-form__input--invalid');
+              }
+            }
+          } else if (key.startsWith('instructions[')) {
+            // Highlight instruction fields
+            const match = key.match(/instructions\[(\d+)\]/);
+            if (match) {
+              const idx = parseInt(match[1], 10);
+              const input = this.shadowRoot.querySelectorAll('.recipe-form__stages input[type="text"]')[idx];
+              if (input) input.classList.add('recipe-form__input--invalid');
+            }
+          } else if (key.startsWith('stages[')) {
+            // Highlight stage fields
+            const match = key.match(/stages\[(\d+)\](?:\.(\w+))?/);
+            if (match) {
+              const sIdx = parseInt(match[1], 10);
+              const field = match[2];
+              const stage = this.shadowRoot.querySelectorAll('.recipe-form__steps')[sIdx];
+              if (stage && field === 'title') {
+                const input = stage.querySelector('.recipe-form__input--stage-name');
+                if (input) input.classList.add('recipe-form__input--invalid');
+              }
+              if (stage && field === 'instructions') {
+                stage.querySelectorAll('input[type="text"]').forEach((input) => {
+                  input.classList.add('recipe-form__input--invalid');
+                });
+              }
+            }
+          } else {
+            // Highlight main fields
+            const fieldMap = {
+              name: 'name',
+              category: 'dish-type',
+              prepTime: 'prep-time',
+              waitTime: 'wait-time',
+              servings: 'servings-form',
+              difficulty: 'difficulty',
+              mainIngredient: 'main-ingredient',
+              tags: 'tags',
+              comments: 'comments',
+            };
+            const fieldId = fieldMap[key];
+            if (fieldId) {
+              const el = this.shadowRoot.getElementById(fieldId);
+              if (el) el.classList.add('recipe-form__input--invalid');
+            }
+          }
+        });
+        // Show all error messages
+        errorText = Object.values(errors).join(' ');
+      }
+      errorMessage.textContent = errorText;
       errorMessage.style.display = 'block';
     } else {
       errorMessage.style.display = 'none';
     }
-
     return isValid;
   }
 
@@ -788,13 +777,35 @@ class RecipeFormComponent extends HTMLElement {
     // Collect images
     const imageHandler = this.shadowRoot.getElementById('recipe-images');
     const images = imageHandler.getImages();
+    // Track removed images if the handler supports it
+    const toDelete = typeof imageHandler.getRemovedImages === 'function' ? imageHandler.getRemovedImages() : [];
 
-    this.recipeData.images = images.map((img) => ({
-      file: img.file,
-      isPrimary: img.isPrimary,
-      access: 'public', // Default access level
-      uploadedBy: authService.getCurrentUser()?.uid || 'anonymous',
-    }));
+    this.recipeData.images = images.map((img) => {
+      if (img.file) {
+        // New image to upload
+        return {
+          file: img.file,
+          isPrimary: img.isPrimary,
+          access: 'public',
+          uploadedBy: authService.getCurrentUser()?.uid || 'anonymous',
+          source: 'new',
+        };
+      } else {
+        // Existing image to keep
+        return {
+          id: img.id,
+          isPrimary: img.isPrimary,
+          full: img.full,
+          compressed: img.compressed,
+          access: img.access,
+          uploadedBy: img.uploadedBy,
+          fileName: img.fileName,
+          uploadTimestamp: img.uploadTimestamp,
+          source: 'existing',
+        };
+      }
+    });
+    this.recipeData.toDelete = toDelete;
 
     // Get comments if present
     const comments = this.shadowRoot.getElementById('comments').value.trim();
@@ -1030,25 +1041,31 @@ class RecipeFormComponent extends HTMLElement {
     }
   }
 
+  // FIXME: create file object before re-uploading images
   async populateImages(images, category) {
     const imageHandler = this.shadowRoot.getElementById('recipe-images');
 
     for (const image of images) {
       try {
-        // FIXME: missing implementation for fetchImageFromStorage
-        const imageUrl = await this.fetchImageFromStorage(category, image.fileName);
-        if (imageUrl) {
-          // Convert URL to File object
-          const response = await fetch(imageUrl);
-          const blob = await response.blob();
-          const file = new File([blob], image.fileName, { type: blob.type });
-
-          // Add to image handler
+        // Use getImageUrl from recipe-image-utils for preview
+        const previewUrl = image.compressed
+          ? await getImageUrl(image.compressed)
+          : image.full
+            ? await getImageUrl(image.full)
+            : null;
+        if (previewUrl) {
           imageHandler.addImage({
-            file,
-            preview: imageUrl,
+            file: null, // No file object, just preview
+            preview: previewUrl,
             id: image.id,
             isPrimary: image.isPrimary,
+            full: image.full,
+            compressed: image.compressed,
+            access: image.access,
+            uploadedBy: image.uploadedBy,
+            fileName: image.fileName,
+            uploadTimestamp: image.uploadTimestamp,
+            source: 'existing',
           });
         }
       } catch (error) {

@@ -14,10 +14,13 @@
  *
  */
 
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
-import { collection, doc, addDoc, updateDoc, Timestamp } from 'firebase/firestore';
-import { ref, uploadBytes } from 'firebase/storage';
+import { FirestoreService } from '../../../js/services/firestore-service.js';
+import { uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-image-utils.js';
+import { Timestamp } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
+
+import './recipe_form_component.js';
+import '../../modals/message-modal/message-modal.js';
 
 class ProposeRecipeComponent extends HTMLElement {
   constructor() {
@@ -50,70 +53,47 @@ class ProposeRecipeComponent extends HTMLElement {
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
     try {
-      const db = getFirestoreInstance();
       const user = authService.getCurrentUser();
-      // Store images separately
       const imagesToUpload = recipeData.images || [];
-      // Create a copy of recipe data without images
       const recipeDataForFirestore = { ...recipeData };
-      delete recipeDataForFirestore.images; // Remove images array
-      // Add timestamp and user info
+      delete recipeDataForFirestore.images;
       recipeDataForFirestore.creationTime = Timestamp.now();
       recipeDataForFirestore.userId = user?.uid || 'anonymous';
-      // Save recipe to Firestore first to get the ID
-      const recipeRef = await addDoc(collection(db, 'recipes'), recipeDataForFirestore);
+      // Add recipe to Firestore
+      const recipeId = await FirestoreService.addDocument('recipes', recipeDataForFirestore);
       // Upload images if provided
       if (imagesToUpload.length > 0) {
         const imageUploadResults = await this.uploadRecipeImages(
-          recipeRef.id,
+          recipeId,
           imagesToUpload,
           recipeDataForFirestore.category,
+          user?.uid || 'anonymous'
         );
-        // Update recipe with image array that matches RecipeComponent expectations
-        await updateDoc(doc(db, 'recipes', recipeRef.id), {
+        await FirestoreService.updateDocument('recipes', recipeId, {
           images: imageUploadResults,
-          allowImageSuggestions: true, // Add a flag to indicate images are present
+          allowImageSuggestions: true,
         });
       }
-      // Optionally, you can reset the form here
       this.clearForm();
-      // Provide feedback to the user
       this.showSuccessMessage('Recipe proposed successfully!');
     } catch (error) {
       this.showErrorMessage('Error proposing recipe:', error);
     }
   }
 
-  // Helper function to upload image to Firebase Storage
-  async uploadRecipeImages(recipeId, images, category) {
-    const storage = getStorageInstance();
-    const user = authService.getCurrentUser();
+  async uploadRecipeImages(recipeId, images, category, uploader) {
     const imageUploadResults = [];
     for (const imageData of images) {
       const { file, isPrimary } = imageData;
-      const fileExtension = file.name.split('.').pop();
-      const fileName = isPrimary ? 'primary.jpg' : `${Date.now()}.${fileExtension}`;
       try {
-        const fullPath = `img/recipes/full/${category}/${recipeId}/${fileName}`;
-        const compressedPath = `img/recipes/compressed/${category}/${recipeId}/${fileName}`;
-        // Upload full-size image
-        const fullSizeRef = ref(storage, fullPath);
-        await uploadBytes(fullSizeRef, file);
-        // Create compressed version of the image
-        const compressedFile = await this.compressImage(file);
-        // Upload compressed version
-        const compressedRef = ref(storage, compressedPath);
-        await uploadBytes(compressedRef, compressedFile);
-        // Add image metadata to results
-        imageUploadResults.push({
-          full: fullPath, // Store the full storage path
-          compressed: compressedPath, // Store the compressed storage path
-          fileName,
+        const meta = await uploadAndBuildImageMetadata({
+          recipeId,
+          category,
+          file,
           isPrimary,
-          uploadTimestamp: Timestamp.now(),
-          uploadedBy: user?.uid || 'anonymous',
-          access: 'public',
+          uploadedBy: uploader,
         });
+        imageUploadResults.push(meta);
       } catch (error) {
         console.error('Error uploading image:', error);
         throw error;
@@ -122,14 +102,6 @@ class ProposeRecipeComponent extends HTMLElement {
     return imageUploadResults;
   }
 
-  // Helper function to compress image (replace with your actual compression logic)
-  async compressImage(imageFile) {
-    // TODO: ... Your image compression logic here ...
-    // For now, it returns the original image
-    return imageFile;
-  }
-
-  // Helper functions for showing success/error messages
   showSuccessMessage(message) {
     const proposeRecipeModal = this.shadowRoot.querySelector('message-modal');
     proposeRecipeModal.show('המתכון נשלח בהצלחה!', '', 'Close');
@@ -137,8 +109,7 @@ class ProposeRecipeComponent extends HTMLElement {
 
   showErrorMessage(message, error) {
     const proposeRecipeModal = this.shadowRoot.querySelector('message-modal');
-    // proposeRecipeModal.show('חלה שגיאה בהעלאת המתכון, אנא נסה שנית מאוחר יותר.', '', 'Close');
-    proposeRecipeModal.show(error.message + error.stack, message, 'Close');
+    proposeRecipeModal.show(error?.message + (error?.stack || ''), message, 'Close');
   }
 
   clearForm() {

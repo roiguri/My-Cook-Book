@@ -45,9 +45,9 @@
  * logic in your parent component.
  */
 
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
-import { doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
-import { ref, deleteObject } from 'firebase/storage';
+import '../recipe_component/recipe_component.js';
+import '../recipe_form_component/edit_recipe_component.js';
+import '../../utilities/modal/modal.js';
 
 class EditPreviewRecipe extends HTMLElement {
   constructor() {
@@ -249,39 +249,6 @@ class EditPreviewRecipe extends HTMLElement {
     this.modal.close();
   }
 
-  async handleRecipeApproval(recipeId) {
-    try {
-      const db = getFirestoreInstance();
-      await updateDoc(doc(db, 'recipes', recipeId), { approved: true });
-      console.log('Recipe approved:', recipeId);
-    } catch (error) {
-      this.handleError(error);
-    }
-  }
-
-  async handleRecipeRejection(recipeId) {
-    try {
-      const db = getFirestoreInstance();
-      const storage = getStorageInstance();
-      const recipeRef = doc(db, 'recipes', recipeId);
-      const recipeSnapshot = await getDoc(recipeRef);
-      const recipeData = recipeSnapshot.data();
-      const imageName = recipeData.image;
-      const compressedImagePath = `img/recipes/compressed/${recipeData.category}/${imageName}`;
-      const fullImagePath = `img/recipes/full/${recipeData.category}/${imageName}`;
-      try {
-        await deleteObject(ref(storage, compressedImagePath));
-        await deleteObject(ref(storage, fullImagePath));
-      } catch (imageError) {
-        console.error('Error deleting images:', imageError);
-      }
-      await deleteDoc(recipeRef);
-      console.log('Recipe rejected:', recipeId);
-    } catch (error) {
-      this.handleError(error);
-    }
-  }
-
   handleError(error) {
     // TODO: add error handling
     return;
@@ -289,7 +256,7 @@ class EditPreviewRecipe extends HTMLElement {
 
   // Handle recipe preview size for different layouts
   handleResize() {
-    const element = this.shadowRoot.querySelector('custom-modal'); // Replace with your element ID
+    const element = this.shadowRoot.querySelector('custom-modal');
     if (window.innerWidth < 768) {
       // Adjust breakpoint as needed
       this.modal.setHeight('100vh');

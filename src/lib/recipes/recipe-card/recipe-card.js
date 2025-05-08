@@ -18,11 +18,22 @@
  * - recipe-card-open: Emitted when the card is clicked
  *   detail: { recipeId: string }
  */
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
 import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
+import {
+  getLocalizedCategoryName,
+  formatCookingTime,
+  getTimeClass,
+  getDifficultyClass,
+  getRecipeById,
+} from '../../../js/utils/recipes/recipe-data-utils.js';
+import {
+  getPrimaryImageUrl,
+  getPlaceholderImageUrl,
+} from '../../../js/utils/recipes/recipe-image-utils.js';
+import { extractIngredientNames } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
 
 class RecipeCard extends HTMLElement {
   // Define observed attributes
@@ -42,18 +53,6 @@ class RecipeCard extends HTMLElement {
     super();
     // Create shadow DOM
     this.attachShadow({ mode: 'open' });
-
-    this._categoryMap = {
-      appetizers: 'מנות ראשונות',
-      'main-courses': 'מנות עיקריות',
-      'side-dishes': 'תוספות',
-      'soups-stews': 'מרקים ותבשילים',
-      salads: 'סלטים',
-      desserts: 'קינוחים',
-      'breakfast-brunch': 'ארוחות בוקר',
-      snacks: 'חטיפים',
-      beverages: 'משקאות',
-    };
 
     // Initialize default values
     this._defaults = {
@@ -236,41 +235,20 @@ class RecipeCard extends HTMLElement {
     }
   }
 
-  _getTimeClass(minutes) {
-    if (minutes <= 30) return 'quick';
-    if (minutes <= 60) return 'medium';
-    return 'long';
-  }
-
-  _translateCategory(category) {
-    return this._categoryMap[category] || category; // fallback to original if not found
-  }
-
   // Data fetching
   async _fetchRecipeData() {
     if (!this.recipeId) {
       this._handleError('No recipe ID provided');
       return;
     }
-
     try {
       this._isLoading = true;
       this._render();
-
-      const db = getFirestoreInstance();
-      const recipeDoc = await getDoc(doc(db, 'recipes', this.recipeId));
-
-      if (!recipeDoc.exists()) {
+      this._recipeData = await getRecipeById(this.recipeId);
+      if (!this._recipeData) {
         throw new Error('Recipe not found');
       }
-
-      this._recipeData = {
-        id: recipeDoc.id,
-        ...recipeDoc.data(),
-      };
-
       await this._fetchRecipeImage();
-
       this._isLoading = false;
       this._render();
     } catch (error) {
@@ -280,24 +258,10 @@ class RecipeCard extends HTMLElement {
 
   async _fetchRecipeImage() {
     try {
-      const storage = getStorageInstance();
-      // First check if recipe has an image defined
-      if (this._recipeData.image) {
-        const imagePath = `img/recipes/compressed/${this._recipeData.category}/${this._recipeData.image}`;
-        const imageRef = ref(storage, imagePath);
-        this._imageUrl = await getDownloadURL(imageRef);
-        return;
-      }
-      // If no image, use placeholder without throwing an error
-      const placeholderPath = 'img/recipes/compressed/place-holder-missing.png';
-      const placeholderRef = ref(storage, placeholderPath);
-      this._imageUrl = await getDownloadURL(placeholderRef);
+      this._imageUrl = await getPrimaryImageUrl(this._recipeData);
     } catch (error) {
-      // Only catch actual storage errors
-      const storage = getStorageInstance();
-      const placeholderPath = 'img/recipes/compressed/place-holder-missing.png';
-      const placeholderRef = ref(storage, placeholderPath);
-      this._imageUrl = await getDownloadURL(placeholderRef);
+      console.error('Error fetching recipe image:', error);
+      this._imageUrl = await getPlaceholderImageUrl();
     }
   }
 
@@ -695,12 +659,13 @@ class RecipeCard extends HTMLElement {
       `;
   }
 
+  // TODO: improve more info icon
   _renderRecipe() {
     const { name, category, prepTime, waitTime, difficulty } = this._recipeData;
     const totalTime = prepTime + waitTime;
-    const timeClass = this._getTimeClass(totalTime);
-    const difficultyClass = this._getDifficultyClass(difficulty);
-    const ingredients = this._recipeData.ingredients.map((i) => i.item).join(', ');
+    const timeClass = getTimeClass(totalTime);
+    const difficultyClass = getDifficultyClass(difficulty);
+    const ingredients = extractIngredientNames(this._recipeData.ingredients).join(', ');
     const favoriteButton = this.hasAttribute('show-favorites')
       ? `
         <button class="favorite-btn ${this._isFavorite() ? 'active' : ''}" 
@@ -750,12 +715,12 @@ class RecipeCard extends HTMLElement {
                     <div class="recipe-meta">
                         <div class="category-container">
                             <span class="badge category ${category}">
-                                ${this._getCategoryIcon(category)} ${this._translateCategory(category)}
+                                ${getLocalizedCategoryName(category)}
                             </span>
                         </div>
                         <div class="stats-container">
                             <span dir="rtl" class="badge time ${timeClass}">
-                                ${this._formatCookingTime(totalTime)}
+                                ${formatCookingTime(totalTime)}
                             </span>
                             <span class="badge difficulty ${difficultyClass}">
                                 <span class="icon">${this._getDifficultyIcon()} ${difficulty}</span>
@@ -770,6 +735,7 @@ class RecipeCard extends HTMLElement {
     this._setupEventListeners();
   }
 
+  // TODO: create and extract to favorites-utils file
   async _fetchUserFavorites() {
     try {
       const user = authService.getCurrentUser();
@@ -820,36 +786,6 @@ class RecipeCard extends HTMLElement {
     return '';
   }
 
-  _getDifficultyClass(difficulty) {
-    const difficultyMap = {
-      קלה: 'easy',
-      בינונית: 'medium',
-      קשה: 'hard',
-    };
-    return difficultyMap[difficulty] || 'medium';
-  }
-
-  _getCategoryIcon(category) {
-    const icons = {
-      appetizers: '🥗',
-      'main-courses': '🍖',
-      'side-dishes': '🥔',
-      'soups-stews': '🥘',
-      salads: '🥬',
-      desserts: '🍰',
-      'breakfast-brunch': '🍳',
-      snacks: '🥨',
-      beverages: '🥤',
-      else: '🍽️',
-    };
-    return '';
-  }
-
-  _getTimeIcon() {
-    const icon = '⏰';
-    return '';
-  }
-
   // Utility methods
   _updateCollapseState() {
     const card = this.shadowRoot.querySelector('.recipe-card');
@@ -875,15 +811,6 @@ class RecipeCard extends HTMLElement {
   _updateDimensions() {
     this.style.setProperty('--card-width', this.cardWidth);
     this.style.setProperty('--card-height', this.cardHeight);
-  }
-
-  _formatCookingTime(time) {
-    if (time <= 60) return `${time} דקות`;
-    if (time < 120) return `שעה ו-${time % 60} דקות`;
-    if (time === 120) return 'שעתיים';
-    if (time < 180) return `שעתיים ו-${time % 60} דקות`;
-    if (time % 60 === 0) return `${time / 60} שעות`;
-    return `${Math.floor(time / 60)} שעות ו-${time % 60} דקות`;
   }
 }
 

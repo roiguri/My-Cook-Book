@@ -1,3 +1,42 @@
+/*
+ * Recipe Image Utilities
+ * ---------------------
+ * This module provides helper functions for image upload, management, and retrieval for recipes.
+ *
+ * Exported Methods:
+ *
+ * Validation & Compression:
+ *   - validateImageFile(file): Validate file type and size.
+ *   - compressImage(imageFile, quality): (Stub) Compress image file.
+ *
+ * Storage Path Helpers:
+ *   - getImageStoragePath(recipeId, category, fileName, type): Get storage path for image.
+ *   - generateImageId(): Generate a unique image ID.
+ *
+ * Single Pending Image (Legacy): // TODO: remove after multiple images is fully implemented
+ *   - addPendingImage(recipeId, file, category, uploader): Upload a single pending image.
+ *   - approvePendingImage(recipeId): Approve the single pending image.
+ *   - rejectPendingImage(recipeId): Reject/delete the single pending image.
+ *   - getPendingImage(recipeId): Get the single pending image.
+ *
+ * Multi Pending Images (Current):
+ *   - addPendingImages(recipeId, files, category, uploader): Upload multiple pending images.
+ *   - approvePendingImageById(recipeId, pendingImageId): Approve a specific pending image by ID.
+ *   - rejectPendingImageById(recipeId, pendingImageId): Reject/delete a specific pending image by ID.
+ *   - getPendingImages(recipeId): Get all pending images for a recipe.
+ *
+ * Approved Images:
+ *   - removeApprovedImage(recipeId, imageId): Remove an approved image.
+ *   - setPrimaryImage(recipeId, imageId): Set the primary image for a recipe.
+ *   - getRecipeImages(recipe, userRole): Get accessible images for a user role.
+ *   - getPrimaryImage(recipe): Get the primary image object.
+ *   - getPrimaryImageUrl(recipe): Get the download URL for the primary image or placeholder.
+ *   - getImageUrl(storagePath): Get the download URL for a storage path.
+ *   - getPlaceholderImageUrl(): Get the placeholder image URL.
+ *   - removeAllRecipeImages(recipeId): Remove all images (approved and pending) for a recipe.
+ *   - uploadAndBuildImageMetadata({ recipeId, category, file, isPrimary, uploadedBy }): Upload and return metadata for an image.
+ */
+
 /**
  * @typedef {Object} RecipeImage
  * @property {string} id
@@ -63,6 +102,15 @@ async function updateRecipeDoc(recipeId, data) {
   return await FirestoreService.updateDocument('recipes', recipeId, data);
 }
 
+// --- Image ID Helper ---
+/**
+ * Generates a unique image ID with 'img-' prefix
+ * @returns {string}
+ */
+export function generateImageId() {
+  return 'img-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+}
+
 // --- Image CRUD ---
 /**
  * Uploads a pending image for a recipe (to be approved by manager)
@@ -105,7 +153,7 @@ export async function approvePendingImage(recipeId) {
   const { full, compressed, fileExtension, uploadedBy } = recipe.pendingImage;
   const fileName = `${recipeId}.${fileExtension}`;
   const newImage = {
-    id: `${Date.now()}`,
+    id: generateImageId(),
     full,
     compressed,
     isPrimary: !recipe.images || recipe.images.length === 0,
@@ -206,4 +254,212 @@ export async function getImageUrl(storagePath) {
  */
 export async function getPlaceholderImageUrl() {
   return await StorageService.getFileUrl('img/recipes/compressed/place-holder-add-new.png');
+}
+
+/**
+ * Returns the primary image object for a recipe
+ * @param {Object} recipe - Recipe object with images array
+ * @returns {RecipeImage|undefined} The primary image object or undefined
+ */
+export function getPrimaryImage(recipe) {
+  console.log('recipe', recipe);
+  if (!recipe || !Array.isArray(recipe.images) || recipe.images.length === 0) return undefined;
+  const primary = recipe.images.find((img) => img.isPrimary);
+  return primary || recipe.images[0];
+}
+
+/**
+ * Returns the download URL for the primary image's compressed version, or the placeholder if none
+ * @param {Object} recipe - Recipe object with images array
+ * @returns {Promise<string>} Download URL for the primary image or placeholder
+ */
+export async function getPrimaryImageUrl(recipe) {
+  const primary = getPrimaryImage(recipe);
+  if (primary && primary.compressed) {
+    return await StorageService.getFileUrl(primary.compressed);
+  }
+  return await getPlaceholderImageUrl();
+}
+
+/**
+ * Removes all images (approved and pending) for a recipe
+ * @param {string} recipeId
+ * @returns {Promise<void>}
+ */
+export async function removeAllRecipeImages(recipeId) {
+  const recipe = await getRecipeDoc(recipeId);
+  if (!recipe) {
+    console.warn('Recipe not found for image removal:', recipeId);
+    return;
+  }
+  const deletePromises = [];
+  // Delete approved images
+  if (recipe.images && Array.isArray(recipe.images)) {
+    recipe.images.forEach((image) => {
+      if (image.full) {
+        deletePromises.push(
+          StorageService.deleteFile(image.full).catch((err) =>
+            console.warn(`Error deleting full image ${image.id}:`, err),
+          ),
+        );
+      }
+      if (image.compressed) {
+        deletePromises.push(
+          StorageService.deleteFile(image.compressed).catch((err) =>
+            console.warn(`Error deleting compressed image ${image.id}:`, err),
+          ),
+        );
+      }
+    });
+  }
+  // Delete pending images (batches) // TODO: check if necessary when implementing image suggestions
+  if (recipe.pendingImages && Array.isArray(recipe.pendingImages)) {
+    recipe.pendingImages.forEach((pendingBatch) => {
+      if (pendingBatch.images && Array.isArray(pendingBatch.images)) {
+        pendingBatch.images.forEach((image) => {
+          if (image.full) {
+            deletePromises.push(
+              StorageService.deleteFile(image.full).catch((err) =>
+                console.warn(`Error deleting pending full image ${image.id}:`, err),
+              ),
+            );
+          }
+          if (image.compressed) {
+            deletePromises.push(
+              StorageService.deleteFile(image.compressed).catch((err) =>
+                console.warn(`Error deleting pending compressed image ${image.id}:`, err),
+              ),
+            );
+          }
+        });
+      }
+    });
+  }
+  await Promise.all(deletePromises);
+  // Remove images and pendingImages from Firestore
+  await updateRecipeDoc(recipeId, { images: [], pendingImages: [] });
+}
+
+/**
+ * Uploads a recipe image (full and compressed) and returns metadata
+ * @param {Object} params
+ * @param {string} recipeId
+ * @param {string} category
+ * @param {File} file
+ * @param {boolean} isPrimary
+ * @param {string} uploadedBy
+ * @returns {Promise<Object>} image metadata
+ */
+export async function uploadAndBuildImageMetadata({ recipeId, category, file, isPrimary, uploadedBy }) {
+  const fileExtension = file.name.split('.').pop();
+  const fileName = isPrimary ? 'primary.jpg' : `${Date.now()}.${fileExtension}`;
+  const fullPath = getImageStoragePath(recipeId, category, fileName, 'full');
+  const compressedPath = getImageStoragePath(recipeId, category, fileName, 'compressed');
+  await StorageService.uploadFile(file, fullPath);
+  const compressedFile = await compressImage(file);
+  await StorageService.uploadFile(compressedFile, compressedPath);
+  return {
+    id: generateImageId(),
+    full: fullPath,
+    compressed: compressedPath,
+    fileName,
+    isPrimary,
+    uploadedBy,
+    access: 'public',
+    uploadTimestamp: Timestamp.now(),
+  };
+}
+
+/**
+ * Uploads multiple pending images for a recipe (to be approved by manager)
+ * @param {string} recipeId
+ * @param {File[]} files
+ * @param {string} category
+ * @param {string} uploader
+ * @returns {Promise<Array>} Array of pending image objects
+ */
+export async function addPendingImages(recipeId, files, category, uploader) {
+  if (!Array.isArray(files) || files.length === 0) return [];
+  const recipe = await getRecipeDoc(recipeId);
+  const pendingImages = Array.isArray(recipe.pendingImages) ? [...recipe.pendingImages] : [];
+  const newPendingImages = [];
+  for (const file of files) {
+    const fileExtension = file.name.split('.').pop();
+    const id = generateImageId();
+    const fileName = `${id}.${fileExtension}`;
+    // Upload full-size
+    const fullPath = getImageStoragePath(recipeId, category, fileName, 'full');
+    await StorageService.uploadFile(file, fullPath);
+    // Compress and upload
+    const compressedFile = await compressImage(file);
+    const compressedPath = getImageStoragePath(recipeId, category, fileName, 'compressed');
+    await StorageService.uploadFile(compressedFile, compressedPath);
+    const pendingImage = {
+      id,
+      full: fullPath,
+      compressed: compressedPath,
+      fileExtension,
+      timestamp: serverTimestamp(),
+      uploadedBy: uploader,
+    };
+    pendingImages.push(pendingImage);
+    newPendingImages.push(pendingImage);
+  }
+  await updateRecipeDoc(recipeId, { pendingImages });
+  return newPendingImages;
+}
+
+/**
+ * Approves a specific pending image for a recipe, moving it to the images array
+ * @param {string} recipeId
+ * @param {string} pendingImageId
+ * @returns {Promise<void>}
+ */
+export async function approvePendingImageById(recipeId, pendingImageId) {
+  const recipe = await getRecipeDoc(recipeId);
+  if (!recipe || !Array.isArray(recipe.pendingImages)) throw new Error('No pending images to approve');
+  const idx = recipe.pendingImages.findIndex(img => img.id === pendingImageId);
+  if (idx === -1) throw new Error('Pending image not found');
+  const pendingImage = recipe.pendingImages[idx];
+  const newImage = {
+    id: generateImageId(),
+    full: pendingImage.full,
+    compressed: pendingImage.compressed,
+    isPrimary: !recipe.images || recipe.images.length === 0,
+    access: 'public',
+    uploadedBy: pendingImage.uploadedBy,
+    fileName: `${pendingImageId}.${pendingImage.fileExtension}`,
+    uploadTimestamp: Timestamp.now(),
+  };
+  const images = Array.isArray(recipe.images) ? [...recipe.images, newImage] : [newImage];
+  const pendingImages = recipe.pendingImages.filter(img => img.id !== pendingImageId);
+  await updateRecipeDoc(recipeId, { images, pendingImages });
+}
+
+/**
+ * Rejects a specific pending image for a recipe, deleting it from storage and Firestore
+ * @param {string} recipeId
+ * @param {string} pendingImageId
+ * @returns {Promise<void>}
+ */
+export async function rejectPendingImageById(recipeId, pendingImageId) {
+  const recipe = await getRecipeDoc(recipeId);
+  if (!recipe || !Array.isArray(recipe.pendingImages)) throw new Error('No pending images to reject');
+  const idx = recipe.pendingImages.findIndex(img => img.id === pendingImageId);
+  if (idx === -1) throw new Error('Pending image not found');
+  const pendingImage = recipe.pendingImages[idx];
+  await StorageService.deleteFile(pendingImage.full);
+  await StorageService.deleteFile(pendingImage.compressed);
+  const pendingImages = recipe.pendingImages.filter(img => img.id !== pendingImageId);
+  await updateRecipeDoc(recipeId, { pendingImages });
+}
+
+/**
+ * Returns the array of pending images for a recipe
+ * @param {string} recipeId
+ * @returns {Promise<Array>}
+ */
+export async function getPendingImages(recipeId) {
+  const recipe = await getRecipeDoc(recipeId);
+  return Array.isArray(recipe?.pendingImages) ? recipe.pendingImages : [];
 }

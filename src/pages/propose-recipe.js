@@ -8,12 +8,8 @@ import '../styles/main.css';
 import '../styles/pages/propose_recipe.css';
 
 // Import components
-import '../lib/utilities/modal/modal.js';
-import '../lib/modals/message-modal/message-modal.js';
-import '../lib/recipes/recipe_form_component/recipe_form_component.js';
 import '../lib/recipes/recipe_form_component/propose_recipe_component.js';
 import '../lib/search/header-search-bar/header-search-bar.js';
-import '../lib/images/image-handler.js';
 
 // Authentication Components
 import('../lib/auth/auth-controller.js');
