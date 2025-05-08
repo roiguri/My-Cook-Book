@@ -18,7 +18,8 @@ let validateImageFile,
   getImageUrl,
   getPlaceholderImageUrl,
   getPrimaryImage,
-  getPrimaryImageUrl;
+  getPrimaryImageUrl,
+  removeAllRecipeImages;
 
 // Mock StorageService and FirestoreService
 const uploadFileMock = jest.fn();
@@ -57,6 +58,7 @@ describe('recipe-image-utils', () => {
     uploadFileMock.mockReset();
     getFileUrlMock.mockReset();
     deleteFileMock.mockReset();
+    deleteFileMock.mockImplementation(() => Promise.resolve());
     getDocumentMock.mockReset();
     updateDocumentMock.mockReset();
     const utils = await import('../../../src/js/utils/recipes/recipe-image-utils.js');
@@ -74,6 +76,7 @@ describe('recipe-image-utils', () => {
     getPlaceholderImageUrl = utils.getPlaceholderImageUrl;
     getPrimaryImage = utils.getPrimaryImage;
     getPrimaryImageUrl = utils.getPrimaryImageUrl;
+    removeAllRecipeImages = utils.removeAllRecipeImages;
   });
 
   describe('validateImageFile', () => {
@@ -284,6 +287,49 @@ describe('recipe-image-utils', () => {
       await expect(getPrimaryImageUrl({ images: [] })).resolves.toBe('placeholder-url');
       await expect(getPrimaryImageUrl({})).resolves.toBe('placeholder-url');
       await expect(getPrimaryImageUrl(null)).resolves.toBe('placeholder-url');
+    });
+  });
+
+  describe('removeAllRecipeImages', () => {
+    it('removes all approved and pending images and updates Firestore', async () => {
+      getDocumentMock.mockResolvedValue({
+        images: [
+          { id: 'a', full: 'f1', compressed: 'c1' },
+          { id: 'b', full: 'f2', compressed: 'c2' },
+        ],
+        pendingImages: [
+          {
+            images: [
+              { id: 'p1', full: 'pf1', compressed: 'pc1' },
+              { id: 'p2', full: 'pf2', compressed: 'pc2' },
+            ],
+          },
+        ],
+      });
+      updateDocumentMock.mockResolvedValue();
+      await removeAllRecipeImages('rid');
+      expect(deleteFileMock).toHaveBeenCalledWith('f1');
+      expect(deleteFileMock).toHaveBeenCalledWith('c1');
+      expect(deleteFileMock).toHaveBeenCalledWith('f2');
+      expect(deleteFileMock).toHaveBeenCalledWith('c2');
+      expect(deleteFileMock).toHaveBeenCalledWith('pf1');
+      expect(deleteFileMock).toHaveBeenCalledWith('pc1');
+      expect(deleteFileMock).toHaveBeenCalledWith('pf2');
+      expect(deleteFileMock).toHaveBeenCalledWith('pc2');
+      expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', { images: [], pendingImages: [] });
+    });
+    it('handles missing recipe gracefully', async () => {
+      getDocumentMock.mockResolvedValue(null);
+      await expect(removeAllRecipeImages('rid')).resolves.toBeUndefined();
+      expect(deleteFileMock).not.toHaveBeenCalled();
+      expect(updateDocumentMock).not.toHaveBeenCalled();
+    });
+    it('handles empty images and pendingImages arrays', async () => {
+      getDocumentMock.mockResolvedValue({ images: [], pendingImages: [] });
+      updateDocumentMock.mockResolvedValue();
+      await removeAllRecipeImages('rid');
+      expect(deleteFileMock).not.toHaveBeenCalled();
+      expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', { images: [], pendingImages: [] });
     });
   });
 });

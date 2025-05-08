@@ -232,3 +232,62 @@ export async function getPrimaryImageUrl(recipe) {
   }
   return await getPlaceholderImageUrl();
 }
+
+/**
+ * Removes all images (approved and pending) for a recipe
+ * @param {string} recipeId
+ * @returns {Promise<void>}
+ */
+export async function removeAllRecipeImages(recipeId) {
+  const recipe = await getRecipeDoc(recipeId);
+  if (!recipe) {
+    console.warn('Recipe not found for image removal:', recipeId);
+    return;
+  }
+  const deletePromises = [];
+  // Delete approved images
+  if (recipe.images && Array.isArray(recipe.images)) {
+    recipe.images.forEach((image) => {
+      if (image.full) {
+        deletePromises.push(
+          StorageService.deleteFile(image.full).catch((err) =>
+            console.warn(`Error deleting full image ${image.id}:`, err),
+          ),
+        );
+      }
+      if (image.compressed) {
+        deletePromises.push(
+          StorageService.deleteFile(image.compressed).catch((err) =>
+            console.warn(`Error deleting compressed image ${image.id}:`, err),
+          ),
+        );
+      }
+    });
+  }
+  // Delete pending images (batches) // TODO: check if necessary when implementing image suggestions
+  if (recipe.pendingImages && Array.isArray(recipe.pendingImages)) {
+    recipe.pendingImages.forEach((pendingBatch) => {
+      if (pendingBatch.images && Array.isArray(pendingBatch.images)) {
+        pendingBatch.images.forEach((image) => {
+          if (image.full) {
+            deletePromises.push(
+              StorageService.deleteFile(image.full).catch((err) =>
+                console.warn(`Error deleting pending full image ${image.id}:`, err),
+              ),
+            );
+          }
+          if (image.compressed) {
+            deletePromises.push(
+              StorageService.deleteFile(image.compressed).catch((err) =>
+                console.warn(`Error deleting pending compressed image ${image.id}:`, err),
+              ),
+            );
+          }
+        });
+      }
+    });
+  }
+  await Promise.all(deletePromises);
+  // Remove images and pendingImages from Firestore
+  await updateRecipeDoc(recipeId, { images: [], pendingImages: [] });
+}
