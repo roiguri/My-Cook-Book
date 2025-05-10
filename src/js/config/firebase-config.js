@@ -2,11 +2,11 @@
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: 'AIzaSyAx23P7ruwizOjIfJHqhjZOIG5V7E_53Sk',
-  authDomain: 'cook-book-test-479e8.firebaseapp.com',
-  projectId: 'cook-book-test-479e8',
-  storageBucket: 'cook-book-test-479e8.appspot.com',
-  messagingSenderId: '521454028338',
-  appId: '1:521454028338:web:97104163823838a9dd9e2b',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 export default firebaseConfig;

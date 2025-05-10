@@ -43,3 +43,6 @@ yarn-error.log*
 # IDE/editor
 .idea/
 *.swp
+
+# local env
+.env.local
