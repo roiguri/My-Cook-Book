@@ -60,7 +60,7 @@ class EditPreviewRecipe extends HTMLElement {
     this.showButtons = false;
     this.recipeName = this.getAttribute('recipe-name');
     this.mode = this.getAttribute('start-mode') || 'preview'; // Get start mode or default to 'preview'
-    this.path = '/My-Cook-Book/img/icon/other/';
+    this.path = '/img/icon/other/';
     this.render();
     this.modal = this.shadowRoot.querySelector('custom-modal');
     this.setupModeToggle();

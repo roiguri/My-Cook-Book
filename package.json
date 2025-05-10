@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "This is a my first web project.",
   "type": "module",
-  "main": "service-worker.js",
   "directories": {
     "doc": "docs",
     "lib": "lib"

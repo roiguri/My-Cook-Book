@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import path from 'path';
 
 export default defineConfig({
-  base: process.env.VITE_BASE_URL || '/My-Cook-Book/',
+  base: '/',
   plugins: [react()],
   optimizeDependencies: false,
   build: {
