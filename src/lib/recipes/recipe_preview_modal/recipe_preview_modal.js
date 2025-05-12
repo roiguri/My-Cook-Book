@@ -52,6 +52,7 @@ import { removeAllRecipeImages } from '../../../js/utils/recipes/recipe-image-ut
 
 import '../recipe_component/recipe_component.js';
 import '../../utilities/modal/modal.js';
+import '../../utilities/loading-spinner/loading-spinner.js';
 
 class RecipePreviewModal extends HTMLElement {
   constructor() {
@@ -166,37 +167,6 @@ class RecipePreviewModal extends HTMLElement {
         background-color: var(--error-hover, #d32f2f); /* Darker red on hover */
       }
 
-      .loading-overlay {
-        display: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(255, 255, 255, 0.8);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
-      .loading-overlay.active {
-        display: flex;
-      }
-
-      .loading-spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #3498db;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-
       .error-message {
         color: var(--error-color, #f44336);
         margin: 10px 0;
@@ -210,10 +180,8 @@ class RecipePreviewModal extends HTMLElement {
     return `
       <div class="recipe-preview-modal">
         <custom-modal height="90vh" width="60vw">
-          <div class="loading-overlay">
-            <div class="loading-spinner"></div>
-          </div>
-          <div class="error-message"></div
+          <loading-spinner overlay style="z-index:1000; display:none;" id="modal-spinner"></loading-spinner>
+          <div class="error-message"></div>
           <h3> Recipe Preview </h3>
           <div class="modal-content">
             <recipe-component recipe-id="${this.recipeId}"></recipe-component>
@@ -243,16 +211,18 @@ class RecipePreviewModal extends HTMLElement {
 
   setLoading(loading) {
     this.isLoading = loading;
-    const overlay = this.shadowRoot.querySelector('.loading-overlay');
+    const spinner = this.shadowRoot.getElementById('modal-spinner');
     const approveButton = this.shadowRoot.getElementById('approve-button');
     const rejectButton = this.shadowRoot.getElementById('reject-button');
 
     if (loading) {
-      overlay.classList.add('active');
+      spinner.setAttribute('active', '');
+      spinner.style.display = 'flex';
       approveButton?.setAttribute('disabled', 'true');
       rejectButton?.setAttribute('disabled', 'true');
     } else {
-      overlay.classList.remove('active');
+      spinner.removeAttribute('active');
+      spinner.style.display = 'none';
       approveButton?.removeAttribute('disabled');
       rejectButton?.removeAttribute('disabled');
     }
