@@ -82,6 +82,7 @@ class ProposeRecipeComponent extends HTMLElement {
       this.clearForm();
       this.showSuccessMessage('Recipe proposed successfully!');
       spinner.removeAttribute('active');
+      this.dispatchEvent(new CustomEvent('recipe-proposed-success', { bubbles: true, composed: true }));
     } catch (error) {
       spinner.removeAttribute('active');
       this.showErrorMessage('Error proposing recipe:', error);

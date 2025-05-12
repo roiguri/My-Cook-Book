@@ -25,3 +25,8 @@ import '../js/navigation-script.js';
 
 // Register service worker
 import '../js/sw-register.js';
+
+// Scroll to top when recipe is successfully proposed
+document.addEventListener('recipe-proposed-success', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
