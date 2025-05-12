@@ -8,10 +8,12 @@
  * - color: The color of the spinner (default: #333)
  * - length: The length of the spinner (default: 'three-quarters', options: 'quarter', 'half', 'three-quarters')
  * - background-color: The background color of the spinner (default: transparent)
+ * - overlay: If present, spinner is centered in a full-cover overlay
+ * - active: If present, spinner is visible; if not, spinner is hidden
  */
 class LoadingSpinner extends HTMLElement {
   static get observedAttributes() {
-    return ['size', 'line-width', 'color', 'background-color', 'length'];
+    return ['size', 'line-width', 'color', 'background-color', 'length', 'overlay', 'active'];
   }
 
   constructor() {
@@ -54,31 +56,42 @@ class LoadingSpinner extends HTMLElement {
   }
 
   _render() {
+    const isOverlay = this.hasAttribute('overlay');
+    const isActive = this.hasAttribute('active');
     this.shadowRoot.innerHTML = `
       <style>
       :host {
-        display: inline-block;
-        width: ${this.size};
-        height: ${this.size};
+        display: block;
+        position: ${isOverlay ? 'relative' : 'static'};
       }
-
+      .overlay {
+        display: ${isActive && isOverlay ? 'flex' : 'none'};
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        inset: 0;
+        background: rgba(255,255,255,0.7);
+        z-index: 10000;
+        pointer-events: all;
+      }
       .spinner {
         border: ${this.lineWidth} solid ${this.color};
         border-top-color: transparent;
         border-right-color: ${this.length === 'half' || this.length === 'quarter' ? 'transparent' : this.color};
         border-bottom-color: ${this.length === 'quarter' ? 'transparent' : this.color};
         border-radius: 50%;
-        width: 100%;
-        height: 100%;
+        width: ${this.size};
+        height: ${this.size};
+        background: ${this.backgroundColor};
         animation: spin 1s linear infinite;
       }
-
       @keyframes spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
       }
       </style>
-      <div class="spinner"></div>
+      <slot></slot>
+      <div class="overlay"><div class="spinner"></div></div>
     `;
   }
 }
