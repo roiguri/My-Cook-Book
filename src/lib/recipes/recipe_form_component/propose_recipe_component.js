@@ -21,6 +21,7 @@ import authService from '../../../js/services/auth-service.js';
 
 import './recipe_form_component.js';
 import '../../modals/message-modal/message-modal.js';
+import '../../utilities/loading-spinner/loading-spinner.js';
 
 class ProposeRecipeComponent extends HTMLElement {
   constructor() {
@@ -43,16 +44,20 @@ class ProposeRecipeComponent extends HTMLElement {
       <style>
         
       </style>
-      <div class="propose-recipe-container">
-        <recipe-form-component></recipe-form-component>
-        <message-modal></message-modal>
-      </div>
+      <loading-spinner overlay>
+        <div class="propose-recipe-container">
+          <recipe-form-component></recipe-form-component>
+          <message-modal></message-modal>
+        </div>
+      </loading-spinner>
       `;
   }
 
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
+    const spinner = this.shadowRoot.querySelector('loading-spinner');
     try {
+      spinner.setAttribute('active', '');
       const user = authService.getCurrentUser();
       const imagesToUpload = recipeData.images || [];
       const recipeDataForFirestore = { ...recipeData };
@@ -76,7 +81,9 @@ class ProposeRecipeComponent extends HTMLElement {
       }
       this.clearForm();
       this.showSuccessMessage('Recipe proposed successfully!');
+      spinner.removeAttribute('active');
     } catch (error) {
+      spinner.removeAttribute('active');
       this.showErrorMessage('Error proposing recipe:', error);
     }
   }
