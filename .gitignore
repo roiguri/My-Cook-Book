@@ -44,5 +44,10 @@ yarn-error.log*
 .idea/
 *.swp
 
-# local env
+# env variables
 .env.local
+.env.staging
+.env.production
+
+# Local Netlify folder
+.netlify
