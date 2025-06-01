@@ -1,10 +1,15 @@
 import { FirestoreService } from '../js/services/firestore-service.js';
 
-async function displayFeaturedRecipes() {
+async function initFeaturedRecipes() {
   const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
+  const sectionContainer = document.querySelector('.featured-recipes');
+
+  if (!featuredRecipesGrid || !sectionContainer) {
+    console.error('Featured recipes elements not found for initFeaturedRecipes');
+    return;
+  }
 
   // create a message container
-  const sectionContainer = document.querySelector('.featured-recipes');
   const messageContainer = document.createElement('p');
   messageContainer.dir = 'rtl';
   messageContainer.style.fontSize = 'var(--size-header2)';
@@ -14,7 +19,17 @@ async function displayFeaturedRecipes() {
 
   // Get the recipes container
   const elementScroller = document.querySelector('element-scroller');
+  if (!elementScroller) {
+    console.error('Element scroller not found for initFeaturedRecipes');
+    messageContainer.innerHTML = 'Error loading featured recipes section.'; // Update user
+    return;
+  }
   const recipesContainer = elementScroller.querySelector('[slot="items"]');
+  if (!recipesContainer) {
+    console.error('Recipes container (slot="items") not found in element-scroller');
+    messageContainer.innerHTML = 'Error loading featured recipes section.'; // Update user
+    return;
+  }
 
   try {
     // Get most recent approved recipes using modular API
@@ -48,23 +63,29 @@ async function displayFeaturedRecipes() {
     // Add event listener for recipe card clicks
     featuredRecipesGrid.addEventListener('recipe-card-open', (event) => {
       const recipeId = event.detail.recipeId;
-      window.location.href = `${import.meta.env.BASE_URL}pages/recipe-page.html?id=${recipeId}`;
+      // Ensure BASE_URL is correctly handled, assuming it's set globally or accessible
+      const baseUrl = import.meta.env.BASE_URL || '/';
+      window.location.href = `${baseUrl}pages/recipe-page.html?id=${recipeId}`;
     });
 
     // Initialize the element-scroller after content is loaded
-    const scroller = document.querySelector('element-scroller');
-    if (scroller) {
-      // Force recalculation of scroller dimensions
-      scroller.setAttribute('item-width', '200');
-      scroller.setAttribute('padding', '20');
-      setTimeout(() => {
-        scroller.handleResize();
+    // The 'element-scroller' itself should handle its initialization when its content changes
+    // or when it becomes visible. If direct re-initialization is needed,
+    // ensure the component provides a method for it.
+    // For now, we assume the component handles this.
+    // If scroller.handleResize() is a custom method, ensure it's still valid.
+    if (elementScroller.handleResize && typeof elementScroller.handleResize === 'function') {
+       setTimeout(() => {
+        elementScroller.setAttribute('item-width', '200'); // Redundant if already set in HTML
+        elementScroller.setAttribute('padding', '20'); // Redundant if already set in HTML
+        elementScroller.handleResize();
       }, 100);
     }
+
   } catch (error) {
     console.error('Error fetching featured recipes:', error);
     messageContainer.innerHTML = 'Error loading featured recipes. Please try again later.';
   }
 }
 
-document.addEventListener('DOMContentLoaded', displayFeaturedRecipes);
+document.addEventListener('pageContentLoaded', initFeaturedRecipes);

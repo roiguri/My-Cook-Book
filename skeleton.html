@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skeleton</title>
+</head>
+<body>
+    <header class="header-container">
+      <div class="menu-title-container">
+        <button class="nav-toggle" aria-label="Toggle navigation">
+          <span class="hamburger"></span>
+        </button>
+        <a href=".">
+          <div class="logo">Our Kitchen Chronicles</div>
+        </a>
+      </div>
+      <div class="nav-search-container">
+        <nav dir="rtl">
+          <ul>
+            <li><a class="btn-3d" href=".">דף הבית</a></li>
+            <li><a class="btn-3d" href="pages/categories.html">מתכונים</a></li>
+            <li><a class="btn-3d" href="pages/propose-recipe.html">הצעת מתכון</a></li>
+          </ul>
+        </nav>
+        <div class="search-auth-container">
+          <div class="search-bar header-search">
+            <header-search-bar></header-search-bar>
+          </div>
+          <auth-avatar class="btn-3d"></auth-avatar>
+        </div>
+      </div>
+    </header>
+
+    <div id="page-content">
+        <!-- Page-specific content will go here -->
+    </div>
+
+    <footer>
+      <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+      <a id="icon-attribute" href="https://www.flaticon.com/free-icons/spoon" title="spoon icons"
+        >Spoon icons created by Freepik - Flaticon</a
+      >
+    </footer>
+
+    <!-- Auth Components -->
+    <auth-controller>
+      <auth-content>
+        <login-form slot="login-form" class="active"></login-form>
+        <signup-form slot="signup-form"></signup-form>
+        <forgot-password slot="forgot-password"></forgot-password>
+        <user-profile slot="user-profile"></user-profile>
+      </auth-content>
+    </auth-controller>
+</body>
+</html>
