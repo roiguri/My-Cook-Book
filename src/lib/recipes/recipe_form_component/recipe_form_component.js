@@ -1077,6 +1077,18 @@ class RecipeFormComponent extends HTMLElement {
   showErrorMessage(message) {
     // TODO - add error handling
   }
+
+  setDisabled(isDisabled) {
+    const formElements = this.shadowRoot.querySelectorAll('input, select, textarea, button');
+    formElements.forEach(element => {
+      element.disabled = isDisabled;
+    });
+
+    const imageHandler = this.shadowRoot.getElementById('recipe-images');
+    if (imageHandler && typeof imageHandler.setDisabled === 'function') {
+      imageHandler.setDisabled(isDisabled);
+    }
+  }
 }
 
 customElements.define('recipe-form-component', RecipeFormComponent);
