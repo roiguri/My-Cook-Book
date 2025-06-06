@@ -40,6 +40,7 @@ class MessageModal extends Modal {
           <div class="message-modal-content">
             <h2 id="modal-title"></h2>
             <p id="modal-message"></p>
+            <div class="modal-actions"></div>
           </div>
         </div>
       </div>
@@ -56,10 +57,25 @@ class MessageModal extends Modal {
       .message-modal-content {
         text-align: center; /* Center the content */
       }
+      .modal-actions {
+        margin-top: 15px;
+        text-align: center;
+      }
+      .modal-actions button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .modal-actions button:hover {
+        background-color: #0056b3;
+      }
     `;
   }
 
-  show(message, title = '') {
+  show(message, title = '', buttonText = null, buttonAction = null) {
     this.shadowRoot.getElementById('modal-message').textContent = message;
 
     const titleDiv = this.shadowRoot.getElementById('modal-title');
@@ -68,6 +84,19 @@ class MessageModal extends Modal {
       titleDiv.style.display = 'block'; // Show the title if it exists
     } else {
       titleDiv.style.display = 'none'; // Hide the title if it's empty
+    }
+
+    const actionsContainer = this.shadowRoot.querySelector('.modal-actions');
+    actionsContainer.innerHTML = ''; // Clear previous buttons
+
+    if (buttonText && typeof buttonAction === 'function') {
+      const button = document.createElement('button');
+      button.textContent = buttonText;
+      button.classList.add('action-button'); // Add class for styling if needed
+      button.addEventListener('click', () => {
+        buttonAction();
+      });
+      actionsContainer.appendChild(button);
     }
 
     this.open();

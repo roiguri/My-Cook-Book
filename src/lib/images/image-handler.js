@@ -663,6 +663,30 @@ class ImageHandler extends HTMLElement {
       `(מקסימום ${this.maxImages} תמונות, גודל מקסימלי 5MB לתמונה)`;
     this.updateUploadAreaState();
   }
+
+  setDisabled(isDisabled) {
+    const uploadArea = this.shadowRoot.querySelector('.upload-area');
+    uploadArea.setAttribute('data-disabled', isDisabled.toString());
+
+    const controlButtons = this.shadowRoot.querySelectorAll('.image-preview .control-button');
+    controlButtons.forEach(button => {
+      button.disabled = isDisabled;
+    });
+
+    // Additionally, disable the file input itself to prevent programmatic clicking if any
+    const fileInput = this.shadowRoot.querySelector('.file-input');
+    if (fileInput) {
+      fileInput.disabled = isDisabled;
+    }
+
+    // Prevent drag-and-drop on previews when disabled
+    const previews = this.shadowRoot.querySelectorAll('.image-preview');
+    previews.forEach(preview => {
+      preview.draggable = !isDisabled;
+    });
+    // The main upload area click is already handled by checking data-disabled.
+    // Drag-over on upload area also checks data-disabled.
+  }
 }
 
 customElements.define('image-handler', ImageHandler);

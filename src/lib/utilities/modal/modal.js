@@ -186,12 +186,12 @@ export class Modal extends HTMLElement {
    */
   setupEventListeners() {
     const closeButton = this.shadowRoot.querySelector('.close-button');
-    closeButton.addEventListener('click', () => this.close());
+    closeButton.addEventListener('click', () => this.close({ byUser: true }));
 
     const modal = this.shadowRoot.querySelector('.modal');
     modal.addEventListener('click', (event) => {
       if (event.target === modal) {
-        this.close();
+        this.close({ byUser: true });
       }
     });
   }
@@ -212,8 +212,11 @@ export class Modal extends HTMLElement {
     }
   }
 
-  close() {
+  close(options = { byUser: false }) {
     if (this.isOpen) {
+      if (options.byUser) {
+        this.dispatchEvent(new CustomEvent('modal-closed-by-user', { bubbles: true, composed: true }));
+      }
       const modalElement = this.shadowRoot.querySelector('.modal');
       modalElement.classList.remove('open');
       this.isOpen = false;
@@ -256,7 +259,7 @@ export class Modal extends HTMLElement {
 
     switch (event.key) {
       case 'Escape':
-        this.close();
+        this.close({ byUser: true });
         break;
       case 'Tab':
         this.handleTabKey(event);
