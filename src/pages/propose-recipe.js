@@ -39,13 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const proposeRecipeForm = document.querySelector('propose-recipe-component');
   const loginPromptModal = document.querySelector('#login-prompt-modal');
   const authController = document.querySelector('auth-controller');
+  
+  let authInitialized = false;
 
   const showLoginPrompt = () => {
     if (loginPromptModal && authController) {
       loginPromptModal.show(
-        'Only logged-in users can propose recipes. Please log in or sign up to continue.',
-        'Login Required',
-        'Log In / Sign Up', // buttonText
+        'רק משתמשים מחוברים יכולים להציע מתכונים. אנא התחבר או הירשם כדי להמשיך.',
+        'נדרשת התחברות',
+        'התחברות / הרשמה', // buttonText
         () => { // buttonAction
           loginPromptModal.close();
           authController.openModal();
@@ -53,6 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
       );
     }
   };
+
+  // Initially hide the form to prevent flash
+  if (proposeRecipeForm) {
+    proposeRecipeForm.style.display = 'none';
+  }
 
   // Function to handle UI changes based on auth state
   const handleAuthStateChange = (isAuthenticated) => {
@@ -85,15 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Check initial authentication state
-  // Ensure authService is initialized before checking isAuthenticated
-  authService.initialize().then(() => {
-    handleAuthStateChange(authService.isAuthenticated());
-
-    // Add an auth state observer to handle changes after initial load
-    authService.addAuthObserver((authState) => {
-      handleAuthStateChange(authState.isAuthenticated);
-    });
+  // Initialize auth service and use Firebase's onAuthStateChanged directly
+  // This properly waits for the initial auth state to be determined
+  authService.initialize();
+  authService.onAuthStateChanged((user) => {
+    handleAuthStateChange(!!user);
   });
 
   if (loginPromptModal) {
