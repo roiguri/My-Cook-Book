@@ -1,0 +1,81 @@
+/* SPA-specific styles */
+
+.spa-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.spa-content {
+  flex: 1;
+  min-height: 400px;
+  position: relative;
+}
+
+.spa-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* Page transition styles */
+.spa-content .page-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 100;
+}
+
+.spa-content .page-error {
+  margin: 2rem auto;
+  max-width: 600px;
+  padding: 2rem;
+  text-align: center;
+  color: #d32f2f;
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+}
+
+/* Placeholder page styles */
+.spa-home-placeholder,
+.spa-categories-placeholder,
+.spa-propose-placeholder {
+  padding: 2rem 1rem;
+}
+
+.spa-home-placeholder h1,
+.spa-categories-placeholder h1,
+.spa-propose-placeholder h1 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.spa-home-placeholder ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.spa-home-placeholder li {
+  margin: 0.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .spa-content {
+    min-height: 300px;
+  }
+  
+  .spa-home-placeholder,
+  .spa-categories-placeholder,
+  .spa-propose-placeholder {
+    padding: 1rem 0.5rem;
+  }
+}
