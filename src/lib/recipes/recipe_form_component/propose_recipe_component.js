@@ -18,6 +18,7 @@ import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { Timestamp } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
+import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
 
 import './recipe_form_component.js';
 import '../../modals/message-modal/message-modal.js';
@@ -85,7 +86,7 @@ class ProposeRecipeComponent extends HTMLElement {
       this.dispatchEvent(new CustomEvent('recipe-proposed-success', { bubbles: true, composed: true }));
     } catch (error) {
       spinner.removeAttribute('active');
-      this.showErrorMessage('Error proposing recipe:', error);
+      this.showErrorMessage(error);
     }
   }
 
@@ -110,14 +111,15 @@ class ProposeRecipeComponent extends HTMLElement {
     return imageUploadResults;
   }
 
-  showSuccessMessage(message) {
+  showSuccessMessage() {
     const proposeRecipeModal = this.shadowRoot.querySelector('message-modal');
     proposeRecipeModal.show('המתכון נשלח בהצלחה!', '', 'Close');
   }
 
-  showErrorMessage(message, error) {
+  showErrorMessage(error) {
     const proposeRecipeModal = this.shadowRoot.querySelector('message-modal');
-    proposeRecipeModal.show(error?.message + (error?.stack || ''), message, 'Close');
+    logError(error, 'Recipe proposal');
+    showErrorModal(proposeRecipeModal, error);
   }
 
   clearForm() {

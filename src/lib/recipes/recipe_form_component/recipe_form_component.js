@@ -3,6 +3,7 @@ import authService from '../../../js/services/auth-service.js';
 import { doc, getDoc } from 'firebase/firestore';
 import { validateRecipeData } from '../../../js/utils/recipes/recipe-data-utils.js';
 import { getImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
+import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
 
 import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
@@ -268,7 +269,7 @@ class RecipeFormComponent extends HTMLElement {
                 <option value="soups-stews">מרקים ותבשילים</option>
                 <option value="salads">סלטים</option>
                 <option value="desserts">קינוחים</option>
-                <option value="breakfast$brunch">ארוחות בוקר</option>
+                <option value="breakfast-brunch">ארוחות בוקר</option>
                 <option value="snacks">חטיפים</option>
                 <option value="beverages">משקאות</option>
               </select>
@@ -386,7 +387,7 @@ class RecipeFormComponent extends HTMLElement {
     // Add event listener to show image preview
     const imageHandler = this.shadowRoot.getElementById('recipe-images');
 
-    imageHandler.addEventListener('images-changed', (e) => {
+    imageHandler.addEventListener('images-changed', () => {
       // Update validation state when images change
       this.validateForm();
     });
@@ -524,7 +525,7 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   // Add stages
-  addStage(event) {
+  addStage() {
     const stagesContainer = this.shadowRoot.getElementById('stages-container');
     const stageCount = stagesContainer.querySelectorAll('.recipe-form__steps').length;
 
@@ -1026,7 +1027,7 @@ class RecipeFormComponent extends HTMLElement {
 
         // Populate images if they exist
         if (data.images) {
-          await this.populateImages(data.images, data.category);
+          await this.populateImages(data.images);
         }
 
         // Update stage titles
@@ -1042,7 +1043,7 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   // FIXME: create file object before re-uploading images
-  async populateImages(images, category) {
+  async populateImages(images) {
     const imageHandler = this.shadowRoot.getElementById('recipe-images');
 
     for (const image of images) {
@@ -1074,8 +1075,10 @@ class RecipeFormComponent extends HTMLElement {
     }
   }
 
-  showErrorMessage(message) {
-    // TODO - add error handling
+  showErrorMessage(error) {
+    const messageModal = this.shadowRoot.querySelector('message-modal');
+    logError(error, 'Recipe form');
+    showErrorModal(messageModal, error);
   }
 
   setDisabled(isDisabled) {
