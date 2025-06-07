@@ -5,13 +5,13 @@
 
 /* Styles for the hero section */
 .home-page .hero {
-  height: 200px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
   color: #fff;
+  margin: 40px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 

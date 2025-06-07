@@ -1,5 +1,6 @@
 // SPA Main Entry Point
 import './styles/main.css';
+import './styles/pages/index.css';
 
 import { initFirebase } from './js/services/firebase-service.js';
 import firebaseConfig from './js/config/firebase-config.js';
@@ -33,10 +34,13 @@ async function initializeSPA() {
     ]);
     console.log('✅ Auth components loaded');
     
-    // Import search component
-    console.log('🔍 Loading search components...');
-    await import('./lib/search/header-search-bar/header-search-bar.js');
-    console.log('✅ Search components loaded');
+    // Import search component and navigation
+    console.log('🔍 Loading search and navigation components...');
+    await Promise.all([
+      import('./lib/search/header-search-bar/header-search-bar.js'),
+      import('./js/navigation-script.js')
+    ]);
+    console.log('✅ Search and navigation components loaded');
     
     // Get content container
     const contentContainer = document.getElementById('spa-content');
@@ -54,7 +58,7 @@ async function initializeSPA() {
     // Register temporary placeholder routes
     registerPlaceholderRoutes(router, pageManager);
     
-    // Initialize router (this will trigger initial route)
+    // Initialize router
     router.initialize();
     
     console.log('✅ SPA initialized successfully');
@@ -67,39 +71,9 @@ async function initializeSPA() {
 }
 
 function registerPlaceholderRoutes(router, pageManager) {
-  // Home route placeholder
+  // Home route
   router.registerRoute('/home', async (params) => {
-    await pageManager.loadPage({
-      async render(params) {
-        return `
-          <div class="spa-home-placeholder">
-            <div style="text-align: center; padding: 2rem;">
-              <h1>🏠 SPA Home Page</h1>
-              <p>The SPA shell is working! This is a placeholder for the home page.</p>
-              <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin: 1rem 0; max-width: 600px; margin-left: auto; margin-right: auto;">
-                <h3>✅ What's Working:</h3>
-                <ul style="text-align: left;">
-                  <li>SPA application shell loaded</li>
-                  <li>Firebase services initialized</li>
-                  <li>Authentication components loaded</li>
-                  <li>Router and page manager working</li>
-                  <li>Header navigation converted to hash links</li>
-                </ul>
-              </div>
-              <p><strong>Next step:</strong> Implement actual home page content</p>
-            </div>
-          </div>
-        `;
-      },
-      
-      async mount(container) {
-        console.log('Home placeholder page mounted');
-      },
-      
-      getTitle() {
-        return 'Our Kitchen Chronicles';
-      }
-    }, { ...params, route: '/home' });
+    await pageManager.loadPage('/src/app/pages/home-page.js', { ...params, route: '/home' });
   });
 
   // Categories route placeholder

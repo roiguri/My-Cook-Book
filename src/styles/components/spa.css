@@ -6,10 +6,32 @@
   flex-direction: column;
 }
 
+/* Header should not grow */
+.header-container {
+  flex-shrink: 0;
+}
+
+/* Content area grows to fill available space but allows natural overflow */
 .spa-content {
-  flex: 1;
-  min-height: 400px;
-  position: relative;
+  flex: 1 0 auto;
+  width: 100%;
+  min-height: 0; /* Important: allows content to determine its own height */
+}
+
+/* Footer should not grow and stick to bottom */
+footer {
+  flex-shrink: 0;
+}
+
+/* Home page content wrapper - ensure natural flow */
+.spa-content .home-page {
+  width: 100%;
+}
+
+/* Reset any problematic positioning on quote section */
+.spa-content .quote-section {
+  position: static;
+  clear: both;
 }
 
 .spa-loading {
