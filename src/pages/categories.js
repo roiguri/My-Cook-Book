@@ -11,6 +11,7 @@ import '../styles/pages/categories.css';
 import '../js/sw-register.js';
 import '../js/config/firebase-config.js';
 import '../lib/search/header-search-bar/header-search-bar.js';
+import '../js/navigation-script.js';
 
 // Authentication Components
 import('../lib/auth/auth-controller.js');

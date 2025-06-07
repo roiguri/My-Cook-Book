@@ -38,11 +38,24 @@ class ElementScroller extends HTMLElement {
   }
 
   /**
+   * Safely get the first assigned element from slot
+   * @returns {Element|null} First assigned element or null
+   */
+  getFirstAssignedElement() {
+    const slot = this.shadowRoot.querySelector('slot');
+    if (!slot) return null;
+    
+    const assignedElements = slot.assignedElements();
+    if (!assignedElements || assignedElements.length === 0) return null;
+    
+    return assignedElements[0] || null;
+  }
+
+  /**
    * Setup content observer for dynamic changes
    */
   setupContentObserver() {
-    const slot = this.shadowRoot.querySelector('slot');
-    const element = slot.assignedElements()[0];
+    const element = this.getFirstAssignedElement();
     if (!element) return;
 
     this.contentObserver.observe(element, {
@@ -191,8 +204,7 @@ class ElementScroller extends HTMLElement {
    * @returns {number} Total width in pixels
    */
   calculateTotalWidth() {
-    const slot = this.shadowRoot.querySelector('slot');
-    const element = slot.assignedElements()[0];
+    const element = this.getFirstAssignedElement();
     if (!element) return 0;
 
     const itemCount = element.children.length;
@@ -231,17 +243,17 @@ class ElementScroller extends HTMLElement {
    * Apply styles to items regardless of count
    */
   applyItemStyles() {
-    const slot = this.shadowRoot.querySelector('slot');
-    const element = slot.assignedElements()[0];
+    const element = this.getFirstAssignedElement();
     if (!element) return;
 
     // Always set container styles
     element.style.display = 'flex';
     element.style.gap = `${this.gap}px`;
 
-    // Ensure styles are applied to each child
+    // Ensure styles are applied to each child with responsive width
     Array.from(element.children).forEach((child) => {
-      child.style.width = `${this.itemWidth}px`;
+      child.style.width = `min(${this.itemWidth}px, 90vw)`;
+      child.style.maxWidth = '100%';
       child.style.flexShrink = '0';
     });
   }
@@ -267,7 +279,7 @@ class ElementScroller extends HTMLElement {
    */
   getMaxScroll() {
     const slot = this.shadowRoot.querySelector('slot');
-    const element = slot.assignedElements()[0];
+    const element = this.getFirstAssignedElement();
     if (!element) return 0;
 
     const totalItems = element.children.length;
@@ -329,7 +341,7 @@ class ElementScroller extends HTMLElement {
    * Update scroll position
    */
   updateScroll() {
-    const itemsContainer = this.shadowRoot.querySelector('slot').assignedElements()[0];
+    const itemsContainer = this.getFirstAssignedElement();
     if (!itemsContainer) return;
 
     const totalWidth = this.calculateTotalWidth();
@@ -406,7 +418,7 @@ class ElementScroller extends HTMLElement {
     }
 
     // Get the current container position
-    const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
+    const container = this.getFirstAssignedElement();
     if (container) {
       const transform = window.getComputedStyle(container).transform;
       if (transform !== 'none') {
@@ -539,7 +551,7 @@ class ElementScroller extends HTMLElement {
   }
 
   applyTransform(x) {
-    const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
+    const container = this.getFirstAssignedElement();
     if (container) {
       container.style.transform = `translateX(${x}px)`;
       container.style.transition = 'none'; // Remove transition during touch/drag
@@ -547,7 +559,7 @@ class ElementScroller extends HTMLElement {
   }
 
   calculateMaxTranslate() {
-    const container = this.shadowRoot.querySelector('slot').assignedElements()[0];
+    const container = this.getFirstAssignedElement();
     if (!container) return 0;
 
     const containerWidth = this.calculateVisibleWidth();
@@ -560,7 +572,6 @@ class ElementScroller extends HTMLElement {
    * Update arrow visibility based on scroll position
    */
   updateArrowVisibility() {
-    console.log('updateArrowVisibility');
     const leftArrow = this.shadowRoot.querySelector('.scroller-arrow--left');
     const rightArrow = this.shadowRoot.querySelector('.scroller-arrow--right');
 
@@ -577,7 +588,7 @@ class ElementScroller extends HTMLElement {
    * Change style for centered layout when scrolling is not needed
    */
   updateLayout() {
-    const itemsContainer = this.shadowRoot.querySelector('slot').assignedElements()[0];
+    const itemsContainer = this.getFirstAssignedElement();
     if (!itemsContainer) return;
 
     if (!this.isScrollNeeded()) {
@@ -795,7 +806,7 @@ class ElementScroller extends HTMLElement {
 
   getItemCount() {
     const slot = this.shadowRoot.querySelector('slot');
-    const element = slot.assignedElements()[0];
+    const element = this.getFirstAssignedElement();
     return element ? element.children.length : 0;
   }
 

@@ -17,7 +17,7 @@ header {
 
 /* Styles for the menu title container */
 header .menu-title-container {
-  /* Add your styles here */
+  position: relative;
 }
 
 /* Styles for the navigation toggle button */
@@ -32,8 +32,8 @@ header .nav-toggle {
 /* Styles for the hamburger icon */
 header .hamburger {
   display: block;
-  width: 30px;
-  height: 3px;
+  width: 24px;
+  height: 2.5px;
   background-color: var(--background-color);
   position: relative;
   transition: background-color 0.3s;
@@ -50,11 +50,11 @@ header .hamburger::before,
 }
 
 header .hamburger::before {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
 }
 
 header .hamburger::after {
-  transform: translateY(8px);
+  transform: translateY(6px);
 }
 
 /* Animation for hamburger menu */
@@ -77,6 +77,7 @@ header .logo {
   font-size: var(--size-header1);
   color: var(--header-color);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 0.9;
 }
 
 /* Styles for the navigation search container */
@@ -125,7 +126,7 @@ header .search-auth-container {
 
 /* Styles for the search bar inside the header */
 header .search-bar.header-search {
-  /* Add your styles here */
+  transition: all 0.3s ease;
 }
 
 /* Styles for the search form */
@@ -180,16 +181,17 @@ header .search-button {
 
 auth-avatar {
   width: 44px;
+  min-width: 44px;
 }
 
 /* Styles for the authentication container */
 header #auth-container {
-  /* Add your styles here */
+  transition: all 0.3s ease;
 }
 
 /* Styles for the authentication trigger button */
 header #auth-trigger {
-  /* Add your styles here */
+  transition: all 0.2s ease;
 }
 
 /* Styles for the authentication button */
@@ -231,7 +233,6 @@ header .auth-button {
     flex-direction: column;
     align-items: stretch;
     flex-wrap: nowrap;
-    min-width: 200px;
   }
 
   header nav ul {
@@ -252,6 +253,47 @@ header .auth-button {
   header nav ul li a {
     display: block;
     text-align: center;
+    transform: scale(0.95);
+    transition: all 0.2s ease;
+  }
+
+  header nav ul li a:hover {
+    transform: scale(1);
+    background-color: var(--primary-hover);
+  }
+
+  /* Animation for entire nav container when opened */
+  header .nav-search-container.active {
+    animation: fadeInSlide 0.3s ease forwards;
+  }
+
+  /* All nav items get smooth entrance when container is active */
+  header .nav-search-container.active nav ul li {
+    animation: fadeInUp 0.4s ease forwards;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+
+  @keyframes fadeInSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   header .menu-title-container {
@@ -270,8 +312,8 @@ header .auth-button {
   header .logo {
     text-align: center;
     flex-grow: 1;
-    font-size: var(--size-header1-mobile);
-    text-wrap: nowrap;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    line-height: 0.9;
   }
 
   header .nav-search-container {
@@ -308,29 +350,16 @@ header .auth-button {
 }
 
 /*------------------------------------*\
-    #medium size
-\*------------------------------------*/
-@media (max-width: 1500px) {
-  header {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-/*------------------------------------*\
     #tablet-size
 \*------------------------------------*/
-@media (max-width: 1130px) {
+@media (min-width: 769px) and (max-width: 1130px) {
   header {
     flex-direction: column;
     align-items: center;
-  }
-
-  .search-container {
-    width: 100%;
   }
 
   .nav-search-container {
     flex-direction: column;
+    width: 100%;
   }
 }

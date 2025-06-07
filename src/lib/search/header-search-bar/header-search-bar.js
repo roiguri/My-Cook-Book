@@ -65,6 +65,8 @@ class HeaderSearchBar extends HTMLElement {
           flex-grow: 1;
           outline: none;
           height: 100%;
+          min-width: 0;
+          width: 100%;
         }
 
         .search-button {
