@@ -9,6 +9,7 @@ export class PageManager {
     this.currentPageModule = null;
     this.isLoading = false;
     this.loadingTimeouts = new Set();
+    this.loadedStyles = new Map(); // Track dynamically loaded styles
   }
 
   async loadPage(pageModule, params = {}) {
@@ -83,6 +84,9 @@ export class PageManager {
       // Show loading state
       this.showLoadingState();
 
+      // Load page-specific styles if defined
+      await this.loadPageStyles(module, params);
+
       // Render page content
       const html = await this.callPageMethod('render', params);
       if (typeof html === 'string') {
@@ -112,6 +116,9 @@ export class PageManager {
       } catch (error) {
         console.error('Error unmounting current page:', error);
       }
+
+      // Unload page-specific styles
+      await this.unloadPageStyles();
 
       // Clear references
       this.currentPageModule = null;
@@ -284,6 +291,85 @@ export class PageManager {
 
   isPageLoading() {
     return this.isLoading;
+  }
+
+  // Dynamic style loading methods
+  async loadPageStyles(module, params) {
+    try {
+      // Check if module defines custom styles
+      let stylePaths = [];
+      
+      // Option 1: Module defines getStylePaths method
+      if (typeof module.getStylePaths === 'function') {
+        const paths = await module.getStylePaths(params);
+        if (Array.isArray(paths)) {
+          stylePaths = paths;
+        }
+      }
+      
+      // Option 2: Module defines stylePath property
+      if (module.stylePath && typeof module.stylePath === 'string') {
+        stylePaths.push(module.stylePath);
+      }
+      
+      // Load each style file
+      for (const stylePath of stylePaths) {
+        await this.loadStyleSheet(stylePath);
+      }
+      
+    } catch (error) {
+      console.warn('Error loading page styles:', error);
+      // Don't fail page load for style errors
+    }
+  }
+
+  async loadStyleSheet(stylePath) {
+    // Check if already loaded
+    if (this.loadedStyles.has(stylePath)) {
+      return this.loadedStyles.get(stylePath);
+    }
+
+    return new Promise((resolve, reject) => {
+      // Create link element
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = stylePath;
+      link.dataset.pageStyle = 'true'; // Mark as page-specific style
+      
+      // Handle load/error events
+      link.onload = () => {
+        this.loadedStyles.set(stylePath, link);
+        resolve(link);
+      };
+      
+      link.onerror = () => {
+        reject(new Error(`Failed to load stylesheet: ${stylePath}`));
+      };
+      
+      // Add to document head
+      document.head.appendChild(link);
+      
+      // Set timeout to prevent hanging
+      setTimeout(() => {
+        if (!this.loadedStyles.has(stylePath)) {
+          reject(new Error(`Stylesheet load timeout: ${stylePath}`));
+        }
+      }, 5000);
+    });
+  }
+
+  async unloadPageStyles() {
+    // Remove all dynamically loaded page styles
+    const pageStyleLinks = document.querySelectorAll('link[data-page-style="true"]');
+    pageStyleLinks.forEach(link => {
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+    });
+    
+    // Clear loaded styles map
+    this.loadedStyles.clear();
   }
 
   // Cleanup method
