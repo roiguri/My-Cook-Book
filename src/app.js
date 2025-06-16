@@ -75,25 +75,9 @@ function registerPlaceholderRoutes(router, pageManager) {
     await pageManager.loadPage('/src/app/pages/home-page.js', { ...params, route: '/home' });
   });
 
-  // Categories route placeholder
+  // Categories route - full implementation
   router.registerRoute('/categories', async (params) => {
-    await pageManager.loadPage({
-      async render(params) {
-        return `
-          <div class="spa-categories-placeholder">
-            <div style="text-align: center; padding: 2rem;">
-              <h1>📚 Categories Page</h1>
-              <p>Categories page placeholder - will be implemented in future phases</p>
-              <p><a href="#/home">← Back to Home</a></p>
-            </div>
-          </div>
-        `;
-      },
-      
-      getTitle() {
-        return 'Categories - Our Kitchen Chronicles';
-      }
-    }, { ...params, route: '/categories' });
+    await pageManager.loadPage('/src/app/pages/categories-page.js', { ...params, route: '/categories' });
   });
 
   // Propose recipe route placeholder

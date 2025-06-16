@@ -420,13 +420,15 @@ class RecipeCard extends HTMLElement {
           .recipe-image {
               position: relative;
               width: 100%;
-              height: 50%;
+              height: var(--recipe-image-height, 50%);
               object-fit: cover;
               flex-shrink: 0;
               box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
               opacity: 0;
               transition: opacity 0.3s ease;
               background-color: #f0f0f0; /* Placeholder color while loading */
+              min-height: var(--recipe-image-height, auto);
+              max-height: var(--recipe-image-height, none);
           }
 
           .recipe-image.loaded {
@@ -440,6 +442,10 @@ class RecipeCard extends HTMLElement {
               flex-direction: column;
               justify-content: space-between;  /* Center content vertically */
               gap: 0.5rem;
+              height: var(--recipe-content-height, auto);
+              max-height: var(--recipe-content-height, none);
+              overflow: hidden;
+              box-sizing: border-box;
           }
 
           .recipe-title {
@@ -447,7 +453,11 @@ class RecipeCard extends HTMLElement {
               margin: 0 auto;
               display: flex;
               gap: 0.5rem;
-              font-size: 1.2rem;              
+              font-size: 1.2rem;
+              max-height: var(--recipe-title-max-height, none);
+              overflow: hidden;
+              text-overflow: ellipsis;
+              line-height: 1.2;
           }
 
           .more-info {
@@ -560,7 +570,9 @@ class RecipeCard extends HTMLElement {
     return `
           .recipe-card.loading {
               position: relative;
-              min-height: 200px;
+              min-height: var(--recipe-card-loading-height, 200px);
+              height: var(--recipe-card-loading-height, auto);
+              max-height: var(--recipe-card-loading-height, none);
           }
 
           .loading::after {

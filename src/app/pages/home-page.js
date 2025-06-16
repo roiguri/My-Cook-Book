@@ -108,8 +108,7 @@ export default {
         const recipeCard = document.createElement('recipe-card');
         recipeCard.setAttribute('recipe-id', doc.id);
         recipeCard.setAttribute('layout', 'vertical');
-        recipeCard.setAttribute('card-width', '200px');
-        recipeCard.setAttribute('card-height', '300px');
+        // Remove fixed dimensions - let CSS control sizing
         recipesContainer.appendChild(recipeCard);
       });
 
@@ -128,7 +127,7 @@ export default {
       // Initialize the element-scroller after content is loaded
       const scroller = document.querySelector('element-scroller');
       if (scroller) {
-        scroller.setAttribute('item-width', '200');
+        // Remove fixed item-width - let CSS flexbox handle sizing
         scroller.setAttribute('padding', '20');
         setTimeout(() => {
           scroller.handleResize();

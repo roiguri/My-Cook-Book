@@ -55,14 +55,20 @@ export class AppRouter {
     }
     
     // Normalize path
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    let normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    
+    // Extract route path (before query string) for route matching
+    const questionMarkIndex = normalizedPath.indexOf('?');
+    const routePath = questionMarkIndex !== -1 ? normalizedPath.substring(0, questionMarkIndex) : normalizedPath;
+    
+    // Set current route before updating URL to prevent duplicate execution
+    this.currentRoute = routePath;
     
     // Update URL with hash
     this.updateURL(normalizedPath);
     
-    // Set current route and execute handler
-    this.currentRoute = normalizedPath;
-    this.executeRoute(normalizedPath);
+    // Execute handler
+    this.executeRoute(routePath);
   }
 
   getCurrentRoute() {
@@ -70,22 +76,36 @@ export class AppRouter {
   }
 
   getCurrentParams() {
-    if (!this.currentRoute) return {};
-    
-    // Extract parameters from current route
-    // For now, simple implementation - can be enhanced for complex routing
-    const routeParts = this.currentRoute.split('/').filter(Boolean);
     const params = {};
     
-    // Simple parameter extraction (route/param format)
-    if (routeParts.length > 1) {
-      params.id = routeParts[1];
+    // Parse URL parameters from current hash
+    const hash = window.location.hash;
+    if (!hash) return params;
+    
+    // Extract query string from hash
+    const questionMarkIndex = hash.indexOf('?');
+    if (questionMarkIndex === -1) return params;
+    
+    const queryString = hash.substring(questionMarkIndex + 1);
+    const urlParams = new URLSearchParams(queryString);
+    
+    // Convert URLSearchParams to regular object
+    for (const [key, value] of urlParams.entries()) {
+      params[key] = value;
+    }
+    
+    // Also extract path parameters if needed (route/param format)
+    if (this.currentRoute) {
+      const routeParts = this.currentRoute.split('/').filter(Boolean);
+      if (routeParts.length > 1) {
+        params.id = routeParts[1];
+      }
     }
     
     return params;
   }
 
-  handleHashChange(event) {
+  handleHashChange() {
     const newRoute = this.parseCurrentRoute();
     
     if (newRoute === this.currentRoute) return;
@@ -98,9 +118,9 @@ export class AppRouter {
     }
   }
 
-  handlePopState(event) {
+  handlePopState() {
     // Handle browser back/forward buttons
-    this.handleHashChange(event);
+    this.handleHashChange();
   }
 
   updateURL(path) {
@@ -114,10 +134,20 @@ export class AppRouter {
     const hash = window.location.hash;
     
     // Remove # and normalize
-    const route = hash ? hash.substring(1) : '/';
+    let route = hash ? hash.substring(1) : '/';
     
     // Ensure route starts with /
-    return route.startsWith('/') ? route : `/${route}`;
+    if (!route.startsWith('/')) {
+      route = `/${route}`;
+    }
+    
+    // Extract just the path part (before query string)
+    const questionMarkIndex = route.indexOf('?');
+    if (questionMarkIndex !== -1) {
+      route = route.substring(0, questionMarkIndex);
+    }
+    
+    return route;
   }
 
   executeRoute(path) {
@@ -176,6 +206,38 @@ export class AppRouter {
   // Set default route
   setDefaultRoute(path) {
     this.defaultRoute = path.startsWith('/') ? path : `/${path}`;
+  }
+
+  // Build URL with parameters
+  buildURL(path, params = {}) {
+    let url = path.startsWith('/') ? path : `/${path}`;
+    
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== null && value !== undefined && value !== '') {
+        searchParams.set(key, value);
+      }
+    }
+    
+    const queryString = searchParams.toString();
+    return queryString ? `${url}?${queryString}` : url;
+  }
+
+  // Update URL parameters without triggering navigation
+  updateParams(params = {}) {
+    const currentPath = this.parseCurrentRoute();
+    const newURL = this.buildURL(currentPath, params);
+    const newHash = `#${newURL}`;
+    
+    if (window.location.hash !== newHash) {
+      history.replaceState(null, null, newHash);
+    }
+  }
+
+  // Navigate with parameters
+  navigateWithParams(path, params = {}) {
+    const url = this.buildURL(path, params);
+    this.navigate(url);
   }
 }
 

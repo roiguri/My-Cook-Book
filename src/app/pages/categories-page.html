@@ -1,0 +1,56 @@
+<div class="categories-page">
+  <main>
+    <h1 id="category-header">מתכונים</h1>
+
+    <div class="categories-content">
+      <div class="filters-container">
+        <filter-search-bar class="categories-search"></filter-search-bar>
+        <button id="open-filter-modal" class="filter-button">
+          <i class="fas fa-filter"></i>
+          <span id="filter-badge" class="filter-badge"></span>
+        </button>
+
+        <nav dir="rtl" class="category-tabs">
+          <ul>
+            <li><a href="#all" class="active">כל הקטגוריות</a></li>
+            <li><a href="#appetizers">מנות ראשונות</a></li>
+            <li><a href="#main-courses">מנות עיקריות</a></li>
+            <li><a href="#side-dishes">תוספות</a></li>
+            <li><a href="#soups-stews">מרקים ותבשילים</a></li>
+            <li><a href="#salads">סלטים</a></li>
+            <li><a href="#desserts">קינוחים</a></li>
+            <li><a href="#breakfast-brunch">ארוחות בוקר</a></li>
+            <li><a href="#snacks">חטיפים</a></li>
+            <li><a href="#beverages">משקאות</a></li>
+          </ul>
+        </nav>
+        <div class="category-dropdown">
+          <select dir="rtl" id="category-select">
+            <option value="all">כל הקטגוריות</option>
+            <option value="appetizers">מנות ראשונות</option>
+            <option value="main-courses">מנות עיקריות</option>
+            <option value="side-dishes">תוספות</option>
+            <option value="soups-stews">מרקים ותבשילים</option>
+            <option value="salads">סלטים</option>
+            <option value="desserts">קינוחים</option>
+            <option value="breakfast-brunch">ארוחות בוקר</option>
+            <option value="snacks">חטיפים</option>
+            <option value="beverages">משקאות</option>
+          </select>
+        </div>
+      </div>
+
+      <section dir="rtl" class="recipe-grid" id="recipe-grid">
+        <!-- Recipe cards will be dynamically added here -->
+      </section>
+    </div>
+  </main>
+
+  <div class="pagination">
+    <button class="btn-gradient" id="next-page">הבא</button>
+    <span id="page-info"></span>
+    <button class="btn-gradient" id="prev-page">הקודם</button>
+  </div>
+
+  <recipe-filter-component id="recipe-filter"></recipe-filter-component>
+</div>
