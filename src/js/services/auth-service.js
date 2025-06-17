@@ -22,6 +22,7 @@
  *   - addAuthObserver(observer): Adds an observer function for auth state changes.
  *   - removeAuthObserver(observer): Removes a previously added auth observer.
  *   - getCurrentUserRole(): Gets the current user's role.
+ *   - waitForAuth(timeout): Waits for authentication to initialize, returns authenticated user or null.
  */
 import { getAuthInstance, getFirestoreInstance } from './firebase-service.js';
 import { serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -374,6 +375,37 @@ class AuthService {
     // FIXME: remove this once state management is implemented
     this._userRoles = await this._fetchUserRoles(this._currentUser);
     return this._userRoles?.role || 'public';
+  }
+
+  /**
+   * Wait for authentication to initialize
+   * Useful for page components that need to ensure auth state is ready
+   * @param {number} timeout - Maximum time to wait in milliseconds (default: 5000)
+   * @returns {Promise<Object|null>} Promise resolving to authenticated user or null
+   */
+  async waitForAuth(timeout = 5000) {
+    return new Promise((resolve) => {
+      // If already authenticated, return immediately
+      const currentUser = this.getCurrentUser();
+      if (currentUser) {
+        resolve(currentUser);
+        return;
+      }
+
+      // Wait for auth state to initialize
+      let timeoutId;
+      const unsubscribe = this.onAuthStateChanged((user) => {
+        clearTimeout(timeoutId);
+        unsubscribe();
+        resolve(user);
+      });
+
+      // Timeout fallback
+      timeoutId = setTimeout(() => {
+        unsubscribe();
+        resolve(null);
+      }, timeout);
+    });
   }
 
   /* ===== PRIVATE METHODS ===== */

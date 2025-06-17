@@ -13,8 +13,8 @@ export default {
   },
 
   async mount(container, params) {
-    // Check user authentication and manager privileges
-    const currentUser = authService.getCurrentUser();
+    // Wait for authentication to be ready and check manager privileges
+    const currentUser = await authService.waitForAuth();
     if (!currentUser) {
       this.redirectToHome();
       return;
