@@ -123,7 +123,6 @@ export default {
       
       // Reload data and update UI
       await this.loadInitialRecipes();
-      await this.updateRecipesPerPage(); // Recalculate optimal cards per page
       this.updateUI();
       await this.displayCurrentPageRecipes();
     }
@@ -599,7 +598,6 @@ export default {
       // Immediate search without debouncing for live results
       await this.loadInitialRecipes();
       this.currentPage = 1; // Reset to first page
-      await this.updateRecipesPerPage(); // Recalculate optimal cards per page
       this.updateUI();
       await this.displayCurrentPageRecipes();
       
@@ -668,9 +666,6 @@ export default {
     this.displayedRecipes = recipes;
     this.currentPage = 1; // Reset to first page
     
-    // Recalculate optimal cards per page for filtered results
-    await this.updateRecipesPerPage();
-    
     // Update filter badge if filters are active
     this.updateFilterBadge(filters);
     
@@ -694,9 +689,6 @@ export default {
     // Reload recipes without filters
     await this.loadInitialRecipes();
     this.currentPage = 1; // Reset to first page
-    
-    // Recalculate optimal cards per page
-    await this.updateRecipesPerPage();
     
     // Clear filter badge
     this.updateFilterBadge({});
@@ -740,7 +732,6 @@ export default {
     }
     
     await this.loadInitialRecipes();
-    await this.updateRecipesPerPage(); // Recalculate optimal cards per page
     this.updateUI();
     await this.displayCurrentPageRecipes();
     
