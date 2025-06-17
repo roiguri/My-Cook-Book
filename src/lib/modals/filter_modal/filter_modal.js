@@ -109,6 +109,7 @@ class RecipeFilterComponent extends HTMLElement {
       'difficulty-filter',
       'ingredient-filter',
       'tags-filter',
+      'current-filters',
     ];
   }
 
@@ -128,6 +129,23 @@ class RecipeFilterComponent extends HTMLElement {
       case 'category':
         this.state.category = newValue;
         this.loadInitialData();
+        break;
+      case 'current-filters':
+        if (newValue) {
+          try {
+            const filters = JSON.parse(newValue);
+            this.state.filters = {
+              cookingTime: filters.cookingTime || '',
+              difficulty: filters.difficulty || '',
+              mainIngredient: filters.mainIngredient || '',
+              tags: filters.tags || [],
+            };
+            // Update UI to reflect current filters
+            this.updateUI();
+          } catch (error) {
+            console.warn('Error parsing current-filters attribute:', error);
+          }
+        }
         break;
       // Handle other attribute changes...
     }

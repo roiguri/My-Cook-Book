@@ -137,6 +137,16 @@ export default {
     this.recipesPerPage = 4; // Default fallback, will be calculated dynamically
     this.displayedRecipes = [];
     this.allRecipes = [];
+    
+    // Initialize filter state to maintain filters across category changes
+    this.activeFilters = {
+      cookingTime: '',
+      difficulty: '',
+      mainIngredient: '',
+      tags: [],
+      favoritesOnly: false
+    };
+    this.hasActiveFilters = false;
   },
 
   // Calculate optimal cards per page based on actual rendered grid
@@ -294,12 +304,21 @@ export default {
       // Fetch recipes from Firestore
       this.allRecipes = await FirestoreService.queryDocuments('recipes', queryParams);
       
+      // Start with all fetched recipes
+      let filteredRecipes = [...this.allRecipes];
+      
       // Apply search filter if exists
       if (this.currentSearchQuery) {
-        this.displayedRecipes = this.filterRecipesBySearch(this.allRecipes, this.currentSearchQuery);
-      } else {
-        this.displayedRecipes = [...this.allRecipes];
+        filteredRecipes = this.filterRecipesBySearch(filteredRecipes, this.currentSearchQuery);
       }
+      
+      // Apply active filters if any exist
+      if (this.hasActiveFilters) {
+        filteredRecipes = this.applyActiveFilters(filteredRecipes);
+        console.log('Applied filters to recipes:', this.activeFilters, 'Filtered count:', filteredRecipes.length);
+      }
+      
+      this.displayedRecipes = filteredRecipes;
       
       // Reset to first page
       this.currentPage = 1;
@@ -320,6 +339,39 @@ export default {
         .toLowerCase();
       
       return searchTerms.every((term) => searchableText.includes(term));
+    });
+  },
+
+  // Apply active filters to recipes
+  applyActiveFilters(recipes) {
+    if (!this.hasActiveFilters) {
+      return recipes;
+    }
+
+    const { cookingTime, difficulty, mainIngredient, tags } = this.activeFilters;
+
+    return recipes.filter((recipe) => {
+      // Cooking time filter
+      if (cookingTime) {
+        const totalTime = (recipe.prepTime || 0) + (recipe.waitTime || 0);
+        if (cookingTime === '0-30' && totalTime > 30) return false;
+        if (cookingTime === '31-60' && (totalTime < 31 || totalTime > 60)) return false;
+        if (cookingTime === '61' && totalTime <= 60) return false;
+      }
+
+      // Difficulty filter
+      if (difficulty && recipe.difficulty !== difficulty) return false;
+
+      // Main ingredient filter
+      if (mainIngredient && recipe.mainIngredient !== mainIngredient) return false;
+
+      // Tags filter - recipe must have all selected tags
+      if (tags && tags.length > 0) {
+        const recipeTags = recipe.tags || [];
+        if (!tags.every((tag) => recipeTags.includes(tag))) return false;
+      }
+
+      return true;
     });
   },
 
@@ -374,6 +426,7 @@ export default {
     const filterModal = document.getElementById('recipe-filter');
     if (filterModal) {
       filterModal.addEventListener('filter-applied', this.handleFilterApplied.bind(this));
+      filterModal.addEventListener('filter-reset', this.handleFilterReset.bind(this));
     }
   },
 
@@ -565,8 +618,24 @@ export default {
         filterModal.removeAttribute('category');
       }
       
-      // Set the current recipes for filtering
-      filterModal.setAttribute('recipes', JSON.stringify(this.displayedRecipes));
+      // Pass the base recipes (after category and search filter, but before advanced filters)
+      // This allows the filter modal to work with the correct recipe set
+      let baseRecipes = [...this.allRecipes];
+      
+      // Apply search filter if exists
+      if (this.currentSearchQuery) {
+        baseRecipes = this.filterRecipesBySearch(baseRecipes, this.currentSearchQuery);
+      }
+      
+      // Set the base recipes for filtering (not the already filtered ones)
+      filterModal.setAttribute('recipes', JSON.stringify(baseRecipes));
+      
+      // If we have active filters, set them on the modal so they appear selected
+      if (this.hasActiveFilters) {
+        filterModal.setAttribute('current-filters', JSON.stringify(this.activeFilters));
+      } else {
+        filterModal.removeAttribute('current-filters');
+      }
       
       // Open the modal
       filterModal.open();
@@ -577,6 +646,24 @@ export default {
     const { recipes, filters } = event.detail;
     console.log('Filter applied:', filters);
     
+    // Store the active filters state
+    this.activeFilters = {
+      cookingTime: filters.cookingTime || '',
+      difficulty: filters.difficulty || '',
+      mainIngredient: filters.mainIngredient || '',
+      tags: filters.tags || [],
+      favoritesOnly: filters.favoritesOnly || false
+    };
+    
+    // Check if any filters are actually active
+    this.hasActiveFilters = !!(
+      this.activeFilters.cookingTime ||
+      this.activeFilters.difficulty ||
+      this.activeFilters.mainIngredient ||
+      (this.activeFilters.tags && this.activeFilters.tags.length > 0) ||
+      this.activeFilters.favoritesOnly
+    );
+    
     // Update displayed recipes with filtered results
     this.displayedRecipes = recipes;
     this.currentPage = 1; // Reset to first page
@@ -586,6 +673,33 @@ export default {
     
     // Update filter badge if filters are active
     this.updateFilterBadge(filters);
+    
+    // Re-render the recipe grid
+    await this.displayCurrentPageRecipes();
+  },
+
+  async handleFilterReset(event) {
+    console.log('Filter reset');
+    
+    // Clear the active filters state
+    this.activeFilters = {
+      cookingTime: '',
+      difficulty: '',
+      mainIngredient: '',
+      tags: [],
+      favoritesOnly: false
+    };
+    this.hasActiveFilters = false;
+    
+    // Reload recipes without filters
+    await this.loadInitialRecipes();
+    this.currentPage = 1; // Reset to first page
+    
+    // Recalculate optimal cards per page
+    await this.updateRecipesPerPage();
+    
+    // Clear filter badge
+    this.updateFilterBadge({});
     
     // Re-render the recipe grid
     await this.displayCurrentPageRecipes();
