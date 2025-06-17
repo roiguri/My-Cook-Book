@@ -1,0 +1,101 @@
+/* SPA Documents Page Styles - Scoped for SPA Content Container */
+
+.spa-content .documents {
+  margin: 0;
+  padding: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: none;
+  height: 100%;
+}
+
+.spa-content .documents h1 {
+  color: var(--text-color);
+  font-size: var(--size-header1);
+  margin-bottom: 0;
+  margin-top: 0;
+  text-align: center;
+  padding: 0.5rem;
+  flex-shrink: 0;
+}
+
+.spa-content .documents pdf-viewer {
+  width: 100%;
+  max-width: 800px;
+  margin: 1rem auto;
+  display: block;
+  flex-grow: 1;
+  height: 100%;
+}
+
+/* Container for documents content */
+.spa-content .documents .documents-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .spa-content .documents .documents-container {
+    margin-top: 20px;
+    padding: 0 0.5rem;
+  }
+
+  .spa-content .documents h1 {
+    font-size: var(--size-header1-mobile);
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .spa-content .documents pdf-viewer {
+    margin: 0;
+    max-width: none;
+  }
+}
+
+/* Loading state for PDF viewer */
+.spa-content .documents .pdf-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: var(--text-color);
+}
+
+.spa-content .documents .pdf-loading::after {
+  content: 'טוען...';
+  font-size: 1.2rem;
+}
+
+/* Error state styling */
+.spa-content .documents .pdf-error {
+  text-align: center;
+  padding: 2rem;
+  color: var(--error-color, #d32f2f);
+  background-color: var(--error-background, #ffebee);
+  border-radius: 4px;
+  margin: 1rem;
+}
+
+.spa-content .documents .pdf-error h2 {
+  margin-bottom: 1rem;
+  color: var(--error-color, #d32f2f);
+}
+
+.spa-content .documents .pdf-error button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.spa-content .documents .pdf-error button:hover {
+  background-color: var(--primary-color-dark, #a0541a);
+}

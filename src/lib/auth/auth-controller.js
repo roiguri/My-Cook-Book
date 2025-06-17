@@ -109,7 +109,8 @@ class AuthController extends HTMLElement {
       const item = document.createElement('li');
       item.id = id;
       const link = document.createElement('a');
-      link.href = this.getCorrectPath(href);
+      // Use href as-is for SPA hash routes, otherwise apply path correction
+      link.href = href.startsWith('#/') ? href : this.getCorrectPath(href);
       link.textContent = text;
       link.classList.add('btn-3d');
       item.appendChild(link);
@@ -122,7 +123,7 @@ class AuthController extends HTMLElement {
     // Add Grandmother's Recipes for approved users and managers
     if (roles.isApproved || roles.isManager) {
       navMenu.appendChild(
-        createNavItem('documents-tab', 'המטעמים של סבתא', '/pages/documents.html'),
+        createNavItem('documents-tab', 'המטעמים של סבתא', '#/grandmas-cooking'),
       );
     }
 

@@ -89,6 +89,11 @@ function registerRoutes(router, pageManager) {
   router.registerRoute('/propose-recipe', async (params) => {
     await pageManager.loadPage('/src/app/pages/propose-recipe-page.js', { ...params, route: '/propose-recipe' });
   });
+
+  // Grandma's cooking route
+  router.registerRoute('/grandmas-cooking', async (params) => {
+    await pageManager.loadPage('/src/app/pages/documents-page.js', { ...params, route: '/grandmas-cooking' });
+  });
 }
 
 function showInitializationError(error) {
