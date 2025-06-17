@@ -94,6 +94,11 @@ function registerRoutes(router, pageManager) {
   router.registerRoute('/grandmas-cooking', async (params) => {
     await pageManager.loadPage('/src/app/pages/documents-page.js', { ...params, route: '/grandmas-cooking' });
   });
+
+  // Manager dashboard route
+  router.registerRoute('/dashboard', async (params) => {
+    await pageManager.loadPage('/src/app/pages/manager-dashboard-page.js', { ...params, route: '/manager-dashboard' });
+  });
 }
 
 function showInitializationError(error) {

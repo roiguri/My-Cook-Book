@@ -130,7 +130,7 @@ class AuthController extends HTMLElement {
     // Add Management Interface for managers
     if (roles.isManager) {
       navMenu.appendChild(
-        createNavItem('dashboard-tab', 'ממשק ניהול', '/pages/manager-dashboard.html'),
+        createNavItem('dashboard-tab', 'ממשק ניהול', '#/dashboard'),
       );
     }
   }
