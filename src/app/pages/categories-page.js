@@ -540,6 +540,18 @@ export default {
         recipeCard.style.width = '100%';
         recipeCard.style.height = '100%';
 
+        // Add click handler for SPA navigation
+        recipeCard.addEventListener('recipe-card-open', (event) => {
+          const recipeId = event.detail.recipeId;
+          // Use SPA navigation
+          if (window.spa?.router) {
+            window.spa.router.navigate(`/recipe/${recipeId}`);
+          } else {
+            // Fallback to traditional navigation
+            window.location.href = `${import.meta.env.BASE_URL}pages/recipe-page.html?id=${recipeId}`;
+          }
+        });
+
         cardContainer.appendChild(recipeCard);
         recipeGrid.appendChild(cardContainer);
       });

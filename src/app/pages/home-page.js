@@ -127,7 +127,6 @@ export default {
       // Initialize the element-scroller after content is loaded
       const scroller = document.querySelector('element-scroller');
       if (scroller) {
-        // Remove fixed item-width - let CSS flexbox handle sizing
         scroller.setAttribute('padding', '20');
         setTimeout(() => {
           scroller.handleResize();

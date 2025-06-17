@@ -75,9 +75,14 @@ function registerPlaceholderRoutes(router, pageManager) {
     await pageManager.loadPage('/src/app/pages/home-page.js', { ...params, route: '/home' });
   });
 
-  // Categories route - full implementation
+  // Categories route
   router.registerRoute('/categories', async (params) => {
     await pageManager.loadPage('/src/app/pages/categories-page.js', { ...params, route: '/categories' });
+  });
+
+  // Recipe detail route
+  router.registerRoute('/recipe/:id', async (params) => {
+    await pageManager.loadPage('/src/app/pages/recipe-detail-page.js', { ...params, route: '/recipe/:id' });
   });
 
   // Propose recipe route placeholder

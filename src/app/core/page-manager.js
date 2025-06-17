@@ -255,15 +255,22 @@ export class PageManager {
         <div class="error-card">
           <h2>Page Load Error</h2>
           <p>Sorry, there was an error loading this page.</p>
-          <div class="error-details">
-            ${error.message}
-          </div>
-          <button class="reload-button" onclick="window.location.reload()">
+          <div class="error-details" id="error-details"></div>
+          <button class="reload-button" id="reload-button">
             Reload Page
           </button>
         </div>
       </div>
     `;
+    
+    // Safely set error message and attach event listener
+    const errorDetails = this.contentContainer.querySelector('#error-details');
+    const reloadButton = this.contentContainer.querySelector('#reload-button');
+    
+    errorDetails.textContent = error.message;
+    reloadButton.addEventListener('click', () => {
+      window.location.reload();
+    });
   }
 
   // Utility methods

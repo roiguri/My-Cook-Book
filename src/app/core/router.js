@@ -151,10 +151,21 @@ export class AppRouter {
   }
 
   executeRoute(path) {
-    const handler = this.routes.get(path);
+    // First try exact match
+    let handler = this.routes.get(path);
+    let params = this.getCurrentParams();
+    
+    // If no exact match, try parameterized routes
+    if (!handler) {
+      const matchResult = this.matchParameterizedRoute(path);
+      if (matchResult) {
+        handler = matchResult.handler;
+        params = { ...params, ...matchResult.params };
+      }
+    }
+    
     if (handler) {
       try {
-        const params = this.getCurrentParams();
         handler(params);
       } catch (error) {
         console.error(`Error executing route handler for ${path}:`, error);
@@ -163,6 +174,45 @@ export class AppRouter {
     } else {
       this.handleNotFound(path);
     }
+  }
+
+  // Match parameterized routes like /recipe/:id with /recipe/123
+  matchParameterizedRoute(path) {
+    for (const [routePattern, handler] of this.routes.entries()) {
+      // Check if route pattern has parameters (contains :)
+      if (routePattern.includes(':')) {
+        const pathSegments = path.split('/').filter(Boolean);
+        const patternSegments = routePattern.split('/').filter(Boolean);
+        
+        // Must have same number of segments
+        if (pathSegments.length !== patternSegments.length) continue;
+        
+        const params = {};
+        let isMatch = true;
+        
+        // Check each segment
+        for (let i = 0; i < patternSegments.length; i++) {
+          const patternSegment = patternSegments[i];
+          const pathSegment = pathSegments[i];
+          
+          if (patternSegment.startsWith(':')) {
+            // Parameter segment - extract value
+            const paramName = patternSegment.substring(1);
+            params[paramName] = pathSegment;
+          } else if (patternSegment !== pathSegment) {
+            // Literal segment must match exactly
+            isMatch = false;
+            break;
+          }
+        }
+        
+        if (isMatch) {
+          return { handler, params };
+        }
+      }
+    }
+    
+    return null;
   }
 
   handleNotFound(path) {
