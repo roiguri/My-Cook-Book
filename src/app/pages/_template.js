@@ -10,7 +10,8 @@ export default {
   async render(params) {
     // Option 1: Load from external HTML file
     try {
-      const response = await fetch('/src/app/pages/[page-name].html');
+      // Resolve relative to this module so it works no matter where the SPA is mounted
+      const response = await fetch(new URL('./[page-name].html', import.meta.url));
       if (!response.ok) {
         throw new Error(`Failed to load template: ${response.status}`);
       }

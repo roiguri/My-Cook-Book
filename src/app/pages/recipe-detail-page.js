@@ -1,6 +1,7 @@
 export default {
-  async render(params) {
-    const response = await fetch('/src/app/pages/recipe-detail-page.html');
+  async render() {
+    // Resolve relative to this module so it works no matter where the SPA is mounted
+    const response = await fetch(new URL('./recipe-detail-page.html', import.meta.url));
     
     if (!response.ok) {
       throw new Error(`Failed to load template: ${response.status} ${response.statusText}`);

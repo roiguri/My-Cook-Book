@@ -54,8 +54,8 @@ async function initializeSPA() {
     // Make router available globally for debugging
     window.spa = { router, pageManager };
     
-    // Register temporary placeholder routes
-    registerPlaceholderRoutes(router, pageManager);
+    // Register routes
+    registerRoutes(router, pageManager);
     
     // Initialize router
     router.initialize();
@@ -69,7 +69,7 @@ async function initializeSPA() {
   }
 }
 
-function registerPlaceholderRoutes(router, pageManager) {
+function registerRoutes(router, pageManager) {
   // Home route
   router.registerRoute('/home', async (params) => {
     await pageManager.loadPage('/src/app/pages/home-page.js', { ...params, route: '/home' });
@@ -85,25 +85,9 @@ function registerPlaceholderRoutes(router, pageManager) {
     await pageManager.loadPage('/src/app/pages/recipe-detail-page.js', { ...params, route: '/recipe/:id' });
   });
 
-  // Propose recipe route placeholder
+  // Propose recipe route
   router.registerRoute('/propose-recipe', async (params) => {
-    await pageManager.loadPage({
-      async render(params) {
-        return `
-          <div class="spa-propose-placeholder">
-            <div style="text-align: center; padding: 2rem;">
-              <h1>✏️ Propose Recipe</h1>
-              <p>Propose recipe page placeholder - will be implemented in future phases</p>
-              <p><a href="#/home">← Back to Home</a></p>
-            </div>
-          </div>
-        `;
-      },
-      
-      getTitle() {
-        return 'Propose Recipe - Our Kitchen Chronicles';
-      }
-    }, { ...params, route: '/propose-recipe' });
+    await pageManager.loadPage('/src/app/pages/propose-recipe-page.js', { ...params, route: '/propose-recipe' });
   });
 }
 

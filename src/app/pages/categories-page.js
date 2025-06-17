@@ -2,9 +2,10 @@ import authService from '../../js/services/auth-service.js';
 import { FirestoreService } from '../../js/services/firestore-service.js';
 
 export default {
-  async render(params) {
+  async render() {
     try {
-      const response = await fetch('/src/app/pages/categories-page.html');
+      // Resolve relative to this module so it works no matter where the SPA is mounted
+      const response = await fetch(new URL('./categories-page.html', import.meta.url));
       if (!response.ok) {
         throw new Error(`Failed to load categories template: ${response.status}`);
       }

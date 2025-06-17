@@ -1,8 +1,9 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
 
 export default {
-  async render(params) {
-    const response = await fetch('/src/app/pages/home-page.html');
+  async render() {
+    // Resolve relative to this module so it works no matter where the SPA is mounted
+    const response = await fetch(new URL('./home-page.html', import.meta.url));
     if (!response.ok) {
       throw new Error(`Failed to load home page template: ${response.status}`);
     }

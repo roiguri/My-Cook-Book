@@ -405,7 +405,8 @@ class RecipeFormComponent extends HTMLElement {
         this.collectFormData();
         this.dispatchRecipeData();
       } else {
-        this.showErrorMessage();
+        // Scroll to top to show validation errors
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
 
