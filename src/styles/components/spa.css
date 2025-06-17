@@ -56,14 +56,63 @@ footer {
 }
 
 .spa-content .page-error {
-  margin: 2rem auto;
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
   padding: 2rem;
   text-align: center;
+  margin: 0;
+}
+
+.spa-content .page-error .error-card {
+  max-width: 500px;
+  padding: 2rem;
   color: #d32f2f;
   background-color: #ffebee;
   border: 1px solid #ffcdd2;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spa-content .page-error h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #d32f2f;
+}
+
+.spa-content .page-error p {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.spa-content .page-error .error-details {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 1rem;
+  font-family: monospace;
+  background-color: #f5f5f5;
+  padding: 0.5rem;
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+.spa-content .page-error .reload-button {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.spa-content .page-error .reload-button:hover {
+  background: #b71c1c;
 }
 
 /* Placeholder page styles */

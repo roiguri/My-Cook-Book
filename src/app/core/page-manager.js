@@ -251,31 +251,17 @@ export class PageManager {
     
     // Show error message to user
     this.contentContainer.innerHTML = `
-      <div class="page-error" style="
-        padding: 2rem;
-        text-align: center;
-        color: #d32f2f;
-        background-color: #ffebee;
-        border: 1px solid #ffcdd2;
-        border-radius: 4px;
-        margin: 1rem;
-      ">
-        <h2>Page Load Error</h2>
-        <p>Sorry, there was an error loading this page.</p>
-        <p style="font-size: 0.9em; color: #666; margin-top: 1rem;">
-          ${error.message}
-        </p>
-        <button onclick="window.location.reload()" style="
-          margin-top: 1rem;
-          padding: 0.5rem 1rem;
-          background: #d32f2f;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        ">
-          Reload Page
-        </button>
+      <div class="page-error">
+        <div class="error-card">
+          <h2>Page Load Error</h2>
+          <p>Sorry, there was an error loading this page.</p>
+          <div class="error-details">
+            ${error.message}
+          </div>
+          <button class="reload-button" onclick="window.location.reload()">
+            Reload Page
+          </button>
+        </div>
       </div>
     `;
   }
