@@ -1,6 +1,9 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
 
 export default {
+  // Dynamic style loading
+  stylePath: '/src/styles/pages/home-spa.css',
+
   async render() {
     // Resolve relative to this module so it works no matter where the SPA is mounted
     const response = await fetch(new URL('./home-page.html', import.meta.url));

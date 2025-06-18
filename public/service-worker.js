@@ -1,17 +1,23 @@
-const CACHE_NAME = 'our-kitchen-chronicles-2024.10.08,22:23';
+const CACHE_NAME = 'our-kitchen-chronicles-spa-2024.12.18';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/src/styles/',
-  '/img/category-jars/optimized/',
-  '/img/background/stone-counter-top.jpg',
-  '/img/background/wood-texture.jpg',
   '/src/styles/main.css',
   '/src/styles/base.css',
-  '/src/styles/layout.css',
-  '/src/styles/components.css',
-  '/src/styles/pages.css',
-  '/src/styles/responsive.css',
+  '/src/styles/components/spa.css',
+  '/src/styles/components/header.css',
+  '/src/styles/components/footer.css',
+  '/img/background/stone-counter-top.jpg',
+  '/img/background/wood-texture.jpg',
+  '/img/category-jars/optimized/appetizers.jpg',
+  '/img/category-jars/optimized/main-course.webp',
+  '/img/category-jars/optimized/side-dishes.jpeg',
+  '/img/category-jars/optimized/soups&stews.jpg',
+  '/img/category-jars/optimized/salad.jpg',
+  '/img/category-jars/optimized/dessert.jpg',
+  '/img/category-jars/optimized/breakfast.jpeg',
+  '/img/category-jars/optimized/snacks.jpg',
+  '/img/category-jars/optimized/beverages.jpg',
   // Add other critical assets here
 ];
 
@@ -19,7 +25,11 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       console.log('Opened cache');
-      return cache.addAll(urlsToCache);
+      return cache.addAll(urlsToCache).catch(function(error) {
+        console.warn('Failed to cache some resources:', error);
+        // Don't fail the install if some resources can't be cached
+        return Promise.resolve();
+      });
     }),
   );
 });
@@ -71,6 +81,13 @@ self.addEventListener('fetch', function (event) {
         }
 
         return response;
+      }).catch(function(error) {
+        console.warn('Fetch failed for:', event.request.url, error);
+        // Return a generic response or cached fallback
+        return new Response('Resource not available', { 
+          status: 404, 
+          statusText: 'Not Found' 
+        });
       });
     }),
   );

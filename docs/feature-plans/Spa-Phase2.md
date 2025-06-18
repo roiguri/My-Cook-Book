@@ -413,13 +413,23 @@ location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
 ## Step 5: Legacy Code Cleanup (Days 16-17)
 
 ### Tasks
-- [ ] Remove unused legacy page HTML files
-- [ ] Clean up unused CSS files and styles
-- [ ] Remove unused JavaScript files
-- [ ] Update Vite configuration to remove old entry points
-- [ ] Clean up unused assets and images
-- [ ] Remove unused components and utilities
-- [ ] Update imports and references
+- [x] Remove unused legacy page HTML files (entire /pages/ directory removed)
+- [x] Clean up unused CSS files and styles (all non-SPA CSS files removed)
+- [x] Remove unused JavaScript files (entire /src/pages/ directory removed)
+- [x] Update Vite configuration to remove ALL legacy entry points (SPA-only build)
+- [x] Replace index.html with SPA redirect to app.html
+- [x] Clean up CSS imports in main.css (verified - only SPA imports remain)
+- [x] Fix home page styles by adding stylePath property to home-page.js
+- [x] Complete migration to SPA-only architecture
+- [x] Updated service worker for SPA compatibility
+- [x] Verified build works with SPA-only configuration
+- [x] Removed legacy MPA pages completely
+- [x] Removed all legacy MPA JavaScript files (category.js, documents.js, manager-dashboard.js, profile.js, recipe-script.js, featured-recipes.js)
+- [x] Kept only essential shared scripts (navigation, services, utilities)
+- [x] Consolidated to single SPA entry point (removed app.html, renamed to index.html)
+- [x] Updated Vite config for single entry point
+- [x] Updated service worker cache entries
+- [x] Final build verification successful - SPA fully deployed and optimized
 
 ### Implementation Details
 
@@ -609,6 +619,15 @@ function convertToSPARoute(href) {
 - [ ] **Accessibility**: Navigation is accessible via keyboard
 
 ---
+
+## Step 6.5: functionality cleanup
+
+### Tasks
+- [ ] clear search input
+- [ ] fix refresh state for recipe cards
+- [ ] add active state to navigation buttons
+- [ ] fix category tabs layout
+- [ ] show search on default for mobile
 
 ## Step 7: Performance Optimization (Days 20-22)
 

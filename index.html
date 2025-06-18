@@ -21,24 +21,26 @@
     <!-- Icon for iOS -->
     <link rel="apple-touch-icon" sizes="128x128" href="img/icon/wooden-spoon-16.png" />
 
-    <script type="module" src="/src/pages/index.js" defer></script>
+    <!-- SPA Entry Point -->
+    <script type="module" src="/src/app.js" defer></script>
   </head>
-  <body class="home-page">
+  <body class="spa-app">
+    <!-- Application Header -->
     <header class="header-container">
       <div class="menu-title-container">
         <button class="nav-toggle" aria-label="Toggle navigation">
           <span class="hamburger"></span>
         </button>
-        <a href=".">
+        <a href="#/home">
           <div class="logo">Our Kitchen Chronicles</div>
         </a>
       </div>
       <div class="nav-search-container">
         <nav dir="rtl">
           <ul>
-            <li><a class="btn-3d" href=".">דף הבית</a></li>
-            <li><a class="btn-3d" href="pages/categories.html">מתכונים</a></li>
-            <li><a class="btn-3d" href="pages/propose-recipe.html">הצעת מתכון</a></li>
+            <li><a class="btn-3d" href="#/home">דף הבית</a></li>
+            <li><a class="btn-3d" href="#/categories">מתכונים</a></li>
+            <li><a class="btn-3d" href="#/propose-recipe">הצעת מתכון</a></li>
           </ul>
         </nav>
         <div class="search-auth-container">
@@ -50,105 +52,17 @@
       </div>
     </header>
 
-    <main>
-      <section class="hero">
-        <div>Discover homemade goodness in every bite</div>
-      </section>
-
-      <section class="quick-links">
-        <h2>Explore Recipes</h2>
-        <div class="category-jars">
-          <a href="pages/categories.html#appetizers" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/appetizers.jpg')"
-            ></div>
-            <span>Appetizers</span>
-          </a>
-          <a href="pages/categories.html#main-courses" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/main-course.webp')"
-            ></div>
-            <span>Main Courses</span>
-          </a>
-          <a href="pages/categories.html#side-dishes" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/side-dishes.jpeg')"
-            ></div>
-            <span>Side Dishes</span>
-          </a>
-          <a href="pages/categories.html#soups-stews" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/soups&stews.jpg')"
-            ></div>
-            <span>Soups & Stews</span>
-          </a>
-          <a href="pages/categories.html#salads" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/salad.jpg')"
-            ></div>
-            <span>Salads</span>
-          </a>
-          <a href="pages/categories.html#desserts" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/dessert.jpg')"
-            ></div>
-            <span>Desserts</span>
-          </a>
-          <a href="pages/categories.html#breakfast-brunch" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/breakfast.jpeg')"
-            ></div>
-            <span>Breakfast & Brunch</span>
-          </a>
-          <a href="pages/categories.html#snacks" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/snacks.jpg')"
-            ></div>
-            <span>Snacks</span>
-          </a>
-          <a href="pages/categories.html#beverages" class="category-jar">
-            <div
-              class="jar-img"
-              style="background-image: url('/img/category-jars/optimized/beverages.jpg')"
-            ></div>
-            <span>Beverages</span>
-          </a>
-          <!-- Add more category jars as needed -->
+    <!-- SPA Content Container -->
+    <main id="spa-content" class="spa-content">
+      <!-- Page content will be rendered here by the page manager -->
+      <div class="spa-loading">
+        <div style="text-align: center; padding: 2rem; color: #666;">
+          <div>Loading application...</div>
         </div>
-      </section>
-
-      <section class="featured-recipes">
-        <h2>Recently Added</h2>
-        <element-scroller
-          id="featured-recipes-grid"
-          class="favorites-grid"
-          item-width="200"
-          background-color="none"
-          show-scrollbar
-        >
-          <div slot="items">
-            <!-- Content will be dynamically added here -->
-          </div>
-        </element-scroller>
-      </section>
+      </div>
     </main>
 
-    <div class="quote-section">
-      <blockquote>
-        "Cooking is like painting or writing a song. Just as there are only so many notes or colors,
-        there are only so many flavors—it's how you combine them that sets you apart."
-      </blockquote>
-      <cite>– Wolfgang Puck</cite>
-    </div>
-
+    <!-- Application Footer -->
     <footer>
       <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
       <a id="icon-attribute" href="https://www.flaticon.com/free-icons/spoon" title="spoon icons"

@@ -10,13 +10,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        // SPA Architecture - Single Page Application
         main: resolve(__dirname, 'index.html'),
-        categories: resolve(__dirname, 'pages/categories.html'),
-        profile: resolve(__dirname, 'pages/profile.html'),
-        proposeRecipe: resolve(__dirname, 'pages/propose-recipe.html'),
-        recipePage: resolve(__dirname, 'pages/recipe-page.html'),
-        managerDashboard: resolve(__dirname, 'pages/manager-dashboard.html'),
-        documents: resolve(__dirname, 'pages/documents.html'),
       },
     },
   },
