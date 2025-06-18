@@ -1,11 +1,9 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
 
 export default {
-  // Dynamic style loading
   stylePath: '/src/styles/pages/home-spa.css',
 
   async render() {
-    // Resolve relative to this module so it works no matter where the SPA is mounted
     const response = await fetch(new URL('./home-page.html', import.meta.url));
     if (!response.ok) {
       throw new Error(`Failed to load home page template: ${response.status}`);
@@ -13,23 +11,13 @@ export default {
     return await response.text();
   },
 
-  async mount(container) {
-    console.log('Home page: mount() called');
-
-    // Import required components
+  async mount() {
     await this.importComponents();
-
-    // Load featured recipes
     await this.loadFeaturedRecipes();
-
-    // Setup category navigation (already using hash links)
-    this.setupCategoryNavigation();
   },
 
   async unmount() {
-    console.log('Home page: unmount() called');
-    // Cleanup any event listeners or timers if needed
-    this.cleanup();
+    // Nothing to clean up
   },
 
   getTitle() {
@@ -44,7 +32,6 @@ export default {
     };
   },
 
-  // Import required components
   async importComponents() {
     try {
       await Promise.all([
@@ -56,7 +43,6 @@ export default {
     }
   },
 
-  // Load featured recipes
   async loadFeaturedRecipes() {
     const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
     if (!featuredRecipesGrid) {
@@ -64,17 +50,14 @@ export default {
       return;
     }
 
-    // Create message container
     const sectionContainer = document.querySelector('.featured-recipes');
     const messageContainer = document.createElement('p');
     messageContainer.dir = 'rtl';
     messageContainer.style.fontSize = 'var(--size-header2)';
     sectionContainer.insertBefore(messageContainer, featuredRecipesGrid);
 
-    // Add loading message
     messageContainer.innerHTML = 'טוען את המתכונים הכי חדשים...';
 
-    // Get the recipes container
     const elementScroller = document.querySelector('element-scroller');
     const recipesContainer = elementScroller?.querySelector('[slot="items"]');
 
@@ -102,40 +85,32 @@ export default {
         return timeB - timeA;
       });
 
-      // Take only first 3
+      // Take only first 3 recipes
       const recentRecipes = recipes.slice(0, 3);
 
-      // Remove loading message
       messageContainer.remove();
 
-      // Create recipe-card elements
       recentRecipes.forEach((doc) => {
         const recipeCard = document.createElement('recipe-card');
         recipeCard.setAttribute('recipe-id', doc.id);
         recipeCard.setAttribute('layout', 'vertical');
-        // Remove fixed dimensions - let CSS control sizing
         recipesContainer.appendChild(recipeCard);
       });
 
-      // Add event listener for recipe card clicks (SPA navigation)
       featuredRecipesGrid.addEventListener('recipe-card-open', (event) => {
         const recipeId = event.detail.recipeId;
-        // Use SPA navigation instead of window.location
         if (window.spa?.router) {
           window.spa.router.navigate(`/recipe/${recipeId}`);
-          // Update navigation active state after navigation
           setTimeout(() => {
             if (typeof window.updateActiveNavigation === 'function') {
               window.updateActiveNavigation();
             }
           }, 100);
         } else {
-          // Fallback to traditional navigation
           window.location.href = `${import.meta.env.BASE_URL}pages/recipe-page.html?id=${recipeId}`;
         }
       });
 
-      // Initialize the element-scroller after content is loaded
       const scroller = document.querySelector('element-scroller');
       if (scroller) {
         scroller.setAttribute('padding', '20');
@@ -147,18 +122,5 @@ export default {
       console.error('Error fetching featured recipes:', error);
       messageContainer.innerHTML = 'Error loading featured recipes. Please try again later.';
     }
-  },
-
-  // Setup category navigation (links already use hash routing)
-  setupCategoryNavigation() {
-    // Category links are already set up with hash routing in the render method
-    // No additional setup needed since they use #/categories?category=...
-    console.log('Category navigation setup complete (using hash routing)');
-  },
-
-  // Cleanup method
-  cleanup() {
-    // Remove any global event listeners if we had any
-    // For now, nothing specific to clean up
   },
 };

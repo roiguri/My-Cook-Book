@@ -26,21 +26,13 @@ export default {
       return;
     }
 
-    // Import required components
     await this.importComponents();
-
-    // Initialize dashboard functionality
     this.initializeDashboard();
-
-    // Set up auth state listener for logout detection
     this.setupAuthListener();
-
-    // Set up image approval event listeners
     this.setupImageApprovalListeners();
   },
 
   async unmount() {
-    // Clean up auth listener
     if (this.authUnsubscribe) {
       this.authUnsubscribe();
     }
@@ -58,7 +50,6 @@ export default {
   },
 
   async importComponents() {
-    // Import required components
     await Promise.all([
       import('../../lib/utilities/scrolling_list/scroll_list.js'),
       import('../../lib/recipes/recipe_preview_modal/edit_preview_recipe.js'),

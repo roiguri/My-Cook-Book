@@ -13,7 +13,6 @@ export class PageManager {
   }
 
   async loadPage(pageModule, params = {}) {
-    // Prevent concurrent page loads
     if (this.isLoading) {
       console.warn('Page load already in progress, ignoring new request');
       return;
@@ -22,7 +21,6 @@ export class PageManager {
     this.isLoading = true;
 
     try {
-      // If pageModule is a string, import it dynamically
       let module;
       if (typeof pageModule === 'string') {
         module = await this.importPageModule(pageModule);
@@ -30,18 +28,14 @@ export class PageManager {
         module = pageModule;
       }
 
-      // Validate page module interface
       this.validatePageModule(module);
 
-      // Check if this is the same page with different parameters
       const newPageRoute = params.route || 'unknown';
       const isSamePage = this.currentPage === newPageRoute && this.currentPageModule;
 
       if (isSamePage) {
-        // Same page, different parameters - call handleRouteChange if available
         await this.callPageMethod('handleRouteChange', params);
       } else {
-        // Different page - unload current and load new
         await this.unloadCurrentPage();
         await this.loadNewPage(module, params);
       }
@@ -55,7 +49,6 @@ export class PageManager {
 
   async importPageModule(modulePath) {
     try {
-      // Use dynamic import with webpackChunkName for better chunking
       const module = await import(/* webpackChunkName: "page-[request]" */ modulePath);
       return module.default || module;
     } catch (error) {
@@ -72,7 +65,6 @@ export class PageManager {
       throw new Error('Page module must have a render() function');
     }
 
-    // Optional methods - log warnings if missing
     if (typeof module.mount !== 'function') {
       console.warn('Page module missing mount() method - some functionality may not work');
     }
@@ -84,29 +76,22 @@ export class PageManager {
 
   async loadNewPage(module, params) {
     try {
-      // Store references
       this.currentPageModule = module;
       this.currentPage = params.route || 'unknown';
 
-      // Show loading state
       this.showLoadingState();
 
-      // Load page-specific styles if defined
       await this.loadPageStyles(module, params);
 
-      // Render page content
       const html = await this.callPageMethod('render', params);
       if (typeof html === 'string') {
         this.renderPageContent(html);
       }
 
-      // Update page metadata
       await this.updatePageMetadata(params);
 
-      // Mount page (initialize JavaScript functionality)
       await this.callPageMethod('mount', this.contentContainer, params);
 
-      // Hide loading state
       this.hideLoadingState();
     } catch (error) {
       this.hideLoadingState();
@@ -117,24 +102,19 @@ export class PageManager {
   async unloadCurrentPage() {
     if (this.currentPageModule) {
       try {
-        // Call unmount if available
         await this.callPageMethod('unmount');
       } catch (error) {
         console.error('Error unmounting current page:', error);
       }
 
-      // Unload page-specific styles
       await this.unloadPageStyles();
 
-      // Clear references
       this.currentPageModule = null;
       this.currentPage = null;
     }
 
-    // Clear any loading timeouts
     this.clearLoadingTimeouts();
 
-    // Clear content container
     this.clearContainer();
   }
 
@@ -164,13 +144,11 @@ export class PageManager {
 
   async updatePageMetadata(params) {
     try {
-      // Update page title
       const title = await this.callPageMethod('getTitle', params);
       if (title) {
         this.updatePageTitle(title);
       }
 
-      // Update meta tags
       const meta = await this.callPageMethod('getMeta', params);
       if (meta) {
         this.updatePageMeta(meta);
@@ -189,17 +167,14 @@ export class PageManager {
   updatePageMeta(meta) {
     if (!meta || typeof meta !== 'object') return;
 
-    // Update description
     if (meta.description) {
       this.updateMetaTag('description', meta.description);
     }
 
-    // Update keywords
     if (meta.keywords) {
       this.updateMetaTag('keywords', meta.keywords);
     }
 
-    // Update other meta tags
     Object.keys(meta).forEach((key) => {
       if (key !== 'description' && key !== 'keywords') {
         this.updateMetaTag(key, meta[key]);
@@ -220,7 +195,6 @@ export class PageManager {
   }
 
   showLoadingState() {
-    // Simple loading indicator
     this.contentContainer.innerHTML = `
       <div class="page-loading" style="
         display: flex;
@@ -254,7 +228,6 @@ export class PageManager {
   async handlePageLoadError(error) {
     console.error('Page load error:', error);
 
-    // Show error message to user
     this.contentContainer.innerHTML = `
       <div class="page-error">
         <div class="error-card">
@@ -268,7 +241,6 @@ export class PageManager {
       </div>
     `;
 
-    // Safely set error message and attach event listener
     const errorDetails = this.contentContainer.querySelector('#error-details');
     const reloadButton = this.contentContainer.querySelector('#reload-button');
 
@@ -278,7 +250,6 @@ export class PageManager {
     });
   }
 
-  // Utility methods
   getCurrentPage() {
     return this.currentPage;
   }
@@ -291,13 +262,10 @@ export class PageManager {
     return this.isLoading;
   }
 
-  // Dynamic style loading methods
   async loadPageStyles(module, params) {
     try {
-      // Check if module defines custom styles
       let stylePaths = [];
 
-      // Option 1: Module defines getStylePaths method
       if (typeof module.getStylePaths === 'function') {
         const paths = await module.getStylePaths(params);
         if (Array.isArray(paths)) {
@@ -305,36 +273,30 @@ export class PageManager {
         }
       }
 
-      // Option 2: Module defines stylePath property
       if (module.stylePath && typeof module.stylePath === 'string') {
         stylePaths.push(module.stylePath);
       }
 
-      // Load each style file
       for (const stylePath of stylePaths) {
         await this.loadStyleSheet(stylePath);
       }
     } catch (error) {
       console.warn('Error loading page styles:', error);
-      // Don't fail page load for style errors
     }
   }
 
   async loadStyleSheet(stylePath) {
-    // Check if already loaded
     if (this.loadedStyles.has(stylePath)) {
       return this.loadedStyles.get(stylePath);
     }
 
     return new Promise((resolve, reject) => {
-      // Create link element
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.type = 'text/css';
       link.href = stylePath;
-      link.dataset.pageStyle = 'true'; // Mark as page-specific style
+      link.dataset.pageStyle = 'true';
 
-      // Handle load/error events
       link.onload = () => {
         this.loadedStyles.set(stylePath, link);
         resolve(link);
@@ -344,10 +306,8 @@ export class PageManager {
         reject(new Error(`Failed to load stylesheet: ${stylePath}`));
       };
 
-      // Add to document head
       document.head.appendChild(link);
 
-      // Set timeout to prevent hanging
       setTimeout(() => {
         if (!this.loadedStyles.has(stylePath)) {
           reject(new Error(`Stylesheet load timeout: ${stylePath}`));
@@ -357,7 +317,6 @@ export class PageManager {
   }
 
   async unloadPageStyles() {
-    // Remove all dynamically loaded page styles
     const pageStyleLinks = document.querySelectorAll('link[data-page-style="true"]');
     pageStyleLinks.forEach((link) => {
       if (link.parentNode) {
@@ -365,11 +324,9 @@ export class PageManager {
       }
     });
 
-    // Clear loaded styles map
     this.loadedStyles.clear();
   }
 
-  // Cleanup method
   destroy() {
     this.clearLoadingTimeouts();
     this.unloadCurrentPage();
@@ -377,7 +334,6 @@ export class PageManager {
   }
 }
 
-// Helper function to create page manager instance
 export function createPageManager(containerSelector) {
   const container = document.querySelector(containerSelector);
   if (!container) {

@@ -15,7 +15,6 @@ export class AppRouter {
 
     this.isInitialized = true;
 
-    // Parse initial route or navigate to default
     const initialRoute = this.parseCurrentRoute();
     if (!initialRoute || initialRoute === '/') {
       this.navigate(this.defaultRoute, { replace: true });
@@ -41,7 +40,6 @@ export class AppRouter {
       throw new Error('Route path must be a string and handler must be a function');
     }
 
-    // Normalize path to always start with /
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     this.routes.set(normalizedPath, handler);
   }
@@ -51,21 +49,16 @@ export class AppRouter {
       throw new Error('Navigation path must be a string');
     }
 
-    // Normalize path
     let normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
-    // Extract route path (before query string) for route matching
     const questionMarkIndex = normalizedPath.indexOf('?');
     const routePath =
       questionMarkIndex !== -1 ? normalizedPath.substring(0, questionMarkIndex) : normalizedPath;
 
-    // Set current route before updating URL to prevent duplicate execution
     this.currentRoute = routePath;
 
-    // Update URL using History API
     this.updateURL(normalizedPath, options.replace);
 
-    // Execute handler
     this.executeRoute(routePath);
   }
 
@@ -76,15 +69,12 @@ export class AppRouter {
   getCurrentParams() {
     const params = {};
 
-    // Parse URL parameters from current URL
     const searchParams = new URLSearchParams(window.location.search);
 
-    // Convert URLSearchParams to regular object
     for (const [key, value] of searchParams.entries()) {
       params[key] = value;
     }
 
-    // Also extract path parameters if needed (route/param format)
     if (this.currentRoute) {
       const routeParts = this.currentRoute.split('/').filter(Boolean);
       if (routeParts.length > 1) {
@@ -97,7 +87,6 @@ export class AppRouter {
 
 
   handlePopState() {
-    // Handle browser back/forward buttons
     const newRoute = this.parseCurrentRoute();
 
     if (newRoute === this.currentRoute) return;
@@ -124,12 +113,10 @@ export class AppRouter {
   parseCurrentRoute() {
     let route = window.location.pathname;
 
-    // Ensure route starts with /
     if (!route.startsWith('/')) {
       route = `/${route}`;
     }
 
-    // Default to root if empty
     if (route === '') {
       route = '/';
     }
@@ -138,11 +125,9 @@ export class AppRouter {
   }
 
   executeRoute(path) {
-    // First try exact match
     let handler = this.routes.get(path);
     let params = this.getCurrentParams();
 
-    // If no exact match, try parameterized routes
     if (!handler) {
       const matchResult = this.matchParameterizedRoute(path);
       if (matchResult) {
@@ -164,31 +149,25 @@ export class AppRouter {
     }
   }
 
-  // Match parameterized routes like /recipe/:id with /recipe/123
   matchParameterizedRoute(path) {
     for (const [routePattern, handler] of this.routes.entries()) {
-      // Check if route pattern has parameters (contains :)
       if (routePattern.includes(':')) {
         const pathSegments = path.split('/').filter(Boolean);
         const patternSegments = routePattern.split('/').filter(Boolean);
 
-        // Must have same number of segments
         if (pathSegments.length !== patternSegments.length) continue;
 
         const params = {};
         let isMatch = true;
 
-        // Check each segment
         for (let i = 0; i < patternSegments.length; i++) {
           const patternSegment = patternSegments[i];
           const pathSegment = pathSegments[i];
 
           if (patternSegment.startsWith(':')) {
-            // Parameter segment - extract value
             const paramName = patternSegment.substring(1);
             params[paramName] = pathSegment;
           } else if (patternSegment !== pathSegment) {
-            // Literal segment must match exactly
             isMatch = false;
             break;
           }
@@ -206,12 +185,10 @@ export class AppRouter {
   handleNotFound(path) {
     console.warn(`Route not found: ${path}`);
 
-    // Try to navigate to 404 page if registered
     if (this.routes.has('/404')) {
       this.currentRoute = '/404';
       this.executeRoute('/404');
     } else {
-      // Fallback to default route
       console.warn(`No 404 handler found, redirecting to default route: ${this.defaultRoute}`);
       this.navigate(this.defaultRoute);
     }
@@ -220,33 +197,27 @@ export class AppRouter {
   handleError(error, path) {
     console.error(`Router error for path ${path}:`, error);
 
-    // Try to navigate to error page if registered
     if (this.routes.has('/error')) {
       this.currentRoute = '/error';
       this.executeRoute('/error');
     } else {
-      // Fallback to default route
       this.navigate(this.defaultRoute);
     }
   }
 
-  // Utility method to check if a route is registered
   hasRoute(path) {
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     return this.routes.has(normalizedPath);
   }
 
-  // Get all registered routes
   getRoutes() {
     return Array.from(this.routes.keys());
   }
 
-  // Set default route
   setDefaultRoute(path) {
     this.defaultRoute = path.startsWith('/') ? path : `/${path}`;
   }
 
-  // Build URL with parameters
   buildURL(path, params = {}) {
     let url = path.startsWith('/') ? path : `/${path}`;
 
@@ -261,7 +232,6 @@ export class AppRouter {
     return queryString ? `${url}?${queryString}` : url;
   }
 
-  // Update URL parameters without triggering navigation
   updateParams(params = {}) {
     const currentPath = this.parseCurrentRoute();
     const newURL = this.buildURL(currentPath, params);
@@ -272,12 +242,10 @@ export class AppRouter {
     }
   }
 
-  // Navigate with parameters
   navigateWithParams(path, params = {}) {
     const url = this.buildURL(path, params);
     this.navigate(url);
   }
 }
 
-// Export singleton instance for convenience
 export const router = new AppRouter();

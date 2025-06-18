@@ -1,11 +1,6 @@
 /**
  * FilterSearchBar Component
- * @class
- * @extends HTMLElement
- *
- * @description
- * A search bar component specifically designed for filtering recipes in category/profile pages,
- * providing real-time search functionality.
+ * Search bar component for filtering recipes with real-time functionality.
  */
 class FilterSearchBar extends HTMLElement {
   constructor() {
@@ -111,14 +106,11 @@ class FilterSearchBar extends HTMLElement {
     const input = this.shadowRoot.querySelector('.search-input');
     const clearButton = this.shadowRoot.querySelector('.clear-button');
 
-    // Real-time search as user types
     input.addEventListener('input', (e) => {
       const searchText = e.target.value.trim();
 
-      // Show/hide clear button based on input content
       this.updateClearButtonVisibility();
 
-      // Dispatch custom event for real-time search
       this.dispatchEvent(
         new CustomEvent('search-input', {
           bubbles: true,
@@ -128,13 +120,11 @@ class FilterSearchBar extends HTMLElement {
       );
     });
 
-    // Clear button click handler
     clearButton.addEventListener('click', () => {
       this.clear();
     });
   }
 
-  // Public methods
   getValue() {
     return this.shadowRoot.querySelector('.search-input').value;
   }
@@ -146,7 +136,6 @@ class FilterSearchBar extends HTMLElement {
 
   clear() {
     const input = this.shadowRoot.querySelector('.search-input');
-    // Only dispatch event if value actually changed
     if (input.value !== '') {
       input.value = '';
       this.updateClearButtonVisibility();
@@ -160,7 +149,6 @@ class FilterSearchBar extends HTMLElement {
     }
   }
 
-  // Update clear button visibility based on input content
   updateClearButtonVisibility() {
     const input = this.shadowRoot.querySelector('.search-input');
     const clearButton = this.shadowRoot.querySelector('.clear-button');

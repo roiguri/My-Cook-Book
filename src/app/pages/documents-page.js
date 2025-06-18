@@ -26,18 +26,12 @@ export default {
       return;
     }
 
-    // Import and initialize required components
     await this.importComponents();
-    
-    // Initialize PDF viewer functionality
     this.initializePDFViewer();
-    
-    // Set up auth state listener for logout detection
     this.setupAuthListener();
   },
 
   async unmount() {
-    // Clean up auth listener
     if (this.authUnsubscribe) {
       this.authUnsubscribe();
     }
@@ -55,10 +49,7 @@ export default {
   },
 
   async importComponents() {
-    // Import PDF viewer component
     await import('../../lib/utilities/pdf_viewer/pdf_viewer.js');
-    
-    // Import modal component if needed
     await import('../../lib/utilities/modal/modal.js');
   },
 
@@ -97,8 +88,6 @@ export default {
   },
 
   initializePDFViewer() {
-    // The PDF viewer component will handle its own initialization
-    // when it's added to the DOM via the HTML template
     const pdfViewer = document.querySelector('pdf-viewer');
     if (pdfViewer) {
       console.log('PDF viewer initialized');
