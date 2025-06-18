@@ -34,6 +34,7 @@ import {
   getPlaceholderImageUrl,
 } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { extractIngredientNames } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
+import { initLazyLoading } from '../../../js/utils/lazy-loading.js';
 
 class RecipeCard extends HTMLElement {
   // Define observed attributes
@@ -743,10 +744,9 @@ class RecipeCard extends HTMLElement {
               !this.isCollapsed
                 ? `
                 <img class="recipe-image" 
-                  src="${this._imageUrl}" 
+                  data-src="${this._imageUrl}" 
                   alt="${name}"
-                  onload="this.classList.add('loaded')"
-                  onerror="this.src='/img/placeholder.jpg'; this.classList.add('loaded')">
+                  data-fallback="/img/placeholder.jpg">
             `
                 : ''
             }
@@ -783,6 +783,9 @@ class RecipeCard extends HTMLElement {
     `;
 
     this._setupEventListeners();
+    
+    // Initialize lazy loading for images in this component
+    initLazyLoading(this.shadowRoot);
   }
 
   // TODO: create and extract to favorites-utils file

@@ -1,5 +1,6 @@
 import authService from '../../js/services/auth-service.js';
 import { FirestoreService } from '../../js/services/firestore-service.js';
+import { initLazyLoading } from '../../js/utils/lazy-loading.js';
 
 export default {
   async render() {
@@ -896,6 +897,9 @@ export default {
         cardContainer.appendChild(recipeCard);
         recipeGrid.appendChild(cardContainer);
       });
+      
+      // Initialize lazy loading for any images in the recipe cards
+      initLazyLoading(recipeGrid);
     }
 
     // Remove transitioning class to fade back in

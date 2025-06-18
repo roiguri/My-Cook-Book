@@ -9,6 +9,7 @@
 @import 'components/search_bar.css';
 @import 'components/quote.css';
 @import 'components/spa.css';
+@import 'components/lazy-loading.css';
 
 /* SPA pages */
 @import 'pages/home-spa.css';

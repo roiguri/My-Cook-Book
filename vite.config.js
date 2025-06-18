@@ -15,41 +15,36 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
       },
       output: {
-        manualChunks: {
+        manualChunks: (id) => {
           // Vendor libraries
-          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
-          'vendor-react': ['react', 'react-dom'],
+          if (id.includes('firebase')) {
+            return 'vendor-firebase';
+          }
           
           // Core SPA modules
-          'spa-core': [
-            './src/app/core/router.js',
-            './src/app/core/page-manager.js'
-          ],
+          if (id.includes('/src/app/core/')) {
+            return 'spa-core';
+          }
           
           // Services
-          'services': [
-            './src/js/services/firebase-service.js',
-            './src/js/services/auth-service.js',
-            './src/js/services/firestore-service.js',
-            './src/js/services/storage-service.js'
-          ],
+          if (id.includes('/src/js/services/')) {
+            return 'services';
+          }
           
           // Auth components
-          'auth-components': [
-            './src/lib/auth/auth-controller.js',
-            './src/lib/auth/components/auth-avatar.js',
-            './src/lib/auth/components/auth-content.js',
-            './src/lib/auth/components/login-form.js',
-            './src/lib/auth/components/signup-form.js',
-            './src/lib/auth/components/forgot-password.js',
-            './src/lib/auth/components/user-profile.js'
-          ],
+          if (id.includes('/src/lib/auth/')) {
+            return 'auth-components';
+          }
           
           // Search and navigation
-          'search-nav': [
-            './src/lib/search/header-search-bar/header-search-bar.js',
-            './src/js/navigation-script.js'
-          ]
+          if (id.includes('/src/lib/search/') || id.includes('navigation-script')) {
+            return 'search-nav';
+          }
+          
+          // Page modules - lazy loaded, don't chunk
+          if (id.includes('/src/app/pages/')) {
+            return `page-${id.split('/').pop().replace('.js', '')}`;
+          }
         }
       }
     },
