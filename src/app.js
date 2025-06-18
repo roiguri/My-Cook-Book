@@ -57,9 +57,6 @@ async function initializeSPA() {
     // Register routes
     registerRoutes(router, pageManager);
 
-    // Setup simple navigation interception for categories page
-    setupCategoriesNavigation();
-
     // Initialize router
     router.initialize();
 
@@ -118,37 +115,6 @@ function registerRoutes(router, pageManager) {
   });
 }
 
-function setupCategoriesNavigation() {
-  // Simple click interception for categories page
-  document.addEventListener('click', (event) => {
-    const link = event.target.closest('a[href="#/categories?favorites=true"]');
-    if (!link) return;
-
-    // Check if we're already on categories page
-    const currentRoute = window.spa?.router?.getCurrentRoute();
-    const currentPageModule = window.spa?.pageManager?.getCurrentPageModule();
-    
-    if (currentRoute === '/categories' && currentPageModule?.activateFavoritesFilter) {
-      event.preventDefault();
-      currentPageModule.activateFavoritesFilter();
-    }
-  });
-
-  // Handle regular categories link
-  document.addEventListener('click', (event) => {
-    const link = event.target.closest('a[href="#/categories"]');
-    if (!link) return;
-
-    // Check if we're already on categories page
-    const currentRoute = window.spa?.router?.getCurrentRoute();
-    const currentPageModule = window.spa?.pageManager?.getCurrentPageModule();
-    
-    if (currentRoute === '/categories' && currentPageModule?.resetToAllCategories) {
-      event.preventDefault();
-      currentPageModule.resetToAllCategories();
-    }
-  });
-}
 
 function showInitializationError(error) {
   const contentContainer = document.getElementById('spa-content');

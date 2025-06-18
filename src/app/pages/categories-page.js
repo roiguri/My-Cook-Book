@@ -533,6 +533,9 @@ export default {
 
     // Listen for favorite changes to update cache
     document.addEventListener('recipe-favorite-changed', this.handleFavoriteChanged.bind(this));
+
+    // Setup navigation interception for categories page
+    this.setupNavigationInterception();
   },
 
   // Remove event listeners
@@ -544,6 +547,9 @@ export default {
 
     // Remove favorite change listener
     document.removeEventListener('recipe-favorite-changed', this.handleFavoriteChanged.bind(this));
+
+    // Remove navigation interceptors
+    this.removeNavigationInterception();
   },
 
   // Handle recipe favorite changes to update cache
@@ -672,6 +678,53 @@ export default {
   // Update filter badge based on current active filters state
   updateFilterBadgeFromState() {
     this.updateFilterBadge(this.activeFilters);
+  },
+
+  // Setup navigation interception for smart routing
+  setupNavigationInterception() {
+    // Store bound handlers for proper cleanup
+    this.favoritesNavHandler = (event) => {
+      const link = event.target.closest('a[href="#/categories?favorites=true"]');
+      if (!link) return;
+
+      // Check if we're already on categories page
+      const currentRoute = window.spa?.router?.getCurrentRoute();
+      
+      if (currentRoute === '/categories') {
+        event.preventDefault();
+        this.activateFavoritesFilter();
+      }
+    };
+
+    this.categoriesNavHandler = (event) => {
+      const link = event.target.closest('a[href="#/categories"]');
+      if (!link) return;
+
+      // Check if we're already on categories page
+      const currentRoute = window.spa?.router?.getCurrentRoute();
+      
+      if (currentRoute === '/categories') {
+        event.preventDefault();
+        this.resetToAllCategories();
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener('click', this.favoritesNavHandler);
+    document.addEventListener('click', this.categoriesNavHandler);
+  },
+
+  // Remove navigation interception
+  removeNavigationInterception() {
+    if (this.favoritesNavHandler) {
+      document.removeEventListener('click', this.favoritesNavHandler);
+      this.favoritesNavHandler = null;
+    }
+    
+    if (this.categoriesNavHandler) {
+      document.removeEventListener('click', this.categoriesNavHandler);
+      this.categoriesNavHandler = null;
+    }
   },
 
 
