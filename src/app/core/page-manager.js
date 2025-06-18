@@ -33,11 +33,18 @@ export class PageManager {
       // Validate page module interface
       this.validatePageModule(module);
 
-      // Unload current page first
-      await this.unloadCurrentPage();
+      // Check if this is the same page with different parameters
+      const newPageRoute = params.route || 'unknown';
+      const isSamePage = this.currentPage === newPageRoute && this.currentPageModule;
 
-      // Load new page
-      await this.loadNewPage(module, params);
+      if (isSamePage) {
+        // Same page, different parameters - call handleRouteChange if available
+        await this.callPageMethod('handleRouteChange', params);
+      } else {
+        // Different page - unload current and load new
+        await this.unloadCurrentPage();
+        await this.loadNewPage(module, params);
+      }
     } catch (error) {
       console.error('Error loading page:', error);
       await this.handlePageLoadError(error);

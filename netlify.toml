@@ -1,0 +1,70 @@
+# Netlify Configuration for SPA Deployment
+[build]
+  # Build command - uses npm run build from package.json
+  command = "npm run build"
+  
+  # Directory where the built files are located
+  publish = "dist"
+
+# SPA Settings
+[build.environment]
+  # Node.js version
+  NODE_VERSION = "18"
+
+# Disable automatic plugin detection to avoid esbuild issues
+[build.processing]
+  skip_processing = true
+
+# Disable problematic plugins for local development
+[dev]
+  # Disable automatic plugin installation
+  autoLaunch = false
+
+# Redirects and rewrites for SPA routing
+# Note: The _redirects file in public/ directory will also be processed
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security and performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Service worker and manifest files
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/site.webmanifest.json"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

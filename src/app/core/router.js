@@ -5,14 +5,12 @@ export class AppRouter {
     this.defaultRoute = '/home';
     this.isInitialized = false;
 
-    this.handleHashChange = this.handleHashChange.bind(this);
     this.handlePopState = this.handlePopState.bind(this);
   }
 
   initialize() {
     if (this.isInitialized) return;
 
-    window.addEventListener('hashchange', this.handleHashChange);
     window.addEventListener('popstate', this.handlePopState);
 
     this.isInitialized = true;
@@ -20,8 +18,8 @@ export class AppRouter {
     // Parse initial route or navigate to default
     const initialRoute = this.parseCurrentRoute();
     if (!initialRoute || initialRoute === '/') {
-      this.navigate(this.defaultRoute);
-    } else if (this.routes.has(initialRoute)) {
+      this.navigate(this.defaultRoute, { replace: true });
+    } else if (this.routes.has(initialRoute) || this.matchParameterizedRoute(initialRoute)) {
       this.currentRoute = initialRoute;
       this.executeRoute(initialRoute);
     } else {
@@ -32,7 +30,6 @@ export class AppRouter {
   destroy() {
     if (!this.isInitialized) return;
 
-    window.removeEventListener('hashchange', this.handleHashChange);
     window.removeEventListener('popstate', this.handlePopState);
 
     this.isInitialized = false;
@@ -49,7 +46,7 @@ export class AppRouter {
     this.routes.set(normalizedPath, handler);
   }
 
-  navigate(path) {
+  navigate(path, options = {}) {
     if (typeof path !== 'string') {
       throw new Error('Navigation path must be a string');
     }
@@ -65,8 +62,8 @@ export class AppRouter {
     // Set current route before updating URL to prevent duplicate execution
     this.currentRoute = routePath;
 
-    // Update URL with hash
-    this.updateURL(normalizedPath);
+    // Update URL using History API
+    this.updateURL(normalizedPath, options.replace);
 
     // Execute handler
     this.executeRoute(routePath);
@@ -79,19 +76,11 @@ export class AppRouter {
   getCurrentParams() {
     const params = {};
 
-    // Parse URL parameters from current hash
-    const hash = window.location.hash;
-    if (!hash) return params;
-
-    // Extract query string from hash
-    const questionMarkIndex = hash.indexOf('?');
-    if (questionMarkIndex === -1) return params;
-
-    const queryString = hash.substring(questionMarkIndex + 1);
-    const urlParams = new URLSearchParams(queryString);
+    // Parse URL parameters from current URL
+    const searchParams = new URLSearchParams(window.location.search);
 
     // Convert URLSearchParams to regular object
-    for (const [key, value] of urlParams.entries()) {
+    for (const [key, value] of searchParams.entries()) {
       params[key] = value;
     }
 
@@ -106,7 +95,9 @@ export class AppRouter {
     return params;
   }
 
-  handleHashChange() {
+
+  handlePopState() {
+    // Handle browser back/forward buttons
     const newRoute = this.parseCurrentRoute();
 
     if (newRoute === this.currentRoute) return;
@@ -119,33 +110,28 @@ export class AppRouter {
     }
   }
 
-  handlePopState() {
-    // Handle browser back/forward buttons
-    this.handleHashChange();
-  }
-
-  updateURL(path) {
-    const newHash = `#${path}`;
-    if (window.location.hash !== newHash) {
-      window.location.hash = newHash;
+  updateURL(path, replace = false) {
+    const currentPath = window.location.pathname + window.location.search;
+    if (currentPath !== path) {
+      if (replace) {
+        history.replaceState(null, '', path);
+      } else {
+        history.pushState(null, '', path);
+      }
     }
   }
 
   parseCurrentRoute() {
-    const hash = window.location.hash;
-
-    // Remove # and normalize
-    let route = hash ? hash.substring(1) : '/';
+    let route = window.location.pathname;
 
     // Ensure route starts with /
     if (!route.startsWith('/')) {
       route = `/${route}`;
     }
 
-    // Extract just the path part (before query string)
-    const questionMarkIndex = route.indexOf('?');
-    if (questionMarkIndex !== -1) {
-      route = route.substring(0, questionMarkIndex);
+    // Default to root if empty
+    if (route === '') {
+      route = '/';
     }
 
     return route;
@@ -167,6 +153,7 @@ export class AppRouter {
 
     if (handler) {
       try {
+        console.log(`Executing route ${path} with params:`, params);
         handler(params);
       } catch (error) {
         console.error(`Error executing route handler for ${path}:`, error);
@@ -278,10 +265,10 @@ export class AppRouter {
   updateParams(params = {}) {
     const currentPath = this.parseCurrentRoute();
     const newURL = this.buildURL(currentPath, params);
-    const newHash = `#${newURL}`;
+    const currentFullPath = window.location.pathname + window.location.search;
 
-    if (window.location.hash !== newHash) {
-      history.replaceState(null, null, newHash);
+    if (currentFullPath !== newURL) {
+      history.replaceState(null, '', newURL);
     }
   }
 

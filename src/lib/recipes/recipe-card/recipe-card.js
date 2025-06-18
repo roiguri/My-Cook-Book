@@ -212,6 +212,44 @@ class RecipeCard extends HTMLElement {
       return;
     }
 
+    // For modifier keys and non-left clicks, create and click a temporary link
+    // This ensures proper browser behavior for opening in new tabs
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      if (this.recipeId) {
+        // Create a temporary link element
+        const tempLink = document.createElement('a');
+        tempLink.href = `/recipe/${this.recipeId}`;
+        tempLink.style.display = 'none';
+        document.body.appendChild(tempLink);
+        
+        // Create a new click event with the same properties
+        const linkClickEvent = new MouseEvent('click', {
+          button: event.button,
+          buttons: event.buttons,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+          shiftKey: event.shiftKey,
+          altKey: event.altKey,
+          bubbles: true,
+          cancelable: true
+        });
+        
+        // Click the link (this will be handled by the global navigation script)
+        tempLink.dispatchEvent(linkClickEvent);
+        
+        // Clean up
+        document.body.removeChild(tempLink);
+      }
+      return;
+    }
+
     console.log('Card clicked, emitting event for recipe:', this.recipeId);
 
     // Emit recipe-card-open event for the modal

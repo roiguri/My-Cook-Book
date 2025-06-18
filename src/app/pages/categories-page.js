@@ -38,11 +38,17 @@ export default {
       // Calculate optimal cards per page based on current layout
       await this.updateRecipesPerPage();
 
-      // Update UI based on current state
+      // Update UI based on current state (with small delay to ensure DOM is ready)
+      await new Promise(resolve => setTimeout(resolve, 10));
       this.updateUI();
 
       // Display recipes
       await this.displayCurrentPageRecipes();
+
+      // If favorites filter was set in URL, log for debugging
+      if (params?.favorites === 'true') {
+        console.log('Favorites filter activated from URL parameter');
+      }
     } catch (error) {
       console.error('Error mounting categories page:', error);
       this.handleError(error, 'mount');
@@ -115,7 +121,9 @@ export default {
     }
 
     // Check if favorites filter changed
-    if (favoritesOnly !== this.activeFilters.favoritesOnly) {
+    // IMPORTANT: Only update favorites if it's explicitly set to true in URL params
+    // Don't clear favorites just because it's missing from URL
+    if (favoritesOnly && favoritesOnly !== this.activeFilters.favoritesOnly) {
       this.activeFilters.favoritesOnly = favoritesOnly;
       this.hasActiveFilters = this.checkHasActiveFilters();
       needsReload = true;
@@ -212,8 +220,8 @@ export default {
             const rows = 2;
             const cardsPerPage = actualColumns * rows;
 
-            // Ensure minimum of 2 cards and maximum of 12 cards per page
-            const finalResult = Math.max(2, Math.min(12, cardsPerPage));
+            // Ensure minimum of 2 cards and maximum of 8 cards per page
+            const finalResult = Math.max(2, Math.min(8, cardsPerPage));
 
             console.log(
               `Grid measurement: ${actualColumns} columns × ${rows} rows = ${finalResult} cards per page (container width: ${recipeGrid.offsetWidth}px)`,
@@ -478,11 +486,7 @@ export default {
 
   // Setup event listeners
   setupEventListeners() {
-    // Category tabs navigation
-    const categoryTabs = document.querySelector('.category-tabs ul');
-    if (categoryTabs) {
-      categoryTabs.addEventListener('click', this.handleCategoryClick.bind(this));
-    }
+    // Note: Category tabs navigation is now handled by setupNavigationInterception()
 
     // Window resize listener for dynamic cards per page calculation
     this.resizeHandler = this.debounce(async () => {
@@ -577,9 +581,15 @@ export default {
   // Update active tab styling
   updateActiveTab() {
     const categoryTabs = document.querySelectorAll('.category-tabs a');
+    
+    // Since no tabs start as active, just apply active class to the correct one
     categoryTabs.forEach((tab) => {
       const href = tab.getAttribute('href');
-      const category = href ? href.substring(1) : '';
+      let category = 'all';
+      if (href) {
+        const url = new URL(href, window.location.origin);
+        category = url.searchParams.get('category') || 'all';
+      }
 
       if (category === this.currentCategory) {
         tab.classList.add('active');
@@ -684,8 +694,20 @@ export default {
   setupNavigationInterception() {
     // Store bound handlers for proper cleanup
     this.favoritesNavHandler = (event) => {
-      const link = event.target.closest('a[href="#/categories?favorites=true"]');
+      const link = event.target.closest('a[href="/categories?favorites=true"]');
       if (!link) return;
+
+      // Allow browser default behavior for modifier keys and non-left clicks
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return; // Let browser handle naturally (opens in new tab/window)
+      }
 
       // Check if we're already on categories page
       const currentRoute = window.spa?.router?.getCurrentRoute();
@@ -697,8 +719,20 @@ export default {
     };
 
     this.categoriesNavHandler = (event) => {
-      const link = event.target.closest('a[href="#/categories"]');
+      const link = event.target.closest('a[href="/categories"]');
       if (!link) return;
+
+      // Allow browser default behavior for modifier keys and non-left clicks
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return; // Let browser handle naturally (opens in new tab/window)
+      }
 
       // Check if we're already on categories page
       const currentRoute = window.spa?.router?.getCurrentRoute();
@@ -709,21 +743,65 @@ export default {
       }
     };
 
-    // Add event listeners
-    document.addEventListener('click', this.favoritesNavHandler);
-    document.addEventListener('click', this.categoriesNavHandler);
+    // Category tab navigation with favorites preservation
+    this.categoryTabHandler = async (event) => {
+      const link = event.target.closest('.category-tabs a');
+      if (!link) return;
+
+      // Allow browser default behavior for modifier keys and non-left clicks
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return; // Let browser handle naturally (opens in new tab/window)
+      }
+
+      // Check if we're already on categories page
+      const currentRoute = window.spa?.router?.getCurrentRoute();
+      
+      if (currentRoute === '/categories') {
+        event.preventDefault();
+        
+        const href = link.getAttribute('href');
+        let category = 'all';
+        if (href) {
+          const url = new URL(href, window.location.origin);
+          category = url.searchParams.get('category') || 'all';
+        }
+        
+        // Change category while preserving current filters (including favorites)
+        await this.changeCategory(category);
+        
+        // After changing category, update URL to include all current state
+        this.updateURLSilently();
+      }
+    };
+
+    // Add event listeners with capture phase to run before global navigation handler
+    document.addEventListener('click', this.favoritesNavHandler, true);
+    document.addEventListener('click', this.categoriesNavHandler, true);
+    document.addEventListener('click', this.categoryTabHandler, true);
   },
 
   // Remove navigation interception
   removeNavigationInterception() {
     if (this.favoritesNavHandler) {
-      document.removeEventListener('click', this.favoritesNavHandler);
+      document.removeEventListener('click', this.favoritesNavHandler, true);
       this.favoritesNavHandler = null;
     }
     
     if (this.categoriesNavHandler) {
-      document.removeEventListener('click', this.categoriesNavHandler);
+      document.removeEventListener('click', this.categoriesNavHandler, true);
       this.categoriesNavHandler = null;
+    }
+    
+    if (this.categoryTabHandler) {
+      document.removeEventListener('click', this.categoryTabHandler, true);
+      this.categoryTabHandler = null;
     }
   },
 
@@ -837,13 +915,19 @@ export default {
     if (!link) return;
 
     const href = link.getAttribute('href');
-    const category = href ? href.substring(1) : 'all';
+    // Parse category from clean URL
+    let category = 'all';
+    if (href) {
+      const url = new URL(href, window.location.origin);
+      category = url.searchParams.get('category') || 'all';
+    }
     this.changeCategory(category);
   },
 
-  handleCategoryChange(event) {
+  async handleCategoryChange(event) {
     const category = event.target.value;
-    this.changeCategory(category);
+    await this.changeCategory(category);
+    this.updateURLSilently();
   },
 
   async handleSearchInput(event) {
@@ -1001,7 +1085,8 @@ export default {
     this.currentCategory = category;
     this.currentPage = 1; // Reset to first page
 
-    // Clear search when switching categories (like legacy behavior)
+    // IMPORTANT: Always preserve favorites filter when switching categories
+    // Only clear search, not favorites
     const filterSearchBar = document.querySelector('filter-search-bar');
     if (filterSearchBar && this.currentSearchQuery) {
       filterSearchBar.clear(); // This will trigger the search-input event
@@ -1015,8 +1100,7 @@ export default {
     // Update filter modal counter if modal exists
     this.updateFilterModalCounter();
 
-    // Update URL silently to avoid navigation refresh
-    this.updateURLSilently();
+    // Note: URL update is now handled by the caller to preserve state
   },
 
   async changeSearch(searchQuery) {
