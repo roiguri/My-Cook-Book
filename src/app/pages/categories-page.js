@@ -144,6 +144,13 @@ export default {
     this.displayedRecipes = [];
     this.allRecipes = [];
     this.currentUser = authService.getCurrentUser(); // Track current user for auth changes
+    
+    // Initialize favorites cache
+    this.userFavoritesCache = {
+      userId: null,
+      favorites: [],
+      isLoaded: false
+    };
 
     // Initialize filter state to maintain filters across category changes
     this.activeFilters = {
@@ -324,6 +331,18 @@ export default {
         console.log('User logged out while in favorites view - resetting to all categories');
       }
 
+      // Clear favorites cache on auth state changes
+      if (wasAuthenticated && !isNowAuthenticated) {
+        // User logged out - clear favorites cache
+        this.clearFavoritesCache();
+      } else if (!wasAuthenticated && isNowAuthenticated) {
+        // User logged in - cache will be populated on first use
+        this.clearFavoritesCache(); // Clear any stale cache
+      } else if (wasAuthenticated && isNowAuthenticated && this.currentUser?.uid !== authState.user?.uid) {
+        // Different user logged in - clear cache for previous user
+        this.clearFavoritesCache();
+      }
+
       // Repopulate recipes when the authentication state changes
       await this.loadInitialRecipes();
       this.updateUI();
@@ -447,15 +466,10 @@ export default {
     if (favoritesOnly) {
       const user = authService.getCurrentUser();
       if (user) {
-        try {
-          const userDoc = await FirestoreService.getDocument('users', user.uid);
-          const favoriteRecipeIds = userDoc?.favorites || [];
-          filteredRecipes = filteredRecipes.filter((recipe) =>
-            favoriteRecipeIds.includes(recipe.id),
-          );
-        } catch (error) {
-          console.error('Error fetching user favorites:', error);
-        }
+        const favoriteRecipeIds = await this.getUserFavorites();
+        filteredRecipes = filteredRecipes.filter((recipe) =>
+          favoriteRecipeIds.includes(recipe.id),
+        );
       }
     }
 
@@ -516,6 +530,9 @@ export default {
       filterModal.addEventListener('filter-applied', this.handleFilterApplied.bind(this));
       filterModal.addEventListener('filter-reset', this.handleFilterReset.bind(this));
     }
+
+    // Listen for favorite changes to update cache
+    document.addEventListener('recipe-favorite-changed', this.handleFavoriteChanged.bind(this));
   },
 
   // Remove event listeners
@@ -523,6 +540,23 @@ export default {
     // Remove resize listener
     if (this.resizeHandler) {
       window.removeEventListener('resize', this.resizeHandler);
+    }
+
+    // Remove favorite change listener
+    document.removeEventListener('recipe-favorite-changed', this.handleFavoriteChanged.bind(this));
+  },
+
+  // Handle recipe favorite changes to update cache
+  handleFavoriteChanged(event) {
+    const { recipeId, isFavorite } = event.detail;
+    this.updateFavoritesCache(recipeId, isFavorite);
+    
+    // If we're currently viewing favorites, refresh the display
+    if (this.activeFilters.favoritesOnly) {
+      this.loadInitialRecipes().then(() => {
+        this.displayCurrentPageRecipes();
+        this.updateFilterModalCounter();
+      });
     }
   },
 
@@ -797,13 +831,8 @@ export default {
       if (this.activeFilters.favoritesOnly) {
         const user = authService.getCurrentUser();
         if (user) {
-          try {
-            const userDoc = await FirestoreService.getDocument('users', user.uid);
-            const favoriteRecipeIds = userDoc?.favorites || [];
-            baseRecipes = baseRecipes.filter(recipe => favoriteRecipeIds.includes(recipe.id));
-          } catch (error) {
-            console.error('Error fetching user favorites for filter modal:', error);
-          }
+          const favoriteRecipeIds = await this.getUserFavorites();
+          baseRecipes = baseRecipes.filter(recipe => favoriteRecipeIds.includes(recipe.id));
         }
       }
 
@@ -1007,6 +1036,59 @@ export default {
     const filterModal = document.getElementById('recipe-filter');
     if (filterModal && typeof filterModal.updateRecipeCount === 'function') {
       filterModal.updateRecipeCount(this.displayedRecipes.length);
+    }
+  },
+
+  // Cache management for user favorites
+  async getUserFavorites() {
+    const user = authService.getCurrentUser();
+    if (!user) {
+      return [];
+    }
+
+    // Check if we have cached favorites for this user
+    if (this.userFavoritesCache.userId === user.uid && this.userFavoritesCache.isLoaded) {
+      return this.userFavoritesCache.favorites;
+    }
+
+    // Fetch favorites from Firestore
+    try {
+      const userDoc = await FirestoreService.getDocument('users', user.uid);
+      const favoriteRecipeIds = userDoc?.favorites || [];
+      
+      // Update cache
+      this.userFavoritesCache = {
+        userId: user.uid,
+        favorites: favoriteRecipeIds,
+        isLoaded: true
+      };
+      
+      return favoriteRecipeIds;
+    } catch (error) {
+      console.error('Error fetching user favorites:', error);
+      return [];
+    }
+  },
+
+  // Clear favorites cache (call when user logs out or favorites change)
+  clearFavoritesCache() {
+    this.userFavoritesCache = {
+      userId: null,
+      favorites: [],
+      isLoaded: false
+    };
+  },
+
+  // Update favorites cache when a recipe is added/removed from favorites
+  updateFavoritesCache(recipeId, isAdding) {
+    if (this.userFavoritesCache.isLoaded) {
+      if (isAdding) {
+        if (!this.userFavoritesCache.favorites.includes(recipeId)) {
+          this.userFavoritesCache.favorites.push(recipeId);
+        }
+      } else {
+        this.userFavoritesCache.favorites = this.userFavoritesCache.favorites.filter(id => id !== recipeId);
+      }
     }
   },
 

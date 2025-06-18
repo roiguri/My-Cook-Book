@@ -767,9 +767,12 @@ class RecipeCard extends HTMLElement {
       const user = authService.getCurrentUser();
       const userId = user?.uid;
       if (!userId) return; // No user logged in
+      
+      const wasFavorite = this._isFavorite();
       const db = getFirestoreInstance();
       const userDocRef = doc(db, 'users', userId);
-      if (this._isFavorite()) {
+      
+      if (wasFavorite) {
         // Remove from favorites
         await updateDoc(userDocRef, {
           favorites: arrayRemove(this.recipeId),
@@ -782,6 +785,27 @@ class RecipeCard extends HTMLElement {
         });
         this._userFavorites.add(this.recipeId);
       }
+      
+      // Dispatch event to notify other components about the favorite change
+      this.dispatchEvent(new CustomEvent('recipe-favorite-changed', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          recipeId: this.recipeId,
+          isFavorite: !wasFavorite,
+          userId: userId
+        }
+      }));
+      
+      // Also dispatch to document for global listeners
+      document.dispatchEvent(new CustomEvent('recipe-favorite-changed', {
+        detail: {
+          recipeId: this.recipeId,
+          isFavorite: !wasFavorite,
+          userId: userId
+        }
+      }));
+      
       this._renderRecipe(); // Re-render to reflect the change
     } catch (error) {
       console.error('Error toggling favorite:', error);
