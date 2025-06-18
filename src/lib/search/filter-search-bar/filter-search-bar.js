@@ -38,7 +38,7 @@ class FilterSearchBar extends HTMLElement {
         .search-input {
           width: 100%;
           padding: 10px;
-          padding-left: 40px; /* Space for the search icon */
+          padding-left: 70px; /* Space for the search icon and clear button */
           border: 2px solid var(--border-color, #ccc);
           border-radius: 4px;
           font-size: var(--size-body);
@@ -60,6 +60,33 @@ class FilterSearchBar extends HTMLElement {
           font-size: var(--size-icon);
         }
 
+        .clear-button {
+          position: absolute;
+          left: 40px; /* Position next to search icon */
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: var(--text-color);
+          cursor: pointer;
+          font-size: 16px;
+          padding: 4px;
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          display: none; /* Hidden by default */
+          align-items: center;
+          justify-content: center;
+        }
+
+        .clear-button:hover {
+          background-color: var(--border-color, #e0e0e0);
+        }
+
+        .clear-button.visible {
+          display: flex;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
           .search-container {
@@ -75,16 +102,21 @@ class FilterSearchBar extends HTMLElement {
           placeholder="${placeholder}"
           aria-label="חיפוש מתכונים">
         <span class="search-icon">🔍</span>
+        <button class="clear-button" type="button" aria-label="נקה חיפוש">×</button>
       </div>
     `;
   }
 
   setupEventListeners() {
     const input = this.shadowRoot.querySelector('.search-input');
+    const clearButton = this.shadowRoot.querySelector('.clear-button');
 
     // Real-time search as user types
     input.addEventListener('input', (e) => {
       const searchText = e.target.value.trim();
+
+      // Show/hide clear button based on input content
+      this.updateClearButtonVisibility();
 
       // Dispatch custom event for real-time search
       this.dispatchEvent(
@@ -95,6 +127,11 @@ class FilterSearchBar extends HTMLElement {
         }),
       );
     });
+
+    // Clear button click handler
+    clearButton.addEventListener('click', () => {
+      this.clear();
+    });
   }
 
   // Public methods
@@ -104,6 +141,7 @@ class FilterSearchBar extends HTMLElement {
 
   setValue(text) {
     this.shadowRoot.querySelector('.search-input').value = text;
+    this.updateClearButtonVisibility();
   }
 
   clear() {
@@ -111,6 +149,7 @@ class FilterSearchBar extends HTMLElement {
     // Only dispatch event if value actually changed
     if (input.value !== '') {
       input.value = '';
+      this.updateClearButtonVisibility();
       this.dispatchEvent(
         new CustomEvent('search-input', {
           bubbles: true,
@@ -118,6 +157,18 @@ class FilterSearchBar extends HTMLElement {
           detail: { searchText: '' },
         }),
       );
+    }
+  }
+
+  // Update clear button visibility based on input content
+  updateClearButtonVisibility() {
+    const input = this.shadowRoot.querySelector('.search-input');
+    const clearButton = this.shadowRoot.querySelector('.clear-button');
+    
+    if (input.value.trim().length > 0) {
+      clearButton.classList.add('visible');
+    } else {
+      clearButton.classList.remove('visible');
     }
   }
 }

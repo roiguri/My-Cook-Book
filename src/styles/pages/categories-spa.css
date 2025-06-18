@@ -258,6 +258,11 @@
     min-width: 0;
   }
 
+  /* Hide category header on mobile */
+  .spa-content .categories-page #category-header {
+    display: none;
+  }
+
   .spa-content .categories-page .filters-container {
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto;

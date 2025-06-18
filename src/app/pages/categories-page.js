@@ -1085,14 +1085,6 @@ export default {
     this.currentCategory = category;
     this.currentPage = 1; // Reset to first page
 
-    // IMPORTANT: Always preserve favorites filter when switching categories
-    // Only clear search, not favorites
-    const filterSearchBar = document.querySelector('filter-search-bar');
-    if (filterSearchBar && this.currentSearchQuery) {
-      filterSearchBar.clear(); // This will trigger the search-input event
-      this.currentSearchQuery = ''; // Reset search query
-    }
-
     await this.loadInitialRecipes();
     this.updateUI();
     await this.displayCurrentPageRecipes();

@@ -145,6 +145,9 @@ class HeaderSearchBar extends HTMLElement {
       searchParams.set('q', searchText);
       const searchUrl = `/categories?${searchParams.toString()}`;
       window.spa.router.navigate(searchUrl);
+      
+      // Clear the navigation search input after navigation
+      this.clear();
     } else {
       // Fallback to legacy navigation
       const searchParams = new URLSearchParams();
@@ -160,6 +163,7 @@ class HeaderSearchBar extends HTMLElement {
 
       // Navigate to categories page with search parameter
       window.location.href = searchUrl;
+      // Note: for legacy navigation, page will reload so clearing isn't needed
     }
   }
 
