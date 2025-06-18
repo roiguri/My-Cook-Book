@@ -121,7 +121,8 @@
     0 6px 4px rgba(0, 0, 0, 0.2);
 }
 
-.btn-3d:active {
+.btn-3d:active,
+.btn-3d.active {
   background-color: var(--primary-dark);
   transform: translateY(0);
   box-shadow:

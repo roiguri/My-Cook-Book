@@ -638,6 +638,11 @@ export default {
     this.updateUI();
     await this.displayCurrentPageRecipes();
     
+    // Update navigation active state
+    if (window.updateActiveNavigation) {
+      setTimeout(window.updateActiveNavigation, 0);
+    }
+    
         // Update filter modal counter if modal exists
     this.updateFilterModalCounter();
 
@@ -669,6 +674,11 @@ export default {
     await this.loadInitialRecipes();
     this.updateUI();
     await this.displayCurrentPageRecipes();
+
+    // Update navigation active state
+    if (window.updateActiveNavigation) {
+      setTimeout(window.updateActiveNavigation, 0);
+    }
 
     // Update filter modal counter
     this.updateFilterModalCounter();
@@ -871,6 +881,12 @@ export default {
           // Use SPA navigation
           if (window.spa?.router) {
             window.spa.router.navigate(`/recipe/${recipeId}`);
+            // Update navigation active state after navigation
+            setTimeout(() => {
+              if (typeof window.updateActiveNavigation === 'function') {
+                window.updateActiveNavigation();
+              }
+            }, 100);
           } else {
             // Fallback to traditional navigation
             window.location.href = `${import.meta.env.BASE_URL}pages/recipe-page.html?id=${recipeId}`;
@@ -1024,6 +1040,11 @@ export default {
     // Update URL to reflect favorites filter
     this.updateURLSilently();
 
+    // Update navigation active state
+    if (window.updateActiveNavigation) {
+      setTimeout(window.updateActiveNavigation, 0);
+    }
+
     // Re-render the recipe grid
     await this.displayCurrentPageRecipes();
   },
@@ -1053,6 +1074,11 @@ export default {
 
     // Update URL to reflect cleared favorites filter
     this.updateURLSilently();
+
+    // Update navigation active state
+    if (window.updateActiveNavigation) {
+      setTimeout(window.updateActiveNavigation, 0);
+    }
 
     // Re-render the recipe grid
     await this.displayCurrentPageRecipes();

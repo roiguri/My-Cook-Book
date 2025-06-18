@@ -123,6 +123,12 @@ export default {
         // Use SPA navigation instead of window.location
         if (window.spa?.router) {
           window.spa.router.navigate(`/recipe/${recipeId}`);
+          // Update navigation active state after navigation
+          setTimeout(() => {
+            if (typeof window.updateActiveNavigation === 'function') {
+              window.updateActiveNavigation();
+            }
+          }, 100);
         } else {
           // Fallback to traditional navigation
           window.location.href = `${import.meta.env.BASE_URL}pages/recipe-page.html?id=${recipeId}`;
