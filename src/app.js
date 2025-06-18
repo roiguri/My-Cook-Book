@@ -110,7 +110,7 @@ function registerRoutes(router, pageManager) {
   router.registerRoute('/dashboard', async (params) => {
     await pageManager.loadPage('/src/app/pages/manager-dashboard-page.js', {
       ...params,
-      route: '/manager-dashboard',
+      route: '/dashboard',
     });
   });
 }
