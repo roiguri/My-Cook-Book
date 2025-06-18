@@ -107,7 +107,7 @@ export default {
             }
           }, 100);
         } else {
-          window.location.href = `${import.meta.env.BASE_URL}pages/recipe-page.html?id=${recipeId}`;
+          window.location.href = `${import.meta.env.BASE_URL}recipe/${recipeId}`;
         }
       });
 
