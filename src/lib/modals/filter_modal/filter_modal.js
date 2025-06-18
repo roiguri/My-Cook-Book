@@ -93,6 +93,7 @@ class RecipeFilterComponent extends HTMLElement {
         difficulty: '',
         mainIngredient: '',
         tags: [],
+        favoritesOnly: false,
       },
       availableFilters: {
         mainIngredients: [],
@@ -109,7 +110,9 @@ class RecipeFilterComponent extends HTMLElement {
       'difficulty-filter',
       'ingredient-filter',
       'tags-filter',
+      'favorites-filter',
       'current-filters',
+      'recipes',
     ];
   }
 
@@ -120,6 +123,30 @@ class RecipeFilterComponent extends HTMLElement {
     }
     this.render();
     this.setupEventListeners();
+    this.setupAuthObserver();
+  }
+
+  disconnectedCallback() {
+    // Clean up auth observer
+    if (this.authUnsubscribe) {
+      this.authUnsubscribe();
+    }
+  }
+
+  setupAuthObserver() {
+    // Listen for auth state changes to update UI accordingly
+    this.authUnsubscribe = authService.addAuthObserver(async (authState) => {
+      // Re-render to show/hide favorites filter based on auth state
+      this.render();
+      this.setupEventListeners();
+      
+      // If user logged out while modal is open, update data
+      if (!authState.user) {
+        // Clear favorites filter state since user is no longer authenticated
+        this.state.filters.favoritesOnly = false;
+        this.updateUI();
+      }
+    });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -128,7 +155,11 @@ class RecipeFilterComponent extends HTMLElement {
     switch (name) {
       case 'category':
         this.state.category = newValue;
-        this.loadInitialData();
+        // Only reload data if modal is not being programmatically configured
+        // If recipes attribute is also being set, let that handle the data loading
+        if (!this.hasAttribute('recipes')) {
+          this.loadInitialData();
+        }
         break;
       case 'current-filters':
         if (newValue) {
@@ -139,11 +170,24 @@ class RecipeFilterComponent extends HTMLElement {
               difficulty: filters.difficulty || '',
               mainIngredient: filters.mainIngredient || '',
               tags: filters.tags || [],
+              favoritesOnly: filters.favoritesOnly || false,
             };
             // Update UI to reflect current filters
             this.updateUI();
+            // Recalculate matching count with current filters
+            this.updateMatchingCount();
           } catch (error) {
             console.warn('Error parsing current-filters attribute:', error);
+          }
+        }
+        break;
+      case 'recipes':
+        if (newValue) {
+          try {
+            const recipes = JSON.parse(newValue);
+            this.setInitialRecipes(recipes);
+          } catch (error) {
+            console.warn('Error parsing recipes attribute:', error);
           }
         }
         break;
@@ -309,6 +353,27 @@ class RecipeFilterComponent extends HTMLElement {
         font-size: 0.9rem;
       }
 
+      .favorites-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+
+      .favorites-checkbox input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+      }
+
+      .checkmark {
+        display: none;
+      }
+
+      .checkbox-label {
+        color: #333;
+      }
+
       /* Custom scrollbar for better visual */
       ::-webkit-scrollbar {
         width: 6px;
@@ -372,12 +437,14 @@ class RecipeFilterComponent extends HTMLElement {
   }
 
   renderFilterGrid() {
+    const user = authService.getCurrentUser();
     return `
       <div class="filter-grid">
         ${this.getAttribute('cooking-time-filter') !== 'false' ? this.renderCookingTimeFilter() : ''}
         ${this.getAttribute('difficulty-filter') !== 'false' ? this.renderDifficultyFilter() : ''}
         ${this.getAttribute('ingredient-filter') !== 'false' ? this.renderIngredientFilter() : ''}
         ${this.getAttribute('tags-filter') !== 'false' ? this.renderTagsFilter() : ''}
+        ${user && this.getAttribute('favorites-filter') !== 'false' ? this.renderFavoritesFilter() : ''}
       </div>
     `;
   }
@@ -483,6 +550,25 @@ class RecipeFilterComponent extends HTMLElement {
     `;
   }
 
+  renderFavoritesFilter() {
+    return `
+      <div class="filter-section">
+        <h3>מועדפים</h3>
+        <div class="filter-content">
+          <label class="favorites-checkbox">
+            <input 
+              type="checkbox" 
+              id="favorites-only"
+              ${this.state.filters.favoritesOnly ? 'checked' : ''}
+            >
+            <span class="checkmark"></span>
+            <span class="checkbox-label">הצג רק מועדפים</span>
+          </label>
+        </div>
+      </div>
+    `;
+  }
+
   renderFooter() {
     return `
       <div class="filter-footer">
@@ -508,6 +594,12 @@ class RecipeFilterComponent extends HTMLElement {
         select.addEventListener('change', () => this.handleFilterChange());
       }
     });
+
+    // Favorites checkbox listener
+    const favoritesCheckbox = this.shadowRoot.getElementById('favorites-only');
+    if (favoritesCheckbox) {
+      favoritesCheckbox.addEventListener('change', () => this.handleFilterChange());
+    }
 
     // Tag search
     const tagSearch = this.shadowRoot.getElementById('tag-search');
@@ -584,7 +676,7 @@ class RecipeFilterComponent extends HTMLElement {
         const recipes = await Promise.all(
           favoriteRecipeIds.map(async (recipeId) => {
             return await FirestoreService.getDocument('recipes', recipeId);
-          })
+          }),
         );
         this.state.availableFilters.mainIngredients = [
           ...new Set(
@@ -643,12 +735,14 @@ class RecipeFilterComponent extends HTMLElement {
     const cookingTime = this.shadowRoot.getElementById('cooking-time')?.value;
     const difficulty = this.shadowRoot.getElementById('difficulty')?.value;
     const mainIngredient = this.shadowRoot.getElementById('main-ingredient')?.value;
+    const favoritesOnly = this.shadowRoot.getElementById('favorites-only')?.checked || false;
 
     this.state.filters = {
       ...this.state.filters,
       cookingTime,
       difficulty,
       mainIngredient,
+      favoritesOnly,
     };
   }
 
@@ -667,7 +761,7 @@ class RecipeFilterComponent extends HTMLElement {
         recipes = await Promise.all(
           favoriteRecipeIds.map(async (recipeId) => {
             return await FirestoreService.getDocument('recipes', recipeId);
-          })
+          }),
         );
       } else {
         const queryParams = {
@@ -678,7 +772,7 @@ class RecipeFilterComponent extends HTMLElement {
         }
         recipes = await FirestoreService.queryDocuments('recipes', queryParams);
       }
-      recipes = this.applyFiltersToRecipes(recipes);
+      recipes = await this.applyFiltersToRecipes(recipes);
       this.state.matchingCount = recipes.length;
     } catch (error) {
       console.error('Error updating matching count:', error);
@@ -688,10 +782,10 @@ class RecipeFilterComponent extends HTMLElement {
     }
   }
 
-  applyFiltersToRecipes(recipes) {
-    const { cookingTime, difficulty, mainIngredient, tags } = this.state.filters;
+  async applyFiltersToRecipes(recipes) {
+    const { cookingTime, difficulty, mainIngredient, tags, favoritesOnly } = this.state.filters;
 
-    return recipes.filter((recipe) => {
+    let filteredRecipes = recipes.filter((recipe) => {
       // Cooking time filter
       if (cookingTime) {
         const totalTime = recipe.prepTime + recipe.waitTime;
@@ -714,6 +808,24 @@ class RecipeFilterComponent extends HTMLElement {
 
       return true;
     });
+
+    // Favorites filter (only for authenticated users)
+    if (favoritesOnly) {
+      const user = authService.getCurrentUser();
+      if (user) {
+        try {
+          const userDoc = await FirestoreService.getDocument('users', user.uid);
+          const favoriteRecipeIds = userDoc?.favorites || [];
+          filteredRecipes = filteredRecipes.filter((recipe) =>
+            favoriteRecipeIds.includes(recipe.id),
+          );
+        } catch (error) {
+          console.error('Error fetching user favorites:', error);
+        }
+      }
+    }
+
+    return filteredRecipes;
   }
 
   async applyFilters() {
@@ -731,7 +843,7 @@ class RecipeFilterComponent extends HTMLElement {
         recipes = await Promise.all(
           favoriteRecipeIds.map(async (recipeId) => {
             return await FirestoreService.getDocument('recipes', recipeId);
-          })
+          }),
         );
       } else {
         const queryParams = {
@@ -742,7 +854,7 @@ class RecipeFilterComponent extends HTMLElement {
         }
         recipes = await FirestoreService.queryDocuments('recipes', queryParams);
       }
-      recipes = this.applyFiltersToRecipes(recipes);
+      recipes = await this.applyFiltersToRecipes(recipes);
       this.dispatchEvent(
         new CustomEvent('filter-applied', {
           bubbles: true,
@@ -769,6 +881,7 @@ class RecipeFilterComponent extends HTMLElement {
       difficulty: '',
       mainIngredient: '',
       tags: [],
+      favoritesOnly: false,
     };
 
     // Reset UI elements
@@ -777,6 +890,10 @@ class RecipeFilterComponent extends HTMLElement {
       const select = this.shadowRoot.getElementById(id);
       if (select) select.value = '';
     });
+
+    // Clear favorites checkbox
+    const favoritesCheckbox = this.shadowRoot.getElementById('favorites-only');
+    if (favoritesCheckbox) favoritesCheckbox.checked = false;
 
     // Clear tag search
     const tagSearch = this.shadowRoot.getElementById('tag-search');
@@ -830,7 +947,7 @@ class RecipeFilterComponent extends HTMLElement {
   }
 
   updateFilterValues() {
-    const { cookingTime, difficulty, mainIngredient } = this.state.filters;
+    const { cookingTime, difficulty, mainIngredient, favoritesOnly } = this.state.filters;
 
     const selects = {
       'cooking-time': cookingTime,
@@ -844,6 +961,12 @@ class RecipeFilterComponent extends HTMLElement {
         select.value = value;
       }
     });
+
+    // Update favorites checkbox
+    const favoritesCheckbox = this.shadowRoot.getElementById('favorites-only');
+    if (favoritesCheckbox) {
+      favoritesCheckbox.checked = favoritesOnly;
+    }
   }
 
   updateTagsDisplay() {
@@ -926,6 +1049,12 @@ class RecipeFilterComponent extends HTMLElement {
   close() {
     const modal = this.shadowRoot.querySelector('custom-modal');
     if (modal) modal.close();
+  }
+
+  // Update the recipe counter from external source (e.g., categories page)
+  updateRecipeCount(count) {
+    this.state.matchingCount = count;
+    this.updateCounter();
   }
 }
 

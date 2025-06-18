@@ -117,21 +117,17 @@ class AuthController extends HTMLElement {
       return item;
     };
 
-    // Add Favorites tab for all logged in users
-    navMenu.appendChild(createNavItem('profile-tab', 'מועדפים', '/pages/profile.html'));
+    // Add Favorites tab for all logged in users - redirect to categories page with favorites filter
+    navMenu.appendChild(createNavItem('profile-tab', 'מועדפים', '#/categories?favorites=true'));
 
     // Add Grandmother's Recipes for approved users and managers
     if (roles.isApproved || roles.isManager) {
-      navMenu.appendChild(
-        createNavItem('documents-tab', 'המטעמים של סבתא', '#/grandmas-cooking'),
-      );
+      navMenu.appendChild(createNavItem('documents-tab', 'המטעמים של סבתא', '#/grandmas-cooking'));
     }
 
     // Add Management Interface for managers
     if (roles.isManager) {
-      navMenu.appendChild(
-        createNavItem('dashboard-tab', 'ממשק ניהול', '#/dashboard'),
-      );
+      navMenu.appendChild(createNavItem('dashboard-tab', 'ממשק ניהול', '#/dashboard'));
     }
   }
 

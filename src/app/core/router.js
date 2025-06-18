@@ -4,19 +4,19 @@ export class AppRouter {
     this.currentRoute = null;
     this.defaultRoute = '/home';
     this.isInitialized = false;
-    
+
     this.handleHashChange = this.handleHashChange.bind(this);
     this.handlePopState = this.handlePopState.bind(this);
   }
 
   initialize() {
     if (this.isInitialized) return;
-    
+
     window.addEventListener('hashchange', this.handleHashChange);
     window.addEventListener('popstate', this.handlePopState);
-    
+
     this.isInitialized = true;
-    
+
     // Parse initial route or navigate to default
     const initialRoute = this.parseCurrentRoute();
     if (!initialRoute || initialRoute === '/') {
@@ -31,10 +31,10 @@ export class AppRouter {
 
   destroy() {
     if (!this.isInitialized) return;
-    
+
     window.removeEventListener('hashchange', this.handleHashChange);
     window.removeEventListener('popstate', this.handlePopState);
-    
+
     this.isInitialized = false;
     this.currentRoute = null;
   }
@@ -43,7 +43,7 @@ export class AppRouter {
     if (typeof path !== 'string' || typeof handler !== 'function') {
       throw new Error('Route path must be a string and handler must be a function');
     }
-    
+
     // Normalize path to always start with /
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     this.routes.set(normalizedPath, handler);
@@ -53,20 +53,21 @@ export class AppRouter {
     if (typeof path !== 'string') {
       throw new Error('Navigation path must be a string');
     }
-    
+
     // Normalize path
     let normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    
+
     // Extract route path (before query string) for route matching
     const questionMarkIndex = normalizedPath.indexOf('?');
-    const routePath = questionMarkIndex !== -1 ? normalizedPath.substring(0, questionMarkIndex) : normalizedPath;
-    
+    const routePath =
+      questionMarkIndex !== -1 ? normalizedPath.substring(0, questionMarkIndex) : normalizedPath;
+
     // Set current route before updating URL to prevent duplicate execution
     this.currentRoute = routePath;
-    
+
     // Update URL with hash
     this.updateURL(normalizedPath);
-    
+
     // Execute handler
     this.executeRoute(routePath);
   }
@@ -77,23 +78,23 @@ export class AppRouter {
 
   getCurrentParams() {
     const params = {};
-    
+
     // Parse URL parameters from current hash
     const hash = window.location.hash;
     if (!hash) return params;
-    
+
     // Extract query string from hash
     const questionMarkIndex = hash.indexOf('?');
     if (questionMarkIndex === -1) return params;
-    
+
     const queryString = hash.substring(questionMarkIndex + 1);
     const urlParams = new URLSearchParams(queryString);
-    
+
     // Convert URLSearchParams to regular object
     for (const [key, value] of urlParams.entries()) {
       params[key] = value;
     }
-    
+
     // Also extract path parameters if needed (route/param format)
     if (this.currentRoute) {
       const routeParts = this.currentRoute.split('/').filter(Boolean);
@@ -101,15 +102,15 @@ export class AppRouter {
         params.id = routeParts[1];
       }
     }
-    
+
     return params;
   }
 
   handleHashChange() {
     const newRoute = this.parseCurrentRoute();
-    
+
     if (newRoute === this.currentRoute) return;
-    
+
     if (this.routes.has(newRoute)) {
       this.currentRoute = newRoute;
       this.executeRoute(newRoute);
@@ -132,21 +133,21 @@ export class AppRouter {
 
   parseCurrentRoute() {
     const hash = window.location.hash;
-    
+
     // Remove # and normalize
     let route = hash ? hash.substring(1) : '/';
-    
+
     // Ensure route starts with /
     if (!route.startsWith('/')) {
       route = `/${route}`;
     }
-    
+
     // Extract just the path part (before query string)
     const questionMarkIndex = route.indexOf('?');
     if (questionMarkIndex !== -1) {
       route = route.substring(0, questionMarkIndex);
     }
-    
+
     return route;
   }
 
@@ -154,7 +155,7 @@ export class AppRouter {
     // First try exact match
     let handler = this.routes.get(path);
     let params = this.getCurrentParams();
-    
+
     // If no exact match, try parameterized routes
     if (!handler) {
       const matchResult = this.matchParameterizedRoute(path);
@@ -163,7 +164,7 @@ export class AppRouter {
         params = { ...params, ...matchResult.params };
       }
     }
-    
+
     if (handler) {
       try {
         handler(params);
@@ -183,18 +184,18 @@ export class AppRouter {
       if (routePattern.includes(':')) {
         const pathSegments = path.split('/').filter(Boolean);
         const patternSegments = routePattern.split('/').filter(Boolean);
-        
+
         // Must have same number of segments
         if (pathSegments.length !== patternSegments.length) continue;
-        
+
         const params = {};
         let isMatch = true;
-        
+
         // Check each segment
         for (let i = 0; i < patternSegments.length; i++) {
           const patternSegment = patternSegments[i];
           const pathSegment = pathSegments[i];
-          
+
           if (patternSegment.startsWith(':')) {
             // Parameter segment - extract value
             const paramName = patternSegment.substring(1);
@@ -205,19 +206,19 @@ export class AppRouter {
             break;
           }
         }
-        
+
         if (isMatch) {
           return { handler, params };
         }
       }
     }
-    
+
     return null;
   }
 
   handleNotFound(path) {
     console.warn(`Route not found: ${path}`);
-    
+
     // Try to navigate to 404 page if registered
     if (this.routes.has('/404')) {
       this.currentRoute = '/404';
@@ -231,7 +232,7 @@ export class AppRouter {
 
   handleError(error, path) {
     console.error(`Router error for path ${path}:`, error);
-    
+
     // Try to navigate to error page if registered
     if (this.routes.has('/error')) {
       this.currentRoute = '/error';
@@ -261,14 +262,14 @@ export class AppRouter {
   // Build URL with parameters
   buildURL(path, params = {}) {
     let url = path.startsWith('/') ? path : `/${path}`;
-    
+
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
       if (value !== null && value !== undefined && value !== '') {
         searchParams.set(key, value);
       }
     }
-    
+
     const queryString = searchParams.toString();
     return queryString ? `${url}?${queryString}` : url;
   }
@@ -278,7 +279,7 @@ export class AppRouter {
     const currentPath = this.parseCurrentRoute();
     const newURL = this.buildURL(currentPath, params);
     const newHash = `#${newURL}`;
-    
+
     if (window.location.hash !== newHash) {
       history.replaceState(null, null, newHash);
     }

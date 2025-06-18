@@ -12,13 +12,13 @@ export default {
 
   async mount(container) {
     console.log('Home page: mount() called');
-    
+
     // Import required components
     await this.importComponents();
-    
+
     // Load featured recipes
     await this.loadFeaturedRecipes();
-    
+
     // Setup category navigation (already using hash links)
     this.setupCategoryNavigation();
   },
@@ -35,8 +35,9 @@ export default {
 
   getMeta() {
     return {
-      description: 'Discover homemade goodness in every bite. Explore our collection of recipes across all categories.',
-      keywords: 'recipes, cooking, homemade, kitchen, food'
+      description:
+        'Discover homemade goodness in every bite. Explore our collection of recipes across all categories.',
+      keywords: 'recipes, cooking, homemade, kitchen, food',
     };
   },
 
@@ -45,7 +46,7 @@ export default {
     try {
       await Promise.all([
         import('../../lib/recipes/recipe-card/recipe-card.js'),
-        import('../../lib/utilities/element-scroller/element-scroller.js')
+        import('../../lib/utilities/element-scroller/element-scroller.js'),
       ]);
     } catch (error) {
       console.error('Error importing home page components:', error);
@@ -66,14 +67,14 @@ export default {
     messageContainer.dir = 'rtl';
     messageContainer.style.fontSize = 'var(--size-header2)';
     sectionContainer.insertBefore(messageContainer, featuredRecipesGrid);
-    
+
     // Add loading message
     messageContainer.innerHTML = 'טוען את המתכונים הכי חדשים...';
 
     // Get the recipes container
     const elementScroller = document.querySelector('element-scroller');
     const recipesContainer = elementScroller?.querySelector('[slot="items"]');
-    
+
     if (!recipesContainer) {
       console.warn('Recipes container not found');
       messageContainer.innerHTML = 'Error loading featured recipes.';
@@ -84,7 +85,7 @@ export default {
       // Get most recent approved recipes
       const queryParams = { where: [['approved', '==', true]] };
       const recipes = await FirestoreService.queryDocuments('recipes', queryParams);
-      
+
       if (!recipes.length) {
         console.log('No matching documents.');
         messageContainer.innerHTML = 'לא נמצאו מתכונים מומלצים.';
@@ -100,7 +101,7 @@ export default {
 
       // Take only first 3
       const recentRecipes = recipes.slice(0, 3);
-      
+
       // Remove loading message
       messageContainer.remove();
 
@@ -133,7 +134,6 @@ export default {
           scroller.handleResize();
         }, 100);
       }
-
     } catch (error) {
       console.error('Error fetching featured recipes:', error);
       messageContainer.innerHTML = 'Error loading featured recipes. Please try again later.';
@@ -151,5 +151,5 @@ export default {
   cleanup() {
     // Remove any global event listeners if we had any
     // For now, nothing specific to clean up
-  }
+  },
 };

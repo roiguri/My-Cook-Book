@@ -37,20 +37,19 @@ export default {
    */
   async mount(container, params) {
     console.log('[Page Name]: mount() called with params:', params);
-    
+
     try {
       // Import required components
       await this.importComponents();
-      
+
       // Load page data
       await this.loadData(params);
-      
+
       // Setup event listeners
       this.setupEventListeners();
-      
+
       // Initialize any third-party libraries
       this.initializeLibraries();
-      
     } catch (error) {
       console.error('Error mounting [page-name]:', error);
       throw error;
@@ -62,20 +61,19 @@ export default {
    */
   async unmount() {
     console.log('[Page Name]: unmount() called');
-    
+
     try {
       // Remove event listeners
       this.removeEventListeners();
-      
+
       // Cancel any pending requests
       this.cancelRequests();
-      
+
       // Clear timers/intervals
       this.clearTimers();
-      
+
       // Cleanup third-party libraries
       this.cleanupLibraries();
-      
     } catch (error) {
       console.error('Error unmounting [page-name]:', error);
     }
@@ -109,9 +107,7 @@ export default {
    * @returns {Promise<string[]>} Array of CSS file paths
    */
   async getStylePaths(params) {
-    return [
-      '/src/styles/pages/[page-name]-spa.css'
-    ];
+    return ['/src/styles/pages/[page-name]-spa.css'];
   },
 
   // Alternative: Static style path property
@@ -215,7 +211,7 @@ export default {
    */
   handleError(error, context = 'unknown') {
     console.error(`[Page Name] Error in ${context}:`, error);
-    
+
     // Show user-friendly error message
     const errorContainer = document.querySelector('.error-container');
     if (errorContainer) {
@@ -225,5 +221,5 @@ export default {
         </div>
       `;
     }
-  }
+  },
 };

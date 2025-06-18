@@ -161,7 +161,7 @@
     max-width: 200px;
     max-height: 267px; /* Maintains 3:4 ratio */
   }
-  
+
   .spa-content .home-page #featured-recipes-grid {
     gap: 15px;
   }
@@ -209,7 +209,7 @@
     max-width: 180px;
     max-height: 240px; /* Maintains 3:4 ratio */
   }
-  
+
   .spa-content .home-page #featured-recipes-grid {
     gap: 10px;
   }

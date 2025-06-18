@@ -3,7 +3,7 @@ export class PageManager {
     if (!contentContainer) {
       throw new Error('Content container element is required');
     }
-    
+
     this.contentContainer = contentContainer;
     this.currentPage = null;
     this.currentPageModule = null;
@@ -38,7 +38,6 @@ export class PageManager {
 
       // Load new page
       await this.loadNewPage(module, params);
-
     } catch (error) {
       console.error('Error loading page:', error);
       await this.handlePageLoadError(error);
@@ -101,7 +100,6 @@ export class PageManager {
 
       // Hide loading state
       this.hideLoadingState();
-
     } catch (error) {
       this.hideLoadingState();
       throw error;
@@ -169,7 +167,6 @@ export class PageManager {
       if (meta) {
         this.updatePageMeta(meta);
       }
-
     } catch (error) {
       console.error('Error updating page metadata:', error);
     }
@@ -195,7 +192,7 @@ export class PageManager {
     }
 
     // Update other meta tags
-    Object.keys(meta).forEach(key => {
+    Object.keys(meta).forEach((key) => {
       if (key !== 'description' && key !== 'keywords') {
         this.updateMetaTag(key, meta[key]);
       }
@@ -204,13 +201,13 @@ export class PageManager {
 
   updateMetaTag(name, content) {
     let meta = document.querySelector(`meta[name="${name}"]`);
-    
+
     if (!meta) {
       meta = document.createElement('meta');
       meta.name = name;
       document.head.appendChild(meta);
     }
-    
+
     meta.content = content;
   }
 
@@ -242,13 +239,13 @@ export class PageManager {
   }
 
   clearLoadingTimeouts() {
-    this.loadingTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.loadingTimeouts.forEach((timeout) => clearTimeout(timeout));
     this.loadingTimeouts.clear();
   }
 
   async handlePageLoadError(error) {
     console.error('Page load error:', error);
-    
+
     // Show error message to user
     this.contentContainer.innerHTML = `
       <div class="page-error">
@@ -262,11 +259,11 @@ export class PageManager {
         </div>
       </div>
     `;
-    
+
     // Safely set error message and attach event listener
     const errorDetails = this.contentContainer.querySelector('#error-details');
     const reloadButton = this.contentContainer.querySelector('#reload-button');
-    
+
     errorDetails.textContent = error.message;
     reloadButton.addEventListener('click', () => {
       window.location.reload();
@@ -291,7 +288,7 @@ export class PageManager {
     try {
       // Check if module defines custom styles
       let stylePaths = [];
-      
+
       // Option 1: Module defines getStylePaths method
       if (typeof module.getStylePaths === 'function') {
         const paths = await module.getStylePaths(params);
@@ -299,17 +296,16 @@ export class PageManager {
           stylePaths = paths;
         }
       }
-      
+
       // Option 2: Module defines stylePath property
       if (module.stylePath && typeof module.stylePath === 'string') {
         stylePaths.push(module.stylePath);
       }
-      
+
       // Load each style file
       for (const stylePath of stylePaths) {
         await this.loadStyleSheet(stylePath);
       }
-      
     } catch (error) {
       console.warn('Error loading page styles:', error);
       // Don't fail page load for style errors
@@ -329,20 +325,20 @@ export class PageManager {
       link.type = 'text/css';
       link.href = stylePath;
       link.dataset.pageStyle = 'true'; // Mark as page-specific style
-      
+
       // Handle load/error events
       link.onload = () => {
         this.loadedStyles.set(stylePath, link);
         resolve(link);
       };
-      
+
       link.onerror = () => {
         reject(new Error(`Failed to load stylesheet: ${stylePath}`));
       };
-      
+
       // Add to document head
       document.head.appendChild(link);
-      
+
       // Set timeout to prevent hanging
       setTimeout(() => {
         if (!this.loadedStyles.has(stylePath)) {
@@ -355,12 +351,12 @@ export class PageManager {
   async unloadPageStyles() {
     // Remove all dynamically loaded page styles
     const pageStyleLinks = document.querySelectorAll('link[data-page-style="true"]');
-    pageStyleLinks.forEach(link => {
+    pageStyleLinks.forEach((link) => {
       if (link.parentNode) {
         link.parentNode.removeChild(link);
       }
     });
-    
+
     // Clear loaded styles map
     this.loadedStyles.clear();
   }
