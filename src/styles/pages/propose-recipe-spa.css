@@ -1,0 +1,129 @@
+/* SPA Propose Recipe Page Styles - Scoped for SPA Content Container */
+
+/* Main container setup for proper layout */
+.spa-content .propose-recipe {
+  min-height: calc(100vh - 200px); /* Adjust based on header/footer height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero section */
+.spa-content .propose-recipe .propose-recipe-hero {
+  color: var(--text-color);
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.spa-content .propose-recipe .propose-recipe-hero h1 {
+  font-size: var(--size-header1);
+  font-family: var(--heading-font);
+  margin-bottom: 0.5rem;
+}
+
+.spa-content .propose-recipe .propose-recipe-hero p {
+  font-size: var(--size-header2);
+}
+
+/* Form container - only this gets the background color */
+.spa-content .propose-recipe-form {
+  background-color: var(--secondary-color);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 2rem auto;
+  max-width: 800px; /* Constrain width */
+  width: calc(100% - 4rem); /* Account for container margins */
+}
+
+/* Quote section - positioned at bottom, matches home page styling */
+.spa-content .quote-section {
+  width: 100%;
+  background-color: var(--secondary-color);
+  text-align: center;
+  font-style: italic;
+  padding: 2rem;
+  margin-top: auto; /* Push to bottom of flex container */
+  margin-bottom: 0;
+  flex-shrink: 0; /* Prevent shrinking */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.spa-content .quote-section blockquote {
+  font-size: var(--size-header2);
+  margin-bottom: 1rem;
+}
+
+.spa-content .quote-section p {
+  font-size: var(--size-body);
+  margin: 0;
+}
+
+.spa-content .error-container {
+  margin: 1rem 0;
+}
+
+.spa-content .error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 5px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.spa-content .error-message h3 {
+  color: #c33;
+  margin-top: 0;
+}
+
+.spa-content .error-message p {
+  margin: 0.5rem 0;
+}
+
+.spa-content .error-message .btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.spa-content .error-message .btn-primary:hover {
+  background-color: var(--primary-color-dark, #0056b3);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .spa-content .propose-recipe {
+    min-height: auto; /* Remove fixed height on mobile */
+  }
+
+  /* Hide hero section on mobile */
+  .spa-content .propose-recipe .propose-recipe-hero {
+    display: none;
+  }
+
+  .spa-content .propose-recipe-form {
+    padding: 1rem;
+    margin: 0 auto;
+    width: calc(100% - 2rem); /* Ensure no horizontal overflow on mobile */
+    max-width: none; /* Remove max-width constraint on mobile */
+    border-radius: 0; /* Remove border radius on mobile */
+  }
+
+  .spa-content .propose-recipe .propose-recipe-form h2 {
+    font-size: var(--size-header2-mobile);
+  }
+
+  /* Quote section responsive - matches home page */
+  .spa-content .quote-section {
+    display: none; /* Hidden on mobile to save space */
+  }
+}

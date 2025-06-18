@@ -1,0 +1,152 @@
+/* SPA-specific styles */
+
+.spa-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header should not grow */
+.header-container {
+  flex-shrink: 0;
+}
+
+/* Content area grows to fill available space but allows natural overflow */
+.spa-content {
+  flex: 1 0 auto;
+  width: 100%;
+  min-height: 0; /* Important: allows content to determine its own height */
+}
+
+/* Footer should not grow and stick to bottom */
+footer {
+  flex-shrink: 0;
+}
+
+/* Home page content wrapper - ensure natural flow */
+.spa-content .home-page {
+  width: 100%;
+}
+
+/* Reset any problematic positioning on quote section */
+.spa-content .quote-section {
+  position: static;
+  clear: both;
+}
+
+.spa-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* Page transition styles */
+.spa-content .page-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 100;
+}
+
+.spa-content .page-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 2rem;
+  text-align: center;
+  margin: 0;
+}
+
+.spa-content .page-error .error-card {
+  max-width: 500px;
+  padding: 2rem;
+  color: #d32f2f;
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spa-content .page-error h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #d32f2f;
+}
+
+.spa-content .page-error p {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.spa-content .page-error .error-details {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 1rem;
+  font-family: monospace;
+  background-color: #f5f5f5;
+  padding: 0.5rem;
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+.spa-content .page-error .reload-button {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.spa-content .page-error .reload-button:hover {
+  background: #b71c1c;
+}
+
+/* Placeholder page styles */
+.spa-home-placeholder,
+.spa-categories-placeholder,
+.spa-propose-placeholder {
+  padding: 2rem 1rem;
+}
+
+.spa-home-placeholder h1,
+.spa-categories-placeholder h1,
+.spa-propose-placeholder h1 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.spa-home-placeholder ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.spa-home-placeholder li {
+  margin: 0.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .spa-content {
+    min-height: 300px;
+  }
+
+  .spa-home-placeholder,
+  .spa-categories-placeholder,
+  .spa-propose-placeholder {
+    padding: 1rem 0.5rem;
+  }
+}

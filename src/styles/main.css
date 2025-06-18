@@ -8,3 +8,13 @@
 @import 'components/base_button.css';
 @import 'components/search_bar.css';
 @import 'components/quote.css';
+@import 'components/spa.css';
+@import 'components/lazy-loading.css';
+
+/* SPA pages */
+@import 'pages/home-spa.css';
+@import 'pages/categories-spa.css';
+@import 'pages/recipe-detail-spa.css';
+@import 'pages/propose-recipe-spa.css';
+@import 'pages/documents-spa.css';
+@import 'pages/manager-dashboard-spa.css';

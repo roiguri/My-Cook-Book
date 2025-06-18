@@ -1,0 +1,18 @@
+# SPA Routing - Redirect all routes to index.html for client-side handling
+# This allows clean URLs to work with History API routing
+
+# Static assets and API routes should not be redirected
+/img/*    /img/:splat    200
+/css/*    /css/:splat    200
+/js/*     /js/:splat     200
+/src/*    /src/:splat    200
+/api/*    /api/:splat    200
+
+# Specific files that should be served directly
+/favicon.ico              /favicon.ico              200
+/robots.txt               /robots.txt               200
+/sitemap.xml              /sitemap.xml              200
+/site.webmanifest.json    /site.webmanifest.json    200
+
+# All other routes fallback to index.html for SPA routing
+/*        /index.html     200

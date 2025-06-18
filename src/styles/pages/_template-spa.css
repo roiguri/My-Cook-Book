@@ -1,0 +1,336 @@
+/* SPA [Page Name] Styles - Template */
+/* Copy this template when creating new SPA page styles */
+
+/*
+IMPORTANT: All selectors must be scoped to .spa-content to avoid conflicts
+with legacy styles and other SPA pages.
+
+Naming Convention:
+- Use .spa-content .[page-name] as the base selector
+- Follow BEM methodology where appropriate
+- Use CSS custom properties (variables) for consistency
+*/
+
+/* Base container for SPA page */
+.spa-content .[page-name] {
+  width: 100%;
+  min-height: 100%;
+  /* Add base page styles here */
+}
+
+/* Page sections */
+.spa-content .[page-name] .header-section {
+  /* Header section styles */
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.spa-content .[page-name] .content-section {
+  /* Main content section styles */
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.spa-content .[page-name] .footer-section {
+  /* Footer section styles */
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+/* Typography */
+.spa-content .[page-name] h1 {
+  font-size: var(--size-header1);
+  font-family: var(--heading-font);
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+.spa-content .[page-name] h2 {
+  font-size: var(--size-header2);
+  font-family: var(--heading-font);
+  color: var(--text-color);
+  margin-bottom: 0.75rem;
+}
+
+.spa-content .[page-name] p {
+  font-size: var(--size-body);
+  color: var(--text-color);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* Links and buttons */
+.spa-content .[page-name] a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.spa-content .[page-name] a:hover {
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+.spa-content .[page-name] .button {
+  background-color: var(--primary-color);
+  color: var(--button-text-color);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--size-body);
+  transition: background-color 0.3s ease;
+}
+
+.spa-content .[page-name] .button:hover {
+  background-color: var(--secondary-color);
+}
+
+.spa-content .[page-name] .button:disabled {
+  background-color: var(--disabled-color);
+  cursor: not-allowed;
+}
+
+/* Form elements */
+.spa-content .[page-name] .form-group {
+  margin-bottom: 1rem;
+}
+
+.spa-content .[page-name] label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--text-color);
+}
+
+.spa-content .[page-name] input,
+.spa-content .[page-name] textarea,
+.spa-content .[page-name] select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: var(--size-body);
+  background-color: var(--input-background);
+  color: var(--text-color);
+}
+
+.spa-content .[page-name] input:focus,
+.spa-content .[page-name] textarea:focus,
+.spa-content .[page-name] select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary-color-light);
+}
+
+/* Cards and containers */
+.spa-content .[page-name] .card {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.spa-content .[page-name] .card-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.spa-content .[page-name] .card-title {
+  font-size: var(--size-header2);
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-color);
+}
+
+/* Grid layouts */
+.spa-content .[page-name] .grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.spa-content .[page-name] .grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.spa-content .[page-name] .grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.spa-content .[page-name] .grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* Flex layouts */
+.spa-content .[page-name] .flex {
+  display: flex;
+}
+
+.spa-content .[page-name] .flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spa-content .[page-name] .flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spa-content .[page-name] .flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* Loading and error states */
+.spa-content .[page-name] .loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-size: var(--size-large);
+  color: var(--text-color-secondary);
+}
+
+.spa-content .[page-name] .error {
+  background-color: var(--error-background);
+  color: var(--error-color);
+  border: 1px solid var(--error-border);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.spa-content .[page-name] .success {
+  background-color: var(--success-background);
+  color: var(--success-color);
+  border: 1px solid var(--success-border);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+/* Utility classes */
+.spa-content .[page-name] .text-center {
+  text-align: center;
+}
+
+.spa-content .[page-name] .text-left {
+  text-align: left;
+}
+
+.spa-content .[page-name] .text-right {
+  text-align: right;
+}
+
+.spa-content .[page-name] .hidden {
+  display: none;
+}
+
+.spa-content .[page-name] .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*------------------------------------*\
+    #Mobile Responsive (768px breakpoint)
+\*------------------------------------*/
+@media (max-width: 768px) {
+  .spa-content .[page-name] .header-section,
+  .spa-content .[page-name] .content-section,
+  .spa-content .[page-name] .footer-section {
+    padding: 1rem 0.5rem;
+  }
+
+  .spa-content .[page-name] h1 {
+    font-size: var(--size-header1-mobile);
+  }
+
+  .spa-content .[page-name] h2 {
+    font-size: var(--size-header2-mobile);
+  }
+
+  /* Stack grid items on mobile */
+  .spa-content .[page-name] .grid-2,
+  .spa-content .[page-name] .grid-3,
+  .spa-content .[page-name] .grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stack flex items on mobile if needed */
+  .spa-content .[page-name] .flex-mobile-stack {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Reduce card padding on mobile */
+  .spa-content .[page-name] .card {
+    padding: 1rem;
+  }
+
+  /* Full width buttons on mobile */
+  .spa-content .[page-name] .button-mobile-full {
+    width: 100%;
+  }
+}
+
+/*------------------------------------*\
+    #Small Mobile (480px breakpoint)
+\*------------------------------------*/
+@media (max-width: 480px) {
+  .spa-content .[page-name] .header-section,
+  .spa-content .[page-name] .content-section,
+  .spa-content .[page-name] .footer-section {
+    padding: 0.75rem 0.25rem;
+  }
+
+  .spa-content .[page-name] .card {
+    padding: 0.75rem;
+  }
+
+  .spa-content .[page-name] .button {
+    padding: 0.5rem 1rem;
+    font-size: var(--size-small);
+  }
+}
+
+/*------------------------------------*\
+    #Print Styles (optional)
+\*------------------------------------*/
+@media print {
+  .spa-content .[page-name] .button,
+  .spa-content .[page-name] .no-print {
+    display: none;
+  }
+
+  .spa-content .[page-name] {
+    background: white;
+    color: black;
+  }
+
+  .spa-content .[page-name] a {
+    color: black;
+    text-decoration: underline;
+  }
+}
+
+/*------------------------------------*\
+    #Dark Mode Support (optional)
+\*------------------------------------*/
+@media (prefers-color-scheme: dark) {
+  .spa-content .[page-name] {
+    /* Dark mode overrides if needed */
+    /* Use CSS custom properties that adjust to dark mode */
+  }
+}

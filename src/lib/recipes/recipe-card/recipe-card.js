@@ -34,6 +34,7 @@ import {
   getPlaceholderImageUrl,
 } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { extractIngredientNames } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
+import { initLazyLoading } from '../../../js/utils/lazy-loading.js';
 
 class RecipeCard extends HTMLElement {
   // Define observed attributes
@@ -209,6 +210,44 @@ class RecipeCard extends HTMLElement {
   _handleCardClick(event) {
     // Prevent handling if clicking the arrow
     if (event.target.closest('.collapse-arrow')) {
+      return;
+    }
+
+    // For modifier keys and non-left clicks, create and click a temporary link
+    // This ensures proper browser behavior for opening in new tabs
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      if (this.recipeId) {
+        // Create a temporary link element
+        const tempLink = document.createElement('a');
+        tempLink.href = `/recipe/${this.recipeId}`;
+        tempLink.style.display = 'none';
+        document.body.appendChild(tempLink);
+        
+        // Create a new click event with the same properties
+        const linkClickEvent = new MouseEvent('click', {
+          button: event.button,
+          buttons: event.buttons,
+          ctrlKey: event.ctrlKey,
+          metaKey: event.metaKey,
+          shiftKey: event.shiftKey,
+          altKey: event.altKey,
+          bubbles: true,
+          cancelable: true
+        });
+        
+        // Click the link (this will be handled by the global navigation script)
+        tempLink.dispatchEvent(linkClickEvent);
+        
+        // Clean up
+        document.body.removeChild(tempLink);
+      }
       return;
     }
 
@@ -420,13 +459,15 @@ class RecipeCard extends HTMLElement {
           .recipe-image {
               position: relative;
               width: 100%;
-              height: 50%;
+              height: var(--recipe-image-height, 50%);
               object-fit: cover;
               flex-shrink: 0;
               box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
               opacity: 0;
               transition: opacity 0.3s ease;
               background-color: #f0f0f0; /* Placeholder color while loading */
+              min-height: var(--recipe-image-height, auto);
+              max-height: var(--recipe-image-height, none);
           }
 
           .recipe-image.loaded {
@@ -440,6 +481,10 @@ class RecipeCard extends HTMLElement {
               flex-direction: column;
               justify-content: space-between;  /* Center content vertically */
               gap: 0.5rem;
+              height: var(--recipe-content-height, auto);
+              max-height: var(--recipe-content-height, none);
+              overflow: hidden;
+              box-sizing: border-box;
           }
 
           .recipe-title {
@@ -447,7 +492,11 @@ class RecipeCard extends HTMLElement {
               margin: 0 auto;
               display: flex;
               gap: 0.5rem;
-              font-size: 1.2rem;              
+              font-size: 1.2rem;
+              max-height: var(--recipe-title-max-height, none);
+              overflow: hidden;
+              text-overflow: ellipsis;
+              line-height: 1.2;
           }
 
           .more-info {
@@ -560,7 +609,9 @@ class RecipeCard extends HTMLElement {
     return `
           .recipe-card.loading {
               position: relative;
-              min-height: 200px;
+              min-height: var(--recipe-card-loading-height, 200px);
+              height: var(--recipe-card-loading-height, auto);
+              max-height: var(--recipe-card-loading-height, none);
           }
 
           .loading::after {
@@ -693,10 +744,9 @@ class RecipeCard extends HTMLElement {
               !this.isCollapsed
                 ? `
                 <img class="recipe-image" 
-                  src="${this._imageUrl}" 
+                  data-src="${this._imageUrl}" 
                   alt="${name}"
-                  onload="this.classList.add('loaded')"
-                  onerror="this.src='/img/placeholder.jpg'; this.classList.add('loaded')">
+                  data-fallback="/img/placeholder.jpg">
             `
                 : ''
             }
@@ -733,6 +783,9 @@ class RecipeCard extends HTMLElement {
     `;
 
     this._setupEventListeners();
+    
+    // Initialize lazy loading for images in this component
+    initLazyLoading(this.shadowRoot);
   }
 
   // TODO: create and extract to favorites-utils file
@@ -755,9 +808,12 @@ class RecipeCard extends HTMLElement {
       const user = authService.getCurrentUser();
       const userId = user?.uid;
       if (!userId) return; // No user logged in
+      
+      const wasFavorite = this._isFavorite();
       const db = getFirestoreInstance();
       const userDocRef = doc(db, 'users', userId);
-      if (this._isFavorite()) {
+      
+      if (wasFavorite) {
         // Remove from favorites
         await updateDoc(userDocRef, {
           favorites: arrayRemove(this.recipeId),
@@ -770,6 +826,27 @@ class RecipeCard extends HTMLElement {
         });
         this._userFavorites.add(this.recipeId);
       }
+      
+      // Dispatch event to notify other components about the favorite change
+      this.dispatchEvent(new CustomEvent('recipe-favorite-changed', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          recipeId: this.recipeId,
+          isFavorite: !wasFavorite,
+          userId: userId
+        }
+      }));
+      
+      // Also dispatch to document for global listeners
+      document.dispatchEvent(new CustomEvent('recipe-favorite-changed', {
+        detail: {
+          recipeId: this.recipeId,
+          isFavorite: !wasFavorite,
+          userId: userId
+        }
+      }));
+      
       this._renderRecipe(); // Re-render to reflect the change
     } catch (error) {
       console.error('Error toggling favorite:', error);

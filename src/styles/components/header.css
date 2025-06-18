@@ -352,7 +352,7 @@ header .auth-button {
 /*------------------------------------*\
     #tablet-size
 \*------------------------------------*/
-@media (min-width: 769px) and (max-width: 1130px) {
+@media (min-width: 769px) and (max-width: 1500px) {
   header {
     flex-direction: column;
     align-items: center;

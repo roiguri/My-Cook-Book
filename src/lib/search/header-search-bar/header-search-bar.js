@@ -138,20 +138,40 @@ class HeaderSearchBar extends HTMLElement {
   navigateToSearch(searchText) {
     if (!searchText.trim()) return;
 
-    // Create search URL
-    const searchParams = new URLSearchParams();
-    searchParams.set('q', searchText);
+    // Check if we're in the SPA context
+    if (window.spa?.router) {
+      // Use SPA router for navigation
+      const searchParams = new URLSearchParams();
+      searchParams.set('q', searchText);
+      const searchUrl = `/categories?${searchParams.toString()}`;
+      window.spa.router.navigate(searchUrl);
+      
+      // Update navigation active state after search navigation
+      setTimeout(() => {
+        if (typeof window.updateActiveNavigation === 'function') {
+          window.updateActiveNavigation();
+        }
+      }, 100);
+      
+      // Clear the navigation search input after navigation
+      this.clear();
+    } else {
+      // Fallback to legacy navigation
+      const searchParams = new URLSearchParams();
+      searchParams.set('q', searchText);
 
-    // Determine if we're on the index page or in a subdirectory
-    const isIndexPage =
-      window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/');
+      // Determine if we're on the index page or in a subdirectory
+      const isIndexPage =
+        window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/');
 
-    // Build the categories page URL
-    const baseUrl = isIndexPage ? './pages/categories.html' : './categories.html';
-    const searchUrl = `${baseUrl}?${searchParams.toString()}`;
+      // Build the categories page URL
+      const baseUrl = isIndexPage ? './pages/categories.html' : './categories.html';
+      const searchUrl = `${baseUrl}?${searchParams.toString()}`;
 
-    // Navigate to categories page with search parameter
-    window.location.href = searchUrl;
+      // Navigate to categories page with search parameter
+      window.location.href = searchUrl;
+      // Note: for legacy navigation, page will reload so clearing isn't needed
+    }
   }
 
   // Method to get current search text
