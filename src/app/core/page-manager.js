@@ -55,7 +55,8 @@ export class PageManager {
 
   async importPageModule(modulePath) {
     try {
-      const module = await import(modulePath);
+      // Use dynamic import with webpackChunkName for better chunking
+      const module = await import(/* webpackChunkName: "page-[request]" */ modulePath);
       return module.default || module;
     } catch (error) {
       throw new Error(`Failed to import page module: ${modulePath}. ${error.message}`);
@@ -100,7 +101,7 @@ export class PageManager {
       }
 
       // Update page metadata
-      await this.updatePageMetadata(module, params);
+      await this.updatePageMetadata(params);
 
       // Mount page (initialize JavaScript functionality)
       await this.callPageMethod('mount', this.contentContainer, params);
@@ -161,7 +162,7 @@ export class PageManager {
     return null;
   }
 
-  async updatePageMetadata(module, params) {
+  async updatePageMetadata(params) {
     try {
       // Update page title
       const title = await this.callPageMethod('getTitle', params);

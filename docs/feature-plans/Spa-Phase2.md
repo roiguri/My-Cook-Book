@@ -545,10 +545,10 @@ console.log('Legacy cleanup completed!');
 
 ### Tasks
 - [x] Enable all header navigation links
-- [ ] Implement active state indicators
-- [ ] Add breadcrumb navigation where appropriate
-- [ ] Update footer links to use SPA routing
-- [ ] Implement proper link highlighting
+- [x] Implement active state indicators
+- [ ] Add breadcrumb navigation where appropriate - (Won't Fix - current state sufficient)
+- [ ] Update footer links to use SPA routing - (Won't Fix - current state sufficient)
+- [ ] Implement proper link highlighting - (Won't Fix - current state sufficient)
 
 ### Implementation Details
 
@@ -628,13 +628,29 @@ function convertToSPARoute(href) {
 
 ## Step 7: Performance Optimization (Days 20-22)
 
-### Tasks
+### Priority Analysis and Recommendations
+
+**Pre-Deployment Essentials (HIGH PRIORITY - 2-3 days):**
+- [ ] **Code Splitting** - HIGH Impact, MEDIUM Complexity - Essential for bundle management
+- [ ] **Bundle Optimization** - HIGH Impact, LOW Complexity - Critical for performance 
+- [ ] **Lazy Loading** - HIGH Impact, LOW Complexity - Easy win with big impact
+
+**Post-Deployment Enhancements (MEDIUM/LOW PRIORITY - 3-4 days):**
+- [ ] **Preloading** - MEDIUM Impact, MEDIUM Complexity - Nice to have, can add later
+- [ ] **Component Caching** - MEDIUM Impact, HIGH Complexity - Skip initially, complex cache invalidation
+- [ ] **Service Worker** - MEDIUM Impact, HIGH Complexity - Skip initially, can introduce caching issues
+
+### Tasks (Updated Priority Order)
+
+**Phase 7A: Pre-Deployment Optimization (Required)**
 - [ ] Implement code splitting for page modules
+- [ ] Optimize bundle sizes with tree shaking and analysis
+- [ ] Implement lazy loading for images and components
+
+**Phase 7B: Post-Deployment Enhancement (Optional)**  
 - [ ] Add preloading for likely next pages
 - [ ] Implement component-level caching
-- [ ] Optimize bundle sizes
 - [ ] Add service worker for offline capability
-- [ ] Implement lazy loading for images and components
 
 ### Implementation Details
 
@@ -710,21 +726,31 @@ class ComponentCache {
 ```
 
 ### Deliverables
+
+**Phase 7A (Pre-Deployment):**
 - Code splitting implementation for all page modules
+- Optimized bundle sizes with tree shaking and analysis
+- Lazy loading for images and non-critical resources
+
+**Phase 7B (Post-Deployment):**
 - Intelligent preloading system
-- Component and data caching mechanisms
-- Optimized bundle sizes with tree shaking
+- Component and data caching mechanisms  
 - Service worker for offline functionality
-- Lazy loading for non-critical resources
 
 ### Success Metrics
-- [ ] **Bundle Size**: Total JavaScript bundle size < 500KB
+
+**Phase 7A (Required for Production):**
+- [ ] **Bundle Size**: Main bundle < 200KB, total split bundles < 500KB
 - [ ] **Page Load**: Initial page load < 1.5 seconds
 - [ ] **Navigation Speed**: Page transitions < 200ms
+- [ ] **Lazy Loading**: Images load on demand, reducing initial payload
+- [ ] **Lighthouse Score**: Performance score > 85
+
+**Phase 7B (Post-Launch Goals):**
 - [ ] **Cache Hit Rate**: > 80% cache hit rate for repeated visits
 - [ ] **Offline Support**: Basic offline functionality works
 - [ ] **Memory Usage**: No memory leaks during extended use
-- [ ] **Lighthouse Score**: Performance score > 90
+- [ ] **Advanced Performance**: Lighthouse score > 90
 
 ---
 
