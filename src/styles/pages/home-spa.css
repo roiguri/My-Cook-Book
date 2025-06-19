@@ -29,10 +29,6 @@
 }
 
 /* Quick links section styles */
-.spa-content .home-page .quick-links {
-  margin-top: 2rem;
-}
-
 .spa-content .home-page .quick-links h2 {
   font-size: var(--size-header1);
   text-align: center;
@@ -80,7 +76,6 @@
 .spa-content .home-page .featured-recipes {
   width: 90vw;
   margin: 2rem auto;
-  margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -187,7 +182,7 @@
 
   .spa-content .home-page .category-jars {
     gap: 40px;
-    margin: 4rem auto;
+    margin: 2rem auto;
   }
 
   .spa-content .home-page .category-jar {
@@ -208,6 +203,10 @@
   .spa-content .home-page .recipe-card {
     max-width: 180px;
     max-height: 240px; /* Maintains 3:4 ratio */
+  }
+
+  .spa-content .home-page .featured-recipes {
+    margin: 1rem auto;
   }
 
   .spa-content .home-page #featured-recipes-grid {

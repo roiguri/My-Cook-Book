@@ -3,7 +3,6 @@ import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/home-spa.css';
 
 export default {
-
   async render() {
     const response = await fetch(new URL('./home-page.html', import.meta.url));
     if (!response.ok) {

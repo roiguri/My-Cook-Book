@@ -51,7 +51,6 @@ export default {
     };
   },
 
-
   async importComponents() {
     try {
       await Promise.all([

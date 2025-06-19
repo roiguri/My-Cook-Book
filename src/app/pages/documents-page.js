@@ -4,7 +4,6 @@ import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/documents-spa.css';
 
 export default {
-
   async render(params) {
     const response = await fetch(new URL('./documents-page.html', import.meta.url));
     if (!response.ok) {

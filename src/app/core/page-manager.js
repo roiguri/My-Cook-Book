@@ -80,7 +80,6 @@ export class PageManager {
 
       this.showLoadingState();
 
-
       const html = await this.callPageMethod('render', params);
       if (typeof html === 'string') {
         this.renderPageContent(html);
@@ -104,7 +103,6 @@ export class PageManager {
       } catch (error) {
         console.error('Error unmounting current page:', error);
       }
-
 
       this.currentPageModule = null;
       this.currentPage = null;
@@ -258,7 +256,6 @@ export class PageManager {
   isPageLoading() {
     return this.isLoading;
   }
-
 
   destroy() {
     this.clearLoadingTimeouts();
