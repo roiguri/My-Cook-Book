@@ -203,13 +203,13 @@ class SignupForm extends HTMLElement {
         </div>
 
         <div class="form-group">
-          <label for="email">כתובת מייל</label>
-          <input type="email" id="email" name="email" required>
+          <label for="signup-email">כתובת מייל</label>
+          <input type="email" id="signup-email" name="email" required>
         </div>
 
         <div class="form-group">
-          <label for="password">סיסמה</label>
-          <input type="password" id="password" name="password" required 
+          <label for="signup-password">סיסמה</label>
+          <input type="password" id="signup-password" name="password" required 
                  minlength="8" autocomplete="new-password">
           <div class="password-strength">
             <div class="strength-meter"></div>
@@ -217,8 +217,8 @@ class SignupForm extends HTMLElement {
         </div>
 
         <div class="form-group">
-          <label for="confirmPassword">אימות סיסמה</label>
-          <input type="password" id="confirmPassword" name="confirmPassword" required>
+          <label for="signup-confirmPassword">אימות סיסמה</label>
+          <input type="password" id="signup-confirmPassword" name="confirmPassword" required>
           <div class="error-message" id="signup-error"></div>
         </div>
 
@@ -247,8 +247,8 @@ class SignupForm extends HTMLElement {
 
   setupEventListeners() {
     const form = this.shadowRoot.querySelector('.signup-form');
-    const passwordInput = this.shadowRoot.getElementById('password');
-    const confirmPasswordInput = this.shadowRoot.getElementById('confirmPassword');
+    const passwordInput = this.shadowRoot.getElementById('signup-password');
+    const confirmPasswordInput = this.shadowRoot.getElementById('signup-confirmPassword');
     const googleSignup = this.shadowRoot.querySelector('.gsi-material-button');
 
     passwordInput.addEventListener('input', () => this.checkPasswordStrength());
@@ -258,7 +258,7 @@ class SignupForm extends HTMLElement {
   }
 
   checkPasswordStrength() {
-    const password = this.shadowRoot.getElementById('password').value;
+    const password = this.shadowRoot.getElementById('signup-password').value;
     const strengthMeter = this.shadowRoot.querySelector('.strength-meter');
 
     // Remove all classes first
@@ -278,8 +278,8 @@ class SignupForm extends HTMLElement {
   }
 
   checkPasswordsMatch() {
-    const password = this.shadowRoot.getElementById('password').value;
-    const confirmPassword = this.shadowRoot.getElementById('confirmPassword').value;
+    const password = this.shadowRoot.getElementById('signup-password').value;
+    const confirmPassword = this.shadowRoot.getElementById('signup-confirmPassword').value;
 
     if (confirmPassword && password !== confirmPassword) {
       this.showError('הסיסמאות אינן תואמות');
@@ -292,9 +292,9 @@ class SignupForm extends HTMLElement {
     e.preventDefault();
 
     const fullName = this.shadowRoot.getElementById('fullName').value;
-    const email = this.shadowRoot.getElementById('email').value;
-    const password = this.shadowRoot.getElementById('password').value;
-    const confirmPassword = this.shadowRoot.getElementById('confirmPassword').value;
+    const email = this.shadowRoot.getElementById('signup-email').value;
+    const password = this.shadowRoot.getElementById('signup-password').value;
+    const confirmPassword = this.shadowRoot.getElementById('signup-confirmPassword').value;
 
     if (!fullName.trim()) {
       this.showError('נא להזין שם מלא');

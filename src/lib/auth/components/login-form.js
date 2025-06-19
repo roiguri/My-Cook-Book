@@ -184,13 +184,13 @@ class LoginForm extends HTMLElement {
 
       <form class="login-form">
         <div class="form-group">
-          <label for="email">כתובת מייל</label>
-          <input type="email" id="email" name="email" required>
+          <label for="login-email">כתובת מייל</label>
+          <input type="email" id="login-email" name="email" required>
         </div>
 
         <div class="form-group">
-          <label for="password">סיסמה</label>
-          <input type="password" id="password" name="password" required>
+          <label for="login-password">סיסמה</label>
+          <input type="password" id="login-password" name="password" required>
           <div class="error-message" id="login-error"></div>
         </div>
 
@@ -238,8 +238,8 @@ class LoginForm extends HTMLElement {
   async handleSubmit(e) {
     e.preventDefault();
 
-    const email = this.shadowRoot.getElementById('email').value;
-    const password = this.shadowRoot.getElementById('password').value;
+    const email = this.shadowRoot.getElementById('login-email').value;
+    const password = this.shadowRoot.getElementById('login-password').value;
     const remember = this.shadowRoot.getElementById('remember').checked;
 
     try {
@@ -269,7 +269,7 @@ class LoginForm extends HTMLElement {
         bubbles: true,
         composed: true,
         detail: {
-          email: this.shadowRoot.getElementById('email').value, // Pass current email if entered
+          email: this.shadowRoot.getElementById('login-email').value, // Pass current email if entered
         },
       }),
     );

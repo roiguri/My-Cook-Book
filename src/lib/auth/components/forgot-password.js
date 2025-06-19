@@ -128,8 +128,8 @@ class ForgotPassword extends HTMLElement {
         </div>
 
         <div class="form-group">
-          <label for="email">כתובת מייל</label>
-          <input type="email" id="email" name="email" required>
+          <label for="forgot-email">כתובת מייל</label>
+          <input type="email" id="forgot-email" name="email" required>
           <div class="error-message" id="reset-error"></div>
           <div class="success-message" id="reset-success"></div>
         </div>
@@ -151,7 +151,7 @@ class ForgotPassword extends HTMLElement {
 
   async handleSubmit(e) {
     e.preventDefault();
-    const email = this.shadowRoot.getElementById('email').value;
+    const email = this.shadowRoot.getElementById('forgot-email').value;
 
     try {
       const authController = this.closest('auth-controller');
