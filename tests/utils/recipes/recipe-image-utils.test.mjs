@@ -326,7 +326,10 @@ describe('recipe-image-utils', () => {
       expect(deleteFileMock).toHaveBeenCalledWith('pc1');
       expect(deleteFileMock).toHaveBeenCalledWith('pf2');
       expect(deleteFileMock).toHaveBeenCalledWith('pc2');
-      expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', { images: [], pendingImages: [] });
+      expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', {
+        images: [],
+        pendingImages: [],
+      });
     });
     it('handles missing recipe gracefully', async () => {
       getDocumentMock.mockResolvedValue(null);
@@ -339,7 +342,10 @@ describe('recipe-image-utils', () => {
       updateDocumentMock.mockResolvedValue();
       await removeAllRecipeImages('rid');
       expect(deleteFileMock).not.toHaveBeenCalled();
-      expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', { images: [], pendingImages: [] });
+      expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', {
+        images: [],
+        pendingImages: [],
+      });
     });
   });
 
@@ -396,7 +402,7 @@ describe('recipe-image-utils', () => {
       expect(updateDocumentMock).toHaveBeenCalledWith(
         'recipes',
         'rid',
-        expect.objectContaining({ pendingImages: expect.any(Array) })
+        expect.objectContaining({ pendingImages: expect.any(Array) }),
       );
       expect(result.length).toBe(2);
       expect(result[0]).toHaveProperty('id');
@@ -412,14 +418,20 @@ describe('recipe-image-utils', () => {
 
   describe('approvePendingImageById', () => {
     it('moves the correct pending image to images array', async () => {
-      const pending = { id: 'pid', full: 'f', compressed: 'c', fileExtension: 'jpg', uploadedBy: 'u' };
+      const pending = {
+        id: 'pid',
+        full: 'f',
+        compressed: 'c',
+        fileExtension: 'jpg',
+        uploadedBy: 'u',
+      };
       getDocumentMock.mockResolvedValue({ pendingImages: [pending], images: [] });
       updateDocumentMock.mockResolvedValue();
       await approvePendingImageById('rid', 'pid');
       expect(updateDocumentMock).toHaveBeenCalledWith(
         'recipes',
         'rid',
-        expect.objectContaining({ images: expect.any(Array), pendingImages: [] })
+        expect.objectContaining({ images: expect.any(Array), pendingImages: [] }),
       );
     });
     it('throws if pending image not found', async () => {
@@ -443,7 +455,7 @@ describe('recipe-image-utils', () => {
       expect(updateDocumentMock).toHaveBeenCalledWith(
         'recipes',
         'rid',
-        expect.objectContaining({ pendingImages: [{ id: 'other' }] })
+        expect.objectContaining({ pendingImages: [{ id: 'other' }] }),
       );
     });
     it('throws if pending image not found', async () => {

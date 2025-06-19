@@ -7,7 +7,9 @@ export default {
   async render(params) {
     const response = await fetch(new URL('./documents-page.html', import.meta.url));
     if (!response.ok) {
-      throw new Error(`Failed to load documents page template: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to load documents page template: ${response.status} ${response.statusText}`,
+      );
     }
     return await response.text();
   },
@@ -43,7 +45,7 @@ export default {
   getMeta() {
     return {
       description: 'ספר המתכונים המקורי של סבתא - אוסף מתכונים משפחתיים עתיקים',
-      keywords: 'ספר מתכונים, מתכונים של סבתא, מתכונים משפחתיים, מתכונים עתיקים'
+      keywords: 'ספר מתכונים, מתכונים של סבתא, מתכונים משפחתיים, מתכונים עתיקים',
     };
   },
 

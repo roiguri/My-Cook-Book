@@ -85,7 +85,6 @@ export class AppRouter {
     return params;
   }
 
-
   handlePopState() {
     const newRoute = this.parseCurrentRoute();
 

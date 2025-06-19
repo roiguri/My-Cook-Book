@@ -44,10 +44,10 @@ class ElementScroller extends HTMLElement {
   getFirstAssignedElement() {
     const slot = this.shadowRoot.querySelector('slot');
     if (!slot) return null;
-    
+
     const assignedElements = slot.assignedElements();
     if (!assignedElements || assignedElements.length === 0) return null;
-    
+
     return assignedElements[0] || null;
   }
 

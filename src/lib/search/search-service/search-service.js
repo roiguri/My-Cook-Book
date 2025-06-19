@@ -138,11 +138,9 @@ class SearchService extends HTMLElement {
       const favoriteIds = userDoc?.favorites || [];
       // Fetch all favorite recipes
       const recipeDocs = await Promise.all(
-        favoriteIds.map((id) => FirestoreService.getDocument('recipes', id))
+        favoriteIds.map((id) => FirestoreService.getDocument('recipes', id)),
       );
-      return recipeDocs
-        .filter((doc) => doc && doc.approved)
-        .map((doc) => doc);
+      return recipeDocs.filter((doc) => doc && doc.approved).map((doc) => doc);
     }
 
     // Build query params for FirestoreService

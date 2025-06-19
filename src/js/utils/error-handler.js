@@ -1,6 +1,6 @@
 /**
  * Error Handler Utility
- * 
+ *
  * Provides centralized error handling and user-friendly error message mapping
  * for Firebase and common application errors.
  */
@@ -63,15 +63,19 @@ export function getErrorMessage(error) {
   }
 
   // Network errors
-  if (errorMessage.toLowerCase().includes('network') || 
-      errorMessage.toLowerCase().includes('fetch') ||
-      errorCode.includes('NetworkError')) {
+  if (
+    errorMessage.toLowerCase().includes('network') ||
+    errorMessage.toLowerCase().includes('fetch') ||
+    errorCode.includes('NetworkError')
+  ) {
     return 'בעיית חיבור לאינטרנט. אנא בדוק את החיבור ונסה שנית.';
   }
 
   // File size errors
-  if (errorMessage.toLowerCase().includes('file') && 
-      (errorMessage.toLowerCase().includes('size') || errorMessage.toLowerCase().includes('large'))) {
+  if (
+    errorMessage.toLowerCase().includes('file') &&
+    (errorMessage.toLowerCase().includes('size') || errorMessage.toLowerCase().includes('large'))
+  ) {
     return 'התמונה גדולה מדי. אנא בחר תמונה קטנה יותר.';
   }
 
@@ -107,8 +111,8 @@ export function logError(error, context = '') {
     name: error?.name,
     message: error?.message,
     stack: error?.stack,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
-  
+
   console.error('[Error Handler]', errorInfo);
 }

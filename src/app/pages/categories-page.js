@@ -25,7 +25,7 @@ export default {
       await this.loadInitialRecipes();
       this.setupEventListeners();
       await this.updateRecipesPerPage();
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       this.updateUI();
       await this.displayCurrentPageRecipes();
     } catch (error) {
@@ -115,11 +115,11 @@ export default {
     this.displayedRecipes = [];
     this.allRecipes = [];
     this.currentUser = authService.getCurrentUser(); // Track current user for auth changes
-    
+
     this.userFavoritesCache = {
       userId: null,
       favorites: [],
-      isLoaded: false
+      isLoaded: false,
     };
 
     this.activeFilters = {
@@ -261,7 +261,7 @@ export default {
         this.hasActiveFilters = this.checkHasActiveFilters();
         this.currentCategory = 'all';
         this.currentSearchQuery = '';
-        
+
         const filterSearchBar = document.querySelector('filter-search-bar');
         if (filterSearchBar) {
           filterSearchBar.clear();
@@ -272,7 +272,11 @@ export default {
         this.clearFavoritesCache();
       } else if (!wasAuthenticated && isNowAuthenticated) {
         this.clearFavoritesCache();
-      } else if (wasAuthenticated && isNowAuthenticated && this.currentUser?.uid !== authState.user?.uid) {
+      } else if (
+        wasAuthenticated &&
+        isNowAuthenticated &&
+        this.currentUser?.uid !== authState.user?.uid
+      ) {
         this.clearFavoritesCache();
       }
 
@@ -292,7 +296,7 @@ export default {
     const filterModal = document.getElementById('recipe-filter');
     if (filterModal) {
       const customModal = filterModal.shadowRoot?.querySelector('custom-modal');
-      
+
       if (customModal?.isOpen) {
         filterModal.render();
         filterModal.setupEventListeners();
@@ -371,9 +375,7 @@ export default {
       const user = authService.getCurrentUser();
       if (user) {
         const favoriteRecipeIds = await this.getUserFavorites();
-        filteredRecipes = filteredRecipes.filter((recipe) =>
-          favoriteRecipeIds.includes(recipe.id),
-        );
+        filteredRecipes = filteredRecipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
       }
     }
 
@@ -438,7 +440,7 @@ export default {
   handleFavoriteChanged(event) {
     const { recipeId, isFavorite } = event.detail;
     this.updateFavoritesCache(recipeId, isFavorite);
-    
+
     if (this.activeFilters.favoritesOnly) {
       this.loadInitialRecipes().then(() => {
         this.displayCurrentPageRecipes();
@@ -456,7 +458,7 @@ export default {
 
   updateActiveTab() {
     const categoryTabs = document.querySelectorAll('.category-tabs a');
-    
+
     categoryTabs.forEach((tab) => {
       const href = tab.getAttribute('href');
       let category = 'all';
@@ -508,11 +510,11 @@ export default {
     await this.loadInitialRecipes();
     this.updateUI();
     await this.displayCurrentPageRecipes();
-    
+
     if (window.updateActiveNavigation) {
       setTimeout(window.updateActiveNavigation, 0);
     }
-    
+
     this.updateFilterModalCounter();
 
     this.updateURLSilently();
@@ -527,10 +529,10 @@ export default {
       favoritesOnly: false,
     };
     this.hasActiveFilters = this.checkHasActiveFilters();
-    
+
     this.currentCategory = 'all';
     this.currentSearchQuery = '';
-    
+
     const filterSearchBar = document.querySelector('filter-search-bar');
     if (filterSearchBar) {
       filterSearchBar.clear();
@@ -578,7 +580,7 @@ export default {
       }
 
       const currentRoute = window.spa?.router?.getCurrentRoute();
-      
+
       if (currentRoute === '/categories') {
         event.preventDefault();
         this.activateFavoritesFilter();
@@ -602,7 +604,7 @@ export default {
       }
 
       const currentRoute = window.spa?.router?.getCurrentRoute();
-      
+
       if (currentRoute === '/categories') {
         event.preventDefault();
         this.resetToAllCategories();
@@ -626,19 +628,19 @@ export default {
       }
 
       const currentRoute = window.spa?.router?.getCurrentRoute();
-      
+
       if (currentRoute === '/categories') {
         event.preventDefault();
-        
+
         const href = link.getAttribute('href');
         let category = 'all';
         if (href) {
           const url = new URL(href, window.location.origin);
           category = url.searchParams.get('category') || 'all';
         }
-        
+
         await this.changeCategory(category);
-        
+
         this.updateURLSilently();
       }
     };
@@ -653,18 +655,17 @@ export default {
       document.removeEventListener('click', this.favoritesNavHandler, true);
       this.favoritesNavHandler = null;
     }
-    
+
     if (this.categoriesNavHandler) {
       document.removeEventListener('click', this.categoriesNavHandler, true);
       this.categoriesNavHandler = null;
     }
-    
+
     if (this.categoryTabHandler) {
       document.removeEventListener('click', this.categoryTabHandler, true);
       this.categoryTabHandler = null;
     }
   },
-
 
   async displayCurrentPageRecipes() {
     const recipeGrid = document.getElementById('recipe-grid');
@@ -735,7 +736,7 @@ export default {
         cardContainer.appendChild(recipeCard);
         recipeGrid.appendChild(cardContainer);
       });
-      
+
       initLazyLoading(recipeGrid);
     }
 
@@ -819,7 +820,7 @@ export default {
         const user = authService.getCurrentUser();
         if (user) {
           const favoriteRecipeIds = await this.getUserFavorites();
-          baseRecipes = baseRecipes.filter(recipe => favoriteRecipeIds.includes(recipe.id));
+          baseRecipes = baseRecipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
         }
       }
 
@@ -837,12 +838,12 @@ export default {
 
   async handleFilterApplied(event) {
     const { recipes, filters } = event.detail;
-    
+
     // Check if favorites filter changed from true to false
     const wasFavoritesOnly = this.activeFilters.favoritesOnly;
     const isFavoritesOnly = filters.favoritesOnly || false;
     const favoritesDisabled = wasFavoritesOnly && !isFavoritesOnly;
-    
+
     this.activeFilters = {
       cookingTime: filters.cookingTime || '',
       difficulty: filters.difficulty || '',
@@ -860,7 +861,7 @@ export default {
     } else {
       this.displayedRecipes = recipes;
     }
-    
+
     this.currentPage = 1;
 
     this.updateFilterBadge(filters);
@@ -934,7 +935,6 @@ export default {
     await this.displayCurrentPageRecipes();
 
     this.updateFilterModalCounter();
-
   },
 
   async changeSearch(searchQuery) {
@@ -1017,13 +1017,13 @@ export default {
     try {
       const userDoc = await FirestoreService.getDocument('users', user.uid);
       const favoriteRecipeIds = userDoc?.favorites || [];
-      
+
       this.userFavoritesCache = {
         userId: user.uid,
         favorites: favoriteRecipeIds,
-        isLoaded: true
+        isLoaded: true,
       };
-      
+
       return favoriteRecipeIds;
     } catch (error) {
       console.error('Error fetching user favorites:', error);
@@ -1035,7 +1035,7 @@ export default {
     this.userFavoritesCache = {
       userId: null,
       favorites: [],
-      isLoaded: false
+      isLoaded: false,
     };
   },
 
@@ -1046,7 +1046,9 @@ export default {
           this.userFavoritesCache.favorites.push(recipeId);
         }
       } else {
-        this.userFavoritesCache.favorites = this.userFavoritesCache.favorites.filter(id => id !== recipeId);
+        this.userFavoritesCache.favorites = this.userFavoritesCache.favorites.filter(
+          (id) => id !== recipeId,
+        );
       }
     }
   },

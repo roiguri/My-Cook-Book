@@ -15,24 +15,24 @@ function initializeNavigation() {
 function initializeSPANavigation() {
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a');
-    
+
     if (link && link.href && isInternalLink(link)) {
       if (
-        e.defaultPrevented ||           // Event already handled
-        e.button !== 0 ||              // Not a left click (middle/right click)
-        e.metaKey ||                   // Cmd/Meta key (Mac)
-        e.ctrlKey ||                   // Ctrl key (Windows/Linux)
-        e.shiftKey ||                  // Shift key
-        e.altKey                       // Alt key
+        e.defaultPrevented || // Event already handled
+        e.button !== 0 || // Not a left click (middle/right click)
+        e.metaKey || // Cmd/Meta key (Mac)
+        e.ctrlKey || // Ctrl key (Windows/Linux)
+        e.shiftKey || // Shift key
+        e.altKey // Alt key
       ) {
         return;
       }
-      
+
       e.preventDefault();
-      
+
       const url = new URL(link.href);
       const fullPath = url.pathname + url.search;
-      
+
       if (window.spa && window.spa.router) {
         window.spa.router.navigate(fullPath);
         setTimeout(updateActiveNavigation, 100);
@@ -44,45 +44,47 @@ function initializeSPANavigation() {
   });
 
   updateActiveNavigation();
-  
+
   window.addEventListener('popstate', updateActiveNavigation);
 }
 
 function updateActiveNavigation() {
   const currentPath = window.location.pathname;
-  
+
   const navLinks = document.querySelectorAll('header nav a');
-  
-  navLinks.forEach(link => {
+
+  navLinks.forEach((link) => {
     link.classList.remove('active');
-    
+
     try {
       const linkUrl = new URL(link.href);
       const linkPath = linkUrl.pathname;
-      
+
       const linkSearchParams = linkUrl.search;
       const currentSearchParams = window.location.search;
       const currentUrlParams = new URLSearchParams(currentSearchParams);
       const linkUrlParams = new URLSearchParams(linkSearchParams);
-      
-      const pathMatches = linkPath === currentPath || 
-                         (linkPath === '/home' && currentPath === '/') ||
-                         (linkPath === '/' && currentPath === '/home');
-      
+
+      const pathMatches =
+        linkPath === currentPath ||
+        (linkPath === '/home' && currentPath === '/') ||
+        (linkPath === '/' && currentPath === '/home');
+
       let shouldBeActive = false;
-      
+
       if (pathMatches) {
         if (linkPath === '/categories') {
           if (linkUrlParams.has('favorites')) {
             shouldBeActive = currentUrlParams.get('favorites') === 'true';
           } else {
-            shouldBeActive = !currentUrlParams.has('favorites') || currentUrlParams.get('favorites') !== 'true';
+            shouldBeActive =
+              !currentUrlParams.has('favorites') || currentUrlParams.get('favorites') !== 'true';
           }
         } else {
           shouldBeActive = linkSearchParams === currentSearchParams;
         }
       }
-      
+
       if (shouldBeActive) {
         link.classList.add('active');
       }
@@ -97,12 +99,14 @@ function isInternalLink(link) {
   try {
     const linkUrl = new URL(link.href);
     const currentUrl = new URL(window.location.href);
-    
-    return linkUrl.origin === currentUrl.origin && 
-           linkUrl.pathname.startsWith('/') && 
-           !linkUrl.pathname.startsWith('/api') &&
-           !link.hasAttribute('target') &&
-           !link.download;
+
+    return (
+      linkUrl.origin === currentUrl.origin &&
+      linkUrl.pathname.startsWith('/') &&
+      !linkUrl.pathname.startsWith('/api') &&
+      !link.hasAttribute('target') &&
+      !link.download
+    );
   } catch (e) {
     return false;
   }

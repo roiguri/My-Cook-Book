@@ -1,7 +1,11 @@
 // edit-recipe-component.js
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { StorageService } from '../../../js/services/storage-service.js';
-import { compressImage, getImageStoragePath, uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-image-utils.js';
+import {
+  compressImage,
+  getImageStoragePath,
+  uploadAndBuildImageMetadata,
+} from '../../../js/utils/recipes/recipe-image-utils.js';
 
 import '../../modals/message-modal/message-modal.js';
 import './recipe_form_component.js';
@@ -102,7 +106,12 @@ class EditRecipeComponent extends HTMLElement {
     if (oldImageName && oldImageName !== imageName) {
       try {
         const oldFullPath = getImageStoragePath(this.recipeId, category, oldImageName, 'full');
-        const oldCompressedPath = getImageStoragePath(this.recipeId, category, oldImageName, 'compressed');
+        const oldCompressedPath = getImageStoragePath(
+          this.recipeId,
+          category,
+          oldImageName,
+          'compressed',
+        );
         await StorageService.deleteFile(oldFullPath);
         await StorageService.deleteFile(oldCompressedPath);
       } catch (error) {

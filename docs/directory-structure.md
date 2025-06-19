@@ -137,6 +137,7 @@ My-Cook-Book/
 ## Architecture Notes
 
 ### SPA Structure
+
 - **Single Entry Point**: `index.html` serves the entire application
 - **History API Routing**: Clean URLs without hash fragments
 - **Code Splitting**: Pages are loaded dynamically via dynamic imports
@@ -146,14 +147,17 @@ My-Cook-Book/
 ### Key Directories
 
 **`src/app/`** - SPA-specific code
+
 - `core/` - Router and page manager
 - `pages/` - Individual page modules with templates
 
 **`src/js/services/`** - Firebase service abstraction layer
+
 - All Firebase operations go through this layer
 - Never import Firebase SDKs directly in UI components
 
 **`src/lib/`** - Reusable UI components organized by domain
+
 - `auth/` - Authentication components
 - `recipes/` - Recipe-related components
 - `modals/` - Modal dialogs
@@ -161,30 +165,37 @@ My-Cook-Book/
 - `utilities/` - General utility components
 
 **`src/styles/`** - CSS organized by components and pages
+
 - `components/` - Component-specific styles
 - `pages/` - SPA page-specific styles (scoped to `.spa-content`)
 
 **`public/`** - Static assets served directly by Vite
+
 - Images, PWA manifest, service worker
 
 **`tests/`** - Jest tests with comprehensive mocking
+
 - Service layer tests with Firebase mocking
 - Utility function tests
 
 ### Removed Legacy Structure
+
 The following were removed during SPA migration:
+
 - `/pages/` directory (legacy MPA pages)
 - Legacy page-specific JS files
-- Legacy page-specific CSS files  
+- Legacy page-specific CSS files
 - Multiple entry points in Vite config
 
 ### Build Output
+
 - Single HTML entry point with dynamically loaded page modules
 - Optimized bundle splitting for better caching
 - All static assets served from `public/` directory
 - Clean URLs with History API routing
 
 ### Development Workflow
+
 1. Create page module in `src/app/pages/`
 2. Create HTML template alongside JS file
 3. Create scoped styles in `src/styles/pages/`

@@ -86,7 +86,7 @@ img[data-src].error {
   .recipe-card img[data-src] {
     height: 150px;
   }
-  
+
   .recipe-detail img[data-src].loading {
     min-height: 200px;
   }

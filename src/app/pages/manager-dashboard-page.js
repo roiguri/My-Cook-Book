@@ -7,7 +7,9 @@ export default {
   async render(params) {
     const response = await fetch(new URL('./manager-dashboard-page.html', import.meta.url));
     if (!response.ok) {
-      throw new Error(`Failed to load manager dashboard template: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to load manager dashboard template: ${response.status} ${response.statusText}`,
+      );
     }
     return await response.text();
   },
@@ -45,7 +47,7 @@ export default {
   getMeta() {
     return {
       description: 'Manager dashboard for recipe and user management',
-      keywords: 'manager, dashboard, admin, recipes, users'
+      keywords: 'manager, dashboard, admin, recipes, users',
     };
   },
 
@@ -55,7 +57,7 @@ export default {
       import('../../lib/recipes/recipe_preview_modal/edit_preview_recipe.js'),
       import('../../lib/recipes/recipe_preview_modal/recipe_preview_modal.js'),
       import('../../lib/modals/image_approval/image_approval.js'),
-      import('../../lib/utilities/image-carousel/image-carousel.js')
+      import('../../lib/utilities/image-carousel/image-carousel.js'),
     ]);
   },
 
@@ -95,8 +97,14 @@ export default {
   setupImageApprovalListeners() {
     const imageApprovalComponent = document.querySelector('image-approval-component');
     if (imageApprovalComponent) {
-      imageApprovalComponent.addEventListener('image-approved', this.handleImageApproved.bind(this));
-      imageApprovalComponent.addEventListener('image-rejected', this.handleImageRejected.bind(this));
+      imageApprovalComponent.addEventListener(
+        'image-approved',
+        this.handleImageApproved.bind(this),
+      );
+      imageApprovalComponent.addEventListener(
+        'image-rejected',
+        this.handleImageRejected.bind(this),
+      );
     }
   },
 
@@ -168,13 +176,15 @@ export default {
     recipeList.setItems([]);
     const searchInput = document.getElementById('recipe-search');
     const filterSelect = document.getElementById('recipe-filter');
-    
+
     try {
-      const recipes = await FirestoreService.queryDocuments('recipes', { where: [['approved', '==', true]] });
+      const recipes = await FirestoreService.queryDocuments('recipes', {
+        where: [['approved', '==', true]],
+      });
       this.allRecipes = recipes;
       this.updateRecipeList(recipes);
       this.populateFilterOptions(recipes);
-      
+
       // Set up event listeners
       searchInput.addEventListener('input', () => this.filterRecipes());
       filterSelect.addEventListener('change', () => this.filterRecipes());
@@ -206,7 +216,7 @@ export default {
 
   get reverseCategoryMapping() {
     return Object.fromEntries(
-      Object.entries(this.categoryMapping).map(([key, value]) => [value, key])
+      Object.entries(this.categoryMapping).map(([key, value]) => [value, key]),
     );
   },
 
@@ -217,7 +227,9 @@ export default {
         <p>זמן הכנה: ${recipe.prepTime + recipe.waitTime} דקות</p>
         <button class="edit-recipe" data-id="${recipe.id}">ערוך</button>
     `;
-    container.querySelector('.edit-recipe').addEventListener('click', () => this.editRecipe(recipe));
+    container
+      .querySelector('.edit-recipe')
+      .addEventListener('click', () => this.editRecipe(recipe));
     return container;
   },
 
@@ -244,7 +256,7 @@ export default {
     const filteredRecipes = this.allRecipes.filter(
       (recipe) =>
         recipe.name.toLowerCase().includes(searchTerm) &&
-        (filterCategory === '' || recipe.category === this.reverseCategoryMapping[filterCategory])
+        (filterCategory === '' || recipe.category === this.reverseCategoryMapping[filterCategory]),
     );
 
     this.updateRecipeList(filteredRecipes);
@@ -268,18 +280,20 @@ export default {
   async loadPendingRecipes() {
     const pendingRecipesList = document.getElementById('pending-recipes-list');
     try {
-      const pendingRecipes = await FirestoreService.queryDocuments('recipes', { where: [['approved', '==', false]] });
+      const pendingRecipes = await FirestoreService.queryDocuments('recipes', {
+        where: [['approved', '==', false]],
+      });
       const recipeItems = pendingRecipes.map((recipe) => ({
         header: this.createPendingRecipeHeader(recipe),
         content: this.createPendingRecipeContent(recipe),
       }));
-      
+
       if (recipeItems.length == 0) {
         const pendingRecipeSection = document.getElementById('pending-recipes');
         pendingRecipeSection.querySelector('.no-pending-message').textContent =
           'אין מתכונים הממתינים לאישור';
       }
-      
+
       if (pendingRecipesList) {
         pendingRecipesList.setItems(recipeItems);
       } else {
@@ -299,7 +313,9 @@ export default {
       <span>${recipe.name} | ${this.categoryMapping[recipe.category] || 'No category'}</span>
       <button class="preview-recipe" data-id="${recipe.id}">הצג</button>
     `;
-    header.querySelector('.preview-recipe').addEventListener('click', () => this.previewRecipe(recipe.id));
+    header
+      .querySelector('.preview-recipe')
+      .addEventListener('click', () => this.previewRecipe(recipe.id));
     return header;
   },
 
@@ -308,7 +324,6 @@ export default {
     content.textContent = `Full recipe details will be shown in the preview modal.`;
     return content;
   },
-
 
   /**
    * Preview Recipe
@@ -349,7 +364,9 @@ export default {
     const pendingImagesList = document.getElementById('pending-images-list');
     pendingImagesList.setItems([]);
     try {
-      const pendingRecipes = await FirestoreService.queryDocuments('recipes', { where: [['pendingImage', '!=', null]] });
+      const pendingRecipes = await FirestoreService.queryDocuments('recipes', {
+        where: [['pendingImage', '!=', null]],
+      });
       const pendingImages = pendingRecipes.map((recipe) => ({
         recipeId: recipe.id,
         recipeName: recipe.name,
@@ -359,13 +376,13 @@ export default {
         header: this.createPendingImageHeader(image),
         content: this.createPendingImageContent(image),
       }));
-      
+
       if (imageItems.length == 0) {
         const pendingRecipeSection = document.getElementById('pending-images');
         pendingRecipeSection.querySelector('.no-pending-message').textContent =
           'אין תמונות הממתינות לאישור';
       }
-      
+
       if (pendingImagesList) {
         pendingImagesList.setItems(imageItems);
       } else {
@@ -445,5 +462,5 @@ export default {
   handleError(error) {
     console.error('Error:', error);
     alert('אירעה שגיאה. אנא נסה שנית.'); // Replace with a more user-friendly error handling system
-  }
+  },
 };

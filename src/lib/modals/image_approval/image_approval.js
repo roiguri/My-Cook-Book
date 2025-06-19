@@ -62,7 +62,10 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { StorageService } from '../../../js/services/storage-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { approvePendingImage, rejectPendingImage } from '../../../js/utils/recipes/recipe-image-utils.js';
+import {
+  approvePendingImage,
+  rejectPendingImage,
+} from '../../../js/utils/recipes/recipe-image-utils.js';
 
 class ImageApprovalComponent extends HTMLElement {
   constructor() {

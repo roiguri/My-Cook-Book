@@ -9,9 +9,9 @@ export class LazyImageLoader {
     this.options = {
       rootMargin: '50px',
       threshold: 0.1,
-      ...options
+      ...options,
     };
-    
+
     this.observer = null;
     this.init();
   }
@@ -19,7 +19,7 @@ export class LazyImageLoader {
   init() {
     if ('IntersectionObserver' in window) {
       this.observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             this.loadImage(entry.target);
             this.observer.unobserve(entry.target);
@@ -50,29 +50,29 @@ export class LazyImageLoader {
     if (img.dataset.src) {
       // Add loading state
       img.classList.add('loading');
-      
+
       // Create a new image to preload
       const imageLoader = new Image();
-      
+
       imageLoader.onload = () => {
         img.src = img.dataset.src;
         img.classList.remove('loading');
         img.classList.add('loaded');
-        
+
         // Remove data-src attribute
         delete img.dataset.src;
       };
-      
+
       imageLoader.onerror = () => {
         img.classList.remove('loading');
         img.classList.add('error');
-        
+
         // Set fallback image if available
         if (img.dataset.fallback) {
           img.src = img.dataset.fallback;
         }
       };
-      
+
       imageLoader.src = img.dataset.src;
     }
   }
@@ -83,7 +83,7 @@ export class LazyImageLoader {
    */
   observeAll(container = document) {
     const lazyImages = container.querySelectorAll('img[data-src]');
-    lazyImages.forEach(img => this.observe(img));
+    lazyImages.forEach((img) => this.observe(img));
   }
 
   /**
@@ -121,13 +121,14 @@ export function createLazyImage(src, alt = '', className = '', fallback = '/img/
   img.dataset.fallback = fallback;
   img.alt = alt;
   img.className = className;
-  
+
   // Set placeholder or loading state
-  img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+';
-  
+  img.src =
+    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+';
+
   // Initialize lazy loading for this image
   lazyImageLoader.observe(img);
-  
+
   return img;
 }
 
@@ -170,7 +171,7 @@ export class LazyComponentLoader {
         .then((module) => {
           this.loadedComponents.set(componentPath, module); // Cache the module
         })
-        .catch(error => {
+        .catch((error) => {
           console.warn(`Failed to preload component: ${componentPath}`, error);
         });
     }

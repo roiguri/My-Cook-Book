@@ -145,14 +145,14 @@ class HeaderSearchBar extends HTMLElement {
       searchParams.set('q', searchText);
       const searchUrl = `/categories?${searchParams.toString()}`;
       window.spa.router.navigate(searchUrl);
-      
+
       // Update navigation active state after search navigation
       setTimeout(() => {
         if (typeof window.updateActiveNavigation === 'function') {
           window.updateActiveNavigation();
         }
       }, 100);
-      
+
       // Clear the navigation search input after navigation
       this.clear();
     } else {

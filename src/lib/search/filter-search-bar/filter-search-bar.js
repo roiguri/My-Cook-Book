@@ -152,7 +152,7 @@ class FilterSearchBar extends HTMLElement {
   updateClearButtonVisibility() {
     const input = this.shadowRoot.querySelector('.search-input');
     const clearButton = this.shadowRoot.querySelector('.clear-button');
-    
+
     if (input.value.trim().length > 0) {
       clearButton.classList.add('visible');
     } else {

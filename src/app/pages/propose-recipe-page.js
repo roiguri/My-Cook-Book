@@ -15,14 +15,12 @@ export default {
   },
 
   async mount(container, params) {
-    
     try {
       await this.importComponents();
-      
+
       await this.setupAuthentication(container);
-      
+
       this.setupEventListeners();
-      
     } catch (error) {
       console.error('Error mounting propose recipe page:', error);
       this.handleError(error, 'mount');
@@ -32,9 +30,8 @@ export default {
   async unmount() {
     try {
       this.removeEventListeners();
-      
+
       this.cleanupAuthListeners();
-      
     } catch (error) {
       console.error('Error unmounting propose recipe page:', error);
     }
@@ -46,7 +43,8 @@ export default {
 
   getMeta() {
     return {
-      description: 'Share your culinary creations with our community. Propose a recipe and inspire others with your cooking expertise.',
+      description:
+        'Share your culinary creations with our community. Propose a recipe and inspire others with your cooking expertise.',
       keywords: 'recipe, cooking, share, community, culinary, propose recipe, cooking tips',
     };
   },
@@ -69,7 +67,7 @@ export default {
     const proposeRecipeForm = container.querySelector('propose-recipe-component');
     const loginPromptModal = document.querySelector('#login-prompt-modal');
     const authController = document.querySelector('auth-controller');
-    
+
     if (!proposeRecipeForm) {
       console.warn('propose-recipe-component not found in container');
       return;
@@ -119,7 +117,7 @@ export default {
         () => {
           this.loginPromptModal.close();
           this.authController.openModal();
-        }
+        },
       );
     }
   },
@@ -128,7 +126,7 @@ export default {
     this.recipeProposedHandler = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-    
+
     document.addEventListener('recipe-proposed-success', this.recipeProposedHandler);
 
     if (this.loginPromptModal) {
@@ -138,7 +136,7 @@ export default {
           window.spa.router.navigate('/home');
         }
       };
-      
+
       this.loginPromptModal.addEventListener('modal-closed-by-user', this.modalClosedHandler);
     }
   },
@@ -148,7 +146,7 @@ export default {
       document.removeEventListener('recipe-proposed-success', this.recipeProposedHandler);
       this.recipeProposedHandler = null;
     }
-    
+
     if (this.loginPromptModal && this.modalClosedHandler) {
       this.loginPromptModal.removeEventListener('modal-closed-by-user', this.modalClosedHandler);
       this.modalClosedHandler = null;
@@ -164,7 +162,7 @@ export default {
 
   handleError(error, context = 'unknown') {
     console.error(`Propose Recipe Page Error in ${context}:`, error);
-    
+
     const errorContainer = document.querySelector('.spa-content .error-container');
     if (errorContainer) {
       errorContainer.innerHTML = `
@@ -174,7 +172,7 @@ export default {
           <button id="propose-error-go-home" class="btn-primary">Go Home</button>
         </div>
       `;
-      
+
       const goHomeButton = errorContainer.querySelector('#propose-error-go-home');
       if (goHomeButton) {
         goHomeButton.addEventListener('click', () => {
@@ -182,5 +180,5 @@ export default {
         });
       }
     }
-  }
+  },
 };

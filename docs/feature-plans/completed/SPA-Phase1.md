@@ -1,4 +1,5 @@
 # SPA Core Implementation Plan - Phase 1
+
 ## Building Foundation Services and Application Shell
 
 ---
@@ -16,6 +17,7 @@ This plan focuses on building the core SPA infrastructure with hash-based routin
 ## Step 1: Core Router Service (Days 1-2)
 
 ### Tasks
+
 - [x] Create `src/app/core/router.js` with hash-based routing
 - [x] Implement route registration, navigation, and URL parsing
 - [x] Add browser back/forward button support
@@ -24,6 +26,7 @@ This plan focuses on building the core SPA infrastructure with hash-based routin
 ### Implementation Details
 
 **Router Core Features:**
+
 ```javascript
 // src/app/core/router.js
 class AppRouter {
@@ -34,31 +37,34 @@ class AppRouter {
   }
 
   // Route management
-  registerRoute(path, handler) { }
-  navigate(path) { }
-  getCurrentRoute() { }
-  
+  registerRoute(path, handler) {}
+  navigate(path) {}
+  getCurrentRoute() {}
+
   // Event handling
-  handleHashChange() { }
-  handlePopState() { }
-  
+  handleHashChange() {}
+  handlePopState() {}
+
   // URL management
-  updateURL(path) { }
-  parseCurrentRoute() { }
+  updateURL(path) {}
+  parseCurrentRoute() {}
 }
 ```
 
 **Test Setup:**
+
 - Create simple test page at `test-router.html`
 - Register test routes that show different content
 - Test navigation programmatically and via URL changes
 
 ### Deliverables
+
 - Working router class in `src/app/core/router.js`
 - Test page demonstrating router functionality
 - Basic documentation of router API
 
 ### Success Metrics
+
 - [x] **Route Registration**: Can register routes and retrieve them
 - [x] **Navigation**: `router.navigate('#/test')` changes URL and triggers route handler
 - [x] **URL Parsing**: Router correctly parses `#/page/param` into route and parameters
@@ -69,6 +75,7 @@ class AppRouter {
 - [x] **No Console Errors**: Router operates without JavaScript errors
 
 **Testing Method:**
+
 ```javascript
 // Manual testing in browser console
 router.navigate('#/test1'); // Should show test1 content
@@ -81,6 +88,7 @@ history.back(); // Should go back to test1
 ## Step 2: Page Manager Service (Days 3-4)
 
 ### Tasks
+
 - [x] Create `src/app/core/page-manager.js` for page lifecycle management
 - [x] Implement page loading, rendering, and cleanup
 - [x] Add support for page modules with render/mount/unmount lifecycle
@@ -89,6 +97,7 @@ history.back(); // Should go back to test1
 ### Implementation Details
 
 **Page Manager Features:**
+
 ```javascript
 // src/app/core/page-manager.js
 class PageManager {
@@ -99,47 +108,50 @@ class PageManager {
   }
 
   // Page lifecycle
-  async loadPage(pageModule, params = {}) { }
-  async unloadCurrentPage() { }
-  renderPageContent(html) { }
-  
+  async loadPage(pageModule, params = {}) {}
+  async unloadCurrentPage() {}
+  renderPageContent(html) {}
+
   // Page module interface
-  async callPageMethod(method, ...args) { }
-  
+  async callPageMethod(method, ...args) {}
+
   // Utility
-  updatePageTitle(title) { }
-  updatePageMeta(meta) { }
+  updatePageTitle(title) {}
+  updatePageMeta(meta) {}
 }
 ```
 
 **Test Page Module Interface:**
+
 ```javascript
 // Test page module structure
 export default {
   async render(params) {
     return `<div>Test Page: ${params.id || 'default'}</div>`;
   },
-  
+
   async mount(container) {
     console.log('Test page mounted');
   },
-  
+
   async unmount() {
     console.log('Test page unmounted');
   },
-  
+
   getTitle() {
     return 'Test Page Title';
-  }
-}
+  },
+};
 ```
 
 ### Deliverables
+
 - Working page manager class in `src/app/core/page-manager.js`
 - 2-3 test page modules demonstrating different scenarios
 - Integration test showing router + page manager working together
 
 ### Success Metrics
+
 - [x] **Page Loading**: Can load page modules dynamically using import()
 - [x] **Lifecycle Management**: Calls render(), mount(), unmount() in correct order
 - [x] **Content Rendering**: Page HTML renders correctly in content container
@@ -151,6 +163,7 @@ export default {
 - [x] **Router Integration**: Works seamlessly with router service
 
 **Testing Method:**
+
 ```javascript
 // Integration test
 const pageManager = new PageManager(document.getElementById('content'));
@@ -167,6 +180,7 @@ router.navigate('#/test2'); // Should unmount test1, load and mount test2
 ## Step 3: Integrated Core System (Day 5)
 
 ### Tasks
+
 - [x] Create integrated test showing router + page manager working together
 - [x] Add error handling and fallback mechanisms
 - [x] Test edge cases (invalid routes, failed page loads, etc.)
@@ -175,22 +189,26 @@ router.navigate('#/test2'); // Should unmount test1, load and mount test2
 ### Implementation Details
 
 **Integration Test Setup:**
+
 - Create `test-spa-core.html` demonstrating full system
 - Include multiple test pages with different content
 - Test navigation between pages
 - Verify cleanup and lifecycle management
 
 **Error Handling:**
+
 - 404 page for invalid routes
 - Error page for failed page loads
 - Graceful degradation when modules fail to import
 
 ### Deliverables
+
 - Complete integration test demonstrating core SPA functionality
 - Error handling for common failure scenarios
 - Basic documentation of the system architecture
 
 ### Success Metrics
+
 - [x] **Full Navigation Flow**: Complete page-to-page navigation works flawlessly
 - [x] **Error Recovery**: System handles errors gracefully without breaking
 - [x] **Performance**: Page transitions happen smoothly without delays
@@ -204,6 +222,7 @@ router.navigate('#/test2'); // Should unmount test1, load and mount test2
 ## Step 4: Application Shell Creation (Days 6-7)
 
 ### Tasks
+
 - [x] Create `app.html` as the main SPA shell
 - [x] Extract header/footer structure from existing pages
 - [x] Import existing auth components and services
@@ -213,42 +232,44 @@ router.navigate('#/test2'); // Should unmount test1, load and mount test2
 ### Implementation Details
 
 **App Shell Structure:**
+
 ```html
 <!-- app.html -->
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Our Kitchen Chronicles</title>
-  <!-- Existing favicon and meta tags -->
-  <script type="module" src="/src/app.js" defer></script>
-</head>
-<body>
-  <!-- Existing header structure -->
-  <header class="header-container">
-    <!-- Copy from existing header with navigation links disabled -->
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Our Kitchen Chronicles</title>
+    <!-- Existing favicon and meta tags -->
+    <script type="module" src="/src/app.js" defer></script>
+  </head>
+  <body>
+    <!-- Existing header structure -->
+    <header class="header-container">
+      <!-- Copy from existing header with navigation links disabled -->
+    </header>
 
-  <!-- SPA content container -->
-  <main id="spa-content" class="spa-content">
-    <!-- Page content will be rendered here -->
-  </main>
+    <!-- SPA content container -->
+    <main id="spa-content" class="spa-content">
+      <!-- Page content will be rendered here -->
+    </main>
 
-  <!-- Existing footer structure -->
-  <footer>
-    <!-- Copy from existing footer -->
-  </footer>
+    <!-- Existing footer structure -->
+    <footer>
+      <!-- Copy from existing footer -->
+    </footer>
 
-  <!-- Existing auth components -->
-  <auth-controller>
-    <!-- Copy from existing auth setup -->
-  </auth-controller>
-</body>
+    <!-- Existing auth components -->
+    <auth-controller>
+      <!-- Copy from existing auth setup -->
+    </auth-controller>
+  </body>
 </html>
 ```
 
 **Main Entry Point:**
+
 ```javascript
 // src/app.js
 import { initFirebase } from './js/services/firebase-service.js';
@@ -270,12 +291,14 @@ document.addEventListener('DOMContentLoaded', initializeSPA);
 ```
 
 ### Deliverables
+
 - Complete `app.html` with header/footer structure
 - Main entry point (`src/app.js`) initializing the SPA
 - Header with navigation links (initially disabled/placeholder)
 - Working authentication components in SPA context
 
 ### Success Metrics
+
 - [x] **Shell Loading**: `app.html` loads without errors
 - [x] **Existing Components**: All existing auth components work in SPA context
 - [x] **Styling**: Header/footer styling matches existing pages exactly
@@ -286,6 +309,7 @@ document.addEventListener('DOMContentLoaded', initializeSPA);
 - [x] **Navigation Structure**: Header contains all navigation items (even if disabled)
 
 **Testing Method:**
+
 - Load `app.html` and verify no console errors
 - Test authentication flow (login, logout, profile)
 - Verify responsive behavior on different screen sizes
@@ -296,6 +320,7 @@ document.addEventListener('DOMContentLoaded', initializeSPA);
 ## Step 5: First Page Integration (Days 8-9)
 
 ### Tasks
+
 - [x] Create first page module (`home-page.js`) using existing home page structure
 - [x] Import existing home page components and services
 - [x] Integrate page with router and page manager
@@ -304,6 +329,7 @@ document.addEventListener('DOMContentLoaded', initializeSPA);
 ### Implementation Details
 
 **Home Page Module:**
+
 ```javascript
 // src/app/pages/home-page.js
 import { FirestoreService } from '../../js/services/firestore-service.js';
@@ -346,11 +372,12 @@ export default {
 
   getTitle() {
     return 'Our Kitchen Chronicles';
-  }
-}
+  },
+};
 ```
 
 **Integration Setup:**
+
 ```javascript
 // In src/app.js
 import homePageModule from './app/pages/home-page.js';
@@ -361,12 +388,14 @@ router.registerRoute('/', () => router.navigate('#/home')); // Default route
 ```
 
 ### Deliverables
+
 - Working home page module with existing functionality
 - Complete integration with router and page manager
 - Featured recipes loading and displaying correctly
 - Category navigation structure in place
 
 ### Success Metrics
+
 - [x] **Page Loading**: Home page loads when navigating to `#/home`
 - [x] **Content Rendering**: Page renders identically to existing home page
 - [x] **Component Integration**: Featured recipes component works correctly
@@ -378,6 +407,7 @@ router.registerRoute('/', () => router.navigate('#/home')); // Default route
 - [x] **Error Handling**: Graceful handling of data loading failures
 
 **Testing Method:**
+
 - Navigate to `/app.html#/home` and verify page loads
 - Check that featured recipes display with real data
 - Verify page appearance matches existing home page
@@ -388,6 +418,7 @@ router.registerRoute('/', () => router.navigate('#/home')); // Default route
 ## Overall Success Metrics
 
 ### Technical Metrics
+
 - [x] **Zero Breaking Changes**: Existing site continues to work unchanged
 - [x] **Performance**: SPA shell loads in < 2 seconds
 - [x] **Memory Usage**: No memory leaks during navigation testing
@@ -395,6 +426,7 @@ router.registerRoute('/', () => router.navigate('#/home')); // Default route
 - [x] **Browser Support**: Works in Chrome, Firefox, Safari (latest versions)
 
 ### Functional Metrics
+
 - [x] **Feature Parity**: Home page in SPA has same functionality as original
 - [x] **Authentication**: All auth flows work in SPA context
 - [x] **Navigation**: Smooth transitions between test pages
@@ -402,6 +434,7 @@ router.registerRoute('/', () => router.navigate('#/home')); // Default route
 - [x] **Responsive Design**: Works on desktop, tablet, and mobile
 
 ### Development Metrics
+
 - [x] **Code Organization**: Clear separation between router, page manager, and pages
 - [x] **Reusability**: Existing components work without modification
 - [x] **Maintainability**: Code is well-documented and follows established patterns
@@ -412,11 +445,14 @@ router.registerRoute('/', () => router.navigate('#/home')); // Default route
 ## Risk Mitigation
 
 ### Technical Risks
+
 1. **Component Compatibility**: Existing components may not work in SPA context
+
    - **Mitigation**: Test each component individually as it's integrated
    - **Fallback**: Keep original pages as backup during development
 
 2. **Performance Issues**: Large JavaScript bundles
+
    - **Mitigation**: Use dynamic imports for page modules
    - **Monitoring**: Track bundle sizes during development
 
@@ -425,7 +461,9 @@ router.registerRoute('/', () => router.navigate('#/home')); // Default route
    - **Testing**: Test on multiple browsers regularly
 
 ### Development Risks
+
 1. **Scope Creep**: Trying to migrate too much at once
+
    - **Mitigation**: Stick strictly to defined steps and success metrics
    - **Review**: Regular checkpoints to ensure step completion
 
@@ -438,6 +476,7 @@ router.registerRoute('/', () => router.navigate('#/home')); // Default route
 ## Next Steps After Phase 1
 
 Once this foundation is complete:
+
 1. **Page Migration**: Migrate remaining pages one by one
 2. **Navigation Activation**: Enable header links as pages are migrated
 3. **Performance Optimization**: Implement code splitting and caching
@@ -449,6 +488,7 @@ Once this foundation is complete:
 ## Testing Strategy
 
 ### Manual Testing Checklist
+
 - [x] Load `app.html` without errors
 - [x] Navigate between test routes using URL bar
 - [x] Use browser back/forward buttons
@@ -457,6 +497,7 @@ Once this foundation is complete:
 - [x] Check home page functionality matches original
 
 ### Automated Testing (Future)
+
 - Unit tests for router and page manager
 - Integration tests for complete navigation flows
 - Performance tests for page load times
@@ -467,12 +508,14 @@ Once this foundation is complete:
 ## Documentation Requirements
 
 ### Code Documentation
+
 - [x] README with setup instructions
 - [x] API documentation for router and page manager
 - [x] Code comments explaining complex logic
 - [x] Examples of page module creation
 
 ### Architecture Documentation
+
 - [x] System overview diagram
 - [x] Data flow documentation
 - [x] Integration points with existing system

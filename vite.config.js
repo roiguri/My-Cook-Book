@@ -24,9 +24,7 @@ export default defineConfig({
     // Enable History API fallback for SPA routing in development
     historyApiFallback: {
       // Fallback to index.html for any route that doesn't match static files
-      rewrites: [
-        { from: /^\/(?!src|img|css|js).*$/, to: '/index.html' }
-      ]
-    }
-  }
+      rewrites: [{ from: /^\/(?!src|img|css|js).*$/, to: '/index.html' }],
+    },
+  },
 });

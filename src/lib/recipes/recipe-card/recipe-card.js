@@ -228,7 +228,7 @@ class RecipeCard extends HTMLElement {
         tempLink.href = `/recipe/${this.recipeId}`;
         tempLink.style.display = 'none';
         document.body.appendChild(tempLink);
-        
+
         // Create a new click event with the same properties
         const linkClickEvent = new MouseEvent('click', {
           button: event.button,
@@ -238,12 +238,12 @@ class RecipeCard extends HTMLElement {
           shiftKey: event.shiftKey,
           altKey: event.altKey,
           bubbles: true,
-          cancelable: true
+          cancelable: true,
         });
-        
+
         // Click the link (this will be handled by the global navigation script)
         tempLink.dispatchEvent(linkClickEvent);
-        
+
         // Clean up
         document.body.removeChild(tempLink);
       }
@@ -778,7 +778,7 @@ class RecipeCard extends HTMLElement {
     `;
 
     this._setupEventListeners();
-    
+
     // Initialize lazy loading for images in this component
     initLazyLoading(this.shadowRoot);
   }
@@ -803,11 +803,11 @@ class RecipeCard extends HTMLElement {
       const user = authService.getCurrentUser();
       const userId = user?.uid;
       if (!userId) return; // No user logged in
-      
+
       const wasFavorite = this._isFavorite();
       const db = getFirestoreInstance();
       const userDocRef = doc(db, 'users', userId);
-      
+
       if (wasFavorite) {
         // Remove from favorites
         await updateDoc(userDocRef, {
@@ -821,27 +821,31 @@ class RecipeCard extends HTMLElement {
         });
         this._userFavorites.add(this.recipeId);
       }
-      
+
       // Dispatch event to notify other components about the favorite change
-      this.dispatchEvent(new CustomEvent('recipe-favorite-changed', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          recipeId: this.recipeId,
-          isFavorite: !wasFavorite,
-          userId: userId
-        }
-      }));
-      
+      this.dispatchEvent(
+        new CustomEvent('recipe-favorite-changed', {
+          bubbles: true,
+          composed: true,
+          detail: {
+            recipeId: this.recipeId,
+            isFavorite: !wasFavorite,
+            userId: userId,
+          },
+        }),
+      );
+
       // Also dispatch to document for global listeners
-      document.dispatchEvent(new CustomEvent('recipe-favorite-changed', {
-        detail: {
-          recipeId: this.recipeId,
-          isFavorite: !wasFavorite,
-          userId: userId
-        }
-      }));
-      
+      document.dispatchEvent(
+        new CustomEvent('recipe-favorite-changed', {
+          detail: {
+            recipeId: this.recipeId,
+            isFavorite: !wasFavorite,
+            userId: userId,
+          },
+        }),
+      );
+
       this._renderRecipe(); // Re-render to reflect the change
     } catch (error) {
       console.error('Error toggling favorite:', error);

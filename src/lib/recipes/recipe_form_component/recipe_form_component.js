@@ -649,9 +649,11 @@ class RecipeFormComponent extends HTMLElement {
     this.collectFormData();
     const { isValid, errors } = validateRecipeData(this.recipeData);
     // Clear all previous error states
-    this.shadowRoot.querySelectorAll('.recipe-form__input, .recipe-form__select, .recipe-form__textarea').forEach((el) => {
-      el.classList.remove('recipe-form__input--invalid');
-    });
+    this.shadowRoot
+      .querySelectorAll('.recipe-form__input, .recipe-form__select, .recipe-form__textarea')
+      .forEach((el) => {
+        el.classList.remove('recipe-form__input--invalid');
+      });
     // Show error messages and highlight invalid fields
     const errorMessage = this.shadowRoot.querySelector('.recipe-form__error-message');
     if (!isValid) {
@@ -676,7 +678,9 @@ class RecipeFormComponent extends HTMLElement {
             const match = key.match(/instructions\[(\d+)\]/);
             if (match) {
               const idx = parseInt(match[1], 10);
-              const input = this.shadowRoot.querySelectorAll('.recipe-form__stages input[type="text"]')[idx];
+              const input = this.shadowRoot.querySelectorAll(
+                '.recipe-form__stages input[type="text"]',
+              )[idx];
               if (input) input.classList.add('recipe-form__input--invalid');
             }
           } else if (key.startsWith('stages[')) {
@@ -780,7 +784,8 @@ class RecipeFormComponent extends HTMLElement {
     const imageHandler = this.shadowRoot.getElementById('recipe-images');
     const images = imageHandler.getImages();
     // Track removed images if the handler supports it
-    const toDelete = typeof imageHandler.getRemovedImages === 'function' ? imageHandler.getRemovedImages() : [];
+    const toDelete =
+      typeof imageHandler.getRemovedImages === 'function' ? imageHandler.getRemovedImages() : [];
 
     this.recipeData.images = images.map((img) => {
       if (img.file) {
@@ -1084,7 +1089,7 @@ class RecipeFormComponent extends HTMLElement {
 
   setDisabled(isDisabled) {
     const formElements = this.shadowRoot.querySelectorAll('input, select, textarea, button');
-    formElements.forEach(element => {
+    formElements.forEach((element) => {
       element.disabled = isDisabled;
     });
 

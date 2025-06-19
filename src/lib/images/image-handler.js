@@ -422,7 +422,7 @@ class ImageHandler extends HTMLElement {
     }
 
     const fileNames = this.images
-      .map((img) => img.file ? img.file.name : img.fileName || img.id || 'תמונה קיימת')
+      .map((img) => (img.file ? img.file.name : img.fileName || img.id || 'תמונה קיימת'))
       .filter(Boolean);
     filesArea.textContent = `קבצים נבחרו: ${fileNames.join(', ')}`;
   }
@@ -669,7 +669,7 @@ class ImageHandler extends HTMLElement {
     uploadArea.setAttribute('data-disabled', isDisabled.toString());
 
     const controlButtons = this.shadowRoot.querySelectorAll('.image-preview .control-button');
-    controlButtons.forEach(button => {
+    controlButtons.forEach((button) => {
       button.disabled = isDisabled;
     });
 
@@ -681,7 +681,7 @@ class ImageHandler extends HTMLElement {
 
     // Prevent drag-and-drop on previews when disabled
     const previews = this.shadowRoot.querySelectorAll('.image-preview');
-    previews.forEach(preview => {
+    previews.forEach((preview) => {
       preview.draggable = !isDisabled;
     });
     // The main upload area click is already handled by checking data-disabled.

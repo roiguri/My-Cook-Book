@@ -1,11 +1,11 @@
 export default {
   async render() {
     const response = await fetch(new URL('./recipe-detail-page.html', import.meta.url));
-    
+
     if (!response.ok) {
       throw new Error(`Failed to load template: ${response.status} ${response.statusText}`);
     }
-    
+
     return await response.text();
   },
 
@@ -27,11 +27,11 @@ export default {
 
   async initializeRecipeComponent(container, recipeId) {
     await import('../../lib/recipes/recipe_component/recipe_component.js');
-    
+
     const recipeContainer = container.querySelector('.recipe-container');
     if (recipeContainer) {
       recipeContainer.innerHTML = '';
-      
+
       const recipeComponent = document.createElement('recipe-component');
       recipeComponent.setAttribute('recipe-id', recipeId);
       recipeContainer.appendChild(recipeComponent);
@@ -40,9 +40,7 @@ export default {
     }
   },
 
-  async importComponents() {
-
-  },
+  async importComponents() {},
 
   showError(container, message) {
     container.innerHTML = `
@@ -57,10 +55,10 @@ export default {
         </div>
       </div>
     `;
-    
+
     const errorDetails = container.querySelector('#recipe-error-details');
     const backButton = container.querySelector('#back-button');
-    
+
     errorDetails.textContent = message;
     backButton.addEventListener('click', () => {
       history.back();
@@ -72,15 +70,17 @@ export default {
   },
 
   getTitle(params) {
-    return params.id ? `Recipe ${params.id} - Our Kitchen Chronicles` : 'Recipe - Our Kitchen Chronicles';
+    return params.id
+      ? `Recipe ${params.id} - Our Kitchen Chronicles`
+      : 'Recipe - Our Kitchen Chronicles';
   },
 
   getMeta() {
     return {
       description: 'View detailed recipe instructions, ingredients, and cooking tips.',
-      keywords: 'recipe, cooking, instructions, ingredients, kitchen'
+      keywords: 'recipe, cooking, instructions, ingredients, kitchen',
     };
   },
 
-  stylePath: '/src/styles/pages/recipe-detail-spa.css'
+  stylePath: '/src/styles/pages/recipe-detail-spa.css',
 };

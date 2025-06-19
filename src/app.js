@@ -97,7 +97,6 @@ function registerRoutes(router, pageManager) {
   });
 }
 
-
 function showInitializationError(error) {
   const contentContainer = document.getElementById('spa-content');
   if (contentContainer) {

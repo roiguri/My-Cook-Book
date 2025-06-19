@@ -215,7 +215,9 @@ export class Modal extends HTMLElement {
   close(options = { byUser: false }) {
     if (this.isOpen) {
       if (options.byUser) {
-        this.dispatchEvent(new CustomEvent('modal-closed-by-user', { bubbles: true, composed: true }));
+        this.dispatchEvent(
+          new CustomEvent('modal-closed-by-user', { bubbles: true, composed: true }),
+        );
       }
       const modalElement = this.shadowRoot.querySelector('.modal');
       modalElement.classList.remove('open');

@@ -181,8 +181,13 @@ class ImageProposalModal extends HTMLElement {
       if (!currentUser) throw new Error('User not authenticated');
       const recipe = await getRecipeById(this.recipeId);
       if (!recipe) throw new Error('Recipe not found');
-      const files = images.map(img => img.file);
-      const pendingImages = await addPendingImages(this.recipeId, files, recipe.category, currentUser.uid);
+      const files = images.map((img) => img.file);
+      const pendingImages = await addPendingImages(
+        this.recipeId,
+        files,
+        recipe.category,
+        currentUser.uid,
+      );
       // Dispatch success event
       this.dispatchEvent(
         new CustomEvent('images-proposed', {

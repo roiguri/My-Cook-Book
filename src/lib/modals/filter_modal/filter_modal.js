@@ -139,7 +139,7 @@ class RecipeFilterComponent extends HTMLElement {
       // Re-render to show/hide favorites filter based on auth state
       this.render();
       this.setupEventListeners();
-      
+
       // If user logged out while modal is open, update data
       if (!authState.user) {
         // Clear favorites filter state since user is no longer authenticated
