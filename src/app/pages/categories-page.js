@@ -802,6 +802,13 @@ export default {
   async handleFilterModalOpen() {
     const filterModal = document.getElementById('recipe-filter');
     if (filterModal) {
+      // Set current filters first so modal state is initialized correctly before rendering
+      if (this.hasActiveFilters) {
+        filterModal.setAttribute('current-filters', JSON.stringify(this.activeFilters));
+      } else {
+        filterModal.removeAttribute('current-filters');
+      }
+
       let baseRecipes = [...this.allRecipes];
 
       if (this.currentSearchQuery) {
@@ -824,29 +831,36 @@ export default {
         filterModal.removeAttribute('category');
       }
 
-      if (this.hasActiveFilters) {
-        filterModal.setAttribute('current-filters', JSON.stringify(this.activeFilters));
-      } else {
-        filterModal.removeAttribute('current-filters');
-      }
-
       filterModal.open();
     }
   },
 
   async handleFilterApplied(event) {
     const { recipes, filters } = event.detail;
+    
+    // Check if favorites filter changed from true to false
+    const wasFavoritesOnly = this.activeFilters.favoritesOnly;
+    const isFavoritesOnly = filters.favoritesOnly || false;
+    const favoritesDisabled = wasFavoritesOnly && !isFavoritesOnly;
+    
     this.activeFilters = {
       cookingTime: filters.cookingTime || '',
       difficulty: filters.difficulty || '',
       mainIngredient: filters.mainIngredient || '',
       tags: filters.tags || [],
-      favoritesOnly: filters.favoritesOnly || false,
+      favoritesOnly: isFavoritesOnly,
     };
 
     this.hasActiveFilters = this.checkHasActiveFilters();
 
-    this.displayedRecipes = recipes;
+    // If favorites was disabled, we need to reload all recipes from Firestore
+    // because the modal only had favorites recipes to work with
+    if (favoritesDisabled) {
+      await this.loadInitialRecipes();
+    } else {
+      this.displayedRecipes = recipes;
+    }
+    
     this.currentPage = 1;
 
     this.updateFilterBadge(filters);
