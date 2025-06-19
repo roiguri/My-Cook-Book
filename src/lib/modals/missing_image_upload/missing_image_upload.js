@@ -159,7 +159,6 @@ class MissingImageUpload extends HTMLElement {
 
   set recipeId(value) {
     this._recipeId = value;
-    console.log(`Recipe ID set to: ${value}`);
   }
 
   openModal() {
@@ -271,7 +270,6 @@ class MissingImageUpload extends HTMLElement {
         },
       });
       // TODO: Display a success message to the user indicating the image is pending approval
-      console.log('Image uploaded successfully and pending approval!');
       return { fullSizeUrl, compressedUrl };
     } catch (error) {
       console.error('Error uploading to Firebase Storage:', error);

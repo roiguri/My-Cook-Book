@@ -73,7 +73,6 @@ export default {
       const recipes = await FirestoreService.queryDocuments('recipes', queryParams);
 
       if (!recipes.length) {
-        console.log('No matching documents.');
         messageContainer.innerHTML = 'לא נמצאו מתכונים מומלצים.';
         return;
       }

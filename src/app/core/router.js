@@ -138,7 +138,6 @@ export class AppRouter {
 
     if (handler) {
       try {
-        console.log(`Executing route ${path} with params:`, params);
         handler(params);
       } catch (error) {
         console.error(`Error executing route handler for ${path}:`, error);

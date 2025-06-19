@@ -27,7 +27,6 @@ export default {
     }
 
     await this.importComponents();
-    this.initializePDFViewer();
     this.setupAuthListener();
   },
 
@@ -86,11 +85,4 @@ export default {
       }
     });
   },
-
-  initializePDFViewer() {
-    const pdfViewer = document.querySelector('pdf-viewer');
-    if (pdfViewer) {
-      console.log('PDF viewer initialized');
-    }
-  }
 };

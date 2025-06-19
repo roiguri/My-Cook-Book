@@ -177,7 +177,6 @@ class RecipeCard extends HTMLElement {
     if (favoriteBtn && !favoriteBtn.hasAttribute('listener-attached')) {
       favoriteBtn.setAttribute('listener-attached', 'true');
       favoriteBtn.addEventListener('click', async (e) => {
-        console.log('Favorite button clicked');
         e.stopPropagation(); // Prevent card click
 
         const isFavorite = favoriteBtn.classList.contains('active');
@@ -251,8 +250,6 @@ class RecipeCard extends HTMLElement {
       return;
     }
 
-    console.log('Card clicked, emitting event for recipe:', this.recipeId);
-
     // Emit recipe-card-open event for the modal
     const customEvent = new CustomEvent('recipe-card-open', {
       detail: { recipeId: this.recipeId },
@@ -263,8 +260,6 @@ class RecipeCard extends HTMLElement {
   }
 
   _handleArrowClick(event) {
-    console.log('Arrow clicked, current collapsed state:', this.isCollapsed);
-
     // Stop event propagation to prevent card click
     event.stopPropagation();
 

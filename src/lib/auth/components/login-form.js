@@ -243,14 +243,12 @@ class LoginForm extends HTMLElement {
     const remember = this.shadowRoot.getElementById('remember').checked;
 
     try {
-      console.log('Login attempt with:', { email, remember });
-
       const authController = this.closest('auth-controller');
       await authController.handleLogin(email, password, remember);
       // Close modal after successful login
       authController.closeModal();
     } catch (error) {
-      console.log('Login Error Details:', {
+      console.error('Login Error Details:', {
         code: error.code,
         message: error.message,
         name: error.name,

@@ -350,7 +350,6 @@ class PDFViewer extends HTMLElement {
   }
 
   goToPage(pageNumber) {
-    console.log(pageNumber);
     this.currentPage = Math.max(1, Math.min(pageNumber, this.totalPages));
     this.render();
   }

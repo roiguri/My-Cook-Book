@@ -210,7 +210,6 @@ class EditPreviewRecipe extends HTMLElement {
     const modalContent = this.shadowRoot.querySelector('.modal-content'); // Get the container
     const toggleImage = this.shadowRoot.querySelector('.toggle-icon');
     modeToggleButton.addEventListener('click', (event) => {
-      console.log('another click');
       if (this.mode === 'preview') {
         this.mode = 'edit';
 

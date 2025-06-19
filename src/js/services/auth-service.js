@@ -100,7 +100,6 @@ class AuthService {
     });
 
     this._initialized = true;
-    console.log('Auth Service initialized');
   }
 
   /**

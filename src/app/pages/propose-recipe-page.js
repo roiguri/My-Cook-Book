@@ -30,8 +30,6 @@ export default {
   },
 
   async unmount() {
-    console.log('Propose Recipe Page: unmount() called');
-    
     try {
       this.removeEventListeners();
       

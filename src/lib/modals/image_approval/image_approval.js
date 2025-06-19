@@ -171,7 +171,6 @@ class ImageApprovalComponent extends HTMLElement {
   }
 
   async handleApprove() {
-    console.log('Approve button clicked');
     try {
       await approvePendingImage(this.imageData.recipeId);
       this.dispatchEvent(
@@ -188,7 +187,6 @@ class ImageApprovalComponent extends HTMLElement {
   }
 
   async handleReject() {
-    console.log('Reject button clicked');
     try {
       await rejectPendingImage(this.imageData.recipeId);
       this.dispatchEvent(

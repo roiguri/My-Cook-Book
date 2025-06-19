@@ -153,7 +153,7 @@ class AuthController extends HTMLElement {
     try {
       return await authService.login(email, password, remember);
     } catch (error) {
-      console.log('AuthService Error:', {
+      console.error('AuthService Error:', {
         code: error.code,
         message: error.message,
         fullError: error,

@@ -173,9 +173,6 @@ export default {
             const cardsPerPage = actualColumns * rows;
             const finalResult = Math.max(2, Math.min(8, cardsPerPage));
 
-            console.log(
-              `Grid measurement: ${actualColumns} columns × ${rows} rows = ${finalResult} cards per page (container width: ${recipeGrid.offsetWidth}px)`,
-            );
             resolve(finalResult);
           });
         });
@@ -230,8 +227,6 @@ export default {
     const newRecipesPerPage = await this.calculateOptimalCardsPerPage();
 
     if (newRecipesPerPage !== this.recipesPerPage) {
-      console.log(`Updating recipes per page: ${this.recipesPerPage} → ${newRecipesPerPage}`);
-
       const currentStartIndex = (this.currentPage - 1) * this.recipesPerPage;
       this.recipesPerPage = newRecipesPerPage;
       this.currentPage = Math.max(1, Math.floor(currentStartIndex / this.recipesPerPage) + 1);
@@ -271,8 +266,6 @@ export default {
         if (filterSearchBar) {
           filterSearchBar.clear();
         }
-        
-        console.log('User logged out while in favorites view - resetting to all categories');
       }
 
       if (wasAuthenticated && !isNowAuthenticated) {
@@ -325,12 +318,6 @@ export default {
 
       if (this.hasActiveFilters) {
         filteredRecipes = await this.applyActiveFilters(filteredRecipes);
-        console.log(
-          'Applied filters to recipes:',
-          this.activeFilters,
-          'Filtered count:',
-          filteredRecipes.length,
-        );
       }
 
       this.displayedRecipes = filteredRecipes;
@@ -849,8 +836,6 @@ export default {
 
   async handleFilterApplied(event) {
     const { recipes, filters } = event.detail;
-    console.log('Filter applied:', filters);
-
     this.activeFilters = {
       cookingTime: filters.cookingTime || '',
       difficulty: filters.difficulty || '',
@@ -878,8 +863,6 @@ export default {
   },
 
   async handleFilterReset() {
-    console.log('Filter reset');
-
     this.activeFilters = {
       cookingTime: '',
       difficulty: '',

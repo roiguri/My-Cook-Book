@@ -80,8 +80,6 @@ class EditRecipeComponent extends HTMLElement {
 
       // 3. Update the recipe data in Firestore (exclude file/source/toDelete)
       const { images, toDelete, ...rest } = recipeData;
-      console.log('Images to upload:', newImages);
-      console.log('Uploading recipe:', { ...rest, images: newImages });
       await FirestoreService.updateDocument('recipes', this.recipeId, {
         ...rest,
         images: newImages,
@@ -97,7 +95,6 @@ class EditRecipeComponent extends HTMLElement {
     // Remove the imageFile property before saving to Firestore
     const { imageFile, ...recipeDataWithoutImage } = recipeData;
     await FirestoreService.updateDocument('recipes', recipeId, recipeDataWithoutImage);
-    console.log('Recipe updated in Firestore with ID:', recipeId);
   }
 
   async uploadImage(imageFile, category, imageName, oldImageName = null) {
@@ -108,7 +105,6 @@ class EditRecipeComponent extends HTMLElement {
         const oldCompressedPath = getImageStoragePath(this.recipeId, category, oldImageName, 'compressed');
         await StorageService.deleteFile(oldFullPath);
         await StorageService.deleteFile(oldCompressedPath);
-        console.log('Removed old images from Firebase Storage');
       } catch (error) {
         console.error('Error removing old images:', error);
       }
@@ -117,15 +113,9 @@ class EditRecipeComponent extends HTMLElement {
     try {
       const fullPath = getImageStoragePath(this.recipeId, category, imageName, 'full');
       const compressedPath = getImageStoragePath(this.recipeId, category, imageName, 'compressed');
-      // Compress the image using shared utility
       const compressedImageBlob = await compressImage(imageFile);
-      // Upload the compressed image
       await StorageService.uploadFile(compressedImageBlob, compressedPath);
-      console.log('Uploaded compressed image to Firebase Storage');
-      // Upload the full-size image
       await StorageService.uploadFile(imageFile, fullPath);
-      console.log('Uploaded full-size image to Firebase Storage');
-      // No need to return download URL for now
     } catch (error) {
       console.error('Error uploading new images:', error);
     }
