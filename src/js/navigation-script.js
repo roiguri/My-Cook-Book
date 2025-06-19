@@ -46,6 +46,10 @@ function initializeSPANavigation() {
   updateActiveNavigation();
 
   window.addEventListener('popstate', updateActiveNavigation);
+
+  window.addEventListener('spa-navigation', () => {
+    setTimeout(updateActiveNavigation, 100);
+  });
 }
 
 function updateActiveNavigation() {

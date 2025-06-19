@@ -60,6 +60,9 @@ export class AppRouter {
     this.updateURL(normalizedPath, options.replace);
 
     this.executeRoute(routePath);
+
+    // Dispatch navigation event for navigation script to update active states
+    this.dispatchNavigationEvent(normalizedPath);
   }
 
   getCurrentRoute() {
@@ -243,6 +246,14 @@ export class AppRouter {
   navigateWithParams(path, params = {}) {
     const url = this.buildURL(path, params);
     this.navigate(url);
+  }
+
+  dispatchNavigationEvent(path) {
+    // Dispatch a custom event that navigation script can listen to
+    const navigationEvent = new CustomEvent('spa-navigation', {
+      detail: { path },
+    });
+    window.dispatchEvent(navigationEvent);
   }
 }
 
