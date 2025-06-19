@@ -1,3 +1,5 @@
+import '../../styles/pages/recipe-detail-spa.css';
+
 export default {
   async render() {
     const response = await fetch(new URL('./recipe-detail-page.html', import.meta.url));

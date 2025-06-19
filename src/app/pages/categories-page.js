@@ -1,6 +1,7 @@
 import authService from '../../js/services/auth-service.js';
 import { FirestoreService } from '../../js/services/firestore-service.js';
 import { initLazyLoading } from '../../js/utils/lazy-loading.js';
+import '../../styles/pages/categories-spa.css';
 
 export default {
   async render() {

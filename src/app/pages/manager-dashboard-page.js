@@ -1,8 +1,8 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
 import authService from '../../js/services/auth-service.js';
+import '../../styles/pages/manager-dashboard-spa.css';
 
 export default {
-  stylePath: '/src/styles/pages/manager-dashboard-spa.css',
 
   async render(params) {
     const response = await fetch(new URL('./manager-dashboard-page.html', import.meta.url));

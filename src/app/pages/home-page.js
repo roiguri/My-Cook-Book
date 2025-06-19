@@ -1,7 +1,7 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
+import '../../styles/pages/home-spa.css';
 
 export default {
-  stylePath: new URL('../../styles/pages/home-spa.css', import.meta.url).href,
 
   async render() {
     const response = await fetch(new URL('./home-page.html', import.meta.url));

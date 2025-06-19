@@ -1,4 +1,5 @@
 import authService from '../../js/services/auth-service.js';
+import '../../styles/pages/propose-recipe-spa.css';
 
 export default {
   async render() {
@@ -49,7 +50,6 @@ export default {
     };
   },
 
-  stylePath: '/src/styles/pages/propose-recipe-spa.css',
 
   async importComponents() {
     try {
