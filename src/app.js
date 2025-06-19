@@ -1,6 +1,9 @@
 // SPA Main Entry Point
 import './styles/main.css';
 
+// Register Service Worker for PWA functionality
+import './js/sw-register.js';
+
 import { initFirebase } from './js/services/firebase-service.js';
 import firebaseConfig from './js/config/firebase-config.js';
 

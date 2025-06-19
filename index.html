@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Our Kitchen Chronicles</title>
+    <title>%VITE_APP_TITLE%</title>
 
     <!-- Styles -->
     <link
@@ -12,14 +12,28 @@
     />
 
     <!-- Favicon for browsers -->
-    <link rel="icon" type="image/png" sizes="32x32" href="img/icon/wooden-spoon-32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="img/icon/wooden-spoon-16.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="img/icon/%VITE_ICON_PATH%/wooden-spoon-32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="img/icon/%VITE_ICON_PATH%/wooden-spoon-16.png"
+    />
 
     <!-- Icon for Android Chrome -->
-    <link rel="manifest" href="/site.webmanifest.json" />
+    <link rel="manifest" href="/%VITE_MANIFEST_FILE%" />
 
     <!-- Icon for iOS -->
-    <link rel="apple-touch-icon" sizes="128x128" href="img/icon/wooden-spoon-16.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="128x128"
+      href="img/icon/%VITE_ICON_PATH%/wooden-spoon-128.png"
+    />
 
     <!-- SPA Entry Point -->
     <script type="module" src="/src/app.js" defer></script>

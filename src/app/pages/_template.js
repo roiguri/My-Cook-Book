@@ -1,6 +1,8 @@
 // SPA Page Module Template
 // Copy this template when creating new SPA pages
 
+import { AppConfig } from '../../js/config/app-config.js';
+
 export default {
   /**
    * Required: Renders the page HTML content
@@ -85,7 +87,7 @@ export default {
    * @returns {string} Page title
    */
   getTitle(params) {
-    return '[Page Title] - Our Kitchen Chronicles';
+    return AppConfig.getPageTitle('[Page Title]');
   },
 
   /**

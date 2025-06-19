@@ -1,4 +1,5 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
+import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/home-spa.css';
 
 export default {
@@ -21,7 +22,7 @@ export default {
   },
 
   getTitle() {
-    return 'Our Kitchen Chronicles';
+    return AppConfig.title;
   },
 
   getMeta() {

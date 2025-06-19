@@ -1,5 +1,6 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
 import authService from '../../js/services/auth-service.js';
+import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/manager-dashboard-spa.css';
 
 export default {
@@ -41,7 +42,7 @@ export default {
   },
 
   getTitle() {
-    return 'Manager Dashboard - Our Kitchen Chronicles';
+    return AppConfig.getPageTitle('Manager Dashboard');
   },
 
   getMeta() {

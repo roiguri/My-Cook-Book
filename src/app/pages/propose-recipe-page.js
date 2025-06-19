@@ -1,4 +1,5 @@
 import authService from '../../js/services/auth-service.js';
+import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/propose-recipe-spa.css';
 
 export default {
@@ -39,7 +40,7 @@ export default {
   },
 
   getTitle() {
-    return 'Propose a Recipe - Our Kitchen Chronicles';
+    return AppConfig.getPageTitle('הצעת מתכון');
   },
 
   getMeta() {

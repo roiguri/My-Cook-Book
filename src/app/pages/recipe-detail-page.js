@@ -1,3 +1,4 @@
+import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/recipe-detail-spa.css';
 
 export default {
@@ -73,8 +74,8 @@ export default {
 
   getTitle(params) {
     return params.id
-      ? `Recipe ${params.id} - Our Kitchen Chronicles`
-      : 'Recipe - Our Kitchen Chronicles';
+      ? AppConfig.getPageTitle(`Recipe ${params.id}`)
+      : AppConfig.getPageTitle('Recipe');
   },
 
   getMeta() {

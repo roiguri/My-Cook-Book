@@ -1,28 +1,28 @@
 {
   "name": "A Family Cookbook",
-  "short_name": "Cookbook",
+  "short_name": "Cookbook [STAGING]",
   "icons": [
     {
-      "src": "/img/icon/prod/wooden-spoon-128.png",
+      "src": "/img/icon/staging/wooden-spoon-128.png",
       "sizes": "128x128",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/img/icon/prod/wooden-spoon-192.png",
+      "src": "/img/icon/staging/wooden-spoon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/img/icon/prod/wooden-spoon-256.png",
+      "src": "/img/icon/staging/wooden-spoon-256.png",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
   "start_url": "/",
-  "theme_color": "#ffffff",
+  "theme_color": "#9b2226",
   "background_color": "#ffffff",
   "display": "standalone"
 }
