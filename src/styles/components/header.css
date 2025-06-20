@@ -124,11 +124,6 @@ header .search-auth-container {
   gap: 0.5rem;
 }
 
-/* Styles for the search bar inside the header */
-header .search-bar.header-search {
-  transition: all 0.3s ease;
-}
-
 /* Styles for the search form */
 header .search-form {
   border: 2px solid var(--primary-color);
@@ -138,7 +133,8 @@ header .search-form {
   align-items: center;
   border-radius: 5px;
   overflow: hidden;
-  height: 40px;
+  height: calc(1rem + 16px + 2px); /* Match nav button height: padding (0.5rem * 2) + line-height + border */
+  min-height: calc(1rem + 16px + 2px);
 }
 
 header .search-form:hover {
@@ -184,16 +180,6 @@ auth-avatar {
   min-width: 44px;
 }
 
-/* Styles for the authentication container */
-header #auth-container {
-  transition: all 0.3s ease;
-}
-
-/* Styles for the authentication trigger button */
-header #auth-trigger {
-  transition: all 0.2s ease;
-}
-
 /* Styles for the authentication button */
 header .auth-button {
   /* Reset any inherited styles that might be causing issues */
@@ -204,9 +190,9 @@ header .auth-button {
   color: var(--button-color);
   cursor: pointer;
 
-  /* Set precise dimensions */
-  width: 40px;
-  height: 44px;
+  /* Set precise dimensions to match nav buttons */
+  width: 100%;
+  height: 100%;
 
   /* Center the icon */
   display: flex;
@@ -262,8 +248,8 @@ header .auth-button {
     background-color: var(--primary-hover);
   }
 
-  /* Animation for entire nav container when opened */
-  header .nav-search-container.active {
+  /* Animation for nav items when opened */
+  header .nav-search-container.active nav {
     animation: fadeInSlide 0.3s ease forwards;
   }
 
@@ -319,16 +305,17 @@ header .auth-button {
   header .nav-search-container {
     flex-basis: 100%;
     order: 2;
-    display: none;
+    display: flex;
     flex-direction: column;
     align-items: stretch;
   }
 
-  header .nav-search-container.active {
-    display: flex;
-    flex-direction: column;
-    align-self: stretch;
-    margin-inline: 25px;
+  header .nav-search-container nav {
+    display: none;
+  }
+
+  header .nav-search-container.active nav {
+    display: block;
   }
 
   header .search-auth-container {
