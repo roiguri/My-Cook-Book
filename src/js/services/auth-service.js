@@ -23,6 +23,7 @@
  *   - removeAuthObserver(observer): Removes a previously added auth observer.
  *   - getCurrentUserRole(): Gets the current user's role.
  *   - waitForAuth(timeout): Waits for authentication to initialize, returns authenticated user or null.
+ *   - getCurrentAvatarUrl(): Returns the current user's avatar URL.
  */
 import { getAuthInstance, getFirestoreInstance } from './firebase-service.js';
 import { serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -47,6 +48,7 @@ class AuthService {
     this._initialized = false;
     this._currentUser = null;
     this._userRoles = null;
+    this._currentAvatarUrl = null;
     this._observers = [];
     this._unsubscribeFromAuth = null;
 
@@ -74,8 +76,10 @@ class AuthService {
       if (user) {
         // Fetch user roles from Firestore when logged in
         this._userRoles = await this._fetchUserRoles(user);
+        this._currentAvatarUrl = await this._fetchAvatarUrl(user);
       } else {
         this._userRoles = null;
+        this._currentAvatarUrl = null;
       }
 
       // Notify observers of the auth state change
@@ -83,6 +87,7 @@ class AuthService {
         user: this._currentUser,
         isAuthenticated: !!this._currentUser,
         roles: this._userRoles,
+        avatarUrl: this._currentAvatarUrl,
         isManager: this._userRoles?.role === 'manager',
         isApproved: this._userRoles?.role === 'approved' || this._userRoles?.role === 'manager',
         previousUser: prevUser,
@@ -93,6 +98,7 @@ class AuthService {
         user: this._currentUser,
         isAuthenticated: !!this._currentUser,
         roles: this._userRoles,
+        avatarUrl: this._currentAvatarUrl,
         isManager: this._userRoles?.role === 'manager',
         isApproved: this._userRoles?.role === 'approved' || this._userRoles?.role === 'manager',
         previousUser: prevUser,
@@ -116,6 +122,14 @@ class AuthService {
    */
   isAuthenticated() {
     return !!this._currentUser;
+  }
+
+  /**
+   * Get the current user's avatar URL
+   * @returns {string|null} Current avatar URL or null if not available
+   */
+  getCurrentAvatarUrl() {
+    return this._currentAvatarUrl;
   }
 
   /**
@@ -258,6 +272,10 @@ class AuthService {
         ...profileData,
         updatedAt: serverTimestamp(),
       });
+      // Update cached avatar URL if it was changed
+      if (profileData.avatarUrl !== undefined) {
+        this._currentAvatarUrl = profileData.avatarUrl;
+      }
       // Dispatch profile updated event
       const event = new CustomEvent('profile-updated', {
         detail: {
@@ -427,6 +445,28 @@ class AuthService {
     } catch (error) {
       console.error('Error fetching user roles:', error);
       return { role: 'user' }; // Default role on error
+    }
+  }
+
+  /**
+   * Fetch user avatar URL from Firestore with fallback to Firebase Auth
+   * @private
+   * @param {Object} user - Firebase user object
+   * @returns {Promise<string|null>} Promise resolving to avatar URL or null
+   */
+  async _fetchAvatarUrl(user) {
+    try {
+      const db = getFirestoreInstance();
+      const userDocRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        return userData.avatarUrl || user.photoURL || null;
+      }
+      return user.photoURL || null;
+    } catch (error) {
+      console.warn('Error fetching avatar URL from Firestore, using photoURL:', error);
+      return user.photoURL || null;
     }
   }
 

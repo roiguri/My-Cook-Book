@@ -1,4 +1,3 @@
-// FIXME: leave favorites page when a user logs out
 // FIXME: when user logging in with different account, when opening modal for the first time, it shows the previous user's profile
 /**
  * AuthController Component
@@ -196,7 +195,7 @@ class AuthController extends HTMLElement {
 
   async updateUserAvatar(avatarUrl) {
     try {
-      await authService.updateProfile({ photoURL: avatarUrl });
+      await authService.updateProfile({ avatarUrl: avatarUrl });
       this.dispatchAuthStateChanged({
         user: authService.getCurrentUser(),
         isAuthenticated: true,

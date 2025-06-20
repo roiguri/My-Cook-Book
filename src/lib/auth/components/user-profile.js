@@ -9,9 +9,8 @@
 
 import './auth-content.js';
 import '../../modals/message-modal/message-modal.js';
-import { doc, getDoc } from 'firebase/firestore';
-import { ref, listAll, getDownloadURL } from 'firebase/storage';
-import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
+import { getDownloadURL } from 'firebase/storage';
+import { StorageService } from '../../../js/services/storage-service.js';
 import authService from '../../../js/services/auth-service.js';
 
 class UserProfile extends HTMLElement {
@@ -30,13 +29,15 @@ class UserProfile extends HTMLElement {
     authService.addAuthObserver((state) => {
       if (state.user) {
         this.updateWelcomeText();
+        // Update avatar selection when auth state includes avatar URL
+        if (state.avatarUrl !== undefined) {
+          this.updateAvatarSelection(state.avatarUrl);
+        }
       }
     });
   }
 
   render() {
-    const user = authService.getCurrentUser();
-    const displayName = user?.displayName || user?.email?.split('@')[0] || '';
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -192,41 +193,50 @@ class UserProfile extends HTMLElement {
 
   async loadAvatars() {
     try {
-      const user = authService.getCurrentUser();
       const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
-      let currentAvatarUrl = null;
-      // Only fetch from Firestore if user is logged in
-      if (user) {
-        const db = getFirestoreInstance();
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        currentAvatarUrl = userDocSnap.data()?.avatarUrl;
-      }
-      // Get avatar URLs from Firebase Storage (modular)
-      const storage = getStorageInstance();
-      const avatarsRef = ref(storage, 'Avatars');
-      const avatarList = await listAll(avatarsRef);
+      // Get avatar URLs from Firebase Storage
+      const avatarList = await StorageService.listFiles('Avatars');
       // Clear loading message
       avatarGrid.innerHTML = '';
-      // Store current avatar URL
-      this.selectedAvatarUrl = currentAvatarUrl || null;
+      
       // Add avatars to grid
       for (const avatarRef of avatarList.items) {
         const url = await getDownloadURL(avatarRef);
         const button = document.createElement('button');
         button.className = 'avatar-button';
-        // Check against Firestore avatarUrl
-        if (url === currentAvatarUrl) {
-          button.classList.add('selected');
-          this.selectedAvatarUrl = url;
-        }
         button.innerHTML = `<img src="${url}" alt="Avatar" class="avatar-image">`;
         button.addEventListener('click', () => this.selectAvatar(button, url));
         avatarGrid.appendChild(button);
       }
+      
+      const currentAvatarUrl = authService.getCurrentAvatarUrl();
+      this.updateAvatarSelection(currentAvatarUrl);
+      
     } catch (error) {
       console.error('Error loading avatars:', error);
       this.showError('שגיאה בטעינת תמונות הפרופיל. אנא נסה שנית.');
+    }
+  }
+
+  updateAvatarSelection(currentAvatarUrl) {
+    // Clear all selections first
+    this.shadowRoot.querySelectorAll('.avatar-button').forEach((btn) => {
+      btn.classList.remove('selected');
+    });
+    
+    // Set the selected avatar URL
+    this.selectedAvatarUrl = currentAvatarUrl || null;
+    
+    // If we have a current avatar URL, find and select the matching button
+    if (currentAvatarUrl) {
+      const avatarButtons = this.shadowRoot.querySelectorAll('.avatar-button');
+      for (const button of avatarButtons) {
+        const img = button.querySelector('img');
+        if (img && img.src === currentAvatarUrl) {
+          button.classList.add('selected');
+          break;
+        }
+      }
     }
   }
 
