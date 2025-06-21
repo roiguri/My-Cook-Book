@@ -35,6 +35,7 @@ function initializeSPANavigation() {
 
       if (window.spa && window.spa.router) {
         window.spa.router.navigate(fullPath);
+        closeHamburgerMenuIfOpen();
         setTimeout(updateActiveNavigation, 100);
       } else {
         console.warn('SPA router not available, falling back to default navigation');
@@ -50,6 +51,16 @@ function initializeSPANavigation() {
   window.addEventListener('spa-navigation', () => {
     setTimeout(updateActiveNavigation, 100);
   });
+}
+
+function closeHamburgerMenuIfOpen() {
+  const navToggle = document.querySelector('.nav-toggle');
+  const navSearchContainer = document.querySelector('.nav-search-container');
+  
+  if (navToggle && navSearchContainer && navToggle.classList.contains('active')) {
+    navToggle.classList.remove('active');
+    navSearchContainer.classList.remove('active');
+  }
 }
 
 function updateActiveNavigation() {
