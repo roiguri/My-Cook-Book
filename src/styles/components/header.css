@@ -1,6 +1,6 @@
 /* Styles for the header container */
 :root {
-  --header-background: url('/img/background/wood-texture.jpg') repeat-x;
+  --header-background: url('/img/background/navigation/wood-texture.jpg') repeat-x;
 }
 
 header {
@@ -36,7 +36,9 @@ header .hamburger {
   height: 2.5px;
   background-color: var(--background-color);
   position: relative;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s ease;
+  /* Pre-warm hamburger animations */
+  will-change: background-color;
 }
 
 header .hamburger::before,
@@ -46,7 +48,9 @@ header .hamburger::before,
   width: 100%;
   height: 100%;
   background-color: var(--background-color);
-  transition: transform 0.3s;
+  transition: transform 0.2s ease;
+  /* Pre-warm transform animations */
+  will-change: transform;
 }
 
 header .hamburger::before {
@@ -124,11 +128,6 @@ header .search-auth-container {
   gap: 0.5rem;
 }
 
-/* Styles for the search bar inside the header */
-header .search-bar.header-search {
-  transition: all 0.3s ease;
-}
-
 /* Styles for the search form */
 header .search-form {
   border: 2px solid var(--primary-color);
@@ -138,7 +137,8 @@ header .search-form {
   align-items: center;
   border-radius: 5px;
   overflow: hidden;
-  height: 40px;
+  height: calc(1rem + 16px + 2px); /* Match nav button height: padding (0.5rem * 2) + line-height + border */
+  min-height: calc(1rem + 16px + 2px);
 }
 
 header .search-form:hover {
@@ -184,16 +184,6 @@ auth-avatar {
   min-width: 44px;
 }
 
-/* Styles for the authentication container */
-header #auth-container {
-  transition: all 0.3s ease;
-}
-
-/* Styles for the authentication trigger button */
-header #auth-trigger {
-  transition: all 0.2s ease;
-}
-
 /* Styles for the authentication button */
 header .auth-button {
   /* Reset any inherited styles that might be causing issues */
@@ -204,9 +194,9 @@ header .auth-button {
   color: var(--button-color);
   cursor: pointer;
 
-  /* Set precise dimensions */
-  width: 40px;
-  height: 44px;
+  /* Set precise dimensions to match nav buttons */
+  width: 100%;
+  height: 100%;
 
   /* Center the icon */
   display: flex;
@@ -238,7 +228,6 @@ header .auth-button {
   header nav ul {
     flex-direction: column;
     width: 100%;
-    margin-bottom: 1rem;
   }
 
   header nav ul li {
@@ -262,39 +251,6 @@ header .auth-button {
     background-color: var(--primary-hover);
   }
 
-  /* Animation for entire nav container when opened */
-  header .nav-search-container.active {
-    animation: fadeInSlide 0.3s ease forwards;
-  }
-
-  /* All nav items get smooth entrance when container is active */
-  header .nav-search-container.active nav ul li {
-    animation: fadeInUp 0.4s ease forwards;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-
-  @keyframes fadeInSlide {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
   header .menu-title-container {
     display: flex;
@@ -302,6 +258,7 @@ header .auth-button {
     gap: 15px;
     justify-content: center;
     flex-wrap: nowrap;
+    margin-bottom: 0.5rem;
   }
 
   header .nav-toggle {
@@ -319,16 +276,30 @@ header .auth-button {
   header .nav-search-container {
     flex-basis: 100%;
     order: 2;
-    display: none;
+    display: flex;
     flex-direction: column;
     align-items: stretch;
+    gap: 0;
   }
 
   header .nav-search-container.active {
-    display: flex;
-    flex-direction: column;
-    align-self: stretch;
-    margin-inline: 25px;
+    gap: 0.5rem;
+  }
+
+  header .nav-search-container nav {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.15s ease, opacity 0.15s ease;
+    /* Pre-warm styles to avoid layout calculations */
+    contain: layout style;
+    will-change: max-height, opacity;
+  }
+
+  header .nav-search-container.active nav {
+    max-height: 300px;
+    opacity: 1;
   }
 
   header .search-auth-container {

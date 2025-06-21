@@ -1,15 +1,43 @@
+// Module-scope DOM element references
+let navToggle = null;
+let navSearchContainer = null;
+
 function initializeNavigation() {
-  const navToggle = document.querySelector('.nav-toggle');
-  const navSearchContainer = document.querySelector('.nav-search-container');
+  // Cache DOM element references
+  navToggle = document.querySelector('.nav-toggle');
+  navSearchContainer = document.querySelector('.nav-search-container');
 
   if (navToggle && navSearchContainer) {
+    // Pre-warm hamburger menu styles to improve first interaction
+    preWarmHamburgerMenu();
+    
+    // Optimize first interaction by using requestAnimationFrame
     navToggle.addEventListener('click', function () {
-      this.classList.toggle('active');
-      navSearchContainer.classList.toggle('active');
+      // Batch DOM updates in single frame
+      requestAnimationFrame(() => {
+        this.classList.toggle('active');
+        navSearchContainer.classList.toggle('active');
+      });
     });
   }
 
   initializeSPANavigation();
+}
+
+function preWarmHamburgerMenu() {
+  // Force browser to calculate styles by briefly adding/removing active class
+  // This pre-calculates layout and paint operations for smoother first interaction
+  requestAnimationFrame(() => {
+    navToggle.classList.add('active');
+    navSearchContainer.classList.add('active');
+    
+    // Force style calculation
+    navSearchContainer.offsetHeight;
+    
+    // Remove immediately (before next frame)
+    navToggle.classList.remove('active');
+    navSearchContainer.classList.remove('active');
+  });
 }
 
 function initializeSPANavigation() {
@@ -35,6 +63,7 @@ function initializeSPANavigation() {
 
       if (window.spa && window.spa.router) {
         window.spa.router.navigate(fullPath);
+        closeHamburgerMenuIfOpen();
         setTimeout(updateActiveNavigation, 100);
       } else {
         console.warn('SPA router not available, falling back to default navigation');
@@ -50,6 +79,19 @@ function initializeSPANavigation() {
   window.addEventListener('spa-navigation', () => {
     setTimeout(updateActiveNavigation, 100);
   });
+
+  document.addEventListener('submit', (e) => {
+    if (e.target.classList.contains('search-form')) {
+      closeHamburgerMenuIfOpen();
+    }
+  });
+}
+
+function closeHamburgerMenuIfOpen() {
+  if (navToggle && navSearchContainer && navToggle.classList.contains('active')) {
+    navToggle.classList.remove('active');
+    navSearchContainer.classList.remove('active');
+  }
 }
 
 function updateActiveNavigation() {
@@ -116,8 +158,9 @@ function isInternalLink(link) {
   }
 }
 
-// Make updateActiveNavigation available globally for other components
+// Make functions available globally for other components
 window.updateActiveNavigation = updateActiveNavigation;
+window.closeHamburgerMenuIfOpen = closeHamburgerMenuIfOpen;
 
 // Initialize immediately if DOM is ready, otherwise wait for it
 if (document.readyState === 'loading') {

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" preserveAspectRatio="none">
+  <defs>
+    <!-- Wood grain gradient definitions - Darker tones -->
+    <linearGradient id="woodBase" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3D2914;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#4A2C17;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#5D4037;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#4A2C17;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3D2914;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Individual plank gradients - Darker variations -->
+    <linearGradient id="plank1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2F1B14;stop-opacity:0.4" />
+      <stop offset="30%" style="stop-color:#3D2914;stop-opacity:0.2" />
+      <stop offset="70%" style="stop-color:#4A2C17;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#2F1B14;stop-opacity:0.5" />
+    </linearGradient>
+    
+    <linearGradient id="plank2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3D2914;stop-opacity:0.3" />
+      <stop offset="40%" style="stop-color:#5D4037;stop-opacity:0.2" />
+      <stop offset="80%" style="stop-color:#6D4C41;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#3D2914;stop-opacity:0.4" />
+    </linearGradient>
+    
+    <linearGradient id="plank3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4A2C17;stop-opacity:0.5" />
+      <stop offset="35%" style="stop-color:#6D4C41;stop-opacity:0.2" />
+      <stop offset="65%" style="stop-color:#5D4037;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#3D2914;stop-opacity:0.4" />
+    </linearGradient>
+    
+    <!-- Wood grain texture pattern -->
+    <pattern id="woodGrain" x="0" y="0" width="20" height="100" patternUnits="userSpaceOnUse">
+      <rect width="20" height="100" fill="url(#woodBase)"/>
+      <path d="M2,10 Q10,15 18,12 Q10,20 2,25 Q10,30 18,28 Q10,35 2,40 Q10,45 18,42 Q10,50 2,55 Q10,60 18,58 Q10,65 2,70 Q10,75 18,72 Q10,80 2,85 Q10,90 18,88" 
+            stroke="#2F1B14" stroke-width="0.5" fill="none" opacity="0.4"/>
+      <path d="M6,5 Q14,8 22,6 Q14,15 6,18 Q14,25 22,23 Q14,32 6,35 Q14,42 22,40 Q14,49 6,52 Q14,59 22,57 Q14,66 6,69 Q14,76 22,74 Q14,83 6,86 Q14,93 22,91" 
+            stroke="#4A2C17" stroke-width="0.3" fill="none" opacity="0.5"/>
+    </pattern>
+    
+    <!-- Knot patterns for realistic wood effect -->
+    <radialGradient id="knot1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#3D2914;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#654321;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#8B4513;stop-opacity:0.2" />
+    </radialGradient>
+    
+    <radialGradient id="knot2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#2F1B14;stop-opacity:0.7" />
+      <stop offset="60%" style="stop-color:#654321;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#A0522D;stop-opacity:0.1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Base wood texture -->
+  <rect width="400" height="100" fill="url(#woodGrain)"/>
+  
+  <!-- Vertical planks with individual characteristics -->
+  <rect x="0" y="0" width="50" height="100" fill="url(#plank1)"/>
+  <rect x="50" y="0" width="45" height="100" fill="url(#plank2)"/>
+  <rect x="95" y="0" width="52" height="100" fill="url(#plank3)"/>
+  <rect x="147" y="0" width="48" height="100" fill="url(#plank1)"/>
+  <rect x="195" y="0" width="55" height="100" fill="url(#plank2)"/>
+  <rect x="250" y="0" width="47" height="100" fill="url(#plank3)"/>
+  <rect x="297" y="0" width="51" height="100" fill="url(#plank1)"/>
+  <rect x="348" y="0" width="52" height="100" fill="url(#plank2)"/>
+  
+  <!-- Plank separation lines - Darker -->
+  <line x1="50" y1="0" x2="50" y2="100" stroke="#2F1B14" stroke-width="1" opacity="0.7"/>
+  <line x1="95" y1="0" x2="95" y2="100" stroke="#2F1B14" stroke-width="1" opacity="0.7"/>
+  <line x1="147" y1="0" x2="147" y2="100" stroke="#2F1B14" stroke-width="1" opacity="0.7"/>
+  <line x1="195" y1="0" x2="195" y2="100" stroke="#2F1B14" stroke-width="1" opacity="0.7"/>
+  <line x1="250" y1="0" x2="250" y2="100" stroke="#2F1B14" stroke-width="1" opacity="0.7"/>
+  <line x1="297" y1="0" x2="297" y2="100" stroke="#2F1B14" stroke-width="1" opacity="0.7"/>
+  <line x1="348" y1="0" x2="348" y2="100" stroke="#2F1B14" stroke-width="1" opacity="0.7"/>
+  
+  <!-- Wood knots for realism -->
+  <ellipse cx="75" cy="25" rx="8" ry="12" fill="url(#knot1)"/>
+  <ellipse cx="170" cy="60" rx="6" ry="10" fill="url(#knot2)"/>
+  <ellipse cx="275" cy="35" rx="7" ry="11" fill="url(#knot1)"/>
+  <ellipse cx="360" cy="75" rx="5" ry="8" fill="url(#knot2)"/>
+  
+  <!-- Subtle highlight for depth -->
+  <rect width="400" height="100" fill="url(#woodBase)" opacity="0.1"/>
+</svg>
