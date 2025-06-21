@@ -36,7 +36,7 @@ header .hamburger {
   height: 2.5px;
   background-color: var(--background-color);
   position: relative;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease-in-out;
 }
 
 header .hamburger::before,
@@ -46,7 +46,7 @@ header .hamburger::before,
   width: 100%;
   height: 100%;
   background-color: var(--background-color);
-  transition: transform 0.3s;
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 header .hamburger::before {
@@ -224,7 +224,6 @@ header .auth-button {
   header nav ul {
     flex-direction: column;
     width: 100%;
-    margin-bottom: 1rem;
   }
 
   header nav ul li {
@@ -248,33 +247,45 @@ header .auth-button {
     background-color: var(--primary-hover);
   }
 
-  /* Animation for nav items when opened */
-  header .nav-search-container.active nav {
-    animation: fadeInSlide 0.3s ease forwards;
+  /* Base nav items */
+  header .nav-search-container nav ul li {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out;
   }
 
-  /* All nav items get smooth entrance when container is active */
+  /* Active menu items */
   header .nav-search-container.active nav ul li {
-    animation: fadeInUp 0.4s ease forwards;
     opacity: 0;
-    animation-fill-mode: forwards;
+    transform: translateY(20px);
+    animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   }
 
-  @keyframes fadeInSlide {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  /* Staggered delay for each menu item */
+  header .nav-search-container.active nav ul li:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  header .nav-search-container.active nav ul li:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  header .nav-search-container.active nav ul li:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  header .nav-search-container.active nav ul li:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+
+  header .nav-search-container.active nav ul li:nth-child(5) {
+    animation-delay: 0.5s;
   }
 
   @keyframes fadeInUp {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(20px);
     }
     to {
       opacity: 1;
@@ -288,6 +299,7 @@ header .auth-button {
     gap: 15px;
     justify-content: center;
     flex-wrap: nowrap;
+    margin-bottom: 0.5rem;
   }
 
   header .nav-toggle {
@@ -308,14 +320,27 @@ header .auth-button {
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    gap: 0;
+  }
+
+  header .nav-search-container.active {
+    gap: 0.5rem;
   }
 
   header .nav-search-container nav {
-    display: none;
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: max-height 0.3s ease-out, opacity 0.25s ease-out, transform 0.25s ease-out;
   }
 
   header .nav-search-container.active nav {
-    display: block;
+    max-height: 300px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: max-height 0.4s ease-in, opacity 0.3s ease-in 0.1s, transform 0.3s ease-in 0.1s;
   }
 
   header .search-auth-container {
