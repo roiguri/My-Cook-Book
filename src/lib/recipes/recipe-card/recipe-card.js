@@ -1,22 +1,31 @@
 /**
  * Recipe Card Web Component
- * A customizable card component for displaying recipe information
- *
- * @dependencies
- * - Font Awesome 6.4.2 (CDN): <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+ * A simplified card component for displaying recipe information in vertical layout
  *
  * @attributes
- * - recipe-id: ID of the recipe to fetch from Firestore
- * - layout: 'vertical' (default) or 'horizontal'
- * - is-collapsed: Whether the card starts collapsed (requires is-collapsible)
- * - is-collapsible: Whether the card can be collapsed/expanded
- * - has-more-info-icon: Whether to show the ingredients tooltip
- * - card-width: Width of the card (default: 300px)
- * - card-height: Height of the card (default: 400px)
+ * - recipe-id: ID of the recipe to fetch from Firestore (required)
+ * - show-favorites: Whether to show the favorite button (optional)
+ * - card-width: Width of the card (default: 200px)
+ * - card-height: Height of the card (default: 300px)
  *
  * @events
  * - recipe-card-open: Emitted when the card is clicked
  *   detail: { recipeId: string }
+ * - recipe-favorite-changed: Emitted when favorite status changes
+ *   detail: { recipeId: string, isFavorite: boolean, userId: string }
+ * - add-favorite: Emitted when recipe is added to favorites
+ *   detail: { recipeId: string }
+ * - remove-favorite: Emitted when recipe is removed from favorites
+ *   detail: { recipeId: string }
+ *
+ * @features
+ * - Displays recipe image (50% of card height)
+ * - Shows recipe title, category, cooking time, and difficulty
+ * - Loading state with skeleton animation
+ * - Error state handling
+ * - Favorite functionality for authenticated users
+ * - Lazy loading for images
+ * - Consistent dimensions to prevent layout shifts
  */
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -33,7 +42,6 @@ import {
   getPrimaryImageUrl,
   getPlaceholderImageUrl,
 } from '../../../js/utils/recipes/recipe-image-utils.js';
-import { extractIngredientNames } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
 import { initLazyLoading } from '../../../js/utils/lazy-loading.js';
 
 class RecipeCard extends HTMLElement {
@@ -41,10 +49,6 @@ class RecipeCard extends HTMLElement {
   static get observedAttributes() {
     return [
       'recipe-id',
-      'layout',
-      'is-collapsed',
-      'is-collapsible',
-      'has-more-info-icon',
       'card-width',
       'card-height',
     ];
@@ -57,24 +61,15 @@ class RecipeCard extends HTMLElement {
 
     // Initialize default values
     this._defaults = {
-      vertical: {
-        width: '200px',
-        height: '300px',
-      },
-      horizontal: {
-        width: '300px',
-        height: '200px',
-      },
+      width: '200px',
+      height: '300px',
     };
-
-    this._currentLayout = 'vertical';
     this._isLoading = true;
     this._recipeData = null;
     this._imageUrl = null;
     this._error = null;
 
     // Bind methods
-    this._handleArrowClick = this._handleArrowClick.bind(this);
     this._handleCardClick = this._handleCardClick.bind(this);
 
     this._userFavorites = new Set();
@@ -85,21 +80,6 @@ class RecipeCard extends HTMLElement {
     return this.getAttribute('recipe-id');
   }
 
-  get layout() {
-    return this.getAttribute('layout') || 'vertical';
-  }
-
-  get isCollapsed() {
-    return this.hasAttribute('is-collapsed');
-  }
-
-  get isCollapsible() {
-    return this.hasAttribute('is-collapsible');
-  }
-
-  get hasMoreInfoIcon() {
-    return this.hasAttribute('has-more-info-icon');
-  }
 
   get cardWidth() {
     return this.getAttribute('card-width') || this._defaultWidth;
@@ -110,10 +90,9 @@ class RecipeCard extends HTMLElement {
   }
 
   _getCurrentDimensions() {
-    const layout = this.getAttribute('layout') || 'vertical';
     return {
-      width: this.getAttribute('card-width') || this._defaults[layout].width,
-      height: this.getAttribute('card-height') || this._defaults[layout].height,
+      width: this.getAttribute('card-width') || this._defaults.width,
+      height: this.getAttribute('card-height') || this._defaults.height,
     };
   }
 
@@ -132,12 +111,6 @@ class RecipeCard extends HTMLElement {
     switch (name) {
       case 'recipe-id':
         if (this.isConnected) this._fetchRecipeData();
-        break;
-      case 'layout':
-        this._updateLayout();
-        break;
-      case 'is-collapsed':
-        if (this.isCollapsible) this._updateCollapseState();
         break;
       case 'card-width':
       case 'card-height':
@@ -159,19 +132,13 @@ class RecipeCard extends HTMLElement {
     this._removeEventListeners();
 
     const card = this.shadowRoot.querySelector('.recipe-card');
-    const arrow = this.shadowRoot.querySelector('.collapse-arrow');
 
     if (card) {
       card.addEventListener('click', this._handleCardClick);
     }
 
-    if (arrow) {
-      arrow.addEventListener('click', this._handleArrowClick);
-    }
-
     // Store references for cleanup
     this._card = card;
-    this._arrow = arrow;
 
     const favoriteBtn = this.shadowRoot.querySelector('.favorite-btn');
     if (favoriteBtn && !favoriteBtn.hasAttribute('listener-attached')) {
@@ -201,17 +168,9 @@ class RecipeCard extends HTMLElement {
     if (this._card) {
       this._card.removeEventListener('click', this._handleCardClick);
     }
-    if (this._arrow) {
-      this._arrow.removeEventListener('click', this._handleArrowClick);
-    }
   }
 
   _handleCardClick(event) {
-    // Prevent handling if clicking the arrow
-    if (event.target.closest('.collapse-arrow')) {
-      return;
-    }
-
     // For modifier keys and non-left clicks, create and click a temporary link
     // This ensures proper browser behavior for opening in new tabs
     if (
@@ -259,15 +218,6 @@ class RecipeCard extends HTMLElement {
     this.dispatchEvent(customEvent);
   }
 
-  _handleArrowClick(event) {
-    // Stop event propagation to prevent card click
-    event.stopPropagation();
-
-    if (this.isCollapsible) {
-      this.toggleAttribute('is-collapsed');
-      this._updateCollapseState();
-    }
-  }
 
   // Data fetching
   async _fetchRecipeData() {
@@ -328,8 +278,8 @@ class RecipeCard extends HTMLElement {
     return `
         :host {
               display: block;
-              width: var(--card-width, ${this._defaultWidth});
-              height: var(--card-height, ${this._defaultHeight});
+              width: var(--card-width, 200px);
+              height: var(--card-height, 300px);
           }
 
           .recipe-card {
@@ -420,49 +370,17 @@ class RecipeCard extends HTMLElement {
               background: linear-gradient(135deg, #a5b4fc, #6366f1);  /* Light Indigo to Indigo */
           }
 
-          .collapse-arrow {
-              position: absolute;
-              top: 8px;
-              left: 8px;
-              width: 24px;
-              height: 24px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              background: rgba(0, 0, 0, 0.1);
-              border-radius: 50%;
-              cursor: pointer;
-              z-index: 10;
-              transition: all 0.5s ease;
-          }
-
-          .collapse-arrow::before {
-              content: "▼";
-              font-size: 12px;
-              color: #666;
-              transition: color 0.5s ease;
-          }
-
-          .collapse-arrow:hover {
-              background: rgba(0, 0, 0, 0.2);
-          }
-
-          .recipe-card.collapsed .collapse-arrow {
-              transform: rotate(-90deg);
-          }
 
           .recipe-image {
               position: relative;
               width: 100%;
-              height: var(--recipe-image-height, 50%);
+              height: 50%;
               object-fit: cover;
               flex-shrink: 0;
               box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
               opacity: 0;
               transition: opacity 0.3s ease;
               background-color: #f0f0f0; /* Placeholder color while loading */
-              min-height: var(--recipe-image-height, auto);
-              max-height: var(--recipe-image-height, none);
           }
 
           .recipe-image.loaded {
@@ -471,13 +389,11 @@ class RecipeCard extends HTMLElement {
 
           .recipe-content {
               padding: 0.5rem;
-              flex: 1;
+              height: 50%;
               display: flex;
               flex-direction: column;
-              justify-content: space-between;  /* Center content vertically */
+              justify-content: space-between;
               gap: 0.5rem;
-              height: var(--recipe-content-height, auto);
-              max-height: var(--recipe-content-height, none);
               overflow: hidden;
               box-sizing: border-box;
           }
@@ -485,18 +401,12 @@ class RecipeCard extends HTMLElement {
           .recipe-title {
               text-align: center;
               margin: 0 auto;
-              display: flex;
-              gap: 0.5rem;
               font-size: 1.2rem;
-              max-height: var(--recipe-title-max-height, none);
               overflow: hidden;
               text-overflow: ellipsis;
               line-height: 1.2;
           }
 
-          .more-info {
-            order: -1;
-          }
 
           .recipe-meta {
               display: flex;
@@ -579,34 +489,14 @@ class RecipeCard extends HTMLElement {
   }
 
   _getLayoutStyles() {
-    return `
-        .recipe-card[data-layout="horizontal"] {
-            display: flex;
-            flex-direction: row-reverse;
-        }
-
-        .recipe-card[data-layout="horizontal"] .recipe-image {
-            width: 50%;  /* Changed from 40% to 50% */
-            height: 100%;
-        }
-
-        .recipe-card[data-layout="horizontal"] .recipe-content {
-            width: 50%;  /* Changed from 60% to 50% */
-            padding: 0.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-    `;
+    return ``;
   }
 
   _getLoadingStyles() {
     return `
           .recipe-card.loading {
               position: relative;
-              min-height: var(--recipe-card-loading-height, 200px);
-              height: var(--recipe-card-loading-height, auto);
-              max-height: var(--recipe-card-loading-height, none);
+              height: 100%;
           }
 
           .loading::after {
@@ -646,30 +536,7 @@ class RecipeCard extends HTMLElement {
   }
 
   _getCollapseStyles() {
-    return `
-          .recipe-card.collapsed .recipe-content > *:not(.recipe-title) {
-              display: none;
-          }
-
-          .recipe-card.collapsed {
-              height: auto;
-              min-height: 80px;
-          }
-
-          .recipe-card.collapsed .recipe-image {
-              display: none;
-          }
-
-          .recipe-details {
-              max-height: 0;
-              transition: max-height 0.3s ease-out;
-          }
-
-          .recipe-card:not(.collapsed) .recipe-details {
-              max-height: 500px;
-              transition: max-height 0.3s ease-in;
-          }
-      `;
+    return ``;
   }
 
   // Rendering
@@ -705,13 +572,11 @@ class RecipeCard extends HTMLElement {
       `;
   }
 
-  // TODO: improve more info icon
   _renderRecipe() {
     const { name, category, prepTime, waitTime, difficulty } = this._recipeData;
     const totalTime = prepTime + waitTime;
     const timeClass = getTimeClass(totalTime);
     const difficultyClass = getDifficultyClass(difficulty);
-    const ingredients = extractIngredientNames(this._recipeData.ingredients).join(', ');
     const favoriteButton = this.hasAttribute('show-favorites')
       ? `
         <button class="favorite-btn ${this._isFavorite() ? 'active' : ''}" 
@@ -725,36 +590,15 @@ class RecipeCard extends HTMLElement {
       : '';
     this.shadowRoot.innerHTML = `
         <style>${this._getStyles()}</style>
-        <div class="recipe-card ${this.isCollapsed ? 'collapsed' : ''}" 
-             data-layout="${this.layout}">
+        <div class="recipe-card">
             ${favoriteButton}
-            ${
-              this.isCollapsible
-                ? `
-                <div class="collapse-arrow"></div>
-            `
-                : ''
-            }
-            ${
-              !this.isCollapsed
-                ? `
-                <img class="recipe-image" 
-                  data-src="${this._imageUrl}" 
-                  alt="${name}"
-                  data-fallback="/img/placeholder.jpg">
-            `
-                : ''
-            }
+            <img class="recipe-image" 
+              data-src="${this._imageUrl}" 
+              alt="${name}"
+              data-fallback="/img/placeholder.jpg">
             <div class="recipe-content">
                 <h3 class="recipe-title">
                     ${name}
-                    ${
-                      this.hasMoreInfoIcon
-                        ? `
-                        <span class="more-info" title="${ingredients}">ℹ️</span>
-                    `
-                        : ''
-                    }
                 </h3>
                 <div class="recipe-details">
                     <div class="recipe-meta">
@@ -858,35 +702,15 @@ class RecipeCard extends HTMLElement {
   }
 
   _getDifficultyIcon() {
-    const icon = '💪';
     return '';
   }
 
   // Utility methods
-  _updateCollapseState() {
-    const card = this.shadowRoot.querySelector('.recipe-card');
-    if (card) {
-      card.classList.toggle('collapsed', this.isCollapsed);
-    }
-  }
-
-  _updateLayout() {
-    const layout = this.getAttribute('layout') || 'vertical';
-    this._currentLayout = layout;
-    const dimensions = this._getCurrentDimensions();
-
-    this.style.setProperty('--card-width', dimensions.width);
-    this.style.setProperty('--card-height', dimensions.height);
-
-    const card = this.shadowRoot.querySelector('.recipe-card');
-    if (card) {
-      card.setAttribute('data-layout', layout);
-    }
-  }
 
   _updateDimensions() {
-    this.style.setProperty('--card-width', this.cardWidth);
-    this.style.setProperty('--card-height', this.cardHeight);
+    const dimensions = this._getCurrentDimensions();
+    this.style.setProperty('--card-width', dimensions.width);
+    this.style.setProperty('--card-height', dimensions.height);
   }
 }
 
