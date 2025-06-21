@@ -1,6 +1,11 @@
+// Module-scope DOM element references
+let navToggle = null;
+let navSearchContainer = null;
+
 function initializeNavigation() {
-  const navToggle = document.querySelector('.nav-toggle');
-  const navSearchContainer = document.querySelector('.nav-search-container');
+  // Cache DOM element references
+  navToggle = document.querySelector('.nav-toggle');
+  navSearchContainer = document.querySelector('.nav-search-container');
 
   if (navToggle && navSearchContainer) {
     navToggle.addEventListener('click', function () {
@@ -51,12 +56,15 @@ function initializeSPANavigation() {
   window.addEventListener('spa-navigation', () => {
     setTimeout(updateActiveNavigation, 100);
   });
+
+  document.addEventListener('submit', (e) => {
+    if (e.target.classList.contains('search-form')) {
+      closeHamburgerMenuIfOpen();
+    }
+  });
 }
 
 function closeHamburgerMenuIfOpen() {
-  const navToggle = document.querySelector('.nav-toggle');
-  const navSearchContainer = document.querySelector('.nav-search-container');
-  
   if (navToggle && navSearchContainer && navToggle.classList.contains('active')) {
     navToggle.classList.remove('active');
     navSearchContainer.classList.remove('active');
@@ -127,8 +135,9 @@ function isInternalLink(link) {
   }
 }
 
-// Make updateActiveNavigation available globally for other components
+// Make functions available globally for other components
 window.updateActiveNavigation = updateActiveNavigation;
+window.closeHamburgerMenuIfOpen = closeHamburgerMenuIfOpen;
 
 // Initialize immediately if DOM is ready, otherwise wait for it
 if (document.readyState === 'loading') {

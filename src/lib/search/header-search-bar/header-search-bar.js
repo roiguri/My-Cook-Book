@@ -146,6 +146,11 @@ class HeaderSearchBar extends HTMLElement {
       const searchUrl = `/categories?${searchParams.toString()}`;
       window.spa.router.navigate(searchUrl);
 
+      // Close hamburger menu if open
+      if (typeof window.closeHamburgerMenuIfOpen === 'function') {
+        window.closeHamburgerMenuIfOpen();
+      }
+
       // Update navigation active state after search navigation
       setTimeout(() => {
         if (typeof window.updateActiveNavigation === 'function') {
