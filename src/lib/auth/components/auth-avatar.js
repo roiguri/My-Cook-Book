@@ -110,10 +110,10 @@ class AuthAvatar extends HTMLElement {
 
     if (user) {
       avatar.classList.remove('signed-out');
-      
+
       // Use centralized avatar URL from auth service
       const avatarUrl = authService.getCurrentAvatarUrl();
-      
+
       if (avatarUrl) {
         avatar.innerHTML = `<img src="${avatarUrl}" alt="User Avatar">`;
       } else {

@@ -493,6 +493,11 @@ export default {
   },
 
   async activateFavoritesFilter() {
+    // Close mobile drawer immediately for consistent timing
+    if (window.closeMobileDrawer) {
+      window.closeMobileDrawer();
+    }
+
     const user = authService.getCurrentUser();
     if (!user) {
       // If user is not authenticated, show auth modal or redirect
@@ -523,6 +528,11 @@ export default {
   },
 
   async resetToAllCategories() {
+    // Close mobile drawer immediately for consistent timing
+    if (window.closeMobileDrawer) {
+      window.closeMobileDrawer();
+    }
+
     this.activeFilters = {
       cookingTime: '',
       difficulty: '',
@@ -928,6 +938,11 @@ export default {
 
   async changeCategory(category) {
     if (category === this.currentCategory) return;
+
+    // Close mobile drawer immediately for consistent timing
+    if (window.closeMobileDrawer) {
+      window.closeMobileDrawer();
+    }
 
     this.currentCategory = category;
     this.currentPage = 1;

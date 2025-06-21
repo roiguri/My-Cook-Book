@@ -38,7 +38,6 @@ class UserProfile extends HTMLElement {
   }
 
   render() {
-
     this.shadowRoot.innerHTML = `
       <style>
         .profile-container {
@@ -198,7 +197,7 @@ class UserProfile extends HTMLElement {
       const avatarList = await StorageService.listFiles('Avatars');
       // Clear loading message
       avatarGrid.innerHTML = '';
-      
+
       // Add avatars to grid
       for (const avatarRef of avatarList.items) {
         const url = await getDownloadURL(avatarRef);
@@ -208,10 +207,9 @@ class UserProfile extends HTMLElement {
         button.addEventListener('click', () => this.selectAvatar(button, url));
         avatarGrid.appendChild(button);
       }
-      
+
       const currentAvatarUrl = authService.getCurrentAvatarUrl();
       this.updateAvatarSelection(currentAvatarUrl);
-      
     } catch (error) {
       console.error('Error loading avatars:', error);
       this.showError('שגיאה בטעינת תמונות הפרופיל. אנא נסה שנית.');
@@ -223,10 +221,10 @@ class UserProfile extends HTMLElement {
     this.shadowRoot.querySelectorAll('.avatar-button').forEach((btn) => {
       btn.classList.remove('selected');
     });
-    
+
     // Set the selected avatar URL
     this.selectedAvatarUrl = currentAvatarUrl || null;
-    
+
     // If we have a current avatar URL, find and select the matching button
     if (currentAvatarUrl) {
       const avatarButtons = this.shadowRoot.querySelectorAll('.avatar-button');

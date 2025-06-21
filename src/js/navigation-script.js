@@ -1,43 +1,128 @@
 // Module-scope DOM element references
 let navToggle = null;
-let navSearchContainer = null;
+let mobileDrawer = null;
+let mobileBackdrop = null;
 
 function initializeNavigation() {
   // Cache DOM element references
   navToggle = document.querySelector('.nav-toggle');
-  navSearchContainer = document.querySelector('.nav-search-container');
 
-  if (navToggle && navSearchContainer) {
-    // Pre-warm hamburger menu styles to improve first interaction
-    preWarmHamburgerMenu();
-    
-    // Optimize first interaction by using requestAnimationFrame
-    navToggle.addEventListener('click', function () {
-      // Batch DOM updates in single frame
-      requestAnimationFrame(() => {
-        this.classList.toggle('active');
-        navSearchContainer.classList.toggle('active');
-      });
-    });
+  if (window.innerWidth <= 768) {
+    createMobileDrawer();
   }
+
+  if (navToggle) {
+    navToggle.addEventListener('click', toggleMobileDrawer);
+  }
+
+  window.addEventListener('resize', handleResize);
 
   initializeSPANavigation();
 }
 
-function preWarmHamburgerMenu() {
-  // Force browser to calculate styles by briefly adding/removing active class
-  // This pre-calculates layout and paint operations for smoother first interaction
-  requestAnimationFrame(() => {
-    navToggle.classList.add('active');
-    navSearchContainer.classList.add('active');
-    
-    // Force style calculation
-    navSearchContainer.offsetHeight;
-    
-    // Remove immediately (before next frame)
-    navToggle.classList.remove('active');
-    navSearchContainer.classList.remove('active');
-  });
+function createMobileDrawer() {
+  if (mobileDrawer) return;
+
+  mobileBackdrop = document.createElement('div');
+  mobileBackdrop.className = 'mobile-nav-backdrop';
+  mobileBackdrop.addEventListener('click', closeMobileDrawer);
+
+  mobileDrawer = document.createElement('div');
+  mobileDrawer.className = 'mobile-nav-drawer';
+
+  const drawerHeader = document.createElement('div');
+  drawerHeader.className = 'drawer-header';
+
+  const drawerLogo = document.createElement('div');
+  drawerLogo.className = 'drawer-logo';
+  drawerLogo.textContent = 'תפריט';
+
+  const drawerClose = document.createElement('button');
+  drawerClose.className = 'drawer-close';
+  drawerClose.setAttribute('aria-label', 'Close menu');
+  drawerClose.addEventListener('click', closeMobileDrawer);
+
+  drawerHeader.appendChild(drawerLogo);
+  drawerHeader.appendChild(drawerClose);
+
+  mobileDrawer.appendChild(drawerHeader);
+  syncMobileDrawerNavigation();
+
+  document.body.appendChild(mobileBackdrop);
+  document.body.appendChild(mobileDrawer);
+
+  document.addEventListener('auth-state-changed', syncMobileDrawerNavigation);
+
+  const headerNav = document.querySelector('header nav');
+  if (headerNav) {
+    const observer = new MutationObserver(syncMobileDrawerNavigation);
+    observer.observe(headerNav, {
+      childList: true,
+      subtree: true,
+    });
+
+    mobileDrawer._navObserver = observer;
+  }
+}
+
+function syncMobileDrawerNavigation() {
+  if (!mobileDrawer) return;
+
+  const headerNav = document.querySelector('header nav');
+  if (!headerNav) return;
+
+  const existingNav = mobileDrawer.querySelector('nav');
+  if (existingNav) {
+    existingNav.remove();
+  }
+
+  const drawerNav = headerNav.cloneNode(true);
+  mobileDrawer.appendChild(drawerNav);
+}
+
+function toggleMobileDrawer() {
+  if (!mobileDrawer || !mobileBackdrop) return;
+
+  const isActive = mobileDrawer.classList.contains('active');
+
+  if (!isActive) {
+    navToggle.classList.add('active', 'drawer-open');
+    mobileDrawer.classList.add('active');
+    mobileBackdrop.classList.add('active');
+
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeMobileDrawer() {
+  if (!mobileDrawer || !mobileBackdrop) return;
+
+  navToggle.classList.remove('active', 'drawer-open');
+  mobileDrawer.classList.remove('active');
+  mobileBackdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function handleResize() {
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile && !mobileDrawer) {
+    createMobileDrawer();
+  } else if (!isMobile && mobileDrawer) {
+    closeMobileDrawer();
+    if (mobileDrawer) {
+      if (mobileDrawer._navObserver) {
+        mobileDrawer._navObserver.disconnect();
+      }
+      document.removeEventListener('auth-state-changed', syncMobileDrawerNavigation);
+      mobileDrawer.remove();
+      mobileDrawer = null;
+    }
+    if (mobileBackdrop) {
+      mobileBackdrop.remove();
+      mobileBackdrop = null;
+    }
+  }
 }
 
 function initializeSPANavigation() {
@@ -88,16 +173,15 @@ function initializeSPANavigation() {
 }
 
 function closeHamburgerMenuIfOpen() {
-  if (navToggle && navSearchContainer && navToggle.classList.contains('active')) {
-    navToggle.classList.remove('active');
-    navSearchContainer.classList.remove('active');
+  if (mobileDrawer && mobileDrawer.classList.contains('active')) {
+    closeMobileDrawer();
   }
 }
 
 function updateActiveNavigation() {
   const currentPath = window.location.pathname;
 
-  const navLinks = document.querySelectorAll('header nav a');
+  const navLinks = document.querySelectorAll('header nav a, .mobile-nav-drawer nav a');
 
   navLinks.forEach((link) => {
     link.classList.remove('active');
@@ -161,6 +245,8 @@ function isInternalLink(link) {
 // Make functions available globally for other components
 window.updateActiveNavigation = updateActiveNavigation;
 window.closeHamburgerMenuIfOpen = closeHamburgerMenuIfOpen;
+window.closeMobileDrawer = closeMobileDrawer;
+window.syncMobileDrawerNavigation = syncMobileDrawerNavigation;
 
 // Initialize immediately if DOM is ready, otherwise wait for it
 if (document.readyState === 'loading') {

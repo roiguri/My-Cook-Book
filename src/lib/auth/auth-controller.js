@@ -128,6 +128,11 @@ class AuthController extends HTMLElement {
     if (roles.isManager) {
       navMenu.appendChild(createNavItem('dashboard-tab', 'ממשק ניהול', '/dashboard'));
     }
+
+    // Sync mobile drawer navigation if it exists
+    if (window.syncMobileDrawerNavigation) {
+      window.syncMobileDrawerNavigation();
+    }
   }
 
   getCorrectPath(path) {
