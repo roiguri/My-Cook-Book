@@ -2,10 +2,15 @@
 
 """
 Environment Icon Generator
-Creates complete environment icon sets from production icons with custom colors and optional labels
+Creates complete environment icon sets from dev original icons with custom colors and optional labels
 
 USAGE:
 python3 create-environment-icons.py <environment> <hex_color> [--label <text>] [--no-label]
+
+COLORS:
+dev - original color
+staging - created with #9b59b6
+prod - created with #31572c
 
 EXAMPLES:
 python3 create-environment-icons.py test "#ff6b35" --label "TEST"
@@ -18,7 +23,7 @@ FEATURES:
 - Changes background color from cyan to any hex color
 - Optionally adds environment labels with shadow style
 - Creates complete icon sets (all sizes)
-- Preserves original prod icons
+- Preserves original dev icons
 - Uses HSV color replacement for precise results
 - Professional shadow styling with asymmetric text placement
 """
@@ -315,7 +320,7 @@ OUTPUT:
     # Setup paths
     script_dir = Path(__file__).parent
     icon_dir = script_dir.parent / 'public' / 'img' / 'icon'
-    prod_dir = icon_dir / 'prod'
+    dev_dir = icon_dir / 'dev'
     
     # Determine output directory
     if args.output_dir:
@@ -331,20 +336,20 @@ OUTPUT:
             output_dir = icon_dir / args.environment
             label_text = None
     
-    # Check if prod directory exists
-    if not prod_dir.exists():
-        print(f"Error: Production icons directory not found: {prod_dir}")
-        print("Make sure you have the original prod icons in public/img/icon/prod/")
+    # Check if dev directory exists
+    if not dev_dir.exists():
+        print(f"Error: Dev icons directory not found: {dev_dir}")
+        print("Make sure you have the original dev icons in public/img/icon/dev/")
         sys.exit(1)
     
-    # Get all PNG files in prod directory
-    icon_files = list(prod_dir.glob('*.png'))
+    # Get all PNG files in dev directory
+    icon_files = list(dev_dir.glob('*.png'))
     if not icon_files:
-        print(f"Error: No PNG files found in {prod_dir}")
+        print(f"Error: No PNG files found in {dev_dir}")
         sys.exit(1)
     
     print(f"Creating {args.environment} environment icons...")
-    print(f"Source: {prod_dir}")
+    print(f"Source: {dev_dir}")
     print(f"Target: {output_dir}")
     print(f"Color: {target_color}")
     print(f"Label: {label_text if label_text else 'None'}")
