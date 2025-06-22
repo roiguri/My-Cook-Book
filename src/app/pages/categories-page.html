@@ -5,10 +5,7 @@
     <div class="categories-content">
       <div class="filters-container">
         <filter-search-bar class="categories-search"></filter-search-bar>
-        <button id="open-filter-modal" class="filter-button">
-          <i class="fas fa-filter"></i>
-          <span id="filter-badge" class="filter-badge"></span>
-        </button>
+        <filter-manager id="filter-manager" dir="rtl"></filter-manager>
 
         <category-navigation id="category-navigation" dir="rtl"></category-navigation>
       </div>
@@ -20,6 +17,4 @@
   </main>
 
   <recipe-pagination id="recipe-pagination" dir="rtl"></recipe-pagination>
-
-  <recipe-filter-component id="recipe-filter"></recipe-filter-component>
 </div>

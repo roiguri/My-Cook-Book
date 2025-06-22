@@ -249,9 +249,9 @@ export default {
         import('../../lib/recipes/recipe-card/recipe-card.js'),
         import('../../lib/search/filter-search-bar/filter-search-bar.js'),
         import('../../lib/search/search-service/search-service.js'),
-        import('../../lib/modals/filter_modal/filter_modal.js'),
         import('../../lib/collections/category-navigation/category-navigation.js'),
         import('../../lib/collections/recipe-pagination/recipe-pagination.js'),
+        import('../../lib/collections/filter-manager/filter-manager.js'),
       ]);
     } catch (error) {
       console.error('Error importing categories page components:', error);
@@ -291,8 +291,6 @@ export default {
       await this.loadInitialRecipes();
       this.updateUI();
       await this.displayCurrentPageRecipes();
-
-      this.updateFilterModalCounter();
 
       this.updateURLSilently();
 
@@ -412,21 +410,20 @@ export default {
       recipePagination.addEventListener('page-changed', this.handlePaginationChange.bind(this));
     }
 
-    const filterButton = document.getElementById('open-filter-modal');
-    if (filterButton) {
-      filterButton.addEventListener('click', this.handleFilterModalOpen.bind(this));
+    const filterManager = document.getElementById('filter-manager');
+    if (filterManager) {
+      filterManager.addEventListener(
+        'filter-modal-requested',
+        this.handleFilterModalRequested.bind(this),
+      );
+      filterManager.addEventListener('filter-applied', this.handleFilterApplied.bind(this));
+      filterManager.addEventListener('filter-reset', this.handleFilterReset.bind(this));
     }
 
     const filterSearchBar = document.querySelector('filter-search-bar');
     if (filterSearchBar) {
       filterSearchBar.setValue(this.currentSearchQuery);
       filterSearchBar.addEventListener('search-input', this.handleSearchInput.bind(this));
-    }
-
-    const filterModal = document.getElementById('recipe-filter');
-    if (filterModal) {
-      filterModal.addEventListener('filter-applied', this.handleFilterApplied.bind(this));
-      filterModal.addEventListener('filter-reset', this.handleFilterReset.bind(this));
     }
 
     document.addEventListener('recipe-favorite-changed', this.handleFavoriteChanged.bind(this));
@@ -451,7 +448,6 @@ export default {
     if (this.activeFilters.favoritesOnly) {
       this.loadInitialRecipes().then(() => {
         this.displayCurrentPageRecipes();
-        this.updateFilterModalCounter();
       });
     }
   },
@@ -459,7 +455,7 @@ export default {
   updateUI() {
     this.updateCategoryNavigation();
     this.updatePageTitle();
-    this.updateFilterBadgeFromState();
+    this.updateFilterManager();
   },
 
   updateCategoryNavigation() {
@@ -514,8 +510,6 @@ export default {
       setTimeout(window.updateActiveNavigation, 0);
     }
 
-    this.updateFilterModalCounter();
-
     this.updateURLSilently();
   },
 
@@ -550,13 +544,17 @@ export default {
       setTimeout(window.updateActiveNavigation, 0);
     }
 
-    this.updateFilterModalCounter();
-
     this.updateURLSilently();
   },
 
-  updateFilterBadgeFromState() {
-    this.updateFilterBadge(this.activeFilters);
+  updateFilterManager() {
+    const filterManager = document.getElementById('filter-manager');
+    if (filterManager) {
+      filterManager.setFiltersInternal(this.activeFilters);
+      filterManager.setCurrentCategory(this.currentCategory);
+      filterManager.setCurrentSearchQuery(this.currentSearchQuery);
+      filterManager.setBaseRecipes(this.allRecipes || []);
+    }
   },
 
   setupNavigationInterception() {
@@ -747,45 +745,32 @@ export default {
       this.updateUI();
       await this.displayCurrentPageRecipes();
 
-      this.updateFilterModalCounter();
-
       this.updateURLSilently();
     }
   },
 
-  async handleFilterModalOpen() {
-    const filterModal = document.getElementById('recipe-filter');
-    if (filterModal) {
-      // Set current filters first so modal state is initialized correctly before rendering
-      if (this.hasActiveFilters) {
-        filterModal.setAttribute('current-filters', JSON.stringify(this.activeFilters));
-      } else {
-        filterModal.removeAttribute('current-filters');
+  async handleFilterModalRequested() {
+    // Prepare recipe data for the filter manager
+    let baseRecipes = [...this.allRecipes];
+
+    if (this.currentSearchQuery) {
+      baseRecipes = this.filterRecipesBySearch(baseRecipes, this.currentSearchQuery);
+    }
+
+    if (this.activeFilters.favoritesOnly) {
+      const user = authService.getCurrentUser();
+      if (user) {
+        const favoriteRecipeIds = await this.getUserFavorites();
+        baseRecipes = baseRecipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
       }
+    }
 
-      let baseRecipes = [...this.allRecipes];
-
-      if (this.currentSearchQuery) {
-        baseRecipes = this.filterRecipesBySearch(baseRecipes, this.currentSearchQuery);
-      }
-
-      if (this.activeFilters.favoritesOnly) {
-        const user = authService.getCurrentUser();
-        if (user) {
-          const favoriteRecipeIds = await this.getUserFavorites();
-          baseRecipes = baseRecipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
-        }
-      }
-
-      filterModal.setAttribute('recipes', JSON.stringify(baseRecipes));
-
-      if (this.currentCategory !== 'all') {
-        filterModal.setAttribute('category', this.currentCategory);
-      } else {
-        filterModal.removeAttribute('category');
-      }
-
-      filterModal.open();
+    // Update the filter manager with the prepared data
+    const filterManager = document.getElementById('filter-manager');
+    if (filterManager) {
+      filterManager.setBaseRecipes(baseRecipes);
+      filterManager.setCurrentCategory(this.currentCategory);
+      filterManager.setCurrentSearchQuery(this.currentSearchQuery);
     }
   },
 
@@ -817,9 +802,10 @@ export default {
 
     this.currentPage = 1;
 
-    this.updateFilterBadge(filters);
-
     this.updatePageTitle();
+
+    // Update filter manager to reflect new state
+    this.updateFilterManager();
 
     this.updateURLSilently();
 
@@ -844,9 +830,10 @@ export default {
     await this.loadInitialRecipes();
     this.currentPage = 1;
 
-    this.updateFilterBadge({});
-
     this.updatePageTitle();
+
+    // Update filter manager to reflect new state
+    this.updateFilterManager();
 
     this.updateURLSilently();
 
@@ -855,26 +842,6 @@ export default {
     }
 
     await this.displayCurrentPageRecipes();
-  },
-
-  updateFilterBadge(filters) {
-    const filterBadge = document.getElementById('filter-badge');
-    if (!filterBadge) return;
-
-    // Count active filters
-    let activeFilters = 0;
-    if (filters.cookingTime) activeFilters++;
-    if (filters.difficulty) activeFilters++;
-    if (filters.mainIngredient) activeFilters++;
-    if (filters.tags && filters.tags.length > 0) activeFilters++;
-    if (filters.favoritesOnly) activeFilters++;
-
-    if (activeFilters > 0) {
-      filterBadge.textContent = activeFilters;
-      filterBadge.style.display = 'flex';
-    } else {
-      filterBadge.style.display = 'none';
-    }
   },
 
   async changeCategory(category) {
@@ -891,8 +858,6 @@ export default {
     await this.loadInitialRecipes();
     this.updateUI();
     await this.displayCurrentPageRecipes();
-
-    this.updateFilterModalCounter();
   },
 
   async changeSearch(searchQuery) {
@@ -952,13 +917,6 @@ export default {
 
     if (window.spa?.router) {
       window.spa.router.updateParams(params);
-    }
-  },
-
-  updateFilterModalCounter() {
-    const filterModal = document.getElementById('recipe-filter');
-    if (filterModal && typeof filterModal.updateRecipeCount === 'function') {
-      filterModal.updateRecipeCount(this.displayedRecipes.length);
     }
   },
 

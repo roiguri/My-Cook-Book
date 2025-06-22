@@ -49,37 +49,8 @@
   font-size: var(--size-body);
 }
 
-.spa-content .categories-page .filter-button {
-  --border-color: #ccc;
-  display: block;
-  position: relative;
-  background-color: var(--tabs-color);
-  color: var(--text-color);
-  border: 2px solid var(--border-color, #ccc);
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  font-size: var(--size-body);
+.spa-content .categories-page filter-manager {
   align-self: stretch;
-}
-
-.spa-content .categories-page .filter-button:hover {
-  --border-color: var(--secondary);
-}
-
-.spa-content .categories-page .filter-badge {
-  display: none;
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: var(--secondary);
-  border-radius: 50%;
-  padding: 2px 6px;
-  width: 10px;
-  height: 16px;
-  text-align: center;
-  font-weight: 700;
 }
 
 .spa-content .categories-page category-navigation {
@@ -168,12 +139,11 @@
     margin-bottom: 0;
   }
 
-  .spa-content .categories-page .filter-button {
+  .spa-content .categories-page filter-manager {
     order: 3;
     grid-column: 2;
     grid-row: 2;
     margin-bottom: 0;
-    align-self: stretch;
   }
 }
 

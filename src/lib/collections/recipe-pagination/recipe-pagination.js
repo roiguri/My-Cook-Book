@@ -1,10 +1,10 @@
 /**
  * Recipe Pagination Web Component
  * Pure UI component for pagination controls
- * 
+ *
  * Architecture: Separated HTML, CSS, and JS files
  * - recipe-pagination.html: HTML template
- * - recipe-pagination-styles.js: Component styles  
+ * - recipe-pagination-styles.js: Component styles
  * - recipe-pagination-config.js: Configuration constants
  * - recipe-pagination.js: Component logic (this file)
  *
@@ -35,14 +35,14 @@ class RecipePagination extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    
+
     // State
     this.currentPage = 1;
     this.totalPages = 1;
     this.totalItems = 0;
     this.prevText = CONFIG.DEFAULT_TEXT.prevButton;
     this.nextText = CONFIG.DEFAULT_TEXT.nextButton;
-    
+
     // Bindings
     this.handlePrevClick = this.handlePrevClick.bind(this);
     this.handleNextClick = this.handleNextClick.bind(this);
@@ -54,7 +54,7 @@ class RecipePagination extends HTMLElement {
       ATTRIBUTES.totalPages,
       ATTRIBUTES.totalItems,
       ATTRIBUTES.prevText,
-      ATTRIBUTES.nextText
+      ATTRIBUTES.nextText,
     ];
   }
 
@@ -123,7 +123,6 @@ class RecipePagination extends HTMLElement {
       // Setup initial content
       this.updateButtonTexts();
       this.updateUI();
-
     } catch (error) {
       console.error('Error rendering recipe pagination:', error);
       this.shadowRoot.innerHTML = `
@@ -138,11 +137,11 @@ class RecipePagination extends HTMLElement {
   updateButtonTexts() {
     const prevButton = this.shadowRoot.querySelector('.prev-button');
     const nextButton = this.shadowRoot.querySelector('.next-button');
-    
+
     if (prevButton) {
       prevButton.textContent = this.prevText;
     }
-    
+
     if (nextButton) {
       nextButton.textContent = this.nextText;
     }
@@ -161,18 +160,18 @@ class RecipePagination extends HTMLElement {
       .replace('{current}', this.currentPage)
       .replace('{total}', this.totalPages)
       .replace('{totalItems}', this.totalItems);
-    
+
     pageInfo.textContent = text;
   }
 
   updateButtonStates() {
     const prevButton = this.shadowRoot.querySelector('.prev-button');
     const nextButton = this.shadowRoot.querySelector('.next-button');
-    
+
     if (prevButton) {
       prevButton.disabled = this.currentPage <= 1;
     }
-    
+
     if (nextButton) {
       nextButton.disabled = this.currentPage >= this.totalPages;
     }
@@ -181,11 +180,11 @@ class RecipePagination extends HTMLElement {
   setupEventListeners() {
     const prevButton = this.shadowRoot.querySelector('.prev-button');
     const nextButton = this.shadowRoot.querySelector('.next-button');
-    
+
     if (prevButton) {
       prevButton.addEventListener('click', this.handlePrevClick);
     }
-    
+
     if (nextButton) {
       nextButton.addEventListener('click', this.handleNextClick);
     }
@@ -194,11 +193,11 @@ class RecipePagination extends HTMLElement {
   removeEventListeners() {
     const prevButton = this.shadowRoot.querySelector('.prev-button');
     const nextButton = this.shadowRoot.querySelector('.next-button');
-    
+
     if (prevButton) {
       prevButton.removeEventListener('click', this.handlePrevClick);
     }
-    
+
     if (nextButton) {
       nextButton.removeEventListener('click', this.handleNextClick);
     }
@@ -206,40 +205,42 @@ class RecipePagination extends HTMLElement {
 
   handlePrevClick(event) {
     event.preventDefault();
-    
+
     if (this.currentPage <= 1) return;
-    
+
     const newPage = this.currentPage - 1;
     this.emitPageChanged(newPage, 'prev');
   }
 
   handleNextClick(event) {
     event.preventDefault();
-    
+
     if (this.currentPage >= this.totalPages) return;
-    
+
     const newPage = this.currentPage + 1;
     this.emitPageChanged(newPage, 'next');
   }
 
   emitPageChanged(page, direction) {
     const oldPage = this.currentPage;
-    
+
     // Update internal state
     this.currentPage = page;
     this.updateUI();
 
     // Emit event
-    this.dispatchEvent(new CustomEvent(CONFIG.EVENTS.pageChanged, {
-      detail: {
-        page,
-        previousPage: oldPage,
-        direction,
-        totalPages: this.totalPages,
-        totalItems: this.totalItems
-      },
-      bubbles: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent(CONFIG.EVENTS.pageChanged, {
+        detail: {
+          page,
+          previousPage: oldPage,
+          direction,
+          totalPages: this.totalPages,
+          totalItems: this.totalItems,
+        },
+        bubbles: true,
+      }),
+    );
   }
 
   // Public API methods
@@ -271,7 +272,7 @@ class RecipePagination extends HTMLElement {
     if (page < 1 || page > this.totalPages || page === this.currentPage) {
       return false;
     }
-    
+
     const direction = page > this.currentPage ? 'next' : 'prev';
     this.emitPageChanged(page, direction);
     return true;
