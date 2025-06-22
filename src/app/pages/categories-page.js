@@ -251,6 +251,7 @@ export default {
         import('../../lib/search/search-service/search-service.js'),
         import('../../lib/modals/filter_modal/filter_modal.js'),
         import('../../lib/collections/category-navigation/category-navigation.js'),
+        import('../../lib/collections/recipe-pagination/recipe-pagination.js'),
       ]);
     } catch (error) {
       console.error('Error importing categories page components:', error);
@@ -406,13 +407,9 @@ export default {
       );
     }
 
-    const prevButton = document.getElementById('prev-page');
-    const nextButton = document.getElementById('next-page');
-    if (prevButton) {
-      prevButton.addEventListener('click', () => this.goToPage(this.currentPage - 1));
-    }
-    if (nextButton) {
-      nextButton.addEventListener('click', () => this.goToPage(this.currentPage + 1));
+    const recipePagination = document.getElementById('recipe-pagination');
+    if (recipePagination) {
+      recipePagination.addEventListener('page-changed', this.handlePaginationChange.bind(this));
     }
 
     const filterButton = document.getElementById('open-filter-modal');
@@ -706,20 +703,11 @@ export default {
   },
 
   updatePaginationInfo(currentPage, totalPages, totalRecipes) {
-    const pageInfo = document.getElementById('page-info');
-    const prevButton = document.getElementById('prev-page');
-    const nextButton = document.getElementById('next-page');
-
-    if (pageInfo) {
-      pageInfo.textContent = `עמוד ${currentPage} מתוך ${totalPages} (${totalRecipes} מתכונים)`;
-    }
-
-    if (prevButton) {
-      prevButton.disabled = currentPage <= 1;
-    }
-
-    if (nextButton) {
-      nextButton.disabled = currentPage >= totalPages;
+    const recipePagination = document.getElementById('recipe-pagination');
+    if (recipePagination) {
+      recipePagination.setCurrentPage(currentPage);
+      recipePagination.setTotalPages(totalPages);
+      recipePagination.setTotalItems(totalRecipes);
     }
   },
 
@@ -741,6 +729,11 @@ export default {
     const category = event.detail.category;
     await this.changeCategory(category);
     this.updateURLSilently();
+  },
+
+  async handlePaginationChange(event) {
+    const { page } = event.detail;
+    await this.goToPage(page);
   },
 
   async handleSearchInput(event) {

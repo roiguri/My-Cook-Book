@@ -130,40 +130,8 @@
   margin: 1rem 0;
 }
 
-.spa-content .categories-page .pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
+.spa-content .categories-page recipe-pagination {
   margin-top: auto;
-  margin-bottom: 20px;
-  padding-top: 20px;
-}
-
-.spa-content .categories-page .pagination button {
-  background-color: var(--primary-color);
-  color: var(--button-color);
-  border: none;
-  padding: 10px 15px;
-  margin: 0 5px;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-}
-
-.spa-content .categories-page .pagination button:hover,
-.spa-content .categories-page .pagination button.active {
-  background-color: var(--primary-hover);
-  color: var(--button-color);
-}
-
-.spa-content .categories-page .pagination button:disabled {
-  background-color: var(--disabled-color);
-  cursor: not-allowed;
-}
-
-.spa-content .categories-page .pagination #page-info {
-  margin: 0 10px;
 }
 
 /*------------------------------------*\

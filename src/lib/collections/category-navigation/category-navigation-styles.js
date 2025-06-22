@@ -14,7 +14,6 @@ export const styles = `
   }
 
   .category-tabs {
-    margin-bottom: 20px;
     width: 100%;
   }
 
