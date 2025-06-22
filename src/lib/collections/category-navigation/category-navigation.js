@@ -1,10 +1,10 @@
 /**
  * Category Navigation Web Component
  * Pure UI component for category selection with tabs and dropdown
- * 
+ *
  * Architecture: Separated HTML, CSS, and JS files
  * - category-navigation.html: HTML template
- * - category-navigation-styles.js: Component styles  
+ * - category-navigation-styles.js: Component styles
  * - category-navigation-config.js: Configuration constants
  * - category-navigation.js: Component logic (this file)
  *
@@ -33,12 +33,12 @@ class CategoryNavigation extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    
+
     // State
     this.currentCategory = 'all';
     this.categories = CONFIG.DEFAULT_CATEGORIES;
     this.mobileBreakpoint = CONFIG.MOBILE_BREAKPOINT;
-    
+
     // Bindings
     this.handleTabClick = this.handleTabClick.bind(this);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
@@ -46,11 +46,7 @@ class CategoryNavigation extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return [
-      ATTRIBUTES.currentCategory,
-      ATTRIBUTES.categories,
-      ATTRIBUTES.mobileBreakpoint
-    ];
+    return [ATTRIBUTES.currentCategory, ATTRIBUTES.categories, ATTRIBUTES.mobileBreakpoint];
   }
 
   async connectedCallback() {
@@ -109,11 +105,10 @@ class CategoryNavigation extends HTMLElement {
       this.populateTabs();
       this.populateDropdown();
       this.updateActiveStates();
-      
+
       // Re-setup event listeners since DOM was recreated
       this.removeEventListeners();
       this.setupEventListeners();
-
     } catch (error) {
       console.error('Error rendering category navigation:', error);
       this.shadowRoot.innerHTML = `
@@ -130,17 +125,17 @@ class CategoryNavigation extends HTMLElement {
     if (!tabsList) return;
 
     tabsList.innerHTML = '';
-    
-    this.categories.forEach(category => {
+
+    this.categories.forEach((category) => {
       const li = document.createElement('li');
       li.className = CONFIG.CSS_CLASSES.tabsItem;
-      
+
       const button = document.createElement('button');
       button.className = CONFIG.CSS_CLASSES.tabsLink;
       button.textContent = category.label;
       button.dataset.category = category.value;
       button.type = 'button';
-      
+
       li.appendChild(button);
       tabsList.appendChild(li);
     });
@@ -151,8 +146,8 @@ class CategoryNavigation extends HTMLElement {
     if (!select) return;
 
     select.innerHTML = '';
-    
-    this.categories.forEach(category => {
+
+    this.categories.forEach((category) => {
       const option = document.createElement('option');
       option.value = category.value;
       option.textContent = category.label;
@@ -163,7 +158,7 @@ class CategoryNavigation extends HTMLElement {
   updateActiveStates() {
     // Update tabs active state
     const tabLinks = this.shadowRoot.querySelectorAll('.category-tabs-link');
-    tabLinks.forEach(link => {
+    tabLinks.forEach((link) => {
       if (link.dataset.category === this.currentCategory) {
         link.classList.add(CONFIG.CSS_CLASSES.tabsLinkActive);
       } else {
@@ -214,7 +209,7 @@ class CategoryNavigation extends HTMLElement {
     if (!button) return;
 
     event.preventDefault();
-    
+
     const category = button.dataset.category;
     this.selectCategory(category);
   }
@@ -234,22 +229,24 @@ class CategoryNavigation extends HTMLElement {
 
     const oldCategory = this.currentCategory;
     this.currentCategory = category;
-    
+
     // Update UI
     this.updateActiveStates();
 
     // Find category data
-    const categoryData = this.categories.find(cat => cat.value === category);
+    const categoryData = this.categories.find((cat) => cat.value === category);
 
     // Emit event
-    this.dispatchEvent(new CustomEvent(CONFIG.EVENTS.categoryChanged, {
-      detail: {
-        category,
-        categoryData,
-        previousCategory: oldCategory
-      },
-      bubbles: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent(CONFIG.EVENTS.categoryChanged, {
+        detail: {
+          category,
+          categoryData,
+          previousCategory: oldCategory,
+        },
+        bubbles: true,
+      }),
+    );
   }
 
   // Public API methods

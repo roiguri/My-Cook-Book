@@ -11,11 +11,7 @@ export const RECIPE_CARD_CONFIG = {
   },
 
   // Observed attributes
-  OBSERVED_ATTRIBUTES: [
-    'recipe-id',
-    'card-width',
-    'card-height',
-  ],
+  OBSERVED_ATTRIBUTES: ['recipe-id', 'card-width', 'card-height'],
 
   // CSS Classes
   CSS_CLASSES: {

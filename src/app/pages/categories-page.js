@@ -30,7 +30,7 @@ export default {
       await new Promise((resolve) => setTimeout(resolve, 10));
       this.updateUI();
       await this.displayCurrentPageRecipes();
-      
+
       // Ensure category navigation is initialized with current state
       await new Promise((resolve) => setTimeout(resolve, 50));
       this.updateCategoryNavigation();
@@ -400,7 +400,10 @@ export default {
 
     const categoryNavigation = document.getElementById('category-navigation');
     if (categoryNavigation) {
-      categoryNavigation.addEventListener('category-changed', this.handleCategoryNavigationChange.bind(this));
+      categoryNavigation.addEventListener(
+        'category-changed',
+        this.handleCategoryNavigationChange.bind(this),
+      );
     }
 
     const prevButton = document.getElementById('prev-page');
@@ -555,7 +558,6 @@ export default {
     this.updateURLSilently();
   },
 
-
   updateFilterBadgeFromState() {
     this.updateFilterBadge(this.activeFilters);
   },
@@ -609,7 +611,6 @@ export default {
       }
     };
 
-
     document.addEventListener('click', this.favoritesNavHandler, true);
     document.addEventListener('click', this.categoriesNavHandler, true);
   },
@@ -624,7 +625,6 @@ export default {
       document.removeEventListener('click', this.categoriesNavHandler, true);
       this.categoriesNavHandler = null;
     }
-
   },
 
   async displayCurrentPageRecipes() {

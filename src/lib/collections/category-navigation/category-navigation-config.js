@@ -6,7 +6,7 @@
 export const CONFIG = {
   // Component selector
   COMPONENT_TAG: 'category-navigation',
-  
+
   // CSS classes
   CSS_CLASSES: {
     container: 'category-navigation',
@@ -16,14 +16,14 @@ export const CONFIG = {
     tabsLink: 'category-tabs-link',
     tabsLinkActive: 'active',
     dropdown: 'category-dropdown',
-    dropdownSelect: 'category-dropdown-select'
+    dropdownSelect: 'category-dropdown-select',
   },
-  
+
   // Events
   EVENTS: {
-    categoryChanged: 'category-changed'
+    categoryChanged: 'category-changed',
   },
-  
+
   // Default categories
   DEFAULT_CATEGORIES: [
     { value: 'all', label: 'כל הקטגוריות' },
@@ -35,15 +35,15 @@ export const CONFIG = {
     { value: 'desserts', label: 'קינוחים' },
     { value: 'breakfast-brunch', label: 'ארוחות בוקר' },
     { value: 'snacks', label: 'חטיפים' },
-    { value: 'beverages', label: 'משקאות' }
+    { value: 'beverages', label: 'משקאות' },
   ],
-  
+
   // Responsive breakpoints
-  MOBILE_BREAKPOINT: 768
+  MOBILE_BREAKPOINT: 768,
 };
 
 export const ATTRIBUTES = {
   currentCategory: 'current-category',
   categories: 'categories',
-  mobileBreakpoint: 'mobile-breakpoint'
+  mobileBreakpoint: 'mobile-breakpoint',
 };

@@ -1,7 +1,7 @@
 /**
  * Recipe Card Web Component
  * A simplified card component for displaying recipe information in vertical layout
- * 
+ *
  * Architecture: Separated HTML, CSS, and JS files
  * - recipe-card.html: HTML templates
  * - recipe-card.css: Component styles
@@ -125,14 +125,11 @@ class RecipeCard extends HTMLElement {
   async _initialize() {
     this._loadStyles();
     this._showImmediateLoadingState();
-    
+
     const templatesPromise = this._loadTemplates();
-    
-    const dataPromise = Promise.all([
-      this._fetchRecipeData(),
-      this._fetchUserFavorites()
-    ]);
-    
+
+    const dataPromise = Promise.all([this._fetchRecipeData(), this._fetchUserFavorites()]);
+
     await templatesPromise;
     this._render();
     await dataPromise;
@@ -149,24 +146,24 @@ class RecipeCard extends HTMLElement {
 
   _loadStyles() {
     if (this._stylesLoaded) return;
-    
+
     const style = document.createElement('style');
     style.textContent = recipeCardStyles;
     this.shadowRoot.appendChild(style);
-    
+
     this._stylesLoaded = true;
   }
 
   async _loadTemplates() {
     if (this._templatesLoaded) return;
-    
+
     // Use static cache to avoid loading templates multiple times
     if (RecipeCard._templateCache) {
       this._templates = RecipeCard._templateCache;
       this._templatesLoaded = true;
       return;
     }
-    
+
     // If another instance is already loading, wait for it
     if (RecipeCard._templatePromise) {
       await RecipeCard._templatePromise;
@@ -174,10 +171,10 @@ class RecipeCard extends HTMLElement {
       this._templatesLoaded = true;
       return;
     }
-    
+
     // This instance will load templates for everyone
     RecipeCard._templatePromise = this._loadTemplatesFromFile();
-    
+
     try {
       await RecipeCard._templatePromise;
       this._templates = RecipeCard._templateCache;
@@ -190,20 +187,20 @@ class RecipeCard extends HTMLElement {
       RecipeCard._templatePromise = null;
     }
   }
-  
+
   async _loadTemplatesFromFile() {
     const response = await fetch(new URL('./recipe-card.html', import.meta.url));
     const htmlText = await response.text();
-    
+
     // Create a temporary container to parse the HTML
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = htmlText;
-    
+
     // Store templates in static cache
     RecipeCard._templateCache = {
       main: tempDiv.querySelector('#recipe-card-template'),
       loading: tempDiv.querySelector('#loading-template'),
-      error: tempDiv.querySelector('#error-template')
+      error: tempDiv.querySelector('#error-template'),
     };
   }
 
@@ -218,7 +215,7 @@ class RecipeCard extends HTMLElement {
     this._templates = {
       main: this._createInlineMainTemplate(),
       loading: this._createInlineLoadingTemplate(),
-      error: this._createInlineErrorTemplate()
+      error: this._createInlineErrorTemplate(),
     };
     this._templatesLoaded = true;
   }
@@ -262,25 +259,34 @@ class RecipeCard extends HTMLElement {
     // Store references for cleanup
     this._card = card;
 
-    const favoriteBtn = this.shadowRoot.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtn}`);
+    const favoriteBtn = this.shadowRoot.querySelector(
+      `.${RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtn}`,
+    );
     if (favoriteBtn && !favoriteBtn.hasAttribute('listener-attached')) {
       favoriteBtn.setAttribute('listener-attached', 'true');
       favoriteBtn.addEventListener('click', async (e) => {
         e.stopPropagation(); // Prevent card click
 
-        const isFavorite = favoriteBtn.classList.contains(RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive);
+        const isFavorite = favoriteBtn.classList.contains(
+          RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
+        );
         favoriteBtn.classList.toggle(RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive);
 
         await this._toggleFavorite();
 
         this.dispatchEvent(
-          new CustomEvent(isFavorite ? RECIPE_CARD_CONFIG.EVENTS.removeFavorite : RECIPE_CARD_CONFIG.EVENTS.addFavorite, {
-            bubbles: true,
-            composed: true,
-            detail: {
-              recipeId: this.recipeId,
+          new CustomEvent(
+            isFavorite
+              ? RECIPE_CARD_CONFIG.EVENTS.removeFavorite
+              : RECIPE_CARD_CONFIG.EVENTS.addFavorite,
+            {
+              bubbles: true,
+              composed: true,
+              detail: {
+                recipeId: this.recipeId,
+              },
             },
-          }),
+          ),
         );
       });
     }
@@ -420,50 +426,55 @@ class RecipeCard extends HTMLElement {
     const totalTime = prepTime + waitTime;
     const timeClass = getTimeClass(totalTime);
     const difficultyClass = getDifficultyClass(difficulty);
-    
+
     this._clearShadowRoot();
     const template = this._templates.main;
     const clone = template.content.cloneNode(true);
-    
+
     // Populate template with data
     const favoriteBtn = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtn}`);
     const recipeImage = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.recipeImage}`);
     const recipeTitle = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.recipeTitle}`);
     const categoryBadge = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeCategory}`);
     const timeBadge = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeTime}`);
-    const difficultyBadge = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeDifficulty}`);
-    
+    const difficultyBadge = clone.querySelector(
+      `.${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeDifficulty}`,
+    );
+
     // Handle favorite button visibility
     if (!this.hasAttribute('show-favorites') && favoriteBtn) {
       favoriteBtn.remove();
     } else if (favoriteBtn) {
-      favoriteBtn.classList.toggle(RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive, this._isFavorite());
+      favoriteBtn.classList.toggle(
+        RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
+        this._isFavorite(),
+      );
     }
-    
+
     // Set image
     if (recipeImage) {
       recipeImage.setAttribute('data-src', this._imageUrl);
       recipeImage.setAttribute('alt', name);
       recipeImage.setAttribute('data-fallback', RECIPE_CARD_CONFIG.FALLBACKS.image);
     }
-    
+
     // Set title
     if (recipeTitle) {
       recipeTitle.textContent = name;
     }
-    
+
     // Set category badge
     if (categoryBadge) {
       categoryBadge.className = `${RECIPE_CARD_CONFIG.CSS_CLASSES.badge} ${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeCategory} ${category}`;
       categoryBadge.textContent = getLocalizedCategoryName(category);
     }
-    
+
     // Set time badge
     if (timeBadge) {
       timeBadge.className = `${RECIPE_CARD_CONFIG.CSS_CLASSES.badge} ${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeTime} ${timeClass}`;
       timeBadge.textContent = formatCookingTime(totalTime);
     }
-    
+
     // Set difficulty badge
     if (difficultyBadge) {
       difficultyBadge.className = `${RECIPE_CARD_CONFIG.CSS_CLASSES.badge} ${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeDifficulty} ${difficultyClass}`;
@@ -472,14 +483,14 @@ class RecipeCard extends HTMLElement {
         iconSpan.textContent = `${this._getDifficultyIcon()} ${difficulty}`;
       }
     }
-    
+
     this.shadowRoot.appendChild(clone);
     this._setupEventListeners();
-    
+
     // Initialize lazy loading for images in this component
     initLazyLoading(this.shadowRoot);
   }
-  
+
   _clearShadowRoot() {
     // Clear shadow root but preserve styles if they exist
     const existingStyle = this.shadowRoot.querySelector('style');

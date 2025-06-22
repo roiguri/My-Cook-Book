@@ -42,7 +42,6 @@
   box-sizing: border-box;
 }
 
-
 .spa-content .categories-page .categories-search .search-button {
   background-color: var(--submenu-color);
   color: var(--button-color);
@@ -209,7 +208,6 @@
     align-self: stretch;
   }
 }
-
 
 /*------------------------------------*\
     #Loading States
