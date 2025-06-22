@@ -30,6 +30,10 @@ export default {
       await new Promise((resolve) => setTimeout(resolve, 10));
       this.updateUI();
       await this.displayCurrentPageRecipes();
+      
+      // Ensure category navigation is initialized with current state
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      this.updateCategoryNavigation();
     } catch (error) {
       console.error('Error mounting categories page:', error);
       this.handleError(error, 'mount');
@@ -246,6 +250,7 @@ export default {
         import('../../lib/search/filter-search-bar/filter-search-bar.js'),
         import('../../lib/search/search-service/search-service.js'),
         import('../../lib/modals/filter_modal/filter_modal.js'),
+        import('../../lib/collections/category-navigation/category-navigation.js'),
       ]);
     } catch (error) {
       console.error('Error importing categories page components:', error);
@@ -393,9 +398,9 @@ export default {
     }, 250);
     window.addEventListener('resize', this.resizeHandler);
 
-    const categoryDropdown = document.getElementById('category-select');
-    if (categoryDropdown) {
-      categoryDropdown.addEventListener('change', this.handleCategoryChange.bind(this));
+    const categoryNavigation = document.getElementById('category-navigation');
+    if (categoryNavigation) {
+      categoryNavigation.addEventListener('category-changed', this.handleCategoryNavigationChange.bind(this));
     }
 
     const prevButton = document.getElementById('prev-page');
@@ -452,29 +457,16 @@ export default {
   },
 
   updateUI() {
-    this.updateActiveTab();
+    this.updateCategoryNavigation();
     this.updatePageTitle();
-    this.updateCategoryDropdown();
     this.updateFilterBadgeFromState();
   },
 
-  updateActiveTab() {
-    const categoryTabs = document.querySelectorAll('.category-tabs a');
-
-    categoryTabs.forEach((tab) => {
-      const href = tab.getAttribute('href');
-      let category = 'all';
-      if (href) {
-        const url = new URL(href, window.location.origin);
-        category = url.searchParams.get('category') || 'all';
-      }
-
-      if (category === this.currentCategory) {
-        tab.classList.add('active');
-      } else {
-        tab.classList.remove('active');
-      }
-    });
+  updateCategoryNavigation() {
+    const categoryNavigation = document.getElementById('category-navigation');
+    if (categoryNavigation) {
+      categoryNavigation.setCurrentCategory(this.currentCategory);
+    }
   },
 
   updatePageTitle() {
@@ -563,12 +555,6 @@ export default {
     this.updateURLSilently();
   },
 
-  updateCategoryDropdown() {
-    const dropdown = document.getElementById('category-select');
-    if (dropdown) {
-      dropdown.value = this.currentCategory;
-    }
-  },
 
   updateFilterBadgeFromState() {
     this.updateFilterBadge(this.activeFilters);
@@ -623,43 +609,9 @@ export default {
       }
     };
 
-    this.categoryTabHandler = async (event) => {
-      const link = event.target.closest('.category-tabs a');
-      if (!link) return;
-
-      // Allow browser default behavior for modifier keys and non-left clicks
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      ) {
-        return; // Let browser handle naturally (opens in new tab/window)
-      }
-
-      const currentRoute = window.spa?.router?.getCurrentRoute();
-
-      if (currentRoute === '/categories') {
-        event.preventDefault();
-
-        const href = link.getAttribute('href');
-        let category = 'all';
-        if (href) {
-          const url = new URL(href, window.location.origin);
-          category = url.searchParams.get('category') || 'all';
-        }
-
-        await this.changeCategory(category);
-
-        this.updateURLSilently();
-      }
-    };
 
     document.addEventListener('click', this.favoritesNavHandler, true);
     document.addEventListener('click', this.categoriesNavHandler, true);
-    document.addEventListener('click', this.categoryTabHandler, true);
   },
 
   removeNavigationInterception() {
@@ -673,10 +625,6 @@ export default {
       this.categoriesNavHandler = null;
     }
 
-    if (this.categoryTabHandler) {
-      document.removeEventListener('click', this.categoryTabHandler, true);
-      this.categoryTabHandler = null;
-    }
   },
 
   async displayCurrentPageRecipes() {
@@ -789,8 +737,8 @@ export default {
     this.changeCategory(category);
   },
 
-  async handleCategoryChange(event) {
-    const category = event.target.value;
+  async handleCategoryNavigationChange(event) {
+    const category = event.detail.category;
     await this.changeCategory(category);
     this.updateURLSilently();
   },
