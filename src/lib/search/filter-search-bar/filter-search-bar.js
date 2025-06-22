@@ -32,27 +32,38 @@ class FilterSearchBar extends HTMLElement {
 
         .search-input {
           width: 100%;
-          padding: 10px;
+          padding: 12px 16px;
           padding-left: 70px; /* Space for the search icon and clear button */
           border: 2px solid var(--border-color, #ccc);
-          border-radius: 4px;
+          border-radius: 12px;
           font-size: var(--size-body);
           font-family: var(--body-font);
+          background-color: white;
+          color: var(--text-color);
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          font-weight: 500;
+        }
+
+        .search-input:hover {
+          border-color: var(--secondary, #6c757d);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         .search-input:focus {
           outline: none;
-          border-color: var(--submenu-color);
+          border-color: var(--secondary, #6c757d);
+          box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.1);
         }
 
         .search-icon {
           position: absolute;
-          left: 10px;
+          left: 12px;
           top: 50%;
           transform: translateY(-50%);
-          color: var(--text-color);
+          color: var(--text-color-secondary, #666);
           pointer-events: none;
-          font-size: var(--size-icon);
+          font-size: var(--size-icon, 1.2em);
         }
 
         .clear-button {
@@ -62,9 +73,9 @@ class FilterSearchBar extends HTMLElement {
           transform: translateY(-50%);
           background: none;
           border: none;
-          color: var(--text-color);
+          color: var(--text-color-secondary, #666);
           cursor: pointer;
-          font-size: 16px;
+          font-size: 18px;
           padding: 4px;
           border-radius: 50%;
           width: 24px;
@@ -72,20 +83,119 @@ class FilterSearchBar extends HTMLElement {
           display: none; /* Hidden by default */
           align-items: center;
           justify-content: center;
+          transition: all 0.2s ease;
+          font-weight: bold;
         }
 
         .clear-button:hover {
-          background-color: var(--border-color, #e0e0e0);
+          background-color: var(--border-light, #e0e0e0);
+          color: var(--text-color, #333);
+          transform: translateY(-50%) scale(1.1);
+        }
+
+        .clear-button:active {
+          transform: translateY(-50%) scale(0.9);
         }
 
         .clear-button.visible {
           display: flex;
         }
 
+        /* RTL support */
+        :host([dir="rtl"]) .search-container {
+          direction: rtl;
+        }
+
+        :host([dir="rtl"]) .search-icon {
+          left: auto;
+          right: 12px;
+        }
+
+        :host([dir="rtl"]) .clear-button {
+          left: auto;
+          right: 40px;
+        }
+
+        :host([dir="rtl"]) .search-input {
+          padding-right: 70px;
+          padding-left: 16px;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
-          .search-container {
-            grid-column: span 2;
+          .search-input {
+            padding: 10px 12px;
+            padding-left: 60px;
+            border-radius: 8px;
+            font-size: var(--size-body-mobile, 0.9rem);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          }
+
+          .search-input:hover {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+          }
+
+          .search-icon {
+            left: 10px;
+            font-size: 1.1em;
+          }
+
+          .clear-button {
+            left: 35px;
+            width: 22px;
+            height: 22px;
+            font-size: 16px;
+          }
+
+          :host([dir="rtl"]) .search-icon {
+            left: auto;
+            right: 10px;
+          }
+
+          :host([dir="rtl"]) .clear-button {
+            left: auto;
+            right: 35px;
+          }
+
+          :host([dir="rtl"]) .search-input {
+            padding-right: 60px;
+            padding-left: 12px;
+          }
+        }
+
+        /* Small mobile adjustments */
+        @media (max-width: 480px) {
+          .search-input {
+            padding: 8px 10px;
+            padding-left: 55px;
+            font-size: 0.85rem;
+          }
+
+          .search-icon {
+            left: 8px;
+            font-size: 1em;
+          }
+
+          .clear-button {
+            left: 30px;
+            width: 20px;
+            height: 20px;
+            font-size: 14px;
+          }
+
+          :host([dir="rtl"]) .search-icon {
+            left: auto;
+            right: 8px;
+          }
+
+          :host([dir="rtl"]) .clear-button {
+            left: auto;
+            right: 30px;
+          }
+
+          :host([dir="rtl"]) .search-input {
+            padding-right: 55px;
+            padding-left: 10px;
           }
         }
       </style>
