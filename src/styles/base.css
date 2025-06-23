@@ -8,6 +8,8 @@
   --primary-bright: #a7c957;
   --neutral: #f2e8cf;
   --secondary: #bc4749;
+  --secondary-light: #d47779;
+  --secondary-dark: #9a3a3c;
 
   /* fonts */
   --heading-font: 'Cormorant Garamond', 'Amatic SC', cursive;
