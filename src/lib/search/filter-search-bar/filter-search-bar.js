@@ -32,7 +32,8 @@ class FilterSearchBar extends HTMLElement {
 
         .search-input {
           width: 100%;
-          padding: 12px 16px;
+          height: 36px;
+          padding: 0 16px;
           padding-left: 70px; /* Space for the search icon and clear button */
           border: 2px solid var(--border-color, #ccc);
           border-radius: 12px;
@@ -43,6 +44,7 @@ class FilterSearchBar extends HTMLElement {
           transition: all 0.2s ease;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           font-weight: 500;
+          box-sizing: border-box;
         }
 
         .search-input:hover {
@@ -124,7 +126,8 @@ class FilterSearchBar extends HTMLElement {
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
           .search-input {
-            padding: 10px 12px;
+            height: 36px;
+            padding: 0 12px;
             padding-left: 60px;
             border-radius: 8px;
             font-size: var(--size-body-mobile, 0.9rem);
@@ -166,7 +169,8 @@ class FilterSearchBar extends HTMLElement {
         /* Small mobile adjustments */
         @media (max-width: 480px) {
           .search-input {
-            padding: 8px 10px;
+            height: 36px;
+            padding: 0 10px;
             padding-left: 55px;
             font-size: 0.85rem;
           }

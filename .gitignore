@@ -2,6 +2,7 @@
 .copilotrc
 .cursor
 CLAUDE.md
+.taskmaster/
 
 # Ignore VS Code settings
 .vscode/

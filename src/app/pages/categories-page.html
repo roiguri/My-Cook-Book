@@ -3,12 +3,12 @@
     <h1 id="category-header">מתכונים</h1>
 
     <div class="categories-content">
-      <div class="filters-container">
-        <filter-search-bar class="categories-search"></filter-search-bar>
-        <filter-manager id="filter-manager" dir="rtl"></filter-manager>
-
-        <category-navigation id="category-navigation" dir="rtl"></category-navigation>
-      </div>
+      <unified-recipe-filter 
+        id="unified-filter" 
+        dir="rtl"
+        layout-mode="categories-page"
+        show-badge="true">
+      </unified-recipe-filter>
 
       <section dir="rtl" class="recipe-grid" id="recipe-grid">
         <!-- Recipe cards will be dynamically added here -->

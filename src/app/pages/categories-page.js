@@ -31,9 +31,9 @@ export default {
       this.updateUI();
       await this.displayCurrentPageRecipes();
 
-      // Ensure category navigation is initialized with current state
+      // Ensure unified filter is initialized with current state
       await new Promise((resolve) => setTimeout(resolve, 50));
-      this.updateCategoryNavigation();
+      this.updateUnifiedFilter();
     } catch (error) {
       console.error('Error mounting categories page:', error);
       this.handleError(error, 'mount');
@@ -102,9 +102,10 @@ export default {
     }
 
     if (needsReload) {
-      const filterSearchBar = document.querySelector('filter-search-bar');
-      if (filterSearchBar) {
-        filterSearchBar.setValue(this.currentSearchQuery);
+      // Update unified filter with new search query
+      const unifiedFilter = document.getElementById('unified-filter');
+      if (unifiedFilter) {
+        unifiedFilter.setSearchQuery(this.currentSearchQuery);
       }
 
       await this.loadInitialRecipes();
@@ -177,7 +178,7 @@ export default {
 
             const rows = 2;
             const cardsPerPage = actualColumns * rows;
-            const finalResult = Math.max(2, Math.min(8, cardsPerPage));
+            const finalResult = Math.max(2, Math.min(6, cardsPerPage));
 
             resolve(finalResult);
           });
@@ -247,11 +248,9 @@ export default {
     try {
       await Promise.all([
         import('../../lib/recipes/recipe-card/recipe-card.js'),
-        import('../../lib/search/filter-search-bar/filter-search-bar.js'),
         import('../../lib/search/search-service/search-service.js'),
-        import('../../lib/collections/category-navigation/category-navigation.js'),
         import('../../lib/collections/recipe-pagination/recipe-pagination.js'),
-        import('../../lib/collections/filter-manager/filter-manager.js'),
+        import('../../lib/collections/unified-recipe-filter/unified-recipe-filter.js'),
       ]);
     } catch (error) {
       console.error('Error importing categories page components:', error);
@@ -397,33 +396,17 @@ export default {
     }, 250);
     window.addEventListener('resize', this.resizeHandler);
 
-    const categoryNavigation = document.getElementById('category-navigation');
-    if (categoryNavigation) {
-      categoryNavigation.addEventListener(
-        'category-changed',
-        this.handleCategoryNavigationChange.bind(this),
-      );
-    }
-
     const recipePagination = document.getElementById('recipe-pagination');
     if (recipePagination) {
       recipePagination.addEventListener('page-changed', this.handlePaginationChange.bind(this));
     }
 
-    const filterManager = document.getElementById('filter-manager');
-    if (filterManager) {
-      filterManager.addEventListener(
-        'filter-modal-requested',
-        this.handleFilterModalRequested.bind(this),
-      );
-      filterManager.addEventListener('filter-applied', this.handleFilterApplied.bind(this));
-      filterManager.addEventListener('filter-reset', this.handleFilterReset.bind(this));
-    }
-
-    const filterSearchBar = document.querySelector('filter-search-bar');
-    if (filterSearchBar) {
-      filterSearchBar.setValue(this.currentSearchQuery);
-      filterSearchBar.addEventListener('search-input', this.handleSearchInput.bind(this));
+    // Setup unified filter component events
+    const unifiedFilter = document.getElementById('unified-filter');
+    if (unifiedFilter) {
+      unifiedFilter.addEventListener('unified-search-changed', this.handleUnifiedSearchChanged.bind(this));
+      unifiedFilter.addEventListener('unified-category-changed', this.handleUnifiedCategoryChanged.bind(this));  
+      unifiedFilter.addEventListener('unified-filters-changed', this.handleUnifiedFiltersChanged.bind(this));
     }
 
     document.addEventListener('recipe-favorite-changed', this.handleFavoriteChanged.bind(this));
@@ -453,9 +436,24 @@ export default {
   },
 
   updateUI() {
-    this.updateCategoryNavigation();
+    this.updateUnifiedFilter();
     this.updatePageTitle();
-    this.updateFilterManager();
+  },
+
+  updateUnifiedFilter() {
+    const unifiedFilter = document.getElementById('unified-filter');
+    if (unifiedFilter) {
+      // Set current state in unified component
+      unifiedFilter.setState({
+        currentCategory: this.currentCategory,
+        searchQuery: this.currentSearchQuery,
+        filters: this.activeFilters,
+        hasActiveFilters: this.hasActiveFilters
+      });
+
+      // Set base recipes for filtering
+      unifiedFilter.setBaseRecipes(this.allRecipes || []);
+    }
   },
 
   updateCategoryNavigation() {
@@ -497,9 +495,10 @@ export default {
     this.currentCategory = 'all';
     this.currentSearchQuery = '';
 
-    const filterSearchBar = document.querySelector('filter-search-bar');
-    if (filterSearchBar) {
-      filterSearchBar.clear();
+    // Clear search in unified filter
+    const unifiedFilter = document.getElementById('unified-filter');
+    if (unifiedFilter) {
+      unifiedFilter.setSearchQuery('');
     }
 
     await this.loadInitialRecipes();
@@ -531,9 +530,10 @@ export default {
     this.currentCategory = 'all';
     this.currentSearchQuery = '';
 
-    const filterSearchBar = document.querySelector('filter-search-bar');
-    if (filterSearchBar) {
-      filterSearchBar.clear();
+    // Clear search in unified filter
+    const unifiedFilter = document.getElementById('unified-filter');
+    if (unifiedFilter) {
+      unifiedFilter.setSearchQuery('');
     }
 
     await this.loadInitialRecipes();
@@ -547,15 +547,6 @@ export default {
     this.updateURLSilently();
   },
 
-  updateFilterManager() {
-    const filterManager = document.getElementById('filter-manager');
-    if (filterManager) {
-      filterManager.setFiltersInternal(this.activeFilters);
-      filterManager.setCurrentCategory(this.currentCategory);
-      filterManager.setCurrentSearchQuery(this.currentSearchQuery);
-      filterManager.setBaseRecipes(this.allRecipes || []);
-    }
-  },
 
   setupNavigationInterception() {
     this.favoritesNavHandler = (event) => {
@@ -723,15 +714,68 @@ export default {
     this.changeCategory(category);
   },
 
-  async handleCategoryNavigationChange(event) {
-    const category = event.detail.category;
-    await this.changeCategory(category);
-    this.updateURLSilently();
-  },
 
   async handlePaginationChange(event) {
     const { page } = event.detail;
     await this.goToPage(page);
+  },
+
+  async handleUnifiedSearchChanged(event) {
+    const { searchQuery } = event.detail;
+
+    if (this.currentSearchQuery !== searchQuery) {
+      this.currentSearchQuery = searchQuery;
+
+      await this.loadInitialRecipes();
+      this.currentPage = 1;
+      this.updateUI();
+      await this.displayCurrentPageRecipes();
+
+      this.updateURLSilently();
+    }
+  },
+
+  async handleUnifiedCategoryChanged(event) {
+    const { category } = event.detail;
+    await this.changeCategory(category);
+    this.updateURLSilently();
+  },
+
+  async handleUnifiedFiltersChanged(event) {
+    const { filters, filteredRecipes, hasActiveFilters } = event.detail;
+
+    // Check if favorites filter changed from true to false
+    const wasFavoritesOnly = this.activeFilters.favoritesOnly;
+    const isFavoritesOnly = filters.favoritesOnly || false;
+    const favoritesDisabled = wasFavoritesOnly && !isFavoritesOnly;
+
+    this.activeFilters = {
+      cookingTime: filters.cookingTime || '',
+      difficulty: filters.difficulty || '',
+      mainIngredient: filters.mainIngredient || '',
+      tags: filters.tags || [],
+      favoritesOnly: isFavoritesOnly,
+    };
+
+    this.hasActiveFilters = hasActiveFilters;
+
+    // If favorites was disabled, we need to reload all recipes from Firestore
+    // because the unified component only had favorites recipes to work with
+    if (favoritesDisabled) {
+      await this.loadInitialRecipes();
+    } else {
+      this.displayedRecipes = filteredRecipes;
+    }
+
+    this.currentPage = 1;
+    this.updatePageTitle();
+    this.updateURLSilently();
+
+    if (window.updateActiveNavigation) {
+      setTimeout(window.updateActiveNavigation, 0);
+    }
+
+    await this.displayCurrentPageRecipes();
   },
 
   async handleSearchInput(event) {
@@ -749,100 +793,6 @@ export default {
     }
   },
 
-  async handleFilterModalRequested() {
-    // Prepare recipe data for the filter manager
-    let baseRecipes = [...this.allRecipes];
-
-    if (this.currentSearchQuery) {
-      baseRecipes = this.filterRecipesBySearch(baseRecipes, this.currentSearchQuery);
-    }
-
-    if (this.activeFilters.favoritesOnly) {
-      const user = authService.getCurrentUser();
-      if (user) {
-        const favoriteRecipeIds = await this.getUserFavorites();
-        baseRecipes = baseRecipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
-      }
-    }
-
-    // Update the filter manager with the prepared data
-    const filterManager = document.getElementById('filter-manager');
-    if (filterManager) {
-      filterManager.setBaseRecipes(baseRecipes);
-      filterManager.setCurrentCategory(this.currentCategory);
-      filterManager.setCurrentSearchQuery(this.currentSearchQuery);
-    }
-  },
-
-  async handleFilterApplied(event) {
-    const { recipes, filters } = event.detail;
-
-    // Check if favorites filter changed from true to false
-    const wasFavoritesOnly = this.activeFilters.favoritesOnly;
-    const isFavoritesOnly = filters.favoritesOnly || false;
-    const favoritesDisabled = wasFavoritesOnly && !isFavoritesOnly;
-
-    this.activeFilters = {
-      cookingTime: filters.cookingTime || '',
-      difficulty: filters.difficulty || '',
-      mainIngredient: filters.mainIngredient || '',
-      tags: filters.tags || [],
-      favoritesOnly: isFavoritesOnly,
-    };
-
-    this.hasActiveFilters = this.checkHasActiveFilters();
-
-    // If favorites was disabled, we need to reload all recipes from Firestore
-    // because the modal only had favorites recipes to work with
-    if (favoritesDisabled) {
-      await this.loadInitialRecipes();
-    } else {
-      this.displayedRecipes = recipes;
-    }
-
-    this.currentPage = 1;
-
-    this.updatePageTitle();
-
-    // Update filter manager to reflect new state
-    this.updateFilterManager();
-
-    this.updateURLSilently();
-
-    if (window.updateActiveNavigation) {
-      setTimeout(window.updateActiveNavigation, 0);
-    }
-
-    await this.displayCurrentPageRecipes();
-  },
-
-  async handleFilterReset() {
-    this.activeFilters = {
-      cookingTime: '',
-      difficulty: '',
-      mainIngredient: '',
-      tags: [],
-      favoritesOnly: false,
-    };
-    this.hasActiveFilters = this.checkHasActiveFilters();
-
-    // Reload recipes without filters
-    await this.loadInitialRecipes();
-    this.currentPage = 1;
-
-    this.updatePageTitle();
-
-    // Update filter manager to reflect new state
-    this.updateFilterManager();
-
-    this.updateURLSilently();
-
-    if (window.updateActiveNavigation) {
-      setTimeout(window.updateActiveNavigation, 0);
-    }
-
-    await this.displayCurrentPageRecipes();
-  },
 
   async changeCategory(category) {
     if (category === this.currentCategory) return;

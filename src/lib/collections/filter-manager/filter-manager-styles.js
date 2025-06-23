@@ -32,9 +32,9 @@ export const styles = `
     font-size: var(--size-body);
     font-family: inherit;
     font-weight: 500;
-    min-width: 44px;
-    min-height: 44px;
-    height: 100%;
+    min-width: 36px;
+    min-height: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;

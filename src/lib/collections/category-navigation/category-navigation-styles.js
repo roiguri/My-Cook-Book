@@ -80,7 +80,8 @@ export const styles = `
   .category-dropdown-select {
     width: 100%;
     display: block;
-    padding: 12px 16px;
+    height: 36px;
+    padding: 0 16px;
     font-size: var(--size-body);
     border: 2px solid var(--border-color, #ccc);
     border-radius: 8px;
@@ -93,6 +94,7 @@ export const styles = `
     font-family: inherit;
     font-weight: 500;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 12px center;
     background-repeat: no-repeat;
