@@ -19,12 +19,11 @@ export const styles = `
   }
 
   .filter-button {
-    --border-color: var(--border-light, #e0e0e0);
     display: block;
     position: relative;
     background-color: white;
     color: var(--text-color-secondary, #666);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-light, #e0e0e0);
     padding: 10px 15px;
     border-radius: 12px;
     cursor: pointer;
@@ -38,7 +37,7 @@ export const styles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .filter-button:hover {
@@ -63,7 +62,7 @@ export const styles = `
     background-color: white;
     border-color: var(--border-light, #e0e0e0);
     transform: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .filter-button .icon {
@@ -123,6 +122,11 @@ export const styles = `
       font-size: var(--size-body);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
+    .filter-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
     
     .filter-badge {
       font-size: 0.7rem;
@@ -131,6 +135,7 @@ export const styles = `
       min-width: 14px;
     }
   }
+
 
   /* Animation for badge appearance */
   .filter-badge {

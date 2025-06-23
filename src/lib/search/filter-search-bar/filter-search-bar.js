@@ -35,7 +35,7 @@ class FilterSearchBar extends HTMLElement {
           height: 36px;
           padding: 0 16px;
           padding-left: 70px; /* Space for the search icon and clear button */
-          border: 2px solid var(--border-color, #ccc);
+          border: 2px solid var(--border-light, #e0e0e0);
           border-radius: 12px;
           font-size: var(--size-body);
           font-family: var(--body-font);
@@ -49,7 +49,8 @@ class FilterSearchBar extends HTMLElement {
 
         .search-input:hover {
           border-color: var(--secondary, #6c757d);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
 
         .search-input:focus {
@@ -131,10 +132,11 @@ class FilterSearchBar extends HTMLElement {
             padding-left: 60px;
             border-radius: 8px;
             font-size: var(--size-body-mobile, 0.9rem);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
 
           .search-input:hover {
+            transform: translateY(-1px);
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
           }
 
@@ -166,42 +168,6 @@ class FilterSearchBar extends HTMLElement {
           }
         }
 
-        /* Small mobile adjustments */
-        @media (max-width: 480px) {
-          .search-input {
-            height: 36px;
-            padding: 0 10px;
-            padding-left: 55px;
-            font-size: 0.85rem;
-          }
-
-          .search-icon {
-            left: 8px;
-            font-size: 1em;
-          }
-
-          .clear-button {
-            left: 30px;
-            width: 20px;
-            height: 20px;
-            font-size: 14px;
-          }
-
-          :host([dir="rtl"]) .search-icon {
-            left: auto;
-            right: 8px;
-          }
-
-          :host([dir="rtl"]) .clear-button {
-            left: auto;
-            right: 30px;
-          }
-
-          :host([dir="rtl"]) .search-input {
-            padding-right: 55px;
-            padding-left: 10px;
-          }
-        }
       </style>
 
       <div class="search-container" dir="rtl">
