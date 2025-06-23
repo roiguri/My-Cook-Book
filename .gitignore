@@ -2,7 +2,6 @@
 .copilotrc
 .cursor
 CLAUDE.md
-.taskmaster/
 
 # Ignore VS Code settings
 .vscode/
@@ -53,3 +52,22 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+logs
+*.log
+dev-debug.log
+# Dependency directories
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 

@@ -1,0 +1,199 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Refactor Categories Page Architecture and Components",
+        "description": "Refactor the categories page to improve component architecture, code organization, and maintainability following the project's Web Components pattern with Shadow DOM.",
+        "details": "1. **Analyze Current Categories Page Structure**: Review existing categories page implementation in `src/app/pages/` to understand current architecture and identify refactoring opportunities. 2. **Extract Reusable Components**: Break down the categories page into smaller, reusable Web Components following the Separated Component Architecture Pattern with individual files for logic (.js), templates (.html), styles (-styles.js), and configuration (-config.js). 3. **Implement Shadow DOM Components**: Convert category-related UI elements into Custom Elements with Shadow DOM, ensuring proper encapsulation and following the pattern established in `src/lib/recipes/recipe-card/`. 4. **Service Layer Integration**: Ensure all Firebase operations go through the service layer (`src/js/services/`) rather than direct Firebase SDK calls. 5. **Update Styling Architecture**: Refactor CSS to follow the SPA styling convention with `.spa-content` scoping and organize styles in component-specific files. 6. **Component Library Organization**: Place new components in appropriate domain folders within `src/lib/` (e.g., `src/lib/categories/`). 7. **State Management**: Implement proper state management through the service layer for category data and user interactions.",
+        "testStrategy": "1. **Component Isolation Testing**: Test each extracted component independently to ensure proper Shadow DOM encapsulation and functionality. 2. **Integration Testing**: Verify that refactored components integrate correctly with the categories page and maintain existing functionality. 3. **Service Layer Testing**: Confirm all Firebase operations work correctly through the service layer abstraction. 4. **Visual Regression Testing**: Compare the refactored categories page visually with the original to ensure no UI/UX regressions. 5. **Performance Testing**: Measure page load times and component rendering performance before and after refactoring. 6. **Cross-browser Testing**: Test the refactored Shadow DOM components across different browsers for compatibility. 7. **User Flow Testing**: Test complete user workflows involving category navigation, filtering, and selection to ensure seamless functionality.",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Improve Cumulative Layout Shift (CLS) Performance",
+        "description": "Optimize the application to reduce Cumulative Layout Shift by implementing proper image sizing, font loading strategies, and element pre-allocation to improve Core Web Vitals.",
+        "details": "1. **Analyze Current CLS Issues**: Use browser DevTools and Lighthouse to identify specific elements causing layout shifts, focusing on recipe cards, images, and dynamic content loading. 2. **Implement Image Optimization**: Add explicit width/height attributes to all images, implement responsive image sizing with aspect-ratio CSS, and use placeholder elements for lazy-loaded content in recipe cards and galleries. 3. **Optimize Font Loading**: Implement font-display: swap for custom fonts, preload critical fonts in the HTML head, and use font-size-adjust to minimize layout shifts during font loading. 4. **Pre-allocate Dynamic Content**: Reserve space for dynamically loaded content like recipe cards, search results, and pagination components by using skeleton screens or fixed-height containers. 5. **Optimize Component Mounting**: Ensure Web Components in Shadow DOM don't cause layout shifts during initialization by pre-defining container dimensions and using CSS transforms instead of changing layout properties. 6. **Implement Proper Loading States**: Add consistent loading placeholders that match final content dimensions for all async operations including Firebase data fetching and image loading.",
+        "testStrategy": "1. **CLS Measurement**: Use Lighthouse CI to measure CLS scores before and after optimizations, aiming for a score below 0.1. Run tests on multiple page types including home, categories, and individual recipe pages. 2. **Visual Regression Testing**: Capture screenshots during page load to verify no unexpected layout shifts occur during content loading phases. 3. **Performance Testing**: Test on slow network connections (3G simulation) to ensure optimizations work under real-world conditions. 4. **Component Testing**: Verify that each Web Component loads without causing layout shifts by testing Shadow DOM mounting and content initialization. 5. **Cross-Browser Testing**: Test CLS improvements across different browsers and device sizes to ensure consistent performance gains.",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "medium",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-23T13:26:07.634Z",
+      "updated": "2025-06-23T14:34:37.544Z",
+      "description": "Tasks for categories context"
+    }
+  },
+  "refactor-categories": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Implement Unified Recipe Filter Component",
+        "description": "Create a complete unified recipe filter component that consolidates all filtering functionality including search, categories, and filter management",
+        "status": "done",
+        "dependencies": [],
+        "priority": "high",
+        "details": "Build a Web Component that encapsulates filter-search-bar, category-navigation, and filter-manager components. Implement centralized state management and provide a single unified event API for filter changes.",
+        "testStrategy": "Test component creation, state management, internal component integration, event API, and overall component functionality through comprehensive unit and integration tests.",
+        "subtasks": [
+          {
+            "id": "1.1",
+            "title": "Create Unified Recipe Filter Component Structure",
+            "description": "Create the directory structure and base files for the unified-recipe-filter component following the separated component architecture pattern",
+            "details": "Create src/lib/collections/unified-recipe-filter/ directory with four files: unified-recipe-filter.js (main component logic), unified-recipe-filter.html (template structure), unified-recipe-filter-styles.js (CSS exported as JS string), and unified-recipe-filter-config.js (constants and configuration). Follow Web Components pattern with Shadow DOM. Set up basic component class extending HTMLElement with connectedCallback and disconnectedCallback methods.",
+            "testStrategy": "Verify directory structure exists, all four files are created with proper exports, and basic component can be imported and instantiated without errors. Test Shadow DOM attachment and basic lifecycle methods.",
+            "status": "done"
+          },
+          {
+            "id": "1.2",
+            "title": "Implement Unified Filter State Management",
+            "description": "Implement centralized state management for all filter functionality within the unified-recipe-filter component",
+            "details": "Create FilterState class to manage searchQuery, category, activeFilters, and hasActiveFilters properties. Implement methods: setFilters(), resetFilters(), setCurrentCategory(), setSearchQuery(). Add state synchronization logic and validation. Create private methods for state updates and event emission. Implement debouncing for search queries to optimize performance.",
+            "testStrategy": "Unit test all state management methods, verify state transitions are correct, test debouncing functionality, and ensure proper event emission on state changes. Mock internal components during testing.",
+            "status": "done"
+          },
+          {
+            "id": "1.3",
+            "title": "Integrate Existing Filter Components",
+            "description": "Integrate filter-search-bar, category-navigation, and filter-manager as internal components within unified-recipe-filter",
+            "details": "Import existing components (filter-search-bar, category-navigation, filter-manager) and embed them in the unified component template. Set up component communication through custom events and method calls. Implement event listeners for each internal component and map their events to unified state updates. Create component lifecycle management to ensure proper initialization and cleanup of internal components.",
+            "testStrategy": "Test that all three internal components render correctly, verify event propagation from internal components to unified component, test component lifecycle methods, and ensure proper cleanup when component is removed from DOM.",
+            "status": "done"
+          },
+          {
+            "id": "1.4",
+            "title": "Implement Unified Filter Event API",
+            "description": "Create the single 'filters-changed' event API that consolidates all filter changes into one unified event",
+            "details": "Implement CustomEvent emission for 'filters-changed' with payload containing searchQuery, category, activeFilters, and hasActiveFilters. Create event aggregation logic that collects changes from internal components and emits single consolidated event. Add event throttling to prevent excessive emissions. Implement event detail validation and type checking.",
+            "testStrategy": "Test event emission with correct payload structure, verify throttling works correctly, test that all filter changes trigger the unified event, and validate event detail properties match expected schema.",
+            "status": "done"
+          },
+          {
+            "id": "1.5",
+            "title": "Test Unified Recipe Filter Component",
+            "description": "Perform comprehensive testing of the complete unified-recipe-filter component",
+            "details": "Execute full component testing including unit tests for state management, integration tests for internal component communication, and end-to-end tests for the complete filter workflow. Test edge cases, error handling, and performance under various conditions.",
+            "testStrategy": "Run comprehensive test suite covering all component functionality, verify no regressions in existing filter behavior, and ensure component meets performance requirements.",
+            "status": "done"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Recipe Presentation Grid Component",
+        "description": "Create a complete recipe presentation grid component that handles recipe display, grid layout calculations, and pagination",
+        "status": "in-progress",
+        "dependencies": [],
+        "priority": "high",
+        "details": "Build a Web Component that manages recipe grid rendering, responsive layout calculations, and integrates pagination functionality. Extract existing grid logic from categories-page.js and provide a clean event API.",
+        "testStrategy": "Test component creation, grid rendering logic, pagination integration, event API, and overall component functionality through comprehensive unit and integration tests.",
+        "subtasks": [
+          {
+            "id": "2.1",
+            "title": "Create Recipe Presentation Grid Component Structure",
+            "description": "Create the directory structure and base files for the recipe-presentation-grid component following the separated component architecture pattern",
+            "details": "Create src/lib/collections/recipe-presentation-grid/ directory with four files: recipe-presentation-grid.js (main component logic), recipe-presentation-grid.html (template structure), recipe-presentation-grid-styles.js (CSS exported as JS string), and recipe-presentation-grid-config.js (constants and configuration). Implement Web Component with Shadow DOM, basic properties for recipes array, currentPage, recipesPerPage, and loading state.",
+            "testStrategy": "Verify directory structure, test component instantiation, verify Shadow DOM creation, and test basic property setters and getters. Ensure component can handle empty recipes array without errors.",
+            "status": "pending"
+          },
+          {
+            "id": "2.2",
+            "title": "Extract and Implement Grid Rendering Logic",
+            "description": "Extract grid rendering and layout calculation logic from categories-page.js and implement in recipe-presentation-grid component",
+            "details": "Extract responsive grid calculation methods from categories-page.js (~200 lines). Implement calculateOptimalLayout() method for responsive grid sizing. Create recipe card rendering logic with proper event handling. Implement loading states, empty states, and error handling. Add grid container management and recipe card lifecycle methods. Ensure grid recalculates on window resize.",
+            "testStrategy": "Test grid calculations with various screen sizes, verify recipe card rendering with different recipe data, test loading and empty states, and ensure responsive behavior works correctly. Test grid recalculation on window resize events.",
+            "status": "pending"
+          },
+          {
+            "id": "2.3",
+            "title": "Integrate Recipe Pagination Component",
+            "description": "Integrate the existing recipe-pagination component as an internal component within recipe-presentation-grid",
+            "details": "Import and embed recipe-pagination component within the presentation grid template. Implement pagination state management including currentPage, totalPages calculation, and page navigation. Set up event listeners for pagination events and emit 'page-changed' events with page number and direction. Create methods: setCurrentPage(), calculateTotalPages(), and handlePageChange().",
+            "testStrategy": "Test pagination component integration, verify page change events are properly emitted, test page calculation logic with different recipe counts, and ensure pagination updates correctly when recipes change.",
+            "status": "pending"
+          },
+          {
+            "id": "2.4",
+            "title": "Implement Recipe Presentation Grid Event API",
+            "description": "Create the event API for recipe-presentation-grid including 'page-changed' and 'recipe-opened' events",
+            "details": "Implement CustomEvent emission for 'page-changed' with payload containing page number and direction. Create 'recipe-opened' event emission when recipe cards are clicked with recipeId in payload. Add event delegation for recipe card clicks to handle dynamic content. Implement proper event bubbling and cancellation support.",
+            "testStrategy": "Test both event types are emitted with correct payloads, verify event delegation works for dynamically created recipe cards, and test event bubbling behavior. Mock recipe card interactions to test recipe-opened events.",
+            "status": "pending"
+          },
+          {
+            "id": "2.5",
+            "title": "Test Recipe Presentation Grid Component",
+            "description": "Perform comprehensive testing of the complete recipe-presentation-grid component",
+            "details": "Execute full component testing including unit tests for grid rendering logic, integration tests for pagination functionality, and end-to-end tests for the complete presentation workflow. Test responsive behavior, loading states, and error handling.",
+            "testStrategy": "Run comprehensive test suite covering all component functionality, verify grid calculations work across different screen sizes, and ensure component meets performance requirements.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Refactor Categories Page",
+        "description": "Refactor categories-page.js to simplify and improve code organization while maintaining existing functionality",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "details": "Simplify categories-page.js by improving code organization, removing redundant logic, and ensuring clean separation of concerns while maintaining all existing functionality like URL synchronization and authentication.",
+        "testStrategy": "Test that categories page functionality remains identical after refactoring, verify all existing features work, and ensure no regression in user experience.",
+        "subtasks": [
+          {
+            "id": "3.1",
+            "title": "Refactor Categories Page Code Organization",
+            "description": "Improve code organization and structure in categories-page.js while maintaining all existing functionality",
+            "details": "Refactor categories-page.js to improve code organization and maintainability. Clean up redundant code, improve method organization, and ensure proper separation of concerns. Maintain existing URL synchronization, authentication state handling, and Firebase queries. Update component initialization and cleanup methods for better performance.",
+            "testStrategy": "Test that categories page functionality remains identical after refactoring, verify all existing features work (search, filtering, pagination, favorites), test URL synchronization still works, and ensure no regression in user experience.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Final Integration Testing and Code Quality",
+        "description": "Perform comprehensive system testing, clean up unused code, and ensure code quality standards",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "details": "Execute full system integration tests, clean up unused code from refactoring, run quality checks, and verify performance improvements.",
+        "testStrategy": "Execute full test suite including unit tests for new components and integration tests for categories page. Test on multiple screen sizes and browsers. Run linting tools and fix any issues. Verify performance metrics show improvement.",
+        "subtasks": [
+          {
+            "id": "4.1",
+            "title": "Integration Testing and Code Quality",
+            "description": "Perform comprehensive testing of the refactored system, clean up unused code, and run quality checks",
+            "details": "Run comprehensive integration tests across all components. Test responsive behavior on different screen sizes. Verify loading states, error handling, and edge cases. Remove unused imports, methods, and variables from categories-page.js. Run npm run lint and npm run format to ensure code quality. Update any documentation comments and verify no console errors or warnings.",
+            "testStrategy": "Execute full test suite including unit tests for new components and integration tests for categories page. Test on multiple screen sizes and browsers. Run linting tools and fix any issues. Verify performance metrics show improvement in component coordination overhead.",
+            "status": "pending"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement CLS Prevention and Performance Compliance",
+        "description": "Add Cumulative Layout Shift prevention patterns to all components, implement loading states, layout containment, and progressive enhancement to eliminate layout shifts during component initialization and interaction.",
+        "details": "Implement comprehensive CLS prevention across all components by adding loading skeletons, fixed container dimensions, and layout containment CSS properties. For unified-recipe-filter and filter-manager components (already completed), verify CLS compliance. For recipe-presentation-grid component, add skeleton loading states during data fetch, implement CSS contain property for layout isolation, and ensure grid items have fixed dimensions during loading. Add aspect-ratio CSS to maintain consistent layouts. Implement progressive enhancement patterns where components gracefully handle loading states without causing layout shifts. Add performance monitoring to track CLS metrics and ensure compliance with Core Web Vitals thresholds (CLS < 0.1). Create reusable CLS prevention utilities and patterns that can be shared across components.",
+        "testStrategy": "Create automated CLS testing using Lighthouse CI or similar tools to measure layout shift metrics. Test all components in isolation and integration scenarios, verifying no layout shifts occur during loading, data updates, or user interactions. Test on various screen sizes and connection speeds to ensure consistent behavior. Implement visual regression testing to catch layout shifts. Verify loading states display correctly without causing shifts. Test progressive enhancement fallbacks work properly. Run performance audits to ensure CLS scores meet Core Web Vitals standards across all pages.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-23T14:18:40.513Z",
+      "updated": "2025-06-23T14:43:50.313Z",
+      "description": "Tag created on 6/23/2025"
+    }
+  }
+}
