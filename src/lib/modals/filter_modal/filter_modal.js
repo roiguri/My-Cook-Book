@@ -1,106 +1,74 @@
 /**
- * RecipeFilterComponent
+ * RecipeFilterComponent - Simplified
  * @class
  * @extends HTMLElement
  *
  * @description
- * A custom web component that provides a modal interface for filtering recipes
- * with multiple criteria. The component extends Modal functionality for the interface
- * and integrates with Firebase/Firestore for data management. Supports RTL (Right-to-Left)
- * layout by default.
+ * A simplified custom web component that provides a modal interface for filtering recipes.
+ * Uses provided recipes data and pure FilterUtils for filtering logic.
+ * No Firebase dependencies - all data is provided externally.
  *
  * @dependencies
  * - Requires Modal component (`custom-modal`)
- * - Firebase/Firestore for data fetching
- * - Firebase Authentication for user state
- *
- * @cssVariables
- * - --primary-color: Primary color for buttons and highlights
- * - --primary-hover: Hover state color for buttons
- * - --secondary-color: Used for border colors and backgrounds
+ * - FilterUtils for filtering logic
+ * - Firebase Authentication only for user state (showing favorites filter)
  *
  * @example
- * // Basic Usage
- * <recipe-filter-component></recipe-filter-component>
- *
- * // With specific category and selected filters
- * <recipe-filter-component
- *   category="main-courses"
- *   cooking-time-filter="true"
- *   difficulty-filter="true"
- *   ingredient-filter="true"
- *   tags-filter="true"
- *   favorites-only="true">
- * </recipe-filter-component>
- *
- * // JavaScript interaction
+ * // JavaScript usage
  * const filterComponent = document.querySelector('recipe-filter-component');
+ *
+ * // Set recipes data
+ * filterComponent.setRecipes(recipesArray);
+ *
+ * // Set current filters
+ * filterComponent.setCurrentFilters({
+ *   cookingTime: '0-30',
+ *   difficulty: 'קלה',
+ *   tags: ['בריא', 'מהיר']
+ * });
  *
  * // Open the filter modal
  * filterComponent.open();
  *
  * // Listen for filter events
  * filterComponent.addEventListener('filter-applied', (e) => {
- *   const { recipes, filters } = e.detail;
+ *   const { recipes, filters, count } = e.detail;
  *   // Handle filtered recipes
- *   console.log('Filtered recipes:', recipes);
- *   console.log('Applied filters:', filters);
  * });
  *
  * @fires filter-applied - When filters are applied
- * @property {Object} detail.recipes - Array of filtered recipe objects
- * @property {Object} detail.filters - Current state of applied filters
+ * @property {Array} detail.recipes - Filtered recipe objects
+ * @property {Object} detail.filters - Applied filter values
+ * @property {number} detail.count - Number of filtered recipes
  *
  * @fires filter-reset - When filters are reset
- * @property {Object} detail.category - Current category if set
- *
- * @attr {string} category - Optional category to filter recipes by
- * @attr {boolean} [cooking-time-filter=true] - Enable/disable cooking time filter
- * @attr {boolean} [difficulty-filter=true] - Enable/disable difficulty filter
- * @attr {boolean} [ingredient-filter=true] - Enable/disable main ingredient filter
- * @attr {boolean} [tags-filter=true] - Enable/disable tags filter
- * @attr {boolean} [favorites-only=false] - When true, only shows user's favorite recipes
- *
- * @state
- * - isLoading: Boolean indicating loading state
- * - matchingCount: Number of recipes matching current filters
- * - filters: Object containing current filter values
- *   - cookingTime: String ('0-30', '31-60', '61')
- *   - difficulty: String ('קלה', 'בינונית', 'קשה')
- *   - mainIngredient: String
- *   - tags: Array of strings
+ * @property {Array} detail.recipes - All original recipes
+ * @property {number} detail.count - Total number of recipes
  *
  * @methods
+ * - setRecipes(recipes) - Set the recipes data to filter
+ * - setCurrentFilters(filters) - Set current filter values
+ * - getCurrentFilters() - Get current filter values
+ * - getFilteredRecipes() - Get filtered recipes array
  * - open() - Opens the filter modal
  * - close() - Closes the filter modal
- * - clearFilters() - Resets all filters to default state
  */
 
 import authService from '../../../js/services/auth-service.js';
 import { FirestoreService } from '../../../js/services/firestore-service.js';
+import { FilterUtils } from '../../../js/utils/filter-utils.js';
 
 class RecipeFilterComponent extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
 
-    // Initialize state
-    this.state = {
-      isLoading: false,
-      matchingCount: 0,
-      filters: {
-        cookingTime: '',
-        difficulty: '',
-        mainIngredient: '',
-        tags: [],
-        favoritesOnly: false,
-      },
-      availableFilters: {
-        mainIngredients: [],
-        tags: [],
-      },
-      category: null,
-    };
+    // Initialize state - simplified
+    this.recipes = []; // Provided externally
+    this.filters = FilterUtils.createEmptyFilters();
+    this.availableOptions = FilterUtils.extractFilterOptions([]);
+    this.category = null;
+    this.favoriteRecipeIds = []; // Cache for user's favorite recipe IDs
   }
 
   static get observedAttributes() {
@@ -116,11 +84,7 @@ class RecipeFilterComponent extends HTMLElement {
     ];
   }
 
-  async connectedCallback() {
-    const user = authService.getCurrentUser();
-    if (user) {
-      await this.loadInitialData();
-    }
+  connectedCallback() {
     this.render();
     this.setupEventListeners();
     this.setupAuthObserver();
@@ -131,20 +95,30 @@ class RecipeFilterComponent extends HTMLElement {
     if (this.authUnsubscribe) {
       this.authUnsubscribe();
     }
+
+    // Clean up timeouts
+    if (this._filterChangeTimeout) {
+      clearTimeout(this._filterChangeTimeout);
+    }
   }
 
   setupAuthObserver() {
     // Listen for auth state changes to update UI accordingly
-    this.authUnsubscribe = authService.addAuthObserver(async (authState) => {
+    this.authUnsubscribe = authService.addAuthObserver((authState) => {
       // Re-render to show/hide favorites filter based on auth state
       this.render();
       this.setupEventListeners();
 
-      // If user logged out while modal is open, update data
+      // If user logged out while modal is open, clear favorites filter and data
       if (!authState.user) {
-        // Clear favorites filter state since user is no longer authenticated
-        this.state.filters.favoritesOnly = false;
-        this.updateUI();
+        this.favoriteRecipeIds = [];
+        if (this.filters.favoritesOnly) {
+          this.filters.favoritesOnly = false;
+          this.updateUI();
+        }
+      } else {
+        // User logged in, clear cached favorites so they reload fresh
+        this.favoriteRecipeIds = [];
       }
     });
   }
@@ -154,28 +128,14 @@ class RecipeFilterComponent extends HTMLElement {
 
     switch (name) {
       case 'category':
-        this.state.category = newValue;
-        // Only reload data if modal is not being programmatically configured
-        // If recipes attribute is also being set, let that handle the data loading
-        if (!this.hasAttribute('recipes')) {
-          this.loadInitialData();
-        }
+        this.category = newValue;
         break;
       case 'current-filters':
         if (newValue) {
           try {
             const filters = JSON.parse(newValue);
-            this.state.filters = {
-              cookingTime: filters.cookingTime || '',
-              difficulty: filters.difficulty || '',
-              mainIngredient: filters.mainIngredient || '',
-              tags: filters.tags || [],
-              favoritesOnly: filters.favoritesOnly || false,
-            };
-            // Update UI to reflect current filters
+            this.filters = FilterUtils.validateFilters(filters);
             this.updateUI();
-            // Recalculate matching count with current filters
-            this.updateMatchingCount();
           } catch (error) {
             console.warn('Error parsing current-filters attribute:', error);
           }
@@ -185,7 +145,7 @@ class RecipeFilterComponent extends HTMLElement {
         if (newValue) {
           try {
             const recipes = JSON.parse(newValue);
-            this.setInitialRecipes(recipes);
+            this.setRecipes(recipes);
           } catch (error) {
             console.warn('Error parsing recipes attribute:', error);
           }
@@ -198,7 +158,7 @@ class RecipeFilterComponent extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>${this.styles()}</style>
-      <custom-modal height="auto" width="auto">
+      <custom-modal height="auto">
         <div class="filter-container">
           ${this.renderHeader()}
           ${this.renderFilterGrid()}
@@ -210,8 +170,21 @@ class RecipeFilterComponent extends HTMLElement {
 
   styles() {
     return `
+      :host {
+        --modal-max-width: 700px;
+        --modal-mobile-width: 85vw;
+        --modal-width: min(var(--modal-max-width), var(--modal-mobile-width));
+      }
+
+      custom-modal {
+        width: var(--modal-width);
+      }
+
       .filter-container {
         padding: 16px;
+        width: 100%;
+        max-width: var(--modal-max-width);
+        box-sizing: border-box;
       }
 
       .filter-header {
@@ -235,9 +208,12 @@ class RecipeFilterComponent extends HTMLElement {
 
       .filter-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 12px;
         margin-bottom: 16px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
       }
 
       .filter-section {
@@ -246,6 +222,8 @@ class RecipeFilterComponent extends HTMLElement {
         border-radius: 8px;
         box-sizing: border-box;
         width: 100%;
+        min-width: 0;
+        overflow: hidden;
       }
 
       .filter-section h3 {
@@ -393,9 +371,10 @@ class RecipeFilterComponent extends HTMLElement {
         background: #ccc;
       }
 
-      @media (max-width: 600px) {
+      @media (max-width: 768px) {
         .filter-container {
           padding: 12px;
+          max-width: var(--modal-mobile-width);
         }
 
         .filter-grid {
@@ -426,11 +405,12 @@ class RecipeFilterComponent extends HTMLElement {
   }
 
   renderHeader() {
+    const matchingCount = this.getMatchingCount();
     return `
       <div class="filter-header">
         <h2>סינון מתכונים</h2>
         <span class="results-counter">
-          ${this.state.isLoading ? 'טוען...' : `${this.state.matchingCount} מתכונים תואמים`}
+          ${matchingCount} מתכונים תואמים
         </span>
       </div>
     `;
@@ -453,15 +433,12 @@ class RecipeFilterComponent extends HTMLElement {
     return `
       <div class="filter-section">
         <h3>זמן הכנה</h3>
-        <div class="loading-text" style="display: ${this.state.isLoading ? 'block' : 'none'}">
-          ${this.renderLoading()}
-        </div>
-        <div class="filter-content" style="display: ${this.state.isLoading ? 'none' : 'block'}">
+        <div class="filter-content">
           <select id="cooking-time">
             <option value="">הכל</option>
-            <option value="0-30">0-30 דקות</option>
-            <option value="31-60">31-60 דקות</option>
-            <option value="61">מעל שעה</option>
+            <option value="0-30" ${this.filters.cookingTime === '0-30' ? 'selected' : ''}>0-30 דקות</option>
+            <option value="31-60" ${this.filters.cookingTime === '31-60' ? 'selected' : ''}>31-60 דקות</option>
+            <option value="61" ${this.filters.cookingTime === '61' ? 'selected' : ''}>מעל שעה</option>
           </select>
         </div>
       </div>
@@ -472,15 +449,12 @@ class RecipeFilterComponent extends HTMLElement {
     return `
       <div class="filter-section">
         <h3>רמת קושי</h3>
-        <div class="loading-text" style="display: ${this.state.isLoading ? 'block' : 'none'}">
-          ${this.renderLoading()}
-        </div>
-        <div class="filter-content" style="display: ${this.state.isLoading ? 'none' : 'block'}">
+        <div class="filter-content">
           <select id="difficulty">
             <option value="">הכל</option>
-            <option value="קלה">קלה</option>
-            <option value="בינונית">בינונית</option>
-            <option value="קשה">קשה</option>
+            <option value="קלה" ${this.filters.difficulty === 'קלה' ? 'selected' : ''}>קלה</option>
+            <option value="בינונית" ${this.filters.difficulty === 'בינונית' ? 'selected' : ''}>בינונית</option>
+            <option value="קשה" ${this.filters.difficulty === 'קשה' ? 'selected' : ''}>קשה</option>
           </select>
         </div>
       </div>
@@ -491,16 +465,13 @@ class RecipeFilterComponent extends HTMLElement {
     return `
       <div class="filter-section">
         <h3>מרכיב עיקרי</h3>
-        <div class="loading-text" style="display: ${this.state.isLoading ? 'block' : 'none'}">
-          ${this.renderLoading()}
-        </div>
-        <div class="filter-content" style="display: ${this.state.isLoading ? 'none' : 'block'}">
+        <div class="filter-content">
           <select id="main-ingredient">
             <option value="">הכל</option>
-            ${this.state.availableFilters.mainIngredients
+            ${this.availableOptions.mainIngredients
               .map(
                 (ingredient) =>
-                  `<option value="${ingredient}" ${this.state.filters.mainIngredient === ingredient ? 'selected' : ''}>
+                  `<option value="${ingredient}" ${this.filters.mainIngredient === ingredient ? 'selected' : ''}>
                 ${ingredient}
               </option>`,
               )
@@ -515,10 +486,7 @@ class RecipeFilterComponent extends HTMLElement {
     return `
       <div class="filter-section">
         <h3>תגיות</h3>
-        <div class="loading-text" style="display: ${this.state.isLoading ? 'block' : 'none'}">
-          ${this.renderLoading()}
-        </div>
-        <div class="filter-content" style="display: ${this.state.isLoading ? 'none' : 'block'}">
+        <div class="filter-content">
           <div class="searchable-select-container">
             <input 
               list="tags-list" 
@@ -527,14 +495,14 @@ class RecipeFilterComponent extends HTMLElement {
               autocomplete="off"
             >
             <datalist id="tags-list">
-              ${this.state.availableFilters.tags
-                .filter((tag) => !this.state.filters.tags.includes(tag))
+              ${this.availableOptions.tags
+                .filter((tag) => !this.filters.tags.includes(tag))
                 .map((tag) => `<option value="${tag}">`)
                 .join('')}
             </datalist>
           </div>
           <div class="tags-container">
-            ${this.state.filters.tags
+            ${this.filters.tags
               .map(
                 (tag) => `
               <span class="tag">
@@ -559,7 +527,7 @@ class RecipeFilterComponent extends HTMLElement {
             <input 
               type="checkbox" 
               id="favorites-only"
-              ${this.state.filters.favoritesOnly ? 'checked' : ''}
+              ${this.filters.favoritesOnly ? 'checked' : ''}
             >
             <span class="checkmark"></span>
             <span class="checkbox-label">הצג רק מועדפים</span>
@@ -573,7 +541,7 @@ class RecipeFilterComponent extends HTMLElement {
     return `
       <div class="filter-footer">
         <button class="clear-btn">נקה הכל</button>
-        <button class="apply-btn" ${this.state.isLoading ? 'disabled' : ''}>
+        <button class="apply-btn">
           החל סינון
         </button>
       </div>
@@ -581,7 +549,7 @@ class RecipeFilterComponent extends HTMLElement {
   }
 
   renderLoading() {
-    return `<div class="loading-indicator">טוען...</div>`;
+    return `<div class="loading-indicator"></div>`;
   }
 
   setupEventListeners() {
@@ -601,18 +569,25 @@ class RecipeFilterComponent extends HTMLElement {
       favoritesCheckbox.addEventListener('change', () => this.handleFilterChange());
     }
 
-    // Tag search
-    const tagSearch = this.shadowRoot.getElementById('tag-search');
-    if (tagSearch) {
-      tagSearch.addEventListener('input', (e) => this.handleTagSearch(e));
-    }
-
     // Tags input handler
     const tagsSelect = this.shadowRoot.getElementById('tags-select');
     if (tagsSelect) {
+      // Handle both input and change events for datalist
+      tagsSelect.addEventListener('input', (e) => {
+        const selectedTag = e.target.value.trim();
+        if (
+          selectedTag &&
+          this.availableOptions.tags.includes(selectedTag) &&
+          !this.filters.tags.includes(selectedTag)
+        ) {
+          this.addTag(selectedTag);
+          e.target.value = ''; // Clear input after selection
+        }
+      });
+
       tagsSelect.addEventListener('change', (e) => {
-        const selectedTag = e.target.value;
-        if (selectedTag && !this.state.filters.tags.includes(selectedTag)) {
+        const selectedTag = e.target.value.trim();
+        if (selectedTag && !this.filters.tags.includes(selectedTag)) {
           this.addTag(selectedTag);
           e.target.value = ''; // Clear input after selection
         }
@@ -621,8 +596,8 @@ class RecipeFilterComponent extends HTMLElement {
       // Handle Enter key
       tagsSelect.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-          const inputValue = e.target.value;
-          if (inputValue && !this.state.filters.tags.includes(inputValue)) {
+          const inputValue = e.target.value.trim();
+          if (inputValue && !this.filters.tags.includes(inputValue)) {
             this.addTag(inputValue);
             e.target.value = ''; // Clear input after adding
           }
@@ -652,93 +627,67 @@ class RecipeFilterComponent extends HTMLElement {
   }
 
   addTag(tag) {
-    if (!this.state.filters.tags.includes(tag)) {
-      this.state.filters.tags.push(tag);
+    if (!this.filters.tags.includes(tag)) {
+      this.filters.tags.push(tag);
+      this.updateTagsDisplay();
       this.handleFilterChange();
     }
   }
 
   removeTag(tag) {
-    this.state.filters.tags = this.state.filters.tags.filter((t) => t !== tag);
+    this.filters.tags = this.filters.tags.filter((t) => t !== tag);
+    this.updateTagsDisplay();
     this.handleFilterChange();
   }
 
-  async loadInitialData() {
-    this.state.isLoading = true;
+  // Simplified: Set recipes and extract filter options
+  setRecipes(recipes) {
+    this.recipes = recipes || [];
+    this.availableOptions = FilterUtils.extractFilterOptions(this.recipes);
     this.updateUI();
+  }
+
+  // Load user's favorite recipe IDs from Firestore
+  async loadUserFavorites() {
+    const user = authService.getCurrentUser();
+    if (!user) {
+      this.favoriteRecipeIds = [];
+      return;
+    }
+
     try {
-      const user = authService.getCurrentUser();
-      if (this.hasAttribute('favorites-only')) {
-        const userId = user.uid;
-        const userDoc = await FirestoreService.getDocument('users', userId);
-        const favoriteRecipeIds = userDoc?.favorites || [];
-        // Fetch favorite recipes only
-        const recipes = await Promise.all(
-          favoriteRecipeIds.map(async (recipeId) => {
-            return await FirestoreService.getDocument('recipes', recipeId);
-          }),
-        );
-        this.state.availableFilters.mainIngredients = [
-          ...new Set(
-            recipes
-              .map((r) => r?.mainIngredient)
-              .filter((ingredient) => ingredient && ingredient.trim()),
-          ),
-        ].sort((a, b) => a.localeCompare(b));
-        this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r?.tags || []))];
-        this.state.matchingCount = recipes.length;
-      } else {
-        // Build query params for FirestoreService
-        const queryParams = {
-          where: [['approved', '==', true]],
-        };
-        if (this.state.category) {
-          queryParams.where.push(['category', '==', this.state.category]);
-        }
-        const recipes = await FirestoreService.queryDocuments('recipes', queryParams);
-        this.state.availableFilters.mainIngredients = [
-          ...new Set(
-            recipes
-              .map((r) => r?.mainIngredient)
-              .filter((ingredient) => ingredient && ingredient.trim()),
-          ),
-        ].sort((a, b) => a.localeCompare(b));
-        this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r?.tags || []))];
-        this.state.matchingCount = recipes.length;
-      }
+      const userDoc = await FirestoreService.getDocument('users', user.uid);
+      this.favoriteRecipeIds = userDoc?.favorites || [];
     } catch (error) {
-      console.error('Error loading initial data:', error);
-    } finally {
-      this.state.isLoading = false;
-      this.updateUI();
+      console.error('Error loading user favorites:', error);
+      this.favoriteRecipeIds = [];
     }
   }
 
-  async handleFilterChange() {
+  handleFilterChange() {
     this.updateFilterState();
-    await this.updateMatchingCount();
-  }
+    // Use debouncing to prevent too many rapid updates
+    if (this._filterChangeTimeout) {
+      clearTimeout(this._filterChangeTimeout);
+    }
 
-  async handleTagSearch(event) {
-    const searchTerm = event.target.value.toLowerCase();
-    const suggestions = this.state.availableFilters.tags.filter(
-      (tag) => tag.toLowerCase().includes(searchTerm) && !this.state.filters.tags.includes(tag),
-    );
-
-    const suggestionsContainer = this.shadowRoot.getElementById('tag-suggestions');
-    suggestionsContainer.innerHTML = suggestions
-      .map((tag) => `<div class="tag-suggestion" data-tag="${tag}">${tag}</div>`)
-      .join('');
+    this._filterChangeTimeout = setTimeout(async () => {
+      // If favorites filter is enabled, ensure we have favorites data
+      if (this.filters.favoritesOnly && this.favoriteRecipeIds.length === 0) {
+        await this.loadUserFavorites();
+      }
+      this.updateCounter();
+    }, 300); // 300ms debounce
   }
 
   updateFilterState() {
-    const cookingTime = this.shadowRoot.getElementById('cooking-time')?.value;
-    const difficulty = this.shadowRoot.getElementById('difficulty')?.value;
-    const mainIngredient = this.shadowRoot.getElementById('main-ingredient')?.value;
+    const cookingTime = this.shadowRoot.getElementById('cooking-time')?.value || '';
+    const difficulty = this.shadowRoot.getElementById('difficulty')?.value || '';
+    const mainIngredient = this.shadowRoot.getElementById('main-ingredient')?.value || '';
     const favoritesOnly = this.shadowRoot.getElementById('favorites-only')?.checked || false;
 
-    this.state.filters = {
-      ...this.state.filters,
+    this.filters = {
+      ...this.filters,
       cookingTime,
       difficulty,
       mainIngredient,
@@ -746,143 +695,39 @@ class RecipeFilterComponent extends HTMLElement {
     };
   }
 
-  async updateMatchingCount() {
-    this.state.isLoading = true;
-    this.updateUI();
-    try {
-      const user = authService.getCurrentUser();
-      let recipes;
-      if (this.currentRecipes) {
-        recipes = this.currentRecipes;
-      } else if (this.hasAttribute('favorites-only') && user) {
-        const userId = user.uid;
-        const userDoc = await FirestoreService.getDocument('users', userId);
-        const favoriteRecipeIds = userDoc?.favorites || [];
-        recipes = await Promise.all(
-          favoriteRecipeIds.map(async (recipeId) => {
-            return await FirestoreService.getDocument('recipes', recipeId);
-          }),
-        );
-      } else {
-        const queryParams = {
-          where: [['approved', '==', true]],
-        };
-        if (this.state.category) {
-          queryParams.where.push(['category', '==', this.state.category]);
-        }
-        recipes = await FirestoreService.queryDocuments('recipes', queryParams);
-      }
-      recipes = await this.applyFiltersToRecipes(recipes);
-      this.state.matchingCount = recipes.length;
-    } catch (error) {
-      console.error('Error updating matching count:', error);
-    } finally {
-      this.state.isLoading = false;
-      this.updateUI();
+  // Simplified: Calculate matching count from current recipes
+  getMatchingCount() {
+    if (!this.recipes || this.recipes.length === 0) {
+      return 0;
     }
+    return FilterUtils.applyFilters(this.recipes, this.filters, this.favoriteRecipeIds).length;
   }
 
-  async applyFiltersToRecipes(recipes) {
-    const { cookingTime, difficulty, mainIngredient, tags, favoritesOnly } = this.state.filters;
-
-    let filteredRecipes = recipes.filter((recipe) => {
-      // Cooking time filter
-      if (cookingTime) {
-        const totalTime = recipe.prepTime + recipe.waitTime;
-        const [min, max] = cookingTime.split('-').map(Number);
-        if (max) {
-          if (totalTime < min || totalTime > max) return false;
-        } else {
-          if (totalTime < min) return false;
-        }
-      }
-
-      // Difficulty filter
-      if (difficulty && recipe.difficulty !== difficulty) return false;
-
-      // Main ingredient filter
-      if (mainIngredient && recipe.mainIngredient !== mainIngredient) return false;
-
-      // Tags filter
-      if (tags.length > 0 && !tags.every((tag) => recipe.tags.includes(tag))) return false;
-
-      return true;
-    });
-
-    // Favorites filter (only for authenticated users)
-    if (favoritesOnly) {
-      const user = authService.getCurrentUser();
-      if (user) {
-        try {
-          const userDoc = await FirestoreService.getDocument('users', user.uid);
-          const favoriteRecipeIds = userDoc?.favorites || [];
-          filteredRecipes = filteredRecipes.filter((recipe) =>
-            favoriteRecipeIds.includes(recipe.id),
-          );
-        } catch (error) {
-          console.error('Error fetching user favorites:', error);
-        }
-      }
-    }
-
-    return filteredRecipes;
+  // Simplified: Use FilterUtils for filtering
+  applyCurrentFilters() {
+    return FilterUtils.applyFilters(this.recipes, this.filters, this.favoriteRecipeIds);
   }
 
-  async applyFilters() {
-    this.state.isLoading = true;
-    this.updateUI();
-    try {
-      const user = authService.getCurrentUser();
-      let recipes;
-      if (this.currentRecipes) {
-        recipes = this.currentRecipes;
-      } else if (this.hasAttribute('favorites-only') && user) {
-        const userId = user.uid;
-        const userDoc = await FirestoreService.getDocument('users', userId);
-        const favoriteRecipeIds = userDoc?.favorites || [];
-        recipes = await Promise.all(
-          favoriteRecipeIds.map(async (recipeId) => {
-            return await FirestoreService.getDocument('recipes', recipeId);
-          }),
-        );
-      } else {
-        const queryParams = {
-          where: [['approved', '==', true]],
-        };
-        if (this.state.category) {
-          queryParams.where.push(['category', '==', this.state.category]);
-        }
-        recipes = await FirestoreService.queryDocuments('recipes', queryParams);
-      }
-      recipes = await this.applyFiltersToRecipes(recipes);
-      this.dispatchEvent(
-        new CustomEvent('filter-applied', {
-          bubbles: true,
-          composed: true,
-          detail: {
-            recipes,
-            filters: { ...this.state.filters, category: this.state.category },
-          },
-        }),
-      );
-      this.close();
-    } catch (error) {
-      console.error('Error applying filters:', error);
-    } finally {
-      this.state.isLoading = false;
-      this.updateUI();
-    }
+  applyFilters() {
+    const filteredRecipes = this.applyCurrentFilters();
+
+    this.dispatchEvent(
+      new CustomEvent('filter-applied', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          recipes: filteredRecipes,
+          filters: { ...this.filters, category: this.category },
+          count: filteredRecipes.length,
+        },
+      }),
+    );
+    this.close();
   }
 
   clearFilters() {
     // Reset filter state
-    this.state.filters = {
-      cookingTime: '',
-      difficulty: '',
-      mainIngredient: '',
-      tags: [],
-      favoritesOnly: false,
-    };
+    this.filters = FilterUtils.createEmptyFilters();
 
     // Reset UI elements
     const selects = ['cooking-time', 'difficulty', 'main-ingredient'];
@@ -895,84 +740,48 @@ class RecipeFilterComponent extends HTMLElement {
     const favoritesCheckbox = this.shadowRoot.getElementById('favorites-only');
     if (favoritesCheckbox) favoritesCheckbox.checked = false;
 
-    // Clear tag search
-    const tagSearch = this.shadowRoot.getElementById('tag-search');
-    if (tagSearch) tagSearch.value = '';
+    // Clear tags input
+    const tagsSelect = this.shadowRoot.getElementById('tags-select');
+    if (tagsSelect) tagsSelect.value = '';
+
+    // Close the modal to re-enable scrolling
+    this.close();
 
     // Update UI
-    this.updateMatchingCount();
+    this.updateUI();
 
-    // Dispatch reset event with current recipes if available
+    // Dispatch reset event with all recipes (unfiltered)
     this.dispatchEvent(
       new CustomEvent('filter-reset', {
         bubbles: true,
         composed: true,
         detail: {
-          recipes: this.currentRecipes || null,
-          category: this.state.category,
+          recipes: this.recipes,
+          category: this.category,
+          count: this.recipes.length,
         },
       }),
     );
   }
 
   updateUI() {
-    // Instead of re-rendering everything, update specific parts
-    this.updateLoadingState();
-    this.updateCounter();
-    this.updateFilterValues();
-    this.updateTagsDisplay();
-    this.updateApplyButton();
-    this.updateIngredientSelect();
+    // Simple UI update - just re-render
+    this.render();
+    this.setupEventListeners();
   }
 
-  updateLoadingState() {
-    const loadingElements = this.shadowRoot.querySelectorAll('.loading-text');
-    loadingElements.forEach((element) => {
-      element.style.display = this.state.isLoading ? 'block' : 'none';
-    });
-
-    const contentElements = this.shadowRoot.querySelectorAll('.filter-content');
-    contentElements.forEach((element) => {
-      element.style.display = this.state.isLoading ? 'none' : 'block';
-    });
-  }
-
-  async updateCounter() {
+  updateCounter() {
     const counter = this.shadowRoot.querySelector('.results-counter');
     if (counter) {
-      counter.textContent = this.state.isLoading
-        ? 'טוען...'
-        : `${this.state.matchingCount} מתכונים תואמים`;
-    }
-  }
-
-  updateFilterValues() {
-    const { cookingTime, difficulty, mainIngredient, favoritesOnly } = this.state.filters;
-
-    const selects = {
-      'cooking-time': cookingTime,
-      difficulty: difficulty,
-      'main-ingredient': mainIngredient,
-    };
-
-    Object.entries(selects).forEach(([id, value]) => {
-      const select = this.shadowRoot.getElementById(id);
-      if (select && value) {
-        select.value = value;
-      }
-    });
-
-    // Update favorites checkbox
-    const favoritesCheckbox = this.shadowRoot.getElementById('favorites-only');
-    if (favoritesCheckbox) {
-      favoritesCheckbox.checked = favoritesOnly;
+      const count = this.getMatchingCount();
+      counter.textContent = `${count} מתכונים תואמים`;
     }
   }
 
   updateTagsDisplay() {
     const tagsContainer = this.shadowRoot.querySelector('.tags-container');
     if (tagsContainer) {
-      tagsContainer.innerHTML = this.state.filters.tags
+      tagsContainer.innerHTML = this.filters.tags
         .map(
           (tag) => `
         <span class="tag">
@@ -987,61 +796,39 @@ class RecipeFilterComponent extends HTMLElement {
     // Update available options in datalist
     const datalist = this.shadowRoot.getElementById('tags-list');
     if (datalist) {
-      datalist.innerHTML = this.state.availableFilters.tags
-        .filter((tag) => !this.state.filters.tags.includes(tag))
+      datalist.innerHTML = this.availableOptions.tags
+        .filter((tag) => !this.filters.tags.includes(tag))
         .map((tag) => `<option value="${tag}">`)
         .join('');
     }
   }
 
-  updateApplyButton() {
-    const applyBtn = this.shadowRoot.querySelector('.apply-btn');
-    if (applyBtn) {
-      applyBtn.disabled = this.state.isLoading;
-    }
-  }
-
-  updateIngredientSelect() {
-    const select = this.shadowRoot.getElementById('main-ingredient');
-    if (select) {
-      // Store current selection
-      const currentValue = select.value;
-
-      // Clear and rebuild options
-      select.innerHTML = `
-        <option value="">הכל</option>
-        ${this.state.availableFilters.mainIngredients
-          .map(
-            (ingredient) =>
-              `<option value="${ingredient}" ${currentValue === ingredient ? 'selected' : ''}>
-            ${ingredient}
-          </option>`,
-          )
-          .join('')}
-      `;
-    }
-  }
-
-  setInitialRecipes(recipes) {
-    this.currentRecipes = recipes;
-
-    // Update available filters based on current recipes
-    this.state.availableFilters.mainIngredients = [
-      ...new Set(
-        recipes
-          .map((r) => r.mainIngredient)
-          .filter((ingredient) => ingredient && ingredient.trim()),
-      ),
-    ].sort((a, b) => a.localeCompare(b));
-
-    this.state.availableFilters.tags = [...new Set(recipes.flatMap((r) => r.tags || []))];
-
-    this.state.matchingCount = recipes.length;
+  // Public API methods for external control
+  setCurrentFilters(filters) {
+    this.filters = FilterUtils.validateFilters(filters);
     this.updateUI();
   }
 
+  setCategory(category) {
+    this.category = category;
+  }
+
+  getCurrentFilters() {
+    return { ...this.filters };
+  }
+
+  getFilteredRecipes() {
+    return this.applyCurrentFilters();
+  }
+
   // Public methods
-  open() {
+  async open() {
+    // If favorites filter is enabled, ensure we have favorites data
+    if (this.filters.favoritesOnly) {
+      await this.loadUserFavorites();
+      this.updateUI(); // Update counter after loading favorites
+    }
+
     const modal = this.shadowRoot.querySelector('custom-modal');
     if (modal) modal.open();
   }
@@ -1049,12 +836,6 @@ class RecipeFilterComponent extends HTMLElement {
   close() {
     const modal = this.shadowRoot.querySelector('custom-modal');
     if (modal) modal.close();
-  }
-
-  // Update the recipe counter from external source (e.g., categories page)
-  updateRecipeCount(count) {
-    this.state.matchingCount = count;
-    this.updateCounter();
   }
 }
 

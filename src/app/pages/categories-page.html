@@ -3,54 +3,22 @@
     <h1 id="category-header">מתכונים</h1>
 
     <div class="categories-content">
-      <div class="filters-container">
-        <filter-search-bar class="categories-search"></filter-search-bar>
-        <button id="open-filter-modal" class="filter-button">
-          <i class="fas fa-filter"></i>
-          <span id="filter-badge" class="filter-badge"></span>
-        </button>
+      <unified-recipe-filter
+        id="unified-filter"
+        dir="rtl"
+        layout-mode="categories-page"
+        show-badge="true"
+      >
+      </unified-recipe-filter>
 
-        <nav dir="rtl" class="category-tabs">
-          <ul>
-            <li><a href="/categories?category=all">כל הקטגוריות</a></li>
-            <li><a href="/categories?category=appetizers">מנות ראשונות</a></li>
-            <li><a href="/categories?category=main-courses">מנות עיקריות</a></li>
-            <li><a href="/categories?category=side-dishes">תוספות</a></li>
-            <li><a href="/categories?category=soups-stews">מרקים ותבשילים</a></li>
-            <li><a href="/categories?category=salads">סלטים</a></li>
-            <li><a href="/categories?category=desserts">קינוחים</a></li>
-            <li><a href="/categories?category=breakfast-brunch">ארוחות בוקר</a></li>
-            <li><a href="/categories?category=snacks">חטיפים</a></li>
-            <li><a href="/categories?category=beverages">משקאות</a></li>
-          </ul>
-        </nav>
-        <div class="category-dropdown">
-          <select dir="rtl" id="category-select">
-            <option value="all">כל הקטגוריות</option>
-            <option value="appetizers">מנות ראשונות</option>
-            <option value="main-courses">מנות עיקריות</option>
-            <option value="side-dishes">תוספות</option>
-            <option value="soups-stews">מרקים ותבשילים</option>
-            <option value="salads">סלטים</option>
-            <option value="desserts">קינוחים</option>
-            <option value="breakfast-brunch">ארוחות בוקר</option>
-            <option value="snacks">חטיפים</option>
-            <option value="beverages">משקאות</option>
-          </select>
-        </div>
-      </div>
-
-      <section dir="rtl" class="recipe-grid" id="recipe-grid">
-        <!-- Recipe cards will be dynamically added here -->
-      </section>
+      <recipe-presentation-grid
+        id="recipe-presentation-grid"
+        dir="rtl"
+        recipes-per-page="12"
+        show-pagination="true"
+        show-favorites="false"
+      >
+      </recipe-presentation-grid>
     </div>
   </main>
-
-  <div class="pagination">
-    <button class="btn-gradient" id="next-page">הבא</button>
-    <span id="page-info"></span>
-    <button class="btn-gradient" id="prev-page">הקודם</button>
-  </div>
-
-  <recipe-filter-component id="recipe-filter"></recipe-filter-component>
 </div>

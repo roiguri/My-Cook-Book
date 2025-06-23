@@ -52,3 +52,15 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+# Additional logs
+logs/
+*.log
+dev-debug.log
+
+# Additional IDE/editor files (consolidating with existing entries above)
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

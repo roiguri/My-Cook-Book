@@ -242,11 +242,62 @@ function isInternalLink(link) {
   }
 }
 
+// Generic navigation interceptor for pages
+class NavigationInterceptor {
+  constructor() {
+    this.handlers = new Map();
+  }
+
+  addHandler(selector, callback) {
+    const handler = (event) => {
+      const link = event.target.closest(selector);
+      if (!link) return;
+
+      // Allow browser default behavior for modifier keys and non-left clicks
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const currentRoute = window.spa?.router?.getCurrentRoute();
+      if (currentRoute === '/categories') {
+        event.preventDefault();
+        callback(event, link);
+      }
+    };
+
+    this.handlers.set(selector, handler);
+    document.addEventListener('click', handler, true);
+  }
+
+  removeHandler(selector) {
+    const handler = this.handlers.get(selector);
+    if (handler) {
+      document.removeEventListener('click', handler, true);
+      this.handlers.delete(selector);
+    }
+  }
+
+  removeAllHandlers() {
+    this.handlers.forEach((handler, selector) => {
+      document.removeEventListener('click', handler, true);
+    });
+    this.handlers.clear();
+  }
+}
+
 // Make functions available globally for other components
 window.updateActiveNavigation = updateActiveNavigation;
 window.closeHamburgerMenuIfOpen = closeHamburgerMenuIfOpen;
 window.closeMobileDrawer = closeMobileDrawer;
 window.syncMobileDrawerNavigation = syncMobileDrawerNavigation;
+window.NavigationInterceptor = NavigationInterceptor;
 
 // Initialize immediately if DOM is ready, otherwise wait for it
 if (document.readyState === 'loading') {
