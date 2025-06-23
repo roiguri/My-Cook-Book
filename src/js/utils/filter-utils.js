@@ -138,4 +138,30 @@ export class FilterUtils {
       favoritesOnly: Boolean(filters.favoritesOnly),
     };
   }
+
+  /**
+   * Search recipes by text across name, category, and tags
+   * @param {Array} recipes - Array of recipe objects to search
+   * @param {string} searchText - Search query string
+   * @returns {Array} Filtered recipes matching the search query
+   */
+  static searchRecipes(recipes, searchText) {
+    if (!recipes || !Array.isArray(recipes)) {
+      return [];
+    }
+
+    if (!searchText || typeof searchText !== 'string') {
+      return recipes;
+    }
+
+    const searchTerms = searchText.toLowerCase().trim().split(/\s+/);
+
+    return recipes.filter((recipe) => {
+      const searchableText = [recipe.name, recipe.category, ...(recipe.tags || [])]
+        .join(' ')
+        .toLowerCase();
+
+      return searchTerms.every((term) => searchableText.includes(term));
+    });
+  }
 }

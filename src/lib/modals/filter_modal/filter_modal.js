@@ -739,6 +739,9 @@ class RecipeFilterComponent extends HTMLElement {
     const tagsSelect = this.shadowRoot.getElementById('tags-select');
     if (tagsSelect) tagsSelect.value = '';
 
+    // Close the modal to re-enable scrolling
+    this.close();
+
     // Update UI
     this.updateUI();
 

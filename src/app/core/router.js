@@ -255,6 +255,43 @@ export class AppRouter {
     });
     window.dispatchEvent(navigationEvent);
   }
+
+  // Categories page specific URL helpers
+  updateCategoriesParams(currentCategory, currentSearchQuery, activeFilters) {
+    const params = {};
+
+    if (currentCategory && currentCategory !== 'all') {
+      params.category = currentCategory;
+    }
+
+    if (currentSearchQuery) {
+      params.q = currentSearchQuery;
+    }
+
+    if (activeFilters.favoritesOnly) {
+      params.favorites = 'true';
+    }
+
+    this.updateParams(params);
+  }
+
+  navigateToCategoriesWithParams(currentCategory, currentSearchQuery, activeFilters) {
+    const params = {};
+
+    if (currentCategory && currentCategory !== 'all') {
+      params.category = currentCategory;
+    }
+
+    if (currentSearchQuery) {
+      params.q = currentSearchQuery;
+    }
+
+    if (activeFilters.favoritesOnly) {
+      params.favorites = 'true';
+    }
+
+    this.navigateWithParams('/categories', params);
+  }
 }
 
 export const router = new AppRouter();

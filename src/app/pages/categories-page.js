@@ -1,6 +1,10 @@
 import authService from '../../js/services/auth-service.js';
 import { FirestoreService } from '../../js/services/firestore-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
+import { FilterUtils } from '../../js/utils/filter-utils.js';
+import { getLocalizedCategoryName } from '../../js/utils/recipes/recipe-data-utils.js';
+import { getErrorMessage, logError } from '../../js/utils/error-handler.js';
+import favoritesService from '../../js/services/favorites-service.js';
 import '../../styles/pages/categories-spa.css';
 
 export default {
@@ -26,16 +30,7 @@ export default {
       await this.loadInitialRecipes();
       this.setupEventListeners();
       this.updateUI();
-      
       await this.displayCurrentPageRecipes();
-
-      const changed = await this.updateRecipesPerPage();
-      if (changed) {
-        await this.displayCurrentPageRecipes();
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      this.updateUnifiedFilter();
     } catch (error) {
       console.error('Error mounting categories page:', error);
       this.handleError(error, 'mount');
@@ -56,7 +51,7 @@ export default {
   getTitle(params) {
     const category = params?.category;
     if (category && category !== 'all') {
-      return AppConfig.getPageTitle(this.getCategoryDisplayName(category));
+      return AppConfig.getPageTitle(getLocalizedCategoryName(category));
     }
     return AppConfig.getPageTitle('מתכונים');
   },
@@ -67,7 +62,7 @@ export default {
 
     let description = 'Browse our collection of delicious recipes';
     if (category && category !== 'all') {
-      description = `Discover ${this.getCategoryDisplayName(category)} recipes`;
+      description = `Discover ${getLocalizedCategoryName(category)} recipes`;
     }
     if (searchQuery) {
       description += ` matching "${searchQuery}"`;
@@ -99,7 +94,7 @@ export default {
     // Only update favorites if it's explicitly set to true in URL params
     if (favoritesOnly && favoritesOnly !== this.activeFilters.favoritesOnly) {
       this.activeFilters.favoritesOnly = favoritesOnly;
-      this.hasActiveFilters = this.checkHasActiveFilters();
+      this.hasActiveFilters = FilterUtils.hasActiveFilters(this.activeFilters);
       needsReload = true;
     }
 
@@ -120,16 +115,9 @@ export default {
     this.currentCategory = params?.category || 'all';
     this.currentSearchQuery = params?.q || '';
     this.currentPage = 1;
-    this.recipesPerPage = 4; // Default fallback, will be calculated dynamically
     this.displayedRecipes = [];
     this.allRecipes = [];
     this.currentUser = authService.getCurrentUser(); // Track current user for auth changes
-
-    this.userFavoritesCache = {
-      userId: null,
-      favorites: [],
-      isLoaded: false,
-    };
 
     this.activeFilters = {
       cookingTime: '',
@@ -138,158 +126,7 @@ export default {
       tags: [],
       favoritesOnly: params?.favorites === 'true' || false,
     };
-    this.hasActiveFilters = this.checkHasActiveFilters();
-  },
-
-  checkHasActiveFilters() {
-    return !!(
-      this.activeFilters.cookingTime ||
-      this.activeFilters.difficulty ||
-      this.activeFilters.mainIngredient ||
-      (this.activeFilters.tags && this.activeFilters.tags.length > 0) ||
-      this.activeFilters.favoritesOnly
-    );
-  },
-
-  async calculateOptimalCardsPerPage() {    
-    const recipePresentationGrid = document.getElementById('recipe-presentation-grid');
-    if (!recipePresentationGrid || !recipePresentationGrid.shadowRoot) {
-      console.warn('Recipe presentation grid not ready for measurement');
-      return 4; // Fallback
-    }
-
-    const recipeGrid = recipePresentationGrid.shadowRoot.querySelector('.recipe-grid');
-    if (!recipeGrid) {
-      console.warn('Recipe grid not found in shadow DOM');
-      return 4; // Fallback
-    }
-
-    // Ensure the grid has been styled and laid out
-    if (recipeGrid.offsetWidth === 0) {
-      console.warn('Recipe grid has no width, using fallback');
-      return 4;
-    }
-
-    // Skip measurement if we're processing filters to avoid conflicts, but allow it for initial load
-    if (this.processingFilters && this.recipesPerPage) {
-      return this.recipesPerPage;
-    }
-
-    const tempCards = [];
-    const existingChildren = Array.from(recipeGrid.children);
-    
-    try {
-      existingChildren.forEach((child) => (child.style.display = 'none'));
-
-      // Add temporary measurement cards
-      for (let i = 0; i < 6; i++) {
-        const tempCard = document.createElement('div');
-        tempCard.className = 'recipe-card-container';
-        tempCard.style.minHeight = '200px'; // Realistic card height
-        tempCard.style.backgroundColor = 'transparent';
-        tempCard.style.border = '1px solid transparent';
-        recipeGrid.appendChild(tempCard);
-        tempCards.push(tempCard);
-      }
-
-      // Force layout calculation
-      recipeGrid.offsetHeight;
-
-      const result = await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Grid measurement timeout'));
-        }, 1000);
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            try {
-              clearTimeout(timeout);
-              let actualColumns = this.measureGridColumns(tempCards);
-
-              const rows = 2;
-              const cardsPerPage = actualColumns * rows;
-              const finalResult = Math.max(2, Math.min(6, cardsPerPage));
-
-              console.log(`Grid calculation: ${actualColumns} columns × ${rows} rows = ${cardsPerPage} cards, capped to ${finalResult}`);
-              resolve(finalResult);
-            } catch (measureError) {
-              clearTimeout(timeout);
-              reject(measureError);
-            }
-          });
-        });
-      });
-
-      return result;
-    } catch (error) {
-      console.warn('Error measuring grid layout:', error);
-      return 4; // Fallback
-    } finally {
-      try {
-        tempCards.forEach((card) => {
-          if (card.parentNode) {
-            card.remove();
-          }
-        });
-        existingChildren.forEach((child) => {
-          if (child.style) {
-            child.style.display = '';
-          }
-        });
-      } catch (cleanupError) {
-        console.warn('Error during measurement cleanup:', cleanupError);
-      }
-    }
-  },
-
-  measureGridColumns(cards) {
-    if (cards.length < 2) return 1;
-
-    let actualColumns = 1;
-
-    try {
-      const firstCard = cards[0];
-      const firstRect = firstCard.getBoundingClientRect();
-      const firstRowTop = firstRect.top;
-
-      for (let i = 1; i < cards.length; i++) {
-        const cardRect = cards[i].getBoundingClientRect();
-        if (Math.abs(cardRect.top - firstRowTop) < 10) {
-          actualColumns++;
-        } else {
-          break;
-        }
-      }
-
-      if (actualColumns === 1 && cards.length >= 2) {
-        const recipePresentationGrid = document.getElementById('recipe-presentation-grid');
-        const recipeGrid = recipePresentationGrid?.shadowRoot?.querySelector('.recipe-grid');
-        const containerWidth = recipeGrid?.offsetWidth || 800;
-
-        const minCardWidth = 200;
-        const gap = 16;
-        actualColumns = Math.max(1, Math.floor((containerWidth + gap) / (minCardWidth + gap)));
-      }
-    } catch (error) {
-      console.warn('Error in measureGridColumns:', error);
-      actualColumns = 1;
-    }
-
-    return actualColumns;
-  },
-
-  async updateRecipesPerPage() {
-    const newRecipesPerPage = await this.calculateOptimalCardsPerPage();
-
-    if (newRecipesPerPage !== this.recipesPerPage) {
-      const currentStartIndex = (this.currentPage - 1) * this.recipesPerPage;
-      this.recipesPerPage = newRecipesPerPage;
-      this.currentPage = Math.max(1, Math.floor(currentStartIndex / this.recipesPerPage) + 1);
-
-      return true;
-    }
-
-    return false;
+    this.hasActiveFilters = FilterUtils.hasActiveFilters(this.activeFilters);
   },
 
   async importComponents() {
@@ -313,7 +150,7 @@ export default {
 
       if (wasAuthenticated && !isNowAuthenticated && this.activeFilters.favoritesOnly) {
         this.activeFilters.favoritesOnly = false;
-        this.hasActiveFilters = this.checkHasActiveFilters();
+        this.hasActiveFilters = FilterUtils.hasActiveFilters(this.activeFilters);
         this.currentCategory = 'all';
         this.currentSearchQuery = '';
 
@@ -324,22 +161,22 @@ export default {
       }
 
       if (wasAuthenticated && !isNowAuthenticated) {
-        this.clearFavoritesCache();
+        favoritesService.clearCache();
       } else if (!wasAuthenticated && isNowAuthenticated) {
-        this.clearFavoritesCache();
+        favoritesService.clearCache();
       } else if (
         wasAuthenticated &&
         isNowAuthenticated &&
         this.currentUser?.uid !== authState.user?.uid
       ) {
-        this.clearFavoritesCache();
+        favoritesService.clearCache();
       }
 
       await this.loadInitialRecipes();
       this.updateUI();
       await this.displayCurrentPageRecipes();
 
-      this.updateURLSilently();
+      this.updateURL(true);
 
       this.refreshFilterModalIfOpen();
     });
@@ -370,7 +207,7 @@ export default {
       let filteredRecipes = [...this.allRecipes];
 
       if (this.currentSearchQuery) {
-        filteredRecipes = this.filterRecipesBySearch(filteredRecipes, this.currentSearchQuery);
+        filteredRecipes = FilterUtils.searchRecipes(filteredRecipes, this.currentSearchQuery);
       }
 
       if (this.hasActiveFilters) {
@@ -385,75 +222,35 @@ export default {
     }
   },
 
-  filterRecipesBySearch(recipes, searchText) {
-    const searchTerms = searchText.toLowerCase().trim().split(/\s+/);
-
-    return recipes.filter((recipe) => {
-      const searchableText = [recipe.name, recipe.category, ...(recipe.tags || [])]
-        .join(' ')
-        .toLowerCase();
-
-      return searchTerms.every((term) => searchableText.includes(term));
-    });
-  },
-
   async applyActiveFilters(recipes) {
     if (!this.hasActiveFilters) {
       return recipes;
     }
 
-    const { cookingTime, difficulty, mainIngredient, tags, favoritesOnly } = this.activeFilters;
-
-    let filteredRecipes = recipes.filter((recipe) => {
-      if (cookingTime) {
-        const totalTime = (recipe.prepTime || 0) + (recipe.waitTime || 0);
-        if (cookingTime === '0-30' && totalTime > 30) return false;
-        if (cookingTime === '31-60' && (totalTime < 31 || totalTime > 60)) return false;
-        if (cookingTime === '61' && totalTime <= 60) return false;
-      }
-
-      if (difficulty && recipe.difficulty !== difficulty) return false;
-
-      if (mainIngredient && recipe.mainIngredient !== mainIngredient) return false;
-
-      if (tags && tags.length > 0) {
-        const recipeTags = recipe.tags || [];
-        if (!tags.every((tag) => recipeTags.includes(tag))) return false;
-      }
-
-      return true;
-    });
-
-    if (favoritesOnly) {
-      const user = authService.getCurrentUser();
-      if (user) {
-        const favoriteRecipeIds = await this.getUserFavorites();
-        filteredRecipes = filteredRecipes.filter((recipe) => favoriteRecipeIds.includes(recipe.id));
-      }
+    let favoriteRecipeIds = [];
+    if (this.activeFilters.favoritesOnly) {
+      favoriteRecipeIds = await favoritesService.getUserFavorites();
     }
 
-    return filteredRecipes;
+    return FilterUtils.applyFilters(recipes, this.activeFilters, favoriteRecipeIds);
   },
 
   setupEventListeners() {
-    this.resizeHandler = this.debounce(async () => {      
-      // Skip resize handling if we're currently processing filters to avoid conflicts
-      if (this.processingFilters) {
-        return;
-      }
-      
-      const changed = await this.updateRecipesPerPage();
-      if (changed) {
-        await this.displayCurrentPageRecipes();
-      }
-    }, 250);
-    window.addEventListener('resize', this.resizeHandler);
-
     const recipePresentationGrid = document.getElementById('recipe-presentation-grid');
     if (recipePresentationGrid) {
-      recipePresentationGrid.addEventListener('page-changed', this.handlePaginationChange.bind(this));
+      recipePresentationGrid.addEventListener('page-changed', async (event) => {
+        const { page } = event.detail;
+        this.currentPage = page;
+        await this.displayCurrentPageRecipes();
+      });
       recipePresentationGrid.addEventListener('recipe-selected', this.handleRecipeSelected.bind(this));
-      recipePresentationGrid.addEventListener('favorite-changed', this.handleFavoriteChanged.bind(this));
+      recipePresentationGrid.addEventListener('favorite-changed', (event) => {
+        const { recipeId, isFavorite } = event.detail;
+        favoritesService.updateCache(recipeId, isFavorite);
+        if (this.activeFilters.favoritesOnly) {
+          this.loadInitialRecipes().then(() => this.displayCurrentPageRecipes());
+        }
+      });
     }
 
     const unifiedFilter = document.getElementById('unified-filter');
@@ -463,31 +260,21 @@ export default {
       unifiedFilter.addEventListener('unified-filters-changed', this.handleUnifiedFiltersChanged.bind(this));
     }
 
-    document.addEventListener('recipe-favorite-changed', this.handleFavoriteChanged.bind(this));
+    document.addEventListener('recipe-favorite-changed', (event) => {
+      const { recipeId, isFavorite } = event.detail;
+      favoritesService.updateCache(recipeId, isFavorite);
+      if (this.activeFilters.favoritesOnly) {
+        this.loadInitialRecipes().then(() => this.displayCurrentPageRecipes());
+      }
+    });
 
     this.setupNavigationInterception();
   },
 
   removeEventListeners() {
-    if (this.resizeHandler) {
-      window.removeEventListener('resize', this.resizeHandler);
-    }
-
-    document.removeEventListener('recipe-favorite-changed', this.handleFavoriteChanged.bind(this));
-
     this.removeNavigationInterception();
   },
 
-  handleFavoriteChanged(event) {
-    const { recipeId, isFavorite } = event.detail;
-    this.updateFavoritesCache(recipeId, isFavorite);
-
-    if (this.activeFilters.favoritesOnly) {
-      this.loadInitialRecipes().then(() => {
-        this.displayCurrentPageRecipes();
-      });
-    }
-  },
 
   updateUI() {
     this.updateUnifiedFilter();
@@ -510,12 +297,6 @@ export default {
     }
   },
 
-  updateCategoryNavigation() {
-    const categoryNavigation = document.getElementById('category-navigation');
-    if (categoryNavigation) {
-      categoryNavigation.setCurrentCategory(this.currentCategory);
-    }
-  },
 
   updatePageTitle() {
     const pageTitle = document.querySelector('#category-header');
@@ -525,31 +306,43 @@ export default {
       } else if (this.currentSearchQuery) {
         pageTitle.textContent = `תוצאות חיפוש: "${this.currentSearchQuery}"`;
       } else if (this.currentCategory !== 'all') {
-        pageTitle.textContent = this.getCategoryDisplayName(this.currentCategory);
+        pageTitle.textContent = getLocalizedCategoryName(this.currentCategory);
       } else {
         pageTitle.textContent = 'מתכונים';
       }
     }
   },
 
-  async activateFavoritesFilter() {
-    // Close mobile drawer immediately for consistent timing
+  async setFilterState(options = {}) {
+    const { favoritesOnly = false, resetFilters = false } = options;
+
     if (window.closeMobileDrawer) {
       window.closeMobileDrawer();
     }
 
-    const user = authService.getCurrentUser();
-    if (!user) {
-      // If user is not authenticated, show auth modal or redirect
-      return;
+    if (favoritesOnly) {
+      const user = authService.getCurrentUser();
+      if (!user) {
+        return;
+      }
     }
 
-    this.activeFilters.favoritesOnly = true;
-    this.hasActiveFilters = this.checkHasActiveFilters();
+    if (resetFilters || favoritesOnly) {
+      this.activeFilters = {
+        cookingTime: '',
+        difficulty: '',
+        mainIngredient: '',
+        tags: [],
+        favoritesOnly,
+      };
+    } else {
+      this.activeFilters.favoritesOnly = favoritesOnly;
+    }
+
+    this.hasActiveFilters = FilterUtils.hasActiveFilters(this.activeFilters);
     this.currentCategory = 'all';
     this.currentSearchQuery = '';
 
-    // Clear search in unified filter
     const unifiedFilter = document.getElementById('unified-filter');
     if (unifiedFilter) {
       unifiedFilter.setSearchQuery('');
@@ -563,114 +356,36 @@ export default {
       setTimeout(window.updateActiveNavigation, 0);
     }
 
-    this.updateURLSilently();
+    this.updateURL(true);
+  },
+
+  async activateFavoritesFilter() {
+    await this.setFilterState({ favoritesOnly: true });
   },
 
   async resetToAllCategories() {
-    // Close mobile drawer immediately for consistent timing
-    if (window.closeMobileDrawer) {
-      window.closeMobileDrawer();
-    }
-
-    this.activeFilters = {
-      cookingTime: '',
-      difficulty: '',
-      mainIngredient: '',
-      tags: [],
-      favoritesOnly: false,
-    };
-    this.hasActiveFilters = this.checkHasActiveFilters();
-
-    this.currentCategory = 'all';
-    this.currentSearchQuery = '';
-
-    // Clear search in unified filter
-    const unifiedFilter = document.getElementById('unified-filter');
-    if (unifiedFilter) {
-      unifiedFilter.setSearchQuery('');
-    }
-
-    await this.loadInitialRecipes();
-    this.updateUI();
-    await this.displayCurrentPageRecipes();
-
-    if (window.updateActiveNavigation) {
-      setTimeout(window.updateActiveNavigation, 0);
-    }
-
-    this.updateURLSilently();
-    
-    setTimeout(() => {
-      if (document.body.style.overflow === 'hidden') {
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-      }
-    }, 100);
+    await this.setFilterState({ resetFilters: true });
   },
 
 
   setupNavigationInterception() {
-    this.favoritesNavHandler = (event) => {
-      const link = event.target.closest('a[href="/categories?favorites=true"]');
-      if (!link) return;
-
-      // Allow browser default behavior for modifier keys and non-left clicks
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      ) {
-        return; // Let browser handle naturally (opens in new tab/window)
-      }
-
-      const currentRoute = window.spa?.router?.getCurrentRoute();
-
-      if (currentRoute === '/categories') {
-        event.preventDefault();
+    if (window.NavigationInterceptor) {
+      this.navigationInterceptor = new window.NavigationInterceptor();
+      
+      this.navigationInterceptor.addHandler('a[href="/categories?favorites=true"]', () => {
         this.activateFavoritesFilter();
-      }
-    };
-
-    this.categoriesNavHandler = (event) => {
-      const link = event.target.closest('a[href="/categories"]');
-      if (!link) return;
-
-      // Allow browser default behavior for modifier keys and non-left clicks
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      ) {
-        return; // Let browser handle naturally (opens in new tab/window)
-      }
-
-      const currentRoute = window.spa?.router?.getCurrentRoute();
-
-      if (currentRoute === '/categories') {
-        event.preventDefault();
+      });
+      
+      this.navigationInterceptor.addHandler('a[href="/categories"]', () => {
         this.resetToAllCategories();
-      }
-    };
-
-    document.addEventListener('click', this.favoritesNavHandler, true);
-    document.addEventListener('click', this.categoriesNavHandler, true);
+      });
+    }
   },
 
   removeNavigationInterception() {
-    if (this.favoritesNavHandler) {
-      document.removeEventListener('click', this.favoritesNavHandler, true);
-      this.favoritesNavHandler = null;
-    }
-
-    if (this.categoriesNavHandler) {
-      document.removeEventListener('click', this.categoriesNavHandler, true);
-      this.categoriesNavHandler = null;
+    if (this.navigationInterceptor) {
+      this.navigationInterceptor.removeAllHandlers();
+      this.navigationInterceptor = null;
     }
   },
 
@@ -689,10 +404,9 @@ export default {
 
     const authenticated = authService.getCurrentUser();
     recipePresentationGrid.setAttribute('show-favorites', authenticated ? 'true' : 'false');
-    recipePresentationGrid.setAttribute('recipes-per-page', this.recipesPerPage.toString());
+    recipePresentationGrid.setAttribute('recipes-per-page', '6');
     recipePresentationGrid.setAttribute('current-page', this.currentPage.toString());
     
-    // Set recipes data (will trigger internal rendering)
     recipePresentationGrid.setRecipes(this.displayedRecipes, false);
   },
 
@@ -700,7 +414,6 @@ export default {
     const { recipeId } = event.detail;
     if (window.spa?.router) {
       window.spa.router.navigate(`/recipe/${recipeId}`);
-      // Update navigation active state after navigation
       setTimeout(() => {
         if (typeof window.updateActiveNavigation === 'function') {
           window.updateActiveNavigation();
@@ -712,25 +425,6 @@ export default {
     }
   },
 
-  handleCategoryClick(event) {
-    event.preventDefault();
-    const link = event.target.closest('a');
-    if (!link) return;
-
-    const href = link.getAttribute('href');
-    let category = 'all';
-    if (href) {
-      const url = new URL(href, window.location.origin);
-      category = url.searchParams.get('category') || 'all';
-    }
-    this.changeCategory(category);
-  },
-
-
-  async handlePaginationChange(event) {
-    const { page } = event.detail;
-    await this.goToPage(page);
-  },
 
   async handleUnifiedSearchChanged(event) {
     const { searchQuery } = event.detail;
@@ -743,20 +437,17 @@ export default {
       this.updateUI();
       await this.displayCurrentPageRecipes();
 
-      this.updateURLSilently();
+      this.updateURL(true);
     }
   },
 
   async handleUnifiedCategoryChanged(event) {
     const { category } = event.detail;
     await this.changeCategory(category);
-    this.updateURLSilently();
+    this.updateURL(true);
   },
 
   async handleUnifiedFiltersChanged(event) {
-    console.log('Filters changed, event detail:', event.detail);
-    this.processingFilters = true; // Prevent resize handling conflicts
-    
     const { filters, filteredRecipes, hasActiveFilters } = event.detail;
 
     // Check if favorites filter changed from true to false
@@ -774,9 +465,11 @@ export default {
 
     this.hasActiveFilters = hasActiveFilters;
 
-    // If favorites was disabled, we need to reload all recipes from Firestore
-    // because the unified component only had favorites recipes to work with
-    if (favoritesDisabled) {
+    // If favorites filter changed or was enabled, we need to reload from Firestore
+    // because the unified component doesn't have access to user's favorites data
+    const favoritesEnabled = !wasFavoritesOnly && isFavoritesOnly;
+    
+    if (favoritesDisabled || favoritesEnabled) {
       await this.loadInitialRecipes();
     } else {
       this.displayedRecipes = filteredRecipes;
@@ -784,203 +477,77 @@ export default {
 
     this.currentPage = 1;
     this.updatePageTitle();
-    this.updateURLSilently();
+    this.updateURL(true);
 
     if (window.updateActiveNavigation) {
       setTimeout(window.updateActiveNavigation, 0);
     }
 
     await this.displayCurrentPageRecipes();
-    
-    setTimeout(() => {
-      this.processingFilters = false;
-      
-      // Ensure scrolling is not disabled after filter processing
-      // This fixes the issue where clearing filters disables scrolling
-      if (document.body.style.overflow === 'hidden') {
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-      }
-    }, 100);
   },
 
-  async handleSearchInput(event) {
-    const searchQuery = event.detail.searchText || '';
 
-    if (this.currentSearchQuery !== searchQuery) {
-      this.currentSearchQuery = searchQuery;
 
-      await this.loadInitialRecipes();
-      this.currentPage = 1;
-      this.updateUI();
-      await this.displayCurrentPageRecipes();
+  async updatePageState(updates = {}) {
+    const { category, searchQuery } = updates;
+    let hasChanges = false;
 
-      this.updateURLSilently();
+    if (category !== undefined && category !== this.currentCategory) {
+      this.currentCategory = category;
+      hasChanges = true;
     }
-  },
 
+    if (searchQuery !== undefined && searchQuery !== this.currentSearchQuery) {
+      this.currentSearchQuery = searchQuery;
+      hasChanges = true;
+    }
 
-  async changeCategory(category) {
-    if (category === this.currentCategory) return;
+    if (!hasChanges) return;
 
     // Close mobile drawer immediately for consistent timing
     if (window.closeMobileDrawer) {
       window.closeMobileDrawer();
     }
 
-    this.currentCategory = category;
-    this.currentPage = 1;
+    await this.reloadAndDisplay();
+    this.updateURL(true);
+  },
 
-    await this.loadInitialRecipes();
-    this.updateUI();
-    await this.displayCurrentPageRecipes();
+  async changeCategory(category) {
+    await this.updatePageState({ category });
   },
 
   async changeSearch(searchQuery) {
-    if (searchQuery === this.currentSearchQuery) return;
+    await this.updatePageState({ searchQuery });
+  },
 
-    this.currentSearchQuery = searchQuery;
-    await this.loadInitialRecipes();
+  async reloadAndDisplay() {
     this.currentPage = 1;
+    await this.loadInitialRecipes();
     this.updateUI();
     await this.displayCurrentPageRecipes();
-
-    this.updateURLSilently();
   },
 
-  async goToPage(page) {
-    const totalPages = Math.ceil(this.displayedRecipes.length / this.recipesPerPage);
-    if (page < 1 || page > totalPages) return;
 
-    this.currentPage = page;
-    await this.displayCurrentPageRecipes();
-  },
-
-  updateURL() {
-    const params = {};
-
-    if (this.currentCategory && this.currentCategory !== 'all') {
-      params.category = this.currentCategory;
-    }
-
-    if (this.currentSearchQuery) {
-      params.q = this.currentSearchQuery;
-    }
-
-    if (this.activeFilters.favoritesOnly) {
-      params.favorites = 'true';
-    }
-
+  updateURL(silently = false) {
     if (window.spa?.router) {
-      window.spa.router.navigateWithParams('/categories', params);
-    }
-  },
-
-  updateURLSilently() {
-    const params = {};
-
-    if (this.currentCategory && this.currentCategory !== 'all') {
-      params.category = this.currentCategory;
-    }
-
-    if (this.currentSearchQuery) {
-      params.q = this.currentSearchQuery;
-    }
-
-    if (this.activeFilters.favoritesOnly) {
-      params.favorites = 'true';
-    }
-
-    if (window.spa?.router) {
-      window.spa.router.updateParams(params);
-    }
-  },
-
-  async getUserFavorites() {
-    const user = authService.getCurrentUser();
-    if (!user) {
-      return [];
-    }
-
-    if (this.userFavoritesCache.userId === user.uid && this.userFavoritesCache.isLoaded) {
-      return this.userFavoritesCache.favorites;
-    }
-
-    try {
-      const userDoc = await FirestoreService.getDocument('users', user.uid);
-      const favoriteRecipeIds = userDoc?.favorites || [];
-
-      this.userFavoritesCache = {
-        userId: user.uid,
-        favorites: favoriteRecipeIds,
-        isLoaded: true,
-      };
-
-      return favoriteRecipeIds;
-    } catch (error) {
-      console.error('Error fetching user favorites:', error);
-      return [];
-    }
-  },
-
-  clearFavoritesCache() {
-    this.userFavoritesCache = {
-      userId: null,
-      favorites: [],
-      isLoaded: false,
-    };
-  },
-
-  updateFavoritesCache(recipeId, isAdding) {
-    if (this.userFavoritesCache.isLoaded) {
-      if (isAdding) {
-        if (!this.userFavoritesCache.favorites.includes(recipeId)) {
-          this.userFavoritesCache.favorites.push(recipeId);
-        }
+      if (silently) {
+        window.spa.router.updateCategoriesParams(this.currentCategory, this.currentSearchQuery, this.activeFilters);
       } else {
-        this.userFavoritesCache.favorites = this.userFavoritesCache.favorites.filter(
-          (id) => id !== recipeId,
-        );
+        window.spa.router.navigateToCategoriesWithParams(this.currentCategory, this.currentSearchQuery, this.activeFilters);
       }
     }
   },
 
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  },
-
-  getCategoryDisplayName(category) {
-    const categoryNames = {
-      appetizers: 'מנות ראשונות',
-      'main-courses': 'מנות עיקריות',
-      'side-dishes': 'תוספות',
-      'soups-stews': 'מרקים ותבשילים',
-      salads: 'סלטים',
-      desserts: 'קינוחים',
-      'breakfast-brunch': 'ארוחות בוקר',
-      snacks: 'חטיפים',
-      beverages: 'משקאות',
-    };
-
-    return categoryNames[category] || category;
-  },
-
   handleError(error, context = 'unknown') {
-    console.error(`Categories page error in ${context}:`, error);
+    logError(error, `Categories page - ${context}`);
 
+    const errorMessage = getErrorMessage(error);
     const recipeGrid = document.getElementById('recipe-grid');
     if (recipeGrid) {
       recipeGrid.innerHTML = `
         <div class="error-message">
-          <p>מצטערים, אירעה שגיאה בטעינת המתכונים. אנא נסו שוב מאוחר יותר.</p>
+          <p>${errorMessage}</p>
         </div>
       `;
     }
