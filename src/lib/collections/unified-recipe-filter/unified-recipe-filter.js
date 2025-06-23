@@ -258,6 +258,8 @@ class UnifiedRecipeFilter extends HTMLElement {
     const oldQuery = this.state.searchQuery;
     this.state.searchQuery = searchText;
 
+    this.updateFilterManager();
+
     this.emitSearchChanged(oldQuery);
     this.emitStateChanged();
     this.emitFiltersChanged();
@@ -267,10 +269,7 @@ class UnifiedRecipeFilter extends HTMLElement {
     const { category, categoryData, previousCategory } = event.detail;
     this.state.currentCategory = category;
 
-    // Update filter manager with new category
-    if (this.filterManager) {
-      this.filterManager.setCurrentCategory(category);
-    }
+    this.updateFilterManager();
 
     this.emitCategoryChanged(categoryData, previousCategory);
     this.emitStateChanged();
@@ -359,9 +358,13 @@ class UnifiedRecipeFilter extends HTMLElement {
     if (this.filterManager) {
       this.filterManager.setAttribute('current-filters', JSON.stringify(this.state.filters));
       this.filterManager.setAttribute('has-active-filters', this.state.hasActiveFilters.toString());
+      
       if (this.baseRecipes.length > 0) {
         this.filterManager.setBaseRecipes(this.baseRecipes);
       }
+      
+      const filteredRecipes = this.applyAllFilters(this.baseRecipes);
+      this.filterManager.setFilteredRecipes(filteredRecipes);
     }
   }
 

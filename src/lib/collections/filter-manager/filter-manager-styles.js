@@ -15,7 +15,7 @@ export const styles = `
     display: flex;
     align-items: center;
     position: relative;
-    height: 100%;
+    min-height: 36px;
   }
 
   .filter-button {

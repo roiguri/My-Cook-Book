@@ -43,6 +43,7 @@ class FilterManager extends HTMLElement {
     this.hasActiveFilters = false;
     this.isDisabled = false;
     this.baseRecipes = [];
+    this.filteredRecipes = [];
     this.currentCategory = 'all';
     this.currentSearchQuery = '';
 
@@ -228,8 +229,10 @@ class FilterManager extends HTMLElement {
       filterModal.removeAttribute('current-filters');
     }
 
-    if (this.baseRecipes.length > 0) {
-      filterModal.setAttribute('recipes', JSON.stringify(this.baseRecipes));
+    // Use filtered recipes if available, otherwise fall back to base recipes
+    const recipesToUse = this.filteredRecipes.length > 0 ? this.filteredRecipes : this.baseRecipes;
+    if (recipesToUse.length > 0) {
+      filterModal.setAttribute('recipes', JSON.stringify(recipesToUse));
     }
 
     if (this.currentCategory !== 'all') {
@@ -378,6 +381,10 @@ class FilterManager extends HTMLElement {
 
   setBaseRecipes(recipes) {
     this.baseRecipes = Array.isArray(recipes) ? recipes : [];
+  }
+
+  setFilteredRecipes(recipes) {
+    this.filteredRecipes = Array.isArray(recipes) ? recipes : [];
   }
 
   setCurrentCategory(category) {

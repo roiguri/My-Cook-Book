@@ -10,11 +10,13 @@
         show-badge="true">
       </unified-recipe-filter>
 
-      <section dir="rtl" class="recipe-grid" id="recipe-grid">
-        <!-- Recipe cards will be dynamically added here -->
-      </section>
+      <recipe-presentation-grid 
+        id="recipe-presentation-grid"
+        dir="rtl"
+        recipes-per-page="12"
+        show-pagination="true"
+        show-favorites="false">
+      </recipe-presentation-grid>
     </div>
   </main>
-
-  <recipe-pagination id="recipe-pagination" dir="rtl"></recipe-pagination>
 </div>
