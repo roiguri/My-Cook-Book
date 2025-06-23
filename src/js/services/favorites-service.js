@@ -70,9 +70,7 @@ class FavoritesService {
           this.cache.favorites.push(recipeId);
         }
       } else {
-        this.cache.favorites = this.cache.favorites.filter(
-          (id) => id !== recipeId,
-        );
+        this.cache.favorites = this.cache.favorites.filter((id) => id !== recipeId);
       }
     }
   }

@@ -75,7 +75,7 @@ class UnifiedRecipeFilter extends HTMLElement {
       ATTRIBUTES.layoutMode,
       ATTRIBUTES.categories,
       ATTRIBUTES.baseRecipes,
-      ATTRIBUTES.disabled
+      ATTRIBUTES.disabled,
     ];
   }
 
@@ -104,7 +104,9 @@ class UnifiedRecipeFilter extends HTMLElement {
         break;
       case ATTRIBUTES.currentFilters:
         try {
-          this.state.filters = newValue ? JSON.parse(newValue) : { ...CONFIG.DEFAULT_STATE.filters };
+          this.state.filters = newValue
+            ? JSON.parse(newValue)
+            : { ...CONFIG.DEFAULT_STATE.filters };
           this.state.hasActiveFilters = this.checkHasActiveFilters();
           this.updateFilterManager();
         } catch (error) {
@@ -149,7 +151,7 @@ class UnifiedRecipeFilter extends HTMLElement {
       await Promise.all([
         import('../../search/filter-search-bar/filter-search-bar.js'),
         import('../category-navigation/category-navigation.js'),
-        import('../filter-manager/filter-manager.js')
+        import('../filter-manager/filter-manager.js'),
       ]);
     } catch (error) {
       console.error('Error importing dependencies:', error);
@@ -159,7 +161,9 @@ class UnifiedRecipeFilter extends HTMLElement {
   async render() {
     try {
       // Load template
-      const templateResponse = await fetch(new URL('./unified-recipe-filter.html', import.meta.url));
+      const templateResponse = await fetch(
+        new URL('./unified-recipe-filter.html', import.meta.url),
+      );
       if (!templateResponse.ok) {
         throw new Error(`Failed to load template: ${templateResponse.status}`);
       }
@@ -179,7 +183,6 @@ class UnifiedRecipeFilter extends HTMLElement {
       // Initialize component states
       this.initializeComponents();
       this.updateLayout();
-
     } catch (error) {
       console.error('Error rendering unified recipe filter:', error);
       this.shadowRoot.innerHTML = `
@@ -225,7 +228,7 @@ class UnifiedRecipeFilter extends HTMLElement {
       this.categoryNav.addEventListener('category-changed', this.handleCategoryChanged);
     }
 
-    // Filter manager events  
+    // Filter manager events
     if (this.filterManager) {
       this.filterManager.addEventListener('filter-applied', this.handleFilterApplied);
       this.filterManager.addEventListener('filter-reset', this.handleFilterReset);
@@ -327,8 +330,8 @@ class UnifiedRecipeFilter extends HTMLElement {
 
     // Apply category filter
     if (this.state.currentCategory && this.state.currentCategory !== 'all') {
-      filteredRecipes = filteredRecipes.filter(recipe => 
-        recipe.category === this.state.currentCategory
+      filteredRecipes = filteredRecipes.filter(
+        (recipe) => recipe.category === this.state.currentCategory,
       );
     }
 
@@ -358,11 +361,11 @@ class UnifiedRecipeFilter extends HTMLElement {
     if (this.filterManager) {
       this.filterManager.setAttribute('current-filters', JSON.stringify(this.state.filters));
       this.filterManager.setAttribute('has-active-filters', this.state.hasActiveFilters.toString());
-      
+
       if (this.baseRecipes.length > 0) {
         this.filterManager.setBaseRecipes(this.baseRecipes);
       }
-      
+
       const filteredRecipes = this.applyAllFilters(this.baseRecipes);
       this.filterManager.setFilteredRecipes(filteredRecipes);
     }
@@ -374,7 +377,7 @@ class UnifiedRecipeFilter extends HTMLElement {
 
     // Remove existing layout classes
     container.classList.remove('compact-layout', 'full-layout');
-    
+
     // Add current layout class
     container.classList.add(`${this.layoutMode}-layout`);
   }
@@ -406,10 +409,10 @@ class UnifiedRecipeFilter extends HTMLElement {
           searchQuery: this.state.searchQuery,
           previousQuery,
           category: this.state.currentCategory,
-          filters: this.state.filters
+          filters: this.state.filters,
         },
-        bubbles: true
-      })
+        bubbles: true,
+      }),
     );
   }
 
@@ -421,10 +424,10 @@ class UnifiedRecipeFilter extends HTMLElement {
           categoryData,
           previousCategory,
           searchQuery: this.state.searchQuery,
-          filters: this.state.filters
+          filters: this.state.filters,
         },
-        bubbles: true
-      })
+        bubbles: true,
+      }),
     );
   }
 
@@ -435,17 +438,16 @@ class UnifiedRecipeFilter extends HTMLElement {
           searchQuery: this.state.searchQuery,
           category: this.state.currentCategory,
           filters: this.state.filters,
-          hasActiveFilters: this.state.hasActiveFilters
+          hasActiveFilters: this.state.hasActiveFilters,
         },
-        bubbles: true
-      })
+        bubbles: true,
+      }),
     );
   }
 
   emitFiltersChanged() {
-    const filteredRecipes = this.baseRecipes.length > 0 
-      ? this.applyAllFilters(this.baseRecipes)
-      : [];
+    const filteredRecipes =
+      this.baseRecipes.length > 0 ? this.applyAllFilters(this.baseRecipes) : [];
 
     this.dispatchEvent(
       new CustomEvent(CONFIG.EVENTS.filtersChanged, {
@@ -454,10 +456,10 @@ class UnifiedRecipeFilter extends HTMLElement {
           category: this.state.currentCategory,
           filters: this.state.filters,
           hasActiveFilters: this.state.hasActiveFilters,
-          filteredRecipes
+          filteredRecipes,
         },
-        bubbles: true
-      })
+        bubbles: true,
+      }),
     );
   }
 
@@ -502,9 +504,9 @@ class UnifiedRecipeFilter extends HTMLElement {
   setFilters(filters) {
     const newFilters = { ...CONFIG.DEFAULT_STATE.filters, ...filters };
     const hasActiveFilters = this.checkHasActiveFilters();
-    this.setState({ 
-      filters: newFilters, 
-      hasActiveFilters 
+    this.setState({
+      filters: newFilters,
+      hasActiveFilters,
     });
   }
 
@@ -513,7 +515,7 @@ class UnifiedRecipeFilter extends HTMLElement {
       searchQuery: '',
       currentCategory: 'all',
       filters: { ...CONFIG.DEFAULT_STATE.filters },
-      hasActiveFilters: false
+      hasActiveFilters: false,
     });
   }
 

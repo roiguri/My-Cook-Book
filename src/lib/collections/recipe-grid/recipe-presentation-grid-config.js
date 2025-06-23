@@ -15,8 +15,8 @@ export const RECIPE_PRESENTATION_GRID_CONFIG = {
   GRID_LAYOUTS: {
     RESPONSIVE: 'responsive',
     FIXED_2: 'fixed-2',
-    FIXED_3: 'fixed-3', 
-    FIXED_4: 'fixed-4'
+    FIXED_3: 'fixed-3',
+    FIXED_4: 'fixed-4',
   },
 
   // Messages
@@ -36,7 +36,7 @@ export const RECIPE_PRESENTATION_GRID_CONFIG = {
     NO_RESULTS_MESSAGE: 'no-results-message',
     LOADING_STATE: 'loading-state',
     ERROR_STATE: 'error-state',
-    TRANSITIONING: 'transitioning'
+    TRANSITIONING: 'transitioning',
   },
 
   // Component Selectors
@@ -45,7 +45,7 @@ export const RECIPE_PRESENTATION_GRID_CONFIG = {
     PAGINATION: 'recipe-pagination',
     PAGINATION_CONTAINER: '.pagination-container',
     RECIPE_CARD: 'recipe-card',
-    CARD_CONTAINER: '.recipe-card-container'
+    CARD_CONTAINER: '.recipe-card-container',
   },
 
   // Event Names
@@ -55,7 +55,7 @@ export const RECIPE_PRESENTATION_GRID_CONFIG = {
     RECIPES_LOADED: 'recipes-loaded',
     FAVORITE_CHANGED: 'favorite-changed',
     RECIPE_CARD_OPEN: 'recipe-card-open',
-    RECIPE_FAVORITE_CHANGED: 'recipe-favorite-changed'
+    RECIPE_FAVORITE_CHANGED: 'recipe-favorite-changed',
   },
 
   // Attribute Names
@@ -66,7 +66,7 @@ export const RECIPE_PRESENTATION_GRID_CONFIG = {
     SHOW_FAVORITES: 'show-favorites',
     GRID_LAYOUT: 'grid-layout',
     RECIPE_ID: 'recipe-id',
-    LAYOUT: 'layout'
+    LAYOUT: 'layout',
   },
 
   // Timing
@@ -79,15 +79,15 @@ export const RECIPE_PRESENTATION_GRID_CONFIG = {
     MOBILE: 768,
     TABLET: 1024,
     DESKTOP: 1200,
-    LARGE_DESKTOP: 1400
+    LARGE_DESKTOP: 1400,
   },
 
   // Grid Column Minimums (for responsive layout)
   COLUMN_MIN_WIDTHS: {
     MOBILE: 220,
-    TABLET: 250, 
+    TABLET: 250,
     DESKTOP: 280,
-    LARGE_DESKTOP: 300
+    LARGE_DESKTOP: 300,
   },
 
   // Card Height Minimums
@@ -95,6 +95,6 @@ export const RECIPE_PRESENTATION_GRID_CONFIG = {
     MOBILE: 260,
     TABLET: 300,
     DESKTOP: 320,
-    LARGE_DESKTOP: 340
-  }
+    LARGE_DESKTOP: 340,
+  },
 };

@@ -43,7 +43,7 @@ class RecipePresentationGrid extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    
+
     // Component state
     this.recipes = [];
     this.currentPage = 1;
@@ -54,7 +54,7 @@ class RecipePresentationGrid extends HTMLElement {
     this.isLoading = false;
     this.isReady = false;
     this.pendingRecipes = null; // Store recipes if set before component is ready
-    
+
     // Bind methods
     this.handleRecipeCardOpen = this.handleRecipeCardOpen.bind(this);
     this.handleFavoriteChanged = this.handleFavoriteChanged.bind(this);
@@ -62,12 +62,7 @@ class RecipePresentationGrid extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return [
-      'recipes-per-page',
-      'current-page', 
-      'show-pagination',
-      'show-favorites'
-    ];
+    return ['recipes-per-page', 'current-page', 'show-pagination', 'show-favorites'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -106,12 +101,14 @@ class RecipePresentationGrid extends HTMLElement {
   async render() {
     try {
       // Load HTML template
-      const templateResponse = await fetch(new URL('./recipe-presentation-grid.html', import.meta.url));
+      const templateResponse = await fetch(
+        new URL('./recipe-presentation-grid.html', import.meta.url),
+      );
       if (!templateResponse.ok) {
         throw new Error(`Failed to load template: ${templateResponse.status}`);
       }
       const template = await templateResponse.text();
-      
+
       this.shadowRoot.innerHTML = `
         <style>${RECIPE_PRESENTATION_GRID_STYLES}</style>
         ${template}
@@ -124,17 +121,16 @@ class RecipePresentationGrid extends HTMLElement {
 
       // Set initial attributes
       this.updatePaginationVisibility();
-      
+
       // Mark component as ready
       this.isReady = true;
-      
+
       // Process any pending recipes that were set before component was ready
       if (this.pendingRecipes) {
         console.log('Processing pending recipes:', this.pendingRecipes.length);
         this.setRecipes(this.pendingRecipes, false);
         this.pendingRecipes = null;
       }
-      
     } catch (error) {
       console.error('Error rendering recipe presentation grid:', error);
       this.shadowRoot.innerHTML = `
@@ -150,7 +146,7 @@ class RecipePresentationGrid extends HTMLElement {
     // Listen for recipe card interactions
     this.shadowRoot.addEventListener('recipe-card-open', this.handleRecipeCardOpen);
     this.shadowRoot.addEventListener('recipe-favorite-changed', this.handleFavoriteChanged);
-    
+
     // Listen for pagination events
     const pagination = this.shadowRoot.querySelector('recipe-pagination');
     if (pagination) {
@@ -169,32 +165,39 @@ class RecipePresentationGrid extends HTMLElement {
    * @param {boolean} resetPage - Whether to reset to page 1
    */
   setRecipes(recipes, resetPage = false) {
-    console.log('setRecipes called with', recipes?.length || 0, 'recipes, component ready:', this.isReady);
-    
+    console.log(
+      'setRecipes called with',
+      recipes?.length || 0,
+      'recipes, component ready:',
+      this.isReady,
+    );
+
     // If component isn't ready yet, store recipes for later processing
     if (!this.isReady) {
       console.log('Component not ready, storing recipes for later');
       this.pendingRecipes = recipes || [];
       return;
     }
-    
+
     this.recipes = recipes || [];
-    
+
     if (resetPage) {
       this.currentPage = 1;
     }
-    
+
     this.recalculatePages();
     this.renderCurrentPage();
     this.updatePagination();
-    
+
     // Emit recipes loaded event
-    this.dispatchEvent(new CustomEvent('recipes-loaded', {
-      detail: { 
-        recipes: this.recipes, 
-        totalCount: this.recipes.length 
-      }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('recipes-loaded', {
+        detail: {
+          recipes: this.recipes,
+          totalCount: this.recipes.length,
+        },
+      }),
+    );
   }
 
   /**
@@ -225,21 +228,21 @@ class RecipePresentationGrid extends HTMLElement {
 
     // Add transition class for smooth updates
     gridContainer.classList.add('transitioning');
-    
+
     // Small delay for transition effect
-    await new Promise(resolve => setTimeout(resolve, 150));
-    
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
     // Clear existing content
     gridContainer.innerHTML = '';
-    
+
     const currentPageRecipes = this.getCurrentPageRecipes();
-    
+
     if (currentPageRecipes.length === 0) {
       this.renderNoResults(gridContainer);
     } else {
       await this.renderRecipeCards(gridContainer, currentPageRecipes);
     }
-    
+
     // Remove transition class
     gridContainer.classList.remove('transitioning');
   }
@@ -249,14 +252,14 @@ class RecipePresentationGrid extends HTMLElement {
    */
   renderNoResults(container) {
     container.className = 'recipe-grid no-results';
-    
+
     const noResultsDiv = document.createElement('div');
     noResultsDiv.className = 'no-results-message';
     noResultsDiv.innerHTML = `
       <p>${RECIPE_PRESENTATION_GRID_CONFIG.NO_RESULTS_MESSAGE}</p>
       <p class="suggestion">${RECIPE_PRESENTATION_GRID_CONFIG.NO_RESULTS_SUGGESTION}</p>
     `;
-    
+
     container.appendChild(noResultsDiv);
   }
 
@@ -265,25 +268,25 @@ class RecipePresentationGrid extends HTMLElement {
    */
   async renderRecipeCards(container, recipes) {
     container.className = 'recipe-grid';
-    
+
     const authenticated = authService.getCurrentUser();
-    
+
     for (const recipe of recipes) {
       const cardContainer = document.createElement('div');
       cardContainer.className = 'recipe-card-container';
-      
+
       const recipeCard = document.createElement('recipe-card');
       recipeCard.setAttribute('recipe-id', recipe.id);
       recipeCard.setAttribute('layout', 'vertical');
-      
+
       if (authenticated && this.showFavorites) {
         recipeCard.setAttribute('show-favorites', 'true');
       }
-      
+
       cardContainer.appendChild(recipeCard);
       container.appendChild(cardContainer);
     }
-    
+
     // Initialize lazy loading for images
     initLazyLoading(container);
   }
@@ -293,20 +296,24 @@ class RecipePresentationGrid extends HTMLElement {
    */
   handleRecipeCardOpen(event) {
     const { recipeId } = event.detail;
-    const recipe = this.recipes.find(r => r.id === recipeId);
-    
-    this.dispatchEvent(new CustomEvent('recipe-selected', {
-      detail: { recipeId, recipe }
-    }));
+    const recipe = this.recipes.find((r) => r.id === recipeId);
+
+    this.dispatchEvent(
+      new CustomEvent('recipe-selected', {
+        detail: { recipeId, recipe },
+      }),
+    );
   }
 
   /**
    * Handle favorite status change
    */
   handleFavoriteChanged(event) {
-    this.dispatchEvent(new CustomEvent('favorite-changed', {
-      detail: event.detail
-    }));
+    this.dispatchEvent(
+      new CustomEvent('favorite-changed', {
+        detail: event.detail,
+      }),
+    );
   }
 
   /**
@@ -322,16 +329,18 @@ class RecipePresentationGrid extends HTMLElement {
    */
   async goToPage(page) {
     if (page < 1 || page > this.totalPages) return;
-    
+
     this.currentPage = page;
     await this.renderCurrentPage();
-    
-    this.dispatchEvent(new CustomEvent('page-changed', {
-      detail: { 
-        page: this.currentPage, 
-        totalPages: this.totalPages 
-      }
-    }));
+
+    this.dispatchEvent(
+      new CustomEvent('page-changed', {
+        detail: {
+          page: this.currentPage,
+          totalPages: this.totalPages,
+        },
+      }),
+    );
   }
 
   /**
@@ -419,8 +428,8 @@ class RecipePresentationGrid extends HTMLElement {
    */
   async waitForReady(timeout = 5000) {
     const startTime = Date.now();
-    while (!this.isComponentReady() && (Date.now() - startTime) < timeout) {
-      await new Promise(resolve => setTimeout(resolve, 50));
+    while (!this.isComponentReady() && Date.now() - startTime < timeout) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
     return this.isComponentReady();
   }

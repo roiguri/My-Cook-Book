@@ -43,7 +43,6 @@
   min-height: 0;
 }
 
-
 .spa-content .categories-page .recipe-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
@@ -108,7 +107,6 @@
     width: min(100vw - 2rem, 350px);
     margin: 0 auto;
   }
-
 }
 
 /*------------------------------------*\

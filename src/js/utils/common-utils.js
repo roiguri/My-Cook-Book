@@ -34,7 +34,7 @@ export function throttle(func, limit) {
     if (!inThrottle) {
       func.apply(this, args);
       inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+      setTimeout(() => (inThrottle = false), limit);
     }
   };
 }
@@ -55,5 +55,7 @@ export function capitalize(str) {
  * @returns {string} Random ID string
  */
 export function generateId(length = 8) {
-  return Math.random().toString(36).substring(2, length + 2);
+  return Math.random()
+    .toString(36)
+    .substring(2, length + 2);
 }

@@ -243,7 +243,10 @@ export default {
         this.currentPage = page;
         await this.displayCurrentPageRecipes();
       });
-      recipePresentationGrid.addEventListener('recipe-selected', this.handleRecipeSelected.bind(this));
+      recipePresentationGrid.addEventListener(
+        'recipe-selected',
+        this.handleRecipeSelected.bind(this),
+      );
       recipePresentationGrid.addEventListener('favorite-changed', (event) => {
         const { recipeId, isFavorite } = event.detail;
         favoritesService.updateCache(recipeId, isFavorite);
@@ -255,9 +258,18 @@ export default {
 
     const unifiedFilter = document.getElementById('unified-filter');
     if (unifiedFilter) {
-      unifiedFilter.addEventListener('unified-search-changed', this.handleUnifiedSearchChanged.bind(this));
-      unifiedFilter.addEventListener('unified-category-changed', this.handleUnifiedCategoryChanged.bind(this));  
-      unifiedFilter.addEventListener('unified-filters-changed', this.handleUnifiedFiltersChanged.bind(this));
+      unifiedFilter.addEventListener(
+        'unified-search-changed',
+        this.handleUnifiedSearchChanged.bind(this),
+      );
+      unifiedFilter.addEventListener(
+        'unified-category-changed',
+        this.handleUnifiedCategoryChanged.bind(this),
+      );
+      unifiedFilter.addEventListener(
+        'unified-filters-changed',
+        this.handleUnifiedFiltersChanged.bind(this),
+      );
     }
 
     document.addEventListener('recipe-favorite-changed', (event) => {
@@ -275,7 +287,6 @@ export default {
     this.removeNavigationInterception();
   },
 
-
   updateUI() {
     this.updateUnifiedFilter();
     this.updatePageTitle();
@@ -289,14 +300,13 @@ export default {
         currentCategory: this.currentCategory,
         searchQuery: this.currentSearchQuery,
         filters: this.activeFilters,
-        hasActiveFilters: this.hasActiveFilters
+        hasActiveFilters: this.hasActiveFilters,
       });
 
       // Set base recipes for filtering
       unifiedFilter.setBaseRecipes(this.allRecipes || []);
     }
   },
-
 
   updatePageTitle() {
     const pageTitle = document.querySelector('#category-header');
@@ -367,15 +377,14 @@ export default {
     await this.setFilterState({ resetFilters: true });
   },
 
-
   setupNavigationInterception() {
     if (window.NavigationInterceptor) {
       this.navigationInterceptor = new window.NavigationInterceptor();
-      
+
       this.navigationInterceptor.addHandler('a[href="/categories?favorites=true"]', () => {
         this.activateFavoritesFilter();
       });
-      
+
       this.navigationInterceptor.addHandler('a[href="/categories"]', () => {
         this.resetToAllCategories();
       });
@@ -406,7 +415,7 @@ export default {
     recipePresentationGrid.setAttribute('show-favorites', authenticated ? 'true' : 'false');
     recipePresentationGrid.setAttribute('recipes-per-page', '6');
     recipePresentationGrid.setAttribute('current-page', this.currentPage.toString());
-    
+
     recipePresentationGrid.setRecipes(this.displayedRecipes, false);
   },
 
@@ -424,7 +433,6 @@ export default {
       window.location.href = `${import.meta.env.BASE_URL}pages/recipe-page.html?id=${recipeId}`;
     }
   },
-
 
   async handleUnifiedSearchChanged(event) {
     const { searchQuery } = event.detail;
@@ -468,7 +476,7 @@ export default {
     // If favorites filter changed or was enabled, we need to reload from Firestore
     // because the unified component doesn't have access to user's favorites data
     const favoritesEnabled = !wasFavoritesOnly && isFavoritesOnly;
-    
+
     if (favoritesDisabled || favoritesEnabled) {
       await this.loadInitialRecipes();
     } else {
@@ -485,8 +493,6 @@ export default {
 
     await this.displayCurrentPageRecipes();
   },
-
-
 
   async updatePageState(updates = {}) {
     const { category, searchQuery } = updates;
@@ -528,13 +534,20 @@ export default {
     await this.displayCurrentPageRecipes();
   },
 
-
   updateURL(silently = false) {
     if (window.spa?.router) {
       if (silently) {
-        window.spa.router.updateCategoriesParams(this.currentCategory, this.currentSearchQuery, this.activeFilters);
+        window.spa.router.updateCategoriesParams(
+          this.currentCategory,
+          this.currentSearchQuery,
+          this.activeFilters,
+        );
       } else {
-        window.spa.router.navigateToCategoriesWithParams(this.currentCategory, this.currentSearchQuery, this.activeFilters);
+        window.spa.router.navigateToCategoriesWithParams(
+          this.currentCategory,
+          this.currentSearchQuery,
+          this.activeFilters,
+        );
       }
     }
   },
