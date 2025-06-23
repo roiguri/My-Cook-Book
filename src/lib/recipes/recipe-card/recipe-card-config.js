@@ -57,7 +57,7 @@ export const RECIPE_CARD_CONFIG = {
   // Fallback values
   FALLBACKS: {
     image: '/img/placeholder.jpg',
-    errorMessage: 'Failed to load recipe',
+    errorMessage: 'שגיאה בטעינת המתכון',
   },
 };
 

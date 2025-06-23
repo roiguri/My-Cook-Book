@@ -273,8 +273,7 @@ class RecipePagination extends HTMLElement {
       return false;
     }
 
-    const direction = page > this.currentPage ? 'next' : 'prev';
-    this.emitPageChanged(page, direction);
+    this.setAttribute('current-page', page);
     return true;
   }
 }

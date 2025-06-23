@@ -55,7 +55,9 @@ export function capitalize(str) {
  * @returns {string} Random ID string
  */
 export function generateId(length = 8) {
-  return Math.random()
-    .toString(36)
-    .substring(2, length + 2);
+  let result = '';
+  while (result.length < length) {
+    result += Math.random().toString(36).substring(2);
+  }
+  return result.substring(0, length);
 }

@@ -257,7 +257,7 @@ export class AppRouter {
   }
 
   // Categories page specific URL helpers
-  updateCategoriesParams(currentCategory, currentSearchQuery, activeFilters) {
+  buildCategoriesParams(currentCategory, currentSearchQuery, activeFilters) {
     const params = {};
 
     if (currentCategory && currentCategory !== 'all') {
@@ -272,24 +272,16 @@ export class AppRouter {
       params.favorites = 'true';
     }
 
+    return params;
+  }
+
+  updateCategoriesParams(currentCategory, currentSearchQuery, activeFilters) {
+    const params = this.buildCategoriesParams(currentCategory, currentSearchQuery, activeFilters);
     this.updateParams(params);
   }
 
   navigateToCategoriesWithParams(currentCategory, currentSearchQuery, activeFilters) {
-    const params = {};
-
-    if (currentCategory && currentCategory !== 'all') {
-      params.category = currentCategory;
-    }
-
-    if (currentSearchQuery) {
-      params.q = currentSearchQuery;
-    }
-
-    if (activeFilters.favoritesOnly) {
-      params.favorites = 'true';
-    }
-
+    const params = this.buildCategoriesParams(currentCategory, currentSearchQuery, activeFilters);
     this.navigateWithParams('/categories', params);
   }
 }

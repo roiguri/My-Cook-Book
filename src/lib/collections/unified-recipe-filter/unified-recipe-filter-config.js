@@ -76,6 +76,7 @@ export const ATTRIBUTES = {
   categories: 'categories',
   baseRecipes: 'base-recipes',
   disabled: 'disabled',
+  userFavorites: 'user-favorites',
 };
 
 // Default categories (matches exactly the original category-navigation component)

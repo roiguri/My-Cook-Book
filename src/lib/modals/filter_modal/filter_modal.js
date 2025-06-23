@@ -158,7 +158,7 @@ class RecipeFilterComponent extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>${this.styles()}</style>
-      <custom-modal height="auto" width="min(700px, 85vw)">
+      <custom-modal height="auto">
         <div class="filter-container">
           ${this.renderHeader()}
           ${this.renderFilterGrid()}
@@ -173,6 +173,11 @@ class RecipeFilterComponent extends HTMLElement {
       :host {
         --modal-max-width: 700px;
         --modal-mobile-width: 85vw;
+        --modal-width: min(var(--modal-max-width), var(--modal-mobile-width));
+      }
+
+      custom-modal {
+        width: var(--modal-width);
       }
 
       .filter-container {

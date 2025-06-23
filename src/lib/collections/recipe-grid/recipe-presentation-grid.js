@@ -70,12 +70,14 @@ class RecipePresentationGrid extends HTMLElement {
 
     switch (name) {
       case 'recipes-per-page':
-        this.recipesPerPage = parseInt(newValue) || 12;
+        const recipesPerPage = parseInt(newValue);
+        this.recipesPerPage = (recipesPerPage > 0 && recipesPerPage <= 100) ? recipesPerPage : 6;
         this.recalculatePages();
         this.renderCurrentPage();
         break;
       case 'current-page':
-        this.currentPage = parseInt(newValue) || 1;
+        const currentPage = parseInt(newValue);
+        this.currentPage = (currentPage > 0) ? currentPage : 1;
         this.renderCurrentPage();
         break;
       case 'show-pagination':
@@ -108,6 +110,11 @@ class RecipePresentationGrid extends HTMLElement {
         throw new Error(`Failed to load template: ${templateResponse.status}`);
       }
       const template = await templateResponse.text();
+      
+      // Validate response is not empty
+      if (!template || template.trim().length === 0) {
+        throw new Error('Template file is empty or invalid');
+      }
 
       this.shadowRoot.innerHTML = `
         <style>${RECIPE_PRESENTATION_GRID_STYLES}</style>
@@ -127,7 +134,6 @@ class RecipePresentationGrid extends HTMLElement {
 
       // Process any pending recipes that were set before component was ready
       if (this.pendingRecipes) {
-        console.log('Processing pending recipes:', this.pendingRecipes.length);
         this.setRecipes(this.pendingRecipes, false);
         this.pendingRecipes = null;
       }
@@ -165,16 +171,8 @@ class RecipePresentationGrid extends HTMLElement {
    * @param {boolean} resetPage - Whether to reset to page 1
    */
   setRecipes(recipes, resetPage = false) {
-    console.log(
-      'setRecipes called with',
-      recipes?.length || 0,
-      'recipes, component ready:',
-      this.isReady,
-    );
-
     // If component isn't ready yet, store recipes for later processing
     if (!this.isReady) {
-      console.log('Component not ready, storing recipes for later');
       this.pendingRecipes = recipes || [];
       return;
     }

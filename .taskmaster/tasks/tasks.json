@@ -19,7 +19,9 @@
         "details": "1. **Analyze Current CLS Issues**: Use browser DevTools and Lighthouse to identify specific elements causing layout shifts, focusing on recipe cards, images, and dynamic content loading. 2. **Implement Image Optimization**: Add explicit width/height attributes to all images, implement responsive image sizing with aspect-ratio CSS, and use placeholder elements for lazy-loaded content in recipe cards and galleries. 3. **Optimize Font Loading**: Implement font-display: swap for custom fonts, preload critical fonts in the HTML head, and use font-size-adjust to minimize layout shifts during font loading. 4. **Pre-allocate Dynamic Content**: Reserve space for dynamically loaded content like recipe cards, search results, and pagination components by using skeleton screens or fixed-height containers. 5. **Optimize Component Mounting**: Ensure Web Components in Shadow DOM don't cause layout shifts during initialization by pre-defining container dimensions and using CSS transforms instead of changing layout properties. 6. **Implement Proper Loading States**: Add consistent loading placeholders that match final content dimensions for all async operations including Firebase data fetching and image loading.",
         "testStrategy": "1. **CLS Measurement**: Use Lighthouse CI to measure CLS scores before and after optimizations, aiming for a score below 0.1. Run tests on multiple page types including home, categories, and individual recipe pages. 2. **Visual Regression Testing**: Capture screenshots during page load to verify no unexpected layout shifts occur during content loading phases. 3. **Performance Testing**: Test on slow network connections (3G simulation) to ensure optimizations work under real-world conditions. 4. **Component Testing**: Verify that each Web Component loads without causing layout shifts by testing Shadow DOM mounting and content initialization. 5. **Cross-Browser Testing**: Test CLS improvements across different browsers and device sizes to ensure consistent performance gains.",
         "status": "pending",
-        "dependencies": [1],
+        "dependencies": [
+          1
+        ],
         "priority": "medium",
         "subtasks": []
       }
@@ -161,6 +163,26 @@
       "created": "2025-06-23T14:18:40.513Z",
       "updated": "2025-06-23T17:09:27.005Z",
       "description": "Tag created on 6/23/2025"
+    }
+  },
+  "optimizations": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Replace Font Awesome CDN with local npm package",
+        "description": "Install @fortawesome/fontawesome-free as a local dependency and replace CDN imports to improve performance and enable offline functionality.",
+        "details": "1. Install @fortawesome/fontawesome-free package via npm\n2. Remove CDN import from filter-manager-styles.js and any other files\n3. Import Font Awesome CSS locally in the appropriate bundler configuration or main CSS file\n4. Update Shadow DOM components to properly load Font Awesome styles within shadow boundaries\n5. Verify all existing Font Awesome icons continue to display correctly\n6. Test icon rendering in both connected and offline environments\n7. Update build process to include Font Awesome assets in the final bundle\n8. Consider using CSS custom properties or CSS-in-JS approach for Shadow DOM icon styling if needed",
+        "testStrategy": "1. Verify all existing Font Awesome icons render correctly across all components\n2. Test application functionality in offline mode to ensure icons still display\n3. Run performance tests to confirm improved loading times without CDN dependency\n4. Check Shadow DOM components specifically for proper icon rendering\n5. Validate that no console errors occur related to missing Font Awesome resources\n6. Test on different browsers to ensure cross-browser compatibility\n7. Verify build process includes all necessary Font Awesome assets",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-23T20:02:20.394Z",
+      "updated": "2025-06-23T20:03:02.462Z",
+      "description": "Performance and code optimization tasks"
     }
   }
 }

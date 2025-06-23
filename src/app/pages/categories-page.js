@@ -7,6 +7,7 @@ import { getErrorMessage, logError } from '../../js/utils/error-handler.js';
 import favoritesService from '../../js/services/favorites-service.js';
 import '../../styles/pages/categories-spa.css';
 
+// TODO: implement recipe-per-page change on screen resize
 export default {
   async render() {
     try {
@@ -160,16 +161,11 @@ export default {
         }
       }
 
-      if (wasAuthenticated && !isNowAuthenticated) {
-        favoritesService.clearCache();
-      } else if (!wasAuthenticated && isNowAuthenticated) {
-        favoritesService.clearCache();
-      } else if (
-        wasAuthenticated &&
-        isNowAuthenticated &&
-        this.currentUser?.uid !== authState.user?.uid
-      ) {
-        favoritesService.clearCache();
+      const userChanged = wasAuthenticated !== isNowAuthenticated ||  
+        (isNowAuthenticated && this.currentUser?.uid !== authState.user?.uid);  
+
+      if (userChanged) {  
+        favoritesService.clearCache();  
       }
 
       await this.loadInitialRecipes();
@@ -556,7 +552,7 @@ export default {
     logError(error, `Categories page - ${context}`);
 
     const errorMessage = getErrorMessage(error);
-    const recipeGrid = document.getElementById('recipe-grid');
+    const recipeGrid = document.getElementById('recipe-presentation-grid');
     if (recipeGrid) {
       recipeGrid.innerHTML = `
         <div class="error-message">

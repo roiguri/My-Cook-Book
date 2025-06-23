@@ -53,21 +53,14 @@ yarn-error.log*
 # Local Netlify folder
 .netlify
 
-logs
+# Additional logs
+logs/
 *.log
 dev-debug.log
-# Dependency directories
-# Environment variables
-# Editor directories and files
-.idea
-.vscode
+
+# Additional IDE/editor files (consolidating with existing entries above)
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-# OS specific
-
-# Task files
-# tasks.json
-# tasks/ 

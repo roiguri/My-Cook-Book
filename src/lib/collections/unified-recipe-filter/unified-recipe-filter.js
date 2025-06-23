@@ -50,6 +50,7 @@ class UnifiedRecipeFilter extends HTMLElement {
     this.state = { ...CONFIG.DEFAULT_STATE };
     this.categories = DEFAULT_CATEGORIES;
     this.baseRecipes = [];
+    this.userFavorites = [];
     this.layoutMode = CONFIG.LAYOUT_MODES.categoriesPage;
     this.isDisabled = false;
 
@@ -76,6 +77,7 @@ class UnifiedRecipeFilter extends HTMLElement {
       ATTRIBUTES.categories,
       ATTRIBUTES.baseRecipes,
       ATTRIBUTES.disabled,
+      ATTRIBUTES.userFavorites,
     ];
   }
 
@@ -141,6 +143,14 @@ class UnifiedRecipeFilter extends HTMLElement {
       case ATTRIBUTES.disabled:
         this.isDisabled = newValue === 'true';
         this.updateDisabledState();
+        break;
+      case ATTRIBUTES.userFavorites:
+        try {
+          this.userFavorites = newValue ? JSON.parse(newValue) : [];
+        } catch (error) {
+          console.warn('Invalid user favorites JSON:', error);
+          this.userFavorites = [];
+        }
         break;
     }
   }
@@ -337,7 +347,7 @@ class UnifiedRecipeFilter extends HTMLElement {
 
     // Apply advanced filters through filter manager
     if (this.filterManager && this.state.hasActiveFilters) {
-      filteredRecipes = this.filterManager.applyFilters(filteredRecipes);
+      filteredRecipes = this.filterManager.applyFilters(filteredRecipes, this.userFavorites);
     }
 
     return filteredRecipes;

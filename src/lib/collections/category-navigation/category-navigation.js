@@ -29,6 +29,9 @@
 import { CONFIG, ATTRIBUTES } from './category-navigation-config.js';
 import { styles } from './category-navigation-styles.js';
 
+// Template cache to avoid repeated fetches
+let templateCache = null;
+
 class CategoryNavigation extends HTMLElement {
   constructor() {
     super();
@@ -88,12 +91,15 @@ class CategoryNavigation extends HTMLElement {
 
   async render() {
     try {
-      // Load template
-      const templateResponse = await fetch(new URL('./category-navigation.html', import.meta.url));
-      if (!templateResponse.ok) {
-        throw new Error(`Failed to load template: ${templateResponse.status}`);
+      // Load template (with caching)
+      if (!templateCache) {
+        const templateResponse = await fetch(new URL('./category-navigation.html', import.meta.url));
+        if (!templateResponse.ok) {
+          throw new Error(`Failed to load template: ${templateResponse.status}`);
+        }
+        templateCache = await templateResponse.text();
       }
-      const template = await templateResponse.text();
+      const template = templateCache;
 
       // Create complete HTML with styles
       this.shadowRoot.innerHTML = `

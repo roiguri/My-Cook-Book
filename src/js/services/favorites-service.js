@@ -64,6 +64,13 @@ class FavoritesService {
    * @param {boolean} isAdding - Whether adding or removing from favorites
    */
   updateCache(recipeId, isAdding) {
+    const user = authService.getCurrentUser();
+    
+    // Skip cache update if no user or user doesn't match cached user
+    if (!user || this.cache.userId !== user.uid) {
+      return;
+    }
+    
     if (this.cache.isLoaded) {
       if (isAdding) {
         if (!this.cache.favorites.includes(recipeId)) {
@@ -81,6 +88,11 @@ class FavoritesService {
    * @returns {Promise<boolean>} Whether the recipe is favorited
    */
   async isFavorite(recipeId) {
+    if (!recipeId || (typeof recipeId !== 'string' && typeof recipeId !== 'number')) {
+      console.warn('isFavorite: Invalid recipeId provided:', recipeId);
+      return false;
+    }
+    
     const favorites = await this.getUserFavorites();
     return favorites.includes(recipeId);
   }
