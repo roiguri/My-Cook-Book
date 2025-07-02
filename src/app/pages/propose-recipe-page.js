@@ -19,23 +19,90 @@ export default {
   async mount(container, params) {
     try {
       await this.importComponents();
-
-      await this.setupAuthentication(container);
-
+      await this.setupAuthentication(container); // this.proposeComponent is set here
       this.setupEventListeners();
+
+      // Bind context for handleBeforeUnload
+      this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
+      window.addEventListener('beforeunload', this.handleBeforeUnload);
+
+      // Get the confirmation modal - assuming it's in propose-recipe-page.html or added by a parent
+      // It's better to have it inside the page's own template or ensure its availability.
+      // For now, query globally. If page has its own shadow DOM, this might need adjustment.
+      this.navConfirmationModal = document.querySelector('#propose-page-confirmation-modal');
+      if (!this.navConfirmationModal) {
+          // Fallback: create and append if not found. This is not ideal for component structure.
+          console.warn('Propose page confirmation modal not found in DOM, creating one.');
+          this.navConfirmationModal = document.createElement('confirmation-modal');
+          this.navConfirmationModal.id = 'propose-page-confirmation-modal'; // Ensure it has an ID if created
+          document.body.appendChild(this.navConfirmationModal); // Or append to container
+      }
+
     } catch (error) {
       console.error('Error mounting propose recipe page:', error);
       this.handleError(error, 'mount');
     }
   },
 
+  async showNavigationConfirmationModal() {
+    return new Promise((resolve) => {
+      if (!this.navConfirmationModal) {
+        console.error('Navigation confirmation modal not available.');
+        resolve(window.confirm('You have unsaved changes. Are you sure you want to leave?')); // Fallback
+        return;
+      }
+
+      const message = 'יש לך שינויים שלא נשמרו. האם ברצונך לצאת?';
+      const title = 'שינויים לא שמורים';
+      const approveText = 'צא'; // Leave
+      const rejectText = 'הישאר'; // Stay
+
+      const approvedHandler = () => {
+        this.navConfirmationModal.removeEventListener('confirm-approved', approvedHandler);
+        this.navConfirmationModal.removeEventListener('confirm-rejected', rejectedHandler);
+        resolve(true);
+      };
+      const rejectedHandler = () => {
+        this.navConfirmationModal.removeEventListener('confirm-approved', approvedHandler);
+        this.navConfirmationModal.removeEventListener('confirm-rejected', rejectedHandler);
+        resolve(false);
+      };
+
+      this.navConfirmationModal.addEventListener('confirm-approved', approvedHandler);
+      this.navConfirmationModal.addEventListener('confirm-rejected', rejectedHandler);
+
+      this.navConfirmationModal.confirm(message, title, approveText, rejectText);
+    });
+  },
+
   async unmount() {
+    if (this.hasUnsavedChanges()) {
+      const confirmed = await this.showNavigationConfirmationModal();
+      if (!confirmed) {
+        console.log('Page unmount cancelled by user due to unsaved changes.');
+        return false; // Indicate that unmount should be aborted
+      }
+    }
+
     try {
       this.removeEventListeners();
-
       this.cleanupAuthListeners();
+      window.removeEventListener('beforeunload', this.handleBeforeUnload);
+      // If modal was dynamically added and needs cleanup:
+      // if (this.navConfirmationModal && this.navConfirmationModal.parentElement === document.body) {
+      //    this.navConfirmationModal.remove();
+      // }
     } catch (error) {
       console.error('Error unmounting propose recipe page:', error);
+    }
+    return true; // Indicate successful unmount
+  },
+
+  handleBeforeUnload(event) {
+    if (this.hasUnsavedChanges()) {
+      event.preventDefault(); // Standard for most browsers
+      event.returnValue = ''; // Required for Chrome and Firefox
+      return ''; // For older browsers
     }
   },
 
@@ -56,6 +123,7 @@ export default {
       await Promise.all([
         import('../../lib/recipes/recipe_form_component/propose_recipe_component.js'),
         import('../../lib/modals/message-modal/message-modal.js'),
+        import('../../lib/modals/confirmation_modal/confirmation_modal.js'),
       ]);
     } catch (error) {
       console.error('Error importing components for propose recipe page:', error);
@@ -64,39 +132,38 @@ export default {
   },
 
   async setupAuthentication(container) {
-    const proposeRecipeForm = container.querySelector('propose-recipe-component');
+    this.proposeComponent = container.querySelector('propose-recipe-component');
     const loginPromptModal = document.querySelector('#login-prompt-modal');
     const authController = document.querySelector('auth-controller');
 
-    if (!proposeRecipeForm) {
+    if (!this.proposeComponent) {
       console.warn('propose-recipe-component not found in container');
       return;
     }
 
-    this.proposeRecipeForm = proposeRecipeForm;
     this.loginPromptModal = loginPromptModal;
     this.authController = authController;
 
-    proposeRecipeForm.style.display = 'none';
+    this.proposeComponent.style.display = 'none';
 
     this.handleAuthStateChange = (isAuthenticated) => {
       if (isAuthenticated) {
         // User is authenticated
-        proposeRecipeForm.style.display = 'block';
-        if (typeof proposeRecipeForm.setFormDisabled === 'function') {
-          proposeRecipeForm.setFormDisabled(false);
+        this.proposeComponent.style.display = 'block';
+        if (typeof this.proposeComponent.setFormDisabled === 'function') {
+          this.proposeComponent.setFormDisabled(false);
         }
         if (loginPromptModal && loginPromptModal.isOpen) {
           loginPromptModal.close();
         }
       } else {
         // User is NOT authenticated
-        proposeRecipeForm.style.display = 'block';
-        if (typeof proposeRecipeForm.setFormDisabled === 'function') {
-          proposeRecipeForm.setFormDisabled(true);
+        this.proposeComponent.style.display = 'block';
+        if (typeof this.proposeComponent.setFormDisabled === 'function') {
+          this.proposeComponent.setFormDisabled(true);
         } else {
-          console.warn('setFormDisabled method not found on proposeRecipeForm');
-          proposeRecipeForm.style.display = 'none';
+          console.warn('setFormDisabled method not found on proposeComponent');
+          this.proposeComponent.style.display = 'none';
         }
         this.showLoginPrompt();
       }
@@ -106,6 +173,13 @@ export default {
     this.authStateUnsubscribe = authService.onAuthStateChanged((user) => {
       this.handleAuthStateChange(!!user);
     });
+  },
+
+  hasUnsavedChanges() {
+    if (this.proposeComponent && typeof this.proposeComponent.isDirty === 'function') {
+      return this.proposeComponent.isDirty();
+    }
+    return false;
   },
 
   showLoginPrompt() {

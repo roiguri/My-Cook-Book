@@ -1,6 +1,12 @@
+// Assuming PageManager is the class that manages page loading and instances
+import { PageManager } from './page-manager.js';
+// MessageModal would also need to be imported if used directly.
+// import MessageModal from '../../lib/modals/message-modal/message-modal.js';
+
 export class AppRouter {
   constructor() {
     this.routes = new Map();
+    // this.messageModalInstance = null; // For a shared modal instance
     this.currentRoute = null;
     this.defaultRoute = '/home';
     this.isInitialized = false;
@@ -44,26 +50,87 @@ export class AppRouter {
     this.routes.set(normalizedPath, handler);
   }
 
-  navigate(path, options = {}) {
+  async navigate(path, options = {}) {
     if (typeof path !== 'string') {
       throw new Error('Navigation path must be a string');
     }
 
-    let normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    const currentPageInstance = PageManager.getCurrentPageInstance(); // Conceptual
 
+    // Check #1: Page's own desire to prevent navigation (e.g. its own modal is open)
+    // This is slightly different from the PRD's `this.currentPage.hasUnsavedChanges` directly in router,
+    // as the page's unmount now handles its own confirmation.
+    if (currentPageInstance && typeof currentPageInstance.unmount === 'function') {
+      // The unmount method in propose-recipe-page now returns true/false.
+      // It needs to be async if it's showing its own modal.
+      const canUnmount = await currentPageInstance.unmount();
+      if (canUnmount === false) { // Explicitly check for false
+        console.log('Router: Navigation prevented by page unmount confirmation.');
+        // Attempt to restore URL if popstate changed it. This is tricky.
+        // For now, primarily for link clicks, this stops before URL change.
+        // If it was a popstate, the URL is already new. We might need to navigate back to this.currentRoute
+        // if the URL actually changed.
+        // For now, we prevent the route execution and new history state.
+        // A robust solution for popstate requires checking if window.location.pathname !== this.currentRoute
+        // and then history.pushState(null, '', this.currentRoute) - but this could cause loops if not careful.
+        return;
+      }
+      // If canUnmount is true, it means either no unsaved changes, or user confirmed leaving.
+    }
+
+    // Check #2: Generic unsaved changes check if unmount didn't handle it or if page doesn't have complex unmount
+    // This aligns more with the PRD's router-level check.
+    // This could be redundant if all pages implement the unmount check like propose-recipe-page.
+    // Or, it can be a fallback.
+    // Let's assume for now that if a page has `hasUnsavedChanges`, its `unmount` will use it.
+    // So, the primary check is the `await currentPageInstance.unmount()` above.
+
+    // The PRD also mentions:
+    // if (this.currentPage?.hasUnsavedChanges?.()) {
+    //   const confirmed = await this.showNavigationConfirmation();
+    //   if (!confirmed) return; // Prevent navigation
+    // }
+    // This is now effectively handled by the page's own unmount method for `propose-recipe-page`.
+    // If we need a generic router modal for pages *without* the new unmount logic,
+    // we could add that check here. For now, relying on page's unmount.
+
+
+    let normalizedPath = path.startsWith('/') ? path : `/${path}`;
     const questionMarkIndex = normalizedPath.indexOf('?');
     const routePath =
       questionMarkIndex !== -1 ? normalizedPath.substring(0, questionMarkIndex) : normalizedPath;
 
+    // If navigation was prevented, currentRoute should not change.
+    // If it proceeded, then update route and URL.
+    const previousRoute = this.currentRoute;
     this.currentRoute = routePath;
 
-    this.updateURL(normalizedPath, options.replace);
-
-    this.executeRoute(routePath);
-
-    // Dispatch navigation event for navigation script to update active states
-    this.dispatchNavigationEvent(normalizedPath);
+    try {
+      this.updateURL(normalizedPath, options.replace);
+      this.executeRoute(routePath); // This is where PageManager.loadPage would be called by the handler
+      this.dispatchNavigationEvent(normalizedPath);
+    } catch (error) {
+      // If executeRoute fails (e.g. page load error), revert currentRoute
+      this.currentRoute = previousRoute;
+      console.error("Error during route execution, currentRoute reverted.", error);
+      // Potentially navigate to an error page or re-throw
+      this.handleError(error, path);
+    }
   }
+
+  // Placeholder for router-specific confirmation, if needed for pages not implementing the new unmount.
+  // async showNavigationConfirmation() {
+  //   // const modal = this.messageModalInstance || document.querySelector('message-modal');
+  //   // if (!modal) {
+  //   //   console.warn('MessageModal not available for router confirmation.');
+  //   //   return window.confirm('You have unsaved changes. Are you sure you want to leave?');
+  //   // }
+  //   // return new Promise(resolve => {
+  //   //   modal.show('You have unsaved changes. Are you sure you want to leave this page?',
+  //   //              'Confirm Navigation', 'Leave', () => resolve(true), 'Stay', () => resolve(false));
+  //   // });
+  //   return window.confirm('Router: You have unsaved changes. Are you sure you want to leave this page?');
+  // }
 
   getCurrentRoute() {
     return this.currentRoute;
@@ -93,12 +160,15 @@ export class AppRouter {
 
     if (newRoute === this.currentRoute) return;
 
-    if (this.routes.has(newRoute)) {
-      this.currentRoute = newRoute;
-      this.executeRoute(newRoute);
-    } else {
-      this.handleNotFound(newRoute);
-    }
+    // For popstate, the URL has already changed.
+    // We must call `navigate` to run all guards and lifecycle hooks.
+    // `navigate` will then call `executeRoute` if it's allowed to proceed.
+    // Using an IIFE because `handlePopState` itself is not async.
+    (async () => {
+      // Pass `isPopState: true` if `navigate` needs to handle popstate differently (e.g., not pushing history)
+      // For now, `replace: true` should suffice to prevent adding to history.
+      await this.navigate(newRoute, { replace: true });
+    })();
   }
 
   updateURL(path, replace = false) {

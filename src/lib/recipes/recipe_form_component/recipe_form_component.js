@@ -13,6 +13,7 @@ class RecipeFormComponent extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.recipeData = {}; // To store recipe data
+    this.initialData = null; // To store initial form data for dirty checking
 
     this.clearButtonText = this.hasAttribute('clear-button-text')
       ? this.getAttribute('clear-button-text')
@@ -30,6 +31,9 @@ class RecipeFormComponent extends HTMLElement {
     const recipeId = this.getAttribute('recipe-id');
     if (recipeId) {
       await this.setRecipeData(recipeId);
+    } else {
+      // If not loading existing data, capture the initial state of an empty form
+      this.captureInitialData();
     }
   }
 
@@ -829,6 +833,48 @@ class RecipeFormComponent extends HTMLElement {
       composed: true, // Allows the event to cross shadow DOM boundaries
     });
     this.dispatchEvent(recipeDataEvent);
+    // After successful data dispatch (submission), update initial data to current
+    this.captureInitialData();
+  }
+
+  captureInitialData() {
+    this.collectFormData(); // Ensure recipeData is current
+    // Deep clone recipeData to store as initialData
+    this.initialData = JSON.parse(JSON.stringify(this.recipeData));
+    // Images and files need special handling as they are not JSON serializable directly
+    // For simplicity in this step, we'll primarily rely on non-file input changes.
+    // A more robust solution might involve checksums or more detailed comparison for file inputs.
+    this.initialData.images = this.recipeData.images.map(img => ({
+      id: img.id,
+      isPrimary: img.isPrimary,
+      source: img.source,
+      fileName: img.fileName, // for existing images
+      // file object for new images is not easily comparable by simple stringify
+    }));
+  }
+
+  isDirty() {
+    // Collect current form data first
+    this.collectFormData();
+
+    // If initialData is not set, assume it's dirty (or fresh form)
+    if (this.initialData === null) return false; // Or true, depending on desired behavior for fresh forms. Let's say false until interacted.
+
+    // Simple comparison for most fields by stringifying.
+    // This is a basic check and might need refinement for complex objects or specific field types.
+    const currentDataForComparison = JSON.parse(JSON.stringify(this.recipeData));
+    const initialDataForComparison = JSON.parse(JSON.stringify(this.initialData));
+
+    // Remove file objects from comparison as they won't match this way
+    if (currentDataForComparison.images) {
+      currentDataForComparison.images = currentDataForComparison.images.map(img => ({ id: img.id, isPrimary: img.isPrimary, source: img.source, fileName: img.fileName }));
+    }
+    if (initialDataForComparison.images) {
+      initialDataForComparison.images = initialDataForComparison.images.map(img => ({ id: img.id, isPrimary: img.isPrimary, source: img.source, fileName: img.fileName }));
+    }
+
+
+    return JSON.stringify(currentDataForComparison) !== JSON.stringify(initialDataForComparison);
   }
 
   clearForm() {
@@ -912,6 +958,9 @@ class RecipeFormComponent extends HTMLElement {
     // Hide error message if visible
     const errorMessage = this.shadowRoot.querySelector('.recipe-form__error-message');
     if (errorMessage) errorMessage.style.display = 'none';
+
+    // After clearing the form, capture its state as the new initial state
+    this.captureInitialData();
   }
 
   async setRecipeData(recipeId) {
@@ -1038,13 +1087,19 @@ class RecipeFormComponent extends HTMLElement {
 
         // Update stage titles
         this.updateStageNumbers();
+        // Once data is loaded and form populated, capture this as the initial state
+        this.captureInitialData();
       } else {
         console.warn('No such document!');
         // Handle the case where the recipe doesn't exist
+        // Capture state of empty form if recipe not found
+        this.captureInitialData();
       }
     } catch (error) {
       console.error('Error fetching recipe:', error);
       // Handle the error appropriately (e.g., show an error message)
+      // Capture state of empty form on error
+      this.captureInitialData();
     }
   }
 

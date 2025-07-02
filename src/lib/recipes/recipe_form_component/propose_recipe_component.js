@@ -135,6 +135,11 @@ class ProposeRecipeComponent extends HTMLElement {
       recipeFormComponent.setDisabled(isDisabled);
     }
   }
+
+  isDirty() {
+    const formComponent = this.shadowRoot.querySelector('recipe-form-component');
+    return formComponent ? formComponent.isDirty() : false;
+  }
 }
 
 customElements.define('propose-recipe-component', ProposeRecipeComponent);
