@@ -250,11 +250,11 @@ function prepareCookbookRecipe(recipeData, metadata) {
     ...(recipeData.stages && { stages: recipeData.stages }),
     ...(recipeData.instructions && { instructions: recipeData.instructions }),
     
-    // Optional fields (only if provided)
+    // Optional fields (with defaults for arrays)
     ...(recipeData.difficulty && { difficulty: recipeData.difficulty }),
     ...(recipeData.mainIngredient && { mainIngredient: recipeData.mainIngredient }),
-    ...(recipeData.tags && { tags: recipeData.tags }),
-    ...(recipeData.comments && { comments: recipeData.comments }),
+    tags: recipeData.tags || [],
+    comments: recipeData.comments || [],
     
     // TODO: Uncomment when added to database schema
     // ...(recipeData.description && { description: recipeData.description }),
