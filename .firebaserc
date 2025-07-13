@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "cook-book-test-479e8"
-  }
+    "default": "cook-book-test-479e8",
+    "staging": "cook-book-test-479e8",
+    "production": "my-cook-book-67fde"
+  },
+  "targets": {},
+  "etags": {}
 }
