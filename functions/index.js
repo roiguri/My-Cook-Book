@@ -2,11 +2,113 @@ const { onMessagePublished } = require('firebase-functions/v2/pubsub');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
+const sharp = require('sharp');
 
 // Initialize Firebase Admin
 initializeApp();
 const db = getFirestore();
 const storage = getStorage();
+
+async function processRecipeImages(recipeId, images, category, originalUserId) {
+  const processedImages = [];
+  
+  console.log(`Processing ${images.length} images for recipe ${recipeId}`);
+  
+  for (const [index, imageData] of images.entries()) {
+    try {
+      console.log(`Processing image ${index + 1}/${images.length}: ${imageData.filename}`);
+      
+      // Download image from signed URL
+      const response = await fetch(imageData.downloadUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to download image: ${response.status}`);
+      }
+      
+      const imageBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(imageBuffer);
+      
+      console.log(`Downloaded image: ${imageData.filename}, size: ${buffer.length} bytes`);
+      
+      // Generate unique filename and ID
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(2, 15);
+      const imageId = `img-${timestamp}-${randomId}`;
+      const fileName = imageData.filename || `image-${index + 1}.jpg`;
+      
+      // Upload full-size image
+      const fullPath = `img/recipes/full/${category}/${recipeId}/${fileName}`;
+      const bucket = storage.bucket();
+      const fullFile = bucket.file(fullPath);
+      
+      await fullFile.save(buffer, {
+        metadata: {
+          contentType: imageData.contentType || 'image/jpeg',
+          metadata: {
+            originalSource: 'recipe-reader-transfer',
+            transferredAt: new Date().toISOString()
+          }
+        }
+      });
+      
+      console.log(`Uploaded full image to: ${fullPath}`);
+      
+      // Create compressed version
+      let compressedBuffer;
+      try {
+        compressedBuffer = await sharp(buffer)
+          .resize(800, 600, { 
+            fit: 'inside',
+            withoutEnlargement: true 
+          })
+          .jpeg({ quality: 80 })
+          .toBuffer();
+      } catch (compressionError) {
+        console.warn(`Compression failed for ${fileName}, using original:`, compressionError.message);
+        compressedBuffer = buffer;
+      }
+      
+      // Upload compressed image
+      const compressedPath = `img/recipes/compressed/${category}/${recipeId}/${fileName}`;
+      const compressedFile = bucket.file(compressedPath);
+      
+      await compressedFile.save(compressedBuffer, {
+        metadata: {
+          contentType: 'image/jpeg',
+          metadata: {
+            originalSource: 'recipe-reader-transfer',
+            transferredAt: new Date().toISOString(),
+            compressed: true
+          }
+        }
+      });
+      
+      console.log(`Uploaded compressed image to: ${compressedPath}`);
+      
+      // Create Firestore image object
+      const firestoreImage = {
+        access: 'public',
+        compressed: compressedPath,
+        fileName: fileName,
+        full: fullPath,
+        id: imageId,
+        isPrimary: index === 0, // First image is primary
+        uploadTimestamp: new Date(),
+        uploadedBy: originalUserId
+      };
+      
+      processedImages.push(firestoreImage);
+      
+      console.log(`Successfully processed image ${index + 1}: ${fileName}`);
+      
+    } catch (error) {
+      console.error(`Failed to process image ${index + 1} (${imageData.filename}):`, error.message);
+      // Continue with other images - don't fail the entire transfer
+    }
+  }
+  
+  console.log(`Successfully processed ${processedImages.length}/${images.length} images`);
+  return processedImages;
+}
 
 // Cookbook schema validation
 function validateCookbookRecipe(recipeData) {
@@ -240,11 +342,32 @@ exports.processRecipeTransfer = onMessagePublished(
       
       console.log(`Recipe stored successfully with ID: ${recipeId}`);
       
-      // TODO: Add image transfer logic (next sub-step)
-      // const images = transferRequest.images || [];
-      // if (images.length > 0) {
-      //   await processRecipeImages(recipeId, images, cookbookRecipe.category);
-      // }
+      // Process images if present
+      const images = transferRequest.images || [];
+      let processedImages = [];
+
+      if (images.length > 0) {
+      console.log(`Starting image transfer for ${images.length} images`);
+        
+        try {
+                processedImages = await processRecipeImages(
+                recipeId, 
+                images, 
+                transferRequest.recipeData.category,
+                transferRequest.metadata.userId
+            );
+                
+            // Update recipe with processed images
+            if (processedImages.length > 0) {
+                await recipeRef.update({ images: processedImages });
+                console.log(`Updated recipe with ${processedImages.length} images`);
+            }
+                
+        } catch (imageError) {
+            console.error('Image processing failed:', imageError.message);
+            // Recipe transfer succeeds even if images fail
+        }
+      }
       
       console.log(`Recipe transfer completed successfully: ${cookbookRecipe.name} (ID: ${recipeId})`);
       
