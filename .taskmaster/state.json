@@ -1,6 +1,8 @@
 {
-  "currentTag": "features",
-  "lastSwitched": "2025-06-24T03:46:35.403Z",
-  "branchTagMapping": {},
+  "currentTag": "feature-recipe-reader-integration",
+  "lastSwitched": "2025-07-12T18:56:42.780Z",
+  "branchTagMapping": {
+    "feature/recipe-reader-integration": "feature-recipe-reader-integration"
+  },
   "migrationNoticeShown": true
 }

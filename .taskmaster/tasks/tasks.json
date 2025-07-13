@@ -148,8 +148,8 @@
     ],
     "metadata": {
       "created": "2025-06-23T20:34:15.863Z",
-      "updated": "2025-06-24T03:43:55.302Z",
-      "description": "Tag created on 6/23/2025"
+      "updated": "2025-07-12T18:56:38.837Z",
+      "description": "Tasks for features context"
     }
   },
   "completed": {
@@ -190,6 +190,119 @@
       "created": "2025-06-24T03:38:15.098Z",
       "updated": "2025-06-24T03:39:03.164Z",
       "description": "Tag created on 6/24/2025"
+    }
+  },
+  "feature-recipe-reader-integration": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Google Cloud Pub/Sub Infrastructure",
+        "description": "Create and configure Google Cloud Pub/Sub topic, subscription, and service accounts for recipe transfer messaging",
+        "details": "Create 'recipe-transfers' topic and 'cookbook-transfers' subscription in Google Cloud Console. Set up service account with pubsub.publisher role for demo app and pubsub.subscriber role for cookbook app. Configure dead letter queue for failed message handling. Install @google-cloud/pubsub v4.x in demo app. Set retention policy to 7 days and acknowledgment deadline to 600 seconds for image processing time.",
+        "testStrategy": "Verify topic and subscription creation through Google Cloud Console. Test service account permissions by publishing and consuming test messages. Validate dead letter queue configuration with intentionally failed messages.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Recipe Data Packaging Service",
+        "description": "Create service to fetch complete recipe data from demo app's Supabase and generate signed URLs for images",
+        "details": "Create CookbookTransferService class in demo app. Implement fetchCompleteRecipe() method to retrieve recipe data including all related images from Supabase. Use Supabase storage.createSignedUrl() with 24-hour expiry for each image. Package data into message schema format with recipe data, signed image URLs, and metadata (userId, userEmail, sourceType, timestamp). Handle error cases for missing images or invalid recipe data.",
+        "testStrategy": "Unit tests for data packaging with mock Supabase responses. Integration tests with real recipe data. Verify signed URLs are valid and accessible. Test error handling for missing or corrupted recipe data.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Create Firebase Cloud Function for Recipe Processing",
+        "description": "Implement Cloud Function triggered by Pub/Sub messages to process recipe transfers in cookbook app",
+        "details": "Create processRecipeTransfer Firebase Function v2 with Pub/Sub trigger. Configure function with 5-minute timeout, 1GB memory, and pubsub.subscriber trigger. Implement message parsing, error handling with automatic retries (max 3 attempts), and dead letter queue integration. Use Firebase Admin SDK for Firestore operations. Add structured logging for debugging and monitoring. Handle malformed messages gracefully.",
+        "testStrategy": "Unit tests with mock Pub/Sub messages. Integration tests with Firebase Functions Emulator. Test timeout scenarios and memory usage with large payloads. Verify retry logic and dead letter queue behavior.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement Data Transformation and Schema Mapping",
+        "description": "Create service to transform demo app recipe format to cookbook app format with proper field mapping",
+        "details": "Create RecipeTransformationService in cookbook function. Implement schema mapping: cook_time → waitTime, map demo categories to cookbook categories, handle prep_time and total_time fields. Add transfer metadata fields (source: 'demo-app', transferredAt: timestamp, approved: false, confidence: 'high'). Create validation functions for required fields. Handle missing or invalid data gracefully with default values.",
+        "testStrategy": "Unit tests with various recipe formats and edge cases. Schema validation tests to ensure cookbook format compliance. Test category mapping accuracy and fallback handling for unknown categories.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Image Transfer and Storage System",
+        "description": "Download images from signed URLs and upload to Firebase Storage with cookbook naming conventions",
+        "details": "Create ImageTransferService in cookbook function. Use node-fetch or axios to download images from signed URLs with timeout handling (30s per image). Validate image formats (JPEG, PNG, WebP) and file sizes (max 10MB). Upload to Firebase Storage under /recipes/{recipeId}/images/ with UUID filenames. Generate pendingImages array for admin approval. Implement retry logic for failed downloads and graceful error handling for expired URLs.",
+        "testStrategy": "Unit tests with mock image downloads and uploads. Integration tests with real signed URLs and Firebase Storage. Test error scenarios including expired URLs, large files, and network timeouts. Verify image integrity after transfer.",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Create Transfer UI Components",
+        "description": "Build user interface components for single and batch recipe transfers in demo app",
+        "details": "Create TransferButton component using React/Vue with cookbook branding (icon from lucide-react or similar). Add loading states, success/error feedback with react-hot-toast notifications. Create BatchTransferButton for multiple recipe selection with checkbox interface. Implement progress modal showing transfer status for each recipe. Show buttons only to authenticated users. Use optimistic UI updates with rollback on failure.",
+        "testStrategy": "Component tests with React Testing Library or Vue Test Utils. User interaction tests for button clicks and loading states. Accessibility tests for keyboard navigation and screen readers. Visual regression tests for different states.",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Integrate Recipe Storage with Approval Workflow",
+        "description": "Store transformed recipes in Firestore and integrate with existing cookbook admin approval system",
+        "details": "Save transformed recipes to Firestore /recipes collection with approved: false flag. Ensure recipes enter existing admin approval workflow without modification. Add transfer-specific fields (transferSource: 'demo-app', originalId, transferredBy, reviewNotes). Create batch write operations for efficiency. Implement transaction handling for consistency. Add indexes for efficient querying of pending transfers.",
+        "testStrategy": "Integration tests with Firestore emulator. Verify recipes appear in admin dashboard. Test batch operations and transaction rollback scenarios. Performance tests for large recipe imports.",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement End-to-End Testing and Monitoring",
+        "description": "Create comprehensive testing suite and monitoring dashboard for the complete transfer pipeline",
+        "details": "Create E2E tests using Playwright or Cypress covering complete transfer flow from demo app button click to cookbook storage. Implement monitoring with Google Cloud Monitoring for transfer success rate (>95% target), function execution time (<2min average), and message queue depth. Set up alerts for high error rates, function timeouts, and dead letter queue accumulation. Create health check endpoints for both services. Add performance logging and error tracking with structured logs.",
+        "testStrategy": "E2E test scenarios including successful transfers, error cases, and batch operations. Load testing with concurrent transfers. Monitoring dashboard validation with test metrics. Alert testing with simulated failure conditions.",
+        "priority": "low",
+        "dependencies": [
+          6,
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-12T18:55:15.175Z",
+      "updated": "2025-07-12T19:01:59.886Z",
+      "description": "Tasks for feature-recipe-reader-integration context"
     }
   }
 }
