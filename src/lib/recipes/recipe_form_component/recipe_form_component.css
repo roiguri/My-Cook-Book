@@ -1,8 +1,11 @@
 /**
  * Recipe Form Component Styles
  * ----------------------------
- * Extracted from RecipeFormComponent for better maintainability
- * and separation of concerns.
+ * Shared styles for RecipeFormComponent and its sub-components:
+ * - recipe-metadata-fields.js
+ * 
+ * This CSS file is used by multiple components to ensure consistent
+ * styling and validation appearance across form boundaries.
  */
 
 .recipe-form {

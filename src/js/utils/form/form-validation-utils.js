@@ -34,6 +34,9 @@ export function validateRecipeForm(recipeData, shadowRoot) {
   // Clear all previous error states
   clearValidationErrors(shadowRoot);
   
+  // Reset metadata field errors collection
+  shadowRoot._metadataFieldErrors = {};
+  
   // Show error messages and highlight invalid fields
   const errorMessage = shadowRoot.querySelector('.recipe-form__error-message');
   
@@ -42,6 +45,15 @@ export function validateRecipeForm(recipeData, shadowRoot) {
     
     if (errors) {
       highlightFieldErrors(errors, shadowRoot);
+      
+      // Apply all collected metadata field errors at once
+      if (shadowRoot._metadataFieldErrors && Object.keys(shadowRoot._metadataFieldErrors).length > 0) {
+        const metadataComponent = shadowRoot.getElementById('metadata-fields');
+        if (metadataComponent && typeof metadataComponent.setValidationState === 'function') {
+          metadataComponent.setValidationState(shadowRoot._metadataFieldErrors);
+        }
+      }
+      
       errorText = Object.values(errors).join(' ');
     }
     
@@ -58,8 +70,15 @@ export function validateRecipeForm(recipeData, shadowRoot) {
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  */
 export function clearValidationErrors(shadowRoot) {
+  // Clear validation errors from metadata component
+  const metadataComponent = shadowRoot.getElementById('metadata-fields');
+  if (metadataComponent && typeof metadataComponent.setValidationState === 'function') {
+    metadataComponent.setValidationState({});
+  }
+  
+  // Clear validation errors from main component fields
   shadowRoot
-    .querySelectorAll('.recipe-form__input, .recipe-form__select, .recipe-form__textarea')
+    .querySelectorAll('.recipe-form__input:not(recipe-metadata-fields .recipe-form__input), .recipe-form__select:not(recipe-metadata-fields .recipe-form__select), .recipe-form__textarea:not(recipe-metadata-fields .recipe-form__textarea)')
     .forEach((el) => {
       el.classList.remove('recipe-form__input--invalid');
     });
@@ -158,8 +177,20 @@ function highlightStageField(key, shadowRoot) {
 function highlightMainField(key, shadowRoot) {
   const fieldId = FIELD_MAP[key];
   if (fieldId) {
-    const el = shadowRoot.getElementById(fieldId);
-    if (el) el.classList.add('recipe-form__input--invalid');
+    // Check if this is a metadata field
+    const metadataFields = ['name', 'dish-type', 'prep-time', 'wait-time', 'servings-form', 'difficulty', 'main-ingredient', 'tags'];
+    
+    if (metadataFields.includes(fieldId)) {
+      // Store metadata field error for batch processing
+      if (!shadowRoot._metadataFieldErrors) {
+        shadowRoot._metadataFieldErrors = {};
+      }
+      shadowRoot._metadataFieldErrors[key] = true;
+    } else {
+      // Handle main component fields directly
+      const el = shadowRoot.getElementById(fieldId);
+      if (el) el.classList.add('recipe-form__input--invalid');
+    }
   }
 }
 

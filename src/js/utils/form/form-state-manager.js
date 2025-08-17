@@ -13,7 +13,14 @@
 export function setFormDisabledState(shadowRoot, isDisabled) {
   if (!shadowRoot) return;
   
-  const formElements = shadowRoot.querySelectorAll('input, select, textarea, button');
+  // Handle metadata fields component
+  const metadataComponent = shadowRoot.getElementById('metadata-fields');
+  if (metadataComponent && typeof metadataComponent.setDisabled === 'function') {
+    metadataComponent.setDisabled(isDisabled);
+  }
+  
+  // Handle main component form elements (excluding those in sub-components)
+  const formElements = shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input), select:not(recipe-metadata-fields select), textarea:not(recipe-metadata-fields textarea), button');
   formElements.forEach((element) => {
     element.disabled = isDisabled;
   });
@@ -32,14 +39,11 @@ export function setFormDisabledState(shadowRoot, isDisabled) {
 export function clearForm(shadowRoot) {
   if (!shadowRoot) return;
   
-  // Clear all input fields
-  clearInputFields(shadowRoot);
+  // Clear metadata fields through component API
+  clearMetadataFields(shadowRoot);
   
-  // Clear all select fields
-  clearSelectFields(shadowRoot);
-  
-  // Clear all textareas
-  clearTextareas(shadowRoot);
+  // Clear main component fields (inputs, selects, textareas not in sub-components)
+  clearMainComponentFields(shadowRoot);
   
   // Reset ingredients to initial state
   resetIngredientsToInitial(shadowRoot);
@@ -54,36 +58,34 @@ export function clearForm(shadowRoot) {
   resetFormState(shadowRoot);
 }
 
+
 /**
- * Clears all input fields and removes validation states
+ * Clears metadata fields through component API
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  */
-function clearInputFields(shadowRoot) {
-  shadowRoot.querySelectorAll('input').forEach((input) => {
-    input.value = '';
-    input.classList.remove('recipe-form__input--invalid');
-  });
+function clearMetadataFields(shadowRoot) {
+  const metadataComponent = shadowRoot.getElementById('metadata-fields');
+  if (metadataComponent && typeof metadataComponent.clearFields === 'function') {
+    metadataComponent.clearFields();
+  }
 }
 
 /**
- * Resets all select fields to their first option
+ * Clears main component fields (excluding those in sub-components)
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  */
-function clearSelectFields(shadowRoot) {
-  shadowRoot.querySelectorAll('select').forEach((select) => {
-    select.selectedIndex = 0;
-    select.classList.remove('recipe-form__input--invalid');
-  });
-}
-
-/**
- * Clears all textarea fields
- * @param {ShadowRoot} shadowRoot - The component's shadow root
- */
-function clearTextareas(shadowRoot) {
-  shadowRoot.querySelectorAll('textarea').forEach((textarea) => {
-    textarea.value = '';
-    textarea.classList.remove('recipe-form__input--invalid');
+function clearMainComponentFields(shadowRoot) {
+  // Clear only inputs, selects, and textareas that are direct children of main component
+  // This excludes fields inside sub-components like recipe-metadata-fields
+  shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input), select:not(recipe-metadata-fields select), textarea:not(recipe-metadata-fields textarea)').forEach((field) => {
+    if (field.type === 'textarea' || field.tagName === 'TEXTAREA') {
+      field.value = '';
+    } else if (field.tagName === 'SELECT') {
+      field.selectedIndex = 0;
+    } else {
+      field.value = '';
+    }
+    field.classList.remove('recipe-form__input--invalid');
   });
 }
 

@@ -8,6 +8,7 @@ import { clearForm, setFormDisabledState } from '../../../js/utils/form/form-sta
 
 import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
+import './parts/recipe-metadata-fields.js';
 
 class RecipeFormComponent extends HTMLElement {
   constructor() {
@@ -52,65 +53,7 @@ class RecipeFormComponent extends HTMLElement {
         </div>
   
         <form id="recipe-form" class="recipe-form__form">
-          <div class="recipe-form__row">
-            <div class="recipe-form__group">
-              <label for="name" class="recipe-form__label">שם המנה:</label>
-              <input type="text" id="name" name="name" class="recipe-form__input">
-            </div>
-            <div class="recipe-form__group">
-              <label for="dish-type" class="recipe-form__label">סוג מנה:</label>
-              <select id="dish-type" name="dish-type" class="recipe-form__select">
-                <option value="">בחר סוג מנה</option>
-                <option value="appetizers">מנות ראשונות</option>
-                <option value="main-courses">מנות עיקריות</option>
-                <option value="side-dishes">תוספות</option>
-                <option value="soups-stews">מרקים ותבשילים</option>
-                <option value="salads">סלטים</option>
-                <option value="desserts">קינוחים</option>
-                <option value="breakfast-brunch">ארוחות בוקר</option>
-                <option value="snacks">חטיפים</option>
-                <option value="beverages">משקאות</option>
-              </select>
-            </div>
-          </div>
-  
-          <div class="recipe-form__row">
-            <div class="recipe-form__group">
-              <label for="prep-time" class="recipe-form__label">זמן הכנה (בדקות):</label>
-              <input type="number" id="prep-time" name="prep-time" class="recipe-form__input" min="0">
-            </div>
-            <div class="recipe-form__group">
-              <label for="wait-time" class="recipe-form__label">זמן המתנה (בדקות):</label>
-              <input type="number" id="wait-time" name="wait-time" class="recipe-form__input" min="0">
-            </div>
-          </div>
-  
-          <div class="recipe-form__row">
-            <div class="recipe-form__group">
-              <label for="servings-form" class="recipe-form__label">מספר מנות:</label>
-              <input type="number" id="servings-form" name="servings" class="recipe-form__input" min="1">
-            </div>
-            <div class="recipe-form__group">
-              <label for="difficulty" class="recipe-form__label">דרגת קושי:</label>
-              <select id="difficulty" name="difficulty" class="recipe-form__select">
-                <option value="">בחר דרגת קושי</option>
-                <option value="קלה">קלה</option>
-                <option value="בינונית">בינונית</option>
-                <option value="קשה">קשה</option>
-              </select>
-            </div>
-          </div>
-  
-          <div class="recipe-form__row">
-            <div class="recipe-form__group">
-              <label for="main-ingredient" class="recipe-form__label">מרכיב עיקרי:</label>
-              <input type="text" id="main-ingredient" name="main-ingredient" class="recipe-form__input">
-            </div>
-            <div class="recipe-form__group">
-              <label for="tags" class="recipe-form__label">תגיות:</label>
-              <input type="text" id="tags" name="tags" class="recipe-form__input">
-            </div>
-          </div>
+          <recipe-metadata-fields id="metadata-fields"></recipe-metadata-fields>
   
           <div class="recipe-form__group">
             <div id="ingredients-container" class="recipe-form__ingredients">
@@ -475,18 +418,17 @@ class RecipeFormComponent extends HTMLElement {
         const data = docSnap.data();
         this.recipeData = data; // Store the fetched data
 
-        // Populate basic input fields
-        this.shadowRoot.getElementById('name').value = data.name;
-        this.shadowRoot.getElementById('dish-type').value = data.category;
-        this.shadowRoot.getElementById('prep-time').value = data.prepTime;
-        this.shadowRoot.getElementById('wait-time').value = data.waitTime;
-        this.shadowRoot.getElementById('servings-form').value = data.servings;
-        this.shadowRoot.getElementById('difficulty').value = data.difficulty;
-        this.shadowRoot.getElementById('main-ingredient').value = data.mainIngredient;
-        this.shadowRoot.getElementById('tags').value = data.tags.join(', ');
-        this.shadowRoot.getElementById('comments').value = data.comments
-          ? data.comments.join('\n')
-          : '';
+        // Populate metadata fields through component API
+        const metadataFields = this.shadowRoot.getElementById('metadata-fields');
+        if (metadataFields) {
+          metadataFields.populateFields(data);
+        }
+
+        // Populate comments field (still in main component)
+        const commentsField = this.shadowRoot.getElementById('comments');
+        if (commentsField) {
+          commentsField.value = data.comments ? data.comments.join('\n') : '';
+        }
 
         // Populate ingredients
         const ingredientsContainer = this.shadowRoot.querySelector('.recipe-form__ingredients');

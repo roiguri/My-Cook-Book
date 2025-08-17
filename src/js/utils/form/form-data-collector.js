@@ -13,15 +13,12 @@ import authService from '../../services/auth-service.js';
  * @returns {Object} - Complete recipe data object
  */
 export function collectRecipeFormData(shadowRoot) {
+  // Get metadata from the metadata fields component
+  const metadataComponent = shadowRoot.getElementById('metadata-fields');
+  const metadataData = metadataComponent ? metadataComponent.getFormData() : {};
+  
   const recipeData = {
-    name: getFieldValue(shadowRoot, 'name'),
-    category: getFieldValue(shadowRoot, 'dish-type'),
-    prepTime: getNumericFieldValue(shadowRoot, 'prep-time'),
-    waitTime: getNumericFieldValue(shadowRoot, 'wait-time'),
-    difficulty: getFieldValue(shadowRoot, 'difficulty'),
-    mainIngredient: getFieldValue(shadowRoot, 'main-ingredient'),
-    tags: getTagsArray(shadowRoot),
-    servings: getNumericFieldValue(shadowRoot, 'servings-form'),
+    ...metadataData,
     ingredients: collectIngredients(shadowRoot),
     approved: false,
   };
@@ -48,40 +45,6 @@ export function collectRecipeFormData(shadowRoot) {
   return recipeData;
 }
 
-/**
- * Gets trimmed value from a form field
- * @param {ShadowRoot} shadowRoot - The component's shadow root
- * @param {string} fieldId - The ID of the form field
- * @returns {string} - Trimmed field value
- */
-function getFieldValue(shadowRoot, fieldId) {
-  const element = shadowRoot.getElementById(fieldId);
-  return element ? element.value.trim() : '';
-}
-
-/**
- * Gets numeric value from a form field
- * @param {ShadowRoot} shadowRoot - The component's shadow root
- * @param {string} fieldId - The ID of the form field
- * @returns {number} - Parsed numeric value
- */
-function getNumericFieldValue(shadowRoot, fieldId) {
-  const value = getFieldValue(shadowRoot, fieldId);
-  return parseInt(value) || 0;
-}
-
-/**
- * Collects and parses tags from the tags field
- * @param {ShadowRoot} shadowRoot - The component's shadow root
- * @returns {string[]} - Array of trimmed tag strings
- */
-function getTagsArray(shadowRoot) {
-  const tagsValue = getFieldValue(shadowRoot, 'tags');
-  return tagsValue
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter((tag) => tag.length > 0);
-}
 
 /**
  * Collects ingredient data from all ingredient entries
@@ -200,7 +163,8 @@ function collectImages(shadowRoot) {
  * @returns {string[]|null} - Array with comments or null if empty
  */
 function collectComments(shadowRoot) {
-  const comments = getFieldValue(shadowRoot, 'comments');
+  const commentsElement = shadowRoot.getElementById('comments');
+  const comments = commentsElement ? commentsElement.value.trim() : '';
   return comments.length > 0 ? [comments] : null;
 }
 
@@ -213,16 +177,8 @@ function collectComments(shadowRoot) {
 export function collectSectionData(shadowRoot, section) {
   switch (section) {
     case 'metadata':
-      return {
-        name: getFieldValue(shadowRoot, 'name'),
-        category: getFieldValue(shadowRoot, 'dish-type'),
-        prepTime: getNumericFieldValue(shadowRoot, 'prep-time'),
-        waitTime: getNumericFieldValue(shadowRoot, 'wait-time'),
-        difficulty: getFieldValue(shadowRoot, 'difficulty'),
-        mainIngredient: getFieldValue(shadowRoot, 'main-ingredient'),
-        tags: getTagsArray(shadowRoot),
-        servings: getNumericFieldValue(shadowRoot, 'servings-form'),
-      };
+      const metadataComponent = shadowRoot.getElementById('metadata-fields');
+      return metadataComponent ? metadataComponent.getFormData() : {};
     
     case 'ingredients':
       return { ingredients: collectIngredients(shadowRoot) };
