@@ -1,10 +1,10 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
-import authService from '../../../js/services/auth-service.js';
 import { doc, getDoc } from 'firebase/firestore';
 import { getImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
 import { validateRecipeForm } from '../../../js/utils/form/form-validation-utils.js';
 import { collectRecipeFormData } from '../../../js/utils/form/form-data-collector.js';
+import { clearForm, setFormDisabledState } from '../../../js/utils/form/form-state-manager.js';
 
 import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
@@ -666,86 +666,7 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   clearForm() {
-    // Clear all input fields
-    this.shadowRoot.querySelectorAll('input').forEach((input) => {
-      input.value = '';
-      input.classList.remove('recipe-form__input--invalid');
-    });
-
-    // Clear all select fields
-    this.shadowRoot.querySelectorAll('select').forEach((select) => {
-      select.selectedIndex = 0;
-      select.classList.remove('recipe-form__input--invalid');
-    });
-
-    // Clear all textareas
-    this.shadowRoot.querySelectorAll('textarea').forEach((textarea) => {
-      textarea.value = '';
-      textarea.classList.remove('recipe-form__input--invalid');
-    });
-
-    // Reset ingredients to initial state
-    const ingredientsContainer = this.shadowRoot.querySelector('.recipe-form__ingredients');
-    const ingredientEntries = ingredientsContainer.querySelectorAll(
-      '.recipe-form__ingredient-entry',
-    );
-    ingredientEntries.forEach((entry, index) => {
-      if (index === 0) {
-        // Reset first ingredient entry
-        entry.querySelector('.recipe-form__input--quantity').value = '';
-        entry.querySelector('.recipe-form__input--unit').value = '';
-        entry.querySelector('.recipe-form__input--item').value = '';
-        const addButton = entry.querySelector('button');
-        addButton.textContent = '+';
-        addButton.classList.remove('recipe-form__button--remove-ingredient');
-        addButton.classList.add('recipe-form__button--add-ingredient');
-      } else {
-        // Remove additional ingredient entries
-        entry.remove();
-      }
-    });
-
-    // Reset instructions to initial state
-    const stagesContainer = this.shadowRoot.getElementById('stages-container');
-    const stepsContainers = stagesContainer.querySelectorAll('.recipe-form__steps');
-    stepsContainers.forEach((container, index) => {
-      if (index === 0) {
-        // Reset first stage
-        const steps = container.querySelectorAll('.recipe-form__step');
-        steps.forEach((step, stepIndex) => {
-          if (stepIndex === 0) {
-            // Reset first step
-            step.querySelector('input[type="text"]').value = '';
-            const addButton = step.querySelector('button');
-            addButton.textContent = '+';
-            addButton.classList.remove('recipe-form__button--remove-step');
-            addButton.classList.add('recipe-form__button--add-step');
-          } else {
-            // Remove additional steps
-            step.remove();
-          }
-        });
-        // Remove stage title and name if present
-        const titleContainer = container.querySelector('.recipe-form__stage-header');
-        if (titleContainer) titleContainer.remove();
-        const stageName = container.querySelector('.recipe-form__input--stage-name');
-        if (stageName) stageName.remove();
-      } else {
-        // Remove additional stages
-        container.remove();
-      }
-    });
-
-    // Clear the image preview and hide it
-    const imageHandler = this.shadowRoot.getElementById('recipe-images');
-    imageHandler.clearImages();
-
-    // Reset the form
-    this.shadowRoot.getElementById('recipe-form').reset();
-
-    // Hide error message if visible
-    const errorMessage = this.shadowRoot.querySelector('.recipe-form__error-message');
-    if (errorMessage) errorMessage.style.display = 'none';
+    clearForm(this.shadowRoot);
   }
 
   async setRecipeData(recipeId) {
@@ -922,15 +843,7 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   setDisabled(isDisabled) {
-    const formElements = this.shadowRoot.querySelectorAll('input, select, textarea, button');
-    formElements.forEach((element) => {
-      element.disabled = isDisabled;
-    });
-
-    const imageHandler = this.shadowRoot.getElementById('recipe-images');
-    if (imageHandler && typeof imageHandler.setDisabled === 'function') {
-      imageHandler.setDisabled(isDisabled);
-    }
+    setFormDisabledState(this.shadowRoot, isDisabled);
   }
 }
 
