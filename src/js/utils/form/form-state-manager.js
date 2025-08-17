@@ -19,8 +19,14 @@ export function setFormDisabledState(shadowRoot, isDisabled) {
     metadataComponent.setDisabled(isDisabled);
   }
   
+  // Handle form button group component
+  const buttonGroup = shadowRoot.getElementById('form-buttons');
+  if (buttonGroup && typeof buttonGroup.setDisabled === 'function') {
+    buttonGroup.setDisabled(isDisabled);
+  }
+  
   // Handle main component form elements (excluding those in sub-components)
-  const formElements = shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input), select:not(recipe-metadata-fields select), textarea:not(recipe-metadata-fields textarea), button');
+  const formElements = shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input):not(form-button-group input), select:not(recipe-metadata-fields select):not(form-button-group select), textarea:not(recipe-metadata-fields textarea):not(form-button-group textarea)');
   formElements.forEach((element) => {
     element.disabled = isDisabled;
   });
@@ -371,21 +377,16 @@ function populateImages(shadowRoot, images) {
  * Sets a loading state for the form
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  * @param {boolean} isLoading - Whether form is in loading state
+ * @param {string} loadingText - Text to show during loading
  */
-export function setFormLoadingState(shadowRoot, isLoading) {
+export function setFormLoadingState(shadowRoot, isLoading, loadingText = 'שולח...') {
   if (!shadowRoot) return;
   
   setFormDisabledState(shadowRoot, isLoading);
   
-  // Add loading indicator if needed
-  const submitButton = shadowRoot.getElementById('submit-button');
-  if (submitButton) {
-    if (isLoading) {
-      submitButton.textContent = 'שולח...';
-      submitButton.classList.add('loading');
-    } else {
-      // Reset to original text (would need to be passed in or stored)
-      submitButton.classList.remove('loading');
-    }
+  // Handle loading state through button group component
+  const buttonGroup = shadowRoot.getElementById('form-buttons');
+  if (buttonGroup && typeof buttonGroup.setLoadingState === 'function') {
+    buttonGroup.setLoadingState(isLoading, loadingText);
   }
 }

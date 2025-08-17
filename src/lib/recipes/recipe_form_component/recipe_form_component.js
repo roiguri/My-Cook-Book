@@ -9,6 +9,7 @@ import { clearForm, setFormDisabledState } from '../../../js/utils/form/form-sta
 import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
 import './parts/recipe-metadata-fields.js';
+import './parts/form-button-group.js';
 
 class RecipeFormComponent extends HTMLElement {
   constructor() {
@@ -90,10 +91,11 @@ class RecipeFormComponent extends HTMLElement {
             <textarea id="comments" name="comments" class="recipe-form__textarea"></textarea>
           </div>
   
-          <div class="recipe-form__group--buttons">
-            <button type="button" id="clear-button" class="recipe-form__button recipe-form__button--clear">${this.clearButtonText}</button>
-            <button type="submit" id="submit-button" class="recipe-form__button recipe-form__button--submit">${this.submitButtonText}</button>
-          </div>
+          <form-button-group 
+            id="form-buttons" 
+            clear-text="${this.clearButtonText}" 
+            submit-text="${this.submitButtonText}">
+          </form-button-group>
         </form>
       </div>
       <message-modal></message-modal>
@@ -151,9 +153,9 @@ class RecipeFormComponent extends HTMLElement {
       }
     });
 
-    // Add event listener for clearing the form
-    const clearButton = this.shadowRoot.getElementById('clear-button');
-    clearButton.addEventListener('click', () => {
+    // Add event listeners for form button group events
+    const buttonGroup = this.shadowRoot.getElementById('form-buttons');
+    buttonGroup.addEventListener('clear-clicked', () => {
       this.clearForm();
 
       // Dispatch the clear button click event
@@ -163,6 +165,14 @@ class RecipeFormComponent extends HTMLElement {
           composed: true,
         }),
       );
+    });
+    buttonGroup.addEventListener('submit-clicked', () => {
+      if (this.validateForm()) {
+        this.collectFormData();
+        this.dispatchRecipeData();
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
   }
 
