@@ -96,7 +96,14 @@ function highlightIngredientField(key, shadowRoot) {
     const field = match[2];
     const entry = shadowRoot.querySelectorAll('.recipe-form__ingredient-entry')[idx];
     if (entry) {
-      const input = entry.querySelector(`.recipe-form__input--${field}`);
+      // Map validation field names to actual CSS class names
+      const fieldMapping = {
+        amount: 'quantity',
+        unit: 'unit',
+        item: 'item'
+      };
+      const cssClass = fieldMapping[field] || field;
+      const input = entry.querySelector(`.recipe-form__input--${cssClass}`);
       if (input) input.classList.add('recipe-form__input--invalid');
     }
   }

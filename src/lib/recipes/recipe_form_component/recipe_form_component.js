@@ -1,9 +1,10 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import authService from '../../../js/services/auth-service.js';
 import { doc, getDoc } from 'firebase/firestore';
-import { validateRecipeData } from '../../../js/utils/recipes/recipe-data-utils.js';
 import { getImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
+import { validateRecipeForm } from '../../../js/utils/form/form-validation-utils.js';
+import { collectRecipeFormData } from '../../../js/utils/form/form-data-collector.js';
 
 import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
@@ -643,182 +644,15 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   /**
-   * Validate form using recipe-data-utils and ingredient utils
+   * Validate form using form validation utilities
    */
   validateForm() {
     this.collectFormData();
-    const { isValid, errors } = validateRecipeData(this.recipeData);
-    // Clear all previous error states
-    this.shadowRoot
-      .querySelectorAll('.recipe-form__input, .recipe-form__select, .recipe-form__textarea')
-      .forEach((el) => {
-        el.classList.remove('recipe-form__input--invalid');
-      });
-    // Show error messages and highlight invalid fields
-    const errorMessage = this.shadowRoot.querySelector('.recipe-form__error-message');
-    if (!isValid) {
-      let errorText = 'ישנם שגיאות בטופס. אנא תקן אותן.';
-      if (errors) {
-        // Highlight fields with errors
-        Object.keys(errors).forEach((key) => {
-          if (key.startsWith('ingredients[')) {
-            // Highlight ingredient fields
-            const match = key.match(/ingredients\[(\d+)\]\.(\w+)/);
-            if (match) {
-              const idx = parseInt(match[1], 10);
-              const field = match[2];
-              const entry = this.shadowRoot.querySelectorAll('.recipe-form__ingredient-entry')[idx];
-              if (entry) {
-                const input = entry.querySelector(`.recipe-form__input--${field}`);
-                if (input) input.classList.add('recipe-form__input--invalid');
-              }
-            }
-          } else if (key.startsWith('instructions[')) {
-            // Highlight instruction fields
-            const match = key.match(/instructions\[(\d+)\]/);
-            if (match) {
-              const idx = parseInt(match[1], 10);
-              const input = this.shadowRoot.querySelectorAll(
-                '.recipe-form__stages input[type="text"]',
-              )[idx];
-              if (input) input.classList.add('recipe-form__input--invalid');
-            }
-          } else if (key.startsWith('stages[')) {
-            // Highlight stage fields
-            const match = key.match(/stages\[(\d+)\](?:\.(\w+))?/);
-            if (match) {
-              const sIdx = parseInt(match[1], 10);
-              const field = match[2];
-              const stage = this.shadowRoot.querySelectorAll('.recipe-form__steps')[sIdx];
-              if (stage && field === 'title') {
-                const input = stage.querySelector('.recipe-form__input--stage-name');
-                if (input) input.classList.add('recipe-form__input--invalid');
-              }
-              if (stage && field === 'instructions') {
-                stage.querySelectorAll('input[type="text"]').forEach((input) => {
-                  input.classList.add('recipe-form__input--invalid');
-                });
-              }
-            }
-          } else {
-            // Highlight main fields
-            const fieldMap = {
-              name: 'name',
-              category: 'dish-type',
-              prepTime: 'prep-time',
-              waitTime: 'wait-time',
-              servings: 'servings-form',
-              difficulty: 'difficulty',
-              mainIngredient: 'main-ingredient',
-              tags: 'tags',
-              comments: 'comments',
-            };
-            const fieldId = fieldMap[key];
-            if (fieldId) {
-              const el = this.shadowRoot.getElementById(fieldId);
-              if (el) el.classList.add('recipe-form__input--invalid');
-            }
-          }
-        });
-        // Show all error messages
-        errorText = Object.values(errors).join(' ');
-      }
-      errorMessage.textContent = errorText;
-      errorMessage.style.display = 'block';
-    } else {
-      errorMessage.style.display = 'none';
-    }
-    return isValid;
+    return validateRecipeForm(this.recipeData, this.shadowRoot);
   }
 
   collectFormData() {
-    this.recipeData = {
-      name: this.shadowRoot.getElementById('name').value.trim(),
-      category: this.shadowRoot.getElementById('dish-type').value,
-      prepTime: parseInt(this.shadowRoot.getElementById('prep-time').value),
-      waitTime: parseInt(this.shadowRoot.getElementById('wait-time').value),
-      difficulty: this.shadowRoot.getElementById('difficulty').value,
-      mainIngredient: this.shadowRoot.getElementById('main-ingredient').value,
-      tags: this.shadowRoot
-        .getElementById('tags')
-        .value.split(',')
-        .map((tag) => tag.trim()),
-      servings: parseInt(this.shadowRoot.getElementById('servings-form').value),
-      ingredients: [],
-      approved: false, // Added for future manager approval
-    };
-
-    // Get ingredients
-    this.shadowRoot.querySelectorAll('.recipe-form__ingredient-entry').forEach((entry) => {
-      this.recipeData.ingredients.push({
-        amount: entry.querySelector('.recipe-form__input--quantity').value.trim(),
-        unit: entry.querySelector('.recipe-form__input--unit').value.trim(),
-        item: entry.querySelector('.recipe-form__input--item').value.trim(),
-      });
-    });
-
-    // Check if stages are present
-    const stagesContainers = this.shadowRoot.querySelectorAll('.recipe-form__steps');
-    if (stagesContainers.length > 1) {
-      this.recipeData.stages = [];
-      stagesContainers.forEach((container, index) => {
-        const stageNameInput = container.querySelector('.recipe-form__input--stage-name');
-        const stageTitle = stageNameInput ? stageNameInput.value.trim() : `שלב ${index + 1}`;
-        const stage = {
-          title: stageTitle,
-          instructions: Array.from(
-            container.querySelectorAll('.recipe-form__step input[type="text"]'),
-          ).map((input) => input.value.trim()),
-        };
-        this.recipeData.stages.push(stage);
-      });
-    } else {
-      this.recipeData.instructions = Array.from(
-        this.shadowRoot
-          .querySelector('.recipe-form__stages')
-          .querySelectorAll('input[type="text"]'),
-      ).map((input) => input.value.trim());
-    }
-
-    // Collect images
-    const imageHandler = this.shadowRoot.getElementById('recipe-images');
-    const images = imageHandler.getImages();
-    // Track removed images if the handler supports it
-    const toDelete =
-      typeof imageHandler.getRemovedImages === 'function' ? imageHandler.getRemovedImages() : [];
-
-    this.recipeData.images = images.map((img) => {
-      if (img.file) {
-        // New image to upload
-        return {
-          file: img.file,
-          isPrimary: img.isPrimary,
-          access: 'public',
-          uploadedBy: authService.getCurrentUser()?.uid || 'anonymous',
-          source: 'new',
-        };
-      } else {
-        // Existing image to keep
-        return {
-          id: img.id,
-          isPrimary: img.isPrimary,
-          full: img.full,
-          compressed: img.compressed,
-          access: img.access,
-          uploadedBy: img.uploadedBy,
-          fileName: img.fileName,
-          uploadTimestamp: img.uploadTimestamp,
-          source: 'existing',
-        };
-      }
-    });
-    this.recipeData.toDelete = toDelete;
-
-    // Get comments if present
-    const comments = this.shadowRoot.getElementById('comments').value.trim();
-    if (comments) {
-      this.recipeData.comments = [comments];
-    }
+    this.recipeData = collectRecipeFormData(this.shadowRoot);
   }
 
   dispatchRecipeData() {

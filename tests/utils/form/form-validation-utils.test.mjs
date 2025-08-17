@@ -95,6 +95,20 @@ describe('form-validation-utils', () => {
 
     it('should highlight ingredient field errors correctly', () => {
       const mockShadowRoot = createMockShadowRoot();
+      const mockEntry = {
+        querySelector: jest.fn((selector) => {
+          if (selector === '.recipe-form__input--quantity') return { classList: { add: jest.fn() } };
+          if (selector === '.recipe-form__input--unit') return { classList: { add: jest.fn() } };
+          if (selector === '.recipe-form__input--item') return { classList: { add: jest.fn() } };
+          return null;
+        })
+      };
+      
+      mockShadowRoot.querySelectorAll.mockImplementation((selector) => {
+        if (selector === '.recipe-form__ingredient-entry') return [mockEntry];
+        return [];
+      });
+      
       const recipeData = { name: 'Test' };
       const errors = { 'ingredients[0].amount': 'Amount is required' };
       
@@ -103,6 +117,7 @@ describe('form-validation-utils', () => {
       validateRecipeForm(recipeData, mockShadowRoot);
 
       expect(mockShadowRoot.querySelectorAll).toHaveBeenCalledWith('.recipe-form__ingredient-entry');
+      expect(mockEntry.querySelector).toHaveBeenCalledWith('.recipe-form__input--quantity');
     });
 
     it('should highlight main field errors correctly', () => {
