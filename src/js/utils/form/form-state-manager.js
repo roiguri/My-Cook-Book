@@ -19,6 +19,12 @@ export function setFormDisabledState(shadowRoot, isDisabled) {
     metadataComponent.setDisabled(isDisabled);
   }
   
+  // Handle ingredients list component
+  const ingredientsList = shadowRoot.getElementById('ingredients-list');
+  if (ingredientsList && typeof ingredientsList.setDisabled === 'function') {
+    ingredientsList.setDisabled(isDisabled);
+  }
+  
   // Handle form button group component
   const buttonGroup = shadowRoot.getElementById('form-buttons');
   if (buttonGroup && typeof buttonGroup.setDisabled === 'function') {
@@ -26,7 +32,7 @@ export function setFormDisabledState(shadowRoot, isDisabled) {
   }
   
   // Handle main component form elements (excluding those in sub-components)
-  const formElements = shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input):not(form-button-group input), select:not(recipe-metadata-fields select):not(form-button-group select), textarea:not(recipe-metadata-fields textarea):not(form-button-group textarea)');
+  const formElements = shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input):not(form-button-group input):not(recipe-ingredients-list input), select:not(recipe-metadata-fields select):not(form-button-group select):not(recipe-ingredients-list select), textarea:not(recipe-metadata-fields textarea):not(form-button-group textarea):not(recipe-ingredients-list textarea)');
   formElements.forEach((element) => {
     element.disabled = isDisabled;
   });
@@ -48,11 +54,11 @@ export function clearForm(shadowRoot) {
   // Clear metadata fields through component API
   clearMetadataFields(shadowRoot);
   
+  // Clear ingredients through component API
+  clearIngredientsFields(shadowRoot);
+  
   // Clear main component fields (inputs, selects, textareas not in sub-components)
   clearMainComponentFields(shadowRoot);
-  
-  // Reset ingredients to initial state
-  resetIngredientsToInitial(shadowRoot);
   
   // Reset instructions/stages to initial state
   resetInstructionsToInitial(shadowRoot);
@@ -77,13 +83,24 @@ function clearMetadataFields(shadowRoot) {
 }
 
 /**
+ * Clears ingredients fields through component API
+ * @param {ShadowRoot} shadowRoot - The component's shadow root
+ */
+function clearIngredientsFields(shadowRoot) {
+  const ingredientsList = shadowRoot.getElementById('ingredients-list');
+  if (ingredientsList && typeof ingredientsList.clearIngredients === 'function') {
+    ingredientsList.clearIngredients();
+  }
+}
+
+/**
  * Clears main component fields (excluding those in sub-components)
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  */
 function clearMainComponentFields(shadowRoot) {
   // Clear only inputs, selects, and textareas that are direct children of main component
-  // This excludes fields inside sub-components like recipe-metadata-fields
-  shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input), select:not(recipe-metadata-fields select), textarea:not(recipe-metadata-fields textarea)').forEach((field) => {
+  // This excludes fields inside sub-components
+  shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input):not(recipe-ingredients-list input), select:not(recipe-metadata-fields select):not(recipe-ingredients-list select), textarea:not(recipe-metadata-fields textarea):not(recipe-ingredients-list textarea)').forEach((field) => {
     if (field.type === 'textarea' || field.tagName === 'TEXTAREA') {
       field.value = '';
     } else if (field.tagName === 'SELECT') {
@@ -92,44 +109,6 @@ function clearMainComponentFields(shadowRoot) {
       field.value = '';
     }
     field.classList.remove('recipe-form__input--invalid');
-  });
-}
-
-/**
- * Resets ingredients section to initial state (single empty ingredient)
- * @param {ShadowRoot} shadowRoot - The component's shadow root
- */
-function resetIngredientsToInitial(shadowRoot) {
-  const ingredientsContainer = shadowRoot.querySelector('.recipe-form__ingredients');
-  if (!ingredientsContainer) return;
-  
-  const ingredientEntries = ingredientsContainer.querySelectorAll('.recipe-form__ingredient-entry');
-  
-  ingredientEntries.forEach((entry, index) => {
-    if (index === 0) {
-      // Reset first ingredient entry
-      const quantityInput = entry.querySelector('.recipe-form__input--quantity');
-      const unitInput = entry.querySelector('.recipe-form__input--unit');
-      const itemInput = entry.querySelector('.recipe-form__input--item');
-      
-      if (quantityInput) quantityInput.value = '';
-      if (unitInput) unitInput.value = '';
-      if (itemInput) itemInput.value = '';
-      
-      // Reset button to add state
-      const button = entry.querySelector('button');
-      if (button) {
-        button.textContent = '+';
-        button.className = 'recipe-form__button recipe-form__button--add-ingredient';
-      }
-      
-      // Remove any remove buttons from first entry
-      const removeButton = entry.querySelector('.recipe-form__button--remove-ingredient');
-      if (removeButton) removeButton.remove();
-    } else {
-      // Remove additional ingredient entries
-      entry.remove();
-    }
   });
 }
 
@@ -265,65 +244,17 @@ function populateBasicFields(shadowRoot, recipeData) {
 }
 
 /**
- * Populates ingredients section
+ * Populates ingredients section using component API
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  * @param {Array} ingredients - Array of ingredient objects
  */
 function populateIngredients(shadowRoot, ingredients) {
-  const ingredientsContainer = shadowRoot.querySelector('.recipe-form__ingredients');
-  if (!ingredientsContainer || !ingredients.length) return;
-  
-  // Clear existing ingredients first
-  const existingEntries = ingredientsContainer.querySelectorAll('.recipe-form__ingredient-entry');
-  existingEntries.forEach((entry, index) => {
-    if (index > 0) entry.remove();
-  });
-  
-  // Populate ingredients
-  ingredients.forEach((ingredient, index) => {
-    const entries = ingredientsContainer.querySelectorAll('.recipe-form__ingredient-entry');
-    let entry = entries[index];
-    
-    // Add new entry if needed
-    if (!entry && index > 0) {
-      const firstEntry = entries[0];
-      const addButton = firstEntry.querySelector('.recipe-form__button--add-ingredient');
-      if (addButton) {
-        // This would need to call the component's addIngredientLine method
-        // For now, we'll create the entry manually
-        entry = createIngredientEntry();
-        ingredientsContainer.appendChild(entry);
-      }
-    }
-    
-    if (entry) {
-      const quantityInput = entry.querySelector('.recipe-form__input--quantity');
-      const unitInput = entry.querySelector('.recipe-form__input--unit');
-      const itemInput = entry.querySelector('.recipe-form__input--item');
-      
-      if (quantityInput) quantityInput.value = ingredient.amount || '';
-      if (unitInput) unitInput.value = ingredient.unit || '';
-      if (itemInput) itemInput.value = ingredient.item || '';
-    }
-  });
+  const ingredientsList = shadowRoot.getElementById('ingredients-list');
+  if (ingredientsList && typeof ingredientsList.populateIngredients === 'function') {
+    ingredientsList.populateIngredients(ingredients);
+  }
 }
 
-/**
- * Creates a new ingredient entry element
- * @returns {HTMLElement} - New ingredient entry element
- */
-function createIngredientEntry() {
-  const entry = document.createElement('div');
-  entry.classList.add('recipe-form__ingredient-entry');
-  entry.innerHTML = `
-    <input type="text" class="recipe-form__input recipe-form__input--quantity" placeholder="כמות">
-    <input type="text" class="recipe-form__input recipe-form__input--unit" placeholder="יחידה">
-    <input type="text" class="recipe-form__input recipe-form__input--item" placeholder="פריט">
-    <button type="button" class="recipe-form__button recipe-form__button--add-ingredient">+</button>
-    <button type="button" class="recipe-form__button recipe-form__button--remove-ingredient">-</button>
-  `;
-  return entry;
-}
 
 /**
  * Populates instructions/stages section

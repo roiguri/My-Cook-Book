@@ -4,6 +4,7 @@
  * Shared styles for RecipeFormComponent and its sub-components:
  * - recipe-metadata-fields.js
  * - form-button-group.js
+ * - recipe-ingredients-list.js
  * 
  * This CSS file is used by multiple components to ensure consistent
  * styling and validation appearance across form boundaries.
@@ -183,7 +184,7 @@
 }
 
 .recipe-form__input--invalid {
-  border-color: red;
+  border: 1px solid red;
 }
 
 /* Responsive Design */

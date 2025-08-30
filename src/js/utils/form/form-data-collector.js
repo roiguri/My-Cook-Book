@@ -47,26 +47,16 @@ export function collectRecipeFormData(shadowRoot) {
 
 
 /**
- * Collects ingredient data from all ingredient entries
+ * Collects ingredient data from the ingredients list component
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  * @returns {Array} - Array of ingredient objects
  */
 function collectIngredients(shadowRoot) {
-  const ingredients = [];
-  const entries = shadowRoot.querySelectorAll('.recipe-form__ingredient-entry');
-  
-  entries.forEach((entry) => {
-    const amount = entry.querySelector('.recipe-form__input--quantity')?.value.trim() || '';
-    const unit = entry.querySelector('.recipe-form__input--unit')?.value.trim() || '';
-    const item = entry.querySelector('.recipe-form__input--item')?.value.trim() || '';
-    
-    // Only add ingredient if at least one field has content
-    if (amount || unit || item) {
-      ingredients.push({ amount, unit, item });
-    }
-  });
-  
-  return ingredients;
+  const ingredientsList = shadowRoot.getElementById('ingredients-list');
+  if (ingredientsList && typeof ingredientsList.getIngredients === 'function') {
+    return ingredientsList.getIngredients();
+  }
+  return [];
 }
 
 /**

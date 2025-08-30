@@ -10,6 +10,7 @@ import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
 import './parts/recipe-metadata-fields.js';
 import './parts/form-button-group.js';
+import './parts/recipe-ingredients-list.js';
 
 class RecipeFormComponent extends HTMLElement {
   constructor() {
@@ -57,15 +58,7 @@ class RecipeFormComponent extends HTMLElement {
           <recipe-metadata-fields id="metadata-fields"></recipe-metadata-fields>
   
           <div class="recipe-form__group">
-            <div id="ingredients-container" class="recipe-form__ingredients">
-              <label class="recipe-form__label">מצרכים:</label>
-              <div class="recipe-form__ingredient-entry">
-                <input type="text" class="recipe-form__input recipe-form__input--quantity" placeholder="כמות">
-                <input type="text" class="recipe-form__input recipe-form__input--unit" placeholder="יחידה">
-                <input type="text" class="recipe-form__input recipe-form__input--item" placeholder="פריט">
-                <button type="button" class="recipe-form__button recipe-form__button--add-ingredient">+</button>
-              </div>
-            </div>
+            <recipe-ingredients-list id="ingredients-list"></recipe-ingredients-list>
           </div>
   
           <div class="recipe-form__group">
@@ -103,15 +96,6 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   setupEventListeners() {
-    // Add event listener for ingredients
-    const ingredientsContainer = this.shadowRoot.getElementById('ingredients-container');
-    ingredientsContainer.addEventListener('click', (event) => {
-      if (event.target.classList.contains('recipe-form__button--add-ingredient')) {
-        this.addIngredientLine(event);
-      } else if (event.target.classList.contains('recipe-form__button--remove-ingredient')) {
-        this.removeIngredientLine(event);
-      }
-    });
 
     // Add event listener for Instructions
     const stagesContainer = this.shadowRoot.getElementById('stages-container');
@@ -176,58 +160,6 @@ class RecipeFormComponent extends HTMLElement {
     });
   }
 
-  /**
-   * Add ingredient
-   */
-  addIngredientLine(event) {
-    const ingredientsContainer = this.shadowRoot.querySelector('.recipe-form__ingredients');
-    const clickedButton = event.target;
-    const currentIngredient = clickedButton.closest('.recipe-form__ingredient-entry');
-
-    // Create and add the new ingredient entry with remove and add buttons in the correct order
-    const newEntry = document.createElement('div');
-    newEntry.classList.add('recipe-form__ingredient-entry');
-    newEntry.innerHTML = `
-      <input type="text" class="recipe-form__input recipe-form__input--quantity" placeholder="כמות">
-      <input type="text" class="recipe-form__input recipe-form__input--unit" placeholder="יחידה">
-      <input type="text" class="recipe-form__input recipe-form__input--item" placeholder="פריט">
-      <button type="button" class="recipe-form__button recipe-form__button--add-ingredient">+</button>
-      <button type="button" class="recipe-form__button recipe-form__button--remove-ingredient">-</button>
-    `;
-
-    // Insert the new entry after the current one
-    ingredientsContainer.insertBefore(newEntry, currentIngredient.nextSibling);
-
-    // Add remove button to the first ingredient if it doesn't have one
-    const firstIngredient = ingredientsContainer.querySelector('.recipe-form__ingredient-entry');
-    if (!firstIngredient.querySelector('.recipe-form__button--remove-ingredient')) {
-      const removeButton = document.createElement('button');
-      removeButton.type = 'button';
-      removeButton.classList.add('recipe-form__button', 'recipe-form__button--remove-ingredient');
-      removeButton.textContent = '-';
-      firstIngredient.appendChild(removeButton);
-    }
-  }
-
-  // Function to remove an ingredient
-  removeIngredientLine(event) {
-    const ingredientToRemove = event.target.closest('.recipe-form__ingredient-entry');
-    const ingredientsContainer = ingredientToRemove.closest('.recipe-form__ingredients');
-    ingredientToRemove.remove();
-
-    // Check if there's only one ingredient left and remove the remove button if so
-    const remainingIngredients = ingredientsContainer.querySelectorAll(
-      '.recipe-form__ingredient-entry',
-    );
-    if (remainingIngredients.length === 1) {
-      const removeButton = remainingIngredients[0].querySelector(
-        '.recipe-form__button--remove-ingredient',
-      );
-      if (removeButton) {
-        removeButton.remove();
-      }
-    }
-  }
 
   /**
    * Add instructions
@@ -440,37 +372,11 @@ class RecipeFormComponent extends HTMLElement {
           commentsField.value = data.comments ? data.comments.join('\n') : '';
         }
 
-        // Populate ingredients
-        const ingredientsContainer = this.shadowRoot.querySelector('.recipe-form__ingredients');
-        // Remove all existing ingredient entries except the first one
-        ingredientsContainer
-          .querySelectorAll('.recipe-form__ingredient-entry')
-          .forEach((entry, index) => {
-            if (index > 0) {
-              entry.remove();
-            }
-          });
-        // Add ingredient entries and populate them
-        data.ingredients.forEach((ingredient, index) => {
-          // Select the correct ingredient entry using index
-          const entries = ingredientsContainer.querySelectorAll('.recipe-form__ingredient-entry');
-          const entry = entries[index];
-
-          if (index < data.ingredients.length - 1) {
-            const addButton = entry.querySelector('.recipe-form__button--add-ingredient');
-
-            if (addButton) {
-              this.addIngredientLine({ target: addButton });
-            }
-          }
-
-          if (entry) {
-            // Make sure the entry exists
-            entry.querySelector('.recipe-form__input--quantity').value = ingredient.amount;
-            entry.querySelector('.recipe-form__input--unit').value = ingredient.unit;
-            entry.querySelector('.recipe-form__input--item').value = ingredient.item;
-          }
-        });
+        // Populate ingredients through component API
+        const ingredientsList = this.shadowRoot.getElementById('ingredients-list');
+        if (ingredientsList && data.ingredients) {
+          ingredientsList.populateIngredients(data.ingredients);
+        }
 
         // Populate instructions (stages)
         const stagesContainer = this.shadowRoot.getElementById('stages-container');
