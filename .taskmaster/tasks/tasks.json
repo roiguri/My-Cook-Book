@@ -304,5 +304,172 @@
       "updated": "2025-07-12T19:01:59.886Z",
       "description": "Tasks for feature-recipe-reader-integration context"
     }
+  },
+  "form-refactoring-phase3": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create SectionedListComponent Base Class",
+        "description": "Develop a generic sectioned list component that extends DynamicListComponent to support both flat lists and grouped sections with dynamic mode switching.",
+        "details": "Create SectionedListComponent class extending DynamicListComponent with mode switching capabilities: 'flat' for simple lists and 'sectioned' for grouped items. Implement core methods: switchToSectionedMode(), switchToFlatMode(), addSection(title), removeSection(index), moveSection(from, to). Support dynamic data formats - flat arrays for simple mode and sectioned objects for grouped mode. Include section-aware validation, proper event propagation through Shadow DOM, and data preservation during mode switches. Use modern ES6+ features and ensure compatibility with existing form validation system. Implement proper lifecycle management and memory cleanup.",
+        "testStrategy": "Unit tests for mode switching, section management operations, data format conversion, and validation integration. Test data preservation during mode changes, proper event dispatching, and Shadow DOM rendering. Verify inheritance from DynamicListComponent works correctly.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Create RecipeInstructionsList Component",
+        "description": "Build instructions component extending SectionedListComponent with Hebrew stage support and backward compatibility with existing instruction formats.",
+        "details": "Create RecipeInstructionsList component extending SectionedListComponent for single-field instructions. Configure for Hebrew interface with 'שלב' section titles and 'הוסף שלב' mode switching button. Support current stage-based architecture and simple instruction arrays for backward compatibility. Implement getInstructions() and populateInstructions() API methods. Handle both instruction formats: simple arrays and stage objects with titles. Include proper RTL text handling and validation for Hebrew content. Ensure event propagation works with existing form validation system.",
+        "testStrategy": "Component tests for Hebrew text handling, RTL layout, mode switching between flat and sectioned modes, data population from both instruction formats, and validation integration. Test backward compatibility with existing recipe data structures.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Integrate Instructions Component into Main Form",
+        "description": "Replace embedded instructions DOM with RecipeInstructionsList component and remove 150+ lines of instructions logic from main component.",
+        "details": "Update recipe_form_component.js template to use <recipe-instructions-list> element instead of embedded DOM. Remove instructions-related methods (addStepLine, removeStepLine, addStage, removeStage, convertToStageFormat, updateStageNumbers) totaling ~150 lines. Update setupEventListeners() to remove instructions event handlers. Modify setRecipeData() to use component API for instructions population. Update form-data-collector.js to use component API instead of DOM queries. Ensure validation and state management work with component-based architecture.",
+        "testStrategy": "Integration tests verifying all existing instruction functionality works through component API. Test recipe data loading and saving with both instruction formats. Verify event propagation and validation work correctly. Regression testing to ensure no functionality is lost.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Design Ingredient Sections Data Model",
+        "description": "Design backward-compatible data structure for sectioned ingredients supporting both flat arrays and grouped sections.",
+        "details": "Design new data structure supporting mode-based ingredients: { mode: 'sectioned'|'flat', sections: [{title: string, items: [ingredient objects]}] } for sectioned mode, or simple array for flat mode. Ensure backward compatibility with existing flat ingredient arrays. Create data detection utilities to identify format during recipe loading. Design migration strategy for existing recipes without requiring database changes. Include validation schemas for both formats and conversion utilities between formats.",
+        "testStrategy": "Schema validation tests for both data formats. Data conversion testing between flat and sectioned formats. Backward compatibility verification with existing recipe data. Migration testing with sample recipe datasets.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Update Recipe Data Utilities for Ingredient Sections",
+        "description": "Modify recipe data handling utilities to support both flat and sectioned ingredient formats with proper validation and conversion.",
+        "details": "Update recipe-data-utils.js to handle sectioned ingredient format. Modify formatRecipeData() to detect and handle both ingredient formats. Update validateRecipeData() with sectioned ingredient validation rules. Create conversion utilities: convertToSectionedIngredients() and convertToFlatIngredients(). Update form-data-collector.js to support component API for sectioned ingredients. Ensure proper error handling and data sanitization for both formats.",
+        "testStrategy": "Unit tests for data format detection, conversion utilities, and validation with both ingredient formats. Integration tests with form data collection. Test error handling for malformed ingredient data.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Update Recipe Presentation Components for Ingredient Sections",
+        "description": "Modify recipe display components to render sectioned ingredients with proper Hebrew section headers and responsive layout.",
+        "details": "Update recipe-card components to display ingredient sections with proper Hebrew section headers. Modify recipe detail views to show collapsible ingredient sections. Update recipe print layouts for sectioned ingredients with clear section breaks. Ensure mobile-responsive section display with proper RTL text handling. Add fallback rendering for flat ingredient format. Use CSS Grid or Flexbox for responsive section layouts.",
+        "testStrategy": "Visual regression tests for recipe displays with sectioned ingredients. Responsive design tests across different screen sizes. RTL text rendering verification. Print layout testing for sectioned format.",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Migrate RecipeIngredientsList to SectionedListComponent",
+        "description": "Refactor existing ingredients component to extend SectionedListComponent architecture while maintaining current functionality.",
+        "details": "Update RecipeIngredientsList to extend SectionedListComponent instead of DynamicListComponent. Add section management UI initially hidden with 'Add Section' button. Update component to handle both flat and sectioned ingredient data. Maintain existing three-field configuration (quantity, unit, item). Implement backward compatibility for existing recipes. Update validation to work with sectioned data structure. Ensure API methods (getIngredients, populateIngredients) work with both formats.",
+        "testStrategy": "Component migration tests verifying identical functionality after inheritance change. Test section management UI interactions. Verify backward compatibility with existing ingredient data. Test validation works with both flat and sectioned formats.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Real-time Validation Enhancement",
+        "description": "Add real-time validation feedback with debounced validation calls and progressive status indicators across all form components.",
+        "details": "Implement debounced validation (300ms delay) on field changes using modern event delegation. Add progressive validation hints showing field completion status and character counts where appropriate. Create visual feedback states for form validation (pending, valid, invalid). Implement cross-component validation dependencies ensuring ingredients and instructions are validated together. Use modern Web API features like IntersectionObserver for efficient validation triggers. Add validation state management utilities that work across Shadow DOM boundaries.",
+        "testStrategy": "Unit tests for debounced validation timing and progressive feedback. Integration tests for cross-component validation. Performance tests ensuring validation doesn't block UI. Accessibility tests for validation feedback with screen readers.",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Add Section Management UI Features",
+        "description": "Create intuitive section management interfaces with drag-and-drop reordering and bulk operations for both ingredients and instructions.",
+        "details": "Implement drag-and-drop section reordering using modern Drag and Drop API or library like @dnd-kit/core for better accessibility. Add section collapse/expand functionality with CSS transitions and proper ARIA attributes. Create bulk operations UI for moving items between sections with checkbox selection. Implement section templates and presets for common ingredient groupings (dry ingredients, wet ingredients, spices). Add keyboard shortcuts for power users (Ctrl+Enter for new section, Ctrl+D for duplicate). Ensure all interactions work properly in RTL Hebrew interface.",
+        "testStrategy": "User interaction tests for drag-and-drop functionality. Accessibility tests for keyboard navigation and screen readers. Test bulk operations with various selection scenarios. Verify RTL interface interactions work correctly.",
+        "priority": "medium",
+        "dependencies": [
+          7,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Performance Optimization for Sectioned Lists",
+        "description": "Optimize component performance for large sectioned lists with virtual scrolling and efficient DOM updates.",
+        "details": "Implement virtual scrolling for large sections using modern libraries like @tanstack/react-virtual or custom solution with IntersectionObserver. Add lazy loading for section content that only renders visible sections. Optimize DOM updates using DocumentFragment for batch operations. Implement efficient memory management for large recipe data with cleanup on component unmount. Use modern performance APIs like PerformanceObserver to monitor component performance. Add debounced resize handling for responsive updates.",
+        "testStrategy": "Performance benchmarks with large datasets (100+ ingredients, 50+ instructions). Memory usage testing during extended form interactions. Load time testing for components with large data sets. Verify virtual scrolling works smoothly across different devices.",
+        "priority": "low",
+        "dependencies": [
+          8,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Comprehensive Sectioned Architecture Testing",
+        "description": "Create thorough test suite covering the complete sectioned architecture with unit, integration, and end-to-end testing.",
+        "details": "Create comprehensive test suite using Jest and Testing Library for Web Components. Include unit tests for SectionedListComponent base class covering mode switching, section management, and data handling. Add integration tests for component interactions and event propagation through Shadow DOM. Test data format conversion and backward compatibility with existing recipe structures. Include cross-component validation testing and form submission workflows. Use modern testing patterns like custom element testing utilities and Shadow DOM query helpers.",
+        "testStrategy": "Achieve 95%+ code coverage for all new components. Create test fixtures for various recipe data formats. Run tests across different browser environments. Include performance regression tests comparing before/after metrics.",
+        "priority": "medium",
+        "dependencies": [
+          10
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "User Acceptance Testing and Migration Verification",
+        "description": "Conduct comprehensive testing with real recipe data and complete user workflows to ensure seamless migration and enhanced functionality.",
+        "details": "Perform comprehensive user acceptance testing with real recipe data from production. Test migration scenarios with existing recipes ensuring no data loss or corruption. Verify new sectioned recipe creation workflows work intuitively. Test mode switching and data preservation across different usage patterns. Conduct performance testing with complex sectioned data and large ingredient lists. Include accessibility testing with screen readers and keyboard navigation. Run cross-browser compatibility tests and mobile device testing. Verify that main component target of <400 lines is achieved.",
+        "testStrategy": "Execute complete user journey tests from recipe creation to editing and viewing. Test with various recipe complexities and data formats. Verify performance meets targets (main component <400 lines). Include accessibility audit with automated tools and manual testing. Conduct usability testing with actual users if possible.",
+        "priority": "high",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-30T13:47:40.442Z",
+      "updated": "2025-08-30T14:01:38.074Z",
+      "description": "Tasks for form-refactoring-phase3 context"
+    }
   }
 }
