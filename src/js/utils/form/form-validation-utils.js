@@ -108,13 +108,13 @@ function highlightFieldErrors(errors, shadowRoot) {
         ingredientErrors[key] = true;
       }
     }
-    // Handle instruction errors directly
-    else if (key.startsWith('instructions[')) {
-      highlightInstructionField(key, shadowRoot);
+    // Handle instruction errors - both general and specific
+    else if (key === 'instructions' || key.startsWith('instructions[')) {
+      highlightInstructionErrors(key, shadowRoot);
     }
-    // Handle stage errors directly
-    else if (key.startsWith('stages[')) {
-      highlightStageField(key, shadowRoot);
+    // Handle stage errors - both general and specific  
+    else if (key === 'stages' || key.startsWith('stages[')) {
+      highlightStageErrors(key, shadowRoot);
     }
     // Handle main component fields directly (like comments)
     else {
@@ -173,45 +173,62 @@ function highlightEmptyIngredientsError(ingredientErrors, shadowRoot) {
 
 
 /**
- * Highlights instruction field errors
- * @param {string} key - Error key (e.g., "instructions[0]")
+ * Highlights instruction errors using component API
+ * @param {string} key - Error key (e.g., "instructions" or "instructions[0]")
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  */
-function highlightInstructionField(key, shadowRoot) {
-  const match = key.match(/instructions\[(\d+)\]/);
-  if (match) {
-    const idx = parseInt(match[1], 10);
-    const input = shadowRoot.querySelectorAll(
-      '.recipe-form__stages input[type="text"]',
-    )[idx];
-    if (input) input.classList.add('recipe-form__input--invalid');
+function highlightInstructionErrors(key, shadowRoot) {
+  const instructionsComponent = shadowRoot.getElementById('instructions-list');
+  
+  if (instructionsComponent && typeof instructionsComponent.setValidationState === 'function') {
+    if (key === 'instructions') {
+      // General instructions error - highlight all visible instruction fields
+      instructionsComponent.setValidationState({ general: true });
+    } else {
+      // Specific instruction error - parse index and highlight specific field
+      const match = key.match(/instructions\[(\d+)\]/);
+      if (match) {
+        const idx = parseInt(match[1], 10);
+        instructionsComponent.setValidationState({ [idx]: true });
+      }
+    }
+  } else {
+    console.warn('Instructions component not found or missing setValidationState method');
   }
 }
 
 /**
- * Highlights stage field errors
- * @param {string} key - Error key (e.g., "stages[0].title")
+ * Highlights stage errors using component API
+ * @param {string} key - Error key (e.g., "stages" or "stages[0].title")
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  */
-function highlightStageField(key, shadowRoot) {
-  const match = key.match(/stages\[(\d+)\](?:\.(\w+))?/);
-  if (match) {
-    const sIdx = parseInt(match[1], 10);
-    const field = match[2];
-    const stage = shadowRoot.querySelectorAll('.recipe-form__steps')[sIdx];
-    
-    if (stage && field === 'title') {
-      const input = stage.querySelector('.recipe-form__input--stage-name');
-      if (input) input.classList.add('recipe-form__input--invalid');
+function highlightStageErrors(key, shadowRoot) {
+  const instructionsComponent = shadowRoot.getElementById('instructions-list');
+  
+  if (instructionsComponent && typeof instructionsComponent.setValidationState === 'function') {
+    if (key === 'stages') {
+      // General stages error - highlight all visible stage fields
+      instructionsComponent.setValidationState({ general: true });
+    } else {
+      // Specific stage error - parse index and field type
+      const match = key.match(/stages\[(\d+)\](?:\.(\w+))?(?:\[(\d+)\])?/);
+      if (match) {
+        const stageIdx = parseInt(match[1], 10);
+        const field = match[2]; // 'title', 'instructions', etc.
+        const stepIdx = match[3] ? parseInt(match[3], 10) : undefined;
+        
+        const errorKey = stepIdx !== undefined 
+          ? `${stageIdx}.${field}.${stepIdx}` 
+          : `${stageIdx}.${field}`;
+        
+        instructionsComponent.setValidationState({ [errorKey]: true });
+      }
     }
-    
-    if (stage && field === 'instructions') {
-      stage.querySelectorAll('input[type="text"]').forEach((input) => {
-        input.classList.add('recipe-form__input--invalid');
-      });
-    }
+  } else {
+    console.warn('Instructions component not found or missing setValidationState method');
   }
 }
+
 
 /**
  * Shows error message in the UI

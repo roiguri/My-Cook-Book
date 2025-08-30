@@ -681,6 +681,105 @@ class RecipeInstructionsList extends DynamicListComponent {
       }
     }));
   }
+
+  /**
+   * Set validation state for instruction fields
+   * @param {Object} errors - Validation errors object
+   */
+  setValidationState(errors) {
+    // Clear all existing validation errors first
+    const allInputs = this.shadowRoot.querySelectorAll('input[type="text"]');
+    allInputs.forEach(input => {
+      input.classList.remove('recipe-form__input--invalid');
+    });
+
+    if (!errors || Object.keys(errors).length === 0) {
+      return; // No errors to highlight
+    }
+
+    // Handle different error types
+    Object.keys(errors).forEach(errorKey => {
+      if (errorKey === 'general') {
+        // General error - highlight all visible instruction inputs
+        this.highlightAllInstructionInputs();
+      } else if (typeof errorKey === 'string' && errorKey.includes('.')) {
+        // Stage-specific error (e.g., "0.title" or "0.instructions.1")
+        this.highlightStageError(errorKey);
+      } else if (typeof errorKey === 'number' || /^\d+$/.test(errorKey)) {
+        // Simple instruction index error
+        this.highlightInstructionByIndex(parseInt(errorKey));
+      }
+    });
+  }
+
+  /**
+   * Highlight all instruction inputs
+   */
+  highlightAllInstructionInputs() {
+    const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
+    inputs.forEach(input => {
+      input.classList.add('recipe-form__input--invalid');
+    });
+
+    // Also highlight stage title inputs if in stage mode
+    if (this.isStageMode) {
+      const stageTitleInputs = this.shadowRoot.querySelectorAll('.recipe-form__input--stage-name');
+      stageTitleInputs.forEach(input => {
+        input.classList.add('recipe-form__input--invalid');
+      });
+    }
+  }
+
+  /**
+   * Highlight specific instruction by index
+   * @param {number} index - Instruction index to highlight
+   */
+  highlightInstructionByIndex(index) {
+    const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
+    if (inputs[index]) {
+      inputs[index].classList.add('recipe-form__input--invalid');
+    }
+  }
+
+  /**
+   * Highlight stage-specific error
+   * @param {string} errorKey - Error key like "0.title" or "0.instructions.1"
+   */
+  highlightStageError(errorKey) {
+    const parts = errorKey.split('.');
+    const stageIndex = parseInt(parts[0]);
+    const field = parts[1]; // 'title' or 'instructions'
+    const stepIndex = parts[2] ? parseInt(parts[2]) : undefined;
+
+    if (field === 'title') {
+      // Highlight stage title input
+      const stageContainer = this.shadowRoot.querySelector(`[data-stage-index="${stageIndex}"]`);
+      if (stageContainer) {
+        const titleInput = stageContainer.querySelector('.recipe-form__input--stage-name');
+        if (titleInput) {
+          titleInput.classList.add('recipe-form__input--invalid');
+        }
+      }
+    } else if (field === 'instructions') {
+      // Highlight instruction inputs in specific stage
+      const stageContainer = this.shadowRoot.querySelector(`[data-stage-index="${stageIndex}"]`);
+      if (stageContainer) {
+        if (stepIndex !== undefined) {
+          // Specific step within stage
+          const stepInputs = stageContainer.querySelectorAll('input[name="steps"]');
+          if (stepInputs[stepIndex]) {
+            stepInputs[stepIndex].classList.add('recipe-form__input--invalid');
+          }
+        } else {
+          // All steps in stage
+          const stepInputs = stageContainer.querySelectorAll('input[name="steps"]');
+          stepInputs.forEach(input => {
+            input.classList.add('recipe-form__input--invalid');
+          });
+        }
+      }
+    }
+  }
 }
 
 customElements.define('recipe-instructions-list', RecipeInstructionsList);
