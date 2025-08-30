@@ -23,12 +23,16 @@ export function collectRecipeFormData(shadowRoot) {
     approved: false,
   };
 
-  // Collect instructions/stages
-  const { instructions, stages } = collectInstructionsAndStages(shadowRoot);
-  if (stages) {
-    recipeData.stages = stages;
-  } else if (instructions) {
-    recipeData.instructions = instructions;
+  // Collect instructions/stages from new component
+  const instructionsData = collectInstructionsFromComponent(shadowRoot);
+  if (instructionsData) {
+    if (Array.isArray(instructionsData) && instructionsData.length > 0 && instructionsData[0].title) {
+      // Stages format
+      recipeData.stages = instructionsData;
+    } else if (Array.isArray(instructionsData)) {
+      // Simple instructions array
+      recipeData.instructions = instructionsData;
+    }
   }
 
   // Collect images
@@ -60,46 +64,21 @@ function collectIngredients(shadowRoot) {
 }
 
 /**
- * Collects instructions and stages data
+ * Collects instructions data from the instructions list component
  * @param {ShadowRoot} shadowRoot - The component's shadow root
- * @returns {Object} - Object with either instructions array or stages array
+ * @returns {Array|null} - Instructions data from component
  */
-function collectInstructionsAndStages(shadowRoot) {
-  const stagesContainers = shadowRoot.querySelectorAll('.recipe-form__steps');
-  
-  if (stagesContainers.length > 1) {
-    // Multiple stages mode
-    const stages = [];
-    
-    stagesContainers.forEach((container, index) => {
-      const stageNameInput = container.querySelector('.recipe-form__input--stage-name');
-      const stageTitle = stageNameInput ? stageNameInput.value.trim() : `שלב ${index + 1}`;
-      
-      const instructions = Array.from(
-        container.querySelectorAll('.recipe-form__step input[type="text"]')
-      )
-        .map((input) => input.value.trim())
-        .filter((instruction) => instruction.length > 0);
-      
-      if (instructions.length > 0) {
-        stages.push({ title: stageTitle, instructions });
-      }
-    });
-    
-    return { stages };
-  } else {
-    // Single stage mode - just instructions
-    const instructions = Array.from(
-      shadowRoot
-        .querySelector('.recipe-form__stages')
-        .querySelectorAll('input[type="text"]')
-    )
-      .map((input) => input.value.trim())
-      .filter((instruction) => instruction.length > 0);
-    
-    return { instructions };
+function collectInstructionsFromComponent(shadowRoot) {
+  const instructionsList = shadowRoot.getElementById('instructions-list');
+  if (instructionsList && typeof instructionsList.getInstructions === 'function') {
+    return instructionsList.getInstructions();
   }
+  
+  // Component should always be available
+  console.warn('Instructions component not found or missing getInstructions method');
+  return null;
 }
+
 
 /**
  * Collects image data from the image handler
@@ -174,7 +153,11 @@ export function collectSectionData(shadowRoot, section) {
       return { ingredients: collectIngredients(shadowRoot) };
     
     case 'instructions':
-      return collectInstructionsAndStages(shadowRoot);
+      const instructionsData = collectInstructionsFromComponent(shadowRoot);
+      if (Array.isArray(instructionsData) && instructionsData.length > 0 && instructionsData[0].title) {
+        return { stages: instructionsData };
+      }
+      return { instructions: instructionsData || [] };
     
     case 'images':
       return collectImages(shadowRoot);

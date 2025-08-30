@@ -113,61 +113,18 @@ function clearMainComponentFields(shadowRoot) {
 }
 
 /**
- * Resets instructions/stages section to initial state
+ * Resets instructions section through component API
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  */
 function resetInstructionsToInitial(shadowRoot) {
-  const stagesContainer = shadowRoot.getElementById('stages-container');
-  if (!stagesContainer) return;
-  
-  const stepsContainers = stagesContainer.querySelectorAll('.recipe-form__steps');
-  
-  stepsContainers.forEach((container, index) => {
-    if (index === 0) {
-      // Reset first stage
-      resetStepsInContainer(container);
-      
-      // Remove stage-specific elements (title, name input)
-      const titleContainer = container.querySelector('.recipe-form__stage-header');
-      const stageName = container.querySelector('.recipe-form__input--stage-name');
-      
-      if (titleContainer) titleContainer.remove();
-      if (stageName) stageName.remove();
-    } else {
-      // Remove additional stages
-      container.remove();
-    }
-  });
+  const instructionsList = shadowRoot.getElementById('instructions-list');
+  if (instructionsList && typeof instructionsList.clearInstructions === 'function') {
+    instructionsList.clearInstructions();
+  } else {
+    console.warn('Instructions component not found or missing clearInstructions method');
+  }
 }
 
-/**
- * Resets steps within a container to initial state
- * @param {HTMLElement} container - The steps container
- */
-function resetStepsInContainer(container) {
-  const steps = container.querySelectorAll('.recipe-form__step');
-  
-  steps.forEach((step, stepIndex) => {
-    if (stepIndex === 0) {
-      // Reset first step
-      const input = step.querySelector('input[type="text"]');
-      if (input) input.value = '';
-      
-      const button = step.querySelector('button');
-      if (button) {
-        button.textContent = '+';
-        button.className = 'recipe-form__button recipe-form__button--add-step';
-      }
-      
-      // Remove any remove buttons from first step
-      const removeButton = step.querySelector('.recipe-form__button--remove-step');
-      if (removeButton) removeButton.remove();
-    } else {
-      // Remove additional steps
-      step.remove();
-    }
-  });
-}
 
 /**
  * Clears images from the image handler

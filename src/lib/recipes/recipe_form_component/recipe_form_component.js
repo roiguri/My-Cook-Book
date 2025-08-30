@@ -11,6 +11,7 @@ import '../../modals/message-modal/message-modal.js';
 import './parts/recipe-metadata-fields.js';
 import './parts/form-button-group.js';
 import './parts/recipe-ingredients-list.js';
+import './parts/recipe-instructions-list.js';
 
 class RecipeFormComponent extends HTMLElement {
   constructor() {
@@ -62,16 +63,7 @@ class RecipeFormComponent extends HTMLElement {
           </div>
   
           <div class="recipe-form__group">
-            <div id="stages-container" class="recipe-form__stages">
-              <label class="recipe-form__label">תהליך הכנה:</label>
-              <div id="steps-container" class="recipe-form__steps">
-                <fieldset class="recipe-form__step">
-                  <input type="text" name="steps" class="recipe-form__input">
-                  <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
-                </fieldset>
-              </div>
-              <button type="button" id="add-stage" class="recipe-form__button recipe-form__button--add-stage">הוסף שלב</button>
-            </div>
+            <recipe-instructions-list id="instructions-list" mode="flat"></recipe-instructions-list>
           </div>
   
           <div class="recipe-form__group">
@@ -97,18 +89,10 @@ class RecipeFormComponent extends HTMLElement {
 
   setupEventListeners() {
 
-    // Add event listener for Instructions
-    const stagesContainer = this.shadowRoot.getElementById('stages-container');
-    stagesContainer.addEventListener('click', (event) => {
-      if (event.target.classList.contains('recipe-form__button--add-step')) {
-        this.addStepLine(event);
-      } else if (event.target.classList.contains('recipe-form__button--remove-step')) {
-        this.removeStepLine(event);
-      } else if (event.target.id === 'add-stage') {
-        this.addStage(event);
-      } else if (event.target.classList.contains('recipe-form__button--remove-stage')) {
-        this.removeStage(event);
-      }
+    // Add event listener for Instructions List component
+    const instructionsList = this.shadowRoot.getElementById('instructions-list');
+    instructionsList.addEventListener('instructions-changed', () => {
+      // No validation on every change - only on submit like before
     });
 
     // Add event listener to show image preview
@@ -160,170 +144,6 @@ class RecipeFormComponent extends HTMLElement {
     });
   }
 
-
-  /**
-   * Add instructions
-   */
-  addStepLine(event) {
-    const stepsContainer = event.target.closest('.recipe-form__steps');
-    const clickedButton = event.target;
-    const currentStep = clickedButton.closest('.recipe-form__step');
-
-    // Create and add the new step with remove and add buttons
-    const newStep = document.createElement('div');
-    newStep.classList.add('recipe-form__step');
-    newStep.innerHTML = `
-      <input type="text" class="recipe-form__input">
-      <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
-      <button type="button" class="recipe-form__button recipe-form__button--remove-step">-</button> 
-    `;
-
-    // Insert the new step after the current one
-    stepsContainer.insertBefore(newStep, currentStep.nextSibling);
-
-    // Add remove button to the first step if it doesn't have one
-    const firstStep = stepsContainer.querySelector('.recipe-form__step');
-    if (!firstStep.querySelector('.recipe-form__button--remove-step')) {
-      const removeButton = document.createElement('button');
-      removeButton.type = 'button';
-      removeButton.classList.add('recipe-form__button', 'recipe-form__button--remove-step');
-      removeButton.textContent = '-';
-      firstStep.appendChild(removeButton);
-    }
-  }
-
-  // Function to remove a step
-  removeStepLine(event) {
-    const stepToRemove = event.target.closest('.recipe-form__step');
-    const stepsContainer = stepToRemove.closest('.recipe-form__steps');
-    stepToRemove.remove();
-
-    // Check if there's only one step left and remove the remove button if so
-    const remainingSteps = stepsContainer.querySelectorAll('.recipe-form__step');
-    if (remainingSteps.length === 1) {
-      const removeButton = remainingSteps[0].querySelector('.recipe-form__button--remove-step');
-      if (removeButton) {
-        removeButton.remove();
-      }
-    }
-  }
-
-  // Add stages
-  addStage() {
-    const stagesContainer = this.shadowRoot.getElementById('stages-container');
-    const stageCount = stagesContainer.querySelectorAll('.recipe-form__steps').length;
-
-    // Store existing instructions from the first stage
-    let existingInstructions = [];
-    if (stageCount === 1) {
-      const firstStage = stagesContainer.querySelector('.recipe-form__steps');
-      existingInstructions = Array.from(
-        firstStage.querySelectorAll('.recipe-form__step input[type="text"]'),
-      ).map((input) => input.value.trim());
-    }
-
-    // Create a new stage and convert it to the correct format
-    const newStage = document.createElement('div');
-    newStage.classList.add('recipe-form__steps');
-    this.convertToStageFormat(newStage, stageCount + 1);
-
-    // Insert the new stage before the "add stage" button
-    const addStageButton = this.shadowRoot.getElementById('add-stage');
-    stagesContainer.insertBefore(newStage, addStageButton);
-
-    // If there were existing instructions, add them to the first stage
-    if (existingInstructions.length > 0) {
-      // Clear existing instructions from the first stage
-      const firstStage = stagesContainer.querySelector('.recipe-form__steps');
-      firstStage.innerHTML = ''; // This line clears the first stage
-
-      // Convert the first stage to the correct format
-      this.convertToStageFormat(firstStage, 1);
-
-      // Add existing instructions to the first stage
-      existingInstructions.forEach((instruction, index) => {
-        if (index > 0) {
-          this.addStepLine({ target: firstStage.querySelector('.recipe-form__button--add-step') });
-        }
-        firstStage.querySelectorAll('.recipe-form__step input[type="text"]')[index].value =
-          instruction;
-      });
-    }
-
-    // Ensure the new stage has at least one empty step
-    if (newStage.querySelectorAll('.recipe-form__step').length === 0) {
-      this.addStepLine({ target: newStage.querySelector('.recipe-form__button--add-step') });
-    }
-  }
-
-  convertToStageFormat(stage, number) {
-    const existingContent = stage.innerHTML;
-    stage.innerHTML = `
-      <div class="recipe-form__stage-header">
-        <h3 class="recipe-form__stage-title">שלב ${number}</h3>
-        <button type="button" class="recipe-form__button recipe-form__button--remove-stage">-</button>
-      </div>
-      <input type="text" class="recipe-form__input recipe-form__input--stage-name" placeholder="שם השלב (אופציונלי)">
-      ${
-        existingContent ||
-        `
-        <fieldset class="recipe-form__step">
-          <input type="text" name="steps" class="recipe-form__input">
-          <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
-        </fieldset>
-      `
-      }
-    `;
-  }
-
-  removeStage(event) {
-    const stagesContainer = this.shadowRoot.getElementById('stages-container');
-    const stageToRemove = event.target.closest('.recipe-form__steps');
-
-    if (stageToRemove) {
-      // If removing the last stage, store the instructions to re-add to the single stage format
-      let existingInstructions = [];
-      const stageCount = stagesContainer.querySelectorAll('.recipe-form__steps').length;
-      if (stageCount === 2) {
-        existingInstructions = Array.from(
-          stageToRemove.querySelectorAll('.recipe-form__step input[type="text"]'),
-        ).map((input) => input.value.trim());
-      }
-
-      stageToRemove.remove();
-
-      // If we're back to one stage, re-add the instructions and clean up extra elements
-      if (stageCount === 2 && existingInstructions.length > 0) {
-        // ... (re-add instructions logic remains the same)
-
-        // Remove extra buttons, the stage title, and the stage name input field
-        const remainingStage = stagesContainer.querySelector('.recipe-form__steps');
-        const addStageButton = remainingStage.querySelector('.recipe-form__button--add-stage');
-        const removeStageButton = remainingStage.querySelector(
-          '.recipe-form__button--remove-stage',
-        );
-        const stageTitle = remainingStage.querySelector('.recipe-form__stage-header');
-        const stageNameInput = remainingStage.querySelector('.recipe-form__input--stage-name'); // Select the stage name input field
-
-        if (addStageButton) addStageButton.remove();
-        if (removeStageButton) removeStageButton.remove();
-        if (stageTitle) stageTitle.remove();
-        if (stageNameInput) stageNameInput.remove(); // Remove the stage name input field
-      }
-
-      this.updateStageNumbers();
-    }
-  }
-
-  updateStageNumbers() {
-    const stages = this.shadowRoot.querySelectorAll('.recipe-form__steps');
-    stages.forEach((stage, index) => {
-      const title = stage.querySelector('.recipe-form__stage-title');
-      if (title) {
-        title.textContent = `שלב ${index + 1}`;
-      }
-    });
-  }
 
   /**
    * Validate form using form validation utilities
@@ -378,67 +198,15 @@ class RecipeFormComponent extends HTMLElement {
           ingredientsList.populateIngredients(data.ingredients);
         }
 
-        // Populate instructions (stages)
-        const stagesContainer = this.shadowRoot.getElementById('stages-container');
-        // Remove all existing stages except the first one
-        stagesContainer.querySelectorAll('.recipe-form__steps').forEach((stage, index) => {
-          if (index > 0) {
-            stage.remove();
+        // Populate instructions through new component API
+        const instructionsList = this.shadowRoot.getElementById('instructions-list');
+        if (instructionsList) {
+          // Component will automatically handle mode switching based on data
+          if (data.stages && data.stages.length > 0) {
+            instructionsList.populateInstructions({ stages: data.stages });
+          } else if (data.instructions && data.instructions.length > 0) {
+            instructionsList.populateInstructions(data.instructions);
           }
-        });
-
-        // Add stages and steps based on fetched data
-        if (data.stages && data.stages.length > 0) {
-          data.stages.forEach((stage, stageIndex) => {
-            // Add new stage only if it's not the first one
-            if (stageIndex < data.stages.length - 1) {
-              this.addStage({
-                target: stagesContainer.querySelector('.recipe-form__button--add-stage'),
-              });
-            }
-
-            const currentStage =
-              stagesContainer.querySelectorAll('.recipe-form__steps')[stageIndex];
-
-            // Add title to the stage if it exists
-            const stageTitleInput = currentStage.querySelector('.recipe-form__input--stage-name');
-            if (stageTitleInput) {
-              stageTitleInput.value = stage.title || ''; // Set the title or leave it empty if it doesn't exist
-            }
-
-            // Add steps to the stage
-            stage.instructions.forEach((instruction, instructionIndex) => {
-              if (instructionIndex > 0) {
-                this.addStepLine({
-                  target: currentStage.querySelectorAll('.recipe-form__button--add-step')[
-                    instructionIndex - 1
-                  ],
-                });
-              }
-              currentStage.querySelectorAll('.recipe-form__step input[type="text"]')[
-                instructionIndex
-              ].value = instruction;
-            });
-          });
-        } else {
-          // Handle the case where there are no stages (single instruction mode)
-          const currentStage = stagesContainer.querySelector('.recipe-form__steps');
-
-          // Add necessary step lines first
-          for (let i = 0; i < data.instructions.length - 1; i++) {
-            const addStepButtons = currentStage.querySelectorAll('.recipe-form__button--add-step');
-            if (addStepButtons.length > 0) {
-              this.addStepLine({ target: addStepButtons[addStepButtons.length - 1] });
-            }
-          }
-
-          // Then populate the step inputs
-          const stepInputs = currentStage.querySelectorAll('.recipe-form__step input[type="text"]');
-          data.instructions.forEach((instruction, instructionIndex) => {
-            if (stepInputs[instructionIndex]) {
-              stepInputs[instructionIndex].value = instruction;
-            }
-          });
         }
 
         // Populate images if they exist
@@ -446,8 +214,6 @@ class RecipeFormComponent extends HTMLElement {
           await this.populateImages(data.images);
         }
 
-        // Update stage titles
-        this.updateStageNumbers();
       } else {
         console.warn('No such document!');
         // Handle the case where the recipe doesn't exist
