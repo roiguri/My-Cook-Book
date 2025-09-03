@@ -110,6 +110,92 @@ async function processRecipeImages(recipeId, images, category, originalUserId) {
   return processedImages;
 }
 
+// Validates sectioned ingredient structure
+function validateIngredientSections(ingredientSections) {
+  const errors = [];
+  
+  if (!ingredientSections || !Array.isArray(ingredientSections)) {
+    errors.push('ingredientSections must be an array');
+    return errors;
+  }
+  
+  if (ingredientSections.length === 0) {
+    errors.push('ingredientSections array cannot be empty');
+    return errors;
+  }
+  
+  ingredientSections.forEach((section, sectionIndex) => {
+    // Validate section structure
+    if (!section || typeof section !== 'object') {
+      errors.push(`Section ${sectionIndex}: must be an object`);
+      return;
+    }
+    
+    // Validate section title
+    if (!section.title || typeof section.title !== 'string') {
+      errors.push(`Section ${sectionIndex}: missing or invalid title`);
+    } else if (section.title.trim().length === 0) {
+      errors.push(`Section ${sectionIndex}: title cannot be empty`);
+    }
+    
+    // Validate section items
+    if (!section.items || !Array.isArray(section.items)) {
+      errors.push(`Section ${sectionIndex}: missing or invalid items array`);
+      return;
+    }
+    
+    if (section.items.length === 0) {
+      errors.push(`Section ${sectionIndex}: items array cannot be empty`);
+      return;
+    }
+    
+    // Validate each ingredient in the section
+    section.items.forEach((ingredient, itemIndex) => {
+      if (!ingredient.item || typeof ingredient.item !== 'string') {
+        errors.push(`Section ${sectionIndex}, Item ${itemIndex}: missing or invalid item`);
+      }
+      if (ingredient.amount && typeof ingredient.amount !== 'string') {
+        errors.push(`Section ${sectionIndex}, Item ${itemIndex}: amount must be string`);
+      }
+      if (ingredient.unit && typeof ingredient.unit !== 'string') {
+        errors.push(`Section ${sectionIndex}, Item ${itemIndex}: unit must be string`);
+      }
+    });
+  });
+  
+  return errors;
+}
+
+// Validates flat ingredient array structure
+function validateFlatIngredients(ingredients) {
+  const errors = [];
+  
+  if (!ingredients || !Array.isArray(ingredients)) {
+    errors.push('ingredients must be an array');
+    return errors;
+  }
+  
+  if (ingredients.length === 0) {
+    errors.push('ingredients array cannot be empty');
+    return errors;
+  }
+  
+  // Validate ingredient structure
+  ingredients.forEach((ingredient, index) => {
+    if (!ingredient.item || typeof ingredient.item !== 'string') {
+      errors.push(`Ingredient ${index}: missing or invalid item`);
+    }
+    if (ingredient.amount && typeof ingredient.amount !== 'string') {
+      errors.push(`Ingredient ${index}: amount must be string`);
+    }
+    if (ingredient.unit && typeof ingredient.unit !== 'string') {
+      errors.push(`Ingredient ${index}: unit must be string`);
+    }
+  });
+  
+  return errors;
+}
+
 // Cookbook schema validation
 function validateCookbookRecipe(recipeData) {
   const errors = [];
@@ -136,22 +222,22 @@ function validateCookbookRecipe(recipeData) {
     errors.push('Missing or invalid servings');
   }
   
-  // Required ingredients array
-  if (!recipeData.ingredients || !Array.isArray(recipeData.ingredients) || recipeData.ingredients.length === 0) {
-    errors.push('Missing or invalid ingredients array');
-  } else {
-    // Validate ingredient structure
-    recipeData.ingredients.forEach((ingredient, index) => {
-      if (!ingredient.item || typeof ingredient.item !== 'string') {
-        errors.push(`Ingredient ${index}: missing or invalid item`);
-      }
-      if (ingredient.amount && typeof ingredient.amount !== 'string') {
-        errors.push(`Ingredient ${index}: amount must be string`);
-      }
-      if (ingredient.unit && typeof ingredient.unit !== 'string') {
-        errors.push(`Ingredient ${index}: unit must be string`);
-      }
-    });
+  // Validate ingredient format - must have exactly one format
+  const hasIngredients = recipeData.ingredients && Array.isArray(recipeData.ingredients);
+  const hasIngredientSections = recipeData.ingredientSections && Array.isArray(recipeData.ingredientSections);
+  
+  if (!hasIngredients && !hasIngredientSections) {
+    errors.push('Must have either ingredients or ingredientSections');
+  } else if (hasIngredients && hasIngredientSections) {
+    errors.push('Cannot have both ingredients and ingredientSections - choose one');
+  } else if (hasIngredients) {
+    // Validate flat ingredients format
+    const ingredientErrors = validateFlatIngredients(recipeData.ingredients);
+    errors.push(...ingredientErrors);
+  } else if (hasIngredientSections) {
+    // Validate sectioned ingredients format
+    const sectionErrors = validateIngredientSections(recipeData.ingredientSections);
+    errors.push(...sectionErrors);
   }
   
   // Validate ONE OF: stages OR instructions (not both, not neither)
@@ -244,7 +330,10 @@ function prepareCookbookRecipe(recipeData, metadata) {
     prepTime: recipeData.prepTime,
     waitTime: recipeData.waitTime,
     servings: recipeData.servings,
-    ingredients: recipeData.ingredients,
+    
+    // ONE OF: ingredients OR ingredientSections
+    ...(recipeData.ingredients && { ingredients: recipeData.ingredients }),
+    ...(recipeData.ingredientSections && { ingredientSections: recipeData.ingredientSections }),
     
     // ONE OF: stages OR instructions
     ...(recipeData.stages && { stages: recipeData.stages }),

@@ -26,22 +26,48 @@
 
 /**
  * Adjusts ingredient quantities for different serving sizes
- * @param {Ingredient[]} ingredients - Original ingredients with quantities
+ * Supports both flat ingredient arrays and sectioned ingredient objects
+ * @param {Ingredient[]|{sections: Array}} ingredients - Original ingredients with quantities
  * @param {number} originalServings - Original recipe serving count
  * @param {number} newServings - New desired serving count
- * @returns {Ingredient[]} Adjusted ingredients array
+ * @returns {Ingredient[]|{sections: Array}} Adjusted ingredients in same format as input
  */
 export function scaleIngredients(ingredients, originalServings, newServings) {
-  if (!Array.isArray(ingredients) || !originalServings || !newServings || originalServings <= 0)
-    return ingredients;
+  if (!originalServings || !newServings || originalServings <= 0) return ingredients;
+  
   const factor = newServings / originalServings;
-  return ingredients.map((ing) => {
+  
+  // Helper function to scale a single ingredient
+  const scaleIngredient = (ing) => {
     const amountNum = parseFloat(ing.amount);
     return {
       ...ing,
       amount: isNaN(amountNum) ? ing.amount : formatIngredientAmount(amountNum * factor),
     };
-  });
+  };
+  
+  // Handle sectioned ingredients format (Firebase direct array format)
+  if (Array.isArray(ingredients) && ingredients.length > 0 && ingredients[0].items) {
+    return ingredients.map(section => ({
+      ...section,
+      items: section.items.map(scaleIngredient)
+    }));
+  }
+  
+  // Handle sectioned ingredients format (form component format with sections wrapper)
+  if (ingredients && typeof ingredients === 'object' && !Array.isArray(ingredients) && ingredients.sections) {
+    return {
+      ...ingredients,
+      sections: ingredients.sections.map(section => ({
+        ...section,
+        items: section.items.map(scaleIngredient)
+      }))
+    };
+  }
+  
+  // Handle flat ingredients array (original format)
+  if (!Array.isArray(ingredients)) return ingredients;
+  return ingredients.map(scaleIngredient);
 }
 
 /**

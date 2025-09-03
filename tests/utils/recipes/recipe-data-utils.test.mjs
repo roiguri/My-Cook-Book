@@ -19,7 +19,9 @@ let calculateTotalTime,
   formatRecipeData,
   validateRecipeData,
   getRecipesForCards,
-  getRecipeById;
+  getRecipeById,
+  scaleIngredientSections,
+  extractIngredientNamesFromSections;
 
 describe('recipe-data-utils', () => {
   beforeEach(async () => {
@@ -35,6 +37,8 @@ describe('recipe-data-utils', () => {
     validateRecipeData = utils.validateRecipeData;
     getRecipesForCards = utils.getRecipesForCards;
     getRecipeById = utils.getRecipeById;
+    scaleIngredientSections = utils.scaleIngredientSections;
+    extractIngredientNamesFromSections = utils.extractIngredientNamesFromSections;
     mockQueryDocuments.mockReset();
     mockGetDocument.mockReset();
   });
@@ -164,6 +168,7 @@ describe('recipe-data-utils', () => {
         tags: [],
         servings: 1,
         ingredients: [],
+        ingredientSections: undefined,
         stages: undefined,
         instructions: undefined,
         images: [],
@@ -247,15 +252,81 @@ describe('recipe-data-utils', () => {
       expect(result.errors.stages).toBeDefined();
     });
 
-    it('fails if ingredients are missing or invalid', () => {
-      expect(validateRecipeData({ ...baseRecipe, ingredients: [] }).isValid).toBe(false);
-      expect(validateRecipeData({ ...baseRecipe, ingredients: undefined }).isValid).toBe(false);
-      const r = { ...baseRecipe, ingredients: [{ amount: '', unit: '', item: '' }] };
-      const result = validateRecipeData(r);
-      expect(result.isValid).toBe(false);
-      expect(result.errors['ingredients[0].amount']).toBeDefined();
-      expect(result.errors['ingredients[0].unit']).toBeDefined();
-      expect(result.errors['ingredients[0].item']).toBeDefined();
+    describe('ingredients vs ingredientSections validation', () => {
+      it('validates flat ingredients format', () => {
+        const r = { ...baseRecipe, ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }] };
+        const result = validateRecipeData(r);
+        expect(result.isValid).toBe(true);
+      });
+
+      it('validates sectioned ingredients format', () => {
+        const r = { 
+          ...baseRecipe, 
+          ingredients: undefined,
+          ingredientSections: [
+            { 
+              title: 'Dry Ingredients', 
+              items: [{ amount: '1', unit: 'cup', item: 'flour' }] 
+            }
+          ]
+        };
+        delete r.ingredients;
+        const result = validateRecipeData(r);
+        expect(result.isValid).toBe(true);
+      });
+
+      it('fails if both ingredients and ingredientSections exist', () => {
+        const r = { 
+          ...baseRecipe, 
+          ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }],
+          ingredientSections: [{ title: 'Test', items: [{ amount: '1', unit: 'cup', item: 'flour' }] }]
+        };
+        const result = validateRecipeData(r);
+        expect(result.isValid).toBe(false);
+        expect(result.errors.ingredients).toBeDefined();
+        expect(result.errors.ingredientSections).toBeDefined();
+      });
+
+      it('fails if neither ingredients nor ingredientSections exist', () => {
+        const r = { ...baseRecipe };
+        delete r.ingredients;
+        const result = validateRecipeData(r);
+        expect(result.isValid).toBe(false);
+        expect(result.errors.ingredients).toBeDefined();
+        expect(result.errors.ingredientSections).toBeDefined();
+      });
+
+      it('fails if flat ingredients are invalid', () => {
+        const r = { ...baseRecipe, ingredients: [{ amount: '', unit: '', item: '' }] };
+        const result = validateRecipeData(r);
+        expect(result.isValid).toBe(false);
+        expect(result.errors['ingredients[0]']).toBeDefined();
+      });
+
+      it('fails if ingredientSections are invalid', () => {
+        const r = { 
+          ...baseRecipe,
+          ingredientSections: [{ title: '', items: [] }]
+        };
+        delete r.ingredients;
+        const result = validateRecipeData(r);
+        expect(result.isValid).toBe(false);
+        expect(result.errors['ingredientSections[0]']).toBeDefined();
+      });
+
+      it('fails if ingredientSection has invalid items', () => {
+        const r = { 
+          ...baseRecipe,
+          ingredientSections: [{ 
+            title: 'Valid Title', 
+            items: [{ amount: '', unit: '', item: '' }] 
+          }]
+        };
+        delete r.ingredients;
+        const result = validateRecipeData(r);
+        expect(result.isValid).toBe(false);
+        expect(result.errors['ingredientSections[0]']).toBeDefined();
+      });
     });
 
     it('validates a recipe with stages and no instructions', () => {
@@ -418,6 +489,123 @@ describe('recipe-data-utils', () => {
       const result = await getRecipeById('notfound');
       // Assert
       expect(result).toBeNull();
+    });
+  });
+
+  describe('formatRecipeData ingredientSections handling', () => {
+    it('handles recipe with ingredientSections (prioritizes sections)', () => {
+      const raw = {
+        name: 'Test Recipe',
+        ingredients: [{ amount: '1', unit: 'cup', item: 'old_ingredient' }],
+        ingredientSections: [
+          { title: 'Section 1', items: [{ amount: '2', unit: 'cups', item: 'flour' }] }
+        ]
+      };
+      const formatted = formatRecipeData(raw);
+      expect(formatted.ingredients).toBeUndefined();
+      expect(formatted.ingredientSections).toBeDefined();
+      expect(formatted.ingredientSections[0].title).toBe('Section 1');
+    });
+
+    it('handles recipe with flat ingredients only', () => {
+      const raw = {
+        name: 'Test Recipe',
+        ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }]
+      };
+      const formatted = formatRecipeData(raw);
+      expect(formatted.ingredients).toEqual([{ amount: '1', unit: 'cup', item: 'sugar' }]);
+      expect(formatted.ingredientSections).toBeUndefined();
+    });
+
+    it('sanitizes invalid ingredientSections data', () => {
+      const raw = {
+        name: 'Test Recipe',
+        ingredientSections: [
+          { title: 'Valid Section', items: [{ amount: '1', unit: 'cup', item: 'flour' }] },
+          { title: '', items: [] }, // Invalid - empty title and no items
+          { title: 'Another Valid', items: [{ amount: '', unit: '', item: '' }] }, // Invalid items
+          { title: 'Good Section', items: [{ amount: '2', unit: 'tbsp', item: 'sugar' }] }
+        ]
+      };
+      const formatted = formatRecipeData(raw);
+      expect(formatted.ingredientSections).toHaveLength(2);
+      expect(formatted.ingredientSections[0].title).toBe('Valid Section');
+      expect(formatted.ingredientSections[1].title).toBe('Good Section');
+    });
+  });
+
+  describe('scaleIngredientSections', () => {
+    it('scales ingredient sections correctly', () => {
+      const sections = [
+        {
+          title: 'Dry Ingredients',
+          items: [
+            { amount: '2', unit: 'cups', item: 'flour' },
+            { amount: '1', unit: 'tbsp', item: 'sugar' }
+          ]
+        }
+      ];
+      const scaled = scaleIngredientSections(sections, 2, 4);
+      expect(scaled[0].items[0].amount).toBe('4');
+      expect(scaled[0].items[1].amount).toBe('2');
+      expect(scaled[0].title).toBe('Dry Ingredients');
+    });
+
+    it('handles non-numeric amounts gracefully', () => {
+      const sections = [
+        {
+          title: 'Seasonings',
+          items: [{ amount: 'to taste', unit: '', item: 'salt' }]
+        }
+      ];
+      const scaled = scaleIngredientSections(sections, 2, 4);
+      expect(scaled[0].items[0].amount).toBe('to taste');
+    });
+
+    it('returns original if invalid parameters', () => {
+      const sections = [{ title: 'Test', items: [] }];
+      expect(scaleIngredientSections(sections, 0, 4)).toBe(sections);
+      expect(scaleIngredientSections(sections, null, 4)).toBe(sections);
+      expect(scaleIngredientSections(null, 2, 4)).toBe(null);
+    });
+  });
+
+  describe('extractIngredientNamesFromSections', () => {
+    it('extracts names from ingredient sections', () => {
+      const sections = [
+        {
+          title: 'Dry',
+          items: [
+            { amount: '1', unit: 'cup', item: 'flour' },
+            { amount: '2', unit: 'tbsp', item: 'sugar' }
+          ]
+        },
+        {
+          title: 'Wet',
+          items: [{ amount: '1', unit: 'cup', item: 'milk' }]
+        }
+      ];
+      expect(extractIngredientNamesFromSections(sections)).toEqual(['flour', 'sugar', 'milk']);
+    });
+
+    it('filters out empty names and handles invalid data', () => {
+      const sections = [
+        {
+          title: 'Test',
+          items: [
+            { amount: '1', unit: 'cup', item: '' },
+            { amount: '2', unit: 'tbsp', item: 'sugar' },
+            { item: null }
+          ]
+        }
+      ];
+      expect(extractIngredientNamesFromSections(sections)).toEqual(['sugar']);
+    });
+
+    it('returns empty array for invalid input', () => {
+      expect(extractIngredientNamesFromSections(null)).toEqual([]);
+      expect(extractIngredientNamesFromSections([])).toEqual([]);
+      expect(extractIngredientNamesFromSections('invalid')).toEqual([]);
     });
   });
 });

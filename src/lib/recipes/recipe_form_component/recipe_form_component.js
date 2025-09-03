@@ -194,8 +194,13 @@ class RecipeFormComponent extends HTMLElement {
 
         // Populate ingredients through component API
         const ingredientsList = this.shadowRoot.getElementById('ingredients-list');
-        if (ingredientsList && data.ingredients) {
-          ingredientsList.populateIngredients(data.ingredients);
+        if (ingredientsList) {
+          // Handle both flat ingredients and sectioned ingredients  
+          if (data.ingredients) {
+            ingredientsList.populateIngredients(data.ingredients);
+          } else if (data.ingredientSections) {
+            ingredientsList.populateIngredients({ ingredientSections: data.ingredientSections });
+          }
         }
 
         // Populate instructions through new component API

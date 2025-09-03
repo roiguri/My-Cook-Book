@@ -181,6 +181,26 @@ class RecipeComponent extends HTMLElement {
       margin-bottom: 10px;
     }
 
+    .Recipe_component__section-title,
+    .Recipe_component__stage-title {
+      font-family: var(--heading-font-he);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 16px 0 8px 0;
+    }
+
+    .Recipe_component__section-ingredients {
+      list-style-type: none;
+      padding: 0;
+      margin-bottom: 20px;
+    }
+
+    .Recipe_component__section-ingredients li {
+      margin-bottom: 8px;
+      padding-right: 15px;
+    }
+
     .Recipe_component__instructions ol {
       padding-right: 20px;
       margin-bottom: 20px;
@@ -225,6 +245,16 @@ class RecipeComponent extends HTMLElement {
       .Recipe_component__meta {
         flex-direction: column;
         align-items: center;
+      }
+
+      .Recipe_component__section-title,
+      .Recipe_component__stage-title {
+        font-size: 1.1rem;
+        margin: 12px 0 6px 0;
+      }
+
+      .Recipe_component__section-ingredients li {
+        padding-right: 10px;
       }
     }
     `;
@@ -343,15 +373,45 @@ class RecipeComponent extends HTMLElement {
   populateIngredientsList(recipe) {
     const ingredientsList = this.shadowRoot.getElementById('Recipe_component__ingredients-list');
     ingredientsList.innerHTML = '';
-    recipe.ingredients.forEach((ingredient) => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <span class="amount">${formatIngredientAmount(ingredient.amount)}</span>
-        <span class="unit">${ingredient.unit}</span>
-        <span class="item">${ingredient.item}</span>
-      `;
-      ingredientsList.appendChild(li);
-    });
+
+    // Check if ingredients are sectioned or flat format
+    if (recipe.ingredientSections && Array.isArray(recipe.ingredientSections)) {
+      // Handle sectioned ingredients format (Firebase uses ingredientSections field)
+      recipe.ingredientSections.forEach((section) => {
+        // Create section title if section has a title
+        if (section.title && section.title.trim()) {
+          const sectionTitle = document.createElement('h3');
+          sectionTitle.textContent = section.title;
+          sectionTitle.classList.add('Recipe_component__section-title');
+          ingredientsList.appendChild(sectionTitle);
+        }
+
+        // Create ingredient list for this section
+        const sectionList = document.createElement('ul');
+        sectionList.classList.add('Recipe_component__section-ingredients');
+        section.items.forEach((ingredient) => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <span class="amount">${formatIngredientAmount(ingredient.amount)}</span>
+            <span class="unit">${ingredient.unit}</span>
+            <span class="item">${ingredient.item}</span>
+          `;
+          sectionList.appendChild(li);
+        });
+        ingredientsList.appendChild(sectionList);
+      });
+    } else if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+      // Fallback to flat ingredients array (original format)
+      recipe.ingredients.forEach((ingredient) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="amount">${formatIngredientAmount(ingredient.amount)}</span>
+          <span class="unit">${ingredient.unit}</span>
+          <span class="item">${ingredient.item}</span>
+        `;
+        ingredientsList.appendChild(li);
+      });
+    }
   }
 
   populateInstructions(recipe) {
@@ -404,16 +464,27 @@ class RecipeComponent extends HTMLElement {
   setupServingsAdjuster(recipe) {
     const servingsInput = this.shadowRoot.getElementById('Recipe_component__servings');
     servingsInput.setAttribute('value', recipe.servings);
-    this._originalIngredients = recipe.ingredients;
+    
+    // Store original data in closure scope to avoid instance state issues
+    const originalIngredients = recipe.ingredientSections || recipe.ingredients;
+    const originalRecipeFormat = recipe.ingredientSections ? 'sectioned' : 'flat';
+    const originalServings = recipe.servings;
 
     servingsInput.addEventListener('change', () => {
       const newServings = parseInt(servingsInput.value);
+      
       const scaledIngredients = scaleIngredients(
-        this._originalIngredients,
-        recipe.servings,
+        originalIngredients,
+        originalServings,
         newServings,
       );
-      this.populateIngredientsList({ ingredients: scaledIngredients });
+      
+      // Pass scaled ingredients in the same format as the original data
+      const scaledRecipe = originalRecipeFormat === 'sectioned' ? 
+        { ingredientSections: scaledIngredients } : 
+        { ingredients: scaledIngredients };
+      
+      this.populateIngredientsList(scaledRecipe);
     });
   }
 }

@@ -136,6 +136,7 @@
 .recipe-form__button--add-step,
 .recipe-form__button--remove-ingredient,
 .recipe-form__button--remove-step,
+.recipe-form__button--remove-section,
 .recipe-form__button--remove-stage {
   padding: 0.5rem;
   width: 30px;
@@ -146,11 +147,10 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  line-height: 1;
+  text-align: center;
 }
 
-.recipe-form__button--add-stage {
-  margin-top: 1rem;
-}
 
 .recipe-form__group--buttons {
   display: flex;

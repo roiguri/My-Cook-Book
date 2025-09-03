@@ -25,9 +25,27 @@
  *       Fetch recipes for display in cards (with filters/options).
  *   - getRecipeById(recipeId):
  *       Fetch a single complete recipe by ID.
+ *   - scaleIngredientSections(ingredientSections, originalServings, newServings):
+ *       Scale ingredient sections for different serving sizes.
+ *   - extractIngredientNamesFromSections(ingredientSections):
+ *       Extract ingredient names from sectioned ingredient format.
  */
 
 import { FirestoreService } from '../../services/firestore-service.js';
+import { formatIngredientAmount } from './recipe-ingredients-utils.js';
+
+/**
+ * @typedef {Object} Ingredient
+ * @property {string} amount - Quantity of ingredient (e.g., "2", "1.5", "to taste")
+ * @property {string} unit - Unit of measurement (e.g., "cup", "tbsp", "kg", "" for unitless)
+ * @property {string} item - Name of the ingredient (e.g., "flour", "salt", "chicken")
+ */
+
+/**
+ * @typedef {Object} IngredientSection
+ * @property {string} title - Section heading (e.g., "מצרכים יבשים", "Dry Ingredients")
+ * @property {Array<Ingredient>} items - Array of ingredients in this section
+ */
 
 /**
  * @typedef {Object} Recipe
@@ -40,7 +58,8 @@ import { FirestoreService } from '../../services/firestore-service.js';
  * @property {string} mainIngredient
  * @property {string[]} tags
  * @property {number} servings
- * @property {Array<{ amount: string, unit: string, item: string }>} ingredients
+ * @property {Array<Ingredient>} [ingredients] - Flat ingredients list (mutually exclusive with ingredientSections)
+ * @property {Array<IngredientSection>} [ingredientSections] - Sectioned ingredients (mutually exclusive with ingredients)
  * @property {Array<{ title: string, instructions: string[] }>} [stages]
  * @property {string[]} [instructions]
  * @property {Array<{ file: string, isPrimary: boolean, access: string, uploadedBy: string }>} [images]
@@ -77,12 +96,117 @@ const CATEGORY_ICONS = {
 };
 
 /**
+ * Validates a single ingredient object structure
+ * @param {Object} ingredient - Ingredient object to validate
+ * @returns {boolean} Whether the ingredient has valid structure
+ */
+function validateIngredientObject(ingredient) {
+  return (
+    ingredient &&
+    typeof ingredient === 'object' &&
+    typeof ingredient.amount === 'string' &&
+    ingredient.amount.trim() &&
+    typeof ingredient.unit === 'string' &&
+    ingredient.unit.trim() &&
+    typeof ingredient.item === 'string' &&
+    ingredient.item.trim()
+  );
+}
+
+/**
+ * Validates an ingredient section object structure
+ * @param {Object} section - IngredientSection object to validate
+ * @returns {boolean} Whether the section has valid structure
+ */
+function validateIngredientSection(section) {
+  return (
+    section &&
+    typeof section === 'object' &&
+    typeof section.title === 'string' &&
+    section.title.trim() &&
+    Array.isArray(section.items) &&
+    section.items.length > 0 &&
+    section.items.every(validateIngredientObject)
+  );
+}
+
+/**
+ * Sanitizes ingredient sections data for safe storage and display
+ * @param {Array} rawSections - Raw ingredient sections from input
+ * @returns {Array<IngredientSection>} Sanitized ingredient sections
+ */
+function sanitizeIngredientSections(rawSections) {
+  if (!Array.isArray(rawSections)) return [];
+  
+  return rawSections
+    .filter(section => section && typeof section === 'object' && section.title && section.items)
+    .map(section => ({
+      title: String(section.title).trim(),
+      items: Array.isArray(section.items) 
+        ? section.items
+            .filter(item => item && typeof item === 'object' && item.item && item.item.trim())
+            .map(item => ({
+              amount: String(item.amount || '').trim(),
+              unit: String(item.unit || '').trim(), 
+              item: String(item.item || '').trim()
+            }))
+        : []
+    }))
+    .filter(section => section.items.length > 0); // Remove sections with no valid items
+}
+
+/**
+ * Scales ingredient sections for different serving sizes
+ * @param {Array<IngredientSection>} ingredientSections - Original ingredient sections
+ * @param {number} originalServings - Original recipe serving count
+ * @param {number} newServings - New desired serving count
+ * @returns {Array<IngredientSection>} Scaled ingredient sections
+ */
+export function scaleIngredientSections(ingredientSections, originalServings, newServings) {
+  if (!Array.isArray(ingredientSections) || !originalServings || !newServings || originalServings <= 0) {
+    return ingredientSections;
+  }
+  
+  const factor = newServings / originalServings;
+  return ingredientSections.map(section => ({
+    ...section,
+    items: section.items.map(item => {
+      const amountNum = parseFloat(item.amount);
+      return {
+        ...item,
+        amount: isNaN(amountNum) ? item.amount : formatIngredientAmount(amountNum * factor)
+      };
+    })
+  }));
+}
+
+/**
+ * Extracts all ingredient names from ingredient sections
+ * @param {Array<IngredientSection>} ingredientSections - Ingredient sections array
+ * @returns {Array<string>} Array of ingredient names
+ */
+export function extractIngredientNamesFromSections(ingredientSections) {
+  if (!Array.isArray(ingredientSections)) return [];
+  
+  return ingredientSections
+    .flatMap(section => section.items || [])
+    .map(item => item.item)
+    .filter(name => name && typeof name === 'string' && name.trim())
+    .map(name => name.trim());
+}
+
+/**
  * Formats raw recipe data from Firestore for display
  * @param {Object} rawData - Raw recipe data from Firestore
  * @returns {Recipe} Formatted recipe data ready for display
  */
 export function formatRecipeData(rawData) {
   if (!rawData || typeof rawData !== 'object') return null;
+  
+  // Handle dual-format ingredients: prioritize ingredientSections if present
+  const hasIngredientSections = Array.isArray(rawData.ingredientSections) && rawData.ingredientSections.length > 0;
+  const hasIngredients = Array.isArray(rawData.ingredients) && rawData.ingredients.length > 0;
+  
   return {
     id: rawData.id || '',
     name: rawData.name || '',
@@ -93,7 +217,11 @@ export function formatRecipeData(rawData) {
     mainIngredient: rawData.mainIngredient || '',
     tags: Array.isArray(rawData.tags) ? rawData.tags : [],
     servings: typeof rawData.servings === 'number' ? rawData.servings : 1,
-    ingredients: Array.isArray(rawData.ingredients) ? rawData.ingredients : [],
+    
+    // Dual-format ingredients handling
+    ingredients: hasIngredientSections ? undefined : (hasIngredients ? rawData.ingredients : []),
+    ingredientSections: hasIngredientSections ? sanitizeIngredientSections(rawData.ingredientSections) : undefined,
+    
     stages: Array.isArray(rawData.stages) ? rawData.stages : undefined,
     instructions: Array.isArray(rawData.instructions) ? rawData.instructions : undefined,
     images: Array.isArray(rawData.images) ? rawData.images : [],
@@ -163,23 +291,28 @@ export function validateRecipeData(recipeData) {
     errors.servings = 'מספר המנות חייב להיות מספר שלם וחיובי.';
   }
 
-  // Ingredients
-  if (!Array.isArray(recipeData.ingredients) || recipeData.ingredients.length === 0) {
-    errors.ingredients = 'חובה למלא לפחות אחד מהמרכיבים.';
-  } else {
+  // Ingredients vs IngredientSections (mutual exclusivity)
+  const hasIngredients = Array.isArray(recipeData.ingredients) && recipeData.ingredients.length > 0;
+  const hasIngredientSections = Array.isArray(recipeData.ingredientSections) && recipeData.ingredientSections.length > 0;
+  
+  if (hasIngredients && hasIngredientSections) {
+    errors.ingredients = 'לא ניתן להציג שני סוגי של מרכיבים.';
+    errors.ingredientSections = 'לא ניתן להציג שני סוגי של מרכיבים.';
+  } else if (!hasIngredients && !hasIngredientSections) {
+    errors.ingredients = 'חובה למלא מרכיבים או קטגוריות מרכיבים.';
+    errors.ingredientSections = 'חובה למלא מרכיבים או קטגוריות מרכיבים.';
+  } else if (hasIngredients) {
+    // Validate flat ingredients array
     recipeData.ingredients.forEach((ing, idx) => {
-      if (!ing || typeof ing !== 'object') {
-        errors[`ingredients[${idx}]`] = 'חובה למלא את המרכיב.';
-        return;
+      if (!validateIngredientObject(ing)) {
+        errors[`ingredients[${idx}]`] = 'חובה למלא את המרכיב בצורה תקינה.';
       }
-      if (!ing.amount || typeof ing.amount !== 'string' || !ing.amount.trim()) {
-        errors[`ingredients[${idx}].amount`] = 'חובה למלא את הכמות.';
-      }
-      if (!ing.unit || typeof ing.unit !== 'string' || !ing.unit.trim()) {
-        errors[`ingredients[${idx}].unit`] = 'חובה למלא את היחידה.';
-      }
-      if (!ing.item || typeof ing.item !== 'string' || !ing.item.trim()) {
-        errors[`ingredients[${idx}].item`] = 'חובה למלא את המרכיב.';
+    });
+  } else if (hasIngredientSections) {
+    // Validate sectioned ingredients
+    recipeData.ingredientSections.forEach((section, sIdx) => {
+      if (!validateIngredientSection(section)) {
+        errors[`ingredientSections[${sIdx}]`] = 'חובה למלא את הקטגוריה בצורה תקינה.';
       }
     });
   }

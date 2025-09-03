@@ -85,9 +85,38 @@ describe('form-data-collector', () => {
       ])
     };
 
+    const mockIngredientsComponent = {
+      getIngredients: jest.fn(() => data.ingredientSections || data.ingredients || [
+        { amount: '2', unit: 'cups', item: 'rice' },
+        { amount: '1', unit: 'kg', item: 'chicken' }
+      ])
+    };
+
+    const mockInstructionsComponent = {
+      getInstructions: jest.fn(() => data.stages || data.instructions || [
+        'Step 1', 'Step 2'
+      ])
+    };
+
+    const mockMetadataComponent = {
+      getFormData: jest.fn(() => ({
+        name: data.name || 'Test Recipe',
+        category: data.category || 'main-courses',
+        prepTime: data.prepTime ? parseInt(data.prepTime) : 30,
+        waitTime: data.waitTime ? parseInt(data.waitTime) : 45,
+        difficulty: data.difficulty || 'קלה',
+        mainIngredient: data.mainIngredient || 'Chicken',
+        tags: data.tags ? (Array.isArray(data.tags) ? data.tags : data.tags.split(', ')) : ['healthy', 'quick'],
+        servings: data.servings ? parseInt(data.servings) : 4
+      }))
+    };
+
     return {
       getElementById: jest.fn((id) => {
         if (id === 'recipe-images') return mockImageHandler;
+        if (id === 'ingredients-list') return mockIngredientsComponent;
+        if (id === 'instructions-list') return mockInstructionsComponent;
+        if (id === 'metadata-fields') return mockMetadataComponent;
         return mockElements[id] || null;
       }),
       querySelector: jest.fn((selector) => {
@@ -130,8 +159,13 @@ describe('form-data-collector', () => {
       expect(result.tags).toEqual(['healthy', 'quick']);
     });
 
-    it('should collect ingredients correctly', () => {
-      const mockShadowRoot = createMockShadowRoot();
+    it('should collect flat ingredients correctly', () => {
+      const mockShadowRoot = createMockShadowRoot({
+        ingredients: [
+          { amount: '2', unit: 'cups', item: 'rice' },
+          { amount: '1', unit: 'kg', item: 'chicken' }
+        ]
+      });
       
       const result = collectRecipeFormData(mockShadowRoot);
 
@@ -139,6 +173,63 @@ describe('form-data-collector', () => {
         { amount: '2', unit: 'cups', item: 'rice' },
         { amount: '1', unit: 'kg', item: 'chicken' }
       ]);
+      expect(result.ingredientSections).toBeUndefined();
+    });
+
+    it('should collect sectioned ingredients correctly', () => {
+      const mockShadowRoot = createMockShadowRoot({
+        ingredientSections: [
+          {
+            title: 'Dry Ingredients',
+            items: [
+              { amount: '2', unit: 'cups', item: 'flour' },
+              { amount: '1', unit: 'tsp', item: 'salt' }
+            ]
+          },
+          {
+            title: 'Wet Ingredients',
+            items: [
+              { amount: '1', unit: 'cup', item: 'milk' }
+            ]
+          }
+        ]
+      });
+      
+      const result = collectRecipeFormData(mockShadowRoot);
+
+      expect(result.ingredientSections).toEqual([
+        {
+          title: 'Dry Ingredients',
+          items: [
+            { amount: '2', unit: 'cups', item: 'flour' },
+            { amount: '1', unit: 'tsp', item: 'salt' }
+          ]
+        },
+        {
+          title: 'Wet Ingredients',
+          items: [
+            { amount: '1', unit: 'cup', item: 'milk' }
+          ]
+        }
+      ]);
+      expect(result.ingredients).toBeUndefined();
+    });
+
+    it('should default to flat ingredients when component returns null', () => {
+      const mockShadowRoot = createMockShadowRoot();
+      // Override ingredients component to return null
+      mockShadowRoot.getElementById = jest.fn((id) => {
+        if (id === 'ingredients-list') return null;
+        if (id === 'metadata-fields') return {
+          getFormData: () => ({ name: 'Test Recipe', category: 'main-courses' })
+        };
+        return null;
+      });
+      
+      const result = collectRecipeFormData(mockShadowRoot);
+
+      expect(result.ingredients).toBeUndefined();
+      expect(result.ingredientSections).toBeUndefined();
     });
 
     it('should collect instructions in single stage mode', () => {
@@ -151,39 +242,11 @@ describe('form-data-collector', () => {
     });
 
     it('should collect stages in multi-stage mode', () => {
-      const mockShadowRoot = createMockShadowRoot();
-      
-      // Mock multi-stage mode
-      mockShadowRoot.querySelectorAll.mockImplementation((selector) => {
-        if (selector === '.recipe-form__steps') {
-          return [
-            {
-              querySelector: jest.fn((sel) => {
-                if (sel === '.recipe-form__input--stage-name') return { value: 'Stage 1' };
-                return null;
-              }),
-              querySelectorAll: jest.fn(() => [
-                { value: 'Step 1.1' },
-                { value: 'Step 1.2' }
-              ])
-            },
-            {
-              querySelector: jest.fn((sel) => {
-                if (sel === '.recipe-form__input--stage-name') return { value: 'Stage 2' };
-                return null;
-              }),
-              querySelectorAll: jest.fn(() => [
-                { value: 'Step 2.1' }
-              ])
-            }
-          ];
-        }
-        if (selector === '.recipe-form__ingredient-entry') {
-          return [{
-            querySelector: jest.fn(() => ({ value: 'test' }))
-          }];
-        }
-        return [];
+      const mockShadowRoot = createMockShadowRoot({
+        stages: [
+          { title: 'Stage 1', instructions: ['Step 1.1', 'Step 1.2'] },
+          { title: 'Stage 2', instructions: ['Step 2.1'] }
+        ]
       });
       
       const result = collectRecipeFormData(mockShadowRoot);
