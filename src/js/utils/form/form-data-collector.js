@@ -68,12 +68,12 @@ export function collectRecipeFormData(shadowRoot) {
  */
 function collectIngredientsFromComponent(shadowRoot) {
   const ingredientsList = shadowRoot.getElementById('ingredients-list');
-  if (ingredientsList && typeof ingredientsList.getIngredients === 'function') {
-    return ingredientsList.getIngredients();
+  if (ingredientsList && typeof ingredientsList.getData === 'function') {
+    return ingredientsList.getData();
   }
   
   // Component should always be available
-  console.warn('Ingredients component not found or missing getIngredients method');
+  console.warn('Ingredients component not found or missing getData method');
   return null;
 }
 

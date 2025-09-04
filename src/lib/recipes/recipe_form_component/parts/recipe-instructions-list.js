@@ -17,7 +17,7 @@ class RecipeInstructionsList extends DynamicListComponent {
     
     // Configure for Hebrew instructions (matching existing styles exactly)
     this.listTitle = this.getAttribute('title') || 'תהליך הכנה:';
-    this.containerClass = 'recipe-form__stages'; // Use existing CSS class
+    this.containerClass = 'recipe-form__stages';
     this.itemClass = 'recipe-form__step';
     this.addButtonClass = 'recipe-form__button--add-step';
     this.removeButtonClass = 'recipe-form__button--remove-step';
@@ -550,7 +550,7 @@ class RecipeInstructionsList extends DynamicListComponent {
     const stages = [];
     
     stageContainers.forEach((container) => {
-      const stageIndex = parseInt(container.dataset.stageIndex, 10);
+      const stageIndex = parseInt(container.dataset.sectionIndex, 10);
       const stageNameInput = container.querySelector('.recipe-form__input--stage-name');
       const stageTitle = stageNameInput ? stageNameInput.value.trim() : `שלב ${stageIndex + 1}`;
       

@@ -140,7 +140,6 @@ export class DynamicListComponent extends HTMLElement {
    * @param {Event} event - Click event from remove button
    */
   removeListItem(event) {
-    const container = this.shadowRoot.querySelector('.list-items-container');
     const itemToRemove = event.target.closest(`.${this.itemClass}`);
     
     itemToRemove.remove();
@@ -201,7 +200,7 @@ export class DynamicListComponent extends HTMLElement {
    * Populates the list with data
    * To be implemented by extending classes
    */
-  populateData(data) {
+  populateData(_data) {
     throw new Error('populateData() must be implemented by extending class');
   }
 
@@ -244,6 +243,15 @@ export class DynamicListComponent extends HTMLElement {
     inputs.forEach(input => {
       input.disabled = disabled;
     });
+  }
+
+  /**
+   * Validates the component data
+   * Base implementation returns valid - extending classes should override
+   * @returns {Object} Validation result with isValid flag and error messages
+   */
+  validate() {
+    return { isValid: true, errors: {} };
   }
 
   /**

@@ -29,20 +29,40 @@ const FIELD_MAP = {
  * @returns {boolean} - True if valid, false otherwise
  */
 export function validateRecipeForm(recipeData, shadowRoot) {
-  const { isValid, errors } = validateRecipeData(recipeData);
+  const { isValid: dataValid, errors } = validateRecipeData(recipeData);
   
   // Clear all previous error states
   clearValidationErrors(shadowRoot);
   
+  let formIsValid = dataValid;
+  let allErrors = { ...errors };
+
+  // Run component-level validation for ingredients
+  const ingredientsComponent = shadowRoot.getElementById('ingredients-list');
+  if (ingredientsComponent && typeof ingredientsComponent.validate === 'function') {
+    const ingredientValidation = ingredientsComponent.validate();
+    if (!ingredientValidation.isValid) {
+      formIsValid = false;
+      Object.assign(allErrors, ingredientValidation.errors);
+      if (ingredientsComponent.setValidationState) {
+        ingredientsComponent.setValidationState(ingredientValidation.errors);
+      }
+    }
+  }
+  
   // Show error messages and highlight invalid fields
   const errorMessage = shadowRoot.querySelector('.recipe-form__error-message');
   
-  if (!isValid) {
+  if (!formIsValid) {
     let errorText = 'ישנם שגיאות בטופס. אנא תקן אותן.';
     
-    if (errors) {
-      highlightFieldErrors(errors, shadowRoot);
-      errorText = Object.values(errors).join(' ');
+    if (allErrors && Object.keys(allErrors).length > 0) {
+      highlightFieldErrors(allErrors, shadowRoot);
+      // Filter out boolean error values and show meaningful messages
+      const errorMessages = Object.values(allErrors).filter(err => typeof err === 'string');
+      if (errorMessages.length > 0) {
+        errorText = errorMessages.join(' ');
+      }
     }
     
     showErrorMessage(errorMessage, errorText);
@@ -50,7 +70,7 @@ export function validateRecipeForm(recipeData, shadowRoot) {
     hideErrorMessage(errorMessage);
   }
   
-  return isValid;
+  return formIsValid;
 }
 
 /**
@@ -99,14 +119,18 @@ function highlightFieldErrors(errors, shadowRoot) {
         key === 'servings' || key === 'difficulty' || key === 'mainIngredient' || key === 'tags') {
       metadataErrors[key] = true;
     }
-    // Handle ingredient errors
-    else if (key === 'ingredients' || key.startsWith('ingredients[')) {
-      if (key === 'ingredients') {
-        // Empty ingredients list - highlight all visible ingredient fields
-        highlightEmptyIngredientsError(ingredientErrors, shadowRoot);
-      } else {
-        ingredientErrors[key] = true;
+    // Handle ingredient errors - now centralized in component
+    else if (key === 'ingredientsRequired') {
+      // Simply trigger component validation - it will handle all highlighting internally
+      const ingredientsComponent = shadowRoot.getElementById('ingredients-list');
+      if (ingredientsComponent && typeof ingredientsComponent.validate === 'function') {
+        const componentValidation = ingredientsComponent.validate();
+        // The component's setValidationState will be called later in this function
       }
+    }
+    // Legacy ingredient error support (for backward compatibility)
+    else if (key === 'ingredients' || key.startsWith('ingredients[')) {
+      ingredientErrors[key] = true;
     }
     // Handle instruction errors - both general and specific
     else if (key === 'instructions' || key.startsWith('instructions[')) {
@@ -134,7 +158,7 @@ function highlightFieldErrors(errors, shadowRoot) {
     }
   }
   
-  // Apply all ingredient errors at once
+  // Apply legacy ingredient errors for backward compatibility
   if (Object.keys(ingredientErrors).length > 0) {
     const ingredientsComponent = shadowRoot.getElementById('ingredients-list');
     if (ingredientsComponent && typeof ingredientsComponent.setValidationState === 'function') {
@@ -143,33 +167,6 @@ function highlightFieldErrors(errors, shadowRoot) {
   }
 }
 
-/**
- * Highlights empty ingredients error (all fields in all visible ingredient lines)
- * @param {Object} ingredientErrors - Error object to populate
- * @param {ShadowRoot} shadowRoot - The component's shadow root
- */
-function highlightEmptyIngredientsError(ingredientErrors, shadowRoot) {
-  // When ingredients are completely empty, highlight all fields in all visible ingredient lines
-  const ingredientsComponent = shadowRoot.getElementById('ingredients-list');
-  if (ingredientsComponent) {
-    const container = ingredientsComponent.shadowRoot?.querySelector('.list-items-container');
-    const items = container?.querySelectorAll('.recipe-form__ingredient-entry');
-    
-    if (items) {
-      // Highlight all fields in all visible ingredient lines
-      items.forEach((_item, index) => {
-        ingredientErrors[`ingredients[${index}].amount`] = true;
-        ingredientErrors[`ingredients[${index}].unit`] = true;
-        ingredientErrors[`ingredients[${index}].item`] = true;
-      });
-    } else {
-      // Fallback: highlight at least the first ingredient line
-      ingredientErrors['ingredients[0].amount'] = true;
-      ingredientErrors['ingredients[0].unit'] = true;
-      ingredientErrors['ingredients[0].item'] = true;
-    }
-  }
-}
 
 
 /**

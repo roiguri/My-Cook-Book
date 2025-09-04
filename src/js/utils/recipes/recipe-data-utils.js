@@ -299,22 +299,7 @@ export function validateRecipeData(recipeData) {
     errors.ingredients = 'לא ניתן להציג שני סוגי של מרכיבים.';
     errors.ingredientSections = 'לא ניתן להציג שני סוגי של מרכיבים.';
   } else if (!hasIngredients && !hasIngredientSections) {
-    errors.ingredients = 'חובה למלא מרכיבים או קטגוריות מרכיבים.';
-    errors.ingredientSections = 'חובה למלא מרכיבים או קטגוריות מרכיבים.';
-  } else if (hasIngredients) {
-    // Validate flat ingredients array
-    recipeData.ingredients.forEach((ing, idx) => {
-      if (!validateIngredientObject(ing)) {
-        errors[`ingredients[${idx}]`] = 'חובה למלא את המרכיב בצורה תקינה.';
-      }
-    });
-  } else if (hasIngredientSections) {
-    // Validate sectioned ingredients
-    recipeData.ingredientSections.forEach((section, sIdx) => {
-      if (!validateIngredientSection(section)) {
-        errors[`ingredientSections[${sIdx}]`] = 'חובה למלא את הקטגוריה בצורה תקינה.';
-      }
-    });
+    errors.ingredientsRequired = true;
   }
 
   // Instructions vs Stages (mutual exclusivity)

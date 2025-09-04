@@ -108,19 +108,6 @@ class RecipeFormComponent extends HTMLElement {
       this.recipeData.primaryImageId = e.detail.imageId;
     });
 
-    // Add event listener for form submission
-    const form = this.shadowRoot.querySelector('#recipe-form');
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      if (this.validateForm()) {
-        this.collectFormData();
-        this.dispatchRecipeData();
-      } else {
-        // Scroll to top to show validation errors
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    });
-
     // Add event listeners for form button group events
     const buttonGroup = this.shadowRoot.getElementById('form-buttons');
     buttonGroup.addEventListener('clear-clicked', () => {
@@ -197,9 +184,9 @@ class RecipeFormComponent extends HTMLElement {
         if (ingredientsList) {
           // Handle both flat ingredients and sectioned ingredients  
           if (data.ingredients) {
-            ingredientsList.populateIngredients(data.ingredients);
+            ingredientsList.populateData(data.ingredients);
           } else if (data.ingredientSections) {
-            ingredientsList.populateIngredients({ ingredientSections: data.ingredientSections });
+            ingredientsList.populateData({ sections: data.ingredientSections });
           }
         }
 
