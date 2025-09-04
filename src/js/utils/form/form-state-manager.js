@@ -88,8 +88,8 @@ function clearMetadataFields(shadowRoot) {
  */
 function clearIngredientsFields(shadowRoot) {
   const ingredientsList = shadowRoot.getElementById('ingredients-list');
-  if (ingredientsList && typeof ingredientsList.clearIngredients === 'function') {
-    ingredientsList.clearIngredients();
+  if (ingredientsList && typeof ingredientsList.clear === 'function') {
+    ingredientsList.clear();
   }
 }
 

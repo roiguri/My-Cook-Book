@@ -119,15 +119,6 @@ function highlightFieldErrors(errors, shadowRoot) {
         key === 'servings' || key === 'difficulty' || key === 'mainIngredient' || key === 'tags') {
       metadataErrors[key] = true;
     }
-    // Handle ingredient errors - now centralized in component
-    else if (key === 'ingredientsRequired') {
-      // Simply trigger component validation - it will handle all highlighting internally
-      const ingredientsComponent = shadowRoot.getElementById('ingredients-list');
-      if (ingredientsComponent && typeof ingredientsComponent.validate === 'function') {
-        const componentValidation = ingredientsComponent.validate();
-        // The component's setValidationState will be called later in this function
-      }
-    }
     // Legacy ingredient error support (for backward compatibility)
     else if (key === 'ingredients' || key.startsWith('ingredients[')) {
       ingredientErrors[key] = true;

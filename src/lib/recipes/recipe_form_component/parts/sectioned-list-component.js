@@ -627,7 +627,7 @@ export class SectionedListComponent extends DynamicListComponent {
       });
 
       if (sectionsWithTitlesAndIngredients < 2) {
-        errors.sectionIngredients = 'חובה למלא לפחות 2 קטגוריות עם מצרכים';
+        errors.sectionIngredients = 'חובה למלא לפחות 2 קטגוריות עם מצרכים.';
         isValid = false;
       }
     }
@@ -671,7 +671,7 @@ export class SectionedListComponent extends DynamicListComponent {
           errors[`items[${index}].${field}`] = true;
         });
       });
-      errors.noIngredients = 'חובה למלא לפחות מרכיב אחד';
+      errors.noIngredients = 'חובה למלא לפחות מרכיב אחד.';
       isValid = false;
     } else {
       // Validate only populated items - check for missing fields in partially filled ingredients
@@ -682,6 +682,7 @@ export class SectionedListComponent extends DynamicListComponent {
             Object.keys(itemErrors).forEach(field => {
               errors[`items[${index}].${field}`] = true;
             });
+            errors.noIngredients = 'חובה למלא לפחות מרכיב אחד.';
             isValid = false;
           }
         }
