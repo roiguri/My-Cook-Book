@@ -50,6 +50,19 @@ export function validateRecipeForm(recipeData, shadowRoot) {
     }
   }
   
+  // Run component-level validation for instructions
+  const instructionsComponent = shadowRoot.getElementById('instructions-list');
+  if (instructionsComponent && typeof instructionsComponent.validate === 'function') {
+    const instructionValidation = instructionsComponent.validate();
+    if (!instructionValidation.isValid) {
+      formIsValid = false;
+      Object.assign(allErrors, instructionValidation.errors);
+      if (instructionsComponent.setValidationState) {
+        instructionsComponent.setValidationState(instructionValidation.errors);
+      }
+    }
+  }
+  
   // Show error messages and highlight invalid fields
   const errorMessage = shadowRoot.querySelector('.recipe-form__error-message');
   
@@ -123,14 +136,6 @@ function highlightFieldErrors(errors, shadowRoot) {
     else if (key === 'ingredients' || key.startsWith('ingredients[')) {
       ingredientErrors[key] = true;
     }
-    // Handle instruction errors - both general and specific
-    else if (key === 'instructions' || key.startsWith('instructions[')) {
-      highlightInstructionErrors(key, shadowRoot);
-    }
-    // Handle stage errors - both general and specific  
-    else if (key === 'stages' || key.startsWith('stages[')) {
-      highlightStageErrors(key, shadowRoot);
-    }
     // Handle main component fields directly (like comments)
     else {
       const fieldId = FIELD_MAP[key];
@@ -158,64 +163,6 @@ function highlightFieldErrors(errors, shadowRoot) {
   }
 }
 
-
-
-/**
- * Highlights instruction errors using component API
- * @param {string} key - Error key (e.g., "instructions" or "instructions[0]")
- * @param {ShadowRoot} shadowRoot - The component's shadow root
- */
-function highlightInstructionErrors(key, shadowRoot) {
-  const instructionsComponent = shadowRoot.getElementById('instructions-list');
-  
-  if (instructionsComponent && typeof instructionsComponent.setValidationState === 'function') {
-    if (key === 'instructions') {
-      // General instructions error - highlight all visible instruction fields
-      instructionsComponent.setValidationState({ general: true });
-    } else {
-      // Specific instruction error - parse index and highlight specific field
-      const match = key.match(/instructions\[(\d+)\]/);
-      if (match) {
-        const idx = parseInt(match[1], 10);
-        instructionsComponent.setValidationState({ [idx]: true });
-      }
-    }
-  } else {
-    console.warn('Instructions component not found or missing setValidationState method');
-  }
-}
-
-/**
- * Highlights stage errors using component API
- * @param {string} key - Error key (e.g., "stages" or "stages[0].title")
- * @param {ShadowRoot} shadowRoot - The component's shadow root
- */
-function highlightStageErrors(key, shadowRoot) {
-  const instructionsComponent = shadowRoot.getElementById('instructions-list');
-  
-  if (instructionsComponent && typeof instructionsComponent.setValidationState === 'function') {
-    if (key === 'stages') {
-      // General stages error - highlight all visible stage fields
-      instructionsComponent.setValidationState({ general: true });
-    } else {
-      // Specific stage error - parse index and field type
-      const match = key.match(/stages\[(\d+)\](?:\.(\w+))?(?:\[(\d+)\])?/);
-      if (match) {
-        const stageIdx = parseInt(match[1], 10);
-        const field = match[2]; // 'title', 'instructions', etc.
-        const stepIdx = match[3] ? parseInt(match[3], 10) : undefined;
-        
-        const errorKey = stepIdx !== undefined 
-          ? `${stageIdx}.${field}.${stepIdx}` 
-          : `${stageIdx}.${field}`;
-        
-        instructionsComponent.setValidationState({ [errorKey]: true });
-      }
-    }
-  } else {
-    console.warn('Instructions component not found or missing setValidationState method');
-  }
-}
 
 
 /**

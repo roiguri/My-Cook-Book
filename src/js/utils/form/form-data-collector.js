@@ -37,12 +37,17 @@ export function collectRecipeFormData(shadowRoot) {
   // Collect instructions/stages from new component
   const instructionsData = collectInstructionsFromComponent(shadowRoot);
   if (instructionsData) {
-    if (Array.isArray(instructionsData) && instructionsData.length > 0 && instructionsData[0].title) {
-      // Stages format
-      recipeData.stages = instructionsData;
+    if (Array.isArray(instructionsData) && instructionsData.length > 0 && instructionsData[0] && instructionsData[0].title) {
+      // Stages format - convert from section format to legacy format
+      recipeData.stages = instructionsData.map(stage => ({
+        title: stage.title,
+        instructions: stage.items ? stage.items.map(item => item.text).filter(text => text.trim()) : []
+      }));
     } else if (Array.isArray(instructionsData)) {
-      // Simple instructions array
-      recipeData.instructions = instructionsData;
+      // Simple instructions array - extract text from objects if needed
+      recipeData.instructions = instructionsData.map(item => 
+        typeof item === 'string' ? item : (item.text || '')
+      ).filter(text => text.trim());
     }
   }
 

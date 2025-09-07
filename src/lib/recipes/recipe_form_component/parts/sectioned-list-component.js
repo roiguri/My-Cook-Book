@@ -586,7 +586,7 @@ export class SectionedListComponent extends DynamicListComponent {
           errors[`sections[${i}].items[${itemIndex}].item`] = true;
         });
       }
-      errors.sectionTitles = 'חובה למלא שמות עבור 2 קטגוריות';
+      errors.sectionTitles = 'חובה למלא לפחות 2 קטגוריות.';
       isValid = false;
       return { isValid, errors };
     }
@@ -601,7 +601,7 @@ export class SectionedListComponent extends DynamicListComponent {
           errors[`sections[${i}].title`] = true;
         }
       }
-      errors.sectionTitles = 'חובה למלא שמות עבור 2 קטגוריות';
+      errors.sectionTitles = 'חובה למלא לפחות 2 קטגוריות.';
       isValid = false;
     } else {
       // We have enough titles, check if each titled section has at least one ingredient

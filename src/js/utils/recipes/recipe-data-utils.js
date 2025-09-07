@@ -302,42 +302,8 @@ export function validateRecipeData(recipeData) {
     errors.ingredientsRequired = true;
   }
 
-  // Instructions vs Stages (mutual exclusivity)
-  const hasInstructions =
-    Array.isArray(recipeData.instructions) && recipeData.instructions.length > 0;
-  const hasStages = Array.isArray(recipeData.stages) && recipeData.stages.length > 0;
-  if (hasInstructions && hasStages) {
-    errors.instructions = 'לא ניתן להציג שני סוגי של הוראות.';
-    errors.stages = 'לא ניתן להציג שני סוגי של הוראות.';
-  } else if (!hasInstructions && !hasStages) {
-    errors.instructions = 'חובה למלא את הוראות או שלבים.';
-    errors.stages = 'חובה למלא את הוראות או שלבים.';
-  } else if (hasInstructions) {
-    recipeData.instructions.forEach((step, idx) => {
-      if (!step || typeof step !== 'string' || !step.trim()) {
-        errors[`instructions[${idx}]`] = 'חובה למלא את השלב.';
-      }
-    });
-  } else if (hasStages) {
-    recipeData.stages.forEach((stage, sIdx) => {
-      if (!stage || typeof stage !== 'object') {
-        errors[`stages[${sIdx}]`] = 'חובה למלא את השלב.';
-        return;
-      }
-      if (!stage.title || typeof stage.title !== 'string' || !stage.title.trim()) {
-        errors[`stages[${sIdx}].title`] = 'חובה למלא את שם השלב.';
-      }
-      if (!Array.isArray(stage.instructions) || stage.instructions.length === 0) {
-        errors[`stages[${sIdx}].instructions`] = 'חובה למלא לפחות אחת מההוראות.';
-      } else {
-        stage.instructions.forEach((step, iIdx) => {
-          if (!step || typeof step !== 'string' || !step.trim()) {
-            errors[`stages[${sIdx}].instructions[${iIdx}]`] = 'חובה למלא את השלב.';
-          }
-        });
-      }
-    });
-  }
+  // Instructions validation is now handled by component-level validation
+  // This data validation only ensures data type consistency if data exists
 
   // Optional fields type validation
   if ('tags' in recipeData && recipeData.tags !== undefined) {

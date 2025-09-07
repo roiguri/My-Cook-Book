@@ -1,17 +1,14 @@
 /**
  * RecipeInstructionsList Component
  * --------------------------------
- * Simple instructions component that dynamically transforms between:
- * - Simple instructions (like existing implementation)
- * - Stage-based instructions (when multiple stages are needed)
- * 
- * Maintains exact same appearance as existing implementation but with
- * cleaner component-based architecture.
+ * Specialized sectioned list component for managing recipe instructions.
+ * Extends SectionedListComponent to provide single-field instructions (instruction text).
+ * Can transform between simple instructions and stage-based instructions.
  */
 
-import { DynamicListComponent } from './dynamic-list-component.js';
+import { SectionedListComponent } from './sectioned-list-component.js';
 
-class RecipeInstructionsList extends DynamicListComponent {
+class RecipeInstructionsList extends SectionedListComponent {
   constructor() {
     super();
     
@@ -22,652 +19,428 @@ class RecipeInstructionsList extends DynamicListComponent {
     this.addButtonClass = 'recipe-form__button--add-step';
     this.removeButtonClass = 'recipe-form__button--remove-step';
     
-    // Single field for instructions
-    this.itemFields = [
-      { placeholder: '', className: 'recipe-form__input', name: 'instruction' }
-    ];
-    
-    // Track current mode (simple or stages)
-    this.isStageMode = false;
-    this.stages = []; // Array of {title, instructions}
+    // Configure sectioned list terminology for instructions
+    this.sectionTitlePrefix = 'שלב';
+    this.addSectionButtonText = 'הוסף שלב';
+    this.sectionNamePlaceholder = 'שם השלב';
   }
 
   /**
-   * Create template matching existing form structure exactly
+   * Creates HTML for a single instruction item
+   * @param {Object} instruction - The instruction data
+   * @param {boolean} includeRemove - Whether to include remove button
+   * @returns {string} HTML for the instruction item
    */
-  template() {
-    return `
-      <div class="${this.containerClass}">
-        <label class="recipe-form__label">${this.listTitle}</label>
-        <div id="steps-container" class="recipe-form__steps">
-          ${this.createInitialItem()}
-        </div>
-        <button type="button" id="add-stage" class="recipe-form__button recipe-form__button--add-stage">הוסף שלב</button>
-      </div>
-    `;
-  }
-
-  /**
-   * Create initial instruction item (matches existing implementation)
-   */
-  createInitialItem() {
-    return `
-      <fieldset class="recipe-form__step">
-        <input type="text" name="steps" class="recipe-form__input">
-        <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
-      </fieldset>
-    `;
-  }
-
-  /**
-   * Override createListItem for instruction-specific structure
-   */
-  createListItem(includeRemoveButton = true) {
-    const removeButtonHTML = includeRemoveButton 
-      ? `<button type="button" class="recipe-form__button recipe-form__button--remove-step">-</button>`
+  createListItemHTML(instruction, includeRemove) {
+    const escapedInstruction = (instruction.text || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const removeButtonHTML = includeRemove
+      ? `<button type="button" class="recipe-form__button ${this.removeButtonClass}">-</button>`
       : '';
 
     return `
-      <fieldset class="recipe-form__step">
-        <input type="text" name="steps" class="recipe-form__input">
-        <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
+      <fieldset class="${this.itemClass}">
+        <input type="text" name="steps" class="recipe-form__input" value="${escapedInstruction}">
+        <button type="button" class="recipe-form__button ${this.addButtonClass}">+</button>
         ${removeButtonHTML}
       </fieldset>
     `;
   }
 
   /**
-   * Override setupEventListeners to handle both regular list and stage events
+   * Extracts data from an instruction DOM element
+   * @param {HTMLElement} itemElement - The instruction element
+   * @returns {Object} The instruction data
    */
-  setupEventListeners() {
-    // Set up event listeners for the steps container (not calling super since we use different structure)
-    const container = this.shadowRoot.querySelector('#steps-container');
+  getItemData(itemElement) {
+    const textInput = itemElement.querySelector('input[name="steps"]');
+    return {
+      text: textInput ? textInput.value.trim() : ''
+    };
+  }
+
+  /**
+   * Returns initial empty instruction structure
+   * @returns {Array} Array with single empty instruction
+   */
+  getInitialItems() {
+    return [{ text: '' }];
+  }
+
+  /**
+   * Checks if an instruction item has content
+   * @param {Object} itemData - The instruction data
+   * @returns {boolean} True if instruction has text
+   */
+  isItemPopulated(itemData) {
+    return itemData.text && itemData.text.trim() !== '';
+  }
+
+  /**
+   * Validates individual instruction fields
+   * @param {Object} item - Instruction item to validate
+   * @returns {Object} Object with field names as keys for invalid fields
+   */
+  validateItemFields(item) {
+    const errors = {};
     
-    if (container) {
-      // Create stable bound handler for simple mode
-      this._stepsContainerHandler = (event) => {
-        if (event.target.classList.contains(this.addButtonClass)) {
-          this.addInstructionItem(event);
-        } else if (event.target.classList.contains(this.removeButtonClass)) {
-          this.removeInstructionItem(event);
-        }
-      };
-      
-      // Handle add/remove step button clicks (for simple mode)
-      container.addEventListener('click', this._stepsContainerHandler);
+    if (!item.text || !item.text.trim()) {
+      errors.text = true;
     }
     
-    // Handle "Add Stage" button and stage management
-    this.shadowRoot.addEventListener('click', (event) => {
-      if (event.target.id === 'add-stage') {
-        this.transformToStageMode();
-      } else if (event.target.classList.contains('recipe-form__button--remove-stage')) {
-        this.removeStage(event);
+    return errors;
+  }
+
+  /**
+   * Override validateBasicMode to provide instruction-specific messages
+   * @returns {Object} Validation result
+   */
+  validateBasicMode() {
+    const errors = {};
+    let isValid = true;
+
+    const container = this.shadowRoot.querySelector('#items-container');
+    const itemElements = container.querySelectorAll(`.${this.itemClass}`);
+    const allItems = Array.from(itemElements).map(element => this.getItemData(element));
+    const populatedItems = allItems.filter(item => this.isItemPopulated(item));
+
+    // If no instructions filled at all, highlight ALL visible instruction fields
+    if (populatedItems.length === 0) {
+      allItems.forEach((item, index) => {
+        const fieldNames = Object.keys(item);
+        fieldNames.forEach(field => {
+          errors[`items[${index}].${field}`] = true;
+        });
+      });
+      errors.instructions = 'חובה למלא תהליך הכנה.';
+      isValid = false;
+    } else {
+      // Validate only populated items - check for missing fields in partially filled instructions
+      allItems.forEach((item, index) => {
+        if (this.isItemPopulated(item)) {
+          const itemErrors = this.validateItemFields(item);
+          if (Object.keys(itemErrors).length > 0) {
+            Object.keys(itemErrors).forEach(field => {
+              errors[`items[${index}].${field}`] = true;
+            });
+            errors.instructions = 'חובה למלא תהליך הכנה.';
+            isValid = false;
+          }
+        }
+      });
+    }
+
+    return { isValid, errors };
+  }
+
+  /**
+   * Override validateSectionMode to provide instruction-specific messages
+   * @returns {Object} Validation result
+   */
+  validateSectionMode() {
+    this.updateSectionsFromDOM();
+    const errors = {};
+    let isValid = true;
+
+    if (this.sections.length < 2) {
+      errors.instructions = 'חובה למלא לפחות 2 שלבים.';
+      isValid = false;
+      return { isValid, errors };
+    }
+
+    let sectionsWithTitles = 0;
+    let sectionsWithInstructions = 0;
+    let totalInstructions = 0;
+
+    // Count sections with filled titles and instructions
+    this.sections.forEach((section) => {
+      const sectionTitle = section.title?.trim();
+      
+      if (sectionTitle) {
+        sectionsWithTitles++;
+      }
+
+      const populatedItems = section.items.filter(item => this.isItemPopulated(item));
+      totalInstructions += populatedItems.length;
+
+      if (populatedItems.length > 0) {
+        sectionsWithInstructions++;
       }
     });
-  }
 
-  /**
-   * Setup event listeners for stage mode
-   */
-  setupStageEventListeners() {
-    const stepsContainer = this.shadowRoot.querySelector('#steps-container');
-    
-    if (stepsContainer) {
-      // Remove existing listeners properly before replacing node
-      if (this._stepsContainerHandler) {
-        stepsContainer.removeEventListener('click', this._stepsContainerHandler);
+    // If no instructions at all, highlight only first 2 section titles and their instruction fields
+    if (totalInstructions === 0) {
+      // Only validate and highlight first 2 sections
+      for (let i = 0; i < Math.min(2, this.sections.length); i++) {
+        // Highlight section title
+        errors[`sections[${i}].title`] = true;
+        
+        // Highlight all instruction fields in this section
+        this.sections[i].items.forEach((_, itemIndex) => {
+          errors[`sections[${i}].items[${itemIndex}].text`] = true;
+        });
       }
-      
-      // Create stable bound handler for stage mode
-      this._stepsContainerHandler = (event) => {
-        if (event.target.classList.contains(this.addButtonClass)) {
-          this.addStageInstructionItem(event);
-        } else if (event.target.classList.contains(this.removeButtonClass)) {
-          this.removeStageInstructionItem(event);
+      errors.instructions = 'חובה למלא לפחות 2 שלבים.';
+      isValid = false;
+      return { isValid, errors };
+    }
+
+    // If we have instructions, validate according to the new rules
+    // Rule: Must have at least 2 section titles filled (only validate first 2 sections)
+    if (sectionsWithTitles < 2) {
+      // Not enough section titles - highlight empty section titles in first 2 sections only
+      for (let i = 0; i < Math.min(2, this.sections.length); i++) {
+        const sectionTitle = this.sections[i].title?.trim();
+        if (!sectionTitle) {
+          errors[`sections[${i}].title`] = true;
         }
-      };
-      
-      // Replace with clone and attach handler to new container
-      stepsContainer.replaceWith(stepsContainer.cloneNode(true));
-      const newStepsContainer = this.shadowRoot.querySelector('#steps-container');
-      
-      newStepsContainer.addEventListener('click', this._stepsContainerHandler);
-    }
-  }
-
-  /**
-   * Add instruction item (replaces parent addListItem)
-   */
-  addInstructionItem(event) {
-    const clickedButton = event.target;
-    const currentItem = clickedButton.closest('.recipe-form__step');
-
-    // Create new item with remove button
-    const newItemHTML = this.createListItem(true);
-    const newItemDiv = document.createElement('div');
-    newItemDiv.innerHTML = newItemHTML;
-    const newItem = newItemDiv.firstElementChild;
-
-    // Insert after current item
-    if (currentItem.nextSibling) {
-      currentItem.parentNode.insertBefore(newItem, currentItem.nextSibling);
+      }
+      errors.instructions = 'חובה למלא לפחות 2 שלבים.';
+      isValid = false;
     } else {
-      currentItem.parentNode.appendChild(newItem);
-    }
+      // We have enough titles, check if each titled section has at least one instruction
+      let sectionsWithTitlesAndInstructions = 0;
+      
+      this.sections.forEach((section, sectionIndex) => {
+        const sectionTitle = section.title?.trim();
+        const populatedItems = section.items.filter(item => this.isItemPopulated(item));
+        
+        if (sectionTitle) {
+          if (populatedItems.length === 0) {
+            // This titled section has no instructions - highlight the instruction fields
+            section.items.forEach((_, itemIndex) => {
+              errors[`sections[${sectionIndex}].items[${itemIndex}].text`] = true;
+            });
+            isValid = false;
+          } else {
+            sectionsWithTitlesAndInstructions++;
+          }
+        }
+      });
 
-    // Add remove button to first item if it doesn't have one
-    this.updateFirstItemRemoveButton();
-
-    // Dispatch change event
-    this.dispatchChangeEvent('instruction-added');
-  }
-
-  /**
-   * Remove instruction item (replaces parent removeListItem)
-   */
-  removeInstructionItem(event) {
-    const itemToRemove = event.target.closest('.recipe-form__step');
-    
-    itemToRemove.remove();
-
-    // Remove remove button from first item if only one remains
-    this.updateFirstItemRemoveButton();
-
-    // Dispatch change event
-    this.dispatchChangeEvent('instruction-removed');
-  }
-
-  /**
-   * Override updateFirstItemRemoveButton to work with our container
-   */
-  updateFirstItemRemoveButton() {
-    const container = this.shadowRoot.querySelector('#steps-container');
-    const items = container.querySelectorAll('.recipe-form__step');
-    const firstItem = items[0];
-
-    if (!firstItem) return;
-
-    if (items.length === 1) {
-      // Remove the remove button from first item
-      const removeButton = firstItem.querySelector('.recipe-form__button--remove-step');
-      if (removeButton) removeButton.remove();
-    } else if (items.length > 1) {
-      // Add remove button to first item if it doesn't have one
-      const removeButton = firstItem.querySelector('.recipe-form__button--remove-step');
-      if (!removeButton) {
-        const newRemoveButton = document.createElement('button');
-        newRemoveButton.type = 'button';
-        newRemoveButton.className = 'recipe-form__button recipe-form__button--remove-step';
-        newRemoveButton.textContent = '-';
-        firstItem.appendChild(newRemoveButton);
+      if (sectionsWithTitlesAndInstructions < 2) {
+        errors.instructions = 'חובה למלא לפחות 2 שלבים.';
+        isValid = false;
       }
     }
-  }
 
-  /**
-   * Add instruction item within a stage
-   */
-  addStageInstructionItem(event) {
-    const clickedButton = event.target;
-    const currentItem = clickedButton.closest('.recipe-form__step');
-    const stageContainer = clickedButton.closest('.recipe-form__steps');
-    const stageIndex = parseInt(stageContainer.dataset.stageIndex, 10);
-
-    // Create new item with remove button
-    const newItemHTML = `
-      <fieldset class="recipe-form__step">
-        <input type="text" name="steps" class="recipe-form__input">
-        <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
-        <button type="button" class="recipe-form__button recipe-form__button--remove-step">-</button>
-      </fieldset>
-    `;
-    
-    const newItemDiv = document.createElement('div');
-    newItemDiv.innerHTML = newItemHTML;
-    const newItem = newItemDiv.firstElementChild;
-
-    // Insert after current item
-    if (currentItem.nextSibling) {
-      currentItem.parentNode.insertBefore(newItem, currentItem.nextSibling);
-    } else {
-      currentItem.parentNode.appendChild(newItem);
-    }
-
-    // Update the stages data
-    if (this.stages[stageIndex]) {
-      this.stages[stageIndex].instructions.push('');
-    }
-
-    // Ensure first item in stage has remove button if needed
-    this.updateStageFirstItemRemoveButton(stageContainer);
-
-    // Dispatch change event
-    this.dispatchChangeEvent('stage-instruction-added');
-  }
-
-  /**
-   * Remove instruction item within a stage
-   */
-  removeStageInstructionItem(event) {
-    const itemToRemove = event.target.closest('.recipe-form__step');
-    const stageContainer = itemToRemove.closest('.recipe-form__steps');
-    const stageIndex = parseInt(stageContainer.dataset.stageIndex, 10);
-    
-    // Find item index within stage
-    const stageItems = Array.from(stageContainer.querySelectorAll('.recipe-form__step'));
-    const itemIndex = stageItems.indexOf(itemToRemove);
-
-    itemToRemove.remove();
-
-    // Update the stages data
-    if (this.stages[stageIndex] && this.stages[stageIndex].instructions[itemIndex] !== undefined) {
-      this.stages[stageIndex].instructions.splice(itemIndex, 1);
-    }
-
-    // Update first item remove button for this stage
-    this.updateStageFirstItemRemoveButton(stageContainer);
-
-    // Dispatch change event
-    this.dispatchChangeEvent('stage-instruction-removed');
-  }
-
-  /**
-   * Update first item remove button within a specific stage
-   */
-  updateStageFirstItemRemoveButton(stageContainer) {
-    const items = stageContainer.querySelectorAll('.recipe-form__step');
-    const firstItem = items[0];
-
-    if (!firstItem) return;
-
-    if (items.length === 1) {
-      // Remove the remove button from first item
-      const removeButton = firstItem.querySelector('.recipe-form__button--remove-step');
-      if (removeButton) removeButton.remove();
-    } else if (items.length > 1) {
-      // Add remove button to first item if it doesn't have one
-      const removeButton = firstItem.querySelector('.recipe-form__button--remove-step');
-      if (!removeButton) {
-        const newRemoveButton = document.createElement('button');
-        newRemoveButton.type = 'button';
-        newRemoveButton.className = 'recipe-form__button recipe-form__button--remove-step';
-        newRemoveButton.textContent = '-';
-        firstItem.appendChild(newRemoveButton);
-      }
-    }
-  }
-
-  /**
-   * Transform to stage mode (creates multiple stages)
-   */
-  transformToStageMode() {
-    if (this.isStageMode) {
-      // Already in stage mode, just add a new stage
-      // First preserve current stage data from DOM
-      this.updateStagesFromDOM();
-      
-      // Add new empty stage
-      this.stages.push({ title: '', instructions: [''] });
-      
-      // Re-render with updated data
-      this.renderStageMode();
-      
-      this.dispatchChangeEvent('stage-added');
-      return;
-    }
-    
-    // Collect current instructions from simple mode
-    const currentInstructions = this.getSimpleInstructions();
-    
-    // Convert to stage mode with first stage containing current instructions
-    this.isStageMode = true;
-    
-    // Ensure we have at least one instruction in the first stage
-    const firstStageInstructions = currentInstructions.length > 0 ? currentInstructions : [''];
-    
-    this.stages = [
-      { title: '', instructions: firstStageInstructions },
-      { title: '', instructions: [''] }  // Second stage always starts empty
-    ];
-    
-    // Re-render in stage mode
-    this.renderStageMode();
-    
-    this.dispatchChangeEvent('transformed-to-stage-mode');
-  }
-
-  /**
-   * Transform back to simple mode (single instruction list)
-   */
-  transformToSimpleMode() {
-    if (!this.isStageMode) return;
-    
-    // First update stages from DOM to get latest values
-    this.updateStagesFromDOM();
-    
-    // Collect all instructions from all stages, filtering out empty ones
-    const allInstructions = this.stages.flatMap(stage => 
-      stage.instructions.filter(instruction => instruction.trim() !== '')
-    );
-    
-    // Convert back to simple mode
-    this.isStageMode = false;
-    this.stages = [];
-    
-    // Re-render in simple mode
-    this.renderSimpleMode();
-    
-    // Populate with collected instructions
-    if (allInstructions.length > 0) {
-      this.populateSimpleInstructions(allInstructions);
-    }
-  }
-
-  /**
-   * Render in stage mode (multiple stages)
-   */
-  renderStageMode() {
-    const stepsContainer = this.shadowRoot.querySelector('#steps-container');
-    const addStageButton = this.shadowRoot.querySelector('#add-stage');
-    
-    // Clear existing content
-    stepsContainer.innerHTML = '';
-    
-    // Create stages
-    this.stages.forEach((stage, index) => {
-      const stageDiv = this.createStageHTML(stage, index);
-      stepsContainer.insertAdjacentHTML('beforeend', stageDiv);
+    // Validate individual instruction fields for populated instructions
+    this.sections.forEach((section, sectionIndex) => {
+      section.items.forEach((item, itemIndex) => {
+        if (this.isItemPopulated(item)) {
+          const itemErrors = this.validateItemFields(item);
+          if (Object.keys(itemErrors).length > 0) {
+            Object.keys(itemErrors).forEach(field => {
+              errors[`sections[${sectionIndex}].items[${itemIndex}].${field}`] = true;
+            });
+            isValid = false;
+          }
+        }
+      });
     });
-    
-    // Update add stage button text
-    addStageButton.textContent = 'הוסף שלב';
-    
-    // Re-setup event listeners for stage mode
-    this.setupStageEventListeners();
+
+    return { isValid, errors };
   }
 
-  /**
-   * Render in simple mode (single instruction list)
-   */
-  renderSimpleMode() {
-    const stepsContainer = this.shadowRoot.querySelector('#steps-container');
-    const addStageButton = this.shadowRoot.querySelector('#add-stage');
-    
-    // Clear existing content
-    stepsContainer.innerHTML = this.createInitialItem();
-    
-    // Reset add stage button
-    addStageButton.textContent = 'הוסף שלב';
-  }
 
   /**
-   * Create HTML for a single stage (matches existing structure)
+   * Override createSectionHTML to use instructions-specific CSS classes
    */
-  createStageHTML(stage, stageIndex) {
-    const stageNumber = stageIndex + 1;
-    const instructions = stage.instructions || [];
-    
-    // Create instruction items
-    const instructionItems = instructions.map((instruction, index) => {
-      const includeRemove = index > 0 || instructions.length > 1;
-      // Escape HTML in instruction value to prevent issues
-      const escapedInstruction = instruction.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-      return `
-        <fieldset class="recipe-form__step">
-          <input type="text" name="steps" class="recipe-form__input" value="${escapedInstruction}">
-          <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
-          ${includeRemove ? '<button type="button" class="recipe-form__button recipe-form__button--remove-step">-</button>' : ''}
-        </fieldset>
-      `;
+  createSectionHTML(section, sectionIndex) {
+    const sectionNumber = sectionIndex + 1;
+    const items = section.items || [];
+    const itemHTMLs = items.map((item, index) => {
+      const includeRemove = index > 0 || items.length > 1;
+      return this.createListItemHTML(item, includeRemove);
     }).join('');
-    
-    // If no instructions, create empty one
-    const content = instructionItems || `
-      <fieldset class="recipe-form__step">
-        <input type="text" name="steps" class="recipe-form__input">
-        <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
-      </fieldset>
-    `;
-
-    const removeStageButton = this.stages.length > 1 
-      ? `<button type="button" class="recipe-form__button recipe-form__button--remove-stage">-</button>`
+    const content = itemHTMLs || this.createListItemHTML(this.getInitialItems()[0], false);
+    const removeSectionButton = this.sections.length > 1
+      ? `<button type="button" class="recipe-form__button recipe-form__button--remove-section">-</button>`
       : '';
+    const escapedSectionTitle = (section.title || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-    // Escape stage title
-    const escapedStageTitle = (stage.title || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    
     return `
-      <div class="recipe-form__steps" data-stage-index="${stageIndex}">
+      <div class="recipe-form__steps" data-section-index="${sectionIndex}">
         <div class="recipe-form__stage-header">
-          <h3 class="recipe-form__stage-title">שלב ${stageNumber}</h3>
-          ${removeStageButton}
+          <h3 class="recipe-form__stage-title">${this.sectionTitlePrefix} ${sectionNumber}</h3>
+          ${removeSectionButton}
         </div>
-        <input type="text" class="recipe-form__input recipe-form__input--stage-name" 
-               placeholder="שם השלב (אופציונלי)" value="${escapedStageTitle}">
+        <input type="text" class="recipe-form__input recipe-form__input--stage-name"
+               placeholder="${this.sectionNamePlaceholder}" value="${escapedSectionTitle}">
         ${content}
       </div>
     `;
   }
 
   /**
-   * Add a new stage (simplified - called only when needed)
+   * Override updateSectionsFromDOM to use instructions-specific CSS classes
    */
-  addNewStage() {
-    // Preserve current stage data from DOM first
-    this.updateStagesFromDOM();
-    
-    // Add new empty stage
-    this.stages.push({ title: '', instructions: [''] });
-    
-    // Re-render with all stage data
-    this.renderStageMode();
-    
-    this.dispatchChangeEvent('stage-added');
-  }
+  updateSectionsFromDOM() {
+    if (!this.isSectionMode) return;
 
-  /**
-   * Update stages data from current DOM state
-   */
-  updateStagesFromDOM() {
-    if (!this.isStageMode) return;
-    
-    const stageContainers = this.shadowRoot.querySelectorAll('.recipe-form__steps[data-stage-index]');
-    
-    stageContainers.forEach((container) => {
-      const stageIndex = parseInt(container.dataset.stageIndex, 10);
-      
-      // Only update if this stage exists in our data
-      if (this.stages[stageIndex]) {
-        const stageNameInput = container.querySelector('.recipe-form__input--stage-name');
-        const stageTitle = stageNameInput ? stageNameInput.value.trim() : '';
-        
-        // Get only instruction inputs that are direct descendants of this stage container
-        const instructions = Array.from(
-          container.querySelectorAll(':scope > .recipe-form__step input[type="text"]')
-        ).map(input => input.value.trim());
-        
-        this.stages[stageIndex] = {
-          title: stageTitle || this.stages[stageIndex].title,
-          instructions: instructions.length > 0 ? instructions : [''] // Ensure at least one empty instruction
+    const sectionContainers = this.shadowRoot.querySelectorAll('.recipe-form__steps[data-section-index]');
+    sectionContainers.forEach((container) => {
+      const sectionIndex = parseInt(container.dataset.sectionIndex, 10);
+      if (this.sections[sectionIndex]) {
+        const sectionNameInput = container.querySelector('.recipe-form__input--stage-name');
+        const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
+        const items = Array.from(
+          container.querySelectorAll(`:scope > .${this.itemClass}`)
+        ).map(item => this.getItemData(item));
+
+        this.sections[sectionIndex] = {
+          title: sectionTitle || this.sections[sectionIndex].title,
+          items: items.length > 0 ? items : this.getInitialItems()
         };
       }
     });
   }
 
   /**
-   * Remove a stage
+   * Override removeSection to use instructions-specific CSS classes
+   * @param {Event} event - The click event
    */
-  removeStage(event) {
-    // First update stages data from DOM
-    this.updateStagesFromDOM();
-    
-    const stageDiv = event.target.closest('.recipe-form__steps');
-    const stageIndex = parseInt(stageDiv.dataset.stageIndex, 10);
-    
-    if (this.stages.length <= 1) return; // Can't remove last stage
-    
-    this.stages.splice(stageIndex, 1);
-    
-    // If only one stage left, transform back to simple mode
-    if (this.stages.length === 1) {
+  removeSection(event) {
+    this.updateSectionsFromDOM();
+    const sectionDiv = event.target.closest('.recipe-form__steps');
+    const sectionIndex = parseInt(sectionDiv.dataset.sectionIndex, 10);
+
+    if (this.sections.length <= 1) return;
+
+    this.sections.splice(sectionIndex, 1);
+
+    if (this.sections.length === 1) {
       this.transformToSimpleMode();
     } else {
-      this.renderStageMode();
+      this.renderSectionMode();
     }
-    
-    this.dispatchChangeEvent('stage-removed');
+
+    this.dispatchChangeEvent('section-removed');
   }
 
   /**
-   * Get current instructions data
+   * Override addSectionItem to use instructions-specific CSS classes
+   * @param {Event} event - The click event
    */
-  getInstructions() {
-    if (this.isStageMode) {
-      return this.getStagesData();
+  addSectionItem(event) {
+    const clickedButton = event.target;
+    const currentItem = clickedButton.closest(`.${this.itemClass}`);
+    const sectionContainer = clickedButton.closest('.recipe-form__steps');
+    const sectionIndex = parseInt(sectionContainer.dataset.sectionIndex, 10);
+    const newItemHTML = this.createListItemHTML(this.getInitialItems()[0], true);
+    const newItemDiv = document.createElement('div');
+    newItemDiv.innerHTML = newItemHTML;
+    const newItem = newItemDiv.firstElementChild;
+
+    if (currentItem.nextSibling) {
+      currentItem.parentNode.insertBefore(newItem, currentItem.nextSibling);
     } else {
-      return this.getSimpleInstructions();
+      currentItem.parentNode.appendChild(newItem);
     }
+
+    if (this.sections[sectionIndex]) {
+      this.sections[sectionIndex].items.push(this.getInitialItems()[0]);
+    }
+
+    this.updateSectionFirstItemRemoveButton(sectionContainer);
+    this.dispatchChangeEvent('section-item-added');
   }
 
   /**
-   * Get simple instructions array
+   * Override removeSectionItem to use instructions-specific CSS classes
+   * @param {Event} event - The click event
    */
-  getSimpleInstructions() {
-    const stepsContainer = this.shadowRoot.querySelector('#steps-container');
-    const inputs = stepsContainer.querySelectorAll('input[type="text"]');
-    
-    return Array.from(inputs)
-      .map(input => input.value.trim())
-      .filter(instruction => instruction.length > 0);
+  removeSectionItem(event) {
+    const itemToRemove = event.target.closest(`.${this.itemClass}`);
+    const sectionContainer = itemToRemove.closest('.recipe-form__steps');
+    const sectionIndex = parseInt(sectionContainer.dataset.sectionIndex, 10);
+    const sectionItems = Array.from(sectionContainer.querySelectorAll(`.${this.itemClass}`));
+    const itemIndex = sectionItems.indexOf(itemToRemove);
+
+    itemToRemove.remove();
+
+    if (this.sections[sectionIndex] && this.sections[sectionIndex].items[itemIndex] !== undefined) {
+      this.sections[sectionIndex].items.splice(itemIndex, 1);
+    }
+
+    this.updateSectionFirstItemRemoveButton(sectionContainer);
+    this.dispatchChangeEvent('section-item-removed');
   }
 
   /**
-   * Get stages data
+   * Override getSectionsData to use instructions-specific CSS classes
+   * @returns {Array} The data for the sectioned list.
    */
-  getStagesData() {
-    const stageContainers = this.shadowRoot.querySelectorAll('.recipe-form__steps[data-stage-index]');
-    const stages = [];
-    
-    stageContainers.forEach((container) => {
-      const stageIndex = parseInt(container.dataset.sectionIndex, 10);
-      const stageNameInput = container.querySelector('.recipe-form__input--stage-name');
-      const stageTitle = stageNameInput ? stageNameInput.value.trim() : `שלב ${stageIndex + 1}`;
-      
-      // Get only instruction inputs that are direct descendants of this stage container
-      const instructions = Array.from(
-        container.querySelectorAll(':scope > .recipe-form__step input[type="text"]')
-      )
-        .map(input => input.value.trim())
-        .filter(instruction => instruction.length > 0);
-      
-      if (instructions.length > 0) {
-        stages.push({ title: stageTitle, instructions });
+  getSectionsData() {
+    const sectionContainers = this.shadowRoot.querySelectorAll('.recipe-form__steps[data-section-index]');
+    const sections = [];
+    sectionContainers.forEach((container) => {
+      const sectionIndex = parseInt(container.dataset.sectionIndex, 10);
+      const sectionNameInput = container.querySelector('.recipe-form__input--stage-name');
+      const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : `${this.sectionTitlePrefix} ${sectionIndex + 1}`;
+      const items = Array.from(
+        container.querySelectorAll(`:scope > .${this.itemClass}`)
+      ).map(item => this.getItemData(item)).filter(item => this.isItemPopulated(item));
+
+      if (items.length > 0 || sectionTitle !== `${this.sectionTitlePrefix} ${sectionIndex + 1}`) {
+        sections.push({ title: sectionTitle, items });
       }
     });
-    
-    return stages;
+    return sections;
   }
 
   /**
-   * Populate instructions data
+   * Custom compatibility methods for legacy API
+   */
+  
+  // Legacy property getters for backward compatibility
+  get isStageMode() {
+    return this.isSectionMode;
+  }
+  
+  set isStageMode(value) {
+    this.isSectionMode = value;
+  }
+  
+  get stages() {
+    return this.sections;
+  }
+  
+  set stages(value) {
+    this.sections = value;
+  }
+
+  /**
+   * Legacy method: Get current instructions data (compatible with existing form API)
+   */
+  getInstructions() {
+    return this.getData();
+  }
+
+  /**
+   * Legacy method: Populate instructions (compatible with existing form API)
    */
   populateInstructions(data) {
     if (Array.isArray(data)) {
-      // Simple instructions array
-      this.populateSimpleInstructions(data);
+      const instructionObjects = data.map(text => ({ text: text || '' }));
+      this.populateSimpleData(instructionObjects);
     } else if (data && Array.isArray(data.stages)) {
-      // Legacy stages format
-      this.populateStagesData(data.stages);
-    } else if (data && data.instructions) {
-      // Simple instructions in object format
-      this.populateSimpleInstructions(data.instructions);
+      const sections = data.stages.map(stage => ({
+        title: stage.title || '',
+        items: (stage.instructions || []).map(text => ({ text: text || '' }))
+      }));
+      this.populateSectionsData(sections);
     }
   }
 
   /**
-   * Populate simple instructions
-   */
-  populateSimpleInstructions(instructions) {
-    if (!Array.isArray(instructions) || instructions.length === 0) return;
-    
-    // Ensure we're in simple mode
-    if (this.isStageMode) {
-      this.transformToSimpleMode();
-    }
-    
-    const stepsContainer = this.shadowRoot.querySelector('#steps-container');
-    
-    // Clear existing and create instructions
-    stepsContainer.innerHTML = '';
-    
-    instructions.forEach((instruction, index) => {
-      const includeRemove = index > 0 || instructions.length > 1; // Fix: include remove for first item if multiple instructions
-      // Escape HTML in instruction value
-      const escapedInstruction = instruction.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-      const stepHTML = `
-        <fieldset class="recipe-form__step">
-          <input type="text" name="steps" class="recipe-form__input" value="${escapedInstruction}">
-          <button type="button" class="recipe-form__button recipe-form__button--add-step">+</button>
-          ${includeRemove ? '<button type="button" class="recipe-form__button recipe-form__button--remove-step">-</button>' : ''}
-        </fieldset>
-      `;
-      stepsContainer.insertAdjacentHTML('beforeend', stepHTML);
-    });
-  }
-
-  /**
-   * Populate stages data
-   */
-  populateStagesData(stages) {
-    if (!Array.isArray(stages) || stages.length === 0) return;
-    
-    this.stages = stages.map(stage => ({
-      title: stage.title || '',
-      instructions: stage.instructions || []
-    }));
-    
-    // Transform to stage mode if more than one stage
-    if (stages.length > 1) {
-      this.isStageMode = true;
-      this.renderStageMode();
-    } else {
-      // Single stage - use simple mode
-      this.populateSimpleInstructions(stages[0].instructions);
-    }
-  }
-
-  /**
-   * Clear instructions
+   * Legacy method: Clear instructions (compatible with existing form API)
    */
   clearInstructions() {
-    this.isStageMode = false;
-    this.stages = [];
-    this.renderSimpleMode();
-    
-    // Clear the single input
-    const input = this.shadowRoot.querySelector('input[type="text"]');
-    if (input) {
-      input.value = '';
-    }
+    this.clear();
   }
 
   /**
-   * Override getData to return appropriate format
-   */
-  getData() {
-    return this.getInstructions();
-  }
-
-  /**
-   * Override populateData
-   */
-  populateData(data) {
-    this.populateInstructions(data);
-  }
-
-  /**
-   * Override dispatchChangeEvent for instructions
+   * Override dispatchChangeEvent to emit instructions-changed event for compatibility
    */
   dispatchChangeEvent(action, additionalData = {}) {
     this.dispatchEvent(new CustomEvent('instructions-changed', {
@@ -697,63 +470,98 @@ class RecipeInstructionsList extends DynamicListComponent {
       return; // No errors to highlight
     }
 
-    // Handle different error types
+    // Handle different error types - simplified for instructions
     Object.keys(errors).forEach(errorKey => {
-      if (errorKey === 'general') {
-        // General error - highlight all visible instruction inputs
-        this.highlightAllInstructionInputs();
+      if (errorKey === 'general' || errorKey === 'instructions') {
+        // General error or instructions error - highlight all visible instruction inputs and stage titles
+        const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
+        inputs.forEach(input => {
+          input.classList.add('recipe-form__input--invalid');
+        });
+        
+        // Also highlight stage title inputs if in stage mode
+        if (this.isSectionMode) {
+          const stageTitleInputs = this.shadowRoot.querySelectorAll('.recipe-form__input--stage-name');
+          stageTitleInputs.forEach(input => {
+            input.classList.add('recipe-form__input--invalid');
+          });
+        }
+      } else if (errorKey.startsWith('sections[') && errorKey.includes('.title')) {
+        // Section title validation errors
+        this.handleSectionTitleError(errorKey);
+      } else if (errorKey.startsWith('sections[') && errorKey.includes('.items')) {
+        // Section item validation errors
+        this.handleSectionItemError(errorKey);
       } else if (typeof errorKey === 'string' && errorKey.includes('.')) {
-        // Stage-specific error (e.g., "0.title" or "0.instructions.1")
-        this.highlightStageError(errorKey);
+        // Legacy stage-specific error handling
+        this.handleLegacyValidationError(errorKey);
       } else if (typeof errorKey === 'number' || /^\d+$/.test(errorKey)) {
         // Simple instruction index error
-        this.highlightInstructionByIndex(parseInt(errorKey));
+        const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
+        const index = parseInt(errorKey);
+        if (inputs[index]) {
+          inputs[index].classList.add('recipe-form__input--invalid');
+        }
       }
     });
   }
 
   /**
-   * Highlight all instruction inputs
+   * Handle section title validation errors
+   * @param {string} errorKey - Error key like "sections[0].title"
    */
-  highlightAllInstructionInputs() {
-    const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
-    inputs.forEach(input => {
-      input.classList.add('recipe-form__input--invalid');
-    });
-
-    // Also highlight stage title inputs if in stage mode
-    if (this.isStageMode) {
-      const stageTitleInputs = this.shadowRoot.querySelectorAll('.recipe-form__input--stage-name');
-      stageTitleInputs.forEach(input => {
-        input.classList.add('recipe-form__input--invalid');
-      });
+  handleSectionTitleError(errorKey) {
+    const match = errorKey.match(/sections\[(\d+)\]\.title/);
+    if (match) {
+      const sectionIndex = parseInt(match[1], 10);
+      const stageContainer = this.shadowRoot.querySelector(`[data-section-index="${sectionIndex}"]`);
+      if (stageContainer) {
+        const titleInput = stageContainer.querySelector('.recipe-form__input--stage-name');
+        if (titleInput) {
+          titleInput.classList.add('recipe-form__input--invalid');
+        }
+      }
     }
   }
 
   /**
-   * Highlight specific instruction by index
-   * @param {number} index - Instruction index to highlight
+   * Handle section item validation errors
+   * @param {string} errorKey - Error key like "sections[0].items[0].text"
    */
-  highlightInstructionByIndex(index) {
-    const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
-    if (inputs[index]) {
-      inputs[index].classList.add('recipe-form__input--invalid');
+  handleSectionItemError(errorKey) {
+    const match = errorKey.match(/sections\[(\d+)\]\.items\[(\d+)\]\.(\w+)/);
+    if (match) {
+      const sectionIndex = parseInt(match[1], 10);
+      const itemIndex = parseInt(match[2], 10);
+      const field = match[3];
+      
+      const stageContainer = this.shadowRoot.querySelector(`[data-section-index="${sectionIndex}"]`);
+      if (stageContainer) {
+        const stepElements = stageContainer.querySelectorAll(`.${this.itemClass}`);
+        const stepElement = stepElements[itemIndex];
+        if (stepElement && field === 'text') {
+          const input = stepElement.querySelector('input[name="steps"]');
+          if (input) {
+            input.classList.add('recipe-form__input--invalid');
+          }
+        }
+      }
     }
   }
 
   /**
-   * Highlight stage-specific error
-   * @param {string} errorKey - Error key like "0.title" or "0.instructions.1"
+   * Handle legacy validation error format for backward compatibility
+   * @param {string} errorKey - Error key from legacy validation
    */
-  highlightStageError(errorKey) {
+  handleLegacyValidationError(errorKey) {
     const parts = errorKey.split('.');
     const stageIndex = parseInt(parts[0]);
-    const field = parts[1]; // 'title' or 'instructions'
+    const field = parts[1];
     const stepIndex = parts[2] ? parseInt(parts[2]) : undefined;
 
     if (field === 'title') {
       // Highlight stage title input
-      const stageContainer = this.shadowRoot.querySelector(`[data-stage-index="${stageIndex}"]`);
+      const stageContainer = this.shadowRoot.querySelector(`[data-section-index="${stageIndex}"]`);
       if (stageContainer) {
         const titleInput = stageContainer.querySelector('.recipe-form__input--stage-name');
         if (titleInput) {
@@ -762,7 +570,7 @@ class RecipeInstructionsList extends DynamicListComponent {
       }
     } else if (field === 'instructions') {
       // Highlight instruction inputs in specific stage
-      const stageContainer = this.shadowRoot.querySelector(`[data-stage-index="${stageIndex}"]`);
+      const stageContainer = this.shadowRoot.querySelector(`[data-section-index="${stageIndex}"]`);
       if (stageContainer) {
         if (stepIndex !== undefined) {
           // Specific step within stage
