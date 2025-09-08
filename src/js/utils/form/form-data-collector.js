@@ -26,7 +26,6 @@ export function collectRecipeFormData(shadowRoot) {
   const ingredientsData = collectIngredientsFromComponent(shadowRoot);
   if (ingredientsData) {
     if (Array.isArray(ingredientsData) && ingredientsData.length > 0 && ingredientsData[0].title) {
-      // Sectioned ingredients format
       recipeData.ingredientSections = ingredientsData;
     } else if (Array.isArray(ingredientsData)) {
       // Flat ingredients array
@@ -41,13 +40,12 @@ export function collectRecipeFormData(shadowRoot) {
       // Stages format - convert from section format to legacy format
       recipeData.stages = instructionsData.map(stage => ({
         title: stage.title,
-        instructions: stage.items ? stage.items.map(item => item.text).filter(text => text.trim()) : []
+        instructions: stage.items ? stage.items.map(item => item.text || '') : []
       }));
     } else if (Array.isArray(instructionsData)) {
-      // Simple instructions array - extract text from objects if needed
       recipeData.instructions = instructionsData.map(item => 
         typeof item === 'string' ? item : (item.text || '')
-      ).filter(text => text.trim());
+      );
     }
   }
 

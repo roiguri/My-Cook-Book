@@ -455,14 +455,13 @@ export class SectionedListComponent extends DynamicListComponent {
     const sectionContainers = this.shadowRoot.querySelectorAll('.recipe-form__ingredient-sections[data-section-index]');
     const sections = [];
     sectionContainers.forEach((container) => {
-      const sectionIndex = parseInt(container.dataset.sectionIndex, 10);
       const sectionNameInput = container.querySelector('.recipe-form__input--section-name');
-      const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : `${this.sectionTitlePrefix} ${sectionIndex + 1}`;
+      const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
       const items = Array.from(
         container.querySelectorAll(`:scope > .${this.itemClass}`)
       ).map(item => this.getItemData(item)).filter(item => this.isItemPopulated(item));
 
-      if (items.length > 0 || sectionTitle !== `${this.sectionTitlePrefix} ${sectionIndex + 1}`) {
+      if (items.length > 0 || sectionTitle) {
         sections.push({ title: sectionTitle, items });
       }
     });

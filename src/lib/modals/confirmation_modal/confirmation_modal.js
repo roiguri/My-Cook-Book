@@ -1,3 +1,5 @@
+import { Modal } from '../../utilities/modal/modal.js';
+
 /**
  * Confirmation Modal Component
  * @class
@@ -159,3 +161,5 @@ class ConfirmationModal extends Modal {
 }
 
 customElements.define('confirmation-modal', ConfirmationModal);
+
+export { ConfirmationModal };
