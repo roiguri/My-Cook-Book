@@ -37,7 +37,7 @@ class EditRecipeComponent extends HTMLElement {
               /* Add your component-specific styles here */
           </style>
           <div class="edit-recipe-container">
-              <recipe-form-component clear-button-text="איפוס" submit-button-text="שמור שינויים" recipe-id="${this.recipeId}"></recipe-form-component>
+              <recipe-form-component clear-button-text="איפוס" submit-button-text="שמור שינויים" recipe-id="${this.recipeId}" disable-form-protection></recipe-form-component>
               <message-modal></message-modal>
           </div>
       `;

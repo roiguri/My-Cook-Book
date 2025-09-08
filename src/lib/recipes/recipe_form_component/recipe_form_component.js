@@ -29,22 +29,28 @@ class RecipeFormComponent extends HTMLElement {
     this.submitButtonText = this.hasAttribute('submit-button-text')
       ? this.getAttribute('submit-button-text')
       : 'שלח מתכון';
+    this.formProtectionDisabled = this.hasAttribute('disable-form-protection');
   }
 
   async connectedCallback() {
     this.render();
     this.setupEventListeners();
-    this.setupFormProtection();
+    
+    if (!this.formProtectionDisabled) {
+      this.setupFormProtection();
+    }
 
     const recipeId = this.getAttribute('recipe-id');
     if (recipeId) {
       await this.setRecipeData(recipeId);
     } else {
-      // Enable protection for new forms after initial render
-      setTimeout(() => {
-        this.collectFormData();
-        this.enableFormProtection(this.recipeData);
-      }, 500);
+      // Enable protection for new forms after initial render (only if not disabled)
+      if (!this.formProtectionDisabled) {
+        setTimeout(() => {
+          this.collectFormData();
+          this.enableFormProtection(this.recipeData);
+        }, 500);
+      }
     }
   }
 
@@ -292,21 +298,28 @@ class RecipeFormComponent extends HTMLElement {
           await this.populateImages(data.images);
         }
 
-        setTimeout(() => this.enableFormProtection(this.recipeData), 500);
+        // Enable protection only if not disabled
+        if (!this.formProtectionDisabled) {
+          setTimeout(() => this.enableFormProtection(this.recipeData), 500);
+        }
 
       } else {
         console.warn('No such document!');
+        if (!this.formProtectionDisabled) {
+          setTimeout(() => {
+            this.collectFormData();
+            this.enableFormProtection(this.recipeData);
+          }, 500);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching recipe:', error);
+      if (!this.formProtectionDisabled) {
         setTimeout(() => {
           this.collectFormData();
           this.enableFormProtection(this.recipeData);
         }, 500);
       }
-    } catch (error) {
-      console.error('Error fetching recipe:', error);
-      setTimeout(() => {
-        this.collectFormData();
-        this.enableFormProtection(this.recipeData);
-      }, 500);
     }
   }
 
@@ -390,7 +403,7 @@ class RecipeFormComponent extends HTMLElement {
    * @param {Object} initialData - Initial form data (optional)
    */
   enableFormProtection(initialData = null) {
-    if (this.isProtectionEnabled) return;
+    if (this.formProtectionDisabled || this.isProtectionEnabled) return;
     
     const dataToUse = initialData || this.recipeData;
     formProtectionManager.initialize(this.shadowRoot, dataToUse);
