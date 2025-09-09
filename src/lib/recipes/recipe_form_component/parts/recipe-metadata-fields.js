@@ -181,6 +181,9 @@ class RecipeMetadataFields extends HTMLElement {
           value = value ? parseInt(value, 10) : 0;
         } else if (transform) {
           value = transform(value);
+        } else if (field === 'mainIngredient' && value === '') {
+          // Convert empty main ingredient to null for consistency
+          value = null;
         }
 
         data[field] = value;

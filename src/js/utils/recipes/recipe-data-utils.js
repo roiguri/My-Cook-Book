@@ -281,13 +281,9 @@ export function validateRecipeData(recipeData) {
     errors.difficulty = 'חובה למלא את רמת הקושי.';
   }
 
-  // Main Ingredient
-  if (
-    !recipeData.mainIngredient ||
-    typeof recipeData.mainIngredient !== 'string' ||
-    !recipeData.mainIngredient.trim()
-  ) {
-    errors.mainIngredient = 'חובה למלא את המרכיב העיקרי.';
+  // Main Ingredient (optional)
+  if (recipeData.mainIngredient && typeof recipeData.mainIngredient !== 'string') {
+    errors.mainIngredient = 'המרכיב העיקרי חייב להיות טקסט.';
   }
 
   // Servings

@@ -38,29 +38,61 @@ describe('FilterUtils', () => {
       waitTime: 10,
       tags: ['בריא', 'מהיר', 'צמחוני'],
     },
+    {
+      id: '5',
+      name: 'Mixed Salad',
+      // No mainIngredient field
+      difficulty: 'קלה',
+      prepTime: 10,
+      waitTime: 0,
+      tags: ['בריא', 'צמחוני'],
+    },
+    {
+      id: '6',
+      name: 'Simple Pasta',
+      mainIngredient: null,
+      difficulty: 'בינונית',
+      prepTime: 15,
+      waitTime: 20,
+      tags: ['מהיר'],
+    },
+    {
+      id: '7',
+      name: 'Fruit Bowl',
+      mainIngredient: '',
+      difficulty: 'קלה',
+      prepTime: 5,
+      waitTime: 0,
+      tags: ['בריא', 'מתוק'],
+    },
   ];
 
   describe('applyFilters', () => {
     test('should return all recipes when no filters applied', () => {
       const filters = FilterUtils.createEmptyFilters();
       const result = FilterUtils.applyFilters(mockRecipes, filters);
-      expect(result).toHaveLength(4);
+      expect(result).toHaveLength(7);
       expect(result).toEqual(mockRecipes);
     });
 
     test('should filter by cooking time 0-30 minutes', () => {
       const filters = { ...FilterUtils.createEmptyFilters(), cookingTime: '0-30' };
       const result = FilterUtils.applyFilters(mockRecipes, filters);
-      expect(result).toHaveLength(2);
+      // Should include recipes 2, 4, 5, 7 (all have total time <= 30 minutes)
+      expect(result).toHaveLength(4);
       expect(result.map((r) => r.id)).toContain('2'); // 30 minutes total
       expect(result.map((r) => r.id)).toContain('4'); // 15 minutes total
+      expect(result.map((r) => r.id)).toContain('5'); // 10 minutes total
+      expect(result.map((r) => r.id)).toContain('7'); // 5 minutes total
     });
 
     test('should filter by cooking time 31-60 minutes', () => {
       const filters = { ...FilterUtils.createEmptyFilters(), cookingTime: '31-60' };
       const result = FilterUtils.applyFilters(mockRecipes, filters);
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('1'); // 45 minutes total
+      // Should include recipes 1, 6 (both have total time 31-60 minutes)
+      expect(result).toHaveLength(2);
+      expect(result.map((r) => r.id)).toContain('1'); // 45 minutes total
+      expect(result.map((r) => r.id)).toContain('6'); // 35 minutes total
     });
 
     test('should filter by cooking time over 60 minutes', () => {
@@ -73,7 +105,8 @@ describe('FilterUtils', () => {
     test('should filter by difficulty', () => {
       const filters = { ...FilterUtils.createEmptyFilters(), difficulty: 'קלה' };
       const result = FilterUtils.applyFilters(mockRecipes, filters);
-      expect(result).toHaveLength(2);
+      // Should include recipes 1, 4, 5, 7 (all have difficulty 'קלה')
+      expect(result).toHaveLength(4);
       expect(result.every((r) => r.difficulty === 'קלה')).toBe(true);
     });
 
@@ -84,10 +117,33 @@ describe('FilterUtils', () => {
       expect(result[0].mainIngredient).toBe('עוף');
     });
 
+    test('should exclude recipes without main ingredient when filtering by main ingredient', () => {
+      const filters = { ...FilterUtils.createEmptyFilters(), mainIngredient: 'ירקות' };
+      const result = FilterUtils.applyFilters(mockRecipes, filters);
+      // Should only return recipe #4 (Vegetable Stir Fry)
+      // Recipes 5, 6, 7 don't have valid main ingredients so should be excluded
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('4');
+      expect(result[0].mainIngredient).toBe('ירקות');
+    });
+
+    test('should return recipes with and without main ingredients when no main ingredient filter applied', () => {
+      const filters = { ...FilterUtils.createEmptyFilters(), difficulty: 'קלה' };
+      const result = FilterUtils.applyFilters(mockRecipes, filters);
+      // Should include recipes 1, 4, 5, 7 (all have difficulty 'קלה')
+      expect(result).toHaveLength(4);
+      const ids = result.map((r) => r.id);
+      expect(ids).toContain('1'); // has mainIngredient
+      expect(ids).toContain('4'); // has mainIngredient
+      expect(ids).toContain('5'); // no mainIngredient
+      expect(ids).toContain('7'); // empty mainIngredient
+    });
+
     test('should filter by single tag', () => {
       const filters = { ...FilterUtils.createEmptyFilters(), tags: ['בריא'] };
       const result = FilterUtils.applyFilters(mockRecipes, filters);
-      expect(result).toHaveLength(3);
+      // Should include recipes 1, 3, 4, 5, 7 (all have 'בריא' tag)
+      expect(result).toHaveLength(5);
       expect(result.every((r) => r.tags.includes('בריא'))).toBe(true);
     });
 
@@ -125,7 +181,8 @@ describe('FilterUtils', () => {
         tags: ['בריא'],
       };
       const result = FilterUtils.applyFilters(mockRecipes, filters);
-      expect(result).toHaveLength(2);
+      // Should include recipes 1, 4, 5, 7 (all have difficulty 'קלה' AND 'בריא' tag)
+      expect(result).toHaveLength(4);
       expect(result.every((r) => r.difficulty === 'קלה' && r.tags.includes('בריא'))).toBe(true);
     });
 
@@ -163,12 +220,13 @@ describe('FilterUtils', () => {
   describe('extractFilterOptions', () => {
     test('should extract main ingredients correctly', () => {
       const result = FilterUtils.extractFilterOptions(mockRecipes);
+      // Should only include recipes 1-4 with valid main ingredients (5-7 have null/empty/missing)
       expect(result.mainIngredients).toEqual(['בקר', 'דגים', 'ירקות', 'עוף']);
     });
 
     test('should extract tags correctly', () => {
       const result = FilterUtils.extractFilterOptions(mockRecipes);
-      expect(result.tags).toEqual(['בריא', 'בשרי', 'חלבי', 'מהיר', 'צמחוני']);
+      expect(result.tags).toEqual(['בריא', 'בשרי', 'חלבי', 'מהיר', 'מתוק', 'צמחוני']);
     });
 
     test('should handle recipes with missing ingredients', () => {

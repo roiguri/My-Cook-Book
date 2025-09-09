@@ -215,6 +215,35 @@ describe('recipe-data-utils', () => {
       expect(result.errors).toEqual({});
     });
 
+    it('validates a recipe without main ingredient', () => {
+      const r = { ...baseRecipe };
+      delete r.mainIngredient;
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual({});
+    });
+
+    it('validates a recipe with empty main ingredient', () => {
+      const r = { ...baseRecipe, mainIngredient: '' };
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual({});
+    });
+
+    it('validates a recipe with null main ingredient', () => {
+      const r = { ...baseRecipe, mainIngredient: null };
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual({});
+    });
+
+    it('fails if main ingredient is not a string', () => {
+      const r = { ...baseRecipe, mainIngredient: 123 };
+      const result = validateRecipeData(r);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.mainIngredient).toBeDefined();
+    });
+
     it('fails if name is missing', () => {
       const r = { ...baseRecipe, name: '' };
       const result = validateRecipeData(r);

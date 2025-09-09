@@ -34,7 +34,10 @@ export class FilterUtils {
       if (difficulty && recipe.difficulty !== difficulty) return false;
 
       // Main ingredient filter
-      if (mainIngredient && recipe.mainIngredient !== mainIngredient) return false;
+      if (mainIngredient) {
+        // Only filter if recipe has a main ingredient and it doesn't match
+        if (!recipe.mainIngredient || recipe.mainIngredient !== mainIngredient) return false;
+      }
 
       // Tags filter - all selected tags must be present
       if (tags && tags.length > 0) {
@@ -73,7 +76,9 @@ export class FilterUtils {
       ...new Set(
         recipes
           .map((r) => r.mainIngredient)
-          .filter((ingredient) => ingredient && ingredient.trim()),
+          .filter(
+            (ingredient) => ingredient && typeof ingredient === 'string' && ingredient.trim(),
+          ),
       ),
     ].sort((a, b) => a.localeCompare(b));
 
