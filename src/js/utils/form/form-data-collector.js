@@ -16,7 +16,7 @@ export function collectRecipeFormData(shadowRoot) {
   // Get metadata from the metadata fields component
   const metadataComponent = shadowRoot.getElementById('metadata-fields');
   const metadataData = metadataComponent ? metadataComponent.getFormData() : {};
-  
+
   const recipeData = {
     ...metadataData,
     approved: false,
@@ -36,15 +36,20 @@ export function collectRecipeFormData(shadowRoot) {
   // Collect instructions/stages from new component
   const instructionsData = collectInstructionsFromComponent(shadowRoot);
   if (instructionsData) {
-    if (Array.isArray(instructionsData) && instructionsData.length > 0 && instructionsData[0] && instructionsData[0].title) {
+    if (
+      Array.isArray(instructionsData) &&
+      instructionsData.length > 0 &&
+      instructionsData[0] &&
+      instructionsData[0].title
+    ) {
       // Stages format - convert from section format to legacy format
-      recipeData.stages = instructionsData.map(stage => ({
+      recipeData.stages = instructionsData.map((stage) => ({
         title: stage.title,
-        instructions: stage.items ? stage.items.map(item => item.text || '') : []
+        instructions: stage.items ? stage.items.map((item) => item.text || '') : [],
       }));
     } else if (Array.isArray(instructionsData)) {
-      recipeData.instructions = instructionsData.map(item => 
-        typeof item === 'string' ? item : (item.text || '')
+      recipeData.instructions = instructionsData.map((item) =>
+        typeof item === 'string' ? item : item.text || '',
       );
     }
   }
@@ -63,7 +68,6 @@ export function collectRecipeFormData(shadowRoot) {
   return recipeData;
 }
 
-
 /**
  * Collects ingredient data from the ingredients list component
  * @param {ShadowRoot} shadowRoot - The component's shadow root
@@ -74,7 +78,7 @@ function collectIngredientsFromComponent(shadowRoot) {
   if (ingredientsList && typeof ingredientsList.getData === 'function') {
     return ingredientsList.getData();
   }
-  
+
   // Component should always be available
   console.warn('Ingredients component not found or missing getData method');
   return null;
@@ -90,12 +94,11 @@ function collectInstructionsFromComponent(shadowRoot) {
   if (instructionsList && typeof instructionsList.getInstructions === 'function') {
     return instructionsList.getInstructions();
   }
-  
+
   // Component should always be available
   console.warn('Instructions component not found or missing getInstructions method');
   return null;
 }
-
 
 /**
  * Collects image data from the image handler
@@ -104,15 +107,14 @@ function collectInstructionsFromComponent(shadowRoot) {
  */
 function collectImages(shadowRoot) {
   const imageHandler = shadowRoot.getElementById('recipe-images');
-  
+
   if (!imageHandler) {
     return { images: [], toDelete: [] };
   }
-  
+
   const images = imageHandler.getImages();
-  const toDelete = typeof imageHandler.getRemovedImages === 'function' 
-    ? imageHandler.getRemovedImages() 
-    : [];
+  const toDelete =
+    typeof imageHandler.getRemovedImages === 'function' ? imageHandler.getRemovedImages() : [];
 
   const processedImages = images.map((img) => {
     if (img.file) {
@@ -165,29 +167,38 @@ export function collectSectionData(shadowRoot, section) {
     case 'metadata':
       const metadataComponent = shadowRoot.getElementById('metadata-fields');
       return metadataComponent ? metadataComponent.getFormData() : {};
-    
+
     case 'ingredients':
       const ingredientsData = collectIngredientsFromComponent(shadowRoot);
-      if (ingredientsData && Array.isArray(ingredientsData) && ingredientsData.length > 0 && ingredientsData[0].title) {
+      if (
+        ingredientsData &&
+        Array.isArray(ingredientsData) &&
+        ingredientsData.length > 0 &&
+        ingredientsData[0].title
+      ) {
         return { ingredientSections: ingredientsData };
       } else if (ingredientsData) {
         return { ingredients: ingredientsData };
       }
       return { ingredients: [] };
-    
+
     case 'instructions':
       const instructionsData = collectInstructionsFromComponent(shadowRoot);
-      if (Array.isArray(instructionsData) && instructionsData.length > 0 && instructionsData[0].title) {
+      if (
+        Array.isArray(instructionsData) &&
+        instructionsData.length > 0 &&
+        instructionsData[0].title
+      ) {
         return { stages: instructionsData };
       }
       return { instructions: instructionsData || [] };
-    
+
     case 'images':
       return collectImages(shadowRoot);
-    
+
     case 'comments':
       return { comments: collectComments(shadowRoot) };
-    
+
     default:
       return {};
   }
@@ -200,9 +211,10 @@ export function collectSectionData(shadowRoot, section) {
  * @returns {boolean} - True if minimum required data is present
  */
 export function hasMinimumRequiredData(recipeData) {
-  const hasIngredients = (recipeData.ingredients && recipeData.ingredients.length > 0) ||
-                         (recipeData.ingredientSections && recipeData.ingredientSections.length > 0);
-  
+  const hasIngredients =
+    (recipeData.ingredients && recipeData.ingredients.length > 0) ||
+    (recipeData.ingredientSections && recipeData.ingredientSections.length > 0);
+
   return !!(
     recipeData.name &&
     recipeData.category &&

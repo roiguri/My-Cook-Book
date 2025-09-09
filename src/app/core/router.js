@@ -49,7 +49,7 @@ export class AppRouter {
     if (typeof name !== 'string' || typeof guardFunction !== 'function') {
       throw new Error('Guard name must be a string and guard must be a function');
     }
-    
+
     this.navigationGuards.set(name, guardFunction);
   }
 
@@ -69,7 +69,7 @@ export class AppRouter {
         // Continue checking other guards on error
       }
     }
-    
+
     return true;
   }
 
@@ -98,7 +98,7 @@ export class AppRouter {
     this.executeRoute(routePath);
 
     this.dispatchNavigationEvent(normalizedPath);
-    
+
     return true;
   }
 

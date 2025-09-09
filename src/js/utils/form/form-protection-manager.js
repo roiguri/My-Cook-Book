@@ -44,7 +44,7 @@ class FormProtectionManager {
 
     const currentData = this.captureCurrentData();
     const isDirty = !this.deepEqual(this.initialData, currentData);
-    
+
     if (isDirty !== this.isDirty) {
       this.isDirty = isDirty;
       this.dispatchDirtyStateChange(isDirty);
@@ -55,11 +55,11 @@ class FormProtectionManager {
 
   deepEqual(obj1, obj2) {
     if (obj1 === obj2) return true;
-    
+
     if (!obj1 || !obj2) return false;
-    
+
     if (typeof obj1 !== typeof obj2) return false;
-    
+
     if (typeof obj1 !== 'object') {
       // Empty strings, null, and undefined are equivalent for form comparison
       if ((obj1 === '' || obj1 == null) && (obj2 === '' || obj2 == null)) {
@@ -67,9 +67,9 @@ class FormProtectionManager {
       }
       return obj1 === obj2;
     }
-    
+
     if (Array.isArray(obj1) !== Array.isArray(obj2)) return false;
-    
+
     if (Array.isArray(obj1)) {
       if (obj1.length !== obj2.length) return false;
       for (let i = 0; i < obj1.length; i++) {
@@ -77,17 +77,17 @@ class FormProtectionManager {
       }
       return true;
     }
-    
+
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
-    
+
     if (keys1.length !== keys2.length) return false;
-    
+
     for (const key of keys1) {
       if (!keys2.includes(key)) return false;
       if (!this.deepEqual(obj1[key], obj2[key])) return false;
     }
-    
+
     return true;
   }
 
@@ -123,20 +123,20 @@ class FormProtectionManager {
       modal.removeEventListener('confirm-approved', handleApproved);
       modal.removeEventListener('confirm-rejected', handleRejected);
     };
-    
+
     const handleRejected = () => {
       resolve(false);
       modal.removeEventListener('confirm-approved', handleApproved);
       modal.removeEventListener('confirm-rejected', handleRejected);
     };
-    
+
     modal.addEventListener('confirm-approved', handleApproved);
     modal.addEventListener('confirm-rejected', handleRejected);
     modal.confirm(
       'יש לך שינויים שלא נשמרו שיאבדו. האם אתה בטוח שברצונך לעזוב את הדף?',
       'שינויים לא נשמרו',
       'המשך בכל זאת',
-      'ביטול'
+      'ביטול',
     );
   }
 
@@ -149,13 +149,11 @@ class FormProtectionManager {
     return modal;
   }
 
-
   discardAndNavigate(resolve) {
     this.isDirty = false;
     this.dispatchDirtyStateChange(false);
     resolve(true);
   }
-
 
   updateInitialData() {
     this.initialData = this.captureCurrentData();
@@ -169,7 +167,7 @@ class FormProtectionManager {
     const dirtyEvent = new CustomEvent('form-dirty-state-changed', {
       bubbles: true,
       composed: true,
-      detail: { isDirty }
+      detail: { isDirty },
     });
 
     this.shadowRoot.dispatchEvent(dirtyEvent);
@@ -215,7 +213,7 @@ class FormProtectionManager {
     return {
       isActive: this.isActive,
       isDirty: this.isDirty,
-      hasInitialData: !!this.initialData
+      hasInitialData: !!this.initialData,
     };
   }
 }

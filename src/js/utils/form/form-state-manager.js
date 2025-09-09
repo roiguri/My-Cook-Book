@@ -12,27 +12,29 @@
  */
 export function setFormDisabledState(shadowRoot, isDisabled) {
   if (!shadowRoot) return;
-  
+
   // Handle metadata fields component
   const metadataComponent = shadowRoot.getElementById('metadata-fields');
   if (metadataComponent && typeof metadataComponent.setDisabled === 'function') {
     metadataComponent.setDisabled(isDisabled);
   }
-  
+
   // Handle ingredients list component
   const ingredientsList = shadowRoot.getElementById('ingredients-list');
   if (ingredientsList && typeof ingredientsList.setDisabled === 'function') {
     ingredientsList.setDisabled(isDisabled);
   }
-  
+
   // Handle form button group component
   const buttonGroup = shadowRoot.getElementById('form-buttons');
   if (buttonGroup && typeof buttonGroup.setDisabled === 'function') {
     buttonGroup.setDisabled(isDisabled);
   }
-  
+
   // Handle main component form elements (excluding those in sub-components)
-  const formElements = shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input):not(form-button-group input):not(recipe-ingredients-list input), select:not(recipe-metadata-fields select):not(form-button-group select):not(recipe-ingredients-list select), textarea:not(recipe-metadata-fields textarea):not(form-button-group textarea):not(recipe-ingredients-list textarea)');
+  const formElements = shadowRoot.querySelectorAll(
+    'input:not(recipe-metadata-fields input):not(form-button-group input):not(recipe-ingredients-list input), select:not(recipe-metadata-fields select):not(form-button-group select):not(recipe-ingredients-list select), textarea:not(recipe-metadata-fields textarea):not(form-button-group textarea):not(recipe-ingredients-list textarea)',
+  );
   formElements.forEach((element) => {
     element.disabled = isDisabled;
   });
@@ -50,26 +52,25 @@ export function setFormDisabledState(shadowRoot, isDisabled) {
  */
 export function clearForm(shadowRoot) {
   if (!shadowRoot) return;
-  
+
   // Clear metadata fields through component API
   clearMetadataFields(shadowRoot);
-  
+
   // Clear ingredients through component API
   clearIngredientsFields(shadowRoot);
-  
+
   // Clear main component fields (inputs, selects, textareas not in sub-components)
   clearMainComponentFields(shadowRoot);
-  
+
   // Reset instructions/stages to initial state
   resetInstructionsToInitial(shadowRoot);
-  
+
   // Clear images
   clearImages(shadowRoot);
-  
+
   // Reset form and hide error messages
   resetFormState(shadowRoot);
 }
-
 
 /**
  * Clears metadata fields through component API
@@ -100,16 +101,20 @@ function clearIngredientsFields(shadowRoot) {
 function clearMainComponentFields(shadowRoot) {
   // Clear only inputs, selects, and textareas that are direct children of main component
   // This excludes fields inside sub-components
-  shadowRoot.querySelectorAll('input:not(recipe-metadata-fields input):not(recipe-ingredients-list input), select:not(recipe-metadata-fields select):not(recipe-ingredients-list select), textarea:not(recipe-metadata-fields textarea):not(recipe-ingredients-list textarea)').forEach((field) => {
-    if (field.type === 'textarea' || field.tagName === 'TEXTAREA') {
-      field.value = '';
-    } else if (field.tagName === 'SELECT') {
-      field.selectedIndex = 0;
-    } else {
-      field.value = '';
-    }
-    field.classList.remove('recipe-form__input--invalid');
-  });
+  shadowRoot
+    .querySelectorAll(
+      'input:not(recipe-metadata-fields input):not(recipe-ingredients-list input), select:not(recipe-metadata-fields select):not(recipe-ingredients-list select), textarea:not(recipe-metadata-fields textarea):not(recipe-ingredients-list textarea)',
+    )
+    .forEach((field) => {
+      if (field.type === 'textarea' || field.tagName === 'TEXTAREA') {
+        field.value = '';
+      } else if (field.tagName === 'SELECT') {
+        field.selectedIndex = 0;
+      } else {
+        field.value = '';
+      }
+      field.classList.remove('recipe-form__input--invalid');
+    });
 }
 
 /**
@@ -124,7 +129,6 @@ function resetInstructionsToInitial(shadowRoot) {
     console.warn('Instructions component not found or missing clearInstructions method');
   }
 }
-
 
 /**
  * Clears images from the image handler
@@ -145,7 +149,7 @@ function resetFormState(shadowRoot) {
   // Reset the form element
   const form = shadowRoot.getElementById('recipe-form');
   if (form) form.reset();
-  
+
   // Hide error message
   const errorMessage = shadowRoot.querySelector('.recipe-form__error-message');
   if (errorMessage) errorMessage.style.display = 'none';
@@ -158,16 +162,16 @@ function resetFormState(shadowRoot) {
  */
 export function populateFormWithData(shadowRoot, recipeData) {
   if (!shadowRoot || !recipeData) return;
-  
+
   // Populate basic fields
   populateBasicFields(shadowRoot, recipeData);
-  
+
   // Populate ingredients
   populateIngredients(shadowRoot, recipeData.ingredients || []);
-  
+
   // Populate instructions/stages
   populateInstructions(shadowRoot, recipeData);
-  
+
   // Populate images (if supported)
   if (recipeData.images) {
     populateImages(shadowRoot, recipeData.images);
@@ -188,10 +192,18 @@ function populateBasicFields(shadowRoot, recipeData) {
     { field: 'servings', id: 'servings-form' },
     { field: 'difficulty', id: 'difficulty' },
     { field: 'mainIngredient', id: 'main-ingredient' },
-    { field: 'tags', id: 'tags', transform: (tags) => Array.isArray(tags) ? tags.join(', ') : tags },
-    { field: 'comments', id: 'comments', transform: (comments) => Array.isArray(comments) ? comments.join('\n') : comments },
+    {
+      field: 'tags',
+      id: 'tags',
+      transform: (tags) => (Array.isArray(tags) ? tags.join(', ') : tags),
+    },
+    {
+      field: 'comments',
+      id: 'comments',
+      transform: (comments) => (Array.isArray(comments) ? comments.join('\n') : comments),
+    },
   ];
-  
+
   fieldMappings.forEach(({ field, id, transform }) => {
     const element = shadowRoot.getElementById(id);
     if (element && recipeData[field] !== undefined) {
@@ -211,7 +223,6 @@ function populateIngredients(shadowRoot, ingredients) {
     ingredientsList.populateIngredients(ingredients);
   }
 }
-
 
 /**
  * Populates instructions/stages section
@@ -246,7 +257,9 @@ function populateStages(_shadowRoot, _stages) {
  */
 function populateSingleStageInstructions(_shadowRoot, _instructions) {
   // This would need integration with the component's addStepLine method
-  console.warn('populateSingleStageInstructions: This method needs integration with component methods');
+  console.warn(
+    'populateSingleStageInstructions: This method needs integration with component methods',
+  );
 }
 
 /**
@@ -269,9 +282,9 @@ function populateImages(shadowRoot, images) {
  */
 export function setFormLoadingState(shadowRoot, isLoading, loadingText = 'שולח...') {
   if (!shadowRoot) return;
-  
+
   setFormDisabledState(shadowRoot, isLoading);
-  
+
   // Handle loading state through button group component
   const buttonGroup = shadowRoot.getElementById('form-buttons');
   if (buttonGroup && typeof buttonGroup.setLoadingState === 'function') {

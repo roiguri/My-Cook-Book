@@ -1,4 +1,3 @@
-
 /**
  * RecipeIngredientsList Component
  * -------------------------------
@@ -16,7 +15,7 @@ class RecipeIngredientsList extends SectionedListComponent {
     this.itemClass = 'recipe-form__ingredient-entry';
     this.addButtonClass = 'recipe-form__button--add-ingredient';
     this.removeButtonClass = 'recipe-form__button--remove-ingredient';
-    
+
     // Override selector configuration for ingredients-specific DOM structure
     this.sectionContainerSelector = '.recipe-form__ingredient-sections[data-section-index]';
     this.sectionNameInputSelector = '.recipe-form__input--section-name';
@@ -36,7 +35,11 @@ class RecipeIngredientsList extends SectionedListComponent {
     // Use event delegation since ingredient inputs are added dynamically
     this.shadowRoot.addEventListener('input', (event) => {
       const target = event.target;
-      if (target.matches('.recipe-form__input--quantity, .recipe-form__input--unit, .recipe-form__input--item, .recipe-form__input--section-name')) {
+      if (
+        target.matches(
+          '.recipe-form__input--quantity, .recipe-form__input--unit, .recipe-form__input--item, .recipe-form__input--section-name',
+        )
+      ) {
         // Clear error highlighting when user changes the value
         target.classList.remove('recipe-form__input--invalid');
       }
@@ -44,7 +47,9 @@ class RecipeIngredientsList extends SectionedListComponent {
   }
 
   createListItemHTML(ingredient, includeRemove) {
-    const escapedQuantity = String(ingredient.amount || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const escapedQuantity = String(ingredient.amount || '')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
     const escapedUnit = (ingredient.unit || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const escapedItem = (ingredient.item || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const removeButtonHTML = includeRemove
@@ -73,7 +78,7 @@ class RecipeIngredientsList extends SectionedListComponent {
     return {
       amount: quantityInput ? quantityInput.value.trim() : '',
       unit: unitInput ? unitInput.value.trim() : '',
-      item: itemInput ? itemInput.value.trim() : ''
+      item: itemInput ? itemInput.value.trim() : '',
     };
   }
 
@@ -92,7 +97,7 @@ class RecipeIngredientsList extends SectionedListComponent {
    */
   validateItemFields(item) {
     const errors = {};
-    
+
     if (!item.amount || !item.amount.trim()) {
       errors.amount = true;
     }
@@ -102,26 +107,26 @@ class RecipeIngredientsList extends SectionedListComponent {
     if (!item.item || !item.item.trim()) {
       errors.item = true;
     }
-    
+
     return errors;
   }
 
   setValidationState(errors) {
     // Clear all existing error states including section name inputs
-    this.shadowRoot.querySelectorAll('.recipe-form__input--invalid').forEach(input => {
-        input.classList.remove('recipe-form__input--invalid');
+    this.shadowRoot.querySelectorAll('.recipe-form__input--invalid').forEach((input) => {
+      input.classList.remove('recipe-form__input--invalid');
     });
 
     if (!errors || Object.keys(errors).length === 0) return;
 
     const fieldMapping = { amount: 'quantity', unit: 'unit', item: 'item' };
 
-    Object.keys(errors).forEach(key => {
+    Object.keys(errors).forEach((key) => {
       // Handle section mode validation errors
       if (key.startsWith('sections[')) {
         this.handleSectionValidationError(key, errors[key]);
       }
-      // Handle basic mode validation errors  
+      // Handle basic mode validation errors
       else if (key.startsWith('items[')) {
         this.handleBasicModeValidationError(key, errors[key], fieldMapping);
       }
@@ -143,7 +148,7 @@ class RecipeIngredientsList extends SectionedListComponent {
 
     const sectionIndex = parseInt(sectionMatch[1], 10);
     const remainder = sectionMatch[2];
-    
+
     const sectionElement = this.shadowRoot.querySelector(`[data-section-index="${sectionIndex}"]`);
     if (!sectionElement) return;
 
@@ -159,11 +164,11 @@ class RecipeIngredientsList extends SectionedListComponent {
       if (itemMatch) {
         const itemIndex = parseInt(itemMatch[1], 10);
         const field = itemMatch[2];
-        
+
         const itemElements = sectionElement.querySelectorAll(`.${this.itemClass}`);
         const itemElement = itemElements[itemIndex];
         if (!itemElement) return;
-        
+
         const cssClass = { amount: 'quantity', unit: 'unit', item: 'item' }[field] || field;
         const input = itemElement.querySelector(`.recipe-form__input--${cssClass}`);
         if (input) input.classList.add('recipe-form__input--invalid');
@@ -202,37 +207,37 @@ class RecipeIngredientsList extends SectionedListComponent {
   handleLegacyIngredientError(key, errorValue, fieldMapping) {
     const allItemElements = [];
     if (this.isSectionMode) {
-        const sectionElements = this.shadowRoot.querySelectorAll('[data-section-index]');
-        Array.from(sectionElements)
-            .sort((a, b) => a.dataset.sectionIndex - b.dataset.sectionIndex)
-            .forEach(sectionEl => {
-                sectionEl.querySelectorAll(`.${this.itemClass}`).forEach(itemEl => {
-                    allItemElements.push(itemEl);
-                });
-            });
-    } else {
-        this.shadowRoot.querySelectorAll(`.${this.itemClass}`).forEach(itemEl => {
+      const sectionElements = this.shadowRoot.querySelectorAll('[data-section-index]');
+      Array.from(sectionElements)
+        .sort((a, b) => a.dataset.sectionIndex - b.dataset.sectionIndex)
+        .forEach((sectionEl) => {
+          sectionEl.querySelectorAll(`.${this.itemClass}`).forEach((itemEl) => {
             allItemElements.push(itemEl);
+          });
         });
+    } else {
+      this.shadowRoot.querySelectorAll(`.${this.itemClass}`).forEach((itemEl) => {
+        allItemElements.push(itemEl);
+      });
     }
 
     const match = key.match(/ingredients\[(\d+)\]\.?(\w+)?/);
     if (match) {
-        const itemIndex = parseInt(match[1], 10);
-        const field = match[2];
+      const itemIndex = parseInt(match[1], 10);
+      const field = match[2];
 
-        const itemEl = allItemElements[itemIndex];
-        if (!itemEl) return;
+      const itemEl = allItemElements[itemIndex];
+      if (!itemEl) return;
 
-        if (field) {
-            const cssClass = fieldMapping[field] || field;
-            const input = itemEl.querySelector(`.recipe-form__input--${cssClass}`);
-            if (input) input.classList.add('recipe-form__input--invalid');
-        } else {
-            itemEl.querySelectorAll('input').forEach(input => {
-                input.classList.add('recipe-form__input--invalid');
-            });
-        }
+      if (field) {
+        const cssClass = fieldMapping[field] || field;
+        const input = itemEl.querySelector(`.recipe-form__input--${cssClass}`);
+        if (input) input.classList.add('recipe-form__input--invalid');
+      } else {
+        itemEl.querySelectorAll('input').forEach((input) => {
+          input.classList.add('recipe-form__input--invalid');
+        });
+      }
     }
   }
 }

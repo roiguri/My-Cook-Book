@@ -1,4 +1,3 @@
-
 /**
  * SectionedListComponent Component
  * --------------------------------
@@ -17,7 +16,7 @@ export class SectionedListComponent extends DynamicListComponent {
     this.sectionTitlePrefix = 'קטגוריה';
     this.addSectionButtonText = 'הוסף קטגוריה';
     this.sectionNamePlaceholder = 'שם הקטגוריה';
-    
+
     // Abstract configuration properties - can be overridden by subclasses
     this.sectionContainerSelector = '.recipe-form__ingredient-sections[data-section-index]';
     this.sectionNameInputSelector = '.recipe-form__input--section-name';
@@ -90,7 +89,7 @@ export class SectionedListComponent extends DynamicListComponent {
     const firstSectionItems = currentItems.length > 0 ? currentItems : this.getInitialItems();
     this.sections = [
       { title: '', items: firstSectionItems },
-      { title: '', items: this.getInitialItems() }
+      { title: '', items: this.getInitialItems() },
     ];
 
     this.renderSectionMode();
@@ -104,8 +103,8 @@ export class SectionedListComponent extends DynamicListComponent {
     if (!this.isSectionMode) return;
 
     this.updateSectionsFromDOM();
-    const allItems = this.sections.flatMap(section =>
-      section.items.filter(item => this.isItemPopulated(item))
+    const allItems = this.sections.flatMap((section) =>
+      section.items.filter((item) => this.isItemPopulated(item)),
     );
 
     this.isSectionMode = false;
@@ -155,15 +154,20 @@ export class SectionedListComponent extends DynamicListComponent {
   createSectionHTML(section, sectionIndex) {
     const sectionNumber = sectionIndex + 1;
     const items = section.items || [];
-    const itemHTMLs = items.map((item, index) => {
-      const includeRemove = index > 0 || items.length > 1;
-      return this.createListItemHTML(item, includeRemove);
-    }).join('');
+    const itemHTMLs = items
+      .map((item, index) => {
+        const includeRemove = index > 0 || items.length > 1;
+        return this.createListItemHTML(item, includeRemove);
+      })
+      .join('');
     const content = itemHTMLs || this.createListItemHTML(this.getInitialItems()[0], false);
-    const removeSectionButton = this.sections.length > 1
-      ? `<button type="button" class="recipe-form__button recipe-form__button--remove-section">-</button>`
-      : '';
-    const escapedSectionTitle = (section.title || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const removeSectionButton =
+      this.sections.length > 1
+        ? `<button type="button" class="recipe-form__button recipe-form__button--remove-section">-</button>`
+        : '';
+    const escapedSectionTitle = (section.title || '')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
 
     return `
       <div class="recipe-form__ingredient-sections" data-section-index="${sectionIndex}">
@@ -190,13 +194,13 @@ export class SectionedListComponent extends DynamicListComponent {
       if (this.sections[sectionIndex]) {
         const sectionNameInput = container.querySelector(this.sectionNameInputSelector);
         const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
-        const items = Array.from(
-          container.querySelectorAll(`:scope > .${this.itemClass}`)
-        ).map(item => this.getItemData(item));
+        const items = Array.from(container.querySelectorAll(`:scope > .${this.itemClass}`)).map(
+          (item) => this.getItemData(item),
+        );
 
         this.sections[sectionIndex] = {
           title: sectionTitle || this.sections[sectionIndex].title,
-          items: items.length > 0 ? items : this.getInitialItems()
+          items: items.length > 0 ? items : this.getInitialItems(),
         };
       }
     });
@@ -400,16 +404,18 @@ export class SectionedListComponent extends DynamicListComponent {
    * @param {object} additionalData - Additional data to include in the event detail.
    */
   dispatchChangeEvent(action, additionalData = {}) {
-    this.dispatchEvent(new CustomEvent('change', {
-      bubbles: true,
-      composed: true,
-      detail: {
-        action,
-        data: this.getData(),
-        isSectionMode: this.isSectionMode,
-        ...additionalData
-      }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('change', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          action,
+          data: this.getData(),
+          isSectionMode: this.isSectionMode,
+          ...additionalData,
+        },
+      }),
+    );
   }
 
   /**
@@ -444,7 +450,7 @@ export class SectionedListComponent extends DynamicListComponent {
     const itemsContainer = this.shadowRoot.querySelector('#items-container');
     const items = itemsContainer.querySelectorAll(`.${this.itemClass}`);
     const data = [];
-    items.forEach(item => {
+    items.forEach((item) => {
       const itemData = this.getItemData(item);
       if (this.isItemPopulated(itemData)) {
         data.push(itemData);
@@ -463,9 +469,9 @@ export class SectionedListComponent extends DynamicListComponent {
     sectionContainers.forEach((container) => {
       const sectionNameInput = container.querySelector(this.sectionNameInputSelector);
       const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
-      const items = Array.from(
-        container.querySelectorAll(`:scope > .${this.itemClass}`)
-      ).map(item => this.getItemData(item)).filter(item => this.isItemPopulated(item));
+      const items = Array.from(container.querySelectorAll(`:scope > .${this.itemClass}`))
+        .map((item) => this.getItemData(item))
+        .filter((item) => this.isItemPopulated(item));
 
       if (items.length > 0 || sectionTitle) {
         sections.push({ title: sectionTitle, items });
@@ -498,9 +504,9 @@ export class SectionedListComponent extends DynamicListComponent {
    */
   populateSectionsData(sections) {
     if (!Array.isArray(sections) || sections.length === 0) return;
-    this.sections = sections.map(section => ({
+    this.sections = sections.map((section) => ({
       title: section.title || '',
-      items: section.items || []
+      items: section.items || [],
     }));
     this.isSectionMode = true;
     this.renderSectionMode();
@@ -514,7 +520,7 @@ export class SectionedListComponent extends DynamicListComponent {
     this.sections = [];
     this.renderSimpleMode();
     const inputs = this.shadowRoot.querySelectorAll('input[type="text"]');
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.value = '';
     });
   }
@@ -531,7 +537,7 @@ export class SectionedListComponent extends DynamicListComponent {
       const validationResult = this.validateSectionMode();
       Object.assign(errors, validationResult.errors);
       isValid = validationResult.isValid;
-      
+
       // Mode switching removed - component stays in user-selected mode
     } else {
       const validationResult = this.validateBasicMode();
@@ -564,12 +570,12 @@ export class SectionedListComponent extends DynamicListComponent {
     // Count sections with filled titles and ingredients
     this.sections.forEach((section) => {
       const sectionTitle = section.title?.trim();
-      
+
       if (sectionTitle) {
         sectionsWithTitles++;
       }
 
-      const populatedItems = section.items.filter(item => this.isItemPopulated(item));
+      const populatedItems = section.items.filter((item) => this.isItemPopulated(item));
       totalIngredients += populatedItems.length;
 
       if (populatedItems.length > 0) {
@@ -580,38 +586,38 @@ export class SectionedListComponent extends DynamicListComponent {
     // Granular validation: validate each of the first 2 sections individually
     // Check what's missing in each section and highlight only those specific fields
     let validSections = 0;
-    
+
     for (let i = 0; i < Math.min(2, this.sections.length); i++) {
       const section = this.sections[i];
       const sectionTitle = section.title?.trim();
-      const populatedItems = section.items.filter(item => this.isItemPopulated(item));
-      
+      const populatedItems = section.items.filter((item) => this.isItemPopulated(item));
+
       // Check if title is missing
       if (!sectionTitle) {
         errors[`sections[${i}].title`] = true;
       }
-      
+
       // Check individual items for missing fields (granular validation)
       // Only highlight empty fields as errors if there are no populated items in this section
       if (populatedItems.length === 0) {
         // No populated items in section - highlight at least the first empty item as error
-        const firstEmptyItem = section.items.find(item => !this.isItemPopulated(item));
+        const firstEmptyItem = section.items.find((item) => !this.isItemPopulated(item));
         if (firstEmptyItem) {
           const firstEmptyIndex = section.items.indexOf(firstEmptyItem);
           const fieldErrors = this.validateItemFields(firstEmptyItem);
-          Object.keys(fieldErrors).forEach(field => {
+          Object.keys(fieldErrors).forEach((field) => {
             errors[`sections[${i}].items[${firstEmptyIndex}].${field}`] = true;
           });
         }
       }
       // If there are populated items, don't highlight empty ones as errors (minimum requirement met)
-      
+
       // A section is valid if it has both title and at least one item
       if (sectionTitle && populatedItems.length > 0) {
         validSections++;
       }
     }
-    
+
     // We need at least 2 valid sections (with both title and content)
     if (validSections < 2) {
       errors[this.sectionValidationErrorKey] = this.sectionValidationErrorMessage;
@@ -624,7 +630,7 @@ export class SectionedListComponent extends DynamicListComponent {
         if (this.isItemPopulated(item)) {
           const itemErrors = this.validateItemFields(item);
           if (Object.keys(itemErrors).length > 0) {
-            Object.keys(itemErrors).forEach(field => {
+            Object.keys(itemErrors).forEach((field) => {
               errors[`sections[${sectionIndex}].items[${itemIndex}].${field}`] = true;
             });
             isValid = false;
@@ -646,14 +652,14 @@ export class SectionedListComponent extends DynamicListComponent {
 
     const container = this.shadowRoot.querySelector('#items-container');
     const itemElements = container.querySelectorAll(`.${this.itemClass}`);
-    const allItems = Array.from(itemElements).map(element => this.getItemData(element));
-    const populatedItems = allItems.filter(item => this.isItemPopulated(item));
+    const allItems = Array.from(itemElements).map((element) => this.getItemData(element));
+    const populatedItems = allItems.filter((item) => this.isItemPopulated(item));
 
     // If no ingredients filled at all, highlight ALL visible ingredient fields
     if (populatedItems.length === 0) {
       allItems.forEach((item, index) => {
         const fieldNames = Object.keys(item);
-        fieldNames.forEach(field => {
+        fieldNames.forEach((field) => {
           errors[`items[${index}].${field}`] = true;
         });
       });
@@ -665,7 +671,7 @@ export class SectionedListComponent extends DynamicListComponent {
         if (this.isItemPopulated(item)) {
           const itemErrors = this.validateItemFields(item);
           if (Object.keys(itemErrors).length > 0) {
-            Object.keys(itemErrors).forEach(field => {
+            Object.keys(itemErrors).forEach((field) => {
               errors[`items[${index}].${field}`] = true;
             });
             errors.noIngredients = 'חובה למלא לפחות מרכיב אחד.';
@@ -677,7 +683,6 @@ export class SectionedListComponent extends DynamicListComponent {
 
     return { isValid, errors };
   }
-
 
   /**
    * Validates individual item fields (to be overridden by subclasses)

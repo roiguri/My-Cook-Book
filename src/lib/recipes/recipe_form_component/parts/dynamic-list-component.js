@@ -4,17 +4,17 @@
  * Reusable base component for managing dynamic lists of form items.
  * Provides common functionality for add/remove operations, button state management,
  * and data collection that can be extended by specific list types.
- * 
+ *
  * Used by:
  * - RecipeIngredientsList (3 fields per line)
- * - RecipeInstructionsList (1 field per line) 
+ * - RecipeInstructionsList (1 field per line)
  */
 
 export class DynamicListComponent extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    
+
     // Configuration properties (to be set by extending classes)
     this.listTitle = this.getAttribute('title') || 'List Items';
     this.itemFields = []; // Array of field definitions: { placeholder, className, name }
@@ -69,12 +69,15 @@ export class DynamicListComponent extends HTMLElement {
    * @param {boolean} includeRemoveButton - Whether to include remove button
    */
   createListItem(includeRemoveButton = true) {
-    const fieldsHTML = this.itemFields.map(field => 
-      `<input type="text" class="recipe-form__input ${field.className || ''}" 
-              placeholder="${field.placeholder}" name="${field.name || ''}">`
-    ).join('');
+    const fieldsHTML = this.itemFields
+      .map(
+        (field) =>
+          `<input type="text" class="recipe-form__input ${field.className || ''}" 
+              placeholder="${field.placeholder}" name="${field.name || ''}">`,
+      )
+      .join('');
 
-    const removeButtonHTML = includeRemoveButton 
+    const removeButtonHTML = includeRemoveButton
       ? `<button type="button" class="recipe-form__button ${this.removeButtonClass}">-</button>`
       : '';
 
@@ -89,7 +92,7 @@ export class DynamicListComponent extends HTMLElement {
 
   setupEventListeners() {
     const container = this.shadowRoot.querySelector('.list-items-container');
-    
+
     // Handle add/remove button clicks
     container.addEventListener('click', (event) => {
       if (event.target.classList.contains(this.addButtonClass)) {
@@ -141,7 +144,7 @@ export class DynamicListComponent extends HTMLElement {
    */
   removeListItem(event) {
     const itemToRemove = event.target.closest(`.${this.itemClass}`);
-    
+
     itemToRemove.remove();
 
     // Remove remove button from first item if only one remains
@@ -181,11 +184,13 @@ export class DynamicListComponent extends HTMLElement {
    * @param {string} action - The action that occurred ('item-added', 'item-removed', etc.)
    */
   dispatchChangeEvent(action) {
-    this.dispatchEvent(new CustomEvent('list-changed', {
-      bubbles: true,
-      composed: true,
-      detail: { action, data: this.getData() }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('list-changed', {
+        bubbles: true,
+        composed: true,
+        detail: { action, data: this.getData() },
+      }),
+    );
   }
 
   /**
@@ -220,7 +225,7 @@ export class DynamicListComponent extends HTMLElement {
     const firstItem = items[0];
     if (firstItem) {
       const inputs = firstItem.querySelectorAll('input');
-      inputs.forEach(input => {
+      inputs.forEach((input) => {
         input.value = '';
         input.classList.remove('recipe-form__input--invalid');
       });
@@ -240,7 +245,7 @@ export class DynamicListComponent extends HTMLElement {
    */
   setDisabled(disabled) {
     const inputs = this.shadowRoot.querySelectorAll('input, button');
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.disabled = disabled;
     });
   }
@@ -261,7 +266,7 @@ export class DynamicListComponent extends HTMLElement {
   setValidationState(_errors) {
     // Default implementation - can be overridden by extending classes
     const inputs = this.shadowRoot.querySelectorAll('input');
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.classList.remove('recipe-form__input--invalid');
     });
 

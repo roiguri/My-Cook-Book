@@ -34,9 +34,9 @@
  */
 export function scaleIngredients(ingredients, originalServings, newServings) {
   if (!originalServings || !newServings || originalServings <= 0) return ingredients;
-  
+
   const factor = newServings / originalServings;
-  
+
   // Helper function to scale a single ingredient
   const scaleIngredient = (ing) => {
     const amountNum = parseFloat(ing.amount);
@@ -45,26 +45,31 @@ export function scaleIngredients(ingredients, originalServings, newServings) {
       amount: isNaN(amountNum) ? ing.amount : formatIngredientAmount(amountNum * factor),
     };
   };
-  
+
   // Handle sectioned ingredients format (Firebase direct array format)
   if (Array.isArray(ingredients) && ingredients.length > 0 && ingredients[0].items) {
-    return ingredients.map(section => ({
+    return ingredients.map((section) => ({
       ...section,
-      items: section.items.map(scaleIngredient)
+      items: section.items.map(scaleIngredient),
     }));
   }
-  
+
   // Handle sectioned ingredients format (form component format with sections wrapper)
-  if (ingredients && typeof ingredients === 'object' && !Array.isArray(ingredients) && ingredients.sections) {
+  if (
+    ingredients &&
+    typeof ingredients === 'object' &&
+    !Array.isArray(ingredients) &&
+    ingredients.sections
+  ) {
     return {
       ...ingredients,
-      sections: ingredients.sections.map(section => ({
+      sections: ingredients.sections.map((section) => ({
         ...section,
-        items: section.items.map(scaleIngredient)
-      }))
+        items: section.items.map(scaleIngredient),
+      })),
     };
   }
-  
+
   // Handle flat ingredients array (original format)
   if (!Array.isArray(ingredients)) return ingredients;
   return ingredients.map(scaleIngredient);

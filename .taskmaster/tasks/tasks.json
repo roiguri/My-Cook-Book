@@ -19,9 +19,7 @@
         "details": "1. **Component Testing Setup**: Establish a comprehensive testing framework using Jest and Testing Library to test all Web Components in isolation, including Shadow DOM testing capabilities and custom element registration verification. 2. **Page-Level Integration Testing**: Create integration tests for all major pages (home, categories, recipes, user profile) that verify complete user workflows, navigation, data loading, and responsive behavior across different screen sizes. 3. **Visual Regression Testing**: Implement visual testing using tools like Playwright or Chromatic to capture screenshots of all pages and components, ensuring UI consistency across browsers and preventing unintended visual changes. 4. **Performance Testing**: Add automated performance tests that verify Core Web Vitals metrics (LCP, FID, CLS) for all pages, with specific attention to recipe loading times and image optimization effectiveness. 5. **Accessibility Testing**: Implement automated accessibility testing using axe-core to verify WCAG compliance across all components, including keyboard navigation, screen reader compatibility, and proper ARIA attributes. 6. **Cross-Browser Testing**: Set up automated testing across major browsers (Chrome, Firefox, Safari, Edge) to ensure consistent functionality and appearance. 7. **Mobile Testing**: Create specific test suites for mobile interactions, touch events, and responsive design breakpoints. 8. **API Integration Testing**: Test all data fetching, recipe CRUD operations, user authentication flows, and error handling scenarios.",
         "testStrategy": "1. **Unit Test Coverage**: Achieve minimum 90% code coverage for all components and utilities, with specific focus on edge cases and error conditions. 2. **End-to-End Testing**: Create comprehensive E2E test suites that cover complete user journeys including recipe browsing, searching, creating, editing, and user account management. 3. **Test Data Management**: Establish proper test data fixtures and mocking strategies for consistent and reliable test execution. 4. **Continuous Integration**: Integrate all tests into CI/CD pipeline with automated test execution on pull requests and deployments. 5. **Performance Benchmarks**: Set up automated performance monitoring that fails builds if Core Web Vitals thresholds are exceeded. 6. **Manual Testing Checklist**: Create comprehensive manual testing checklists for features that require human validation, including UX flows and edge case scenarios.",
         "status": "pending",
-        "dependencies": [
-          1
-        ],
+        "dependencies": [1],
         "priority": "medium",
         "subtasks": []
       }
@@ -77,9 +75,7 @@
             "id": 2,
             "title": "Add form dirty state tracking system",
             "description": "Implement a system to track whether the form has been modified from its initial state",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Create a form dirty state tracker that monitors form field changes, maintains initial form values for comparison, provides isDirty() method to check if form has unsaved changes, and integrates with existing form validation. Track changes on input, textarea, and select elements with proper event handling.",
             "status": "pending",
             "testStrategy": "Unit tests for dirty state detection covering initial state, field modifications, form reset scenarios, and edge cases like programmatic value changes"
@@ -88,10 +84,7 @@
             "id": 3,
             "title": "Implement automatic form field persistence",
             "description": "Add real-time saving of form field values as user types using the persistence utilities and dirty state tracking",
-            "dependencies": [
-              1,
-              2
-            ],
+            "dependencies": [1, 2],
             "details": "Integrate form field persistence by attaching debounced save handlers to form inputs, implementing automatic saving on blur events as backup, excluding sensitive fields from persistence if any, and ensuring compatibility with existing form components. Handle different input types (text, number, select, checkbox, etc.).",
             "status": "pending",
             "testStrategy": "Integration tests covering automatic saving during typing, persistence across different input types, debouncing behavior, and exclusion of sensitive fields"
@@ -100,9 +93,7 @@
             "id": 4,
             "title": "Add form state restoration on page load",
             "description": "Implement automatic restoration of saved form field values when the page loads or component mounts",
-            "dependencies": [
-              1
-            ],
+            "dependencies": [1],
             "details": "Create form restoration logic that loads saved data on component mount, populates form fields with saved values, handles cases where saved data structure doesn't match current form, and integrates with existing form initialization. Ensure proper handling of form validation after restoration.",
             "status": "pending",
             "testStrategy": "Integration tests for form restoration covering successful data loading, handling of missing or corrupted saved data, form validation after restoration, and compatibility with existing form initialization"
@@ -111,9 +102,7 @@
             "id": 5,
             "title": "Implement navigation protection with beforeunload warning",
             "description": "Add beforeunload event listener to warn users about unsaved changes and handle form submission cleanup",
-            "dependencies": [
-              2
-            ],
+            "dependencies": [2],
             "details": "Implement navigation protection using beforeunload event listener that shows confirmation dialog when form has unsaved changes, automatically clears saved data on successful form submission, handles intentional navigation scenarios, and provides user-friendly warning messages. Ensure proper cleanup of event listeners.",
             "status": "pending",
             "testStrategy": "End-to-end tests covering navigation warnings with unsaved changes, no warning when form is clean, automatic cleanup on form submission, and proper event listener management"
@@ -138,10 +127,7 @@
         "details": "1. Extend recipe proposal form with media instruction capabilities:\n   - Add media upload/URL input fields for each instruction step\n   - Implement drag-and-drop media upload interface\n   - Add media type validation (images, videos, GIFs)\n   - Create media preview components with edit/remove options\n   - Integrate with existing form persistence system\n\n2. Enhance recipe presentation with media display:\n   - Create responsive media display components for instruction steps\n   - Implement media carousel/gallery for multiple media per step\n   - Add media zoom/fullscreen functionality\n   - Optimize media loading and lazy loading for performance\n   - Ensure proper media fallbacks and error handling\n\n3. Build media suggestion system for existing recipes:\n   - Create 'Suggest Media for Instructions' entry points on recipe pages\n   - Implement step-specific media suggestion forms\n   - Add media suggestion approval workflow integration\n   - Create suggestion tracking and status display\n   - Link with existing image suggestion infrastructure\n\n4. Database and API enhancements:\n   - Extend recipe instruction schema to include media fields\n   - Create media suggestion API endpoints\n   - Implement media storage and CDN integration\n   - Add media metadata tracking (dimensions, file size, type)\n\n5. User interface improvements:\n   - Create consistent media interaction patterns\n   - Add media accessibility features (alt text, captions)\n   - Implement media compression and optimization\n   - Design mobile-responsive media interfaces",
         "testStrategy": "1. Test recipe proposal media functionality:\n   - Upload various media types during recipe creation\n   - Verify media persistence across form sessions\n   - Test media validation and error handling\n   - Confirm media preview and edit capabilities\n\n2. Test recipe presentation media display:\n   - View recipes with instruction media on different devices\n   - Test media carousel navigation and controls\n   - Verify media zoom and fullscreen functionality\n   - Test media loading performance and fallbacks\n\n3. Test media suggestion workflow:\n   - Suggest media for existing recipe instructions\n   - Verify suggestion forms are step-specific and contextual\n   - Test suggestion submission and approval process\n   - Confirm suggestion tracking and status updates\n\n4. Test cross-device compatibility:\n   - Verify media upload works on mobile devices\n   - Test media display responsiveness\n   - Confirm touch interactions work properly\n\n5. Test accessibility and performance:\n   - Verify alt text and caption functionality\n   - Test media loading optimization\n   - Confirm keyboard navigation support\n   - Test with screen readers and accessibility tools",
         "status": "pending",
-        "dependencies": [
-          1,
-          2
-        ],
+        "dependencies": [1, 2],
         "priority": "medium",
         "subtasks": []
       }
@@ -212,9 +198,7 @@
         "details": "Execute a strategic branch merge to combine sectioned ingredients work with the main forms refactoring:\n\n1. **Pre-merge Analysis**: Review both branches to identify potential conflicts, particularly in form handling, ingredient processing, and validation logic. Document current state of both branches and assess integration points.\n\n2. **Branch Preparation**: Ensure both branches are up-to-date with their respective base branches. Run tests on both branches to confirm stable state before merge.\n\n3. **Strategic Merge**: Perform merge of feature/sectioned-ingredients into refactor/forms, using git merge strategies that preserve the intent of both code paths. Handle conflicts by prioritizing the refactored form architecture while integrating sectioned ingredient capabilities.\n\n4. **Integration Testing**: Verify that sectioned ingredient functionality works correctly within the refactored forms system. Test both ingredient formats (list and sectioned) through the updated form interfaces.\n\n5. **Code Consolidation**: Remove any duplicate functionality and ensure the merged codebase follows consistent patterns established in the forms refactoring work.",
         "testStrategy": "1. Pre-merge testing: Run full test suite on both branches independently to establish baseline\n2. Merge conflict resolution testing: Manually test each resolved conflict area with sample data\n3. Integration testing: Test ingredient form submission with both list format and sectioned format data\n4. Regression testing: Verify existing form functionality remains intact after merge\n5. End-to-end testing: Complete recipe creation workflow using sectioned ingredients through refactored forms\n6. Cross-browser testing: Ensure form behavior consistency across different browsers after integration",
         "status": "done",
-        "dependencies": [
-          1
-        ],
+        "dependencies": [1],
         "priority": "high",
         "subtasks": []
       },
@@ -225,9 +209,7 @@
         "details": "Analyze existing ingredients-list and instructions-list components to identify common patterns and extract them into shared components:\n\n1. **Pattern Analysis**: Examine both components to identify shared functionality including list rendering logic, item formatting, validation patterns, editing capabilities, and state management approaches.\n\n2. **Base List Component**: Create a generic `BaseListComponent` that handles common list operations like rendering items, managing edit states, handling add/remove operations, and providing consistent styling hooks.\n\n3. **Item Renderer Strategy**: Implement a flexible item renderer system using render props or component composition patterns to allow each list type to customize how individual items are displayed while sharing core list logic.\n\n4. **Shared Utilities**: Extract common utility functions for data validation, formatting, and transformation into shared modules. This includes ingredient parsing logic, instruction numbering, and common validation rules.\n\n5. **Hook Extraction**: Create custom React hooks for shared state management patterns like `useListEditor`, `useItemValidation`, and `useFormatDetection` that can be reused across different list types.\n\n6. **Component Migration**: Refactor existing ingredients-list and instructions-list components to use the new shared architecture while maintaining their specific functionality and ensuring backward compatibility.\n\n7. **Type System Integration**: Ensure shared components work seamlessly with existing TypeScript interfaces for both ingredient and instruction data types, using generic types where appropriate.",
         "testStrategy": "1. Unit tests for shared components ensuring they work correctly with both ingredient and instruction data types\n2. Integration tests verifying that refactored ingredients-list and instructions-list components maintain all existing functionality\n3. Visual regression tests to ensure UI consistency is maintained after refactoring\n4. Performance tests comparing before/after bundle size and rendering performance\n5. Cross-component testing to verify shared hooks and utilities work correctly across different list types\n6. Accessibility testing to ensure shared components maintain proper ARIA attributes and keyboard navigation\n7. Edge case testing with various data formats including empty lists, malformed data, and boundary conditions",
         "status": "done",
-        "dependencies": [
-          2
-        ],
+        "dependencies": [2],
         "priority": "medium",
         "subtasks": []
       },
@@ -238,9 +220,7 @@
         "details": "Implement comprehensive drag-and-drop reordering functionality using modern web APIs and libraries:\n\n1. **Library Selection & Integration**: Research and integrate a robust drag-and-drop library (React DnD, @dnd-kit, or native HTML5) that supports touch devices, accessibility, and smooth animations. Evaluate performance implications and bundle size impact.\n\n2. **Enhanced List Components**: Extend the shared component architecture to support drag-and-drop operations. Add drag handles, visual indicators during drag operations, drop zones with clear visual feedback, and proper ARIA labels for accessibility.\n\n3. **Dual-Format Support**: Implement drag-and-drop for both ingredient formats (simple lists and sectioned ingredients with headers). Handle edge cases like dragging items between sections, reordering sections themselves, and maintaining section integrity during operations.\n\n4. **State Management**: Implement optimistic updates for immediate visual feedback, debounced save operations to prevent excessive API calls, conflict resolution for concurrent edits, and proper error handling with rollback capabilities.\n\n5. **Mobile & Touch Support**: Ensure drag-and-drop works smoothly on mobile devices with touch gestures, implement long-press to initiate drag on touch devices, add haptic feedback where supported, and provide alternative reordering methods for accessibility.\n\n6. **Visual Polish**: Add smooth animations during drag operations, ghost/placeholder elements, visual cues for valid drop zones, and consistent styling that matches the existing design system.",
         "testStrategy": "1. Unit tests for drag-and-drop logic including reorder functions, state updates, and edge cases like empty lists and single items\n2. Integration tests verifying drag-and-drop works correctly with both ingredient formats and instruction lists, including cross-section dragging for sectioned ingredients\n3. Accessibility testing using screen readers and keyboard navigation to ensure drag-and-drop alternatives work properly\n4. Mobile device testing on various screen sizes and touch interfaces, including long-press gestures and touch responsiveness\n5. Performance testing with large ingredient lists (50+ items) to ensure smooth animations and no lag during drag operations\n6. Cross-browser compatibility testing focusing on drag-and-drop behavior across Chrome, Firefox, Safari, and mobile browsers\n7. User experience testing to validate intuitive drag handles, clear visual feedback, and expected behavior during drag operations",
         "status": "pending",
-        "dependencies": [
-          3
-        ],
+        "dependencies": [3],
         "priority": "medium",
         "subtasks": []
       },
@@ -251,10 +231,7 @@
         "details": "Implement comprehensive debounced validation system with visual feedback:\n\n1. **Debouncing Infrastructure**: Create a custom React hook `useDebounceValidation` that delays validation execution by 300-500ms after user stops typing. Use `useCallback` and `useRef` to optimize performance and prevent unnecessary re-renders. Implement cleanup logic to cancel pending validations on component unmount.\n\n2. **Real-time Validation Engine**: Extend existing form validation to work incrementally with field-level validation functions. Create validation schemas for both ingredient formats (list and sectioned) that can run efficiently on partial data. Implement async validation for server-side checks like ingredient database lookups.\n\n3. **Status Indicator Components**: Design and implement visual feedback components including loading spinners, success checkmarks, error icons, and warning indicators. Use CSS transitions and animations for smooth state changes. Ensure indicators are accessible with proper ARIA labels and screen reader support.\n\n4. **Form Integration**: Integrate validation system with existing ingredient and instruction forms. Add field-level status indicators that update in real-time as users type. Implement form-level validation summary with aggregated status. Ensure validation works with drag-and-drop reordering from Task 4.\n\n5. **Performance Optimization**: Implement validation result caching to avoid re-validating unchanged data. Use React.memo and useMemo to prevent unnecessary component re-renders. Add performance monitoring to track validation response times and optimize bottlenecks.\n\n6. **Error Recovery**: Implement graceful fallbacks when validation fails or times out. Provide clear error messages that guide users toward fixing issues. Add retry mechanisms for transient validation failures.",
         "testStrategy": "1. Unit tests for debouncing logic including timing accuracy, cancellation behavior, and memory leak prevention\n2. Validation performance tests measuring response times under various data loads and ensuring debouncing prevents excessive API calls\n3. Visual regression tests for status indicator components across different states (loading, success, error, warning)\n4. Integration tests verifying validation works correctly with both ingredient formats and maintains accuracy during drag-and-drop operations\n5. Accessibility tests ensuring status indicators work with screen readers and keyboard navigation\n6. User experience tests measuring perceived performance and validation accuracy with real recipe data\n7. Cross-browser testing for debouncing behavior consistency and visual indicator rendering\n8. Error scenario testing including network failures, validation timeouts, and malformed data inputs",
         "status": "pending",
-        "dependencies": [
-          3,
-          4
-        ],
+        "dependencies": [3, 4],
         "priority": "medium",
         "subtasks": []
       },
@@ -265,9 +242,7 @@
         "details": "Implement multi-layered form protection system to safeguard user data:\n\n1. **Unsaved Changes Detection**: Create a custom React hook `useFormProtection` that tracks form dirty state by comparing current form values with initial/saved values. Use deep comparison for complex nested data like sectioned ingredients and instruction lists. Implement efficient change detection using useRef to store initial values and useMemo for comparison optimization.\n\n2. **Browser Navigation Protection**: Implement beforeunload event listener to show native browser confirmation dialog when users attempt to close tab, refresh page, or navigate to external URLs with unsaved changes. Handle browser-specific behaviors and ensure proper cleanup of event listeners.\n\n3. **Internal Route Protection**: Integrate with React Router's navigation guards or use history.block() to intercept internal navigation attempts. Create a custom confirmation modal component that matches the application's design system, providing clear options to save, discard, or cancel navigation.\n\n4. **Auto-save Integration**: Implement optional auto-save functionality with configurable intervals (30-60 seconds) using localStorage as fallback and cloud storage for authenticated users. Include conflict resolution for when auto-saved data differs from current form state.\n\n5. **Form State Management**: Enhance existing form state management to track modification timestamps, implement undo/redo functionality, and provide visual indicators for unsaved changes (dirty state indicators, save status, last saved time).\n\n6. **Accessibility & UX**: Ensure form protection works with keyboard navigation, screen readers, and touch devices. Provide clear visual feedback about protection status and implement progressive enhancement for users with JavaScript disabled.",
         "testStrategy": "1. Unit tests for useFormProtection hook covering change detection logic, cleanup behavior, and edge cases with empty or malformed form data\n2. Integration tests for browser navigation protection including beforeunload event handling, different navigation scenarios (refresh, close tab, external links), and proper event listener cleanup\n3. Router protection tests verifying internal navigation blocking works correctly with React Router, custom confirmation modals display properly, and navigation proceeds correctly after user confirmation\n4. Auto-save functionality tests including localStorage persistence, conflict resolution between auto-saved and current data, and recovery after browser crashes\n5. Cross-browser compatibility testing ensuring protection works consistently across Chrome, Firefox, Safari, and Edge\n6. Accessibility testing with screen readers and keyboard-only navigation to ensure protection features are accessible\n7. Performance testing to verify form protection doesn't impact form responsiveness or cause memory leaks during extended usage\n8. User experience testing with real users to validate confirmation message clarity and protection behavior meets expectations",
         "status": "done",
-        "dependencies": [
-          3
-        ],
+        "dependencies": [3],
         "priority": "medium",
         "subtasks": []
       }

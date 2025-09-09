@@ -71,13 +71,13 @@ class RecipePresentationGrid extends HTMLElement {
     switch (name) {
       case 'recipes-per-page':
         const recipesPerPage = parseInt(newValue);
-        this.recipesPerPage = (recipesPerPage > 0 && recipesPerPage <= 100) ? recipesPerPage : 6;
+        this.recipesPerPage = recipesPerPage > 0 && recipesPerPage <= 100 ? recipesPerPage : 6;
         this.recalculatePages();
         this.renderCurrentPage();
         break;
       case 'current-page':
         const currentPage = parseInt(newValue);
-        this.currentPage = (currentPage > 0) ? currentPage : 1;
+        this.currentPage = currentPage > 0 ? currentPage : 1;
         this.renderCurrentPage();
         break;
       case 'show-pagination':
@@ -110,7 +110,7 @@ class RecipePresentationGrid extends HTMLElement {
         throw new Error(`Failed to load template: ${templateResponse.status}`);
       }
       const template = await templateResponse.text();
-      
+
       // Validate response is not empty
       if (!template || template.trim().length === 0) {
         throw new Error('Template file is empty or invalid');

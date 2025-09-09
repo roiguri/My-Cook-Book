@@ -11,19 +11,19 @@ import { SectionedListComponent } from './sectioned-list-component.js';
 class RecipeInstructionsList extends SectionedListComponent {
   constructor() {
     super();
-    
+
     // Configure for Hebrew instructions (matching existing styles exactly)
     this.listTitle = this.getAttribute('title') || 'תהליך הכנה:';
     this.containerClass = 'recipe-form__stages';
     this.itemClass = 'recipe-form__step';
     this.addButtonClass = 'recipe-form__button--add-step';
     this.removeButtonClass = 'recipe-form__button--remove-step';
-    
+
     // Configure sectioned list terminology for instructions
     this.sectionTitlePrefix = 'שלב';
     this.addSectionButtonText = 'הוסף שלב';
     this.sectionNamePlaceholder = 'שם השלב';
-    
+
     // Override selector configuration for instructions-specific DOM structure
     this.sectionContainerSelector = '.recipe-form__steps[data-section-index]';
     this.sectionNameInputSelector = '.recipe-form__input--stage-name';
@@ -57,7 +57,9 @@ class RecipeInstructionsList extends SectionedListComponent {
    * @returns {string} HTML for the instruction item
    */
   createListItemHTML(instruction, includeRemove) {
-    const escapedInstruction = (instruction.text || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const escapedInstruction = (instruction.text || '')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
     const removeButtonHTML = includeRemove
       ? `<button type="button" class="recipe-form__button ${this.removeButtonClass}">-</button>`
       : '';
@@ -79,7 +81,7 @@ class RecipeInstructionsList extends SectionedListComponent {
   getItemData(itemElement) {
     const textInput = itemElement.querySelector('input[name="steps"]');
     return {
-      text: textInput ? textInput.value.trim() : ''
+      text: textInput ? textInput.value.trim() : '',
     };
   }
 
@@ -107,11 +109,11 @@ class RecipeInstructionsList extends SectionedListComponent {
    */
   validateItemFields(item) {
     const errors = {};
-    
+
     if (!item.text || !item.text.trim()) {
       errors.text = true;
     }
-    
+
     return errors;
   }
 
@@ -125,14 +127,14 @@ class RecipeInstructionsList extends SectionedListComponent {
 
     const container = this.shadowRoot.querySelector('#items-container');
     const itemElements = container.querySelectorAll(`.${this.itemClass}`);
-    const allItems = Array.from(itemElements).map(element => this.getItemData(element));
-    const populatedItems = allItems.filter(item => this.isItemPopulated(item));
+    const allItems = Array.from(itemElements).map((element) => this.getItemData(element));
+    const populatedItems = allItems.filter((item) => this.isItemPopulated(item));
 
     // If no instructions filled at all, highlight ALL visible instruction fields
     if (populatedItems.length === 0) {
       allItems.forEach((item, index) => {
         const fieldNames = Object.keys(item);
-        fieldNames.forEach(field => {
+        fieldNames.forEach((field) => {
           errors[`items[${index}].${field}`] = true;
         });
       });
@@ -144,7 +146,7 @@ class RecipeInstructionsList extends SectionedListComponent {
         if (this.isItemPopulated(item)) {
           const itemErrors = this.validateItemFields(item);
           if (Object.keys(itemErrors).length > 0) {
-            Object.keys(itemErrors).forEach(field => {
+            Object.keys(itemErrors).forEach((field) => {
               errors[`items[${index}].${field}`] = true;
             });
             errors.instructions = 'חובה למלא תהליך הכנה.';
@@ -157,22 +159,26 @@ class RecipeInstructionsList extends SectionedListComponent {
     return { isValid, errors };
   }
 
-
   /**
    * Override createSectionHTML to use instructions-specific CSS classes
    */
   createSectionHTML(section, sectionIndex) {
     const sectionNumber = sectionIndex + 1;
     const items = section.items || [];
-    const itemHTMLs = items.map((item, index) => {
-      const includeRemove = index > 0 || items.length > 1;
-      return this.createListItemHTML(item, includeRemove);
-    }).join('');
+    const itemHTMLs = items
+      .map((item, index) => {
+        const includeRemove = index > 0 || items.length > 1;
+        return this.createListItemHTML(item, includeRemove);
+      })
+      .join('');
     const content = itemHTMLs || this.createListItemHTML(this.getInitialItems()[0], false);
-    const removeSectionButton = this.sections.length > 1
-      ? `<button type="button" class="recipe-form__button recipe-form__button--remove-section">-</button>`
-      : '';
-    const escapedSectionTitle = (section.title || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const removeSectionButton =
+      this.sections.length > 1
+        ? `<button type="button" class="recipe-form__button recipe-form__button--remove-section">-</button>`
+        : '';
+    const escapedSectionTitle = (section.title || '')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
 
     return `
       <div class="recipe-form__steps" data-section-index="${sectionIndex}">
@@ -193,19 +199,21 @@ class RecipeInstructionsList extends SectionedListComponent {
   updateSectionsFromDOM() {
     if (!this.isSectionMode) return;
 
-    const sectionContainers = this.shadowRoot.querySelectorAll('.recipe-form__steps[data-section-index]');
+    const sectionContainers = this.shadowRoot.querySelectorAll(
+      '.recipe-form__steps[data-section-index]',
+    );
     sectionContainers.forEach((container) => {
       const sectionIndex = parseInt(container.dataset.sectionIndex, 10);
       if (this.sections[sectionIndex]) {
         const sectionNameInput = container.querySelector('.recipe-form__input--stage-name');
         const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
-        const items = Array.from(
-          container.querySelectorAll(`:scope > .${this.itemClass}`)
-        ).map(item => this.getItemData(item));
+        const items = Array.from(container.querySelectorAll(`:scope > .${this.itemClass}`)).map(
+          (item) => this.getItemData(item),
+        );
 
         this.sections[sectionIndex] = {
           title: sectionTitle || this.sections[sectionIndex].title,
-          items: items.length > 0 ? items : this.getInitialItems()
+          items: items.length > 0 ? items : this.getInitialItems(),
         };
       }
     });
@@ -287,14 +295,16 @@ class RecipeInstructionsList extends SectionedListComponent {
    * @returns {Array} The data for the sectioned list.
    */
   getSectionsData() {
-    const sectionContainers = this.shadowRoot.querySelectorAll('.recipe-form__steps[data-section-index]');
+    const sectionContainers = this.shadowRoot.querySelectorAll(
+      '.recipe-form__steps[data-section-index]',
+    );
     const sections = [];
     sectionContainers.forEach((container) => {
       const sectionNameInput = container.querySelector('.recipe-form__input--stage-name');
       const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
-      const items = Array.from(
-        container.querySelectorAll(`:scope > .${this.itemClass}`)
-      ).map(item => this.getItemData(item)).filter(item => this.isItemPopulated(item));
+      const items = Array.from(container.querySelectorAll(`:scope > .${this.itemClass}`))
+        .map((item) => this.getItemData(item))
+        .filter((item) => this.isItemPopulated(item));
 
       if (items.length > 0 || sectionTitle) {
         sections.push({ title: sectionTitle, items });
@@ -306,20 +316,20 @@ class RecipeInstructionsList extends SectionedListComponent {
   /**
    * Custom compatibility methods for legacy API
    */
-  
+
   // Legacy property getters for backward compatibility
   get isStageMode() {
     return this.isSectionMode;
   }
-  
+
   set isStageMode(value) {
     this.isSectionMode = value;
   }
-  
+
   get stages() {
     return this.sections;
   }
-  
+
   set stages(value) {
     this.sections = value;
   }
@@ -336,12 +346,12 @@ class RecipeInstructionsList extends SectionedListComponent {
    */
   populateInstructions(data) {
     if (Array.isArray(data)) {
-      const instructionObjects = data.map(text => ({ text: text || '' }));
+      const instructionObjects = data.map((text) => ({ text: text || '' }));
       this.populateSimpleData(instructionObjects);
     } else if (data && Array.isArray(data.stages)) {
-      const sections = data.stages.map(stage => ({
+      const sections = data.stages.map((stage) => ({
         title: stage.title || '',
-        items: (stage.instructions || []).map(text => ({ text: text || '' }))
+        items: (stage.instructions || []).map((text) => ({ text: text || '' })),
       }));
       this.populateSectionsData(sections);
     }
@@ -358,16 +368,18 @@ class RecipeInstructionsList extends SectionedListComponent {
    * Override dispatchChangeEvent to emit instructions-changed event for compatibility
    */
   dispatchChangeEvent(action, additionalData = {}) {
-    this.dispatchEvent(new CustomEvent('instructions-changed', {
-      bubbles: true,
-      composed: true,
-      detail: { 
-        action, 
-        data: this.getData(),
-        isStageMode: this.isStageMode,
-        ...additionalData 
-      }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('instructions-changed', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          action,
+          data: this.getData(),
+          isStageMode: this.isStageMode,
+          ...additionalData,
+        },
+      }),
+    );
   }
 
   /**
@@ -377,7 +389,7 @@ class RecipeInstructionsList extends SectionedListComponent {
   setValidationState(errors) {
     // Clear all existing validation errors first
     const allInputs = this.shadowRoot.querySelectorAll('input[type="text"]');
-    allInputs.forEach(input => {
+    allInputs.forEach((input) => {
       input.classList.remove('recipe-form__input--invalid');
     });
 
@@ -386,27 +398,28 @@ class RecipeInstructionsList extends SectionedListComponent {
     }
 
     // Handle different error types - use unified approach like ingredients
-    Object.keys(errors).forEach(errorKey => {
+    Object.keys(errors).forEach((errorKey) => {
       // Handle section mode validation errors
       if (errorKey.startsWith('sections[')) {
         this.handleSectionValidationError(errorKey, errors[errorKey]);
       }
-      // Handle legacy basic mode validation errors  
+      // Handle legacy basic mode validation errors
       else if (errorKey.startsWith('items[')) {
         this.handleBasicModeValidationError(errorKey, errors[errorKey]);
-      }
-      else if (errorKey === 'general') {
+      } else if (errorKey === 'general') {
         // Only handle truly general errors, not the specific "instructions" error
         // The granular validation will handle individual field highlighting
         const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
-        inputs.forEach(input => {
+        inputs.forEach((input) => {
           input.classList.add('recipe-form__input--invalid');
         });
-        
+
         // Also highlight stage title inputs if in stage mode
         if (this.isSectionMode) {
-          const stageTitleInputs = this.shadowRoot.querySelectorAll('.recipe-form__input--stage-name');
-          stageTitleInputs.forEach(input => {
+          const stageTitleInputs = this.shadowRoot.querySelectorAll(
+            '.recipe-form__input--stage-name',
+          );
+          stageTitleInputs.forEach((input) => {
             input.classList.add('recipe-form__input--invalid');
           });
         }
@@ -438,7 +451,7 @@ class RecipeInstructionsList extends SectionedListComponent {
 
     const sectionIndex = parseInt(sectionMatch[1], 10);
     const remainder = sectionMatch[2];
-    
+
     const sectionElement = this.shadowRoot.querySelector(`[data-section-index="${sectionIndex}"]`);
     if (!sectionElement) return;
 
@@ -454,7 +467,7 @@ class RecipeInstructionsList extends SectionedListComponent {
       if (itemMatch) {
         const itemIndex = parseInt(itemMatch[1], 10);
         const field = itemMatch[2];
-        
+
         const itemElements = sectionElement.querySelectorAll(`.${this.itemClass}`);
         const itemElement = itemElements[itemIndex];
         if (itemElement && field === 'text') {
@@ -477,7 +490,7 @@ class RecipeInstructionsList extends SectionedListComponent {
     if (itemMatch) {
       const itemIndex = parseInt(itemMatch[1], 10);
       const field = itemMatch[2];
-      
+
       if (field === 'text') {
         const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
         if (inputs[itemIndex]) {
@@ -495,7 +508,9 @@ class RecipeInstructionsList extends SectionedListComponent {
     const match = errorKey.match(/sections\[(\d+)\]\.title/);
     if (match) {
       const sectionIndex = parseInt(match[1], 10);
-      const stageContainer = this.shadowRoot.querySelector(`[data-section-index="${sectionIndex}"]`);
+      const stageContainer = this.shadowRoot.querySelector(
+        `[data-section-index="${sectionIndex}"]`,
+      );
       if (stageContainer) {
         const titleInput = stageContainer.querySelector('.recipe-form__input--stage-name');
         if (titleInput) {
@@ -515,8 +530,10 @@ class RecipeInstructionsList extends SectionedListComponent {
       const sectionIndex = parseInt(match[1], 10);
       const itemIndex = parseInt(match[2], 10);
       const field = match[3];
-      
-      const stageContainer = this.shadowRoot.querySelector(`[data-section-index="${sectionIndex}"]`);
+
+      const stageContainer = this.shadowRoot.querySelector(
+        `[data-section-index="${sectionIndex}"]`,
+      );
       if (stageContainer) {
         const stepElements = stageContainer.querySelectorAll(`.${this.itemClass}`);
         const stepElement = stepElements[itemIndex];
@@ -562,7 +579,7 @@ class RecipeInstructionsList extends SectionedListComponent {
         } else {
           // All steps in stage
           const stepInputs = stageContainer.querySelectorAll('input[name="steps"]');
-          stepInputs.forEach(input => {
+          stepInputs.forEach((input) => {
             input.classList.add('recipe-form__input--invalid');
           });
         }

@@ -35,7 +35,7 @@ class RecipeFormComponent extends HTMLElement {
   async connectedCallback() {
     this.render();
     this.setupEventListeners();
-    
+
     if (!this.formProtectionDisabled) {
       this.setupFormProtection();
     }
@@ -64,7 +64,6 @@ class RecipeFormComponent extends HTMLElement {
       ${this.template()}
     `;
   }
-
 
   template() {
     return `
@@ -108,7 +107,6 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   setupEventListeners() {
-
     // Add event listener for Instructions List component
     const instructionsList = this.shadowRoot.getElementById('instructions-list');
     instructionsList.addEventListener('instructions-changed', () => {
@@ -141,7 +139,6 @@ class RecipeFormComponent extends HTMLElement {
     }
   }
 
-
   /**
    * Validate form using form validation utilities
    */
@@ -158,7 +155,7 @@ class RecipeFormComponent extends HTMLElement {
     const recipeDataEvent = new CustomEvent('recipe-data-collected', {
       detail: { recipeData: this.recipeData },
       bubbles: true,
-      composed: true
+      composed: true,
     });
     this.dispatchEvent(recipeDataEvent);
   }
@@ -166,13 +163,13 @@ class RecipeFormComponent extends HTMLElement {
   handleFormSubmit() {
     if (this.validateForm()) {
       this.collectFormData();
-      
+
       if (this.isProtectionEnabled) {
         formProtectionManager.temporaryDisable();
       }
-      
+
       this.dispatchRecipeData();
-      
+
       if (this.isProtectionEnabled) {
         formProtectionManager.markAsSaved();
         formProtectionManager.enable();
@@ -189,13 +186,13 @@ class RecipeFormComponent extends HTMLElement {
         return;
       }
     }
-    
+
     this.clearForm();
-    
+
     if (this.isProtectionEnabled) {
       formProtectionManager.cleanup();
       this.isProtectionEnabled = false;
-      
+
       // Wait for form clear to complete, then collect the empty state
       setTimeout(() => {
         this.collectFormData(); // Collect the now-empty form data
@@ -223,7 +220,7 @@ class RecipeFormComponent extends HTMLElement {
       // Create a simple confirmation modal
       const modal = document.createElement('confirmation-modal');
       document.body.appendChild(modal);
-      
+
       // Set up event listeners
       const handleApproved = () => {
         document.body.removeChild(modal);
@@ -231,31 +228,31 @@ class RecipeFormComponent extends HTMLElement {
         modal.removeEventListener('confirm-approved', handleApproved);
         modal.removeEventListener('confirm-rejected', handleRejected);
       };
-      
+
       const handleRejected = () => {
         document.body.removeChild(modal);
         resolve(false);
         modal.removeEventListener('confirm-approved', handleApproved);
         modal.removeEventListener('confirm-rejected', handleRejected);
       };
-      
+
       modal.addEventListener('confirm-approved', handleApproved);
       modal.addEventListener('confirm-rejected', handleRejected);
-      
+
       modal.confirm(
         'יש לך שינויים שלא נשמרו שיאבדו. האם אתה בטוח שברצונך לנקות את הטופס?',
         'נקה טופס',
         'נקה טופס',
-        'שמור שינויים'
+        'שמור שינויים',
       );
     });
   }
 
   clearForm() {
     clearForm(this.shadowRoot);
-    
+
     if (this.isProtectionEnabled) {
-      this.collectFormData(); 
+      this.collectFormData();
       formProtectionManager.initialize(this.shadowRoot, this.recipeData);
     }
   }
@@ -305,7 +302,6 @@ class RecipeFormComponent extends HTMLElement {
         if (!this.formProtectionDisabled) {
           setTimeout(() => this.enableFormProtection(this.recipeData), 500);
         }
-
       } else {
         console.warn('No such document!');
         if (!this.formProtectionDisabled) {
@@ -365,7 +361,7 @@ class RecipeFormComponent extends HTMLElement {
   setupFormProtection() {
     // Listen for form protection events
     this.addEventListener('form-dirty-state-changed', this.handleDirtyStateChange.bind(this));
-    
+
     // Add change detection to form fields
     this.setupChangeDetection();
   }
@@ -376,7 +372,7 @@ class RecipeFormComponent extends HTMLElement {
   setupChangeDetection() {
     // Use a debounced function to check dirty state
     let checkDirtyStateTimeout;
-    
+
     const debouncedDirtyCheck = () => {
       clearTimeout(checkDirtyStateTimeout);
       checkDirtyStateTimeout = setTimeout(() => {
@@ -388,7 +384,7 @@ class RecipeFormComponent extends HTMLElement {
 
     // Listen to various change events including keyup for delete detection
     const eventTypes = ['input', 'change', 'paste', 'keyup'];
-    eventTypes.forEach(eventType => {
+    eventTypes.forEach((eventType) => {
       this.shadowRoot.addEventListener(eventType, debouncedDirtyCheck);
     });
 
@@ -396,7 +392,7 @@ class RecipeFormComponent extends HTMLElement {
     this.addEventListener('ingredients-changed', debouncedDirtyCheck);
     this.addEventListener('instructions-changed', debouncedDirtyCheck);
     this.addEventListener('images-changed', debouncedDirtyCheck);
-    
+
     // Also listen for cut events (when users delete content with Ctrl+X)
     this.shadowRoot.addEventListener('cut', debouncedDirtyCheck);
   }
@@ -407,7 +403,7 @@ class RecipeFormComponent extends HTMLElement {
    */
   enableFormProtection(initialData = null) {
     if (this.formProtectionDisabled || this.isProtectionEnabled) return;
-    
+
     const dataToUse = initialData || this.recipeData;
     formProtectionManager.initialize(this.shadowRoot, dataToUse);
     this.isProtectionEnabled = true;
@@ -418,7 +414,7 @@ class RecipeFormComponent extends HTMLElement {
    */
   disableFormProtection() {
     if (!this.isProtectionEnabled) return;
-    
+
     formProtectionManager.temporaryDisable();
     this.isProtectionEnabled = false;
   }
@@ -439,16 +435,18 @@ class RecipeFormComponent extends HTMLElement {
    */
   handleDirtyStateChange(event) {
     this.isDirty = event.detail.isDirty;
-    
+
     // Update visual indicators
     this.updateDirtyStateIndicators(this.isDirty);
-    
+
     // Dispatch event for parent components
-    this.dispatchEvent(new CustomEvent('form-dirty-changed', {
-      detail: { isDirty: this.isDirty },
-      bubbles: true,
-      composed: true
-    }));
+    this.dispatchEvent(
+      new CustomEvent('form-dirty-changed', {
+        detail: { isDirty: this.isDirty },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   /**
@@ -465,7 +463,7 @@ class RecipeFormComponent extends HTMLElement {
         form.classList.remove('form-dirty');
       }
     }
-    
+
     // Update title to show unsaved changes indicator
     const title = this.shadowRoot.querySelector('.recipe-form__title');
     if (title) {

@@ -93,7 +93,9 @@ class CategoryNavigation extends HTMLElement {
     try {
       // Load template (with caching)
       if (!templateCache) {
-        const templateResponse = await fetch(new URL('./category-navigation.html', import.meta.url));
+        const templateResponse = await fetch(
+          new URL('./category-navigation.html', import.meta.url),
+        );
         if (!templateResponse.ok) {
           throw new Error(`Failed to load template: ${templateResponse.status}`);
         }

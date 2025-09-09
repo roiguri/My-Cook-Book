@@ -30,10 +30,10 @@ const FIELD_MAP = {
  */
 export function validateRecipeForm(recipeData, shadowRoot) {
   const { isValid: dataValid, errors } = validateRecipeData(recipeData);
-  
+
   // Clear all previous error states
   clearValidationErrors(shadowRoot);
-  
+
   let formIsValid = dataValid;
   let allErrors = { ...errors };
 
@@ -49,7 +49,7 @@ export function validateRecipeForm(recipeData, shadowRoot) {
       }
     }
   }
-  
+
   // Run component-level validation for instructions
   const instructionsComponent = shadowRoot.getElementById('instructions-list');
   if (instructionsComponent && typeof instructionsComponent.validate === 'function') {
@@ -62,27 +62,27 @@ export function validateRecipeForm(recipeData, shadowRoot) {
       }
     }
   }
-  
+
   // Show error messages and highlight invalid fields
   const errorMessage = shadowRoot.querySelector('.recipe-form__error-message');
-  
+
   if (!formIsValid) {
     let errorText = 'ישנם שגיאות בטופס. אנא תקן אותן.';
-    
+
     if (allErrors && Object.keys(allErrors).length > 0) {
       highlightFieldErrors(allErrors, shadowRoot);
       // Filter out boolean error values and show meaningful messages
-      const errorMessages = Object.values(allErrors).filter(err => typeof err === 'string');
+      const errorMessages = Object.values(allErrors).filter((err) => typeof err === 'string');
       if (errorMessages.length > 0) {
         errorText = errorMessages.join(' ');
       }
     }
-    
+
     showErrorMessage(errorMessage, errorText);
   } else {
     hideErrorMessage(errorMessage);
   }
-  
+
   return formIsValid;
 }
 
@@ -96,21 +96,22 @@ export function clearValidationErrors(shadowRoot) {
   if (metadataComponent && typeof metadataComponent.setValidationState === 'function') {
     metadataComponent.setValidationState({});
   }
-  
+
   // Clear validation errors from ingredients component
   const ingredientsComponent = shadowRoot.getElementById('ingredients-list');
   if (ingredientsComponent && typeof ingredientsComponent.setValidationState === 'function') {
     ingredientsComponent.setValidationState({});
   }
-  
+
   // Clear validation errors from main component fields only (comments textarea and instruction inputs)
   const commentsField = shadowRoot.getElementById('comments');
   if (commentsField) {
     commentsField.classList.remove('recipe-form__input--invalid');
   }
-  
+
   // Clear instruction/stage field errors
-  shadowRoot.querySelectorAll('.recipe-form__stages input[type="text"], .recipe-form__input--stage-name')
+  shadowRoot
+    .querySelectorAll('.recipe-form__stages input[type="text"], .recipe-form__input--stage-name')
     .forEach((el) => {
       el.classList.remove('recipe-form__input--invalid');
     });
@@ -125,11 +126,19 @@ function highlightFieldErrors(errors, shadowRoot) {
   // Collect errors by component for single API calls
   const metadataErrors = {};
   const ingredientErrors = {};
-  
+
   Object.keys(errors).forEach((key) => {
     // Explicitly handle metadata fields
-    if (key === 'name' || key === 'category' || key === 'prepTime' || key === 'waitTime' || 
-        key === 'servings' || key === 'difficulty' || key === 'mainIngredient' || key === 'tags') {
+    if (
+      key === 'name' ||
+      key === 'category' ||
+      key === 'prepTime' ||
+      key === 'waitTime' ||
+      key === 'servings' ||
+      key === 'difficulty' ||
+      key === 'mainIngredient' ||
+      key === 'tags'
+    ) {
       metadataErrors[key] = true;
     }
     // Legacy ingredient error support (for backward compatibility)
@@ -145,7 +154,7 @@ function highlightFieldErrors(errors, shadowRoot) {
       }
     }
   });
-  
+
   // Apply all metadata errors at once
   if (Object.keys(metadataErrors).length > 0) {
     const metadataComponent = shadowRoot.getElementById('metadata-fields');
@@ -153,7 +162,7 @@ function highlightFieldErrors(errors, shadowRoot) {
       metadataComponent.setValidationState(metadataErrors);
     }
   }
-  
+
   // Apply legacy ingredient errors for backward compatibility
   if (Object.keys(ingredientErrors).length > 0) {
     const ingredientsComponent = shadowRoot.getElementById('ingredients-list');
@@ -162,8 +171,6 @@ function highlightFieldErrors(errors, shadowRoot) {
     }
   }
 }
-
-
 
 /**
  * Shows error message in the UI
@@ -202,13 +209,13 @@ export function validateField(fieldName, value, shadowRoot) {
     if (element) {
       // Add field-specific validation logic here
       const isValid = value != null && value.toString().trim().length > 0;
-      
+
       if (isValid) {
         element.classList.remove('recipe-form__input--invalid');
       } else {
         element.classList.add('recipe-form__input--invalid');
       }
-      
+
       return isValid;
     }
   }
@@ -222,10 +229,10 @@ export function validateField(fieldName, value, shadowRoot) {
  */
 export function clearFieldErrorOnChange(element, shadowRoot = null) {
   if (!element) return;
-  
+
   // Remove error class from the element itself
   element.classList.remove('recipe-form__input--invalid');
-  
+
   // If we have a shadow root, try to identify the component and clear its specific error
   if (shadowRoot) {
     // For metadata fields - clear individual field errors
@@ -248,15 +255,15 @@ export function clearFieldErrorOnChange(element, shadowRoot = null) {
  */
 function getFieldNameFromElement(element) {
   const fieldMap = {
-    'name': 'name',
-    'dish-type': 'category', 
+    name: 'name',
+    'dish-type': 'category',
     'prep-time': 'prepTime',
     'wait-time': 'waitTime',
     'servings-form': 'servings',
-    'difficulty': 'difficulty',
+    difficulty: 'difficulty',
     'main-ingredient': 'mainIngredient',
-    'tags': 'tags'
+    tags: 'tags',
   };
-  
+
   return fieldMap[element.id] || fieldMap[element.name] || null;
 }

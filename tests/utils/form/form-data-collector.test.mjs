@@ -29,15 +29,15 @@ describe('form-data-collector', () => {
     });
 
     const mockElements = {
-      'name': mockInput(data.name || 'Test Recipe'),
+      name: mockInput(data.name || 'Test Recipe'),
       'dish-type': mockInput(data.category || 'main-courses'),
       'prep-time': mockInput(data.prepTime || '30'),
       'wait-time': mockInput(data.waitTime || '45'),
-      'difficulty': mockInput(data.difficulty || 'קלה'),
+      difficulty: mockInput(data.difficulty || 'קלה'),
       'main-ingredient': mockInput(data.mainIngredient || 'Chicken'),
-      'tags': mockInput(data.tags || 'healthy, quick'),
+      tags: mockInput(data.tags || 'healthy, quick'),
       'servings-form': mockInput(data.servings || '4'),
-      'comments': mockInput(data.comments !== undefined ? data.comments : 'Test comments'),
+      comments: mockInput(data.comments !== undefined ? data.comments : 'Test comments'),
     };
 
     const mockIngredientEntries = [
@@ -47,7 +47,7 @@ describe('form-data-collector', () => {
           if (selector.includes('unit')) return mockInput('cups');
           if (selector.includes('item')) return mockInput('rice');
           return null;
-        })
+        }),
       },
       {
         querySelector: jest.fn((selector) => {
@@ -55,12 +55,12 @@ describe('form-data-collector', () => {
           if (selector.includes('unit')) return mockInput('kg');
           if (selector.includes('item')) return mockInput('chicken');
           return null;
-        })
-      }
+        }),
+      },
     ];
 
     const mockStagesContainer = {
-      querySelectorAll: jest.fn(() => [mockInput('Step 1'), mockInput('Step 2')])
+      querySelectorAll: jest.fn(() => [mockInput('Step 1'), mockInput('Step 2')]),
     };
 
     const mockImageHandler = {
@@ -78,24 +78,24 @@ describe('form-data-collector', () => {
           uploadedBy: 'user123',
           fileName: 'existing.jpg',
           uploadTimestamp: new Date(),
-        }
+        },
       ]),
-      getRemovedImages: jest.fn(() => [
-        { id: 'removed-1', full: 'path/to/removed.jpg' }
-      ])
+      getRemovedImages: jest.fn(() => [{ id: 'removed-1', full: 'path/to/removed.jpg' }]),
     };
 
     const mockIngredientsComponent = {
-      getData: jest.fn(() => data.ingredientSections || data.ingredients || [
-        { amount: '2', unit: 'cups', item: 'rice' },
-        { amount: '1', unit: 'kg', item: 'chicken' }
-      ])
+      getData: jest.fn(
+        () =>
+          data.ingredientSections ||
+          data.ingredients || [
+            { amount: '2', unit: 'cups', item: 'rice' },
+            { amount: '1', unit: 'kg', item: 'chicken' },
+          ],
+      ),
     };
 
     const mockInstructionsComponent = {
-      getInstructions: jest.fn(() => data.stages || data.instructions || [
-        'Step 1', 'Step 2'
-      ])
+      getInstructions: jest.fn(() => data.stages || data.instructions || ['Step 1', 'Step 2']),
     };
 
     const mockMetadataComponent = {
@@ -106,9 +106,13 @@ describe('form-data-collector', () => {
         waitTime: data.waitTime ? parseInt(data.waitTime) : 45,
         difficulty: data.difficulty || 'קלה',
         mainIngredient: data.mainIngredient || 'Chicken',
-        tags: data.tags ? (Array.isArray(data.tags) ? data.tags : data.tags.split(', ')) : ['healthy', 'quick'],
-        servings: data.servings ? parseInt(data.servings) : 4
-      }))
+        tags: data.tags
+          ? Array.isArray(data.tags)
+            ? data.tags
+            : data.tags.split(', ')
+          : ['healthy', 'quick'],
+        servings: data.servings ? parseInt(data.servings) : 4,
+      })),
     };
 
     return {
@@ -138,7 +142,7 @@ describe('form-data-collector', () => {
 
     it('should collect basic recipe metadata correctly', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.name).toBe('Test Recipe');
@@ -153,7 +157,7 @@ describe('form-data-collector', () => {
 
     it('should parse tags correctly', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.tags).toEqual(['healthy', 'quick']);
@@ -163,15 +167,15 @@ describe('form-data-collector', () => {
       const mockShadowRoot = createMockShadowRoot({
         ingredients: [
           { amount: '2', unit: 'cups', item: 'rice' },
-          { amount: '1', unit: 'kg', item: 'chicken' }
-        ]
+          { amount: '1', unit: 'kg', item: 'chicken' },
+        ],
       });
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.ingredients).toEqual([
         { amount: '2', unit: 'cups', item: 'rice' },
-        { amount: '1', unit: 'kg', item: 'chicken' }
+        { amount: '1', unit: 'kg', item: 'chicken' },
       ]);
       expect(result.ingredientSections).toBeUndefined();
     });
@@ -183,18 +187,16 @@ describe('form-data-collector', () => {
             title: 'Dry Ingredients',
             items: [
               { amount: '2', unit: 'cups', item: 'flour' },
-              { amount: '1', unit: 'tsp', item: 'salt' }
-            ]
+              { amount: '1', unit: 'tsp', item: 'salt' },
+            ],
           },
           {
             title: 'Wet Ingredients',
-            items: [
-              { amount: '1', unit: 'cup', item: 'milk' }
-            ]
-          }
-        ]
+            items: [{ amount: '1', unit: 'cup', item: 'milk' }],
+          },
+        ],
       });
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.ingredientSections).toEqual([
@@ -202,15 +204,13 @@ describe('form-data-collector', () => {
           title: 'Dry Ingredients',
           items: [
             { amount: '2', unit: 'cups', item: 'flour' },
-            { amount: '1', unit: 'tsp', item: 'salt' }
-          ]
+            { amount: '1', unit: 'tsp', item: 'salt' },
+          ],
         },
         {
           title: 'Wet Ingredients',
-          items: [
-            { amount: '1', unit: 'cup', item: 'milk' }
-          ]
-        }
+          items: [{ amount: '1', unit: 'cup', item: 'milk' }],
+        },
       ]);
       expect(result.ingredients).toBeUndefined();
     });
@@ -222,24 +222,29 @@ describe('form-data-collector', () => {
       mockShadowRoot.getElementById = jest.fn((id) => {
         if (id === 'ingredients-list') return null;
         if (id === 'instructions-list') return null;
-        if (id === 'metadata-fields') return {
-          getFormData: () => ({ name: 'Test Recipe', category: 'main-courses' })
-        };
+        if (id === 'metadata-fields')
+          return {
+            getFormData: () => ({ name: 'Test Recipe', category: 'main-courses' }),
+          };
         return null;
       });
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.ingredients).toBeUndefined();
       expect(result.ingredientSections).toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalledWith('Ingredients component not found or missing getData method');
-      expect(consoleSpy).toHaveBeenCalledWith('Instructions component not found or missing getInstructions method');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Ingredients component not found or missing getData method',
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Instructions component not found or missing getInstructions method',
+      );
       consoleSpy.mockRestore();
     });
 
     it('should collect instructions in single stage mode', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.instructions).toEqual(['Step 1', 'Step 2']);
@@ -249,38 +254,33 @@ describe('form-data-collector', () => {
     it('should collect stages in multi-stage mode', () => {
       const mockShadowRoot = createMockShadowRoot({
         stages: [
-          { 
-            title: 'Stage 1', 
-            items: [
-              { text: 'Step 1.1' },
-              { text: 'Step 1.2' }
-            ]
+          {
+            title: 'Stage 1',
+            items: [{ text: 'Step 1.1' }, { text: 'Step 1.2' }],
           },
-          { 
-            title: 'Stage 2', 
-            items: [
-              { text: 'Step 2.1' }
-            ]
-          }
-        ]
+          {
+            title: 'Stage 2',
+            items: [{ text: 'Step 2.1' }],
+          },
+        ],
       });
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.stages).toEqual([
         { title: 'Stage 1', instructions: ['Step 1.1', 'Step 1.2'] },
-        { title: 'Stage 2', instructions: ['Step 2.1'] }
+        { title: 'Stage 2', instructions: ['Step 2.1'] },
       ]);
       expect(result.instructions).toBeUndefined();
     });
 
     it('should collect images with correct metadata', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.images).toHaveLength(2);
-      
+
       // New image
       expect(result.images[0]).toEqual({
         file: expect.any(File),
@@ -309,7 +309,7 @@ describe('form-data-collector', () => {
     it('should handle anonymous user for new images', () => {
       mockGetCurrentUser.mockReturnValue(null);
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.images[0].uploadedBy).toBe('anonymous');
@@ -317,7 +317,7 @@ describe('form-data-collector', () => {
 
     it('should collect comments as array', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.comments).toEqual(['Test comments']);
@@ -325,7 +325,7 @@ describe('form-data-collector', () => {
 
     it('should handle empty comments', () => {
       const mockShadowRoot = createMockShadowRoot({ comments: '' });
-      
+
       const result = collectRecipeFormData(mockShadowRoot);
 
       expect(result.comments).toBeUndefined();
@@ -335,7 +335,7 @@ describe('form-data-collector', () => {
   describe('collectSectionData', () => {
     it('should collect metadata section', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectSectionData(mockShadowRoot, 'metadata');
 
       expect(result).toEqual({
@@ -352,18 +352,18 @@ describe('form-data-collector', () => {
 
     it('should collect ingredients section', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectSectionData(mockShadowRoot, 'ingredients');
 
       expect(result.ingredients).toEqual([
         { amount: '2', unit: 'cups', item: 'rice' },
-        { amount: '1', unit: 'kg', item: 'chicken' }
+        { amount: '1', unit: 'kg', item: 'chicken' },
       ]);
     });
 
     it('should collect instructions section', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectSectionData(mockShadowRoot, 'instructions');
 
       expect(result.instructions).toEqual(['Step 1', 'Step 2']);
@@ -371,7 +371,7 @@ describe('form-data-collector', () => {
 
     it('should collect images section', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectSectionData(mockShadowRoot, 'images');
 
       expect(result.images).toHaveLength(2);
@@ -380,7 +380,7 @@ describe('form-data-collector', () => {
 
     it('should collect comments section', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectSectionData(mockShadowRoot, 'comments');
 
       expect(result.comments).toEqual(['Test comments']);
@@ -388,7 +388,7 @@ describe('form-data-collector', () => {
 
     it('should return empty object for unknown section', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = collectSectionData(mockShadowRoot, 'unknown');
 
       expect(result).toEqual({});
@@ -401,7 +401,7 @@ describe('form-data-collector', () => {
         name: 'Test Recipe',
         category: 'main-courses',
         ingredients: [{ amount: '1', unit: 'cup', item: 'rice' }],
-        instructions: ['Step 1', 'Step 2']
+        instructions: ['Step 1', 'Step 2'],
       };
 
       const result = hasMinimumRequiredData(recipeData);
@@ -414,7 +414,7 @@ describe('form-data-collector', () => {
         name: 'Test Recipe',
         category: 'main-courses',
         ingredients: [{ amount: '1', unit: 'cup', item: 'rice' }],
-        stages: [{ title: 'Stage 1', instructions: ['Step 1'] }]
+        stages: [{ title: 'Stage 1', instructions: ['Step 1'] }],
       };
 
       const result = hasMinimumRequiredData(recipeData);
@@ -426,7 +426,7 @@ describe('form-data-collector', () => {
       const recipeData = {
         category: 'main-courses',
         ingredients: [{ amount: '1', unit: 'cup', item: 'rice' }],
-        instructions: ['Step 1']
+        instructions: ['Step 1'],
       };
 
       const result = hasMinimumRequiredData(recipeData);
@@ -438,7 +438,7 @@ describe('form-data-collector', () => {
       const recipeData = {
         name: 'Test Recipe',
         ingredients: [{ amount: '1', unit: 'cup', item: 'rice' }],
-        instructions: ['Step 1']
+        instructions: ['Step 1'],
       };
 
       const result = hasMinimumRequiredData(recipeData);
@@ -451,7 +451,7 @@ describe('form-data-collector', () => {
         name: 'Test Recipe',
         category: 'main-courses',
         ingredients: [],
-        instructions: ['Step 1']
+        instructions: ['Step 1'],
       };
 
       const result = hasMinimumRequiredData(recipeData);
@@ -463,7 +463,7 @@ describe('form-data-collector', () => {
       const recipeData = {
         name: 'Test Recipe',
         category: 'main-courses',
-        ingredients: [{ amount: '1', unit: 'cup', item: 'rice' }]
+        ingredients: [{ amount: '1', unit: 'cup', item: 'rice' }],
       };
 
       const result = hasMinimumRequiredData(recipeData);
@@ -476,7 +476,7 @@ describe('form-data-collector', () => {
         name: 'Test Recipe',
         category: 'main-courses',
         ingredients: [{ amount: '1', unit: 'cup', item: 'rice' }],
-        instructions: []
+        instructions: [],
       };
 
       const result = hasMinimumRequiredData(recipeData);

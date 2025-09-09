@@ -3,7 +3,7 @@
  * -----------------------------
  * Handles static metadata fields for recipe forms including:
  * - Name, Category, Times, Servings, Difficulty, Main Ingredient, Tags
- * 
+ *
  * This component is focused on simple data binding without complex interactions.
  */
 
@@ -106,7 +106,11 @@ class RecipeMetadataFields extends HTMLElement {
       { field: 'servings', id: 'servings-form' },
       { field: 'difficulty', id: 'difficulty' },
       { field: 'mainIngredient', id: 'main-ingredient' },
-      { field: 'tags', id: 'tags', transform: (tags) => Array.isArray(tags) ? tags.join(', ') : tags }
+      {
+        field: 'tags',
+        id: 'tags',
+        transform: (tags) => (Array.isArray(tags) ? tags.join(', ') : tags),
+      },
     ];
 
     fieldMappings.forEach(({ field, id, transform }) => {
@@ -122,7 +126,7 @@ class RecipeMetadataFields extends HTMLElement {
    */
   clearFields() {
     const inputs = this.shadowRoot.querySelectorAll('input, select');
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       if (input.type === 'number') {
         input.value = '';
       } else {
@@ -141,7 +145,7 @@ class RecipeMetadataFields extends HTMLElement {
    */
   setDisabled(disabled) {
     const inputs = this.shadowRoot.querySelectorAll('input, select');
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.disabled = disabled;
     });
   }
@@ -152,7 +156,7 @@ class RecipeMetadataFields extends HTMLElement {
    */
   getFormData() {
     const data = {};
-    
+
     const fieldMappings = [
       { field: 'name', id: 'name' },
       { field: 'category', id: 'dish-type' },
@@ -161,20 +165,24 @@ class RecipeMetadataFields extends HTMLElement {
       { field: 'servings', id: 'servings-form', isNumeric: true },
       { field: 'difficulty', id: 'difficulty' },
       { field: 'mainIngredient', id: 'main-ingredient' },
-      { field: 'tags', id: 'tags', transform: (value) => value ? value.split(',').map(tag => tag.trim()) : [] }
+      {
+        field: 'tags',
+        id: 'tags',
+        transform: (value) => (value ? value.split(',').map((tag) => tag.trim()) : []),
+      },
     ];
 
     fieldMappings.forEach(({ field, id, isNumeric, transform }) => {
       const element = this.shadowRoot.getElementById(id);
       if (element) {
         let value = element.value.trim();
-        
+
         if (isNumeric) {
           value = value ? parseInt(value, 10) : 0;
         } else if (transform) {
           value = transform(value);
         }
-        
+
         data[field] = value;
       }
     });
@@ -187,7 +195,7 @@ class RecipeMetadataFields extends HTMLElement {
    */
   setupInputListeners() {
     const inputs = this.shadowRoot.querySelectorAll('input, select');
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.addEventListener('input', () => {
         // Clear error highlighting when user changes the value
         input.classList.remove('recipe-form__input--invalid');
@@ -208,7 +216,7 @@ class RecipeMetadataFields extends HTMLElement {
       { field: 'servings', id: 'servings-form' },
       { field: 'difficulty', id: 'difficulty' },
       { field: 'mainIngredient', id: 'main-ingredient' },
-      { field: 'tags', id: 'tags' }
+      { field: 'tags', id: 'tags' },
     ];
 
     fieldMappings.forEach(({ field, id }) => {

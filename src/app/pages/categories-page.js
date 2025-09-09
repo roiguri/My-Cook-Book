@@ -161,11 +161,12 @@ export default {
         }
       }
 
-      const userChanged = wasAuthenticated !== isNowAuthenticated ||  
-        (isNowAuthenticated && this.currentUser?.uid !== authState.user?.uid);  
+      const userChanged =
+        wasAuthenticated !== isNowAuthenticated ||
+        (isNowAuthenticated && this.currentUser?.uid !== authState.user?.uid);
 
-      if (userChanged) {  
-        favoritesService.clearCache();  
+      if (userChanged) {
+        favoritesService.clearCache();
       }
 
       await this.loadInitialRecipes();

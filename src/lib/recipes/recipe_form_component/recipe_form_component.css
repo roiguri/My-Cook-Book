@@ -160,7 +160,6 @@
   text-align: center;
 }
 
-
 .recipe-form__group--buttons {
   display: flex;
   justify-content: center;
@@ -250,7 +249,8 @@
 
 /* Dirty state animation */
 @keyframes dirty-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 rgba(245, 158, 11, 0);
   }
   50% {

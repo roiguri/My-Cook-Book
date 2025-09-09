@@ -259,15 +259,15 @@ describe('recipe-data-utils', () => {
       });
 
       it('validates sectioned ingredients format', () => {
-        const r = { 
-          ...baseRecipe, 
+        const r = {
+          ...baseRecipe,
           ingredients: undefined,
           ingredientSections: [
-            { 
-              title: 'Dry Ingredients', 
-              items: [{ amount: '1', unit: 'cup', item: 'flour' }] 
-            }
-          ]
+            {
+              title: 'Dry Ingredients',
+              items: [{ amount: '1', unit: 'cup', item: 'flour' }],
+            },
+          ],
         };
         delete r.ingredients;
         const result = validateRecipeData(r);
@@ -275,10 +275,12 @@ describe('recipe-data-utils', () => {
       });
 
       it('fails if both ingredients and ingredientSections exist', () => {
-        const r = { 
-          ...baseRecipe, 
+        const r = {
+          ...baseRecipe,
           ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }],
-          ingredientSections: [{ title: 'Test', items: [{ amount: '1', unit: 'cup', item: 'flour' }] }]
+          ingredientSections: [
+            { title: 'Test', items: [{ amount: '1', unit: 'cup', item: 'flour' }] },
+          ],
         };
         const result = validateRecipeData(r);
         expect(result.isValid).toBe(false);
@@ -302,9 +304,9 @@ describe('recipe-data-utils', () => {
       });
 
       it('allows ingredientSections with empty fields (validation handled at component level)', () => {
-        const r = { 
+        const r = {
           ...baseRecipe,
-          ingredientSections: [{ title: '', items: [] }]
+          ingredientSections: [{ title: '', items: [] }],
         };
         delete r.ingredients;
         const result = validateRecipeData(r);
@@ -313,12 +315,14 @@ describe('recipe-data-utils', () => {
       });
 
       it('allows ingredientSection with invalid items (validation handled at component level)', () => {
-        const r = { 
+        const r = {
           ...baseRecipe,
-          ingredientSections: [{ 
-            title: 'Valid Title', 
-            items: [{ amount: '', unit: '', item: '' }] 
-          }]
+          ingredientSections: [
+            {
+              title: 'Valid Title',
+              items: [{ amount: '', unit: '', item: '' }],
+            },
+          ],
         };
         delete r.ingredients;
         const result = validateRecipeData(r);
@@ -496,8 +500,8 @@ describe('recipe-data-utils', () => {
         name: 'Test Recipe',
         ingredients: [{ amount: '1', unit: 'cup', item: 'old_ingredient' }],
         ingredientSections: [
-          { title: 'Section 1', items: [{ amount: '2', unit: 'cups', item: 'flour' }] }
-        ]
+          { title: 'Section 1', items: [{ amount: '2', unit: 'cups', item: 'flour' }] },
+        ],
       };
       const formatted = formatRecipeData(raw);
       expect(formatted.ingredients).toBeUndefined();
@@ -508,7 +512,7 @@ describe('recipe-data-utils', () => {
     it('handles recipe with flat ingredients only', () => {
       const raw = {
         name: 'Test Recipe',
-        ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }]
+        ingredients: [{ amount: '1', unit: 'cup', item: 'sugar' }],
       };
       const formatted = formatRecipeData(raw);
       expect(formatted.ingredients).toEqual([{ amount: '1', unit: 'cup', item: 'sugar' }]);
@@ -522,8 +526,8 @@ describe('recipe-data-utils', () => {
           { title: 'Valid Section', items: [{ amount: '1', unit: 'cup', item: 'flour' }] },
           { title: '', items: [] }, // Invalid - empty title and no items
           { title: 'Another Valid', items: [{ amount: '', unit: '', item: '' }] }, // Invalid items
-          { title: 'Good Section', items: [{ amount: '2', unit: 'tbsp', item: 'sugar' }] }
-        ]
+          { title: 'Good Section', items: [{ amount: '2', unit: 'tbsp', item: 'sugar' }] },
+        ],
       };
       const formatted = formatRecipeData(raw);
       expect(formatted.ingredientSections).toHaveLength(2);
@@ -539,9 +543,9 @@ describe('recipe-data-utils', () => {
           title: 'Dry Ingredients',
           items: [
             { amount: '2', unit: 'cups', item: 'flour' },
-            { amount: '1', unit: 'tbsp', item: 'sugar' }
-          ]
-        }
+            { amount: '1', unit: 'tbsp', item: 'sugar' },
+          ],
+        },
       ];
       const scaled = scaleIngredientSections(sections, 2, 4);
       expect(scaled[0].items[0].amount).toBe('4');
@@ -553,8 +557,8 @@ describe('recipe-data-utils', () => {
       const sections = [
         {
           title: 'Seasonings',
-          items: [{ amount: 'to taste', unit: '', item: 'salt' }]
-        }
+          items: [{ amount: 'to taste', unit: '', item: 'salt' }],
+        },
       ];
       const scaled = scaleIngredientSections(sections, 2, 4);
       expect(scaled[0].items[0].amount).toBe('to taste');
@@ -575,13 +579,13 @@ describe('recipe-data-utils', () => {
           title: 'Dry',
           items: [
             { amount: '1', unit: 'cup', item: 'flour' },
-            { amount: '2', unit: 'tbsp', item: 'sugar' }
-          ]
+            { amount: '2', unit: 'tbsp', item: 'sugar' },
+          ],
         },
         {
           title: 'Wet',
-          items: [{ amount: '1', unit: 'cup', item: 'milk' }]
-        }
+          items: [{ amount: '1', unit: 'cup', item: 'milk' }],
+        },
       ];
       expect(extractIngredientNamesFromSections(sections)).toEqual(['flour', 'sugar', 'milk']);
     });
@@ -593,9 +597,9 @@ describe('recipe-data-utils', () => {
           items: [
             { amount: '1', unit: 'cup', item: '' },
             { amount: '2', unit: 'tbsp', item: 'sugar' },
-            { item: null }
-          ]
-        }
+            { item: null },
+          ],
+        },
       ];
       expect(extractIngredientNamesFromSections(sections)).toEqual(['sugar']);
     });

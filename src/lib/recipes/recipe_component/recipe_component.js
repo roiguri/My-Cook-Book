@@ -464,7 +464,7 @@ class RecipeComponent extends HTMLElement {
   setupServingsAdjuster(recipe) {
     const servingsInput = this.shadowRoot.getElementById('Recipe_component__servings');
     servingsInput.setAttribute('value', recipe.servings);
-    
+
     // Store original data in closure scope to avoid instance state issues
     const originalIngredients = recipe.ingredientSections || recipe.ingredients;
     const originalRecipeFormat = recipe.ingredientSections ? 'sectioned' : 'flat';
@@ -472,18 +472,19 @@ class RecipeComponent extends HTMLElement {
 
     servingsInput.addEventListener('change', () => {
       const newServings = parseInt(servingsInput.value);
-      
+
       const scaledIngredients = scaleIngredients(
         originalIngredients,
         originalServings,
         newServings,
       );
-      
+
       // Pass scaled ingredients in the same format as the original data
-      const scaledRecipe = originalRecipeFormat === 'sectioned' ? 
-        { ingredientSections: scaledIngredients } : 
-        { ingredients: scaledIngredients };
-      
+      const scaledRecipe =
+        originalRecipeFormat === 'sectioned'
+          ? { ingredientSections: scaledIngredients }
+          : { ingredients: scaledIngredients };
+
       this.populateIngredientsList(scaledRecipe);
     });
   }

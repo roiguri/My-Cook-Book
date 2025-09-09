@@ -5,7 +5,7 @@
  * - Submit button with customizable text
  * - Clear button with customizable text
  * - Disabled state management
- * 
+ *
  * This component is focused on form actions and button state management.
  */
 
@@ -13,7 +13,7 @@ class FormButtonGroup extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    
+
     // Get button text from attributes with defaults
     this.clearButtonText = this.getAttribute('clear-text') || 'נקה';
     this.submitButtonText = this.getAttribute('submit-text') || 'שלח מתכון';
@@ -46,20 +46,24 @@ class FormButtonGroup extends HTMLElement {
 
     clearButton.addEventListener('click', (event) => {
       event.preventDefault();
-      this.dispatchEvent(new CustomEvent('clear-clicked', {
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('clear-clicked', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
     });
 
     submitButton.addEventListener('click', (event) => {
       event.preventDefault();
-      
+
       // Dispatch custom event for parent component to handle
-      this.dispatchEvent(new CustomEvent('submit-clicked', {
-        bubbles: true,
-        composed: true
-      }));
+      this.dispatchEvent(
+        new CustomEvent('submit-clicked', {
+          bubbles: true,
+          composed: true,
+        }),
+      );
     });
   }
 
@@ -69,7 +73,7 @@ class FormButtonGroup extends HTMLElement {
    */
   setDisabled(disabled) {
     const buttons = this.shadowRoot.querySelectorAll('button');
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       button.disabled = disabled;
     });
   }
@@ -104,7 +108,7 @@ class FormButtonGroup extends HTMLElement {
       const clearButton = this.shadowRoot.getElementById('clear-button');
       if (clearButton) clearButton.textContent = texts.clearText;
     }
-    
+
     if (texts.submitText) {
       this.submitButtonText = texts.submitText;
       const submitButton = this.shadowRoot.getElementById('submit-button');

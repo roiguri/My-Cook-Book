@@ -25,7 +25,7 @@ describe('form-validation-utils', () => {
       classList: {
         add: jest.fn(),
         remove: jest.fn(),
-        contains: jest.fn(() => className ? true : false),
+        contains: jest.fn(() => (className ? true : false)),
       },
       style: { display: 'block' },
       textContent: '',
@@ -36,27 +36,30 @@ describe('form-validation-utils', () => {
       'recipe-form__error-message': mockElement('recipe-form__error-message'),
       'metadata-fields': {
         setValidationState: jest.fn(),
-        validate: jest.fn(() => ({ isValid: true, errors: {} }))
+        validate: jest.fn(() => ({ isValid: true, errors: {} })),
       },
       'ingredients-list': {
         setValidationState: jest.fn(),
-        validate: jest.fn(() => ({ isValid: true, errors: {} }))
+        validate: jest.fn(() => ({ isValid: true, errors: {} })),
       },
       'instructions-list': {
         setValidationState: jest.fn(),
-        validate: jest.fn(() => ({ isValid: true, errors: {} }))
+        validate: jest.fn(() => ({ isValid: true, errors: {} })),
       },
-      'comments': mockElement(null, 'comments'),
+      comments: mockElement(null, 'comments'),
     };
 
     return {
       querySelector: jest.fn((selector) => {
-        if (selector === '.recipe-form__error-message') return mockElements['recipe-form__error-message'];
+        if (selector === '.recipe-form__error-message')
+          return mockElements['recipe-form__error-message'];
         return null;
       }),
       getElementById: jest.fn((id) => mockElements[id] || null),
       querySelectorAll: jest.fn((selector) => {
-        if (selector === '.recipe-form__stages input[type="text"], .recipe-form__input--stage-name') {
+        if (
+          selector === '.recipe-form__stages input[type="text"], .recipe-form__input--stage-name'
+        ) {
           return [mockElement('stage-input'), mockElement('stage-input')];
         }
         return [];
@@ -68,7 +71,7 @@ describe('form-validation-utils', () => {
     it('should return true when recipe data is valid', () => {
       const mockShadowRoot = createMockShadowRoot();
       const recipeData = { name: 'Test Recipe' };
-      
+
       mockValidateRecipeData.mockReturnValue({ isValid: true, errors: null });
 
       const result = validateRecipeForm(recipeData, mockShadowRoot);
@@ -82,45 +85,49 @@ describe('form-validation-utils', () => {
       const mockShadowRoot = createMockShadowRoot();
       const recipeData = { name: '' };
       const errors = { name: 'Name is required' };
-      
+
       mockValidateRecipeData.mockReturnValue({ isValid: false, errors });
 
       const result = validateRecipeForm(recipeData, mockShadowRoot);
 
       expect(result).toBe(false);
-      expect(mockShadowRoot.querySelector('.recipe-form__error-message').style.display).toBe('block');
+      expect(mockShadowRoot.querySelector('.recipe-form__error-message').style.display).toBe(
+        'block',
+      );
     });
 
     it('should call setValidationState on ingredients component for ingredient errors', () => {
       const mockShadowRoot = createMockShadowRoot();
       const recipeData = { name: 'Test' };
       const errors = { 'ingredients[0].amount': 'Amount is required' };
-      
+
       mockValidateRecipeData.mockReturnValue({ isValid: false, errors });
 
       validateRecipeForm(recipeData, mockShadowRoot);
 
       const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
-      expect(ingredientsComponent.setValidationState).toHaveBeenCalledWith({'ingredients[0].amount': true});
+      expect(ingredientsComponent.setValidationState).toHaveBeenCalledWith({
+        'ingredients[0].amount': true,
+      });
     });
 
     it('should call setValidationState on metadata component for metadata field errors', () => {
       const mockShadowRoot = createMockShadowRoot();
       const recipeData = { name: '' };
       const errors = { name: 'Name is required' };
-      
+
       mockValidateRecipeData.mockReturnValue({ isValid: false, errors });
 
       validateRecipeForm(recipeData, mockShadowRoot);
 
       const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
-      expect(metadataComponent.setValidationState).toHaveBeenCalledWith({name: true});
+      expect(metadataComponent.setValidationState).toHaveBeenCalledWith({ name: true });
     });
 
     it('should clear previous error states before validation', () => {
       const mockShadowRoot = createMockShadowRoot();
       const recipeData = { name: 'Test' };
-      
+
       mockValidateRecipeData.mockReturnValue({ isValid: true, errors: null });
 
       validateRecipeForm(recipeData, mockShadowRoot);
@@ -128,7 +135,7 @@ describe('form-validation-utils', () => {
       // Check that components received clear validation states
       const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
       const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
-      
+
       expect(metadataComponent.setValidationState).toHaveBeenCalledWith({});
       expect(ingredientsComponent.setValidationState).toHaveBeenCalledWith({});
     });
@@ -142,7 +149,7 @@ describe('form-validation-utils', () => {
 
       const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
       const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
-      
+
       expect(metadataComponent.setValidationState).toHaveBeenCalledWith({});
       expect(ingredientsComponent.setValidationState).toHaveBeenCalledWith({});
     });
@@ -153,7 +160,7 @@ describe('form-validation-utils', () => {
       clearValidationErrors(mockShadowRoot);
 
       expect(mockShadowRoot.querySelectorAll).toHaveBeenCalledWith(
-        '.recipe-form__stages input[type="text"], .recipe-form__input--stage-name'
+        '.recipe-form__stages input[type="text"], .recipe-form__input--stage-name',
       );
     });
   });
@@ -166,7 +173,7 @@ describe('form-validation-utils', () => {
         classList: {
           add: jest.fn(),
           remove: jest.fn(),
-        }
+        },
       };
       mockShadowRoot.getElementById.mockImplementation((id) => {
         if (id === 'name') return mockFieldElement;
@@ -178,7 +185,7 @@ describe('form-validation-utils', () => {
       const mockShadowRoot = createMockShadowRoot();
       const mockElement = { classList: { add: jest.fn(), remove: jest.fn() } };
       mockShadowRoot.getElementById.mockReturnValue(mockElement);
-      
+
       const result = validateField('name', 'Valid Name', mockShadowRoot);
 
       expect(result).toBe(true);
@@ -189,7 +196,7 @@ describe('form-validation-utils', () => {
       const mockShadowRoot = createMockShadowRoot();
       const mockElement = { classList: { add: jest.fn(), remove: jest.fn() } };
       mockShadowRoot.getElementById.mockReturnValue(mockElement);
-      
+
       const result = validateField('name', '', mockShadowRoot);
 
       expect(result).toBe(false);
@@ -198,7 +205,7 @@ describe('form-validation-utils', () => {
 
     it('should return true for unknown field names', () => {
       const mockShadowRoot = createMockShadowRoot();
-      
+
       const result = validateField('unknownField', 'value', mockShadowRoot);
 
       expect(result).toBe(true);
@@ -211,7 +218,7 @@ describe('form-validation-utils', () => {
       const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
       ingredientsComponent.validate.mockReturnValue({
         isValid: false,
-        errors: { 'ingredient-error': 'Missing ingredient' }
+        errors: { 'ingredient-error': 'Missing ingredient' },
       });
 
       const recipeData = { name: 'Test' };
@@ -221,7 +228,9 @@ describe('form-validation-utils', () => {
 
       expect(result).toBe(false);
       expect(ingredientsComponent.validate).toHaveBeenCalled();
-      expect(ingredientsComponent.setValidationState).toHaveBeenCalledWith({ 'ingredient-error': 'Missing ingredient' });
+      expect(ingredientsComponent.setValidationState).toHaveBeenCalledWith({
+        'ingredient-error': 'Missing ingredient',
+      });
     });
 
     it('should validate instructions component when it exists', () => {
@@ -229,7 +238,7 @@ describe('form-validation-utils', () => {
       const instructionsComponent = mockShadowRoot.getElementById('instructions-list');
       instructionsComponent.validate.mockReturnValue({
         isValid: false,
-        errors: { 'instruction-error': 'Missing instruction' }
+        errors: { 'instruction-error': 'Missing instruction' },
       });
 
       const recipeData = { name: 'Test' };
@@ -239,7 +248,9 @@ describe('form-validation-utils', () => {
 
       expect(result).toBe(false);
       expect(instructionsComponent.validate).toHaveBeenCalled();
-      expect(instructionsComponent.setValidationState).toHaveBeenCalledWith({ 'instruction-error': 'Missing instruction' });
+      expect(instructionsComponent.setValidationState).toHaveBeenCalledWith({
+        'instruction-error': 'Missing instruction',
+      });
     });
   });
 });

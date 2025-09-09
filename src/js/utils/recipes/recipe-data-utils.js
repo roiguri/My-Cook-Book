@@ -137,22 +137,22 @@ function validateIngredientSection(section) {
  */
 function sanitizeIngredientSections(rawSections) {
   if (!Array.isArray(rawSections)) return [];
-  
+
   return rawSections
-    .filter(section => section && typeof section === 'object' && section.title && section.items)
-    .map(section => ({
+    .filter((section) => section && typeof section === 'object' && section.title && section.items)
+    .map((section) => ({
       title: String(section.title).trim(),
-      items: Array.isArray(section.items) 
+      items: Array.isArray(section.items)
         ? section.items
-            .filter(item => item && typeof item === 'object' && item.item && item.item.trim())
-            .map(item => ({
+            .filter((item) => item && typeof item === 'object' && item.item && item.item.trim())
+            .map((item) => ({
               amount: String(item.amount || '').trim(),
-              unit: String(item.unit || '').trim(), 
-              item: String(item.item || '').trim()
+              unit: String(item.unit || '').trim(),
+              item: String(item.item || '').trim(),
             }))
-        : []
+        : [],
     }))
-    .filter(section => section.items.length > 0); // Remove sections with no valid items
+    .filter((section) => section.items.length > 0); // Remove sections with no valid items
 }
 
 /**
@@ -163,20 +163,25 @@ function sanitizeIngredientSections(rawSections) {
  * @returns {Array<IngredientSection>} Scaled ingredient sections
  */
 export function scaleIngredientSections(ingredientSections, originalServings, newServings) {
-  if (!Array.isArray(ingredientSections) || !originalServings || !newServings || originalServings <= 0) {
+  if (
+    !Array.isArray(ingredientSections) ||
+    !originalServings ||
+    !newServings ||
+    originalServings <= 0
+  ) {
     return ingredientSections;
   }
-  
+
   const factor = newServings / originalServings;
-  return ingredientSections.map(section => ({
+  return ingredientSections.map((section) => ({
     ...section,
-    items: section.items.map(item => {
+    items: section.items.map((item) => {
       const amountNum = parseFloat(item.amount);
       return {
         ...item,
-        amount: isNaN(amountNum) ? item.amount : formatIngredientAmount(amountNum * factor)
+        amount: isNaN(amountNum) ? item.amount : formatIngredientAmount(amountNum * factor),
       };
-    })
+    }),
   }));
 }
 
@@ -187,12 +192,12 @@ export function scaleIngredientSections(ingredientSections, originalServings, ne
  */
 export function extractIngredientNamesFromSections(ingredientSections) {
   if (!Array.isArray(ingredientSections)) return [];
-  
+
   return ingredientSections
-    .flatMap(section => section.items || [])
-    .map(item => item.item)
-    .filter(name => name && typeof name === 'string' && name.trim())
-    .map(name => name.trim());
+    .flatMap((section) => section.items || [])
+    .map((item) => item.item)
+    .filter((name) => name && typeof name === 'string' && name.trim())
+    .map((name) => name.trim());
 }
 
 /**
@@ -202,11 +207,12 @@ export function extractIngredientNamesFromSections(ingredientSections) {
  */
 export function formatRecipeData(rawData) {
   if (!rawData || typeof rawData !== 'object') return null;
-  
+
   // Handle dual-format ingredients: prioritize ingredientSections if present
-  const hasIngredientSections = Array.isArray(rawData.ingredientSections) && rawData.ingredientSections.length > 0;
+  const hasIngredientSections =
+    Array.isArray(rawData.ingredientSections) && rawData.ingredientSections.length > 0;
   const hasIngredients = Array.isArray(rawData.ingredients) && rawData.ingredients.length > 0;
-  
+
   return {
     id: rawData.id || '',
     name: rawData.name || '',
@@ -217,11 +223,13 @@ export function formatRecipeData(rawData) {
     mainIngredient: rawData.mainIngredient || '',
     tags: Array.isArray(rawData.tags) ? rawData.tags : [],
     servings: typeof rawData.servings === 'number' ? rawData.servings : 1,
-    
+
     // Dual-format ingredients handling
-    ingredients: hasIngredientSections ? undefined : (hasIngredients ? rawData.ingredients : []),
-    ingredientSections: hasIngredientSections ? sanitizeIngredientSections(rawData.ingredientSections) : undefined,
-    
+    ingredients: hasIngredientSections ? undefined : hasIngredients ? rawData.ingredients : [],
+    ingredientSections: hasIngredientSections
+      ? sanitizeIngredientSections(rawData.ingredientSections)
+      : undefined,
+
     stages: Array.isArray(rawData.stages) ? rawData.stages : undefined,
     instructions: Array.isArray(rawData.instructions) ? rawData.instructions : undefined,
     images: Array.isArray(rawData.images) ? rawData.images : [],
@@ -293,8 +301,9 @@ export function validateRecipeData(recipeData) {
 
   // Ingredients vs IngredientSections (mutual exclusivity)
   const hasIngredients = Array.isArray(recipeData.ingredients) && recipeData.ingredients.length > 0;
-  const hasIngredientSections = Array.isArray(recipeData.ingredientSections) && recipeData.ingredientSections.length > 0;
-  
+  const hasIngredientSections =
+    Array.isArray(recipeData.ingredientSections) && recipeData.ingredientSections.length > 0;
+
   if (hasIngredients && hasIngredientSections) {
     errors.ingredients = 'לא ניתן להציג שני סוגי של מרכיבים.';
     errors.ingredientSections = 'לא ניתן להציג שני סוגי של מרכיבים.';
