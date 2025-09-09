@@ -118,11 +118,6 @@ class RecipeFormComponent extends HTMLElement {
     // Add event listener to show image preview
     const imageHandler = this.shadowRoot.getElementById('recipe-images');
 
-    imageHandler.addEventListener('images-changed', () => {
-      // Update validation state when images change
-      this.validateForm();
-    });
-
     imageHandler.addEventListener('primary-image-changed', (e) => {
       // Update internal state when primary image changes
       this.recipeData.primaryImageId = e.detail.imageId;
