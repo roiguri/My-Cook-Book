@@ -18,6 +18,25 @@ class RecipeIngredientsList extends SectionedListComponent {
     this.removeButtonClass = 'recipe-form__button--remove-ingredient';
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    this.setupInputListeners();
+  }
+
+  /**
+   * Sets up input event listeners to clear errors on value change
+   */
+  setupInputListeners() {
+    // Use event delegation since ingredient inputs are added dynamically
+    this.shadowRoot.addEventListener('input', (event) => {
+      const target = event.target;
+      if (target.matches('.recipe-form__input--quantity, .recipe-form__input--unit, .recipe-form__input--item, .recipe-form__input--section-name')) {
+        // Clear error highlighting when user changes the value
+        target.classList.remove('recipe-form__input--invalid');
+      }
+    });
+  }
+
   createListItemHTML(ingredient, includeRemove) {
     const escapedQuantity = String(ingredient.amount || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const escapedUnit = (ingredient.unit || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');

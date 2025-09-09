@@ -131,6 +131,14 @@ class RecipeFormComponent extends HTMLElement {
     buttonGroup.addEventListener('submit-clicked', () => {
       this.handleFormSubmit();
     });
+
+    // Add input listener for comments textarea to clear errors on change
+    const commentsTextarea = this.shadowRoot.getElementById('comments');
+    if (commentsTextarea) {
+      commentsTextarea.addEventListener('input', () => {
+        commentsTextarea.classList.remove('recipe-form__input--invalid');
+      });
+    }
   }
 
 

@@ -178,14 +178,22 @@ export class SectionedListComponent extends DynamicListComponent {
   updateSectionsFromDOM() {
     if (!this.isSectionMode) return;
 
-    const sectionContainers = this.shadowRoot.querySelectorAll('.recipe-form__ingredient-sections[data-section-index]');
+    // Use dynamic section container class based on component type
+    const sectionContainerClass = this.constructor.name === 'RecipeInstructionsList' 
+      ? '.recipe-form__steps[data-section-index]'
+      : '.recipe-form__ingredient-sections[data-section-index]';
+    const sectionContainers = this.shadowRoot.querySelectorAll(sectionContainerClass);
     sectionContainers.forEach((container) => {
       const sectionIndex = parseInt(container.dataset.sectionIndex, 10);
       if (this.sections[sectionIndex]) {
-        const sectionNameInput = container.querySelector('.recipe-form__input--section-name');
+        // Use dynamic section name input class based on component type
+        const sectionNameInputClass = this.constructor.name === 'RecipeInstructionsList' 
+          ? '.recipe-form__input--stage-name'
+          : '.recipe-form__input--section-name';
+        const sectionNameInput = container.querySelector(sectionNameInputClass);
         const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
         const items = Array.from(
-          container.querySelectorAll(':scope > .recipe-form__ingredient-entry')
+          container.querySelectorAll(`:scope > .${this.itemClass}`)
         ).map(item => this.getItemData(item));
 
         this.sections[sectionIndex] = {
@@ -452,10 +460,18 @@ export class SectionedListComponent extends DynamicListComponent {
    * @returns {Array} The data for the sectioned list.
    */
   getSectionsData() {
-    const sectionContainers = this.shadowRoot.querySelectorAll('.recipe-form__ingredient-sections[data-section-index]');
+    // Use dynamic section container class based on component type
+    const sectionContainerClass = this.constructor.name === 'RecipeInstructionsList' 
+      ? '.recipe-form__steps[data-section-index]'
+      : '.recipe-form__ingredient-sections[data-section-index]';
+    const sectionContainers = this.shadowRoot.querySelectorAll(sectionContainerClass);
     const sections = [];
     sectionContainers.forEach((container) => {
-      const sectionNameInput = container.querySelector('.recipe-form__input--section-name');
+      // Use dynamic section name input class based on component type
+      const sectionNameInputClass = this.constructor.name === 'RecipeInstructionsList' 
+        ? '.recipe-form__input--stage-name'
+        : '.recipe-form__input--section-name';
+      const sectionNameInput = container.querySelector(sectionNameInputClass);
       const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
       const items = Array.from(
         container.querySelectorAll(`:scope > .${this.itemClass}`)
@@ -571,67 +587,53 @@ export class SectionedListComponent extends DynamicListComponent {
       }
     });
 
-    // If no ingredients at all, highlight only first 2 section titles and their ingredient fields
-    if (totalIngredients === 0) {
-      // Only validate and highlight first 2 sections
-      for (let i = 0; i < Math.min(2, this.sections.length); i++) {
-        // Highlight section title
-        errors[`sections[${i}].title`] = true;
-        
-        // Highlight all ingredient fields in this section
-        this.sections[i].items.forEach((_, itemIndex) => {
-          errors[`sections[${i}].items[${itemIndex}].amount`] = true;
-          errors[`sections[${i}].items[${itemIndex}].unit`] = true;
-          errors[`sections[${i}].items[${itemIndex}].item`] = true;
-        });
-      }
-      errors.sectionTitles = 'חובה למלא לפחות 2 קטגוריות.';
-      isValid = false;
-      return { isValid, errors };
-    }
-
-    // If we have ingredients, validate according to the new rules
-    // Rule: Must have at least 2 section titles filled (only validate first 2 sections)
-    if (sectionsWithTitles < 2) {
-      // Not enough section titles - highlight empty section titles in first 2 sections only
-      for (let i = 0; i < Math.min(2, this.sections.length); i++) {
-        const sectionTitle = this.sections[i].title?.trim();
-        if (!sectionTitle) {
-          errors[`sections[${i}].title`] = true;
-        }
-      }
-      errors.sectionTitles = 'חובה למלא לפחות 2 קטגוריות.';
-      isValid = false;
-    } else {
-      // We have enough titles, check if each titled section has at least one ingredient
-      let sectionsWithTitlesAndIngredients = 0;
+    // Granular validation: validate each of the first 2 sections individually
+    // Check what's missing in each section and highlight only those specific fields
+    let validSections = 0;
+    
+    for (let i = 0; i < Math.min(2, this.sections.length); i++) {
+      const section = this.sections[i];
+      const sectionTitle = section.title?.trim();
+      const populatedItems = section.items.filter(item => this.isItemPopulated(item));
       
-      this.sections.forEach((section, sectionIndex) => {
-        const sectionTitle = section.title?.trim();
-        const populatedItems = section.items.filter(item => this.isItemPopulated(item));
-        
-        if (sectionTitle) {
-          if (populatedItems.length === 0) {
-            // This titled section has no ingredients - highlight the ingredient fields
-            section.items.forEach((_, itemIndex) => {
-              errors[`sections[${sectionIndex}].items[${itemIndex}].amount`] = true;
-              errors[`sections[${sectionIndex}].items[${itemIndex}].unit`] = true;
-              errors[`sections[${sectionIndex}].items[${itemIndex}].item`] = true;
-            });
-            isValid = false;
-          } else {
-            sectionsWithTitlesAndIngredients++;
-          }
+      // Check if title is missing
+      if (!sectionTitle) {
+        errors[`sections[${i}].title`] = true;
+      }
+      
+      // Check individual items for missing fields (granular validation)
+      // Only highlight empty fields as errors if there are no populated items in this section
+      if (populatedItems.length === 0) {
+        // No populated items in section - highlight at least the first empty item as error
+        const firstEmptyItem = section.items.find(item => !this.isItemPopulated(item));
+        if (firstEmptyItem) {
+          const firstEmptyIndex = section.items.indexOf(firstEmptyItem);
+          const fieldErrors = this.validateItemFields(firstEmptyItem);
+          Object.keys(fieldErrors).forEach(field => {
+            errors[`sections[${i}].items[${firstEmptyIndex}].${field}`] = true;
+          });
         }
-      });
-
-      if (sectionsWithTitlesAndIngredients < 2) {
-        errors.sectionIngredients = 'חובה למלא לפחות 2 קטגוריות עם מצרכים.';
-        isValid = false;
+      }
+      // If there are populated items, don't highlight empty ones as errors (minimum requirement met)
+      
+      // A section is valid if it has both title and at least one item
+      if (sectionTitle && populatedItems.length > 0) {
+        validSections++;
       }
     }
+    
+    // We need at least 2 valid sections (with both title and content)
+    if (validSections < 2) {
+      // Use component-specific error messages
+      if (this.constructor.name === 'RecipeInstructionsList') {
+        errors.instructions = 'חובה למלא לפחות 2 שלבים עם כותרת והוראות.';
+      } else {
+        errors.sectionTitles = 'חובה למלא לפחות 2 קטגוריות עם כותרת ומצרכים.';
+      }
+      isValid = false;
+    }
 
-    // Validate individual ingredient fields for populated ingredients
+    // Validate individual fields for populated items (ingredients/instructions)
     this.sections.forEach((section, sectionIndex) => {
       section.items.forEach((item, itemIndex) => {
         if (this.isItemPopulated(item)) {

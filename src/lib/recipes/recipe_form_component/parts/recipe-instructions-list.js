@@ -25,6 +25,25 @@ class RecipeInstructionsList extends SectionedListComponent {
     this.sectionNamePlaceholder = 'שם השלב';
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    this.setupInputListeners();
+  }
+
+  /**
+   * Sets up input event listeners to clear errors on value change
+   */
+  setupInputListeners() {
+    // Use event delegation since instruction inputs are added dynamically
+    this.shadowRoot.addEventListener('input', (event) => {
+      const target = event.target;
+      if (target.matches('.recipe-form__input, .recipe-form__input--stage-name')) {
+        // Clear error highlighting when user changes the value
+        target.classList.remove('recipe-form__input--invalid');
+      }
+    });
+  }
+
   /**
    * Creates HTML for a single instruction item
    * @param {Object} instruction - The instruction data
@@ -128,115 +147,6 @@ class RecipeInstructionsList extends SectionedListComponent {
         }
       });
     }
-
-    return { isValid, errors };
-  }
-
-  /**
-   * Override validateSectionMode to provide instruction-specific messages
-   * @returns {Object} Validation result
-   */
-  validateSectionMode() {
-    this.updateSectionsFromDOM();
-    const errors = {};
-    let isValid = true;
-
-    if (this.sections.length < 2) {
-      errors.instructions = 'חובה למלא לפחות 2 שלבים.';
-      isValid = false;
-      return { isValid, errors };
-    }
-
-    let sectionsWithTitles = 0;
-    let sectionsWithInstructions = 0;
-    let totalInstructions = 0;
-
-    // Count sections with filled titles and instructions
-    this.sections.forEach((section) => {
-      const sectionTitle = section.title?.trim();
-      
-      if (sectionTitle) {
-        sectionsWithTitles++;
-      }
-
-      const populatedItems = section.items.filter(item => this.isItemPopulated(item));
-      totalInstructions += populatedItems.length;
-
-      if (populatedItems.length > 0) {
-        sectionsWithInstructions++;
-      }
-    });
-
-    // If no instructions at all, highlight only first 2 section titles and their instruction fields
-    if (totalInstructions === 0) {
-      // Only validate and highlight first 2 sections
-      for (let i = 0; i < Math.min(2, this.sections.length); i++) {
-        // Highlight section title
-        errors[`sections[${i}].title`] = true;
-        
-        // Highlight all instruction fields in this section
-        this.sections[i].items.forEach((_, itemIndex) => {
-          errors[`sections[${i}].items[${itemIndex}].text`] = true;
-        });
-      }
-      errors.instructions = 'חובה למלא לפחות 2 שלבים.';
-      isValid = false;
-      return { isValid, errors };
-    }
-
-    // If we have instructions, validate according to the new rules
-    // Rule: Must have at least 2 section titles filled (only validate first 2 sections)
-    if (sectionsWithTitles < 2) {
-      // Not enough section titles - highlight empty section titles in first 2 sections only
-      for (let i = 0; i < Math.min(2, this.sections.length); i++) {
-        const sectionTitle = this.sections[i].title?.trim();
-        if (!sectionTitle) {
-          errors[`sections[${i}].title`] = true;
-        }
-      }
-      errors.instructions = 'חובה למלא לפחות 2 שלבים.';
-      isValid = false;
-    } else {
-      // We have enough titles, check if each titled section has at least one instruction
-      let sectionsWithTitlesAndInstructions = 0;
-      
-      this.sections.forEach((section, sectionIndex) => {
-        const sectionTitle = section.title?.trim();
-        const populatedItems = section.items.filter(item => this.isItemPopulated(item));
-        
-        if (sectionTitle) {
-          if (populatedItems.length === 0) {
-            // This titled section has no instructions - highlight the instruction fields
-            section.items.forEach((_, itemIndex) => {
-              errors[`sections[${sectionIndex}].items[${itemIndex}].text`] = true;
-            });
-            isValid = false;
-          } else {
-            sectionsWithTitlesAndInstructions++;
-          }
-        }
-      });
-
-      if (sectionsWithTitlesAndInstructions < 2) {
-        errors.instructions = 'חובה למלא לפחות 2 שלבים.';
-        isValid = false;
-      }
-    }
-
-    // Validate individual instruction fields for populated instructions
-    this.sections.forEach((section, sectionIndex) => {
-      section.items.forEach((item, itemIndex) => {
-        if (this.isItemPopulated(item)) {
-          const itemErrors = this.validateItemFields(item);
-          if (Object.keys(itemErrors).length > 0) {
-            Object.keys(itemErrors).forEach(field => {
-              errors[`sections[${sectionIndex}].items[${itemIndex}].${field}`] = true;
-            });
-            isValid = false;
-          }
-        }
-      });
-    });
 
     return { isValid, errors };
   }
@@ -469,10 +379,19 @@ class RecipeInstructionsList extends SectionedListComponent {
       return; // No errors to highlight
     }
 
-    // Handle different error types - simplified for instructions
+    // Handle different error types - use unified approach like ingredients
     Object.keys(errors).forEach(errorKey => {
-      if (errorKey === 'general' || errorKey === 'instructions') {
-        // General error or instructions error - highlight all visible instruction inputs and stage titles
+      // Handle section mode validation errors
+      if (errorKey.startsWith('sections[')) {
+        this.handleSectionValidationError(errorKey, errors[errorKey]);
+      }
+      // Handle legacy basic mode validation errors  
+      else if (errorKey.startsWith('items[')) {
+        this.handleBasicModeValidationError(errorKey, errors[errorKey]);
+      }
+      else if (errorKey === 'general') {
+        // Only handle truly general errors, not the specific "instructions" error
+        // The granular validation will handle individual field highlighting
         const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
         inputs.forEach(input => {
           input.classList.add('recipe-form__input--invalid');
@@ -485,13 +404,10 @@ class RecipeInstructionsList extends SectionedListComponent {
             input.classList.add('recipe-form__input--invalid');
           });
         }
-      } else if (errorKey.startsWith('sections[') && errorKey.includes('.title')) {
-        // Section title validation errors
-        this.handleSectionTitleError(errorKey);
-      } else if (errorKey.startsWith('sections[') && errorKey.includes('.items')) {
-        // Section item validation errors
-        this.handleSectionItemError(errorKey);
-      } else if (typeof errorKey === 'string' && errorKey.includes('.')) {
+      }
+      // NOTE: Removed 'instructions' error handling to avoid conflict with granular validation
+      // The sections[].items[].text errors will handle individual field highlighting
+      else if (typeof errorKey === 'string' && errorKey.includes('.')) {
         // Legacy stage-specific error handling
         this.handleLegacyValidationError(errorKey);
       } else if (typeof errorKey === 'number' || /^\d+$/.test(errorKey)) {
@@ -503,6 +419,66 @@ class RecipeInstructionsList extends SectionedListComponent {
         }
       }
     });
+  }
+
+  /**
+   * Handles validation errors for section mode
+   * @param {string} key - Error key (e.g., "sections[0].title" or "sections[0].items[1].text")
+   * @param {*} errorValue - Error value (usually true)
+   */
+  handleSectionValidationError(key, errorValue) {
+    const sectionMatch = key.match(/sections\[(\d+)\]\.(.+)/);
+    if (!sectionMatch) return;
+
+    const sectionIndex = parseInt(sectionMatch[1], 10);
+    const remainder = sectionMatch[2];
+    
+    const sectionElement = this.shadowRoot.querySelector(`[data-section-index="${sectionIndex}"]`);
+    if (!sectionElement) return;
+
+    if (remainder === 'title') {
+      // Highlight section title input
+      const titleInput = sectionElement.querySelector('.recipe-form__input--stage-name');
+      if (titleInput) {
+        titleInput.classList.add('recipe-form__input--invalid');
+      }
+    } else if (remainder.startsWith('items[')) {
+      // Handle item-specific errors within a section
+      const itemMatch = remainder.match(/items\[(\d+)\]\.(\w+)/);
+      if (itemMatch) {
+        const itemIndex = parseInt(itemMatch[1], 10);
+        const field = itemMatch[2];
+        
+        const itemElements = sectionElement.querySelectorAll(`.${this.itemClass}`);
+        const itemElement = itemElements[itemIndex];
+        if (itemElement && field === 'text') {
+          const input = itemElement.querySelector('input[name="steps"]');
+          if (input) {
+            input.classList.add('recipe-form__input--invalid');
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Handles validation errors for basic mode
+   * @param {string} key - Error key (e.g., "items[0].text")
+   * @param {*} errorValue - Error value (usually true)
+   */
+  handleBasicModeValidationError(key, errorValue) {
+    const itemMatch = key.match(/items\[(\d+)\]\.(\w+)/);
+    if (itemMatch) {
+      const itemIndex = parseInt(itemMatch[1], 10);
+      const field = itemMatch[2];
+      
+      if (field === 'text') {
+        const inputs = this.shadowRoot.querySelectorAll('input[name="steps"]');
+        if (inputs[itemIndex]) {
+          inputs[itemIndex].classList.add('recipe-form__input--invalid');
+        }
+      }
+    }
   }
 
   /**

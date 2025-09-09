@@ -214,3 +214,49 @@ export function validateField(fieldName, value, shadowRoot) {
   }
   return true;
 }
+
+/**
+ * Clears error highlighting for a specific field when its value changes
+ * @param {HTMLElement} element - The input element that changed
+ * @param {ShadowRoot} shadowRoot - The component's shadow root (optional, for component fields)
+ */
+export function clearFieldErrorOnChange(element, shadowRoot = null) {
+  if (!element) return;
+  
+  // Remove error class from the element itself
+  element.classList.remove('recipe-form__input--invalid');
+  
+  // If we have a shadow root, try to identify the component and clear its specific error
+  if (shadowRoot) {
+    // For metadata fields - clear individual field errors
+    const metadataComponent = shadowRoot.getElementById('metadata-fields');
+    if (metadataComponent && element.closest('recipe-metadata-fields')) {
+      const fieldName = getFieldNameFromElement(element);
+      if (fieldName && typeof metadataComponent.setValidationState === 'function') {
+        // Get current validation state and clear only this field
+        const currentErrors = {};
+        metadataComponent.setValidationState({ ...currentErrors, [fieldName]: false });
+      }
+    }
+  }
+}
+
+/**
+ * Gets the field name for an element based on its ID or name attribute
+ * @param {HTMLElement} element - The input element
+ * @returns {string|null} - The field name or null if not found
+ */
+function getFieldNameFromElement(element) {
+  const fieldMap = {
+    'name': 'name',
+    'dish-type': 'category', 
+    'prep-time': 'prepTime',
+    'wait-time': 'waitTime',
+    'servings-form': 'servings',
+    'difficulty': 'difficulty',
+    'main-ingredient': 'mainIngredient',
+    'tags': 'tags'
+  };
+  
+  return fieldMap[element.id] || fieldMap[element.name] || null;
+}

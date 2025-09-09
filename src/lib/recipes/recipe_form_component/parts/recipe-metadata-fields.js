@@ -15,6 +15,7 @@ class RecipeMetadataFields extends HTMLElement {
 
   connectedCallback() {
     this.render();
+    this.setupInputListeners();
   }
 
   render() {
@@ -179,6 +180,19 @@ class RecipeMetadataFields extends HTMLElement {
     });
 
     return data;
+  }
+
+  /**
+   * Sets up input event listeners to clear errors on value change
+   */
+  setupInputListeners() {
+    const inputs = this.shadowRoot.querySelectorAll('input, select');
+    inputs.forEach(input => {
+      input.addEventListener('input', () => {
+        // Clear error highlighting when user changes the value
+        input.classList.remove('recipe-form__input--invalid');
+      });
+    });
   }
 
   /**
