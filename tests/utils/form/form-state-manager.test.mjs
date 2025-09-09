@@ -16,17 +16,38 @@ describe('form-state-manager', () => {
 
   // Mock DOM elements and shadow root
   function createMockShadowRoot() {
-    const mockFormElement = (type = 'input', value = '') => ({
-      type,
-      value,
-      disabled: false,
-      selectedIndex: 0,
-      classList: {
-        add: jest.fn(),
-        remove: jest.fn(),
-      },
-      reset: jest.fn(),
-    });
+    const mockFormElement = (type = 'input', value = '') => {
+      const element = {
+        type,
+        value,
+        disabled: false,
+        selectedIndex: 0,
+        classList: {
+          add: jest.fn(),
+          remove: jest.fn(),
+        },
+        reset: jest.fn(),
+        textContent: 'Submit Recipe',
+      };
+      // Make disabled property writable to track changes
+      Object.defineProperty(element, 'disabled', {
+        writable: true,
+        value: false,
+      });
+      Object.defineProperty(element, 'value', {
+        writable: true,
+        value: value,
+      });
+      Object.defineProperty(element, 'selectedIndex', {
+        writable: true,
+        value: 0,
+      });
+      Object.defineProperty(element, 'textContent', {
+        writable: true,
+        value: type === 'button' ? 'Submit Recipe' : '',
+      });
+      return element;
+    };
 
     const mockIngredientEntry = {
       querySelector: jest.fn((selector) => {
@@ -80,6 +101,21 @@ describe('form-state-manager', () => {
       'recipe-form': { reset: jest.fn() },
       'submit-button': mockFormElement('button'),
       'recipe-images': mockImageHandler,
+      'instructions-list': {
+        clearInstructions: jest.fn(),
+      },
+      'metadata-fields': {
+        setDisabled: jest.fn(),
+        clearFields: jest.fn(),
+      },
+      'ingredients-list': {
+        setDisabled: jest.fn(),
+        clear: jest.fn(),
+      },
+      'form-buttons': {
+        setDisabled: jest.fn(),
+        setLoadingState: jest.fn(),
+      },
       'stages-container': {
         querySelectorAll: jest.fn(() => [mockStage]),
       },
@@ -113,6 +149,11 @@ describe('form-state-manager', () => {
         if (selector === 'textarea') {
           return [mockElements['comments']];
         }
+        // Handle complex CSS selectors used by form-state-manager
+        if (selector.includes('input:not(') || selector.includes('select:not(') || selector.includes('textarea:not(')) {
+          // Return a subset of main form elements (excluding component-managed elements)
+          return [mockElements['comments']]; // Only return textarea as it's typically a main component field
+        }
         return [];
       }),
     };
@@ -124,8 +165,20 @@ describe('form-state-manager', () => {
       
       setFormDisabledState(mockShadowRoot, true);
 
-      const elements = mockShadowRoot.querySelectorAll('input, select, textarea, button');
-      elements.forEach(element => {
+      // Verify component methods are called
+      const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
+      const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
+      const buttonGroup = mockShadowRoot.getElementById('form-buttons');
+      const imageHandler = mockShadowRoot.getElementById('recipe-images');
+      
+      expect(metadataComponent.setDisabled).toHaveBeenCalledWith(true);
+      expect(ingredientsComponent.setDisabled).toHaveBeenCalledWith(true);
+      expect(buttonGroup.setDisabled).toHaveBeenCalledWith(true);
+      expect(imageHandler.setDisabled).toHaveBeenCalledWith(true);
+
+      // Verify main component elements are disabled (using complex selector)
+      const mainElements = mockShadowRoot.querySelectorAll('input:not(recipe-metadata-fields input):not(recipe-ingredients-list input), select:not(recipe-metadata-fields select):not(recipe-ingredients-list select), textarea:not(recipe-metadata-fields textarea):not(recipe-ingredients-list textarea)');
+      mainElements.forEach(element => {
         expect(element.disabled).toBe(true);
       });
     });
@@ -167,10 +220,20 @@ describe('form-state-manager', () => {
       
       clearForm(mockShadowRoot);
 
-      const inputs = mockShadowRoot.querySelectorAll('input');
-      inputs.forEach(input => {
-        expect(input.value).toBe('');
-        expect(input.classList.remove).toHaveBeenCalledWith('recipe-form__input--invalid');
+      // Verify component methods are called
+      const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
+      const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
+      
+      expect(metadataComponent.clearFields).toHaveBeenCalled();
+      expect(ingredientsComponent.clear).toHaveBeenCalled();
+
+      // Verify main component fields are cleared (using complex selector)
+      const mainElements = mockShadowRoot.querySelectorAll('input:not(recipe-metadata-fields input):not(recipe-ingredients-list input), select:not(recipe-metadata-fields select):not(recipe-ingredients-list select), textarea:not(recipe-metadata-fields textarea):not(recipe-ingredients-list textarea)');
+      mainElements.forEach(element => {
+        if (element.tagName === 'TEXTAREA') {
+          expect(element.value).toBe('');
+        }
+        expect(element.classList.remove).toHaveBeenCalledWith('recipe-form__input--invalid');
       });
     });
 
@@ -179,8 +242,13 @@ describe('form-state-manager', () => {
       
       clearForm(mockShadowRoot);
 
-      const selects = mockShadowRoot.querySelectorAll('select');
-      selects.forEach(select => {
+      // Verify component methods handle their own fields
+      const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
+      expect(metadataComponent.clearFields).toHaveBeenCalled();
+
+      // Main component select fields (if any) would be reset
+      const mainElements = mockShadowRoot.querySelectorAll('select:not(recipe-metadata-fields select):not(recipe-ingredients-list select)');
+      mainElements.forEach(select => {
         expect(select.selectedIndex).toBe(0);
         expect(select.classList.remove).toHaveBeenCalledWith('recipe-form__input--invalid');
       });
@@ -191,8 +259,9 @@ describe('form-state-manager', () => {
       
       clearForm(mockShadowRoot);
 
-      const textareas = mockShadowRoot.querySelectorAll('textarea');
-      textareas.forEach(textarea => {
+      // Verify main component textarea fields are cleared
+      const mainElements = mockShadowRoot.querySelectorAll('textarea:not(recipe-metadata-fields textarea):not(recipe-ingredients-list textarea)');
+      mainElements.forEach(textarea => {
         expect(textarea.value).toBe('');
         expect(textarea.classList.remove).toHaveBeenCalledWith('recipe-form__input--invalid');
       });
@@ -203,7 +272,9 @@ describe('form-state-manager', () => {
       
       clearForm(mockShadowRoot);
 
-      expect(mockShadowRoot.querySelector).toHaveBeenCalledWith('.recipe-form__ingredients');
+      // Verify ingredients component clear method is called
+      const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
+      expect(ingredientsComponent.clear).toHaveBeenCalled();
     });
 
     it('should clear images through image handler', () => {
@@ -324,14 +395,19 @@ describe('form-state-manager', () => {
       
       setFormLoadingState(mockShadowRoot, true);
 
-      const elements = mockShadowRoot.querySelectorAll('input, select, textarea, button');
-      elements.forEach(element => {
-        expect(element.disabled).toBe(true);
-      });
+      // Verify form is disabled through component methods
+      const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
+      const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
+      const buttonGroup = mockShadowRoot.getElementById('form-buttons');
+      const imageHandler = mockShadowRoot.getElementById('recipe-images');
+      
+      expect(metadataComponent.setDisabled).toHaveBeenCalledWith(true);
+      expect(ingredientsComponent.setDisabled).toHaveBeenCalledWith(true);
+      expect(buttonGroup.setDisabled).toHaveBeenCalledWith(true);
+      expect(imageHandler.setDisabled).toHaveBeenCalledWith(true);
 
-      const submitButton = mockShadowRoot.getElementById('submit-button');
-      expect(submitButton.textContent).toBe('שולח...');
-      expect(submitButton.classList.add).toHaveBeenCalledWith('loading');
+      // Verify loading state is set on button group
+      expect(buttonGroup.setLoadingState).toHaveBeenCalledWith(true, 'שולח...');
     });
 
     it('should enable form and reset submit button when not loading', () => {
@@ -339,13 +415,19 @@ describe('form-state-manager', () => {
       
       setFormLoadingState(mockShadowRoot, false);
 
-      const elements = mockShadowRoot.querySelectorAll('input, select, textarea, button');
-      elements.forEach(element => {
-        expect(element.disabled).toBe(false);
-      });
+      // Verify form is enabled through component methods
+      const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
+      const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
+      const buttonGroup = mockShadowRoot.getElementById('form-buttons');
+      const imageHandler = mockShadowRoot.getElementById('recipe-images');
+      
+      expect(metadataComponent.setDisabled).toHaveBeenCalledWith(false);
+      expect(ingredientsComponent.setDisabled).toHaveBeenCalledWith(false);
+      expect(buttonGroup.setDisabled).toHaveBeenCalledWith(false);
+      expect(imageHandler.setDisabled).toHaveBeenCalledWith(false);
 
-      const submitButton = mockShadowRoot.getElementById('submit-button');
-      expect(submitButton.classList.remove).toHaveBeenCalledWith('loading');
+      // Verify loading state is cleared on button group
+      expect(buttonGroup.setLoadingState).toHaveBeenCalledWith(false, 'שולח...');
     });
 
     it('should handle missing submit button gracefully', () => {

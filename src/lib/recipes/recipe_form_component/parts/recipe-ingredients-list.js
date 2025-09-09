@@ -16,6 +16,12 @@ class RecipeIngredientsList extends SectionedListComponent {
     this.itemClass = 'recipe-form__ingredient-entry';
     this.addButtonClass = 'recipe-form__button--add-ingredient';
     this.removeButtonClass = 'recipe-form__button--remove-ingredient';
+    
+    // Override selector configuration for ingredients-specific DOM structure
+    this.sectionContainerSelector = '.recipe-form__ingredient-sections[data-section-index]';
+    this.sectionNameInputSelector = '.recipe-form__input--section-name';
+    this.sectionValidationErrorKey = 'sectionTitles';
+    this.sectionValidationErrorMessage = 'חובה למלא לפחות 2 קטגוריות עם כותרת ומצרכים.';
   }
 
   connectedCallback() {

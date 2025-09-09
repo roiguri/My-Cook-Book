@@ -17,6 +17,12 @@ export class SectionedListComponent extends DynamicListComponent {
     this.sectionTitlePrefix = 'קטגוריה';
     this.addSectionButtonText = 'הוסף קטגוריה';
     this.sectionNamePlaceholder = 'שם הקטגוריה';
+    
+    // Abstract configuration properties - can be overridden by subclasses
+    this.sectionContainerSelector = '.recipe-form__ingredient-sections[data-section-index]';
+    this.sectionNameInputSelector = '.recipe-form__input--section-name';
+    this.sectionValidationErrorKey = 'sectionTitles';
+    this.sectionValidationErrorMessage = 'חובה למלא לפחות 2 קטגוריות עם כותרת ומצרכים.';
   }
 
   /**
@@ -178,19 +184,11 @@ export class SectionedListComponent extends DynamicListComponent {
   updateSectionsFromDOM() {
     if (!this.isSectionMode) return;
 
-    // Use dynamic section container class based on component type
-    const sectionContainerClass = this.constructor.name === 'RecipeInstructionsList' 
-      ? '.recipe-form__steps[data-section-index]'
-      : '.recipe-form__ingredient-sections[data-section-index]';
-    const sectionContainers = this.shadowRoot.querySelectorAll(sectionContainerClass);
+    const sectionContainers = this.shadowRoot.querySelectorAll(this.sectionContainerSelector);
     sectionContainers.forEach((container) => {
       const sectionIndex = parseInt(container.dataset.sectionIndex, 10);
       if (this.sections[sectionIndex]) {
-        // Use dynamic section name input class based on component type
-        const sectionNameInputClass = this.constructor.name === 'RecipeInstructionsList' 
-          ? '.recipe-form__input--stage-name'
-          : '.recipe-form__input--section-name';
-        const sectionNameInput = container.querySelector(sectionNameInputClass);
+        const sectionNameInput = container.querySelector(this.sectionNameInputSelector);
         const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
         const items = Array.from(
           container.querySelectorAll(`:scope > .${this.itemClass}`)
@@ -460,18 +458,10 @@ export class SectionedListComponent extends DynamicListComponent {
    * @returns {Array} The data for the sectioned list.
    */
   getSectionsData() {
-    // Use dynamic section container class based on component type
-    const sectionContainerClass = this.constructor.name === 'RecipeInstructionsList' 
-      ? '.recipe-form__steps[data-section-index]'
-      : '.recipe-form__ingredient-sections[data-section-index]';
-    const sectionContainers = this.shadowRoot.querySelectorAll(sectionContainerClass);
+    const sectionContainers = this.shadowRoot.querySelectorAll(this.sectionContainerSelector);
     const sections = [];
     sectionContainers.forEach((container) => {
-      // Use dynamic section name input class based on component type
-      const sectionNameInputClass = this.constructor.name === 'RecipeInstructionsList' 
-        ? '.recipe-form__input--stage-name'
-        : '.recipe-form__input--section-name';
-      const sectionNameInput = container.querySelector(sectionNameInputClass);
+      const sectionNameInput = container.querySelector(this.sectionNameInputSelector);
       const sectionTitle = sectionNameInput ? sectionNameInput.value.trim() : '';
       const items = Array.from(
         container.querySelectorAll(`:scope > .${this.itemClass}`)
@@ -624,12 +614,7 @@ export class SectionedListComponent extends DynamicListComponent {
     
     // We need at least 2 valid sections (with both title and content)
     if (validSections < 2) {
-      // Use component-specific error messages
-      if (this.constructor.name === 'RecipeInstructionsList') {
-        errors.instructions = 'חובה למלא לפחות 2 שלבים עם כותרת והוראות.';
-      } else {
-        errors.sectionTitles = 'חובה למלא לפחות 2 קטגוריות עם כותרת ומצרכים.';
-      }
+      errors[this.sectionValidationErrorKey] = this.sectionValidationErrorMessage;
       isValid = false;
     }
 

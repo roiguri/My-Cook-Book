@@ -235,21 +235,20 @@ describe('recipe-data-utils', () => {
       expect(validateRecipeData({ ...baseRecipe, servings: '2' }).isValid).toBe(false);
     });
 
-    it('fails if both instructions and stages exist', () => {
+    it('allows both instructions and stages to exist (validation handled at component level)', () => {
       const r = { ...baseRecipe, stages: [{ title: 'Stage', instructions: ['Do'] }] };
       const result = validateRecipeData(r);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.instructions).toBeDefined();
-      expect(result.errors.stages).toBeDefined();
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual({});
     });
 
-    it('fails if neither instructions nor stages exist', () => {
+    it('allows missing instructions and stages (validation handled at component level)', () => {
       const r = { ...baseRecipe };
       delete r.instructions;
       const result = validateRecipeData(r);
-      expect(result.isValid).toBe(false);
-      expect(result.errors.instructions).toBeDefined();
-      expect(result.errors.stages).toBeDefined();
+      expect(result.isValid).toBe(true);
+      expect(result.errors.instructions).toBeUndefined();
+      expect(result.errors.stages).toBeUndefined();
     });
 
     describe('ingredients vs ingredientSections validation', () => {
@@ -292,29 +291,28 @@ describe('recipe-data-utils', () => {
         delete r.ingredients;
         const result = validateRecipeData(r);
         expect(result.isValid).toBe(false);
-        expect(result.errors.ingredients).toBeDefined();
-        expect(result.errors.ingredientSections).toBeDefined();
+        expect(result.errors.ingredientsRequired).toBe(true);
       });
 
-      it('fails if flat ingredients are invalid', () => {
+      it('allows flat ingredients with empty fields (validation handled at component level)', () => {
         const r = { ...baseRecipe, ingredients: [{ amount: '', unit: '', item: '' }] };
         const result = validateRecipeData(r);
-        expect(result.isValid).toBe(false);
-        expect(result.errors['ingredients[0]']).toBeDefined();
+        expect(result.isValid).toBe(true);
+        expect(result.errors['ingredients[0]']).toBeUndefined();
       });
 
-      it('fails if ingredientSections are invalid', () => {
+      it('allows ingredientSections with empty fields (validation handled at component level)', () => {
         const r = { 
           ...baseRecipe,
           ingredientSections: [{ title: '', items: [] }]
         };
         delete r.ingredients;
         const result = validateRecipeData(r);
-        expect(result.isValid).toBe(false);
-        expect(result.errors['ingredientSections[0]']).toBeDefined();
+        expect(result.isValid).toBe(true);
+        expect(result.errors['ingredientSections[0]']).toBeUndefined();
       });
 
-      it('fails if ingredientSection has invalid items', () => {
+      it('allows ingredientSection with invalid items (validation handled at component level)', () => {
         const r = { 
           ...baseRecipe,
           ingredientSections: [{ 
@@ -324,8 +322,8 @@ describe('recipe-data-utils', () => {
         };
         delete r.ingredients;
         const result = validateRecipeData(r);
-        expect(result.isValid).toBe(false);
-        expect(result.errors['ingredientSections[0]']).toBeDefined();
+        expect(result.isValid).toBe(true);
+        expect(result.errors['ingredientSections[0]']).toBeUndefined();
       });
     });
 
@@ -337,23 +335,23 @@ describe('recipe-data-utils', () => {
       expect(result.isValid).toBe(true);
     });
 
-    it('fails if a stage is missing title or instructions', () => {
+    it('allows stages with missing title or instructions (validation handled at component level)', () => {
       const r = { ...baseRecipe };
       delete r.instructions;
       r.stages = [{ title: '', instructions: [] }];
       const result = validateRecipeData(r);
-      expect(result.isValid).toBe(false);
-      expect(result.errors['stages[0].title']).toBeDefined();
-      expect(result.errors['stages[0].instructions']).toBeDefined();
+      expect(result.isValid).toBe(true);
+      expect(result.errors['stages[0].title']).toBeUndefined();
+      expect(result.errors['stages[0].instructions']).toBeUndefined();
     });
 
-    it('fails if a stage instruction is empty', () => {
+    it('allows stages with empty instructions (validation handled at component level)', () => {
       const r = { ...baseRecipe };
       delete r.instructions;
       r.stages = [{ title: 'Stage', instructions: [''] }];
       const result = validateRecipeData(r);
-      expect(result.isValid).toBe(false);
-      expect(result.errors['stages[0].instructions[0]']).toBeDefined();
+      expect(result.isValid).toBe(true);
+      expect(result.errors['stages[0].instructions[0]']).toBeUndefined();
     });
 
     it('validates optional fields types (tags, images, comments, approved, createdAt, updatedAt)', () => {

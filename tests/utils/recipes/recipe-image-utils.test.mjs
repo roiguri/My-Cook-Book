@@ -332,10 +332,13 @@ describe('recipe-image-utils', () => {
       });
     });
     it('handles missing recipe gracefully', async () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       getDocumentMock.mockResolvedValue(null);
       await expect(removeAllRecipeImages('rid')).resolves.toBeUndefined();
       expect(deleteFileMock).not.toHaveBeenCalled();
       expect(updateDocumentMock).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith('Recipe not found for image removal:', 'rid');
+      consoleSpy.mockRestore();
     });
     it('handles empty images and pendingImages arrays', async () => {
       getDocumentMock.mockResolvedValue({ images: [], pendingImages: [] });

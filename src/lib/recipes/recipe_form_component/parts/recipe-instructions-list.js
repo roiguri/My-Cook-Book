@@ -23,6 +23,12 @@ class RecipeInstructionsList extends SectionedListComponent {
     this.sectionTitlePrefix = 'שלב';
     this.addSectionButtonText = 'הוסף שלב';
     this.sectionNamePlaceholder = 'שם השלב';
+    
+    // Override selector configuration for instructions-specific DOM structure
+    this.sectionContainerSelector = '.recipe-form__steps[data-section-index]';
+    this.sectionNameInputSelector = '.recipe-form__input--stage-name';
+    this.sectionValidationErrorKey = 'instructions';
+    this.sectionValidationErrorMessage = 'חובה למלא לפחות 2 שלבים עם כותרת והוראות.';
   }
 
   connectedCallback() {

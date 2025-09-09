@@ -86,7 +86,7 @@ describe('form-data-collector', () => {
     };
 
     const mockIngredientsComponent = {
-      getIngredients: jest.fn(() => data.ingredientSections || data.ingredients || [
+      getData: jest.fn(() => data.ingredientSections || data.ingredients || [
         { amount: '2', unit: 'cups', item: 'rice' },
         { amount: '1', unit: 'kg', item: 'chicken' }
       ])
@@ -216,10 +216,12 @@ describe('form-data-collector', () => {
     });
 
     it('should default to flat ingredients when component returns null', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       const mockShadowRoot = createMockShadowRoot();
       // Override ingredients component to return null
       mockShadowRoot.getElementById = jest.fn((id) => {
         if (id === 'ingredients-list') return null;
+        if (id === 'instructions-list') return null;
         if (id === 'metadata-fields') return {
           getFormData: () => ({ name: 'Test Recipe', category: 'main-courses' })
         };
@@ -230,6 +232,9 @@ describe('form-data-collector', () => {
 
       expect(result.ingredients).toBeUndefined();
       expect(result.ingredientSections).toBeUndefined();
+      expect(consoleSpy).toHaveBeenCalledWith('Ingredients component not found or missing getData method');
+      expect(consoleSpy).toHaveBeenCalledWith('Instructions component not found or missing getInstructions method');
+      consoleSpy.mockRestore();
     });
 
     it('should collect instructions in single stage mode', () => {
@@ -244,8 +249,19 @@ describe('form-data-collector', () => {
     it('should collect stages in multi-stage mode', () => {
       const mockShadowRoot = createMockShadowRoot({
         stages: [
-          { title: 'Stage 1', instructions: ['Step 1.1', 'Step 1.2'] },
-          { title: 'Stage 2', instructions: ['Step 2.1'] }
+          { 
+            title: 'Stage 1', 
+            items: [
+              { text: 'Step 1.1' },
+              { text: 'Step 1.2' }
+            ]
+          },
+          { 
+            title: 'Stage 2', 
+            items: [
+              { text: 'Step 2.1' }
+            ]
+          }
         ]
       });
       
