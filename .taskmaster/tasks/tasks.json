@@ -192,117 +192,90 @@
       "description": "Tag created on 6/24/2025"
     }
   },
-  "feature-recipe-reader-integration": {
+  "form-refactoring-phase3": {
     "tasks": [
       {
         "id": 1,
-        "title": "Setup Google Cloud Pub/Sub Infrastructure",
-        "description": "Create and configure Google Cloud Pub/Sub topic, subscription, and service accounts for recipe transfer messaging",
-        "details": "Create 'recipe-transfers' topic and 'cookbook-transfers' subscription in Google Cloud Console. Set up service account with pubsub.publisher role for demo app and pubsub.subscriber role for cookbook app. Configure dead letter queue for failed message handling. Install @google-cloud/pubsub v4.x in demo app. Set retention policy to 7 days and acknowledgment deadline to 600 seconds for image processing time.",
-        "testStrategy": "Verify topic and subscription creation through Google Cloud Console. Test service account permissions by publishing and consuming test messages. Validate dead letter queue configuration with intentionally failed messages.",
-        "priority": "high",
+        "title": "Add cloud function support for sectioned ingredients - Backend validation for both ingredient formats",
+        "description": "Implement Firebase Cloud Functions to validate ingredient data in both list format and sectioned format with headers, ensuring data integrity and proper format detection before database operations.",
+        "details": "Create Firebase Cloud Functions that handle ingredient validation for the dual-format system:\n\n1. **Format Detection Function**: Implement logic to automatically detect whether incoming ingredient data is in list format (simple array) or sectioned format (with headers like 'For the sauce:', 'For the base:', etc.)\n\n2. **List Format Validator**: Validate traditional ingredient lists ensuring each item has proper structure (quantity, unit, ingredient name) and sanitize input data\n\n3. **Sectioned Format Validator**: Validate sectioned ingredients by:\n   - Detecting section headers (lines ending with ':' that don't contain quantities)\n   - Validating ingredients within each section\n   - Ensuring proper nesting and structure\n   - Preserving section relationships\n\n4. **Unified Validation Pipeline**: Create a main validation function that:\n   - Determines format type\n   - Routes to appropriate validator\n   - Returns standardized response format\n   - Handles error cases gracefully\n\n5. **Cloud Function Setup**: Deploy as HTTP-triggered functions with proper:\n   - CORS configuration for web app access\n   - Input sanitization and rate limiting\n   - Error handling and logging\n   - Response formatting for frontend consumption\n\n6. **Integration Points**: Ensure functions integrate with existing recipe creation/editing workflows and maintain compatibility with current ingredient storage schema.",
+        "testStrategy": "1. Unit tests for format detection logic with various ingredient list samples\n2. Validation tests for both list and sectioned formats including edge cases (empty sections, malformed headers, special characters)\n3. Integration tests calling Cloud Functions via HTTP with realistic recipe data\n4. Error handling tests with invalid input data, malformed requests, and timeout scenarios\n5. Performance tests with large ingredient lists and multiple sections\n6. End-to-end tests from frontend form submission through Cloud Function validation to database storage\n7. Manual testing with real recipe data from the existing cookbook to ensure backward compatibility",
+        "status": "done",
         "dependencies": [],
-        "status": "in-progress",
+        "priority": "high",
         "subtasks": []
       },
       {
         "id": 2,
-        "title": "Implement Recipe Data Packaging Service",
-        "description": "Create service to fetch complete recipe data from demo app's Supabase and generate signed URLs for images",
-        "details": "Create CookbookTransferService class in demo app. Implement fetchCompleteRecipe() method to retrieve recipe data including all related images from Supabase. Use Supabase storage.createSignedUrl() with 24-hour expiry for each image. Package data into message schema format with recipe data, signed image URLs, and metadata (userId, userEmail, sourceType, timestamp). Handle error cases for missing images or invalid recipe data.",
-        "testStrategy": "Unit tests for data packaging with mock Supabase responses. Integration tests with real recipe data. Verify signed URLs are valid and accessible. Test error handling for missing or corrupted recipe data.",
-        "priority": "high",
+        "title": "Merge sectioned ingredients to refactor/forms branch",
+        "description": "Integrate the sectioned ingredients functionality with the main forms refactoring work by merging feature/sectioned-ingredients branch into refactor/forms branch and resolving any conflicts.",
+        "details": "Execute a strategic branch merge to combine sectioned ingredients work with the main forms refactoring:\n\n1. **Pre-merge Analysis**: Review both branches to identify potential conflicts, particularly in form handling, ingredient processing, and validation logic. Document current state of both branches and assess integration points.\n\n2. **Branch Preparation**: Ensure both branches are up-to-date with their respective base branches. Run tests on both branches to confirm stable state before merge.\n\n3. **Strategic Merge**: Perform merge of feature/sectioned-ingredients into refactor/forms, using git merge strategies that preserve the intent of both code paths. Handle conflicts by prioritizing the refactored form architecture while integrating sectioned ingredient capabilities.\n\n4. **Integration Testing**: Verify that sectioned ingredient functionality works correctly within the refactored forms system. Test both ingredient formats (list and sectioned) through the updated form interfaces.\n\n5. **Code Consolidation**: Remove any duplicate functionality and ensure the merged codebase follows consistent patterns established in the forms refactoring work.",
+        "testStrategy": "1. Pre-merge testing: Run full test suite on both branches independently to establish baseline\n2. Merge conflict resolution testing: Manually test each resolved conflict area with sample data\n3. Integration testing: Test ingredient form submission with both list format and sectioned format data\n4. Regression testing: Verify existing form functionality remains intact after merge\n5. End-to-end testing: Complete recipe creation workflow using sectioned ingredients through refactored forms\n6. Cross-browser testing: Ensure form behavior consistency across different browsers after integration",
+        "status": "done",
         "dependencies": [
           1
         ],
-        "status": "pending",
+        "priority": "high",
         "subtasks": []
       },
       {
         "id": 3,
-        "title": "Create Firebase Cloud Function for Recipe Processing",
-        "description": "Implement Cloud Function triggered by Pub/Sub messages to process recipe transfers in cookbook app",
-        "details": "Create processRecipeTransfer Firebase Function v2 with Pub/Sub trigger. Configure function with 5-minute timeout, 1GB memory, and pubsub.subscriber trigger. Implement message parsing, error handling with automatic retries (max 3 attempts), and dead letter queue integration. Use Firebase Admin SDK for Firestore operations. Add structured logging for debugging and monitoring. Handle malformed messages gracefully.",
-        "testStrategy": "Unit tests with mock Pub/Sub messages. Integration tests with Firebase Functions Emulator. Test timeout scenarios and memory usage with large payloads. Verify retry logic and dead letter queue behavior.",
-        "priority": "high",
+        "title": "Extract shared component architecture from ingredients-list and instructions-list",
+        "description": "Possibly utilize existing component (sectioned-list-component.js) or refactor common patterns from ingredients-list and instructions-list components into reusable shared components to reduce code duplication and improve maintainability.",
+        "details": "Analyze existing ingredients-list and instructions-list components to identify common patterns and extract them into shared components:\n\n1. **Pattern Analysis**: Examine both components to identify shared functionality including list rendering logic, item formatting, validation patterns, editing capabilities, and state management approaches.\n\n2. **Base List Component**: Create a generic `BaseListComponent` that handles common list operations like rendering items, managing edit states, handling add/remove operations, and providing consistent styling hooks.\n\n3. **Item Renderer Strategy**: Implement a flexible item renderer system using render props or component composition patterns to allow each list type to customize how individual items are displayed while sharing core list logic.\n\n4. **Shared Utilities**: Extract common utility functions for data validation, formatting, and transformation into shared modules. This includes ingredient parsing logic, instruction numbering, and common validation rules.\n\n5. **Hook Extraction**: Create custom React hooks for shared state management patterns like `useListEditor`, `useItemValidation`, and `useFormatDetection` that can be reused across different list types.\n\n6. **Component Migration**: Refactor existing ingredients-list and instructions-list components to use the new shared architecture while maintaining their specific functionality and ensuring backward compatibility.\n\n7. **Type System Integration**: Ensure shared components work seamlessly with existing TypeScript interfaces for both ingredient and instruction data types, using generic types where appropriate.",
+        "testStrategy": "1. Unit tests for shared components ensuring they work correctly with both ingredient and instruction data types\n2. Integration tests verifying that refactored ingredients-list and instructions-list components maintain all existing functionality\n3. Visual regression tests to ensure UI consistency is maintained after refactoring\n4. Performance tests comparing before/after bundle size and rendering performance\n5. Cross-component testing to verify shared hooks and utilities work correctly across different list types\n6. Accessibility testing to ensure shared components maintain proper ARIA attributes and keyboard navigation\n7. Edge case testing with various data formats including empty lists, malformed data, and boundary conditions",
+        "status": "done",
         "dependencies": [
-          1
+          2
         ],
-        "status": "pending",
+        "priority": "medium",
         "subtasks": []
       },
       {
         "id": 4,
-        "title": "Implement Data Transformation and Schema Mapping",
-        "description": "Create service to transform demo app recipe format to cookbook app format with proper field mapping",
-        "details": "Create RecipeTransformationService in cookbook function. Implement schema mapping: cook_time → waitTime, map demo categories to cookbook categories, handle prep_time and total_time fields. Add transfer metadata fields (source: 'demo-app', transferredAt: timestamp, approved: false, confidence: 'high'). Create validation functions for required fields. Handle missing or invalid data gracefully with default values.",
-        "testStrategy": "Unit tests with various recipe formats and edge cases. Schema validation tests to ensure cookbook format compliance. Test category mapping accuracy and fallback handling for unknown categories.",
-        "priority": "medium",
+        "title": "Implement drag-and-drop reordering for ingredients and instructions",
+        "description": "Add intuitive drag-and-drop functionality to reorder items in both ingredient lists and instruction sequences, enhancing user experience with visual feedback and smooth animations.",
+        "details": "Implement comprehensive drag-and-drop reordering functionality using modern web APIs and libraries:\n\n1. **Library Selection & Integration**: Research and integrate a robust drag-and-drop library (React DnD, @dnd-kit, or native HTML5) that supports touch devices, accessibility, and smooth animations. Evaluate performance implications and bundle size impact.\n\n2. **Enhanced List Components**: Extend the shared component architecture to support drag-and-drop operations. Add drag handles, visual indicators during drag operations, drop zones with clear visual feedback, and proper ARIA labels for accessibility.\n\n3. **Dual-Format Support**: Implement drag-and-drop for both ingredient formats (simple lists and sectioned ingredients with headers). Handle edge cases like dragging items between sections, reordering sections themselves, and maintaining section integrity during operations.\n\n4. **State Management**: Implement optimistic updates for immediate visual feedback, debounced save operations to prevent excessive API calls, conflict resolution for concurrent edits, and proper error handling with rollback capabilities.\n\n5. **Mobile & Touch Support**: Ensure drag-and-drop works smoothly on mobile devices with touch gestures, implement long-press to initiate drag on touch devices, add haptic feedback where supported, and provide alternative reordering methods for accessibility.\n\n6. **Visual Polish**: Add smooth animations during drag operations, ghost/placeholder elements, visual cues for valid drop zones, and consistent styling that matches the existing design system.",
+        "testStrategy": "1. Unit tests for drag-and-drop logic including reorder functions, state updates, and edge cases like empty lists and single items\n2. Integration tests verifying drag-and-drop works correctly with both ingredient formats and instruction lists, including cross-section dragging for sectioned ingredients\n3. Accessibility testing using screen readers and keyboard navigation to ensure drag-and-drop alternatives work properly\n4. Mobile device testing on various screen sizes and touch interfaces, including long-press gestures and touch responsiveness\n5. Performance testing with large ingredient lists (50+ items) to ensure smooth animations and no lag during drag operations\n6. Cross-browser compatibility testing focusing on drag-and-drop behavior across Chrome, Firefox, Safari, and mobile browsers\n7. User experience testing to validate intuitive drag handles, clear visual feedback, and expected behavior during drag operations",
+        "status": "pending",
         "dependencies": [
           3
         ],
-        "status": "pending",
+        "priority": "medium",
         "subtasks": []
       },
       {
         "id": 5,
-        "title": "Implement Image Transfer and Storage System",
-        "description": "Download images from signed URLs and upload to Firebase Storage with cookbook naming conventions",
-        "details": "Create ImageTransferService in cookbook function. Use node-fetch or axios to download images from signed URLs with timeout handling (30s per image). Validate image formats (JPEG, PNG, WebP) and file sizes (max 10MB). Upload to Firebase Storage under /recipes/{recipeId}/images/ with UUID filenames. Generate pendingImages array for admin approval. Implement retry logic for failed downloads and graceful error handling for expired URLs.",
-        "testStrategy": "Unit tests with mock image downloads and uploads. Integration tests with real signed URLs and Firebase Storage. Test error scenarios including expired URLs, large files, and network timeouts. Verify image integrity after transfer.",
-        "priority": "medium",
-        "dependencies": [
-          3
-        ],
+        "title": "Add debounced validation and status indicators",
+        "description": "Implement real-time form validation with debouncing and visual status indicators to provide immediate user feedback without performance degradation.",
+        "details": "Implement comprehensive debounced validation system with visual feedback:\n\n1. **Debouncing Infrastructure**: Create a custom React hook `useDebounceValidation` that delays validation execution by 300-500ms after user stops typing. Use `useCallback` and `useRef` to optimize performance and prevent unnecessary re-renders. Implement cleanup logic to cancel pending validations on component unmount.\n\n2. **Real-time Validation Engine**: Extend existing form validation to work incrementally with field-level validation functions. Create validation schemas for both ingredient formats (list and sectioned) that can run efficiently on partial data. Implement async validation for server-side checks like ingredient database lookups.\n\n3. **Status Indicator Components**: Design and implement visual feedback components including loading spinners, success checkmarks, error icons, and warning indicators. Use CSS transitions and animations for smooth state changes. Ensure indicators are accessible with proper ARIA labels and screen reader support.\n\n4. **Form Integration**: Integrate validation system with existing ingredient and instruction forms. Add field-level status indicators that update in real-time as users type. Implement form-level validation summary with aggregated status. Ensure validation works with drag-and-drop reordering from Task 4.\n\n5. **Performance Optimization**: Implement validation result caching to avoid re-validating unchanged data. Use React.memo and useMemo to prevent unnecessary component re-renders. Add performance monitoring to track validation response times and optimize bottlenecks.\n\n6. **Error Recovery**: Implement graceful fallbacks when validation fails or times out. Provide clear error messages that guide users toward fixing issues. Add retry mechanisms for transient validation failures.",
+        "testStrategy": "1. Unit tests for debouncing logic including timing accuracy, cancellation behavior, and memory leak prevention\n2. Validation performance tests measuring response times under various data loads and ensuring debouncing prevents excessive API calls\n3. Visual regression tests for status indicator components across different states (loading, success, error, warning)\n4. Integration tests verifying validation works correctly with both ingredient formats and maintains accuracy during drag-and-drop operations\n5. Accessibility tests ensuring status indicators work with screen readers and keyboard navigation\n6. User experience tests measuring perceived performance and validation accuracy with real recipe data\n7. Cross-browser testing for debouncing behavior consistency and visual indicator rendering\n8. Error scenario testing including network failures, validation timeouts, and malformed data inputs",
         "status": "pending",
+        "dependencies": [
+          3,
+          4
+        ],
+        "priority": "medium",
         "subtasks": []
       },
       {
         "id": 6,
-        "title": "Create Transfer UI Components",
-        "description": "Build user interface components for single and batch recipe transfers in demo app",
-        "details": "Create TransferButton component using React/Vue with cookbook branding (icon from lucide-react or similar). Add loading states, success/error feedback with react-hot-toast notifications. Create BatchTransferButton for multiple recipe selection with checkbox interface. Implement progress modal showing transfer status for each recipe. Show buttons only to authenticated users. Use optimistic UI updates with rollback on failure.",
-        "testStrategy": "Component tests with React Testing Library or Vue Test Utils. User interaction tests for button clicks and loading states. Accessibility tests for keyboard navigation and screen readers. Visual regression tests for different states.",
+        "title": "Implement form protection - Prevent accidental data loss during navigation",
+        "description": "Add comprehensive form protection mechanisms to prevent users from losing unsaved changes when navigating away from recipe forms, including browser navigation, tab closure, and internal routing.",
+        "details": "Implement multi-layered form protection system to safeguard user data:\n\n1. **Unsaved Changes Detection**: Create a custom React hook `useFormProtection` that tracks form dirty state by comparing current form values with initial/saved values. Use deep comparison for complex nested data like sectioned ingredients and instruction lists. Implement efficient change detection using useRef to store initial values and useMemo for comparison optimization.\n\n2. **Browser Navigation Protection**: Implement beforeunload event listener to show native browser confirmation dialog when users attempt to close tab, refresh page, or navigate to external URLs with unsaved changes. Handle browser-specific behaviors and ensure proper cleanup of event listeners.\n\n3. **Internal Route Protection**: Integrate with React Router's navigation guards or use history.block() to intercept internal navigation attempts. Create a custom confirmation modal component that matches the application's design system, providing clear options to save, discard, or cancel navigation.\n\n4. **Auto-save Integration**: Implement optional auto-save functionality with configurable intervals (30-60 seconds) using localStorage as fallback and cloud storage for authenticated users. Include conflict resolution for when auto-saved data differs from current form state.\n\n5. **Form State Management**: Enhance existing form state management to track modification timestamps, implement undo/redo functionality, and provide visual indicators for unsaved changes (dirty state indicators, save status, last saved time).\n\n6. **Accessibility & UX**: Ensure form protection works with keyboard navigation, screen readers, and touch devices. Provide clear visual feedback about protection status and implement progressive enhancement for users with JavaScript disabled.",
+        "testStrategy": "1. Unit tests for useFormProtection hook covering change detection logic, cleanup behavior, and edge cases with empty or malformed form data\n2. Integration tests for browser navigation protection including beforeunload event handling, different navigation scenarios (refresh, close tab, external links), and proper event listener cleanup\n3. Router protection tests verifying internal navigation blocking works correctly with React Router, custom confirmation modals display properly, and navigation proceeds correctly after user confirmation\n4. Auto-save functionality tests including localStorage persistence, conflict resolution between auto-saved and current data, and recovery after browser crashes\n5. Cross-browser compatibility testing ensuring protection works consistently across Chrome, Firefox, Safari, and Edge\n6. Accessibility testing with screen readers and keyboard-only navigation to ensure protection features are accessible\n7. Performance testing to verify form protection doesn't impact form responsiveness or cause memory leaks during extended usage\n8. User experience testing with real users to validate confirmation message clarity and protection behavior meets expectations",
+        "status": "done",
+        "dependencies": [
+          3
+        ],
         "priority": "medium",
-        "dependencies": [
-          2
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 7,
-        "title": "Integrate Recipe Storage with Approval Workflow",
-        "description": "Store transformed recipes in Firestore and integrate with existing cookbook admin approval system",
-        "details": "Save transformed recipes to Firestore /recipes collection with approved: false flag. Ensure recipes enter existing admin approval workflow without modification. Add transfer-specific fields (transferSource: 'demo-app', originalId, transferredBy, reviewNotes). Create batch write operations for efficiency. Implement transaction handling for consistency. Add indexes for efficient querying of pending transfers.",
-        "testStrategy": "Integration tests with Firestore emulator. Verify recipes appear in admin dashboard. Test batch operations and transaction rollback scenarios. Performance tests for large recipe imports.",
-        "priority": "medium",
-        "dependencies": [
-          4,
-          5
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 8,
-        "title": "Implement End-to-End Testing and Monitoring",
-        "description": "Create comprehensive testing suite and monitoring dashboard for the complete transfer pipeline",
-        "details": "Create E2E tests using Playwright or Cypress covering complete transfer flow from demo app button click to cookbook storage. Implement monitoring with Google Cloud Monitoring for transfer success rate (>95% target), function execution time (<2min average), and message queue depth. Set up alerts for high error rates, function timeouts, and dead letter queue accumulation. Create health check endpoints for both services. Add performance logging and error tracking with structured logs.",
-        "testStrategy": "E2E test scenarios including successful transfers, error cases, and batch operations. Load testing with concurrent transfers. Monitoring dashboard validation with test metrics. Alert testing with simulated failure conditions.",
-        "priority": "low",
-        "dependencies": [
-          6,
-          7
-        ],
-        "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
-      "created": "2025-07-12T18:55:15.175Z",
-      "updated": "2025-07-12T19:01:59.886Z",
-      "description": "Tasks for feature-recipe-reader-integration context"
+      "created": "2025-08-30T13:47:40.442Z",
+      "updated": "2025-09-07T19:35:15.787Z",
+      "description": "Tasks for form-refactoring-phase3 context"
     }
   }
 }

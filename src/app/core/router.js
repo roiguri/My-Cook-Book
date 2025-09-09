@@ -4,6 +4,7 @@ export class AppRouter {
     this.currentRoute = null;
     this.defaultRoute = '/home';
     this.isInitialized = false;
+    this.navigationGuards = new Map();
 
     this.handlePopState = this.handlePopState.bind(this);
   }
@@ -44,7 +45,35 @@ export class AppRouter {
     this.routes.set(normalizedPath, handler);
   }
 
-  navigate(path, options = {}) {
+  addNavigationGuard(name, guardFunction) {
+    if (typeof name !== 'string' || typeof guardFunction !== 'function') {
+      throw new Error('Guard name must be a string and guard must be a function');
+    }
+    
+    this.navigationGuards.set(name, guardFunction);
+  }
+
+  removeNavigationGuard(name) {
+    this.navigationGuards.delete(name);
+  }
+
+  async checkNavigationGuards(targetPath) {
+    for (const [name, guard] of this.navigationGuards.entries()) {
+      try {
+        const canNavigate = await guard(targetPath);
+        if (!canNavigate) {
+          return false;
+        }
+      } catch (error) {
+        console.error(`Error in navigation guard ${name}:`, error);
+        // Continue checking other guards on error
+      }
+    }
+    
+    return true;
+  }
+
+  async navigate(path, options = {}) {
     if (typeof path !== 'string') {
       throw new Error('Navigation path must be a string');
     }
@@ -55,14 +84,22 @@ export class AppRouter {
     const routePath =
       questionMarkIndex !== -1 ? normalizedPath.substring(0, questionMarkIndex) : normalizedPath;
 
+    if (!options.skipGuards) {
+      const canNavigate = await this.checkNavigationGuards(routePath);
+      if (!canNavigate) {
+        return false;
+      }
+    }
+
     this.currentRoute = routePath;
 
     this.updateURL(normalizedPath, options.replace);
 
     this.executeRoute(routePath);
 
-    // Dispatch navigation event for navigation script to update active states
     this.dispatchNavigationEvent(normalizedPath);
+    
+    return true;
   }
 
   getCurrentRoute() {
@@ -88,10 +125,18 @@ export class AppRouter {
     return params;
   }
 
-  handlePopState() {
+  async handlePopState() {
     const newRoute = this.parseCurrentRoute();
 
     if (newRoute === this.currentRoute) return;
+
+    const canNavigate = await this.checkNavigationGuards(newRoute);
+    if (!canNavigate) {
+      // Navigation blocked by guard - restore previous URL to prevent browser history mismatch
+      const currentPath = this.currentRoute || this.defaultRoute;
+      history.pushState(null, '', currentPath);
+      return;
+    }
 
     if (this.routes.has(newRoute)) {
       this.currentRoute = newRoute;
