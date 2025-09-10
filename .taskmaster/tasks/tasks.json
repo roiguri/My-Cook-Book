@@ -157,5 +157,102 @@
       "updated": "2025-06-24T03:39:03.164Z",
       "description": "Tag created on 6/24/2025"
     }
+  },
+  "media-instructions": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Update Firebase Security Rules and Data Model for Media Instructions",
+        "description": "Modify Firebase Storage security rules to allow authenticated users to upload/delete media for recipes they own. Define and enforce the data structure for the `mediaInstructions` array within Firestore.",
+        "details": "In `firebase.rules` (or equivalent), update the storage rules for the `recipes/{recipeId}/media-instructions/` path. Implement the `isValidMediaFile` and `userOwnsRecipe` functions as specified in the PRD. Ensure public read access is enabled. This task lays the security and data foundation for all subsequent tasks.",
+        "testStrategy": "Use the Firebase Rules Playground to simulate read, create, and delete operations for authenticated recipe owners and non-owners. Test with valid and invalid file sizes/types to ensure rules are enforced correctly. Verify no regressions are introduced to existing rules.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Create Media Instruction Utility Functions",
+        "description": "Develop a set of utility functions to handle the lifecycle of media instruction files, including uploading to Firebase Storage, deleting from storage, and data validation.",
+        "details": "Create a new file at `src/lib/utils/recipes/recipe-media-utils.js`. Implement three key functions: `uploadMediaInstructionFile(file, recipeId, userId)` which uploads a file to `recipes/{recipeId}/media-instructions/` and returns its metadata; `deleteMediaInstructionFile(filePath)` to remove a file from storage; and `validateMediaInstructionData(mediaInstructions)` which can be used client-side before submission. These functions will abstract the Firebase Storage logic.",
+        "testStrategy": "Write unit tests for each utility function. For `uploadMediaInstructionFile`, mock the Firebase Storage API and verify it's called with the correct path and file. For `deleteMediaInstructionFile`, test that the correct delete command is issued. For `validateMediaInstructionData`, test with valid and malformed data arrays.",
+        "priority": "high",
+        "dependencies": [1],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Develop the Media Instructions Editor Svelte Component",
+        "description": "Create a new Svelte component for creating, editing, reordering, and deleting media instructions within the recipe form.",
+        "details": "Create `src/lib/recipes/media-instructions/MediaInstructionsEditor.svelte`. This component will manage an array of media instruction objects. It should feature: a file input with drag-and-drop support; a text input for captions (supporting Hebrew); a delete button for each item; and drag handles for reordering using the existing `svelte-dnd-action` library. It will use the utility functions from Task 2 for file operations. The component should emit events for data changes.",
+        "testStrategy": "Use Storybook or a similar component testing environment to develop this component in isolation. Test file selection, caption input, item deletion, and drag-and-drop reordering. Verify that the component's internal state correctly reflects user actions.",
+        "priority": "high",
+        "dependencies": [2],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Integrate Media Editor into the Recipe Form",
+        "description": "Embed the new `MediaInstructionsEditor` component into the main recipe form and connect it to the recipe's data model and validation system.",
+        "details": "Modify the existing recipe form component (e.g., `src/lib/components/recipes/RecipeForm.svelte`). Add a new section titled 'הוראות הכנה מצולמות'. Import and render the `MediaInstructionsEditor.svelte` component, binding its data to the recipe's `mediaInstructions` field. Extend the existing `zod` validation schema in `src/lib/utils/recipes.js` to validate the `mediaInstructions` array according to the PRD's data structure.",
+        "testStrategy": "Perform integration testing on the recipe edit page. Verify that media instructions can be added and are correctly saved with the recipe. Test the form's validation by attempting to save with invalid data (e.g., missing caption if required). Ensure that loading an existing recipe correctly populates the editor.",
+        "priority": "high",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Enhance MediaScroller Component for Rich Content Display",
+        "description": "Upgrade the existing `MediaScroller.svelte` component to support captions, different media types (image/video), and click events for fullscreen viewing.",
+        "details": "Refactor `src/lib/components/shared/MediaScroller.svelte`. Modify its `items` prop to accept an array of objects matching the `mediaInstructions` structure (`path`, `caption`, `type`). Add a slot or prop for displaying the caption below the media. Implement logic to render an `<img>` or `<video>` tag based on the `type`. Dispatch a custom `itemclick` event with the item's data when a user clicks on a media element.",
+        "testStrategy": "Update the component's unit tests or stories to pass in the new data structure. Verify that both images and videos render correctly. Test that captions are displayed and that the `itemclick` event is dispatched with the correct payload upon user interaction.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Fullscreen Media Viewer Modal",
+        "description": "Create a reusable modal component for displaying a single media instruction in fullscreen with navigation controls.",
+        "details": "Create a new component `src/lib/components/shared/FullscreenMediaViewer.svelte`. This modal should accept an array of media items and the index of the currently active item. It should display the media prominently, show the caption, and include 'Previous'/'Next' buttons and keyboard navigation (arrow keys) to cycle through the items. Include a close button (and Esc key listener) to exit the modal.",
+        "testStrategy": "Test the modal component in isolation. Verify it displays the correct image/video and caption based on the props. Test the 'Previous' and 'Next' buttons, ensuring they correctly cycle through the items and handle edge cases (first/last item). Test all close mechanisms (button, Esc key, overlay click).",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Integrate Media Display into the Recipe View Page",
+        "description": "Update the recipe display page to render the media instructions using the enhanced `MediaScroller` and `FullscreenMediaViewer` components.",
+        "details": "In the recipe display route (e.g., `src/routes/recipes/[slug]/+page.svelte`), add a new collapsible section for 'הוראות הכנה מצולמות'. If `recipe.mediaInstructions` exists, render the enhanced `MediaScroller` component, passing the data to it. Implement lazy loading for this section. Listen for the `itemclick` event from the scroller to open the `FullscreenMediaViewer` modal with the appropriate data.",
+        "testStrategy": "Conduct end-to-end testing on a recipe that has media instructions. Verify the media scroller displays correctly on both desktop and mobile. Confirm that clicking an item opens the fullscreen modal. Test navigation within the modal. Check that the section is properly collapsed by default and loads media only upon expansion.",
+        "priority": "high",
+        "dependencies": [4, 5, 6],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Performance Optimizations and Sanitization",
+        "description": "Apply performance best practices such as image compression and lazy loading, and ensure all user-generated content is properly sanitized.",
+        "details": "Integrate an image compression library or a cloud function to automatically compress images on upload to reduce storage costs and improve load times. Ensure the `MediaScroller` on the recipe view page lazy-loads media content. Review all points where `mediaInstructions` data (especially `caption`) is rendered and ensure it is sanitized to prevent XSS attacks, possibly using a DOMPurify-like library or Svelte's built-in mechanisms.",
+        "testStrategy": "Use browser developer tools (Lighthouse, Network tab) to measure recipe page load times before and after implementation to ensure no performance degradation. Manually test for XSS vulnerabilities by entering HTML/script tags into caption fields. Verify that images are being compressed by checking file sizes in Firebase Storage.",
+        "priority": "medium",
+        "dependencies": [7],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-09-10T18:37:21.065Z",
+      "updated": "2025-09-10T18:38:32.276Z",
+      "description": "Tasks for media-instructions context"
+    }
   }
 }
