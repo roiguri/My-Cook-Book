@@ -9,6 +9,8 @@
  * This component is focused on form actions and button state management.
  */
 
+import styles from '../recipe_form_component.css?inline';
+
 class FormButtonGroup extends HTMLElement {
   constructor() {
     super();
@@ -26,7 +28,7 @@ class FormButtonGroup extends HTMLElement {
 
   render() {
     this.shadowRoot.innerHTML = `
-      <link rel="stylesheet" href="/src/lib/recipes/recipe_form_component/recipe_form_component.css">
+      <style>${styles}</style>
       ${this.template()}
     `;
   }

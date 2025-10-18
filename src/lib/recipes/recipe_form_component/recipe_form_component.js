@@ -15,6 +15,8 @@ import './parts/form-button-group.js';
 import './parts/recipe-ingredients-list.js';
 import './parts/recipe-instructions-list.js';
 
+import styles from './recipe_form_component.css?inline';
+
 class RecipeFormComponent extends HTMLElement {
   constructor() {
     super();
@@ -60,7 +62,7 @@ class RecipeFormComponent extends HTMLElement {
 
   render() {
     this.shadowRoot.innerHTML = `
-      <link rel="stylesheet" href="/src/lib/recipes/recipe_form_component/recipe_form_component.css">
+      <style>${styles}</style>
       ${this.template()}
     `;
   }
