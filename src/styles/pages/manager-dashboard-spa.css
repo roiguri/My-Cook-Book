@@ -8,12 +8,37 @@
   flex-grow: 1;
 }
 
+/* Dashboard Header with Master Refresh */
+.spa-content .manager-dashboard .dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 30px;
+}
+
 .spa-content .manager-dashboard h1 {
   font-size: 2.5rem;
   color: var(--text-color);
   font-family: var(--heading-font);
-  margin-bottom: 30px;
+  margin: 0;
   text-align: center;
+}
+
+/* Master Refresh Icon - Top Left */
+.spa-content .manager-dashboard .master-refresh {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.spa-content .manager-dashboard .master-refresh:hover {
+  transform: translateY(-50%) scale(1.05);
+}
+
+.spa-content .manager-dashboard .master-refresh:active {
+  transform: translateY(-50%) scale(0.98);
 }
 
 .spa-content .manager-dashboard .sections {
@@ -34,10 +59,73 @@
   gap: 10px;
 }
 
+/* Section Header with Refresh Icon */
+.spa-content .manager-dashboard .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .spa-content .manager-dashboard h2 {
   font-size: 1.8rem;
   color: var(--primary-color);
-  margin: 10px;
+  margin: 0;
+  flex: 1;
+}
+
+/* Refresh Icon Styles */
+.spa-content .manager-dashboard .refresh-icon {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--primary-color);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: var(--primary-color);
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.spa-content .manager-dashboard .refresh-icon:hover {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Section icons only (not master) */
+.spa-content .manager-dashboard .section-refresh:hover {
+  transform: scale(1.05);
+}
+
+.spa-content .manager-dashboard .section-refresh:active {
+  transform: scale(0.98);
+}
+
+.spa-content .manager-dashboard .refresh-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* Spinning Animation for Loading State */
+.spa-content .manager-dashboard .refresh-icon.spinning svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* User Management Styles */
@@ -136,5 +224,17 @@
   .spa-content .manager-dashboard scrolling-list {
     height: auto;
     max-height: 400px;
+  }
+
+  /* Make refresh icons slightly smaller on mobile */
+  .spa-content .manager-dashboard .refresh-icon {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+  }
+
+  .spa-content .manager-dashboard .refresh-icon svg {
+    width: 18px;
+    height: 18px;
   }
 }

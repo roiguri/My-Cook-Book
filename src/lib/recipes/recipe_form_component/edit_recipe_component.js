@@ -68,17 +68,25 @@ class EditRecipeComponent extends HTMLElement {
           });
           newImages.push(meta);
         } else if (img.source === 'existing') {
-          // Keep existing image (exclude file/source)
-          newImages.push({
+          // Keep existing image (exclude file/source and undefined fields)
+          const existingImage = {
             id: img.id,
             full: img.full,
             compressed: img.compressed,
             isPrimary: img.isPrimary,
             access: img.access,
             uploadedBy: img.uploadedBy,
-            fileName: img.fileName,
-            uploadTimestamp: img.uploadTimestamp,
-          });
+          };
+
+          // Only add optional fields if they exist
+          if (img.fileName !== undefined) {
+            existingImage.fileName = img.fileName;
+          }
+          if (img.uploadTimestamp !== undefined) {
+            existingImage.uploadTimestamp = img.uploadTimestamp;
+          }
+
+          newImages.push(existingImage);
         }
       }
 
@@ -90,6 +98,14 @@ class EditRecipeComponent extends HTMLElement {
       });
 
       this.showSuccessMessage('Recipe updated successfully!');
+
+      // 4. Dispatch recipe-updated event for dashboard refresh
+      const event = new CustomEvent('recipe-updated', {
+        detail: { recipeId: this.recipeId },
+        bubbles: true,
+        composed: true,
+      });
+      this.dispatchEvent(event);
     } catch (error) {
       this.showErrorMessage(`Error updating recipe: ${error}`);
     }

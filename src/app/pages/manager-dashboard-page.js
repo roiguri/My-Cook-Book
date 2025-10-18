@@ -2,6 +2,10 @@ import { FirestoreService } from '../../js/services/firestore-service.js';
 import authService from '../../js/services/auth-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
 import { CATEGORY_MAP } from '../../js/utils/recipes/recipe-data-utils.js';
+import {
+  DashboardRefreshManager,
+  DASHBOARD_SECTIONS,
+} from '../../lib/utilities/dashboard-refresh-manager.js';
 import '../../styles/pages/manager-dashboard-spa.css';
 
 export default {
@@ -30,9 +34,12 @@ export default {
     }
 
     await this.importComponents();
+    this.initializeRefreshManager();
     this.initializeDashboard();
     this.setupAuthListener();
     this.setupImageApprovalListeners();
+    this.setupRefreshIconListeners();
+    this.setupEditRecipeListener();
   },
 
   async unmount() {
@@ -109,6 +116,56 @@ export default {
     }
   },
 
+  initializeRefreshManager() {
+    // Create refresh manager instance
+    this.refreshManager = new DashboardRefreshManager(this);
+
+    // Register master refresh icon
+    const masterRefreshIcon = document.getElementById('master-refresh');
+    if (masterRefreshIcon) {
+      this.refreshManager.registerIcon('master', masterRefreshIcon);
+    }
+
+    // Register section refresh icons
+    const sectionIcons = document.querySelectorAll('.section-refresh');
+    sectionIcons.forEach((icon) => {
+      const section = icon.getAttribute('data-section');
+      if (section) {
+        this.refreshManager.registerIcon(section, icon);
+      }
+    });
+  },
+
+  setupRefreshIconListeners() {
+    // Master refresh icon - refresh all dashboards
+    const masterRefreshIcon = document.getElementById('master-refresh');
+    if (masterRefreshIcon) {
+      masterRefreshIcon.addEventListener('click', () => {
+        this.refreshManager.refreshAll();
+      });
+    }
+
+    // Section refresh icons - refresh individual sections
+    const sectionIcons = document.querySelectorAll('.section-refresh');
+    sectionIcons.forEach((icon) => {
+      icon.addEventListener('click', () => {
+        const section = icon.getAttribute('data-section');
+        if (section) {
+          this.refreshManager.refreshDashboards([section]);
+        }
+      });
+    });
+  },
+
+  setupEditRecipeListener() {
+    // Listen for recipe-updated events from edit-preview-recipe component
+    document.addEventListener('recipe-updated', (event) => {
+      console.log('Recipe updated:', event.detail.recipeId);
+      // Refresh both all recipes and pending recipes (edits require re-approval)
+      this.refreshManager.refreshRecipes(600);
+    });
+  },
+
   initializeDashboard() {
     this.loadUserList();
     this.loadAllRecipes();
@@ -120,9 +177,10 @@ export default {
    * User Management
    */
   async loadUserList() {
+    const userList = document.getElementById('user-list');
+    userList.setItems([]); // Clear existing items first
     try {
       const users = await FirestoreService.queryDocuments('users');
-      const userList = document.getElementById('user-list');
       const userItems = users.map((user) => ({
         header: this.createHeader(user.email),
         content: this.createContent(user),
@@ -271,6 +329,9 @@ export default {
    */
   async loadPendingRecipes() {
     const pendingRecipesList = document.getElementById('pending-recipes-list');
+    const pendingRecipeSection = document.getElementById('pending-recipes');
+    const noPendingMessage = pendingRecipeSection.querySelector('.no-pending-message');
+
     try {
       const pendingRecipes = await FirestoreService.queryDocuments('recipes', {
         where: [['approved', '==', false]],
@@ -280,10 +341,11 @@ export default {
         content: this.createPendingRecipeContent(recipe),
       }));
 
+      // Always update the message based on current state
       if (recipeItems.length == 0) {
-        const pendingRecipeSection = document.getElementById('pending-recipes');
-        pendingRecipeSection.querySelector('.no-pending-message').textContent =
-          'אין מתכונים הממתינים לאישור';
+        noPendingMessage.textContent = 'אין מתכונים הממתינים לאישור';
+      } else {
+        noPendingMessage.textContent = ''; // Clear message when items exist
       }
 
       if (pendingRecipesList) {
@@ -333,18 +395,14 @@ export default {
 
       previewRecipeModal.addEventListener('recipe-approved', (event) => {
         console.log('Recipe approved:', event.detail.recipeId);
-        // Refresh the recipe dashboards
-        this.loadPendingRecipes();
-        this.loadAllRecipes();
+        // Refresh the recipe dashboards immediately
+        this.refreshManager.refreshRecipes();
       });
 
       previewRecipeModal.addEventListener('recipe-rejected', (event) => {
         console.log('Recipe rejected:', event.detail.recipeId);
-        // Refresh the recipe dashboards
-        setTimeout(() => {
-          this.loadPendingRecipes();
-          this.loadAllRecipes();
-        }, 600);
+        // Refresh the recipe dashboards with delay to allow animation to complete
+        this.refreshManager.refreshRecipes(600);
       });
     });
   },
@@ -354,6 +412,9 @@ export default {
    */
   async loadPendingImages() {
     const pendingImagesList = document.getElementById('pending-images-list');
+    const pendingImagesSection = document.getElementById('pending-images');
+    const noPendingMessage = pendingImagesSection.querySelector('.no-pending-message');
+
     pendingImagesList.setItems([]);
     try {
       const pendingRecipes = await FirestoreService.queryDocuments('recipes', {
@@ -369,10 +430,11 @@ export default {
         content: this.createPendingImageContent(image),
       }));
 
+      // Always update the message based on current state
       if (imageItems.length == 0) {
-        const pendingRecipeSection = document.getElementById('pending-images');
-        pendingRecipeSection.querySelector('.no-pending-message').textContent =
-          'אין תמונות הממתינות לאישור';
+        noPendingMessage.textContent = 'אין תמונות הממתינות לאישור';
+      } else {
+        noPendingMessage.textContent = ''; // Clear message when items exist
       }
 
       if (pendingImagesList) {
@@ -434,14 +496,13 @@ export default {
   handleImageApproved(event) {
     console.log('Image approved for recipe:', event.detail.recipeId);
     // Refresh both pending images and all recipes lists
-    this.loadPendingImages();
-    this.loadAllRecipes();
+    this.refreshManager.refreshImages();
   },
 
   handleImageRejected(event) {
     console.log('Image rejected for recipe:', event.detail.recipeId);
     // Only refresh the pending images list
-    this.loadPendingImages();
+    this.refreshManager.refreshPendingImages();
   },
 
   /**
