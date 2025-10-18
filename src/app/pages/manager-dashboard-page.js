@@ -1,6 +1,7 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
 import authService from '../../js/services/auth-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
+import { CATEGORY_MAP } from '../../js/utils/recipes/recipe-data-utils.js';
 import '../../styles/pages/manager-dashboard-spa.css';
 
 export default {
@@ -202,22 +203,13 @@ export default {
     recipeList.setItems(recipeItems);
   },
 
-  categoryMapping: {
-    appetizers: 'מנות ראשונות',
-    'main-courses': 'מנות עיקריות',
-    'side-dishes': 'תוספות',
-    'soups-stews': 'מרקים ותבשילים',
-    salads: 'סלטים',
-    'breakfast-brunch': 'ארוחות בוקר',
-    snacks: 'חטיפים',
-    beverages: 'משקאות',
-    desserts: 'קינוחים',
+  // Use central category mapping from single source of truth
+  get categoryMapping() {
+    return CATEGORY_MAP;
   },
 
   get reverseCategoryMapping() {
-    return Object.fromEntries(
-      Object.entries(this.categoryMapping).map(([key, value]) => [value, key]),
-    );
+    return Object.fromEntries(Object.entries(CATEGORY_MAP).map(([key, value]) => [value, key]));
   },
 
   createRecipeContent(recipe) {

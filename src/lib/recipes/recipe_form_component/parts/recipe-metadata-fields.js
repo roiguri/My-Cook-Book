@@ -8,6 +8,7 @@
  */
 
 import styles from '../recipe_form_component.css?inline';
+import { CATEGORY_MAP } from '../../../../js/utils/recipes/recipe-data-utils.js';
 
 class RecipeMetadataFields extends HTMLElement {
   constructor() {
@@ -27,6 +28,16 @@ class RecipeMetadataFields extends HTMLElement {
     `;
   }
 
+  /**
+   * Generates category options from CATEGORY_MAP
+   * @returns {string} HTML string of option elements
+   */
+  generateCategoryOptions() {
+    return Object.entries(CATEGORY_MAP)
+      .map(([value, label]) => `<option value="${value}">${label}</option>`)
+      .join('\n              ');
+  }
+
   template() {
     return `
       <div class="recipe-metadata-fields">
@@ -39,15 +50,7 @@ class RecipeMetadataFields extends HTMLElement {
             <label for="dish-type" class="recipe-form__label">סוג מנה:</label>
             <select id="dish-type" name="dish-type" class="recipe-form__select">
               <option value="">בחר סוג מנה</option>
-              <option value="appetizers">מנות ראשונות</option>
-              <option value="main-courses">מנות עיקריות</option>
-              <option value="side-dishes">תוספות</option>
-              <option value="soups-stews">מרקים ותבשילים</option>
-              <option value="salads">סלטים</option>
-              <option value="desserts">קינוחים</option>
-              <option value="breakfast-brunch">ארוחות בוקר</option>
-              <option value="snacks">חטיפים</option>
-              <option value="beverages">משקאות</option>
+              ${this.generateCategoryOptions()}
             </select>
           </div>
         </div>

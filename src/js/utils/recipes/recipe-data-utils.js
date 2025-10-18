@@ -69,8 +69,8 @@ import { formatIngredientAmount } from './recipe-ingredients-utils.js';
  * @property {Date|string|number} [updatedAt]
  */
 
-// Category mapping and icons
-const CATEGORY_MAP = {
+// Category mapping and icons - Single source of truth for all category data
+export const CATEGORY_MAP = {
   appetizers: 'מנות ראשונות',
   'main-courses': 'מנות עיקריות',
   'side-dishes': 'תוספות',
@@ -78,11 +78,12 @@ const CATEGORY_MAP = {
   salads: 'סלטים',
   desserts: 'קינוחים',
   'breakfast-brunch': 'ארוחות בוקר',
+  'breads-pastries': 'לחמים ומאפים',
   snacks: 'חטיפים',
   beverages: 'משקאות',
 };
 
-const CATEGORY_ICONS = {
+export const CATEGORY_ICONS = {
   appetizers: '🥗',
   'main-courses': '🍖',
   'side-dishes': '🥔',
@@ -90,6 +91,7 @@ const CATEGORY_ICONS = {
   salads: '🥬',
   desserts: '🍰',
   'breakfast-brunch': '🍳',
+  'breads-pastries': '🥖',
   snacks: '🥨',
   beverages: '🥤',
   else: '🍽️',

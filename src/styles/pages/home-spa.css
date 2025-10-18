@@ -66,10 +66,16 @@
 .spa-content .home-page .category-jar span {
   display: flex;
   justify-content: center;
+  align-items: center;
+  text-align: center;
   margin-top: 0.5rem;
   font-family: var(--heading-font);
   font-size: var(--size-header2);
-  white-space: nowrap;
+  line-height: 1.1;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  min-height: 2.5rem;
 }
 
 /* Featured recipes section styles */
@@ -193,11 +199,17 @@
     height: 120px;
   }
 
-  .spa-content .home-page .category-jars span {
-    white-space: nowrap;
+  .spa-content .home-page .category-jar span {
     display: flex;
     justify-content: center;
+    align-items: center;
+    text-align: center;
     font-size: var(--size-header2-mobile);
+    line-height: 1.1; /* Tighter line spacing for multi-line text */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    min-height: 2rem; /* Smaller min-height for mobile */
   }
 
   .spa-content .home-page .recipe-card {

@@ -3,6 +3,20 @@
  * Constants and configuration for the category navigation component
  */
 
+import { CATEGORY_MAP } from '../../../js/utils/recipes/recipe-data-utils.js';
+
+// Generate categories array from central source of truth
+const generateDefaultCategories = () => {
+  const categories = [{ value: 'all', label: 'כל הקטגוריות' }];
+
+  // Add all categories from CATEGORY_MAP
+  Object.entries(CATEGORY_MAP).forEach(([value, label]) => {
+    categories.push({ value, label });
+  });
+
+  return categories;
+};
+
 export const CONFIG = {
   // Component selector
   COMPONENT_TAG: 'category-navigation',
@@ -24,19 +38,8 @@ export const CONFIG = {
     categoryChanged: 'category-changed',
   },
 
-  // Default categories
-  DEFAULT_CATEGORIES: [
-    { value: 'all', label: 'כל הקטגוריות' },
-    { value: 'appetizers', label: 'מנות ראשונות' },
-    { value: 'main-courses', label: 'מנות עיקריות' },
-    { value: 'side-dishes', label: 'תוספות' },
-    { value: 'soups-stews', label: 'מרקים ותבשילים' },
-    { value: 'salads', label: 'סלטים' },
-    { value: 'desserts', label: 'קינוחים' },
-    { value: 'breakfast-brunch', label: 'ארוחות בוקר' },
-    { value: 'snacks', label: 'חטיפים' },
-    { value: 'beverages', label: 'משקאות' },
-  ],
+  // Default categories - dynamically generated from CATEGORY_MAP
+  DEFAULT_CATEGORIES: generateDefaultCategories(),
 
   // Responsive breakpoints
   MOBILE_BREAKPOINT: 768,

@@ -3,6 +3,8 @@
  * Centralized configuration for the unified recipe filter component
  */
 
+import { CONFIG as CATEGORY_NAV_CONFIG } from '../category-navigation/category-navigation-config.js';
+
 export const CONFIG = {
   // Component identification
   COMPONENT_TAG: 'unified-recipe-filter',
@@ -79,16 +81,5 @@ export const ATTRIBUTES = {
   userFavorites: 'user-favorites',
 };
 
-// Default categories (matches exactly the original category-navigation component)
-export const DEFAULT_CATEGORIES = [
-  { value: 'all', label: 'כל הקטגוריות' },
-  { value: 'appetizers', label: 'מנות ראשונות' },
-  { value: 'main-courses', label: 'מנות עיקריות' },
-  { value: 'side-dishes', label: 'תוספות' },
-  { value: 'soups-stews', label: 'מרקים ותבשילים' },
-  { value: 'salads', label: 'סלטים' },
-  { value: 'desserts', label: 'קינוחים' },
-  { value: 'breakfast-brunch', label: 'ארוחות בוקר' },
-  { value: 'snacks', label: 'חטיפים' },
-  { value: 'beverages', label: 'משקאות' },
-];
+// Default categories - imported from category-navigation config (single source of truth)
+export const DEFAULT_CATEGORIES = CATEGORY_NAV_CONFIG.DEFAULT_CATEGORIES;
