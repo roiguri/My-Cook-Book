@@ -15,6 +15,7 @@ import {
 } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
 
 import '../../utilities/image-carousel/image-carousel.js';
+import './parts/cook-mode-container.js';
 
 // TODO - add support for missing image upload
 
@@ -64,6 +65,7 @@ class RecipeComponent extends HTMLElement {
             <span id="Recipe_component__category" class="Recipe_component__category"></span>
           </div>
         </header>
+        <cook-mode-container></cook-mode-container>
         <div class="Recipe_component__content">
           <div class="Recipe_component__details">
             <div class="Recipe_component__serving-adjuster">
