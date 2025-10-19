@@ -63,10 +63,12 @@ class ProposeRecipeComponent extends HTMLElement {
       const imagesToUpload = recipeData.images || [];
       const recipeDataForFirestore = { ...recipeData };
       delete recipeDataForFirestore.images;
+      delete recipeDataForFirestore.mediaInstructions; // Remove - will upload after recipe creation
       recipeDataForFirestore.creationTime = Timestamp.now();
       recipeDataForFirestore.userId = user?.uid || 'anonymous';
       // Add recipe to Firestore
       const recipeId = await FirestoreService.addDocument('recipes', recipeDataForFirestore);
+
       // Upload images if provided
       if (imagesToUpload.length > 0) {
         const imageUploadResults = await this.uploadRecipeImages(
@@ -80,6 +82,23 @@ class ProposeRecipeComponent extends HTMLElement {
           allowImageSuggestions: true,
         });
       }
+
+      // Upload pending media instructions if any
+      const formComponent = this.shadowRoot.querySelector('recipe-form-component');
+      const mediaEditor = formComponent?.shadowRoot?.getElementById('media-instructions-editor');
+      if (mediaEditor && mediaEditor.pendingFiles && mediaEditor.pendingFiles.length > 0) {
+        // Upload all pending files with recipe ID and user ID
+        const uploadedMedia = await mediaEditor.uploadPendingFiles(
+          recipeId,
+          user?.uid || 'anonymous',
+        );
+        if (uploadedMedia.length > 0) {
+          await FirestoreService.updateDocument('recipes', recipeId, {
+            mediaInstructions: uploadedMedia,
+          });
+        }
+      }
+
       this.clearForm();
       this.showSuccessMessage('Recipe proposed successfully!');
       spinner.removeAttribute('active');

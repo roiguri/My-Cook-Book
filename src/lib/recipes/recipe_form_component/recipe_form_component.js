@@ -6,6 +6,7 @@ import { validateRecipeForm } from '../../../js/utils/form/form-validation-utils
 import { collectRecipeFormData } from '../../../js/utils/form/form-data-collector.js';
 import { clearForm, setFormDisabledState } from '../../../js/utils/form/form-state-manager.js';
 import { formProtectionManager } from '../../../js/utils/form/form-protection-manager.js';
+import authService from '../../../js/services/auth-service.js';
 
 import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
@@ -14,6 +15,7 @@ import './parts/recipe-metadata-fields.js';
 import './parts/form-button-group.js';
 import './parts/recipe-ingredients-list.js';
 import './parts/recipe-instructions-list.js';
+import '../media-instructions-editor/media-instructions-editor.js';
 
 import styles from './recipe_form_component.css?inline';
 
@@ -91,7 +93,17 @@ class RecipeFormComponent extends HTMLElement {
             <label class="recipe-form__label">תמונות המתכון:</label>
             <image-handler id="recipe-images"></image-handler>
           </div>
-  
+
+          <div class="recipe-form__group">
+            <label class="recipe-form__label">הוראות הכנה מצולמות (אופציונלי):</label>
+            <p class="recipe-form__help-text">הוסף תמונות או סרטונים המדגימים את שלבי ההכנה</p>
+            <media-instructions-editor
+              id="media-instructions-editor"
+              media-data='[]'
+              recipe-id="">
+            </media-instructions-editor>
+          </div>
+
           <div class="recipe-form__group">
             <label for="comments" class="recipe-form__label">הערות:</label>
             <textarea id="comments" name="comments" class="recipe-form__textarea"></textarea>
@@ -122,6 +134,14 @@ class RecipeFormComponent extends HTMLElement {
       // Update internal state when primary image changes
       this.recipeData.primaryImageId = e.detail.imageId;
     });
+
+    // Add event listener for media instructions editor
+    const mediaEditor = this.shadowRoot.getElementById('media-instructions-editor');
+    if (mediaEditor) {
+      mediaEditor.addEventListener('media-changed', (e) => {
+        this.recipeData.mediaInstructions = e.detail.mediaInstructions;
+      });
+    }
 
     // Add event listeners for form button group events
     const buttonGroup = this.shadowRoot.getElementById('form-buttons');
@@ -300,6 +320,16 @@ class RecipeFormComponent extends HTMLElement {
           await this.populateImages(data.images);
         }
 
+        // Populate media instructions if present
+        const mediaEditor = this.shadowRoot.getElementById('media-instructions-editor');
+        if (mediaEditor && data.mediaInstructions) {
+          mediaEditor.setAttribute('media-data', JSON.stringify(data.mediaInstructions));
+          mediaEditor.setAttribute('recipe-id', recipeId);
+        } else if (mediaEditor) {
+          // Set recipe ID even if no media yet (for new uploads)
+          mediaEditor.setAttribute('recipe-id', recipeId);
+        }
+
         // Enable protection only if not disabled
         if (!this.formProtectionDisabled) {
           setTimeout(() => this.enableFormProtection(this.recipeData), 500);
@@ -394,6 +424,7 @@ class RecipeFormComponent extends HTMLElement {
     this.addEventListener('ingredients-changed', debouncedDirtyCheck);
     this.addEventListener('instructions-changed', debouncedDirtyCheck);
     this.addEventListener('images-changed', debouncedDirtyCheck);
+    this.addEventListener('media-changed', debouncedDirtyCheck);
 
     // Also listen for cut events (when users delete content with Ctrl+X)
     this.shadowRoot.addEventListener('cut', debouncedDirtyCheck);

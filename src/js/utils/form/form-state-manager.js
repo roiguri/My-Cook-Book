@@ -68,6 +68,9 @@ export function clearForm(shadowRoot) {
   // Clear images
   clearImages(shadowRoot);
 
+  // Clear media instructions
+  clearMediaInstructions(shadowRoot);
+
   // Reset form and hide error messages
   resetFormState(shadowRoot);
 }
@@ -138,6 +141,17 @@ function clearImages(shadowRoot) {
   const imageHandler = shadowRoot.getElementById('recipe-images');
   if (imageHandler && typeof imageHandler.clearImages === 'function') {
     imageHandler.clearImages();
+  }
+}
+
+/**
+ * Clears media instructions through component API
+ * @param {ShadowRoot} shadowRoot - The component's shadow root
+ */
+function clearMediaInstructions(shadowRoot) {
+  const mediaEditor = shadowRoot.getElementById('media-instructions-editor');
+  if (mediaEditor && typeof mediaEditor.clear === 'function') {
+    mediaEditor.clear();
   }
 }
 

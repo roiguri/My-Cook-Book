@@ -190,7 +190,7 @@
         "testStrategy": "Use Storybook or a similar component testing environment to develop this component in isolation. Test file selection, caption input, item deletion, and drag-and-drop reordering. Verify that the component's internal state correctly reflects user actions.",
         "priority": "high",
         "dependencies": [2],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -251,7 +251,7 @@
     ],
     "metadata": {
       "created": "2025-09-10T18:37:21.065Z",
-      "updated": "2025-10-19T05:20:48.536Z",
+      "updated": "2025-10-19T05:34:21.141Z",
       "description": "Tasks for media-instructions context"
     }
   }

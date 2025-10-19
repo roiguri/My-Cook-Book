@@ -1,6 +1,7 @@
 // edit-recipe-component.js
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { StorageService } from '../../../js/services/storage-service.js';
+import authService from '../../../js/services/auth-service.js';
 import {
   compressImage,
   getImageStoragePath,
@@ -90,16 +91,62 @@ class EditRecipeComponent extends HTMLElement {
         }
       }
 
+      // 2b. Upload pending media instructions and preserve order
+      const mediaInstructions = [];
+      const formComponent = this.formComponent;
+      const mediaEditor = formComponent?.shadowRoot?.getElementById('media-instructions-editor');
+
+      // Get all media in unified order (both existing and pending with position tracking)
+      const allMediaInOrder = mediaEditor?.getAllMediaInOrder() || [];
+
+      // First, upload all pending files (if any)
+      let uploadedMediaMap = new Map();
+      if (mediaEditor && mediaEditor.pendingFiles && mediaEditor.pendingFiles.length > 0) {
+        const user = authService.getCurrentUser();
+        const uploadedMedia = await mediaEditor.uploadPendingFiles(
+          this.recipeId,
+          user?.uid || 'anonymous',
+        );
+        // Create a map by original position for lookup
+        uploadedMedia.forEach((media) => {
+          uploadedMediaMap.set(media.order, media);
+        });
+      }
+
+      // Now process all media in unified array order (preserves UI reordering)
+      let finalOrder = 0;
+      for (const item of allMediaInOrder) {
+        if (item.file) {
+          // This is a pending file - use uploaded metadata from map
+          const uploaded = uploadedMediaMap.get(item.position);
+          if (uploaded) {
+            uploaded.order = finalOrder; // Assign sequential order
+            mediaInstructions.push(uploaded);
+            finalOrder++;
+          }
+        } else {
+          // Existing media - keep it with updated order
+          const existingMedia = { ...item, order: finalOrder };
+          delete existingMedia.position; // Remove temporary position field
+          mediaInstructions.push(existingMedia);
+          finalOrder++;
+        }
+      }
+
       // 3. Update the recipe data in Firestore (exclude file/source/toDelete)
-      const { images, toDelete, ...rest } = recipeData;
+      const { images, toDelete, mediaInstructions: _, ...rest } = recipeData;
       await FirestoreService.updateDocument('recipes', this.recipeId, {
         ...rest,
         images: newImages,
+        mediaInstructions: mediaInstructions,
       });
 
       this.showSuccessMessage('Recipe updated successfully!');
 
-      // 4. Dispatch recipe-updated event for dashboard refresh
+      // 4. Reload form data to show updated recipe (including uploaded media)
+      await this.formComponent.setRecipeData(this.recipeId);
+
+      // 5. Dispatch recipe-updated event for dashboard refresh
       const event = new CustomEvent('recipe-updated', {
         detail: { recipeId: this.recipeId },
         bubbles: true,

@@ -282,3 +282,17 @@ export async function getMediaInstructionUrl(storagePath) {
     throw new Error(`Failed to get media URL: ${error.message}`);
   }
 }
+
+/**
+ * Removes all media instruction files for a recipe
+ * @param {Array<MediaInstruction>} mediaInstructions - Array of media instructions to delete
+ * @returns {Promise<{ success: number, failed: number, errors: Array }>}
+ */
+export async function removeAllMediaInstructions(mediaInstructions) {
+  if (!Array.isArray(mediaInstructions) || mediaInstructions.length === 0) {
+    return { success: 0, failed: 0, errors: [] };
+  }
+
+  const filePaths = mediaInstructions.map((media) => media.path);
+  return await deleteMediaInstructionFiles(filePaths);
+}

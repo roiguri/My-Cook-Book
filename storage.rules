@@ -41,10 +41,13 @@ service firebase.storage {
       // Public read - anyone can view recipe media
       allow read: if true;
 
-      // Any authenticated user can upload/modify/delete media
-      // Consistent with Firestore rules where any auth user can edit recipes
-      allow write: if request.auth != null
+      // Any authenticated user can upload/update media (with validation)
+      allow create, update: if request.auth != null
         && isValidMediaFile(request.resource);
+
+      // Any authenticated user can delete media
+      // Allows managers to delete media when rejecting recipes
+      allow delete: if request.auth != null;
     }
   }
 

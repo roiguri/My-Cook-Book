@@ -59,6 +59,12 @@ export function collectRecipeFormData(shadowRoot) {
   recipeData.images = images;
   recipeData.toDelete = toDelete;
 
+  // Collect media instructions
+  const mediaInstructions = collectMediaInstructions(shadowRoot);
+  if (mediaInstructions) {
+    recipeData.mediaInstructions = mediaInstructions;
+  }
+
   // Collect comments
   const comments = collectComments(shadowRoot);
   if (comments) {
@@ -146,6 +152,34 @@ function collectImages(shadowRoot) {
 }
 
 /**
+ * Collects media instructions data from the media instructions editor
+ * @param {ShadowRoot} shadowRoot - The component's shadow root
+ * @returns {Array|null} - Array of media instructions or null if none
+ */
+function collectMediaInstructions(shadowRoot) {
+  const mediaEditor = shadowRoot.getElementById('media-instructions-editor');
+
+  if (!mediaEditor) {
+    return null;
+  }
+
+  // Get both uploaded media instructions and pending files
+  const mediaInstructions = mediaEditor.mediaInstructions || [];
+  const hasPendingFiles = mediaEditor.pendingFiles && mediaEditor.pendingFiles.length > 0;
+
+  // Return combined state - important for dirty checking
+  // If there are pending files, include them in the structure
+  if (hasPendingFiles) {
+    return [
+      ...mediaInstructions,
+      ...mediaEditor.pendingFiles.map((p) => ({ pending: true, caption: p.caption })),
+    ];
+  }
+
+  return mediaInstructions.length > 0 ? mediaInstructions : null;
+}
+
+/**
  * Collects comments from the comments field
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  * @returns {string[]|null} - Array with comments or null if empty
@@ -195,6 +229,9 @@ export function collectSectionData(shadowRoot, section) {
 
     case 'images':
       return collectImages(shadowRoot);
+
+    case 'mediaInstructions':
+      return { mediaInstructions: collectMediaInstructions(shadowRoot) };
 
     case 'comments':
       return { comments: collectComments(shadowRoot) };
