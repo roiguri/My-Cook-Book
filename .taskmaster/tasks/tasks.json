@@ -168,7 +168,7 @@
         "testStrategy": "Use the Firebase Rules Playground to simulate read, create, and delete operations for authenticated recipe owners and non-owners. Test with valid and invalid file sizes/types to ensure rules are enforced correctly. Verify no regressions are introduced to existing rules.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -201,7 +201,7 @@
         "testStrategy": "Perform integration testing on the recipe edit page. Verify that media instructions can be added and are correctly saved with the recipe. Test the form's validation by attempting to save with invalid data (e.g., missing caption if required). Ensure that loading an existing recipe correctly populates the editor.",
         "priority": "high",
         "dependencies": [3],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -251,7 +251,7 @@
     ],
     "metadata": {
       "created": "2025-09-10T18:37:21.065Z",
-      "updated": "2025-10-19T05:34:21.141Z",
+      "updated": "2025-10-19T16:07:15.311Z",
       "description": "Tasks for media-instructions context"
     }
   }
