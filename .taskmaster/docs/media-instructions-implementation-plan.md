@@ -90,32 +90,54 @@
 
 #### Task #3: MediaInstructionsEditor Component
 
-**File**: `src/lib/recipes/media-instructions/MediaInstructionsEditor.svelte`
-**Estimated Time**: 3-4 hours
+**File**: `src/lib/recipes/media-instructions-editor/media-instructions-editor.js`
+**Architecture**: Vanilla JavaScript Web Component (Custom Elements API)
+**Estimated Time**: 4-6 hours
 **Status**: Pending
 
-**Component Structure:**
+**Component Pattern** (following existing Web Component architecture):
 
-```svelte
-<script>
-  // Props
-  export let mediaInstructions = [];
-  export let recipeId;
+```javascript
+class MediaInstructionsEditor extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
 
-  // State
-  let uploading = false;
-  let errors = [];
-  let dragOver = false;
+    // State
+    this.mediaInstructions = [];
+    this.uploading = false;
+    this.errors = [];
+    this.dragOver = false;
+  }
 
-  // Events
-  import { createEventDispatcher } from 'svelte';
-  const dispatch = createEventDispatcher();
-</script>
+  static get observedAttributes() {
+    return ['media-data', 'recipe-id', 'user-id'];
+  }
 
-<div class="media-instructions-editor">
-  <!-- File Upload Zone (drag & drop) -->
-  <!-- List of Media Items (with preview, caption, delete, reorder) -->
-</div>
+  connectedCallback() {
+    this.render();
+    this.setupEventListeners();
+  }
+
+  render() {
+    this.shadowRoot.innerHTML = `
+      <style>/* Scoped styles */</style>
+      <div class="media-instructions-editor">
+        <!-- File Upload Zone (drag & drop) -->
+        <!-- List of Media Items (with preview, caption, delete, reorder) -->
+      </div>
+    `;
+  }
+}
+
+customElements.define('media-instructions-editor', MediaInstructionsEditor);
+```
+
+**Usage in Forms:**
+
+```html
+<media-instructions-editor media-data="[]" recipe-id="recipe-123" user-id="user-456">
+</media-instructions-editor>
 ```
 
 **Features:**
@@ -125,15 +147,16 @@
 - ✅ Live preview of uploaded media
 - ✅ Caption input for each item (Hebrew RTL: `dir="rtl"`)
 - ✅ Delete button per item
-- ✅ Drag handles for reordering (`svelte-dnd-action`)
+- ✅ Drag handles for reordering (vanilla JS drag events)
 - ✅ Upload progress indicators
 - ✅ Error handling and display
 
 **Reuse Patterns:**
 
+- Web Component architecture: `src/lib/utilities/media-scroller/media-scroller.js`
 - Form components: `src/lib/recipes/recipe_form_component/`
-- Sectioned lists: Existing reordering patterns
-- Data collection: `form-data-collector.js` patterns
+- Shadow DOM styling: Existing component patterns
+- Event dispatch: CustomEvent for parent communication
 
 ---
 
@@ -156,14 +179,29 @@
    <section class="media-instructions-section">
      <h3>הוראות הכנה מצולמות</h3>
      <p class="help-text">הוסף תמונות או סרטונים המדגימים את שלבי ההכנה</p>
-     <media-instructions-editor
-       bind:media-instructions="{recipe.mediaInstructions}"
-       recipe-id="{recipe.id}"
-     />
+     <media-instructions-editor media-data="[]" recipe-id="" user-id="">
+     </media-instructions-editor>
    </section>
    ```
 
-2. **Extend Validation Schema**
+2. **Listen to Component Events**
+
+   ```javascript
+   // In propose_recipe_component.js / edit_recipe_component.js
+   const editor = document.querySelector('media-instructions-editor');
+
+   // Listen for updates from the Web Component
+   editor.addEventListener('media-changed', (event) => {
+     recipe.mediaInstructions = event.detail.mediaInstructions;
+   });
+
+   // Initialize with existing data (for edit mode)
+   if (recipe.mediaInstructions) {
+     editor.setAttribute('media-data', JSON.stringify(recipe.mediaInstructions));
+   }
+   ```
+
+3. **Extend Validation Schema**
 
    ```javascript
    // In recipe-data-utils.js
@@ -186,13 +224,13 @@
    });
    ```
 
-3. **Form Save Logic**
+4. **Form Save Logic**
 
    ```javascript
    // In propose_recipe_component.js / edit_recipe_component.js
    const recipeData = {
      // ... existing fields ...
-     mediaInstructions: mediaInstructions || [],
+     mediaInstructions: recipe.mediaInstructions || [],
    };
 
    await FirestoreService.addDocument('recipes', recipeData);
