@@ -104,15 +104,24 @@ Recipes currently use this structure:
 
 ### Phase 0: Firebase Safety Setup
 
-**Status**: Not Started
+**Status**: ✅ Completed (October 19, 2025)
 
-- [ ] Export current `storage.rules` from Firebase Console
-- [ ] Export current `firestore.rules` from Firebase Console
-- [ ] Create local `storage.rules` file
-- [ ] Create local `firestore.rules` file
-- [ ] Update `firebase.json` to reference rules files
-- [ ] Commit baseline rules to version control
-- [ ] Test rules deployment to staging
+- [x] Export current `storage.rules` from Firebase Console
+- [x] Export current `firestore.rules` from Firebase Console
+- [x] Create local `storage.rules` file
+- [x] Create local `firestore.rules` file
+- [x] Update `firebase.json` to reference rules files
+- [x] Commit baseline rules to version control
+- [x] Test rules deployment to staging
+
+**Outcome**:
+
+- ✅ Rules files already existed in project root
+- ✅ Updated `firebase.json` with firestore and storage configuration
+- ✅ Successfully deployed to staging (`cook-book-test-479e8`)
+- ✅ Verified storage rules matched existing deployment (no changes)
+- ✅ Firestore rules deployed successfully (new ruleset created)
+- ✅ All rules now version-controlled in git
 
 **Safety Notes**:
 
