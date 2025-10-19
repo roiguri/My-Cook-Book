@@ -170,28 +170,50 @@ Branch is ~50 commits behind `development` including:
 
 ### Phase 2: Security Rules (Task #1)
 
-**Status**: Not Started
+**Status**: ✅ Completed (October 19, 2025)
 **Task Master**: Task #1
+
+#### Design Decision: Collaborative Model (Not Ownership-Based)
+
+**Discovery**: App uses collaborative editing model, not ownership-based access control.
+
+- Firestore rules: `allow write: if request.auth != null` (any auth user can edit any recipe)
+- `userId` field is for **attribution**, not **authorization**
+- `approved` field controls visibility (manager approval workflow)
+
+**Implemented**: Option 1 - Collaborative model (matches Firestore)
+
+- Any authenticated user can add media to any recipe
+- Consistent with existing Firestore permissions
+- Simple, performant (no ownership queries needed)
 
 #### Subtasks
 
-- [ ] Design storage rules for `recipes/{recipeId}/media-instructions/`
-- [ ] Implement `isValidMediaFile()` function (size, MIME type)
-- [ ] Implement `userOwnsRecipe()` function (ownership check)
-- [ ] Add Firestore validation for `mediaInstructions` field
-- [ ] Deploy to staging: `firebase deploy --only storage,firestore --project staging`
-- [ ] Test in staging with `.env.staging`
+- [x] Design storage rules for `recipes/{recipeId}/media-instructions/`
+  - Path: `/recipes/{recipeId}/media-instructions/{fileName}`
+  - Read: Public (anyone can view)
+  - Write: Any authenticated user + file validation
+- [x] Implement `isValidMediaFile()` function (size, MIME type)
+  - 50MB max file size
+  - Accept image/_ and video/_ MIME types
+  - Reject executables and other file types
+- [x] ~~Implement `userOwnsRecipe()` function~~ - Not needed (collaborative model)
+- [x] ~~Add Firestore validation~~ - Not needed (optional field)
+- [x] Deploy to staging: `firebase deploy --only storage --project staging`
+  - New ruleset: `f7caad19-7091-4ff9-890c-2137ca59d270`
+  - Deployed: 2025-10-19 04:38:00 UTC
+- [ ] Test in staging with `.env.staging` - **NEXT STEP**
 - [ ] Monitor for 24-48 hours
-- [ ] Deploy to production: `firebase deploy --only storage,firestore --project production`
+- [ ] Deploy to production: `firebase deploy --only storage --project production`
 - [ ] Monitor production for issues
 
-#### Testing Checklist
+#### Testing Checklist (Updated for Collaborative Model)
 
-- [ ] Upload valid image (JPG, PNG, WEBP) - should succeed
-- [ ] Upload valid video (MP4, WEBM) - should succeed
-- [ ] Upload large file (>50MB) - should fail
-- [ ] Upload as unauthenticated user - should fail
-- [ ] Upload to recipe you don't own - should fail
+- [ ] Upload valid image (JPG, PNG, WEBP) as authenticated user - should succeed
+- [ ] Upload valid video (MP4, WEBM) as authenticated user - should succeed
+- [ ] Upload large file (>50MB) - should fail (file size limit)
+- [ ] Upload as unauthenticated user - should fail (auth required)
+- [ ] ~~Upload to recipe you don't own~~ - N/A (collaborative model allows this)
 - [ ] Existing recipes still work (no regressions)
 
 ---

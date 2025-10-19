@@ -1,21 +1,62 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+
+    // ========================================
+    // RECIPE IMAGES
+    // ========================================
     match /img/recipes/{allPaths=**} {
-      allow read: if true; 
-      allow write:  if request.auth != null; 
+      allow read: if true;
+      allow write: if request.auth != null;
     }
+
+    // ========================================
+    // USER AVATARS
+    // ========================================
     match /Avatars/{allPaths=**} {
       allow read: if true;
     }
+
+    // ========================================
+    // PENDING IMAGE SUGGESTIONS (Manager Approval)
+    // ========================================
     match /pendingImages/{allPaths=**} {
       allow read: if true;
       allow create: if request.resource.size < 5 * 1024 * 1024
-                     && request.resource.contentType.matches('image/.*'); 
+                     && request.resource.contentType.matches('image/.*');
       allow delete, update: if request.auth.uid == "VVEha9tUvnO3oTQTaBtbeusIGnx2"; // Allow only for this UID
     }
+
+    // ========================================
+    // Grandmother's Cookbook
+    // ========================================
     match /grandmas_cookbook/{allPaths=**} {
       allow read: if true;
     }
+
+    // ========================================
+    // MEDIA INSTRUCTIONS
+    // ========================================
+    match /recipes/{recipeId}/media-instructions/{fileName} {
+      // Public read - anyone can view recipe media
+      allow read: if true;
+
+      // Any authenticated user can upload/modify/delete media
+      // Consistent with Firestore rules where any auth user can edit recipes
+      allow write: if request.auth != null
+        && isValidMediaFile(request.resource);
+    }
+  }
+
+  // ========================================
+  // HELPER FUNCTIONS
+  // ========================================
+
+  // Validate that uploaded file is image or video under 50MB
+  // Prevents storage abuse and ensures only appropriate media types
+  function isValidMediaFile(resource) {
+    return resource.size < 50 * 1024 * 1024  // 50MB = 52,428,800 bytes
+      && (resource.contentType.matches('image/.*')    // image/jpeg, image/png, image/webp, etc.
+          || resource.contentType.matches('video/.*')); // video/mp4, video/webm, etc.
   }
 }
