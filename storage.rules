@@ -1,0 +1,21 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /img/recipes/{allPaths=**} {
+      allow read: if true; 
+      allow write:  if request.auth != null; 
+    }
+    match /Avatars/{allPaths=**} {
+      allow read: if true;
+    }
+    match /pendingImages/{allPaths=**} {
+      allow read: if true;
+      allow create: if request.resource.size < 5 * 1024 * 1024
+                     && request.resource.contentType.matches('image/.*'); 
+      allow delete, update: if request.auth.uid == "VVEha9tUvnO3oTQTaBtbeusIGnx2"; // Allow only for this UID
+    }
+    match /grandmas_cookbook/{allPaths=**} {
+      allow read: if true;
+    }
+  }
+}
