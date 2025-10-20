@@ -476,18 +476,11 @@ class RecipeComponent extends HTMLElement {
   }
 
   async displayMediaInstructions(recipe) {
-    console.log('[MediaInstructions] Checking recipe data:', {
-      hasMediaInstructions: !!recipe.mediaInstructions,
-      mediaCount: recipe.mediaInstructions?.length || 0,
-      mediaData: recipe.mediaInstructions,
-    });
-
     const section = this.shadowRoot.getElementById('Recipe_component__media-section');
     const scroller = this.shadowRoot.getElementById('Recipe_component__media-scroller');
 
     // Only display if recipe has media instructions
     if (!recipe.mediaInstructions || recipe.mediaInstructions.length === 0) {
-      console.log('[MediaInstructions] No media instructions found, hiding section');
       section.style.display = 'none';
       return;
     }
@@ -495,15 +488,12 @@ class RecipeComponent extends HTMLElement {
     try {
       // Sort by order field
       const sortedMedia = [...recipe.mediaInstructions].sort((a, b) => a.order - b.order);
-      console.log('[MediaInstructions] Sorted media:', sortedMedia);
 
       // Get Firebase Storage URLs for all media
       const mediaWithUrls = await Promise.all(
         sortedMedia.map(async (media) => {
           try {
-            console.log('[MediaInstructions] Fetching URL for:', media.path);
             const url = await getMediaInstructionUrl(media.path);
-            console.log('[MediaInstructions] Got URL:', url);
             return {
               ...media,
               path: url,
@@ -517,15 +507,12 @@ class RecipeComponent extends HTMLElement {
 
       // Filter out any failed media loads
       const validMedia = mediaWithUrls.filter((media) => media !== null);
-      console.log('[MediaInstructions] Valid media after URL fetch:', validMedia);
 
       if (validMedia.length > 0) {
         scroller.setAttribute('media-data', JSON.stringify(validMedia));
         section.style.display = 'block';
-        console.log('[MediaInstructions] Section displayed with media count:', validMedia.length);
       } else {
         section.style.display = 'none';
-        console.log('[MediaInstructions] No valid media, hiding section');
       }
     } catch (error) {
       console.error('[MediaInstructions] Error displaying media instructions:', error);

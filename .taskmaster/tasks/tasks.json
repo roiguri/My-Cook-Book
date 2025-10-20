@@ -212,7 +212,7 @@
         "testStrategy": "Update the component's unit tests or stories to pass in the new data structure. Verify that both images and videos render correctly. Test that captions are displayed and that the `itemclick` event is dispatched with the correct payload upon user interaction.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -251,7 +251,7 @@
     ],
     "metadata": {
       "created": "2025-09-10T18:37:21.065Z",
-      "updated": "2025-10-19T16:07:15.311Z",
+      "updated": "2025-10-20T04:12:49.300Z",
       "description": "Tasks for media-instructions context"
     }
   }
