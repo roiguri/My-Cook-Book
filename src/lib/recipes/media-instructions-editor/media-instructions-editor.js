@@ -38,6 +38,12 @@ class MediaInstructionsEditor extends HTMLElement {
     this.uploading = false;
     this.errors = [];
     this.draggedIndex = null;
+
+    this.handleDragOver = this.handleDragOver.bind(this);
+    this.handleDragLeave = this.handleDragLeave.bind(this);
+    this.handleDrop = this.handleDrop.bind(this);
+    this.handleFileSelect = this.handleFileSelect.bind(this);
+    this.handleUploadZoneClick = this.handleUploadZoneClick.bind(this);
   }
 
   static get observedAttributes() {
@@ -93,16 +99,13 @@ class MediaInstructionsEditor extends HTMLElement {
     const fileInput = this.shadowRoot.querySelector('.file-input');
 
     // Drag & Drop events
-    uploadZone.addEventListener('dragover', this.handleDragOver.bind(this));
-    uploadZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
-    uploadZone.addEventListener('drop', this.handleDrop.bind(this));
+    uploadZone.addEventListener('dragover', this.handleDragOver);
+    uploadZone.addEventListener('dragleave', this.handleDragLeave);
+    uploadZone.addEventListener('drop', this.handleDrop);
 
     // Click to browse
-    uploadZone.addEventListener('click', () => {
-      const currentFileInput = this.shadowRoot.querySelector('.file-input');
-      if (currentFileInput) currentFileInput.click();
-    });
-    fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+    uploadZone.addEventListener('click', this.handleUploadZoneClick);
+    fileInput.addEventListener('change', this.handleFileSelect);
   }
 
   removeEventListeners() {
@@ -113,7 +116,7 @@ class MediaInstructionsEditor extends HTMLElement {
       uploadZone.removeEventListener('dragover', this.handleDragOver);
       uploadZone.removeEventListener('dragleave', this.handleDragLeave);
       uploadZone.removeEventListener('drop', this.handleDrop);
-      uploadZone.removeEventListener('click', () => fileInput.click());
+      uploadZone.removeEventListener('click', this.handleUploadZoneClick);
     }
 
     if (fileInput) {
@@ -152,6 +155,11 @@ class MediaInstructionsEditor extends HTMLElement {
     await this.uploadFiles(files);
     // Reset input so same file can be selected again
     e.target.value = '';
+  }
+
+  handleUploadZoneClick() {
+    const currentFileInput = this.shadowRoot.querySelector('.file-input');
+    if (currentFileInput) currentFileInput.click();
   }
 
   async uploadFiles(files) {
