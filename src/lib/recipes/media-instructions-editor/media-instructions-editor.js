@@ -51,6 +51,13 @@ class MediaInstructionsEditor extends HTMLElement {
 
   disconnectedCallback() {
     this.removeEventListeners();
+
+    // Clean up any pending blob URLs to prevent memory leaks
+    this.mediaItems.forEach((item) => {
+      if (item.preview && item.file) {
+        URL.revokeObjectURL(item.preview);
+      }
+    });
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -192,6 +199,11 @@ class MediaInstructionsEditor extends HTMLElement {
       // Delete from storage if it's an uploaded item (has path)
       if (item.path) {
         await deleteMediaInstructionFile(item.path);
+      }
+
+      // Clean up blob URL if it's a pending file
+      if (item.preview && item.file) {
+        URL.revokeObjectURL(item.preview);
       }
 
       // Remove from unified array
@@ -813,6 +825,13 @@ class MediaInstructionsEditor extends HTMLElement {
    * Used when resetting the form
    */
   clear() {
+    // Clean up blob URLs before clearing to prevent memory leaks
+    this.mediaItems.forEach((item) => {
+      if (item.preview && item.file) {
+        URL.revokeObjectURL(item.preview);
+      }
+    });
+
     this.mediaItems = [];
     this.errors = [];
     this.emitChange();
