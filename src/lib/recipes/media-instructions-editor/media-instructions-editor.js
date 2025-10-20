@@ -5,17 +5,19 @@
  *
  * @attribute {string} media-data - JSON string of media instructions array
  * @attribute {string} recipe-id - The recipe ID for storage paths
- * @attribute {string} user-id - The current user ID for uploads
  *
  * @fires media-changed - Dispatched when media instructions change
- *   detail: { mediaInstructions: Array }
+ *   detail: { mediaInstructions: Array, hasPendingFiles: boolean }
  *
  * @example
  * <media-instructions-editor
  *   media-data='[]'
- *   recipe-id="recipe-123"
- *   user-id="user-456">
+ *   recipe-id="recipe-123">
  * </media-instructions-editor>
+ *
+ * // To upload pending files, call:
+ * const editor = document.querySelector('media-instructions-editor');
+ * const uploadedMedia = await editor.uploadPendingFiles(recipeId, userId);
  */
 
 import {
@@ -705,6 +707,12 @@ class MediaInstructionsEditor extends HTMLElement {
 
   // --- Pending Files Management ---
 
+  /**
+   * Upload all pending files to Firebase Storage
+   * @param {string} recipeId - The recipe ID for storage paths
+   * @param {string} userId - The user ID performing the upload
+   * @returns {Promise<Array>} Array of uploaded media metadata objects
+   */
   async uploadPendingFiles(recipeId, userId) {
     // Get pending items from unified array
     const pendingItems = this.mediaItems.filter((item) => item.file);
