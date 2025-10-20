@@ -17,6 +17,7 @@ import { getMediaInstructionUrl } from '../../../js/utils/recipes/recipe-media-u
 
 import '../../utilities/image-carousel/image-carousel.js';
 import '../../utilities/media-scroller/media-scroller.js';
+import '../../utilities/fullscreen-media-viewer/fullscreen-media-viewer.js';
 import './parts/cook-mode-container.js';
 
 // TODO - add support for missing image upload
@@ -100,6 +101,7 @@ class RecipeComponent extends HTMLElement {
             item-width="280px">
           </media-scroller>
         </div>
+        <fullscreen-media-viewer id="Recipe_component__media-viewer"></fullscreen-media-viewer>
         <div class="Recipe_component__comments" style="display: none;">
           <h2>הערות:</h2>
           <ol id="Recipe_component__comments-list"></ol>
@@ -478,6 +480,7 @@ class RecipeComponent extends HTMLElement {
   async displayMediaInstructions(recipe) {
     const section = this.shadowRoot.getElementById('Recipe_component__media-section');
     const scroller = this.shadowRoot.getElementById('Recipe_component__media-scroller');
+    const viewer = this.shadowRoot.getElementById('Recipe_component__media-viewer');
 
     // Only display if recipe has media instructions
     if (!recipe.mediaInstructions || recipe.mediaInstructions.length === 0) {
@@ -511,6 +514,15 @@ class RecipeComponent extends HTMLElement {
       if (validMedia.length > 0) {
         scroller.setAttribute('media-data', JSON.stringify(validMedia));
         section.style.display = 'block';
+
+        // Set up fullscreen viewer
+        viewer.setAttribute('media-data', JSON.stringify(validMedia));
+
+        // Listen for itemclick events to open fullscreen viewer
+        scroller.addEventListener('itemclick', (event) => {
+          const { index } = event.detail;
+          viewer.open(index);
+        });
       } else {
         section.style.display = 'none';
       }

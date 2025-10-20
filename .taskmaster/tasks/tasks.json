@@ -223,7 +223,7 @@
         "testStrategy": "Test the modal component in isolation. Verify it displays the correct image/video and caption based on the props. Test the 'Previous' and 'Next' buttons, ensuring they correctly cycle through the items and handle edge cases (first/last item). Test all close mechanisms (button, Esc key, overlay click).",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -234,7 +234,7 @@
         "testStrategy": "Conduct end-to-end testing on a recipe that has media instructions. Verify the media scroller displays correctly on both desktop and mobile. Confirm that clicking an item opens the fullscreen modal. Test navigation within the modal. Check that the section is properly collapsed by default and loads media only upon expansion.",
         "priority": "high",
         "dependencies": [4, 5, 6],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -251,7 +251,7 @@
     ],
     "metadata": {
       "created": "2025-09-10T18:37:21.065Z",
-      "updated": "2025-10-20T04:12:49.300Z",
+      "updated": "2025-10-20T04:50:59.692Z",
       "description": "Tasks for media-instructions context"
     }
   }
