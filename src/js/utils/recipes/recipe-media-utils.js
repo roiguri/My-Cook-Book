@@ -117,23 +117,12 @@ export function validateMediaInstructionData(mediaInstructions) {
 // --- ID Generation ---
 /**
  * Generates a unique media instruction ID with 'media-' prefix
- * @returns {string}
+ * Uses crypto.randomUUID() for guaranteed uniqueness and cryptographic security
+ * @returns {string} Format: 'media-550e8400-e29b-41d4-a716-446655440000'
  */
 export function generateMediaInstructionId() {
-  return 'media-' + Date.now() + '-' + Math.random().toString(36).slice(2, 11);
-}
-
-// --- Storage Path Helper ---
-/**
- * Gets the storage path for a media instruction file
- * @param {string} recipeId - The recipe ID
- * @param {string} fileName - Original file name
- * @returns {string} Storage path
- */
-function getMediaInstructionStoragePath(recipeId, fileName) {
-  const uniqueId = generateMediaInstructionId();
-  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
-  return `recipes/${recipeId}/media-instructions/${uniqueId}_${sanitizedFileName}`;
+  // Use globalThis.crypto for compatibility with both browsers and Node.js
+  return 'media-' + globalThis.crypto.randomUUID();
 }
 
 // --- Determine Media Type ---
@@ -178,8 +167,10 @@ export async function uploadMediaInstructionFile(file, recipeId, userId, onProgr
   }
 
   try {
-    // Generate storage path
-    const storagePath = getMediaInstructionStoragePath(recipeId, file.name);
+    // Generate a single ID for both storage path and metadata
+    const mediaId = generateMediaInstructionId();
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const storagePath = `recipes/${recipeId}/media-instructions/${mediaId}_${sanitizedFileName}`;
 
     // Determine media type
     const mediaType = getMediaType(file);
@@ -202,7 +193,7 @@ export async function uploadMediaInstructionFile(file, recipeId, userId, onProgr
 
     // Build and return metadata
     const metadata = {
-      id: generateMediaInstructionId(),
+      id: mediaId, // Same ID as used in storage path
       path: storagePath,
       caption: '', // Empty caption - to be filled by user
       type: mediaType,

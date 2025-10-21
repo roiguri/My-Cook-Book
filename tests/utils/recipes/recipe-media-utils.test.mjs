@@ -33,8 +33,18 @@ function createFakeFile(name = 'test.jpg', type = 'image/jpeg', size = 1000) {
 }
 
 describe('recipe-media-utils', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     global.URL.createObjectURL = jest.fn(() => 'blob:mock');
+
+    // Polyfill crypto.randomUUID for Node.js test environment
+    if (!globalThis.crypto) {
+      globalThis.crypto = {};
+    }
+    if (!globalThis.crypto.randomUUID) {
+      // Use Node.js crypto module for UUID generation in tests
+      const { randomUUID } = await import('crypto');
+      globalThis.crypto.randomUUID = randomUUID;
+    }
   });
 
   beforeEach(async () => {
@@ -302,10 +312,11 @@ describe('recipe-media-utils', () => {
       expect(id1).not.toBe(id2);
     });
 
-    it('generates IDs with correct format', () => {
+    it('generates IDs with correct UUID format', () => {
       const id = generateMediaInstructionId();
-      // Format: media-{timestamp}-{random}
-      expect(id).toMatch(/^media-\d+-[a-z0-9]+$/);
+      // Format: media-{UUID} (RFC 4122 compliant)
+      // UUID format: 8-4-4-4-12 hexadecimal characters
+      expect(id).toMatch(/^media-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     });
   });
 
