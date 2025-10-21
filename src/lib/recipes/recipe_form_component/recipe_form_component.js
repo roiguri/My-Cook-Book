@@ -6,7 +6,6 @@ import { validateRecipeForm } from '../../../js/utils/form/form-validation-utils
 import { collectRecipeFormData } from '../../../js/utils/form/form-data-collector.js';
 import { clearForm, setFormDisabledState } from '../../../js/utils/form/form-state-manager.js';
 import { formProtectionManager } from '../../../js/utils/form/form-protection-manager.js';
-import authService from '../../../js/services/auth-service.js';
 
 import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';

@@ -483,7 +483,11 @@ class RecipeComponent extends HTMLElement {
     const viewer = this.shadowRoot.getElementById('Recipe_component__media-viewer');
 
     // Only display if recipe has media instructions
-    if (!recipe.mediaInstructions || recipe.mediaInstructions.length === 0) {
+    if (
+      !recipe.mediaInstructions ||
+      !Array.isArray(recipe.mediaInstructions) ||
+      recipe.mediaInstructions.length === 0
+    ) {
       section.style.display = 'none';
       return;
     }
