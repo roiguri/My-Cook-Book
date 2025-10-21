@@ -163,16 +163,22 @@ function collectMediaInstructions(shadowRoot) {
     return null;
   }
 
-  // Get both uploaded media instructions and pending files
-  const mediaInstructions = mediaEditor.mediaInstructions || [];
-  const hasPendingFiles = mediaEditor.pendingFiles && mediaEditor.pendingFiles.length > 0;
+  // Use method-based API for consistency with other components
+  if (typeof mediaEditor.getMediaInstructionsData !== 'function') {
+    console.warn('Media instructions editor missing getMediaInstructionsData method');
+    return null;
+  }
+
+  const data = mediaEditor.getMediaInstructionsData();
+  const mediaInstructions = data.mediaInstructions || [];
+  const hasPendingFiles = data.pendingFiles && data.pendingFiles.length > 0;
 
   // Return combined state - important for dirty checking
   // If there are pending files, include them in the structure
   if (hasPendingFiles) {
     return [
       ...mediaInstructions,
-      ...mediaEditor.pendingFiles.map((p) => ({ pending: true, caption: p.caption })),
+      ...data.pendingFiles.map((p) => ({ pending: true, caption: p.caption })),
     ];
   }
 

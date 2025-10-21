@@ -607,9 +607,10 @@ class MediaInstructionsEditor extends HTMLElement {
 
       // Re-attach file input change listener (new element created by innerHTML)
       const fileInput = this.shadowRoot.querySelector('.file-input');
-      fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+      fileInput.addEventListener('change', this.handleFileSelect);
 
-      // Note: uploadZone listeners (drag/drop/click) remain intact since we only changed innerHTML
+      // Note: uploadZone listeners (drag/drop/click/keydown) remain intact because
+      // uploadZone element itself is not replaced, only its innerHTML children are replaced
     }
   }
 
@@ -852,6 +853,18 @@ class MediaInstructionsEditor extends HTMLElement {
       ...item,
       position: index, // Track position for order preservation during upload
     }));
+  }
+
+  /**
+   * Gets media instructions data for form collection
+   * Provides consistent method-based API for accessing media state
+   * @returns {Object} { mediaInstructions: Array, pendingFiles: Array }
+   */
+  getMediaInstructionsData() {
+    return {
+      mediaInstructions: this.mediaInstructions,
+      pendingFiles: this.pendingFiles,
+    };
   }
 
   /**
