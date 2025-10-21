@@ -44,6 +44,7 @@ class MediaInstructionsEditor extends HTMLElement {
     this.handleDrop = this.handleDrop.bind(this);
     this.handleFileSelect = this.handleFileSelect.bind(this);
     this.handleUploadZoneClick = this.handleUploadZoneClick.bind(this);
+    this.handleUploadZoneKeyDown = this.handleUploadZoneKeyDown.bind(this);
   }
 
   static get observedAttributes() {
@@ -105,6 +106,10 @@ class MediaInstructionsEditor extends HTMLElement {
 
     // Click to browse
     uploadZone.addEventListener('click', this.handleUploadZoneClick);
+
+    // Keyboard accessibility for upload zone
+    uploadZone.addEventListener('keydown', this.handleUploadZoneKeyDown);
+
     fileInput.addEventListener('change', this.handleFileSelect);
   }
 
@@ -117,6 +122,7 @@ class MediaInstructionsEditor extends HTMLElement {
       uploadZone.removeEventListener('dragleave', this.handleDragLeave);
       uploadZone.removeEventListener('drop', this.handleDrop);
       uploadZone.removeEventListener('click', this.handleUploadZoneClick);
+      uploadZone.removeEventListener('keydown', this.handleUploadZoneKeyDown);
     }
 
     if (fileInput) {
@@ -160,6 +166,14 @@ class MediaInstructionsEditor extends HTMLElement {
   handleUploadZoneClick() {
     const currentFileInput = this.shadowRoot.querySelector('.file-input');
     if (currentFileInput) currentFileInput.click();
+  }
+
+  handleUploadZoneKeyDown(e) {
+    // Trigger file input on Enter or Space (standard button behavior)
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this.handleUploadZoneClick();
+    }
   }
 
   async uploadFiles(files) {
@@ -555,11 +569,11 @@ class MediaInstructionsEditor extends HTMLElement {
 
       <div class="editor-container">
         <!-- Upload Zone -->
-        <div class="upload-zone">
-          <div class="upload-icon">📤</div>
+        <div class="upload-zone" role="button" tabindex="0" aria-label="העלאת קבצי מדיה - גרור קבצים או לחץ לבחירה">
+          <div class="upload-icon" aria-hidden="true">📤</div>
           <div class="upload-text">גרור תמונות או סרטונים לכאן, או לחץ לבחירה</div>
           <div class="upload-subtext">תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB</div>
-          <input type="file" class="file-input" multiple accept="image/*,video/*">
+          <input type="file" class="file-input" multiple accept="image/*,video/*" aria-label="בחר קבצי מדיה">
         </div>
 
         <!-- Media List -->
@@ -635,26 +649,37 @@ class MediaInstructionsEditor extends HTMLElement {
               }
 
               const isVideo = item.type === 'video';
+              const mediaTypeText = isVideo ? 'וידאו' : 'תמונה';
               const mediaTag = isVideo
-                ? `<video class="media-preview" src="${previewURL}" controls></video>`
-                : `<img class="media-preview" src="${previewURL}" alt="${item.caption || 'תמונה'}">`;
+                ? `<video class="media-preview" src="${previewURL}" controls aria-label="${item.caption || 'וידאו ללא כיתוב'}"></video>`
+                : `<img class="media-preview" src="${previewURL}" alt="${item.caption || 'תמונה ללא תיאור'}">`;
 
-              const badgeText = isPending
-                ? `${isVideo ? 'וידאו' : 'תמונה'} (ממתין)`
-                : `${isVideo ? 'וידאו' : 'תמונה'}`;
+              const badgeText = isPending ? `${mediaTypeText} (ממתין)` : mediaTypeText;
 
               return `
-              <div class="media-item ${isPending ? 'pending' : ''}" data-index="${index}">
-                <span class="drag-handle" draggable="true">⠿</span>
-                <button class="delete-button">×</button>
+              <div
+                class="media-item ${isPending ? 'pending' : ''}"
+                data-index="${index}"
+                role="article"
+                aria-label="פריט מדיה ${index + 1} מתוך ${this.mediaItems.length}: ${mediaTypeText}">
+                <span
+                  class="drag-handle"
+                  draggable="true"
+                  role="button"
+                  tabindex="0"
+                  aria-label="גרור לשינוי סדר פריט ${index + 1}">⠿</span>
+                <button
+                  class="delete-button"
+                  aria-label="מחק ${mediaTypeText} ${index + 1}">×</button>
                 <span class="media-type-badge ${isPending ? 'pending-badge' : ''}">${badgeText}</span>
-                <span class="item-order">${index + 1}</span>
+                <span class="item-order" aria-hidden="true">${index + 1}</span>
                 ${mediaTag}
                 <input
                   type="text"
                   class="caption-input"
                   placeholder="הוסף הסבר לשלב..."
                   value="${item.caption || ''}"
+                  aria-label="כיתוב עבור ${mediaTypeText} ${index + 1}"
                   dir="rtl"
                 >
               </div>
