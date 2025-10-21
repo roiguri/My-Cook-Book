@@ -516,6 +516,34 @@ class RecipeFormComponent extends HTMLElement {
   setDisabled(isDisabled) {
     setFormDisabledState(this.shadowRoot, isDisabled);
   }
+
+  /**
+   * Public API: Upload pending media instructions
+   * Delegates to the media-instructions-editor component without exposing internal structure
+   * @param {string} recipeId - Recipe ID for storage path
+   * @param {string} userId - User ID for metadata
+   * @returns {Promise<Array>} Array of uploaded media metadata objects
+   */
+  async uploadPendingMediaInstructions(recipeId, userId) {
+    const mediaEditor = this.shadowRoot.getElementById('media-instructions-editor');
+    if (!mediaEditor || typeof mediaEditor.uploadPendingFiles !== 'function') {
+      return [];
+    }
+    return await mediaEditor.uploadPendingFiles(recipeId, userId);
+  }
+
+  /**
+   * Public API: Get all media in order (both uploaded and pending)
+   * Delegates to the media-instructions-editor component without exposing internal structure
+   * @returns {Array} Array of media items with position tracking
+   */
+  getAllMediaInOrder() {
+    const mediaEditor = this.shadowRoot.getElementById('media-instructions-editor');
+    if (!mediaEditor || typeof mediaEditor.getAllMediaInOrder !== 'function') {
+      return [];
+    }
+    return mediaEditor.getAllMediaInOrder();
+  }
 }
 
 customElements.define('recipe-form-component', RecipeFormComponent);

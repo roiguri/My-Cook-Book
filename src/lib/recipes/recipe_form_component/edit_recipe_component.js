@@ -91,26 +91,22 @@ class EditRecipeComponent extends HTMLElement {
         }
       }
 
-      // 2b. Upload pending media instructions and preserve order
       const mediaInstructions = [];
       const formComponent = this.formComponent;
-      const mediaEditor = formComponent?.shadowRoot?.getElementById('media-instructions-editor');
 
-      // Get all media in unified order (both existing and pending with position tracking)
-      const allMediaInOrder = mediaEditor?.getAllMediaInOrder() || [];
-
-      // First, upload all pending files (if any)
+      const allMediaInOrder = formComponent?.getAllMediaInOrder() || [];
       let uploadedMediaMap = new Map();
-      if (mediaEditor && mediaEditor.pendingFiles && mediaEditor.pendingFiles.length > 0) {
+      if (formComponent && typeof formComponent.uploadPendingMediaInstructions === 'function') {
         const user = authService.getCurrentUser();
-        const uploadedMedia = await mediaEditor.uploadPendingFiles(
+        const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
           this.recipeId,
           user?.uid || 'anonymous',
         );
-        // Create a map by original position for lookup
-        uploadedMedia.forEach((media) => {
-          uploadedMediaMap.set(media.order, media);
-        });
+        if (uploadedMedia && Array.isArray(uploadedMedia)) {
+          uploadedMedia.forEach((media) => {
+            uploadedMediaMap.set(media.order, media);
+          });
+        }
       }
 
       // Now process all media in unified array order (preserves UI reordering)

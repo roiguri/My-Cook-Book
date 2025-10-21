@@ -85,14 +85,12 @@ class ProposeRecipeComponent extends HTMLElement {
 
       // Upload pending media instructions if any
       const formComponent = this.shadowRoot.querySelector('recipe-form-component');
-      const mediaEditor = formComponent?.shadowRoot?.getElementById('media-instructions-editor');
-      if (mediaEditor && mediaEditor.pendingFiles && mediaEditor.pendingFiles.length > 0) {
-        // Upload all pending files with recipe ID and user ID
-        const uploadedMedia = await mediaEditor.uploadPendingFiles(
+      if (formComponent && typeof formComponent.uploadPendingMediaInstructions === 'function') {
+        const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
           recipeId,
           user?.uid || 'anonymous',
         );
-        if (uploadedMedia.length > 0) {
+        if (uploadedMedia && uploadedMedia.length > 0) {
           await FirestoreService.updateDocument('recipes', recipeId, {
             mediaInstructions: uploadedMedia,
           });
