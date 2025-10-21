@@ -774,7 +774,7 @@ class MediaInstructionsEditor extends HTMLElement {
     // Upload each pending item and preserve its position in unified array
     for (const pending of pendingItems) {
       try {
-        // Capture the item's position BEFORE removing it
+        // Capture the item's position BEFORE uploading
         const originalIndex = this.mediaItems.indexOf(pending);
 
         const metadata = await uploadMediaInstructionFile(pending.file, recipeId, userId);
@@ -782,6 +782,9 @@ class MediaInstructionsEditor extends HTMLElement {
         // Set order based on position in unified array (not just existing count)
         metadata.order = originalIndex;
         uploadedMedia.push(metadata);
+
+        // Replace pending item with uploaded metadata at the same position
+        this.mediaItems[originalIndex] = metadata;
 
         // Clean up Blob URL
         if (pending.preview) {
@@ -793,11 +796,9 @@ class MediaInstructionsEditor extends HTMLElement {
       }
     }
 
-    // Update order for all existing media based on current positions in unified array
+    // Update order for all items based on current positions in unified array
     this.mediaItems.forEach((item, index) => {
-      if (!item.file && item.order !== undefined) {
-        item.order = index;
-      }
+      item.order = index;
     });
 
     this.uploading = false;
