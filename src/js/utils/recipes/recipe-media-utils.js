@@ -68,6 +68,11 @@ export function validateMediaFile(file) {
 
 /**
  * Validates media instructions array structure and data
+ *
+ * NOTE: This validation function is currently NOT used in production code.
+ * It exists for potential future use and documents the expected data structure.
+ * TODO: Consider using this validation before saving to Firestore to catch data issues early.
+ *
  * @param {Array<MediaInstruction>} mediaInstructions - Array of media instructions to validate
  * @returns {{ valid: boolean, errors: string[] }}
  */
@@ -89,7 +94,7 @@ export function validateMediaInstructionData(mediaInstructions) {
     if (!item.path || typeof item.path !== 'string') {
       errors.push(`${prefix} Missing or invalid 'path' field`);
     }
-    if (!item.caption || typeof item.caption !== 'string') {
+    if (typeof item.caption !== 'string') {
       errors.push(`${prefix} Missing or invalid 'caption' field`);
     }
     if (!item.type || !['image', 'video'].includes(item.type)) {

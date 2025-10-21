@@ -253,6 +253,40 @@ describe('recipe-media-utils', () => {
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(3);
     });
+
+    it('allows empty caption string', () => {
+      const validData = [
+        {
+          id: 'media-123',
+          path: 'recipes/test/media-instructions/file.jpg',
+          caption: '', // Empty caption should be valid
+          type: 'image',
+          order: 0,
+          uploadedBy: 'user-123',
+          uploadedAt: new Date(),
+        },
+      ];
+      const result = validateMediaInstructionData(validData);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('rejects non-string caption', () => {
+      const invalidData = [
+        {
+          id: 'media-123',
+          path: 'recipes/test/media-instructions/file.jpg',
+          caption: null, // null is not a valid caption (must be string)
+          type: 'image',
+          order: 0,
+          uploadedBy: 'user-123',
+          uploadedAt: new Date(),
+        },
+      ];
+      const result = validateMediaInstructionData(invalidData);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.includes("'caption'"))).toBe(true);
+    });
   });
 
   // --- generateMediaInstructionId ---

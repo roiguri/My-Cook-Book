@@ -163,7 +163,6 @@ function collectMediaInstructions(shadowRoot) {
     return null;
   }
 
-  // Use method-based API for consistency with other components
   if (typeof mediaEditor.getMediaInstructionsData !== 'function') {
     console.warn('Media instructions editor missing getMediaInstructionsData method');
     return null;
