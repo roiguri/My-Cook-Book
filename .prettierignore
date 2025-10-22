@@ -5,3 +5,4 @@ coverage/
 .git/
 .idea/
 .vscode/
+.taskmaster/
