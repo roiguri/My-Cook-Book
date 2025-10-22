@@ -64,6 +64,7 @@ class EditPreviewRecipe extends HTMLElement {
     this.render();
     this.modal = this.shadowRoot.querySelector('custom-modal');
     this.setupModeToggle();
+    this.setupSuccessEventListener();
 
     // Initial check on page load
     this.handleResize();
@@ -251,6 +252,12 @@ class EditPreviewRecipe extends HTMLElement {
   handleError(error) {
     // TODO: add error handling
     return;
+  }
+
+  setupSuccessEventListener() {
+    this.addEventListener('edit-success-modal-closed', () => {
+      this.closeModal();
+    });
   }
 
   // Handle recipe preview size for different layouts

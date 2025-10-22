@@ -39,7 +39,7 @@ class EditRecipeComponent extends HTMLElement {
           </style>
           <div class="edit-recipe-container">
               <recipe-form-component clear-button-text="איפוס" submit-button-text="שמור שינויים" recipe-id="${this.recipeId}" disable-form-protection></recipe-form-component>
-              <message-modal></message-modal>
+              <message-modal width="400px" height="auto"></message-modal>
           </div>
       `;
   }
@@ -218,6 +218,19 @@ class EditRecipeComponent extends HTMLElement {
   showSuccessMessage(message) {
     // Show the success message in the modal
     const editRecipeModal = this.shadowRoot.querySelector('message-modal');
+
+    editRecipeModal.addEventListener(
+      'modal-closed',
+      () => {
+        const event = new CustomEvent('edit-success-modal-closed', {
+          bubbles: true,
+          composed: true,
+        });
+        this.dispatchEvent(event);
+      },
+      { once: true },
+    );
+
     editRecipeModal.show(message, 'Success!');
   }
 
