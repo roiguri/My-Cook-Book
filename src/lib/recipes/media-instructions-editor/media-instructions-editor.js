@@ -325,6 +325,7 @@ class MediaInstructionsEditor extends HTMLElement {
         :host {
           display: block;
           font-family: var(--body-font, Arial, sans-serif);
+          margin-bottom: 20px;
         }
 
         .editor-container {
@@ -536,12 +537,45 @@ class MediaInstructionsEditor extends HTMLElement {
           padding: 15px;
           margin-top: 15px;
           direction: rtl;
+          position: relative;
+        }
+
+        .error-dismiss-button {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          background-color: transparent;
+          border: none;
+          color: var(--danger-color, #e74c3c);
+          font-size: 24px;
+          line-height: 1;
+          cursor: pointer;
+          padding: 0;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.2s ease;
+        }
+
+        .error-dismiss-button:hover {
+          background-color: var(--danger-color, #e74c3c);
+          color: white;
+          transform: scale(1.1);
+        }
+
+        .error-dismiss-button:focus {
+          outline: 2px solid var(--danger-color, #e74c3c);
+          outline-offset: 2px;
         }
 
         .error-title {
           font-weight: bold;
           color: var(--danger-dark, #c0392b);
           margin-bottom: 10px;
+          padding-right: 30px; /* Space for dismiss button */
         }
 
         .error-item {
@@ -741,9 +775,21 @@ class MediaInstructionsEditor extends HTMLElement {
 
     errorsContainer.style.display = 'block';
     errorsContainer.innerHTML = `
+      <button class="error-dismiss-button" aria-label="סגור הודעות שגיאה">×</button>
       <div class="error-title">שגיאות בהעלאה:</div>
       ${this.errors.map((error) => `<div class="error-item">• ${error}</div>`).join('')}
     `;
+
+    // Attach dismiss button event listener
+    const dismissButton = errorsContainer.querySelector('.error-dismiss-button');
+    if (dismissButton) {
+      dismissButton.addEventListener('click', () => this.dismissErrors());
+    }
+  }
+
+  dismissErrors() {
+    this.errors = [];
+    this.renderErrors();
   }
 
   showError(message) {

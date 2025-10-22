@@ -97,13 +97,13 @@ describe('recipe-media-utils', () => {
     it('rejects missing file', () => {
       const result = validateMediaFile(null);
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('No file provided');
+      expect(result.errors).toContain('לא סופק קובץ');
     });
 
     it('rejects undefined file', () => {
       const result = validateMediaFile(undefined);
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('No file provided');
+      expect(result.errors).toContain('לא סופק קובץ');
     });
 
     it('rejects wrong type (PDF)', () => {
@@ -111,14 +111,14 @@ describe('recipe-media-utils', () => {
       const result = validateMediaFile(file);
       expect(result.isValid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('Invalid file type');
+      expect(result.errors[0]).toContain('סוג קובץ לא תקין');
     });
 
     it('rejects wrong type (text)', () => {
       const file = createFakeFile('test.txt', 'text/plain', 1000);
       const result = validateMediaFile(file);
       expect(result.isValid).toBe(false);
-      expect(result.errors[0]).toContain('Invalid file type');
+      expect(result.errors[0]).toContain('סוג קובץ לא תקין');
     });
 
     it('rejects file too large (>50MB)', () => {
@@ -126,7 +126,7 @@ describe('recipe-media-utils', () => {
       const result = validateMediaFile(file);
       expect(result.isValid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('too large');
+      expect(result.errors[0]).toContain('גדול מדי');
     });
 
     it('accepts file exactly at 50MB limit', () => {
@@ -358,7 +358,7 @@ describe('recipe-media-utils', () => {
       const file = createFakeFile('test.pdf', 'application/pdf', 1000);
 
       await expect(uploadMediaInstructionFile(file, 'recipe-123', 'user-456')).rejects.toThrow(
-        'File validation failed',
+        'בדיקת הקובץ נכשלה',
       );
 
       expect(uploadFileMock).not.toHaveBeenCalled();
@@ -368,7 +368,7 @@ describe('recipe-media-utils', () => {
       const file = createFakeFile('huge.jpg', 'image/jpeg', 51 * 1024 * 1024);
 
       await expect(uploadMediaInstructionFile(file, 'recipe-123', 'user-456')).rejects.toThrow(
-        'File validation failed',
+        'בדיקת הקובץ נכשלה',
       );
 
       expect(uploadFileMock).not.toHaveBeenCalled();
@@ -400,7 +400,7 @@ describe('recipe-media-utils', () => {
       const file = createFakeFile('test.jpg', 'image/jpeg', 1000);
 
       await expect(uploadMediaInstructionFile(file, 'recipe-123', 'user-456')).rejects.toThrow(
-        'Failed to upload media file',
+        'העלאת הקובץ נכשלה',
       );
     });
 
@@ -464,7 +464,7 @@ describe('recipe-media-utils', () => {
 
       await expect(
         deleteMediaInstructionFile('recipes/test/media-instructions/file.jpg'),
-      ).rejects.toThrow('Failed to delete media file');
+      ).rejects.toThrow('מחיקת הקובץ נכשלה');
     });
   });
 
@@ -528,7 +528,7 @@ describe('recipe-media-utils', () => {
 
       await expect(
         getMediaInstructionUrl('recipes/test/media-instructions/missing.jpg'),
-      ).rejects.toThrow('Failed to get media URL');
+      ).rejects.toThrow('קבלת כתובת המדיה נכשלה');
     });
   });
 });

@@ -48,19 +48,19 @@ export function validateMediaFile(file) {
   const errors = [];
 
   if (!file) {
-    errors.push('No file provided');
+    errors.push('לא סופק קובץ');
     return { isValid: false, errors };
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
     errors.push(
-      `Invalid file type: ${file.type}. Allowed types: images (JPEG, PNG, WebP, GIF) and videos (MP4, WebM, MOV)`,
+      `סוג קובץ לא תקין: ${file.type}. סוגי קבצים מותרים: תמונות (JPEG, PNG, WebP, GIF) וסרטונים (MP4, WebM, MOV)`,
     );
   }
 
   if (file.size > MAX_SIZE) {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-    errors.push(`File is too large (${sizeMB}MB). Maximum size: 50MB`);
+    errors.push(`הקובץ גדול מדי (${sizeMB}MB). גודל מקסימלי: 50MB`);
   }
 
   return { isValid: errors.length === 0, errors };
@@ -155,7 +155,7 @@ export async function uploadMediaInstructionFile(file, recipeId, userId, onProgr
   // Validate file
   const validation = validateMediaFile(file);
   if (!validation.isValid) {
-    throw new Error(`File validation failed: ${validation.errors.join(', ')}`);
+    throw new Error(`בדיקת הקובץ נכשלה: ${validation.errors.join(', ')}`);
   }
 
   // Validate required parameters
@@ -205,7 +205,7 @@ export async function uploadMediaInstructionFile(file, recipeId, userId, onProgr
     return metadata;
   } catch (error) {
     console.error('Error uploading media instruction file:', error);
-    throw new Error(`Failed to upload media file: ${error.message}`);
+    throw new Error(`העלאת הקובץ נכשלה: ${error.message}`);
   }
 }
 
@@ -230,7 +230,7 @@ export async function deleteMediaInstructionFile(filePath) {
     }
 
     console.error('Error deleting media instruction file:', error);
-    throw new Error(`Failed to delete media file: ${error.message}`);
+    throw new Error(`מחיקת הקובץ נכשלה: ${error.message}`);
   }
 }
 
@@ -275,7 +275,7 @@ export async function getMediaInstructionUrl(storagePath) {
     return await StorageService.getFileUrl(storagePath);
   } catch (error) {
     console.error('Error getting media instruction URL:', error);
-    throw new Error(`Failed to get media URL: ${error.message}`);
+    throw new Error(`קבלת כתובת המדיה נכשלה: ${error.message}`);
   }
 }
 
