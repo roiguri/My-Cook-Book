@@ -94,7 +94,7 @@ class RecipeFormComponent extends HTMLElement {
           </div>
 
           <div class="recipe-form__group">
-            <label class="recipe-form__label">הוראות הכנה מצולמות (אופציונלי):</label>
+            <label class="recipe-form__label">טיפים מצולמים:</label>
             <p class="recipe-form__help-text">הוסף תמונות או סרטונים המדגימים את שלבי ההכנה</p>
             <media-instructions-editor
               id="media-instructions-editor"
