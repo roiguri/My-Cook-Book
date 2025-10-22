@@ -96,16 +96,29 @@ class EditRecipeComponent extends HTMLElement {
 
       const allMediaInOrder = formComponent?.getAllMediaInOrder() || [];
       let uploadedMediaMap = new Map();
+      let failedCount = 0;
+      let successCount = 0;
+
       if (formComponent && typeof formComponent.uploadPendingMediaInstructions === 'function') {
         const user = authService.getCurrentUser();
+        const pendingCount = allMediaInOrder.filter((item) => item.file).length;
+
         const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
           this.recipeId,
           user?.uid || 'anonymous',
         );
+
         if (uploadedMedia && Array.isArray(uploadedMedia)) {
+          successCount = uploadedMedia.length;
           uploadedMedia.forEach((media) => {
             uploadedMediaMap.set(media.order, media);
           });
+
+          // Detect partial failure
+          if (pendingCount > 0 && uploadedMedia.length < pendingCount) {
+            failedCount = pendingCount - uploadedMedia.length;
+            console.warn(`${failedCount} of ${pendingCount} media file(s) failed to upload`);
+          }
         }
       }
 
@@ -119,6 +132,10 @@ class EditRecipeComponent extends HTMLElement {
             uploaded.order = finalOrder; // Assign sequential order
             mediaInstructions.push(uploaded);
             finalOrder++;
+          } else {
+            console.warn(
+              `Media at position ${item.position} failed to upload, will be excluded from save`,
+            );
           }
         } else {
           // Existing media - keep it with updated order
@@ -137,7 +154,16 @@ class EditRecipeComponent extends HTMLElement {
         mediaInstructions: mediaInstructions,
       });
 
-      this.showSuccessMessage('Recipe updated successfully!');
+      if (failedCount > 0) {
+        this.showWarningMessage(
+          `Recipe updated successfully!\n\n` +
+            `${successCount} media file(s) were uploaded successfully.\n` +
+            `${failedCount} media file(s) failed to upload and were not saved.\n\n` +
+            `The failed items are still visible in the editor. You can try uploading them again by clicking "Update Recipe".`,
+        );
+      } else {
+        this.showSuccessMessage('Recipe updated successfully!');
+      }
 
       // 4. Reload form data to show updated recipe (including uploaded media)
       await this.formComponent.setRecipeData(this.recipeId);
