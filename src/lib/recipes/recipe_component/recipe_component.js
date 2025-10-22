@@ -55,6 +55,17 @@ class RecipeComponent extends HTMLElement {
     this.fetchAndPopulateRecipeData();
   }
 
+  disconnectedCallback() {
+    // Clean up event listener to prevent memory leaks
+    const scroller = this.shadowRoot?.getElementById('Recipe_component__media-scroller');
+    if (scroller && this._handleMediaClick) {
+      scroller.removeEventListener('itemclick', this._handleMediaClick);
+    }
+
+    // Release handler reference for garbage collection
+    this._handleMediaClick = null;
+  }
+
   render() {
     this.shadowRoot.innerHTML = `
       <style>${this.styles()}</style>
@@ -523,10 +534,15 @@ class RecipeComponent extends HTMLElement {
         viewer.setAttribute('media-data', JSON.stringify(validMedia));
 
         // Listen for itemclick events to open fullscreen viewer
-        scroller.addEventListener('itemclick', (event) => {
+        // Store handler as instance property to prevent memory leaks
+        this._handleMediaClick = (event) => {
           const { index } = event.detail;
           viewer.open(index);
-        });
+        };
+
+        // Remove any existing listener before adding new one
+        scroller.removeEventListener('itemclick', this._handleMediaClick);
+        scroller.addEventListener('itemclick', this._handleMediaClick);
       } else {
         section.style.display = 'none';
       }
