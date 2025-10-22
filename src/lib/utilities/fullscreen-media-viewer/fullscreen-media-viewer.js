@@ -22,6 +22,7 @@ class FullscreenMediaViewer extends HTMLElement {
     this.mediaItems = [];
     this.currentIndex = 0;
     this.isOpen = false;
+    this.originalOverflow = '';
 
     // Bind methods
     this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -48,7 +49,8 @@ class FullscreenMediaViewer extends HTMLElement {
       switch (name) {
         case 'media-data':
           try {
-            this.mediaItems = JSON.parse(newValue) || [];
+            const parsed = newValue ? JSON.parse(newValue) : [];
+            this.mediaItems = Array.isArray(parsed) ? parsed : [];
           } catch (e) {
             console.error('[FullscreenMediaViewer] Invalid media-data JSON:', e);
             this.mediaItems = [];
@@ -166,11 +168,24 @@ class FullscreenMediaViewer extends HTMLElement {
     // Update media
     if (mediaContainer) {
       const isVideo = item.type === 'video' || item.path.endsWith('.mp4');
-      mediaContainer.innerHTML = isVideo
-        ? `<video class="viewer-media__element" controls autoplay>
-             <source src="${item.path}" type="video/mp4">
-           </video>`
-        : `<img class="viewer-media__element" src="${item.path}" alt="${item.caption || ''}">`;
+      mediaContainer.innerHTML = '';
+      if (isVideo) {
+        const video = document.createElement('video');
+        video.className = 'viewer-media__element';
+        video.controls = true;
+        video.autoplay = true;
+        const source = document.createElement('source');
+        source.src = item.path;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+        mediaContainer.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.className = 'viewer-media__element';
+        img.src = item.path;
+        img.alt = item.caption || '';
+        mediaContainer.appendChild(img);
+      }
     }
 
     // Update caption
@@ -196,11 +211,18 @@ class FullscreenMediaViewer extends HTMLElement {
   }
 
   lockScroll() {
+    this.originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    // Prevent layout shift by adding padding for scrollbar width
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
   }
 
   unlockScroll() {
-    document.body.style.overflow = '';
+    document.body.style.overflow = this.originalOverflow;
+    document.body.style.paddingRight = '';
   }
 
   render() {
