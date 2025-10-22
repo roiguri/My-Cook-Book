@@ -13,8 +13,11 @@ import {
   formatIngredientAmount,
   scaleIngredients,
 } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
+import { getMediaInstructionUrl } from '../../../js/utils/recipes/recipe-media-utils.js';
 
 import '../../utilities/image-carousel/image-carousel.js';
+import '../../utilities/media-scroller/media-scroller.js';
+import '../../utilities/fullscreen-media-viewer/fullscreen-media-viewer.js';
 import './parts/cook-mode-container.js';
 
 // TODO - add support for missing image upload
@@ -50,6 +53,17 @@ class RecipeComponent extends HTMLElement {
     this.render();
     this.recipeId = this.getAttribute('recipe-id');
     this.fetchAndPopulateRecipeData();
+  }
+
+  disconnectedCallback() {
+    // Clean up event listener to prevent memory leaks
+    const scroller = this.shadowRoot?.getElementById('Recipe_component__media-scroller');
+    if (scroller && this._handleMediaClick) {
+      scroller.removeEventListener('itemclick', this._handleMediaClick);
+    }
+
+    // Release handler reference for garbage collection
+    this._handleMediaClick = null;
   }
 
   render() {
@@ -90,6 +104,15 @@ class RecipeComponent extends HTMLElement {
           <h2>הוראות הכנה:</h2>
           <ol id="Recipe_component__instructions-list"></ol>
         </div>
+        <div class="Recipe_component__media-instructions" id="Recipe_component__media-section" style="display: none;">
+          <h2>טיפים מצולמים:</h2>
+          <media-scroller
+            id="Recipe_component__media-scroller"
+            item-height="auto"
+            item-width="280px">
+          </media-scroller>
+        </div>
+        <fullscreen-media-viewer id="Recipe_component__media-viewer"></fullscreen-media-viewer>
         <div class="Recipe_component__comments" style="display: none;">
           <h2>הערות:</h2>
           <ol id="Recipe_component__comments-list"></ol>
@@ -167,6 +190,7 @@ class RecipeComponent extends HTMLElement {
 
     .Recipe_component__ingredients h2,
     .Recipe_component__instructions h2,
+    .Recipe_component__media-instructions h2,
     .Recipe_component__comments h2 {
       font-family: var(--heading-font-he);
       font-size: 2rem;
@@ -272,6 +296,7 @@ class RecipeComponent extends HTMLElement {
         this.populateInstructions(recipe);
         this.populateCommentList(recipe);
         this.setupServingsAdjuster(recipe);
+        await this.displayMediaInstructions(recipe);
         this._originalIngredients = recipe.ingredients;
       } else {
         console.warn('No such document!');
@@ -460,6 +485,70 @@ class RecipeComponent extends HTMLElement {
         commentsList.appendChild(li);
       });
       commentsSection.style.display = '';
+    }
+  }
+
+  async displayMediaInstructions(recipe) {
+    const section = this.shadowRoot.getElementById('Recipe_component__media-section');
+    const scroller = this.shadowRoot.getElementById('Recipe_component__media-scroller');
+    const viewer = this.shadowRoot.getElementById('Recipe_component__media-viewer');
+
+    // Only display if recipe has media instructions
+    if (
+      !recipe.mediaInstructions ||
+      !Array.isArray(recipe.mediaInstructions) ||
+      recipe.mediaInstructions.length === 0
+    ) {
+      section.style.display = 'none';
+      return;
+    }
+
+    try {
+      // Sort by order field
+      const sortedMedia = [...recipe.mediaInstructions].sort((a, b) => a.order - b.order);
+
+      // Get Firebase Storage URLs for all media
+      const mediaWithUrls = await Promise.all(
+        sortedMedia.map(async (media) => {
+          try {
+            const url = await getMediaInstructionUrl(media.path);
+            return {
+              ...media,
+              path: url,
+            };
+          } catch (error) {
+            console.error(`[MediaInstructions] Error loading media ${media.path}:`, error);
+            return null;
+          }
+        }),
+      );
+
+      // Filter out any failed media loads
+      const validMedia = mediaWithUrls.filter((media) => media !== null);
+
+      if (validMedia.length > 0) {
+        scroller.setAttribute('media-data', JSON.stringify(validMedia));
+        section.style.display = 'block';
+
+        // Set up fullscreen viewer
+        viewer.setAttribute('media-data', JSON.stringify(validMedia));
+
+        // Listen for itemclick events to open fullscreen viewer
+        // Store handler as instance property to prevent memory leaks
+        this._handleMediaClick = (event) => {
+          const { index } = event.detail;
+          viewer.open(index);
+        };
+
+        // Remove any existing listener before adding new one
+        scroller.removeEventListener('itemclick', this._handleMediaClick);
+        scroller.addEventListener('itemclick', this._handleMediaClick);
+      } else {
+        section.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('[MediaInstructions] Error displaying media instructions:', error);
+      section.style.display = 'none';
     }
   }
 

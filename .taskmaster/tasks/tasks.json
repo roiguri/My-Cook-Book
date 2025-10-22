@@ -157,5 +157,102 @@
       "updated": "2025-06-24T03:39:03.164Z",
       "description": "Tag created on 6/24/2025"
     }
+  },
+  "media-instructions": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Update Firebase Security Rules and Data Model for Media Instructions",
+        "description": "Modify Firebase Storage security rules to allow authenticated users to upload/delete media for recipes they own. Define and enforce the data structure for the `mediaInstructions` array within Firestore.",
+        "details": "In `firebase.rules` (or equivalent), update the storage rules for the `recipes/{recipeId}/media-instructions/` path. Implement the `isValidMediaFile` and `userOwnsRecipe` functions as specified in the PRD. Ensure public read access is enabled. This task lays the security and data foundation for all subsequent tasks.\n<info added on 2025-10-18T20:16:37.796Z>\n### Critical Safety Notes for Dual Firebase Environment\n\n**SAFETY REQUIREMENTS:**\n- Export existing rules from Firebase Console FIRST before making any changes\n- Create local `storage.rules` and `firestore.rules` files\n- Use separate storage path: `recipes/{recipeId}/media-instructions/` (don't touch `img/recipes/*`)\n- Deploy to STAGING first (`cook-book-test-479e8`)\n- Test for 24-48 hours in staging\n- Only deploy to PRODUCTION (`my-cook-book-67fde`) after staging verification\n- Must maintain backward compatibility - don't break existing `img/recipes/*` rules\n\n**TESTING CHECKLIST:**\n- Test upload with valid image/video\n- Test upload >50MB (should fail)\n- Test unauthenticated upload (should fail)\n- Test upload to recipe you don't own (should fail)\n- CRITICAL: Verify existing recipes still work\n</info added on 2025-10-18T20:16:37.796Z>",
+        "testStrategy": "Use the Firebase Rules Playground to simulate read, create, and delete operations for authenticated recipe owners and non-owners. Test with valid and invalid file sizes/types to ensure rules are enforced correctly. Verify no regressions are introduced to existing rules.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Create Media Instruction Utility Functions",
+        "description": "Develop a set of utility functions to handle the lifecycle of media instruction files, including uploading to Firebase Storage, deleting from storage, and data validation.",
+        "details": "Create a new file at `src/lib/utils/recipes/recipe-media-utils.js`. Implement three key functions: `uploadMediaInstructionFile(file, recipeId, userId)` which uploads a file to `recipes/{recipeId}/media-instructions/` and returns its metadata; `deleteMediaInstructionFile(filePath)` to remove a file from storage; and `validateMediaInstructionData(mediaInstructions)` which can be used client-side before submission. These functions will abstract the Firebase Storage logic.\n<info added on 2025-10-18T20:17:03.642Z>\n### Implementation Notes:\n- **Storage Path**: Confirm all media instruction files are stored under `recipes/{recipeId}/media-instructions/`. Ensure no operations interfere with the legacy `img/recipes/*` path.\n- **Image Compression**: For uploaded image files, apply server-side compression using the `sharp` library, mirroring the pattern found in `functions/index.js`. Images should be resized to a maximum of 800x600 pixels (maintaining aspect ratio) and compressed with a JPEG quality of 80.\n- **Error Handling**: Implement robust error handling for all utility functions, gracefully managing network failures, invalid file types, and other potential issues during upload, deletion, or validation.\n- **Backward Compatibility**: The new media instruction upload system must operate independently and not cause any regressions or interference with the existing `img/recipes/*` image upload and display mechanisms.\n- **Dependencies**: This task is critically dependent on Task #1 (Firebase security rules and data model for media instructions). Task #1's changes must be deployed to the staging environment and verified before proceeding with the deployment of these utility functions.\n- **Testing Environment**: All development and testing should initially target the `.env.staging` environment to prevent unintended side effects on production data.\n</info added on 2025-10-18T20:17:03.642Z>",
+        "testStrategy": "Write unit tests for each utility function. For `uploadMediaInstructionFile`, mock the Firebase Storage API and verify it's called with the correct path and file. For `deleteMediaInstructionFile`, test that the correct delete command is issued. For `validateMediaInstructionData`, test with valid and malformed data arrays.",
+        "priority": "high",
+        "dependencies": [1],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Develop the Media Instructions Editor Svelte Component",
+        "description": "Create a new Svelte component for creating, editing, reordering, and deleting media instructions within the recipe form.",
+        "details": "Create `src/lib/recipes/media-instructions/MediaInstructionsEditor.svelte`. This component will manage an array of media instruction objects. It should feature: a file input with drag-and-drop support; a text input for captions (supporting Hebrew); a delete button for each item; and drag handles for reordering using the existing `svelte-dnd-action` library. It will use the utility functions from Task 2 for file operations. The component should emit events for data changes.\n<info added on 2025-10-18T20:17:46.291Z>\n### Implementation Notes:\n- **INTEGRATION PATTERNS:** Follow recent form refactoring patterns from development branch. This likely refers to patterns found in `src/lib/components/recipes/RecipeForm.svelte` or related files, as indicated by Task 4.\n- **RTL SUPPORT:** Hebrew captions require proper `text-align: right` and potentially `direction: rtl` for correct display, given the project's focus on Hebrew content.\n- **REUSABILITY:** Consider reusing sectioned-list patterns if applicable. This might involve looking at existing list components or patterns in `src/lib/components/shared/` or other recipe-related components.\n- **VALIDATION:** Use consistent validation patterns with other form components. This implies using the `zod` schema extension pattern as seen in Task 4's description for `src/lib/utils/recipes.js`.\n\n### Dependencies:\n- Requires rebase onto development first (to get latest form patterns).\n- Requires Task #2 (Create Media Instruction Utility Functions) to be completed, as this component will utilize the `uploadMediaInstructionFile`, `deleteMediaInstructionFile`, and `validateMediaInstructionData` functions from `src/lib/utils/recipes/recipe-media-utils.js`.\n</info added on 2025-10-18T20:17:46.291Z>",
+        "testStrategy": "Use Storybook or a similar component testing environment to develop this component in isolation. Test file selection, caption input, item deletion, and drag-and-drop reordering. Verify that the component's internal state correctly reflects user actions.",
+        "priority": "high",
+        "dependencies": [2],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Integrate Media Editor into the Recipe Form",
+        "description": "Embed the new `MediaInstructionsEditor` component into the main recipe form and connect it to the recipe's data model and validation system.",
+        "details": "Modify the existing recipe form component (e.g., `src/lib/components/recipes/RecipeForm.svelte`). Add a new section titled 'הוראות הכנה מצולמות'. Import and render the `MediaInstructionsEditor.svelte` component, binding its data to the recipe's `mediaInstructions` field. Extend the existing `zod` validation schema in `src/lib/utils/recipes.js` to validate the `mediaInstructions` array according to the PRD's data structure.\n<info added on 2025-10-18T20:18:22.371Z>\nEnsure backward compatibility: The `mediaInstructions` field must be optional in the recipe data model. Update the `zod` validation schema in `src/lib/utils/recipes.js` to reflect this, using `z.array(...).optional()`. The implementation must not break existing recipes that do not have `mediaInstructions` data. The testing strategy should include verifying that recipes can be saved both with and without media instructions, and that existing recipes load correctly without any changes.\n</info added on 2025-10-18T20:18:22.371Z>",
+        "testStrategy": "Perform integration testing on the recipe edit page. Verify that media instructions can be added and are correctly saved with the recipe. Test the form's validation by attempting to save with invalid data (e.g., missing caption if required). Ensure that loading an existing recipe correctly populates the editor.",
+        "priority": "high",
+        "dependencies": [3],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Enhance MediaScroller Component for Rich Content Display",
+        "description": "Upgrade the existing `MediaScroller.svelte` component to support captions, different media types (image/video), and click events for fullscreen viewing.",
+        "details": "Refactor `src/lib/components/shared/MediaScroller.svelte`. Modify its `items` prop to accept an array of objects matching the `mediaInstructions` structure (`path`, `caption`, `type`). Add a slot or prop for displaying the caption below the media. Implement logic to render an `<img>` or `<video>` tag based on the `type`. Dispatch a custom `itemclick` event with the item's data when a user clicks on a media element.",
+        "testStrategy": "Update the component's unit tests or stories to pass in the new data structure. Verify that both images and videos render correctly. Test that captions are displayed and that the `itemclick` event is dispatched with the correct payload upon user interaction.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Fullscreen Media Viewer Modal",
+        "description": "Create a reusable modal component for displaying a single media instruction in fullscreen with navigation controls.",
+        "details": "Create a new component `src/lib/components/shared/FullscreenMediaViewer.svelte`. This modal should accept an array of media items and the index of the currently active item. It should display the media prominently, show the caption, and include 'Previous'/'Next' buttons and keyboard navigation (arrow keys) to cycle through the items. Include a close button (and Esc key listener) to exit the modal.",
+        "testStrategy": "Test the modal component in isolation. Verify it displays the correct image/video and caption based on the props. Test the 'Previous' and 'Next' buttons, ensuring they correctly cycle through the items and handle edge cases (first/last item). Test all close mechanisms (button, Esc key, overlay click).",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Integrate Media Display into the Recipe View Page",
+        "description": "Update the recipe display page to render the media instructions using the enhanced `MediaScroller` and `FullscreenMediaViewer` components.",
+        "details": "In the recipe display route (e.g., `src/routes/recipes/[slug]/+page.svelte`), add a new collapsible section for 'הוראות הכנה מצולמות'. If `recipe.mediaInstructions` exists, render the enhanced `MediaScroller` component, passing the data to it. Implement lazy loading for this section. Listen for the `itemclick` event from the scroller to open the `FullscreenMediaViewer` modal with the appropriate data.\n<info added on 2025-10-18T20:18:31.032Z>\nTest that the collapsible section for 'הוראות הכנה מצולמות' only appears if `recipe.mediaInstructions` exists and has items. Verify that recipes without the `mediaInstructions` field or with an empty array still display correctly without any errors or visual regressions. Confirm that the lazy loading mechanism prevents any performance impact on recipes that do not have media instructions. Ensure that the display and functionality of existing recipe details (those not related to media instructions) remain identical to their pre-implementation state.\n</info added on 2025-10-18T20:18:31.032Z>",
+        "testStrategy": "Conduct end-to-end testing on a recipe that has media instructions. Verify the media scroller displays correctly on both desktop and mobile. Confirm that clicking an item opens the fullscreen modal. Test navigation within the modal. Check that the section is properly collapsed by default and loads media only upon expansion.",
+        "priority": "high",
+        "dependencies": [4, 5, 6],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Performance Optimizations and Sanitization",
+        "description": "Apply performance best practices such as image compression and lazy loading, and ensure all user-generated content is properly sanitized.",
+        "details": "Integrate an image compression library or a cloud function to automatically compress images on upload to reduce storage costs and improve load times. Ensure the `MediaScroller` on the recipe view page lazy-loads media content. Review all points where `mediaInstructions` data (especially `caption`) is rendered and ensure it is sanitized to prevent XSS attacks, possibly using a DOMPurify-like library or Svelte's built-in mechanisms.",
+        "testStrategy": "Use browser developer tools (Lighthouse, Network tab) to measure recipe page load times before and after implementation to ensure no performance degradation. Manually test for XSS vulnerabilities by entering HTML/script tags into caption fields. Verify that images are being compressed by checking file sizes in Firebase Storage.",
+        "priority": "medium",
+        "dependencies": [7],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-09-10T18:37:21.065Z",
+      "updated": "2025-10-20T04:50:59.692Z",
+      "description": "Tasks for media-instructions context"
+    }
   }
 }

@@ -235,6 +235,7 @@ export function formatRecipeData(rawData) {
     stages: Array.isArray(rawData.stages) ? rawData.stages : undefined,
     instructions: Array.isArray(rawData.instructions) ? rawData.instructions : undefined,
     images: Array.isArray(rawData.images) ? rawData.images : [],
+    mediaInstructions: Array.isArray(rawData.mediaInstructions) ? rawData.mediaInstructions : [],
     comments: Array.isArray(rawData.comments) ? rawData.comments : [],
     approved: typeof rawData.approved === 'boolean' ? rawData.approved : false,
     createdAt: rawData.createdAt || null,

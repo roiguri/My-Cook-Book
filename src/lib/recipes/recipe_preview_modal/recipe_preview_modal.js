@@ -49,6 +49,7 @@
  */
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { removeAllRecipeImages } from '../../../js/utils/recipes/recipe-image-utils.js';
+import { removeAllMediaInstructions } from '../../../js/utils/recipes/recipe-media-utils.js';
 
 import '../recipe_component/recipe_component.js';
 import '../../utilities/modal/modal.js';
@@ -293,7 +294,22 @@ class RecipePreviewModal extends HTMLElement {
 
   async handleRecipeRejection(recipeId) {
     try {
+      // Get recipe data to find media instructions
+      const recipe = await FirestoreService.getDocument('recipes', recipeId);
+
+      // Delete all recipe images
       await removeAllRecipeImages(recipeId);
+
+      // Delete all media instructions if any exist
+      if (
+        recipe &&
+        Array.isArray(recipe.mediaInstructions) &&
+        recipe.mediaInstructions.length > 0
+      ) {
+        await removeAllMediaInstructions(recipe.mediaInstructions);
+      }
+
+      // Delete the recipe document
       await FirestoreService.deleteDocument('recipes', recipeId);
     } catch (error) {
       console.error('Error in handleRecipeRejection:', error);

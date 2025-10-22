@@ -1,6 +1,7 @@
 // edit-recipe-component.js
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { StorageService } from '../../../js/services/storage-service.js';
+import authService from '../../../js/services/auth-service.js';
 import {
   compressImage,
   getImageStoragePath,
@@ -90,16 +91,84 @@ class EditRecipeComponent extends HTMLElement {
         }
       }
 
+      const mediaInstructions = [];
+      const formComponent = this.formComponent;
+
+      const allMediaInOrder = formComponent?.getAllMediaInOrder() || [];
+      let uploadedMediaMap = new Map();
+      let failedCount = 0;
+      let successCount = 0;
+
+      if (formComponent && typeof formComponent.uploadPendingMediaInstructions === 'function') {
+        const user = authService.getCurrentUser();
+        const pendingCount = allMediaInOrder.filter((item) => item.file).length;
+
+        const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
+          this.recipeId,
+          user?.uid || 'anonymous',
+        );
+
+        if (uploadedMedia && Array.isArray(uploadedMedia)) {
+          successCount = uploadedMedia.length;
+          uploadedMedia.forEach((media) => {
+            uploadedMediaMap.set(media.order, media);
+          });
+
+          // Detect partial failure
+          if (pendingCount > 0 && uploadedMedia.length < pendingCount) {
+            failedCount = pendingCount - uploadedMedia.length;
+            console.warn(`${failedCount} of ${pendingCount} media file(s) failed to upload`);
+          }
+        }
+      }
+
+      // Now process all media in unified array order (preserves UI reordering)
+      let finalOrder = 0;
+      for (const item of allMediaInOrder) {
+        if (item.file) {
+          // This is a pending file - use uploaded metadata from map
+          const uploaded = uploadedMediaMap.get(item.position);
+          if (uploaded) {
+            uploaded.order = finalOrder; // Assign sequential order
+            mediaInstructions.push(uploaded);
+            finalOrder++;
+          } else {
+            console.warn(
+              `Media at position ${item.position} failed to upload, will be excluded from save`,
+            );
+          }
+        } else {
+          // Existing media - keep it with updated order
+          const existingMedia = { ...item, order: finalOrder };
+          delete existingMedia.position; // Remove temporary position field
+          mediaInstructions.push(existingMedia);
+          finalOrder++;
+        }
+      }
+
       // 3. Update the recipe data in Firestore (exclude file/source/toDelete)
-      const { images, toDelete, ...rest } = recipeData;
+      const { images, toDelete, mediaInstructions: _, ...rest } = recipeData;
       await FirestoreService.updateDocument('recipes', this.recipeId, {
         ...rest,
         images: newImages,
+        mediaInstructions: mediaInstructions,
       });
 
-      this.showSuccessMessage('Recipe updated successfully!');
+      if (failedCount > 0) {
+        this.showWarningMessage(
+          `Recipe updated successfully!\n\n` +
+            `${successCount} media file(s) were uploaded successfully.\n` +
+            `${failedCount} media file(s) failed to upload and were not saved.\n\n` +
+            `The failed items are still visible in the editor. You can try uploading them again by clicking "Update Recipe".`,
+        );
+      } else {
+        this.showSuccessMessage('Recipe updated successfully!');
+      }
 
-      // 4. Dispatch recipe-updated event for dashboard refresh
+      // 4. Reload form data to show updated recipe (including uploaded media)
+      await this.formComponent.setRecipeData(this.recipeId);
+
+      // 5. Dispatch recipe-updated event for dashboard refresh
       const event = new CustomEvent('recipe-updated', {
         detail: { recipeId: this.recipeId },
         bubbles: true,

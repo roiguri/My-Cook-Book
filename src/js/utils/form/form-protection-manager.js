@@ -56,15 +56,16 @@ class FormProtectionManager {
   deepEqual(obj1, obj2) {
     if (obj1 === obj2) return true;
 
-    if (!obj1 || !obj2) return false;
+    // Treat null, undefined, empty arrays, and empty strings as equivalent (no data)
+    const isEmpty1 = obj1 == null || obj1 === '' || (Array.isArray(obj1) && obj1.length === 0);
+    const isEmpty2 = obj2 == null || obj2 === '' || (Array.isArray(obj2) && obj2.length === 0);
+
+    if (isEmpty1 && isEmpty2) return true;
+    if (isEmpty1 || isEmpty2) return false;
 
     if (typeof obj1 !== typeof obj2) return false;
 
     if (typeof obj1 !== 'object') {
-      // Empty strings, null, and undefined are equivalent for form comparison
-      if ((obj1 === '' || obj1 == null) && (obj2 === '' || obj2 == null)) {
-        return true;
-      }
       return obj1 === obj2;
     }
 
@@ -81,11 +82,14 @@ class FormProtectionManager {
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
 
-    if (keys1.length !== keys2.length) return false;
+    // Get all unique keys from both objects
+    const allKeys = new Set([...keys1, ...keys2]);
 
-    for (const key of keys1) {
-      if (!keys2.includes(key)) return false;
-      if (!this.deepEqual(obj1[key], obj2[key])) return false;
+    // Compare each key, treating missing keys as undefined
+    for (const key of allKeys) {
+      const val1 = obj1[key];
+      const val2 = obj2[key];
+      if (!this.deepEqual(val1, val2)) return false;
     }
 
     return true;

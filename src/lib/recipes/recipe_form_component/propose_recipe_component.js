@@ -63,10 +63,12 @@ class ProposeRecipeComponent extends HTMLElement {
       const imagesToUpload = recipeData.images || [];
       const recipeDataForFirestore = { ...recipeData };
       delete recipeDataForFirestore.images;
+      delete recipeDataForFirestore.mediaInstructions; // Remove - will upload after recipe creation
       recipeDataForFirestore.creationTime = Timestamp.now();
       recipeDataForFirestore.userId = user?.uid || 'anonymous';
       // Add recipe to Firestore
       const recipeId = await FirestoreService.addDocument('recipes', recipeDataForFirestore);
+
       // Upload images if provided
       if (imagesToUpload.length > 0) {
         const imageUploadResults = await this.uploadRecipeImages(
@@ -80,8 +82,49 @@ class ProposeRecipeComponent extends HTMLElement {
           allowImageSuggestions: true,
         });
       }
+
+      // Upload pending media instructions if any
+      const formComponent = this.shadowRoot.querySelector('recipe-form-component');
+      let hasPartialFailure = false;
+      let successCount = 0;
+      let failedCount = 0;
+
+      if (formComponent && typeof formComponent.uploadPendingMediaInstructions === 'function') {
+        const allMedia = formComponent.getAllMediaInOrder();
+        const pendingCount = allMedia.filter((item) => item.file).length;
+
+        const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
+          recipeId,
+          user?.uid || 'anonymous',
+        );
+
+        if (uploadedMedia && uploadedMedia.length > 0) {
+          successCount = uploadedMedia.length;
+          await FirestoreService.updateDocument('recipes', recipeId, {
+            mediaInstructions: uploadedMedia,
+          });
+
+          // Detect partial failure
+          if (pendingCount > 0 && uploadedMedia.length < pendingCount) {
+            hasPartialFailure = true;
+            failedCount = pendingCount - uploadedMedia.length;
+            console.warn(`${failedCount} of ${pendingCount} media file(s) failed to upload`);
+          }
+        }
+      }
+
       this.clearForm();
-      this.showSuccessMessage('Recipe proposed successfully!');
+
+      if (hasPartialFailure) {
+        this.showWarningMessage(
+          `Recipe proposed successfully!\n\n` +
+            `${successCount} media file(s) were uploaded successfully.\n` +
+            `${failedCount} media file(s) failed to upload.\n\n` +
+            `You can view your recipe in the Manager Dashboard and edit it to retry uploading the failed media files.`,
+        );
+      } else {
+        this.showSuccessMessage('Recipe proposed successfully!');
+      }
       spinner.removeAttribute('active');
       this.dispatchEvent(
         new CustomEvent('recipe-proposed-success', { bubbles: true, composed: true }),
