@@ -92,7 +92,10 @@ export const recipeCardStyles = `
 }
 .badge.category.breakfast-brunch {
     background: linear-gradient(135deg, #fcd34d, #d97706);  /* Light Amber to Amber */
-} 
+}
+.badge.category.breads-pastries {
+    background: linear-gradient(135deg, #ddd6fe, #8b5cf6);  /* Light Violet to Violet */
+}
 .badge.category.snacks {
     background: linear-gradient(135deg, #fdba74, #f97316);  /* Light Orange to Orange */
 }
