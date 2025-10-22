@@ -32,7 +32,6 @@ class MediaScroller extends HTMLElement {
 
   connectedCallback() {
     this.render();
-    this.attachItemClickListeners();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -55,7 +54,6 @@ class MediaScroller extends HTMLElement {
       }
       if (this.isConnected) {
         this.render();
-        this.attachItemClickListeners();
       }
     }
   }
@@ -66,6 +64,13 @@ class MediaScroller extends HTMLElement {
       itemElement.addEventListener('click', (e) => {
         const index = parseInt(itemElement.getAttribute('data-index'), 10);
         const item = this.mediaItems[index];
+
+        // Defensive check: validate that item exists at this index
+        if (!item) {
+          console.warn(`[MediaScroller] No item found at index ${index}`);
+          return;
+        }
+
         this.dispatchEvent(
           new CustomEvent('itemclick', {
             detail: { index, item },
@@ -78,7 +83,7 @@ class MediaScroller extends HTMLElement {
   }
 
   render() {
-    this.shadowRoot.innerHTML = `
+    const styles = `
       <style>
         :host {
           display: block;
@@ -184,33 +189,67 @@ class MediaScroller extends HTMLElement {
           word-wrap: break-word;
         }
       </style>
-
-      <div class="media-scroller">
-        <div class="media-scroller__items">
-          ${this.mediaItems
-            .map((item, index) => {
-              // Determine media type
-              const isVideo = item.type === 'video' || (!item.type && item.path.endsWith('.mp4'));
-              const mediaType = isVideo ? 'וידאו' : 'תמונה';
-
-              return `
-                <div class="media-scroller__item" data-index="${index}">
-                  <span class="media-type-badge">${mediaType}</span>
-                  ${
-                    isVideo
-                      ? `<video class="media-scroller__media" controls>
-                          <source src="${item.path}" type="video/mp4">
-                        </video>`
-                      : `<img class="media-scroller__media" src="${item.path}" alt="${item.caption || ''}">`
-                  }
-                  ${item.caption ? `<div class="media-scroller__caption">${item.caption}</div>` : ''}
-                </div>
-              `;
-            })
-            .join('')}
-        </div>
-      </div>
     `;
+
+    const container = document.createElement('div');
+    container.className = 'media-scroller';
+
+    const itemsContainer = document.createElement('div');
+    itemsContainer.className = 'media-scroller__items';
+
+    this.mediaItems.forEach((item, index) => {
+      const isVideo = item.type === 'video';
+
+      if (!item.type) {
+        console.warn(`[MediaScroller] Item at index ${index} is missing 'type' field`);
+      }
+
+      const mediaType = isVideo ? 'וידאו' : 'תמונה';
+
+      const itemElement = document.createElement('div');
+      itemElement.className = 'media-scroller__item';
+      itemElement.setAttribute('data-index', index.toString());
+
+      const badge = document.createElement('span');
+      badge.className = 'media-type-badge';
+      badge.textContent = mediaType;
+      itemElement.appendChild(badge);
+
+      if (isVideo) {
+        const video = document.createElement('video');
+        video.className = 'media-scroller__media';
+        video.controls = true;
+
+        const source = document.createElement('source');
+        source.src = item.path;
+        source.type = 'video/mp4';
+
+        video.appendChild(source);
+        itemElement.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.className = 'media-scroller__media';
+        img.src = item.path;
+        img.alt = item.caption || '';
+        itemElement.appendChild(img);
+      }
+
+      if (item.caption) {
+        const caption = document.createElement('div');
+        caption.className = 'media-scroller__caption';
+        caption.textContent = item.caption;
+        itemElement.appendChild(caption);
+      }
+
+      itemsContainer.appendChild(itemElement);
+    });
+
+    container.appendChild(itemsContainer);
+
+    this.shadowRoot.innerHTML = styles;
+    this.shadowRoot.appendChild(container);
+
+    this.attachItemClickListeners();
   }
 }
 
