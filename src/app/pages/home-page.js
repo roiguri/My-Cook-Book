@@ -36,7 +36,7 @@ export default {
     try {
       await Promise.all([
         import('../../lib/recipes/recipe-card/recipe-card.js'),
-        import('../../lib/utilities/element-scroller/element-scroller.js'),
+        import('../../lib/utilities/recipe-scroller/recipe-scroller.js'),
       ]);
     } catch (error) {
       console.error('Error importing home page components:', error);
@@ -58,8 +58,8 @@ export default {
 
     messageContainer.innerHTML = 'טוען את המתכונים הכי חדשים...';
 
-    const elementScroller = document.querySelector('element-scroller');
-    const recipesContainer = elementScroller?.querySelector('[slot="items"]');
+    const recipeScroller = document.querySelector('recipe-scroller');
+    const recipesContainer = recipeScroller?.querySelector('[slot="items"]');
 
     if (!recipesContainer) {
       console.warn('Recipes container not found');
@@ -96,6 +96,11 @@ export default {
         recipesContainer.appendChild(recipeCard);
       });
 
+      // Apply styles after all cards are added
+      if (recipeScroller && typeof recipeScroller.applyItemStyles === 'function') {
+        recipeScroller.applyItemStyles();
+      }
+
       featuredRecipesGrid.addEventListener('recipe-card-open', (event) => {
         const recipeId = event.detail.recipeId;
         if (window.spa?.router) {
@@ -109,14 +114,6 @@ export default {
           window.location.href = `${import.meta.env.BASE_URL}recipe/${recipeId}`;
         }
       });
-
-      const scroller = document.querySelector('element-scroller');
-      if (scroller) {
-        scroller.setAttribute('padding', '20');
-        setTimeout(() => {
-          scroller.handleResize();
-        }, 100);
-      }
     } catch (error) {
       console.error('Error fetching featured recipes:', error);
       messageContainer.innerHTML = 'Error loading featured recipes. Please try again later.';
