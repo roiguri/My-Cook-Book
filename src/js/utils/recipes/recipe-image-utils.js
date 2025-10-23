@@ -404,7 +404,7 @@ export async function addPendingImages(recipeId, files, category, uploader) {
       full: fullPath,
       compressed: compressedPath,
       fileExtension,
-      timestamp: serverTimestamp(),
+      timestamp: Timestamp.now(),
       uploadedBy: uploader,
     };
     pendingImages.push(pendingImage);

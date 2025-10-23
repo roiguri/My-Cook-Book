@@ -23,6 +23,7 @@ export default {
       await this.initializeRecipeComponent(container, recipeId);
       await this.importComponents();
       this.setupMenuHandlers(container, recipeId);
+      this.setupImageProposalListener(container);
     } catch (error) {
       console.error('Failed to load recipe detail page:', error);
       this.showError(container, 'Failed to load recipe details');
@@ -54,6 +55,7 @@ export default {
     await import('../../lib/utilities/loading-spinner/loading-spinner.js');
     await import('../../lib/images/image-handler.js');
     await import('../../lib/images/image-proposal-modal.js');
+    await import('../../lib/modals/message-modal/message-modal.js');
   },
 
   setupMenuHandlers(container, recipeId) {
@@ -94,6 +96,25 @@ export default {
       } else {
         console.error('Image proposal modal not found');
       }
+    });
+  },
+
+  setupImageProposalListener(container) {
+    const imageProposalModal = container.querySelector('image-proposal-modal');
+    const messageModal = container.querySelector('message-modal');
+
+    if (!imageProposalModal || !messageModal) {
+      console.warn('Image proposal modal or message modal not found');
+      return;
+    }
+
+    // Listen for successful image uploads
+    imageProposalModal.addEventListener('images-proposed', (event) => {
+      const { pendingImages } = event.detail;
+      const count = pendingImages.length;
+      const message =
+        count === 1 ? 'התמונה נשלחה לאישור מנהל' : `${count} תמונות נשלחו לאישור מנהל`;
+      messageModal.show(message, 'העלאה הצליחה');
     });
   },
 
