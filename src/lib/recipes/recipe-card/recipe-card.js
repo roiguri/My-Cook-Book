@@ -201,6 +201,7 @@ class RecipeCard extends HTMLElement {
       main: tempDiv.querySelector('#recipe-card-template'),
       loading: tempDiv.querySelector('#loading-template'),
       error: tempDiv.querySelector('#error-template'),
+      noImage: tempDiv.querySelector('#no-image-card-template'),
     };
   }
 
@@ -216,6 +217,7 @@ class RecipeCard extends HTMLElement {
       main: this._createInlineMainTemplate(),
       loading: this._createInlineLoadingTemplate(),
       error: this._createInlineErrorTemplate(),
+      noImage: this._createInlineNoImageTemplate(),
     };
     this._templatesLoaded = true;
   }
@@ -243,6 +245,24 @@ class RecipeCard extends HTMLElement {
   _createInlineErrorTemplate() {
     const template = document.createElement('template');
     template.innerHTML = '<div class="error-state"></div>';
+    return template;
+  }
+
+  _createInlineNoImageTemplate() {
+    const template = document.createElement('template');
+    template.innerHTML = `
+      <div class="recipe-card">
+        <div class="no-image-placeholder recipe-image">
+          <svg class="no-image-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="recipe-content">
+          <h3 class="recipe-title"></h3>
+          <div class="recipe-details"></div>
+        </div>
+      </div>
+    `;
     return template;
   }
 
@@ -428,7 +448,7 @@ class RecipeCard extends HTMLElement {
     const difficultyClass = getDifficultyClass(difficulty);
 
     this._clearShadowRoot();
-    const template = this._templates.main;
+    const template = this._hasImages() ? this._templates.main : this._templates.noImage;
     const clone = template.content.cloneNode(true);
 
     // Populate template with data
@@ -583,6 +603,18 @@ class RecipeCard extends HTMLElement {
     const dimensions = this._getCurrentDimensions();
     this.style.setProperty('--card-width', dimensions.width);
     this.style.setProperty('--card-height', dimensions.height);
+  }
+
+  /**
+   * Check if recipe has any approved images
+   * @returns {boolean} True if recipe has at least one approved image
+   */
+  _hasImages() {
+    return (
+      this._recipeData &&
+      Array.isArray(this._recipeData.images) &&
+      this._recipeData.images.length > 0
+    );
   }
 }
 
