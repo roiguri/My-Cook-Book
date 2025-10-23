@@ -35,14 +35,33 @@ class ImageProposalModal extends HTMLElement {
 
   connectedCallback() {
     this.render();
+    this.setResponsiveWidth();
     this.setupEventListeners();
+
+    // Update width on window resize
+    this.resizeHandler = () => this.setResponsiveWidth();
+    window.addEventListener('resize', this.resizeHandler);
+  }
+
+  disconnectedCallback() {
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
+  }
+
+  setResponsiveWidth() {
+    const modal = this.shadowRoot.querySelector('custom-modal');
+    if (modal) {
+      const isMobile = window.innerWidth <= 768;
+      modal.setAttribute('width', isMobile ? '90vw' : '300px');
+    }
   }
 
   render() {
     this.shadowRoot.innerHTML = `
       <style>
         .loading-overlay {
-          position: absolute;
+          position: fixed;
           top: 0;
           left: 0;
           right: 0;
@@ -51,7 +70,7 @@ class ImageProposalModal extends HTMLElement {
           display: none;
           justify-content: center;
           align-items: center;
-          z-index: 1;
+          z-index: 1001;
         }
 
         .loading-overlay.active {
@@ -61,11 +80,16 @@ class ImageProposalModal extends HTMLElement {
         .proposal-modal {
           position: relative;
           font-family: var(--body-font);
+          width: 100%;
+          max-width: 100%;
+          overflow: hidden;
+          box-sizing: border-box;
         }
-        
+
         .proposal-content {
           width: 100%;
-          max-width: 800px;
+          max-width: 100%;
+          box-sizing: border-box;
         }
 
         .proposal-header {
@@ -83,6 +107,12 @@ class ImageProposalModal extends HTMLElement {
           display: flex;
           flex-direction: column;
           gap: 20px;
+        }
+
+        image-handler {
+          display: block;
+          width: 100%;
+          box-sizing: border-box;
         }
 
         .button-container {
@@ -119,9 +149,17 @@ class ImageProposalModal extends HTMLElement {
         .cancel-button:hover {
           background-color: #5c4033;
         }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+          .proposal-modal,
+          .proposal-content {
+            max-width: 95vw;
+          }
+        }
       </style>
 
-      <custom-modal>
+      <custom-modal width="300px">
         <div class="proposal-modal">
           <div class="proposal-content">
             <div class="proposal-header">
