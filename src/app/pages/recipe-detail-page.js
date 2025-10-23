@@ -22,6 +22,7 @@ export default {
     try {
       await this.initializeRecipeComponent(container, recipeId);
       await this.importComponents();
+      this.setupMenuHandlers(container, recipeId);
     } catch (error) {
       console.error('Failed to load recipe detail page:', error);
       this.showError(container, 'Failed to load recipe details');
@@ -33,7 +34,11 @@ export default {
 
     const recipeContainer = container.querySelector('.recipe-container');
     if (recipeContainer) {
-      recipeContainer.innerHTML = '';
+      // Remove only existing recipe-component, preserve menu
+      const existingComponent = recipeContainer.querySelector('recipe-component');
+      if (existingComponent) {
+        existingComponent.remove();
+      }
 
       const recipeComponent = document.createElement('recipe-component');
       recipeComponent.setAttribute('recipe-id', recipeId);
@@ -43,7 +48,54 @@ export default {
     }
   },
 
-  async importComponents() {},
+  async importComponents() {
+    // Import modal dependencies
+    await import('../../lib/utilities/modal/modal.js');
+    await import('../../lib/utilities/loading-spinner/loading-spinner.js');
+    await import('../../lib/images/image-handler.js');
+    await import('../../lib/images/image-proposal-modal.js');
+  },
+
+  setupMenuHandlers(container, recipeId) {
+    const menuButton = container.querySelector('.recipe-menu-button');
+    const menuDropdown = container.querySelector('.recipe-menu-dropdown');
+    const suggestImagesBtn = container.querySelector('#suggest-images-btn');
+
+    if (!menuButton || !menuDropdown || !suggestImagesBtn) {
+      console.warn('Menu elements not found in container');
+      return;
+    }
+
+    // Toggle dropdown on button click
+    menuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuDropdown.classList.toggle('open');
+    });
+
+    // Close dropdown when clicking outside
+    const closeDropdown = (e) => {
+      if (!menuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
+        menuDropdown.classList.remove('open');
+      }
+    };
+    document.addEventListener('click', closeDropdown);
+
+    // Store cleanup function for unmount
+    this._menuCleanup = () => {
+      document.removeEventListener('click', closeDropdown);
+    };
+
+    // Handle "Suggest Images" click
+    suggestImagesBtn.addEventListener('click', () => {
+      menuDropdown.classList.remove('open');
+      const modal = container.querySelector('image-proposal-modal');
+      if (modal) {
+        modal.openForRecipe(recipeId);
+      } else {
+        console.error('Image proposal modal not found');
+      }
+    });
+  },
 
   showError(container, message) {
     container.innerHTML = `
@@ -69,7 +121,11 @@ export default {
   },
 
   async unmount() {
-    // Nothing to clean up
+    // Clean up menu event listeners
+    if (this._menuCleanup) {
+      this._menuCleanup();
+      this._menuCleanup = null;
+    }
   },
 
   getTitle(params) {
