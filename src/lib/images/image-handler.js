@@ -480,7 +480,7 @@ class ImageHandler extends HTMLElement {
   addImage(imageData) {
     this.images.push({
       ...imageData,
-      isPrimary: this.images.length === 0, // First image is primary by default
+      isPrimary: imageData.isPrimary ?? this.images.length === 0,
     });
     this.updatePreviewContainer();
     this.updateUploadAreaState();
