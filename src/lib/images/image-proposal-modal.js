@@ -60,23 +60,6 @@ class ImageProposalModal extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        .loading-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(255, 255, 255, 0.8);
-          display: none;
-          justify-content: center;
-          align-items: center;
-          z-index: 1001;
-        }
-
-        .loading-overlay.active {
-          display: flex;
-        }
-
         .proposal-modal {
           position: relative;
           font-family: var(--body-font);
@@ -159,25 +142,24 @@ class ImageProposalModal extends HTMLElement {
         }
       </style>
 
-      <custom-modal width="300px">
-        <div class="proposal-modal">
-          <div class="proposal-content">
-            <div class="proposal-header">
-              <h2>הצע תמונות למתכון</h2>
-            </div>
-            <form class="proposal-form">
-              <image-handler></image-handler>
-              <div class="button-container">
-                <button type="button" class="cancel-button">ביטול</button>
-                <button type="submit" class="submit-button">שלח תמונות</button>
+      <loading-spinner overlay size="60px" color="#ffffff">
+        <custom-modal width="300px">
+          <div class="proposal-modal">
+            <div class="proposal-content">
+              <div class="proposal-header">
+                <h2>הצע תמונות למתכון</h2>
               </div>
-            </form>
-            <div class="loading-overlay">
-              <loading-spinner size="60px" color="var(--primary-color)"></loading-spinner>
+              <form class="proposal-form">
+                <image-handler></image-handler>
+                <div class="button-container">
+                  <button type="button" class="cancel-button">ביטול</button>
+                  <button type="submit" class="submit-button">שלח תמונות</button>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
-      </custom-modal>
+        </custom-modal>
+      </loading-spinner>
     `;
   }
 
@@ -211,8 +193,8 @@ class ImageProposalModal extends HTMLElement {
       return;
     }
 
-    const loadingOverlay = this.shadowRoot.querySelector('.loading-overlay');
-    loadingOverlay.classList.add('active');
+    const spinner = this.shadowRoot.querySelector('loading-spinner');
+    spinner.setAttribute('active', '');
 
     try {
       const currentUser = authService.getCurrentUser();
@@ -239,7 +221,7 @@ class ImageProposalModal extends HTMLElement {
       console.error('Error uploading images:', error);
       // TODO: Show error message using message-modal
     } finally {
-      loadingOverlay.classList.remove('active');
+      spinner.removeAttribute('active');
     }
   }
 }
