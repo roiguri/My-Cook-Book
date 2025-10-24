@@ -127,24 +127,28 @@ function collectImages(shadowRoot) {
       // New image to upload
       return {
         file: img.file,
-        isPrimary: img.isPrimary,
+        isPrimary: img.isPrimary ?? false, // Default to false if undefined
         access: 'public',
         uploadedBy: authService.getCurrentUser()?.uid || 'anonymous',
         source: 'new',
       };
     } else {
-      // Existing image to keep
-      return {
-        id: img.id,
-        isPrimary: img.isPrimary,
-        full: img.full,
-        compressed: img.compressed,
-        access: img.access,
-        uploadedBy: img.uploadedBy,
-        fileName: img.fileName,
-        uploadTimestamp: img.uploadTimestamp,
+      // Existing image to keep - only include defined properties
+      const existingImage = {
+        isPrimary: img.isPrimary ?? false, // Default to false if undefined
         source: 'existing',
       };
+
+      // Only add properties that exist (prevent undefined values in Firestore)
+      if (img.id !== undefined) existingImage.id = img.id;
+      if (img.full !== undefined) existingImage.full = img.full;
+      if (img.compressed !== undefined) existingImage.compressed = img.compressed;
+      if (img.access !== undefined) existingImage.access = img.access;
+      if (img.uploadedBy !== undefined) existingImage.uploadedBy = img.uploadedBy;
+      if (img.fileName !== undefined) existingImage.fileName = img.fileName;
+      if (img.uploadTimestamp !== undefined) existingImage.uploadTimestamp = img.uploadTimestamp;
+
+      return existingImage;
     }
   });
 
