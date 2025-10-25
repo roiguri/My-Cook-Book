@@ -23,6 +23,8 @@ class ImageHandler extends HTMLElement {
         .image-handler {
           font-family: var(--body-font);
           width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
         }
 
         .upload-area {
@@ -56,16 +58,41 @@ class ImageHandler extends HTMLElement {
 
         .preview-container {
           position: relative;
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          display: flex;
           gap: 1rem;
           margin-top: 1rem;
           padding: 0.5rem 0;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+          max-width: 100%;
+        }
+
+        /* Scrollbar styling */
+        .preview-container::-webkit-scrollbar {
+          height: 8px;
+        }
+
+        .preview-container::-webkit-scrollbar-track {
+          background: #f5f5f5;
+          border-radius: 4px;
+        }
+
+        .preview-container::-webkit-scrollbar-thumb {
+          background: var(--primary-color, #bb6016);
+          border-radius: 4px;
+        }
+
+        .preview-container::-webkit-scrollbar-thumb:hover {
+          background: var(--primary-hover, #a0501a);
         }
 
         .image-preview {
           position: relative;
-          aspect-ratio: 1;
+          width: 150px;
+          height: 150px;
+          flex-shrink: 0;
           border-radius: 8px;
           overflow: hidden;
           border: 2px solid var(--primary-color, #bb6016);
@@ -453,7 +480,7 @@ class ImageHandler extends HTMLElement {
   addImage(imageData) {
     this.images.push({
       ...imageData,
-      isPrimary: this.images.length === 0, // First image is primary by default
+      isPrimary: imageData.isPrimary ?? this.images.length === 0,
     });
     this.updatePreviewContainer();
     this.updateUploadAreaState();

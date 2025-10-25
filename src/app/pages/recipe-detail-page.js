@@ -22,6 +22,8 @@ export default {
     try {
       await this.initializeRecipeComponent(container, recipeId);
       await this.importComponents();
+      this.setupMenuHandlers(container, recipeId);
+      this.setupImageProposalListener(container);
     } catch (error) {
       console.error('Failed to load recipe detail page:', error);
       this.showError(container, 'Failed to load recipe details');
@@ -33,7 +35,11 @@ export default {
 
     const recipeContainer = container.querySelector('.recipe-container');
     if (recipeContainer) {
-      recipeContainer.innerHTML = '';
+      // Remove only existing recipe-component, preserve menu
+      const existingComponent = recipeContainer.querySelector('recipe-component');
+      if (existingComponent) {
+        existingComponent.remove();
+      }
 
       const recipeComponent = document.createElement('recipe-component');
       recipeComponent.setAttribute('recipe-id', recipeId);
@@ -43,7 +49,74 @@ export default {
     }
   },
 
-  async importComponents() {},
+  async importComponents() {
+    // Import modal dependencies
+    await import('../../lib/utilities/modal/modal.js');
+    await import('../../lib/utilities/loading-spinner/loading-spinner.js');
+    await import('../../lib/images/image-handler.js');
+    await import('../../lib/images/image-proposal-modal.js');
+    await import('../../lib/modals/message-modal/message-modal.js');
+  },
+
+  setupMenuHandlers(container, recipeId) {
+    const menuButton = container.querySelector('.recipe-menu-button');
+    const menuDropdown = container.querySelector('.recipe-menu-dropdown');
+    const suggestImagesBtn = container.querySelector('#suggest-images-btn');
+
+    if (!menuButton || !menuDropdown || !suggestImagesBtn) {
+      console.warn('Menu elements not found in container');
+      return;
+    }
+
+    // Toggle dropdown on button click
+    menuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menuDropdown.classList.toggle('open');
+    });
+
+    // Close dropdown when clicking outside
+    const closeDropdown = (e) => {
+      if (!menuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
+        menuDropdown.classList.remove('open');
+      }
+    };
+    document.addEventListener('click', closeDropdown);
+
+    // Store cleanup function for unmount
+    this._menuCleanup = () => {
+      document.removeEventListener('click', closeDropdown);
+    };
+
+    // Handle "Suggest Images" click
+    suggestImagesBtn.addEventListener('click', () => {
+      menuDropdown.classList.remove('open');
+      const modal = container.querySelector('image-proposal-modal');
+      if (modal) {
+        modal.openForRecipe(recipeId);
+      } else {
+        console.error('Image proposal modal not found');
+      }
+    });
+  },
+
+  setupImageProposalListener(container) {
+    const imageProposalModal = container.querySelector('image-proposal-modal');
+    const messageModal = container.querySelector('message-modal');
+
+    if (!imageProposalModal || !messageModal) {
+      console.warn('Image proposal modal or message modal not found');
+      return;
+    }
+
+    // Listen for successful image uploads
+    imageProposalModal.addEventListener('images-proposed', (event) => {
+      const { pendingImages } = event.detail;
+      const count = pendingImages.length;
+      const message =
+        count === 1 ? 'התמונה נשלחה לאישור מנהל' : `${count} תמונות נשלחו לאישור מנהל`;
+      messageModal.show(message, 'העלאה הצליחה');
+    });
+  },
 
   showError(container, message) {
     container.innerHTML = `
@@ -69,7 +142,11 @@ export default {
   },
 
   async unmount() {
-    // Nothing to clean up
+    // Clean up menu event listeners
+    if (this._menuCleanup) {
+      this._menuCleanup();
+      this._menuCleanup = null;
+    }
   },
 
   getTitle(params) {

@@ -253,4 +253,21 @@ export const recipeCardStyles = `
         justify-content: center;
     }
 }
+
+/* No Image Placeholder Styles */
+.no-image-placeholder.recipe-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    opacity: 1; /* Override .recipe-image default opacity: 0 */
+    /* Inherits width: 100% and height: 50% from .recipe-image */
+}
+
+.no-image-icon {
+    width: 60px;
+    height: 60px;
+    color: #999;
+    opacity: 0.5;
+}
 `;

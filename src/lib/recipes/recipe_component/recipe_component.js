@@ -330,18 +330,22 @@ class RecipeComponent extends HTMLElement {
 
       imageContainer.innerHTML = '';
       if (accessibleImages.length === 0) {
-        await this.showPlaceholder(imageContainer);
-      } else if (accessibleImages.length === 1) {
-        await this.showSingleImage(imageContainer, accessibleImages[0]);
+        imageContainer.style.display = 'none';
       } else {
-        this.showCarousel(imageContainer, accessibleImages);
+        imageContainer.style.display = '';
+        if (accessibleImages.length === 1) {
+          await this.showSingleImage(imageContainer, accessibleImages[0]);
+        } else {
+          this.showCarousel(imageContainer, accessibleImages);
+        }
       }
       // TODO: add fallback to previous load system
     } catch (error) {
       console.error('Error setting recipe images:', error);
-      await this.showPlaceholder(
-        this.shadowRoot.querySelector('.Recipe_component__image-container'),
-      );
+      const container = this.shadowRoot.querySelector('.Recipe_component__image-container');
+      if (container) {
+        container.style.display = 'none';
+      }
     }
   }
 
@@ -578,6 +582,17 @@ class RecipeComponent extends HTMLElement {
 
       this.populateIngredientsList(scaledRecipe);
     });
+  }
+
+  /**
+   * Check if recipe has any accessible images
+   * @param {Object} recipe - Recipe object with images array
+   * @param {string} userRole - User role for access control
+   * @returns {boolean} True if recipe has at least one accessible image
+   */
+  _hasImages(recipe, userRole) {
+    const accessibleImages = getRecipeImages(recipe, userRole);
+    return accessibleImages && accessibleImages.length > 0;
   }
 }
 

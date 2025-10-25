@@ -63,9 +63,20 @@ class ProposeRecipeComponent extends HTMLElement {
       const imagesToUpload = recipeData.images || [];
       const recipeDataForFirestore = { ...recipeData };
       delete recipeDataForFirestore.images;
-      delete recipeDataForFirestore.mediaInstructions; // Remove - will upload after recipe creation
+      delete recipeDataForFirestore.mediaInstructions;
+      delete recipeDataForFirestore.toDelete;
       recipeDataForFirestore.creationTime = Timestamp.now();
       recipeDataForFirestore.userId = user?.uid || 'anonymous';
+
+      Object.keys(recipeDataForFirestore).forEach((key) => {
+        const value = recipeDataForFirestore[key];
+        if (value === undefined) {
+          delete recipeDataForFirestore[key];
+        } else if (Array.isArray(value)) {
+          recipeDataForFirestore[key] = value.filter((item) => item !== undefined);
+        }
+      });
+
       // Add recipe to Firestore
       const recipeId = await FirestoreService.addDocument('recipes', recipeDataForFirestore);
 
@@ -136,24 +147,22 @@ class ProposeRecipeComponent extends HTMLElement {
   }
 
   async uploadRecipeImages(recipeId, images, category, uploader) {
-    const imageUploadResults = [];
-    for (const imageData of images) {
-      const { file, isPrimary } = imageData;
-      try {
-        const meta = await uploadAndBuildImageMetadata({
+    try {
+      // Upload all images in parallel for better performance
+      const uploadPromises = images.map(({ file, isPrimary }) =>
+        uploadAndBuildImageMetadata({
           recipeId,
           category,
           file,
           isPrimary,
           uploadedBy: uploader,
-        });
-        imageUploadResults.push(meta);
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        throw error;
-      }
+        }),
+      );
+      return await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      throw error;
     }
-    return imageUploadResults;
   }
 
   showSuccessMessage() {

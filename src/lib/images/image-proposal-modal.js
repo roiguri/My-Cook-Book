@@ -35,37 +35,44 @@ class ImageProposalModal extends HTMLElement {
 
   connectedCallback() {
     this.render();
+    this.setResponsiveWidth();
     this.setupEventListeners();
+
+    // Update width on window resize
+    this.resizeHandler = () => this.setResponsiveWidth();
+    window.addEventListener('resize', this.resizeHandler);
+  }
+
+  disconnectedCallback() {
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
+  }
+
+  setResponsiveWidth() {
+    const modal = this.shadowRoot.querySelector('custom-modal');
+    if (modal) {
+      const isMobile = window.innerWidth <= 768;
+      modal.setAttribute('width', isMobile ? '90vw' : '300px');
+    }
   }
 
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        .loading-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(255, 255, 255, 0.8);
-          display: none;
-          justify-content: center;
-          align-items: center;
-          z-index: 1;
-        }
-
-        .loading-overlay.active {
-          display: flex;
-        }
-
         .proposal-modal {
           position: relative;
           font-family: var(--body-font);
+          width: 100%;
+          max-width: 100%;
+          overflow: hidden;
+          box-sizing: border-box;
         }
-        
+
         .proposal-content {
           width: 100%;
-          max-width: 800px;
+          max-width: 100%;
+          box-sizing: border-box;
         }
 
         .proposal-header {
@@ -83,6 +90,12 @@ class ImageProposalModal extends HTMLElement {
           display: flex;
           flex-direction: column;
           gap: 20px;
+        }
+
+        image-handler {
+          display: block;
+          width: 100%;
+          box-sizing: border-box;
         }
 
         .button-container {
@@ -119,27 +132,34 @@ class ImageProposalModal extends HTMLElement {
         .cancel-button:hover {
           background-color: #5c4033;
         }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+          .proposal-modal,
+          .proposal-content {
+            max-width: 95vw;
+          }
+        }
       </style>
 
-      <custom-modal>
-        <div class="proposal-modal">
-          <div class="proposal-content">
-            <div class="proposal-header">
-              <h2>הצע תמונות למתכון</h2>
-            </div>
-            <form class="proposal-form">
-              <image-handler></image-handler>
-              <div class="button-container">
-                <button type="button" class="cancel-button">ביטול</button>
-                <button type="submit" class="submit-button">שלח תמונות</button>
+      <loading-spinner overlay size="60px" color="#ffffff">
+        <custom-modal width="300px">
+          <div class="proposal-modal">
+            <div class="proposal-content">
+              <div class="proposal-header">
+                <h2>הצע תמונות למתכון</h2>
               </div>
-            </form>
-            <div class="loading-overlay">
-              <loading-spinner size="60px" color="var(--primary-color)"></loading-spinner>
+              <form class="proposal-form">
+                <image-handler></image-handler>
+                <div class="button-container">
+                  <button type="button" class="cancel-button">ביטול</button>
+                  <button type="submit" class="submit-button">שלח תמונות</button>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
-      </custom-modal>
+        </custom-modal>
+      </loading-spinner>
     `;
   }
 
@@ -173,8 +193,8 @@ class ImageProposalModal extends HTMLElement {
       return;
     }
 
-    const loadingOverlay = this.shadowRoot.querySelector('.loading-overlay');
-    loadingOverlay.classList.add('active');
+    const spinner = this.shadowRoot.querySelector('loading-spinner');
+    spinner.setAttribute('active', '');
 
     try {
       const currentUser = authService.getCurrentUser();
@@ -201,7 +221,7 @@ class ImageProposalModal extends HTMLElement {
       console.error('Error uploading images:', error);
       // TODO: Show error message using message-modal
     } finally {
-      loadingOverlay.classList.remove('active');
+      spinner.removeAttribute('active');
     }
   }
 }
