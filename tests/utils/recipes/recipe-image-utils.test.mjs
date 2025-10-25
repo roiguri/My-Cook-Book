@@ -8,13 +8,9 @@ import '../../common/mocks/firebase-service.mock.js';
 let validateImageFile,
   compressImage,
   getImageStoragePath,
-  addPendingImage,
-  approvePendingImage,
-  rejectPendingImage,
   removeApprovedImage,
   setPrimaryImage,
   getRecipeImages,
-  getPendingImage,
   getImageUrl,
   getPlaceholderImageUrl,
   getPrimaryImage,
@@ -70,13 +66,9 @@ describe('recipe-image-utils', () => {
     validateImageFile = utils.validateImageFile;
     compressImage = utils.compressImage;
     getImageStoragePath = utils.getImageStoragePath;
-    addPendingImage = utils.addPendingImage;
-    approvePendingImage = utils.approvePendingImage;
-    rejectPendingImage = utils.rejectPendingImage;
     removeApprovedImage = utils.removeApprovedImage;
     setPrimaryImage = utils.setPrimaryImage;
     getRecipeImages = utils.getRecipeImages;
-    getPendingImage = utils.getPendingImage;
     getImageUrl = utils.getImageUrl;
     getPlaceholderImageUrl = utils.getPlaceholderImageUrl;
     getPrimaryImage = utils.getPrimaryImage;
@@ -117,59 +109,6 @@ describe('recipe-image-utils', () => {
       expect(getImageStoragePath('id2', 'cat2', 'file2.jpg', 'compressed')).toBe(
         'img/recipes/compressed/cat2/id2/file2.jpg',
       );
-    });
-  });
-
-  describe('addPendingImage', () => {
-    it('uploads and sets pending image', async () => {
-      uploadFileMock.mockResolvedValue('url');
-      updateDocumentMock.mockResolvedValue();
-      const file = createFakeFile('img.jpg');
-      const result = await addPendingImage('rid', file, 'cat', 'user1');
-      expect(uploadFileMock).toHaveBeenCalledTimes(2);
-      expect(updateDocumentMock).toHaveBeenCalledWith(
-        'recipes',
-        'rid',
-        expect.objectContaining({ pendingImage: expect.any(Object) }),
-      );
-      expect(result.full).toContain('img/recipes/full/cat/rid/rid.jpg');
-      expect(result.compressed).toContain('img/recipes/compressed/cat/rid/rid.jpg');
-      expect(result.uploadedBy).toBe('user1');
-    });
-  });
-
-  describe('approvePendingImage', () => {
-    it('moves pending image to images array', async () => {
-      getDocumentMock.mockResolvedValue({
-        pendingImage: { full: 'full', compressed: 'comp', fileExtension: 'jpg', uploadedBy: 'u' },
-        images: [],
-      });
-      updateDocumentMock.mockResolvedValue();
-      await approvePendingImage('rid');
-      expect(updateDocumentMock).toHaveBeenCalledWith(
-        'recipes',
-        'rid',
-        expect.objectContaining({ images: expect.any(Array), pendingImage: null }),
-      );
-    });
-    it('throws if no pending image', async () => {
-      getDocumentMock.mockResolvedValue({});
-      await expect(approvePendingImage('rid')).rejects.toThrow();
-    });
-  });
-
-  describe('rejectPendingImage', () => {
-    it('deletes pending image files and clears field', async () => {
-      getDocumentMock.mockResolvedValue({ pendingImage: { full: 'f', compressed: 'c' } });
-      updateDocumentMock.mockResolvedValue();
-      await rejectPendingImage('rid');
-      expect(deleteFileMock).toHaveBeenCalledWith('f');
-      expect(deleteFileMock).toHaveBeenCalledWith('c');
-      expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', { pendingImage: null });
-    });
-    it('throws if no pending image', async () => {
-      getDocumentMock.mockResolvedValue({});
-      await expect(rejectPendingImage('rid')).rejects.toThrow();
     });
   });
 
@@ -229,17 +168,6 @@ describe('recipe-image-utils', () => {
     });
     it('returns [] for no images', () => {
       expect(getRecipeImages({}, 'public')).toEqual([]);
-    });
-  });
-
-  describe('getPendingImage', () => {
-    it('returns pending image if present', async () => {
-      getDocumentMock.mockResolvedValue({ pendingImage: { full: 'f' } });
-      expect(await getPendingImage('rid')).toEqual({ full: 'f' });
-    });
-    it('returns null if not present', async () => {
-      getDocumentMock.mockResolvedValue({});
-      expect(await getPendingImage('rid')).toBeNull();
     });
   });
 

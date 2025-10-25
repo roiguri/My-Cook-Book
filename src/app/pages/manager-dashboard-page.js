@@ -64,8 +64,11 @@ export default {
       import('../../lib/utilities/scrolling_list/scroll_list.js'),
       import('../../lib/recipes/recipe_preview_modal/edit_preview_recipe.js'),
       import('../../lib/recipes/recipe_preview_modal/recipe_preview_modal.js'),
-      import('../../lib/modals/image_approval/image_approval.js'),
+      import('../../lib/modals/image-approval-multi/image-approval-multi.js'),
       import('../../lib/utilities/image-carousel/image-carousel.js'),
+      import('../../lib/utilities/modal/modal.js'),
+      import('../../lib/utilities/loading-spinner/loading-spinner.js'),
+      import('../../lib/images/image-handler.js'),
     ]);
   },
 
@@ -103,16 +106,10 @@ export default {
   },
 
   setupImageApprovalListeners() {
-    const imageApprovalComponent = document.querySelector('image-approval-component');
-    if (imageApprovalComponent) {
-      imageApprovalComponent.addEventListener(
-        'image-approved',
-        this.handleImageApproved.bind(this),
-      );
-      imageApprovalComponent.addEventListener(
-        'image-rejected',
-        this.handleImageRejected.bind(this),
-      );
+    const imageApprovalMulti = document.querySelector('image-approval-multi');
+    if (imageApprovalMulti) {
+      imageApprovalMulti.addEventListener('images-approved', this.handleImagesApproved.bind(this));
+      imageApprovalMulti.addEventListener('images-rejected', this.handleImagesRejected.bind(this));
     }
   },
 
@@ -417,28 +414,36 @@ export default {
 
     pendingImagesList.setItems([]);
     try {
-      const pendingRecipes = await FirestoreService.queryDocuments('recipes', {
-        where: [['pendingImage', '!=', null]],
+      // TODO: Optimize with Firestore compound index
+      // Current approach uses client-side filtering (works fine for small datasets)
+      // To optimize for large datasets (1000+ recipes):
+      // 1. Create Firestore composite index:
+      //    Collection: recipes
+      //    Fields: pendingImages (Array-contains), approved (Ascending), __name__ (Ascending)
+      // 2. Replace with compound query:
+      //    where: [['pendingImages', '!=', []], ['approved', '==', true]]
+      // See: https://firebase.google.com/docs/firestore/query-data/indexing
+
+      const allPendingRecipes = await FirestoreService.queryDocuments('recipes', {
+        where: [['pendingImages', '!=', []]],
       });
-      const pendingImages = pendingRecipes.map((recipe) => ({
-        recipeId: recipe.id,
-        recipeName: recipe.name,
-        imageUrl: recipe.pendingImage.full,
-      }));
-      const imageItems = pendingImages.map((image) => ({
-        header: this.createPendingImageHeader(image),
-        content: this.createPendingImageContent(image),
+
+      // Filter client-side to only include approved recipes (not recipe proposals)
+      const pendingRecipes = allPendingRecipes.filter((recipe) => recipe.approved === true);
+
+      const recipeItems = pendingRecipes.map((recipe) => ({
+        header: this.createPendingImagesRecipeHeader(recipe),
+        content: this.createPendingImagesRecipeContent(recipe),
       }));
 
-      // Always update the message based on current state
-      if (imageItems.length == 0) {
+      if (recipeItems.length == 0) {
         noPendingMessage.textContent = 'אין תמונות הממתינות לאישור';
       } else {
         noPendingMessage.textContent = ''; // Clear message when items exist
       }
 
       if (pendingImagesList) {
-        pendingImagesList.setItems(imageItems);
+        pendingImagesList.setItems(recipeItems);
       } else {
         console.error('Cannot find pending images list element');
       }
@@ -447,25 +452,22 @@ export default {
     }
   },
 
-  createPendingImageHeader(image) {
+  createPendingImagesRecipeHeader(recipe) {
     const header = document.createElement('div');
     header.style.display = 'flex';
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
 
     const span = document.createElement('span');
-    span.innerHTML = `${image.recipeName}`;
+    const imageCount = recipe.pendingImages?.length || 0;
+    span.innerHTML = `${recipe.name} (${imageCount} תמונות)`;
 
     const previewButton = document.createElement('button');
-    previewButton.classList.add('preview-image');
-    previewButton.setAttribute('data-url', `${image.imageUrl}`);
-    previewButton.setAttribute('data-recipe-id', `${image.recipeId}`);
+    previewButton.classList.add('preview-images');
     previewButton.textContent = 'הצג';
     previewButton.addEventListener('click', (event) => {
       event.preventDefault();
-      const imageUrl = previewButton.getAttribute('data-url');
-      const recipeId = previewButton.getAttribute('data-recipe-id');
-      this.openImageApprovalModal(imageUrl, recipeId, image.recipeName);
+      this.openMultiImageApprovalModal(recipe);
     });
 
     header.appendChild(span);
@@ -474,33 +476,32 @@ export default {
     return header;
   },
 
-  createPendingImageContent(image) {
+  createPendingImagesRecipeContent(recipe) {
     const content = document.createElement('div');
-    content.textContent = `Image preview will be shown in the modal.`;
+    const imageCount = recipe.pendingImages?.length || 0;
+    const uploadedBy = recipe.pendingImages?.[0]?.uploadedBy || 'לא ידוע';
+    content.textContent = `${imageCount} תמונות הועלו על ידי ${uploadedBy}`;
     return content;
   },
 
   /**
-   * Preview Image
+   * Preview Images (Multi-Image Approval)
    */
-  openImageApprovalModal(imageUrl, recipeId, recipeName) {
-    const imageData = {
-      recipeId: recipeId,
-      imageUrl: imageUrl,
-      recipeName: recipeName,
-    };
-    const imageApprovalComponent = document.querySelector('image-approval-component');
-    imageApprovalComponent.openModalForImage(imageData);
+  openMultiImageApprovalModal(recipe) {
+    const imageApprovalMulti = document.querySelector('image-approval-multi');
+    imageApprovalMulti.openForRecipe(recipe);
   },
 
-  handleImageApproved(event) {
-    console.log('Image approved for recipe:', event.detail.recipeId);
+  handleImagesApproved(event) {
+    console.log('Images approved for recipe:', event.detail.recipeId);
+    console.log('Approved image IDs:', event.detail.imageIds);
     // Refresh both pending images and all recipes lists
     this.refreshManager.refreshImages();
   },
 
-  handleImageRejected(event) {
-    console.log('Image rejected for recipe:', event.detail.recipeId);
+  handleImagesRejected(event) {
+    console.log('Images rejected for recipe:', event.detail.recipeId);
+    console.log('Rejected image IDs:', event.detail.imageIds);
     // Only refresh the pending images list
     this.refreshManager.refreshPendingImages();
   },
