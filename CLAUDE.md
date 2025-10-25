@@ -757,6 +757,53 @@ git commit --no-verify -m "emergency fix"
 
 ## Project-Specific Guidelines
 
+### Code Comments Policy
+
+**Philosophy**: Code should be self-documenting. Comments should explain **WHY**, not **WHAT**.
+
+**When to Comment**:
+
+- JSDoc for public APIs and exported functions (required)
+- Complex business logic that isn't immediately obvious
+- Workarounds for bugs or edge cases
+- Performance optimizations that seem counterintuitive
+- TODO/FIXME markers for future work
+
+**When NOT to Comment**:
+
+- ❌ Obvious code: `// Create new array` before `const arr = []`
+- ❌ Numbered steps: `// 1. Do X`, `// 2. Do Y` (use function names instead)
+- ❌ Repeating code: `// Delete file` before `deleteFile()`
+- ❌ Unchanged legacy comments after refactoring
+
+**Examples**:
+
+```javascript
+// ❌ BAD - Obvious comments
+// 1. Fetch original recipe
+const recipe = await getRecipe(id);
+// 2. Check if category changed
+if (recipe.category !== newCategory) {
+  // 3. Migrate images
+  await migrateImages();
+}
+
+// ✅ GOOD - Self-documenting code
+const recipe = await getRecipe(id);
+const categoryChanged = recipe.category !== newCategory;
+
+if (categoryChanged) {
+  await migrateImagesToNewCategory();
+}
+
+// ✅ GOOD - Explains WHY, not WHAT
+// Migrate images because storage paths include category folder
+// (legacy design decision - images are organized by category)
+if (categoryChanged) {
+  await migrateImagesToNewCategory();
+}
+```
+
 ### Do's
 
 - Work with task-master commands rather than changing configuration files
@@ -767,6 +814,8 @@ git commit --no-verify -m "emergency fix"
 - Let pre-commit hooks format and lint your code automatically
 - Run `npm run lint:fix` to auto-fix linting issues before committing
 - Use `firebase-service.js` for all Firebase imports
+- Write JSDoc comments for all exported functions
+- Keep comments focused on explaining WHY, not WHAT
 
 ### Don'ts
 
@@ -777,3 +826,5 @@ git commit --no-verify -m "emergency fix"
 - Do not bypass pre-commit hooks without good reason
 - Do not use default imports from Firebase modules
 - Do not use Firebase compat API
+- Do not add numbered step comments (`// 1. Do X`) - use descriptive function/variable names instead
+- Do not add comments that simply repeat what the code does

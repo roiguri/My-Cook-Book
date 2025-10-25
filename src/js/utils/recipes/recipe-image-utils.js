@@ -28,6 +28,7 @@
  *   - getImageUrl(storagePath): Get the download URL for a storage path.
  *   - getPlaceholderImageUrl(): Get the placeholder image URL.
  *   - removeAllRecipeImages(recipeId): Remove all images (approved and pending) for a recipe.
+ *   - migrateImageToCategory(image, recipeId, oldCategory, newCategory): Migrate image to new category path.
  *   - uploadAndBuildImageMetadata({ recipeId, category, file, isPrimary, uploadedBy }): Upload and return metadata for an image.
  */
 
@@ -253,6 +254,60 @@ export async function removeAllRecipeImages(recipeId) {
   await Promise.all(deletePromises);
   // Remove images and pendingImages from Firestore
   await updateRecipeDoc(recipeId, { images: [], pendingImages: [] });
+}
+
+// TODO: Consider migrating images to be category agnostic
+/**
+ * Migrates an image from old category path to new category path
+ * @param {RecipeImage} image - Image object with old category paths
+ * @param {string} recipeId
+ * @param {string} oldCategory
+ * @param {string} newCategory
+ * @returns {Promise<RecipeImage>} Updated image object with new paths
+ */
+export async function migrateImageToCategory(image, recipeId, oldCategory, newCategory) {
+  if (!image || !image.full || !image.compressed) {
+    throw new Error('Invalid image object for migration');
+  }
+
+  try {
+    const fileName = image.full.split('/').pop();
+    const newFullPath = getImageStoragePath(recipeId, newCategory, fileName, 'full');
+    const newCompressedPath = getImageStoragePath(recipeId, newCategory, fileName, 'compressed');
+
+    const fullUrl = await StorageService.getFileUrl(image.full);
+    const compressedUrl = await StorageService.getFileUrl(image.compressed);
+
+    const fullResponse = await fetch(fullUrl);
+    const compressedResponse = await fetch(compressedUrl);
+
+    if (!fullResponse.ok || !compressedResponse.ok) {
+      throw new Error(
+        `Failed to fetch images: full=${fullResponse.status}, compressed=${compressedResponse.status}`,
+      );
+    }
+
+    const fullBlob = await fullResponse.blob();
+    const compressedBlob = await compressedResponse.blob();
+
+    await StorageService.uploadFile(fullBlob, newFullPath);
+    await StorageService.uploadFile(compressedBlob, newCompressedPath);
+
+    await StorageService.deleteFile(image.full);
+    await StorageService.deleteFile(image.compressed);
+
+    return {
+      ...image,
+      full: newFullPath,
+      compressed: newCompressedPath,
+    };
+  } catch (error) {
+    console.error(
+      `Failed to migrate image ${image.id} from ${oldCategory} to ${newCategory}:`,
+      error,
+    );
+    throw new Error(`Failed to migrate image ${image.id}: ${error.message}`);
+  }
 }
 
 /**

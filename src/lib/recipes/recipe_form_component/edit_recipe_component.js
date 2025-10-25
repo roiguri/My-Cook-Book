@@ -6,6 +6,7 @@ import {
   compressImage,
   getImageStoragePath,
   uploadAndBuildImageMetadata,
+  migrateImageToCategory,
 } from '../../../js/utils/recipes/recipe-image-utils.js';
 
 import '../../modals/message-modal/message-modal.js';
@@ -48,7 +49,9 @@ class EditRecipeComponent extends HTMLElement {
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
     try {
-      // 1. Delete images marked for removal
+      const originalRecipe = await FirestoreService.getDocument('recipes', this.recipeId);
+      const categoryChanged = originalRecipe.category !== recipeData.category;
+
       if (Array.isArray(recipeData.toDelete)) {
         for (const img of recipeData.toDelete) {
           if (img.full) await StorageService.deleteFile(img.full).catch(() => {});
@@ -56,7 +59,6 @@ class EditRecipeComponent extends HTMLElement {
         }
       }
 
-      // 2. Upload new images and build the new images array
       const newImages = [];
       for (const img of recipeData.images) {
         if (img.source === 'new' && img.file) {
@@ -69,8 +71,7 @@ class EditRecipeComponent extends HTMLElement {
           });
           newImages.push(meta);
         } else if (img.source === 'existing') {
-          // Keep existing image (exclude file/source and undefined fields)
-          const existingImage = {
+          let existingImage = {
             id: img.id,
             full: img.full,
             compressed: img.compressed,
@@ -79,12 +80,27 @@ class EditRecipeComponent extends HTMLElement {
             uploadedBy: img.uploadedBy,
           };
 
-          // Only add optional fields if they exist
           if (img.fileName !== undefined) {
             existingImage.fileName = img.fileName;
           }
           if (img.uploadTimestamp !== undefined) {
             existingImage.uploadTimestamp = img.uploadTimestamp;
+          }
+
+          if (categoryChanged) {
+            try {
+              existingImage = await migrateImageToCategory(
+                existingImage,
+                this.recipeId,
+                originalRecipe.category,
+                recipeData.category,
+              );
+            } catch (error) {
+              console.error(`Failed to migrate image ${img.id}:`, error);
+              this.showWarningMessage(
+                `Warning: Could not migrate image ${img.id} to new category folder. The image will remain in the old category folder.`,
+              );
+            }
           }
 
           newImages.push(existingImage);
@@ -146,7 +162,6 @@ class EditRecipeComponent extends HTMLElement {
         }
       }
 
-      // 3. Update the recipe data in Firestore (exclude file/source/toDelete)
       const { images, toDelete, mediaInstructions: _, ...rest } = recipeData;
       await FirestoreService.updateDocument('recipes', this.recipeId, {
         ...rest,
@@ -165,10 +180,7 @@ class EditRecipeComponent extends HTMLElement {
         this.showSuccessMessage('Recipe updated successfully!');
       }
 
-      // 4. Reload form data to show updated recipe (including uploaded media)
-      await this.formComponent.setRecipeData(this.recipeId);
-
-      // 5. Dispatch recipe-updated event for dashboard refresh
+      // Dispatch recipe-updated event for dashboard refresh
       const event = new CustomEvent('recipe-updated', {
         detail: { recipeId: this.recipeId },
         bubbles: true,
@@ -232,6 +244,12 @@ class EditRecipeComponent extends HTMLElement {
     );
 
     editRecipeModal.show(message, 'Success!');
+  }
+
+  showWarningMessage(message) {
+    // Show the warning message in the modal
+    const editRecipeModal = this.shadowRoot.querySelector('message-modal');
+    editRecipeModal.show(message, 'Warning');
   }
 
   showErrorMessage(message, error) {
