@@ -28,17 +28,25 @@ class ImageHandler extends HTMLElement {
         }
 
         .upload-area {
-          border: 2px dashed var(--primary-color, #bb6016);
+          border: 2px dashed var(--border-color, #ccc);
           border-radius: 8px;
-          padding: 2rem;
+          padding: 40px;
           text-align: center;
-          margin-bottom: 1rem;
           cursor: pointer;
-          transition: background-color 0.3s ease;
+          transition: all 0.3s ease;
+          background-color: var(--background-light, #f9f9f9);
+          margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+          border-color: var(--primary-color, #3498db);
+          background-color: var(--background-hover, #f0f8ff);
         }
 
         .upload-area.drag-over {
-          background-color: rgba(187, 96, 22, 0.1);
+          border-color: var(--primary-color, #3498db);
+          background-color: var(--primary-light, #e3f2fd);
+          transform: scale(1.02);
         }
 
         .upload-area[data-disabled="true"] {
