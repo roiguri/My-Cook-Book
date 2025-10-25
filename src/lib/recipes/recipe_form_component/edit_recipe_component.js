@@ -10,6 +10,7 @@ import {
 } from '../../../js/utils/recipes/recipe-image-utils.js';
 
 import '../../modals/message-modal/message-modal.js';
+import '../../utilities/loading-spinner/loading-spinner.js';
 import './recipe_form_component.js';
 
 class EditRecipeComponent extends HTMLElement {
@@ -35,20 +36,21 @@ class EditRecipeComponent extends HTMLElement {
 
   render() {
     this.shadowRoot.innerHTML = `
-          <style>
-              /* Add your component-specific styles here */
-          </style>
-          <div class="edit-recipe-container">
-              <recipe-form-component clear-button-text="איפוס" submit-button-text="שמור שינויים" recipe-id="${this.recipeId}" disable-form-protection></recipe-form-component>
-              <message-modal width="400px" height="auto"></message-modal>
-          </div>
+          <loading-spinner overlay border-radius="10px">
+            <div class="edit-recipe-container">
+                <recipe-form-component clear-button-text="איפוס" submit-button-text="שמור שינויים" recipe-id="${this.recipeId}" disable-form-protection></recipe-form-component>
+                <message-modal width="400px" height="auto"></message-modal>
+            </div>
+          </loading-spinner>
       `;
   }
 
   // TODO: scroll page to top after update
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
+    const spinner = this.shadowRoot.querySelector('loading-spinner');
     try {
+      spinner.setAttribute('active', '');
       const originalRecipe = await FirestoreService.getDocument('recipes', this.recipeId);
       const categoryChanged = originalRecipe.category !== recipeData.category;
 
@@ -98,7 +100,7 @@ class EditRecipeComponent extends HTMLElement {
             } catch (error) {
               console.error(`Failed to migrate image ${img.id}:`, error);
               this.showWarningMessage(
-                `Warning: Could not migrate image ${img.id} to new category folder. The image will remain in the old category folder.`,
+                `אזהרה: לא ניתן להעביר תמונה ${img.id} לתיקיית קטגוריה חדשה. התמונה תישאר בתיקייה הישנה.`,
               );
             }
           }
@@ -171,14 +173,15 @@ class EditRecipeComponent extends HTMLElement {
 
       if (failedCount > 0) {
         this.showWarningMessage(
-          `Recipe updated successfully!\n\n` +
-            `${successCount} media file(s) were uploaded successfully.\n` +
-            `${failedCount} media file(s) failed to upload and were not saved.\n\n` +
-            `The failed items are still visible in the editor. You can try uploading them again by clicking "Update Recipe".`,
+          `המתכון עודכן בהצלחה!\n\n` +
+            `${successCount} קבצי מדיה הועלו בהצלחה.\n` +
+            `${failedCount} קבצי מדיה נכשלו בהעלאה.\n\n` +
+            `הקבצים שנכשלו עדיין נראים בעורך. תוכל לנסות להעלות אותם שוב על ידי לחיצה על "עדכן מתכון".`,
         );
       } else {
-        this.showSuccessMessage('Recipe updated successfully!');
+        this.showSuccessMessage('המתכון עודכן בהצלחה!');
       }
+      spinner.removeAttribute('active');
 
       // Dispatch recipe-updated event for dashboard refresh
       const event = new CustomEvent('recipe-updated', {
@@ -188,7 +191,8 @@ class EditRecipeComponent extends HTMLElement {
       });
       this.dispatchEvent(event);
     } catch (error) {
-      this.showErrorMessage(`Error updating recipe: ${error}`);
+      spinner.removeAttribute('active');
+      this.showErrorMessage(`שגיאה בעדכון המתכון: ${error}`);
     }
   }
 
@@ -228,7 +232,6 @@ class EditRecipeComponent extends HTMLElement {
   }
 
   showSuccessMessage(message) {
-    // Show the success message in the modal
     const editRecipeModal = this.shadowRoot.querySelector('message-modal');
 
     editRecipeModal.addEventListener(
@@ -243,19 +246,17 @@ class EditRecipeComponent extends HTMLElement {
       { once: true },
     );
 
-    editRecipeModal.show(message, 'Success!');
+    editRecipeModal.show(message);
   }
 
   showWarningMessage(message) {
-    // Show the warning message in the modal
     const editRecipeModal = this.shadowRoot.querySelector('message-modal');
-    editRecipeModal.show(message, 'Warning');
+    editRecipeModal.show(message);
   }
 
   showErrorMessage(message, error) {
-    // Show the error message in the modal
     const editRecipeModal = this.shadowRoot.querySelector('message-modal');
-    editRecipeModal.show(message, 'Error!');
+    editRecipeModal.show(message);
   }
 
   resetFormToCurrentData() {

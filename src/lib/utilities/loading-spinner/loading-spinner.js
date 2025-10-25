@@ -13,7 +13,16 @@
  */
 class LoadingSpinner extends HTMLElement {
   static get observedAttributes() {
-    return ['size', 'line-width', 'color', 'background-color', 'length', 'overlay', 'active'];
+    return [
+      'size',
+      'line-width',
+      'color',
+      'background-color',
+      'length',
+      'overlay',
+      'active',
+      'border-radius',
+    ];
   }
 
   constructor() {
@@ -24,6 +33,7 @@ class LoadingSpinner extends HTMLElement {
     this._length = 'three-quarters';
     this._color = '#333';
     this._backgroundColor = 'transparent';
+    this._borderRadius = '0px';
   }
 
   get size() {
@@ -44,6 +54,10 @@ class LoadingSpinner extends HTMLElement {
 
   get length() {
     return this.getAttribute('length') || this._length;
+  }
+
+  get borderRadius() {
+    return this.getAttribute('border-radius') || this._borderRadius;
   }
 
   connectedCallback() {
@@ -73,6 +87,7 @@ class LoadingSpinner extends HTMLElement {
         background: rgba(255,255,255,0.7);
         z-index: 10000;
         pointer-events: all;
+        border-radius: ${this.borderRadius};
       }
       .spinner {
         border: ${this.lineWidth} solid ${this.color};

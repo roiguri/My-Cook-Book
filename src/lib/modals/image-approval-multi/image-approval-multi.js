@@ -59,7 +59,7 @@ class ImageApprovalMulti extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>${this.styles()}</style>
-      <loading-spinner overlay size="60px" color="#ffffff">
+      <loading-spinner overlay border-radius="10px" size="60px" color="#ffffff">
         <custom-modal width="700px" height="auto">
           <div class="approval-container">
             <h2>אישור תמונות</h2>
