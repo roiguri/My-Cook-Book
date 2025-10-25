@@ -303,8 +303,9 @@ export async function addPendingImages(recipeId, files, category, uploader) {
   if (!Array.isArray(files) || files.length === 0) return [];
   const recipe = await getRecipeDoc(recipeId);
   const pendingImages = Array.isArray(recipe.pendingImages) ? [...recipe.pendingImages] : [];
-  const newPendingImages = [];
-  for (const file of files) {
+
+  // Upload all images in parallel for better performance
+  const uploadPromises = files.map(async (file) => {
     const fileExtension = file.name.split('.').pop();
     const id = generateImageId();
     const fileName = `${id}.${fileExtension}`;
@@ -315,7 +316,8 @@ export async function addPendingImages(recipeId, files, category, uploader) {
     const compressedFile = await compressImage(file);
     const compressedPath = getImageStoragePath(recipeId, category, fileName, 'compressed');
     await StorageService.uploadFile(compressedFile, compressedPath);
-    const pendingImage = {
+
+    return {
       id,
       full: fullPath,
       compressed: compressedPath,
@@ -323,9 +325,10 @@ export async function addPendingImages(recipeId, files, category, uploader) {
       timestamp: Timestamp.now(),
       uploadedBy: uploader,
     };
-    pendingImages.push(pendingImage);
-    newPendingImages.push(pendingImage);
-  }
+  });
+
+  const newPendingImages = await Promise.all(uploadPromises);
+  pendingImages.push(...newPendingImages);
   await updateRecipeDoc(recipeId, { pendingImages });
   return newPendingImages;
 }
