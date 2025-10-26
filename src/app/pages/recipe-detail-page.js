@@ -149,6 +149,35 @@ export default {
     }
   },
 
+  async handleRouteChange(params) {
+    // This method is called when navigating from one recipe to another
+    // (e.g., when searching from a recipe page and finding a single match)
+    const newRecipeId = params.id;
+    if (!newRecipeId) {
+      console.error('No recipe ID provided in route change');
+      return;
+    }
+
+    // Find the current recipe component and update its recipe-id attribute
+    const recipeContainer = document.querySelector('.recipe-container');
+    if (recipeContainer) {
+      const recipeComponent = recipeContainer.querySelector('recipe-component');
+      if (recipeComponent) {
+        // Update the recipe-id attribute, which will trigger the component to reload
+        recipeComponent.setAttribute('recipe-id', newRecipeId);
+      } else {
+        // If component doesn't exist, reinitialize it
+        await this.initializeRecipeComponent(recipeContainer, newRecipeId);
+      }
+    }
+
+    // Update page title and metadata
+    const title = this.getTitle(params);
+    if (title) {
+      document.title = title;
+    }
+  },
+
   getTitle(params) {
     return params.id
       ? AppConfig.getPageTitle(`Recipe ${params.id}`)
