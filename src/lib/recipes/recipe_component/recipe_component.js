@@ -1,4 +1,5 @@
 import authService from '../../../js/services/auth-service.js';
+import { AppConfig } from '../../../js/config/app-config.js';
 import {
   getRecipeById,
   getLocalizedCategoryName,
@@ -286,10 +287,17 @@ class RecipeComponent extends HTMLElement {
     `;
   }
 
+  updatePageTitle(recipeName) {
+    if (recipeName && typeof recipeName === 'string') {
+      document.title = AppConfig.getPageTitle(recipeName);
+    }
+  }
+
   async fetchAndPopulateRecipeData() {
     try {
       const recipe = await getRecipeById(this.recipeId);
       if (recipe) {
+        this.updatePageTitle(recipe.name);
         this.populateRecipeDetails(recipe);
         this.setRecipeImage(recipe);
         this.populateIngredientsList(recipe);
