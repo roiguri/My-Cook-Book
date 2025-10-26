@@ -30,7 +30,8 @@
 .cook-mode-toggle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  flex-wrap: wrap;
   padding: 0.25rem 0;
   gap: 1rem;
 }

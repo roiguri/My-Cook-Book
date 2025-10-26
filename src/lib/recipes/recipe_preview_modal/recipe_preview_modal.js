@@ -71,6 +71,24 @@ class RecipePreviewModal extends HTMLElement {
     this.modal.setAttribute('modal-title', `Preview: ${this.recipeName}`);
     this.shadowRoot.querySelector('recipe-component').setAttribute('recipe-id', this.recipeId);
     this.setupButtons();
+    this.setResponsiveWidth();
+
+    this.resizeHandler = () => this.setResponsiveWidth();
+    window.addEventListener('resize', this.resizeHandler);
+  }
+
+  disconnectedCallback() {
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
+  }
+
+  setResponsiveWidth() {
+    const modal = this.shadowRoot.querySelector('custom-modal');
+    if (modal) {
+      const isMobile = window.innerWidth <= 768;
+      modal.setAttribute('width', isMobile ? '90vw' : '60vw');
+    }
   }
 
   render() {
@@ -180,7 +198,7 @@ class RecipePreviewModal extends HTMLElement {
   template() {
     return `
       <div class="recipe-preview-modal">
-        <custom-modal height="90vh" width="60vw">
+        <custom-modal height="90vh" width="90vw">
           <loading-spinner overlay border-radius="10px" style="z-index:1000; display:none;" id="modal-spinner"></loading-spinner>
           <div class="error-message"></div>
           <h3> Recipe Preview </h3>
