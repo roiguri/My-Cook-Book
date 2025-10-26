@@ -1,3 +1,7 @@
+import { FirestoreService } from '../../../js/services/firestore-service.js';
+import { FilterUtils } from '../../../js/utils/filter-utils.js';
+import { showToast } from '../../notifications/toast-notification/toast-notification.js';
+
 /**
  * HeaderSearchBar Component
  * @class
@@ -135,9 +139,56 @@ class HeaderSearchBar extends HTMLElement {
     );
   }
 
-  navigateToSearch(searchText) {
+  async navigateToSearch(searchText) {
     if (!searchText.trim()) return;
 
+    try {
+      // Load all approved recipes from Firestore
+      const recipes = await FirestoreService.queryDocuments('recipes', {
+        where: [['approved', '==', true]],
+      });
+
+      // Filter recipes using the same logic as categories page
+      const filteredRecipes = FilterUtils.searchRecipes(recipes, searchText);
+
+      // If exactly one match, navigate directly to that recipe
+      if (filteredRecipes.length === 1) {
+        const recipeId = filteredRecipes[0].id;
+        const recipeName = filteredRecipes[0].name;
+
+        // Show toast notification
+        showToast(`נמצא מתכון אחד: "${recipeName}" - מעבר ישיר למתכון`, 'success', 3000);
+
+        if (window.spa?.router) {
+          window.spa.router.navigate(`/recipe/${recipeId}`);
+
+          // Close hamburger menu if open
+          if (typeof window.closeHamburgerMenuIfOpen === 'function') {
+            window.closeHamburgerMenuIfOpen();
+          }
+
+          // Update navigation active state after navigation
+          setTimeout(() => {
+            if (typeof window.updateActiveNavigation === 'function') {
+              window.updateActiveNavigation();
+            }
+          }, 100);
+
+          // Clear the search input
+          this.clear();
+        } else {
+          // Fallback to legacy navigation for single recipe
+          window.location.href = `./pages/recipe.html?id=${recipeId}`;
+        }
+        return;
+      }
+    } catch (error) {
+      console.error('Error loading recipes for search:', error);
+      // Fall through to default behavior if there's an error
+    }
+
+    // Default behavior: navigate to categories page with search parameter
+    // This handles 0 results, multiple results, or errors
     // Check if we're in the SPA context
     if (window.spa?.router) {
       // Use SPA router for navigation
