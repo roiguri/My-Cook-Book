@@ -1,18 +1,14 @@
-/* Styles for the header container */
-:root {
-  --header-background: url('/img/background/navigation/wood-texture.jpg') repeat-x;
-}
-
+/* Modern Header Styles */
 header {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: var(--header-background);
-  background-size: auto 100%;
-  border-bottom: 8px solid var(--primary-color);
-  gap: 0.5rem;
+  padding: var(--spacing-4) var(--spacing-6);
+  background: white;
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border-color);
+  gap: var(--spacing-4);
 }
 
 header .menu-title-container {
@@ -31,9 +27,10 @@ header .hamburger {
   display: block;
   width: 24px;
   height: 2.5px;
-  background-color: var(--background-color);
+  background-color: var(--neutral-700);
   position: relative;
   transition: background-color 0.2s ease;
+  border-radius: 2px;
   /* Pre-warm hamburger animations */
   will-change: background-color;
 }
@@ -44,7 +41,8 @@ header .hamburger::before,
   position: absolute;
   width: 100%;
   height: 100%;
-  background-color: var(--background-color);
+  background-color: var(--neutral-700);
+  border-radius: 2px;
   transition: transform 0.2s ease;
   /* Pre-warm transform animations */
   will-change: transform;
@@ -72,11 +70,11 @@ header .hamburger::after {
 
 header .logo {
   font-family: var(--heading-font);
-  font-weight: bolder;
+  font-weight: 800;
   font-size: var(--size-header1);
-  color: var(--header-color);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  line-height: 0.9;
+  color: var(--primary-color);
+  line-height: 1;
+  letter-spacing: -0.025em;
 }
 
 header .nav-search-container {
@@ -103,16 +101,26 @@ header nav ul li:first-child {
 }
 
 header nav ul li a {
-  color: var(--background-color);
+  color: var(--neutral-700);
   font-family: var(--nav-font);
-  font-weight: bold;
-  background: var(--primary-color);
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
+  font-weight: 500;
+  background: transparent;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
 
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
   display: inline-block;
   white-space: nowrap;
+}
+
+header nav ul li a:hover {
+  background: var(--neutral-100);
+  color: var(--primary-color);
+}
+
+header nav ul li a.active {
+  background: var(--primary-color);
+  color: white;
 }
 
 header .search-auth-container {
@@ -122,49 +130,66 @@ header .search-auth-container {
 }
 
 header .search-form {
-  border: 2px solid var(--primary-color);
-  background-color: var(--primary-color);
-  transition: background-color 0.3s;
+  border: 1px solid var(--border-color);
+  background-color: var(--neutral-50);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 header .search-form:hover {
-  background-color: var(--primary-hover);
-  border: 2px solid var(--primary-hover);
+  background-color: white;
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+header .search-form:focus-within {
+  background-color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 header .search-form:hover .search-button {
-  background-color: var(--primary-hover);
+  background-color: transparent;
 }
 
 header .search-button .icon-search {
-  color: var(--button-color);
+  color: var(--neutral-500);
   font-size: var(--size-icon);
 }
 
 header .search-input {
-  background: var(--button-color);
+  background: transparent;
   border: none;
   font-family: var(--body-font);
   font-size: var(--size-body);
-  padding: 0 10px;
+  padding: var(--spacing-2) var(--spacing-3);
   flex-grow: 1;
   outline: none;
   height: 100%;
+  color: var(--text-color);
+}
+
+header .search-input::placeholder {
+  color: var(--neutral-400);
 }
 
 header .search-button {
-  background: var(--primary-color);
+  background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0 15px;
+  padding: 0 var(--spacing-3);
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+}
+
+header .search-button:hover .icon-search {
+  color: var(--primary-color);
 }
 
 auth-avatar {
@@ -174,10 +199,10 @@ auth-avatar {
 
 header .auth-button {
   margin: 0;
-  padding: 0;
-  border: none;
-  background-color: var(--primary-color);
-  color: var(--button-color);
+  padding: var(--spacing-2);
+  border: 1px solid var(--border-color);
+  background-color: white;
+  color: var(--neutral-700);
   cursor: pointer;
 
   width: 100%;
@@ -189,7 +214,13 @@ header .auth-button {
 
   flex: 0 0 auto;
 
-  border-radius: 5px;
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+}
+
+header .auth-button:hover {
+  background-color: var(--neutral-50);
+  border-color: var(--primary-color);
 }
 
 .auth-button svg {
@@ -279,19 +310,15 @@ header .auth-button {
     top: 0;
     right: 0;
     height: 100vh;
-    width: min(220px, 75vw);
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--submenu-color) 100%);
-    border-left: 1px solid rgba(255, 255, 255, 0.15);
-    border-top-left-radius: 24px;
-    border-bottom-left-radius: 24px;
+    width: min(280px, 75vw);
+    background: white;
+    border-left: 1px solid var(--border-color);
     transform: translate3d(100%, 0, 0);
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     z-index: 1001;
-    padding: 2rem 1.5rem;
-    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.3);
+    padding: var(--spacing-8) var(--spacing-6);
+    box-shadow: var(--shadow-xl);
     overflow-y: auto;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
   }
 
   .mobile-nav-drawer.active {
@@ -347,29 +374,27 @@ header .auth-button {
 
   .mobile-nav-drawer nav ul li a {
     display: block;
-    color: var(--background-color);
+    color: var(--neutral-700);
     font-family: var(--nav-font);
-    font-weight: 600;
+    font-weight: 500;
     font-size: 1rem;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 0.9rem 1.1rem;
-    border-radius: 8px;
+    background: var(--neutral-50);
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--radius-md);
     text-decoration: none;
-    border: none;
+    border: 1px solid transparent;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .mobile-nav-drawer nav ul li a:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: var(--neutral-100);
+    border-color: var(--border-color);
   }
 
   .mobile-nav-drawer nav ul li a.active {
-    background: var(--background-color);
-    color: var(--primary-color);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
   }
 
   .mobile-nav-backdrop {
@@ -378,12 +403,12 @@ header .auth-button {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     opacity: 0;
     visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     z-index: 1000;
   }
 
@@ -394,45 +419,44 @@ header .auth-button {
 
   .mobile-nav-drawer .drawer-header {
     position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
-    right: 1.5rem;
+    top: var(--spacing-6);
+    left: var(--spacing-6);
+    right: var(--spacing-6);
     display: flex;
     flex-direction: row-reverse;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    padding-bottom: var(--spacing-6);
+    border-bottom: 1px solid var(--border-color);
   }
 
   .mobile-nav-drawer .drawer-logo {
-    color: var(--background-color);
-    font-weight: bolder;
+    color: var(--primary-color);
+    font-weight: 800;
     font-size: 1.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
+    letter-spacing: -0.025em;
   }
 
   .mobile-nav-drawer .drawer-close {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    color: var(--background-color);
+    background: var(--neutral-50);
+    border: 1px solid var(--border-color);
+    color: var(--neutral-700);
     font-size: 1.3rem;
     cursor: pointer;
-    padding: 0.4rem;
-    border-radius: 50%;
+    padding: var(--spacing-2);
+    border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.2s ease;
   }
 
   .mobile-nav-drawer .drawer-close:hover {
-    background-color: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: scale(1.05);
+    background-color: var(--neutral-100);
+    border-color: var(--neutral-300);
   }
 
   .mobile-nav-drawer .drawer-close::before {

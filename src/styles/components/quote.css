@@ -1,24 +1,33 @@
-/* Styles for the quote section */
+/* Modern Quote Section */
 .quote-section {
-  background-color: var(--secondary-color);
-  padding: 2rem;
+  background: linear-gradient(135deg, var(--primary-bright) 0%, var(--primary) 100%);
+  padding: var(--spacing-12) var(--spacing-6);
   text-align: center;
-  font-style: italic;
-  margin-top: 2rem;
+  margin-top: var(--spacing-12);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
 }
 
 .quote-section blockquote {
   font-size: var(--size-header2);
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-4);
+  font-style: italic;
+  font-weight: 500;
+  color: white;
+  line-height: 1.5;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 768px) {
   .quote-section {
-    padding: 1rem;
+    padding: var(--spacing-8) var(--spacing-4);
+    margin-top: var(--spacing-8);
   }
 
   .quote-section blockquote {
     font-size: var(--size-body);
-    margin: 0 1rem 1rem 1rem;
+    margin: 0 var(--spacing-4) var(--spacing-4) var(--spacing-4);
   }
 }

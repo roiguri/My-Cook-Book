@@ -1,68 +1,73 @@
+/* Modern Button Base */
 .base-button {
-  display: block;
-  padding: 12px;
-  /* background-color: var(--primary-color);
-  color: var(--button-color); */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2) var(--spacing-4);
   border: none;
-  /* border-radius: 5px; */
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: var(--size-body);
-  font-weight: bold;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  gap: var(--spacing-2);
 }
 
-.base-button:hover {
-  background-color: var(--primary-hover);
-}
-
-/* Style 1: Modern Clean */
-.btn-modern {
+/* Primary Button - Main Actions */
+.btn-modern,
+.btn-primary {
   background: var(--primary);
   color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(var(--primary), 0.2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
-.btn-modern:hover {
+.btn-modern:hover,
+.btn-primary:hover {
   background: var(--primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(var(--primary), 0.3);
+  box-shadow: var(--shadow-md);
 }
 
-.btn-modern:active {
-  transform: translateY(0);
+.btn-modern:active,
+.btn-primary:active {
+  transform: scale(0.98);
 }
 
-/* Style 2: Soft UI */
-.btn-soft {
-  background: var(--primary);
-  color: white;
-  border-radius: 15px;
-  box-shadow:
-    4px 4px 8px rgba(var(--primary), 0.2),
-    -4px -4px 8px rgba(255, 255, 255, 0.9);
+.btn-modern:disabled,
+.btn-primary:disabled {
+  background: var(--disabled-color);
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
-.btn-soft:hover {
-  box-shadow:
-    6px 6px 12px rgba(var(--primary), 0.25),
-    -6px -6px 12px rgba(255, 255, 255, 0.95);
+/* Secondary Button - Less Prominent Actions */
+.btn-soft,
+.btn-secondary {
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
 }
 
-.btn-soft:active {
-  box-shadow:
-    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
-    inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+.btn-soft:hover,
+.btn-secondary:hover {
+  background: var(--neutral-200);
+  border-color: var(--neutral-300);
 }
 
-/* Style 3: Outline */
+.btn-soft:active,
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Outline Button - Alternative Actions */
 .btn-outline {
   background: transparent;
   color: var(--primary);
-  border: 2px solid var(--primary);
-  border-radius: 8px;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
 }
 
 .btn-outline:hover {
@@ -70,78 +75,98 @@
   color: white;
 }
 
-/* Style 4: Minimal */
-.btn-minimal {
+.btn-outline:active {
+  transform: scale(0.98);
+}
+
+/* Ghost/Minimal Button - Subtle Actions */
+.btn-minimal,
+.btn-ghost {
   background: transparent;
   color: var(--primary);
-  border-bottom: 2px solid transparent;
+  border: none;
+  padding: var(--spacing-2) var(--spacing-3);
 }
 
-.btn-minimal:hover {
-  border-bottom: 2px solid var(--primary);
+.btn-minimal:hover,
+.btn-ghost:hover {
+  background: var(--neutral-100);
 }
 
-/* Style 5: Gradient */
-.btn-gradient {
-  background: linear-gradient(135deg, var(--primary), var(--primary-bright));
+/* Danger/Destructive Button */
+.btn-danger {
+  background: var(--error);
   color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(var(--primary), 0.2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-danger:hover {
+  background: #DC2626;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger:active {
+  transform: scale(0.98);
+}
+
+/* Success Button */
+.btn-success {
+  background: var(--success);
+  color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-success:hover {
+  background: #059669;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success:active {
+  transform: scale(0.98);
+}
+
+/* Legacy Support - Map old styles to new ones */
+.btn-gradient {
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-gradient:hover {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(var(--primary), 0.3);
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-md);
 }
 
-.btn-gradient:disabled {
-  background: linear-gradient(135deg, gray, var(--primary-bright));
-  color: white;
-  opacity: 0.5;
-  transform: translateY(0);
-}
-
-/* Style 6: 3D Button */
 .btn-3d {
   background: var(--primary);
   color: white;
-  border-radius: 8px;
-  box-shadow:
-    0 4px 0 var(--primary-dark),
-    0 6px 4px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-3d:hover {
-  background-color: var(--primary-dark);
-  box-shadow:
-    inset 0 0 0 3px var(--primary-color),
-    0 4px 0 var(--primary-dark),
-    0 6px 4px rgba(0, 0, 0, 0.2);
+  background: var(--primary-dark);
+  box-shadow: var(--shadow-lg);
 }
 
-.btn-3d:active,
-.btn-3d.active {
-  background-color: var(--primary-dark);
-  transform: translateY(0);
-  box-shadow:
-    inset 0 0 0 3px var(--primary-color),
-    0 6px 4px rgba(0, 0, 0, 0.2);
+.btn-3d:active {
+  transform: scale(0.98);
 }
 
-/* Style 7: Glass Effect */
 .btn-glass {
-  background: rgba(var(--primary), 0.8);
-  color: white;
-  border-radius: 8px;
+  background: var(--neutral-100);
+  color: var(--neutral-700);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-glass:hover {
-  background: rgba(var(--primary), 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: var(--neutral-200);
+  border-color: var(--neutral-300);
 }
 
 /* Sizes */

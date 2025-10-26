@@ -13,94 +13,95 @@ export const recipeCardStyles = `
 }
 
 .recipe-card {
-    position: relative; /* Added for absolute positioning of arrow */
+    position: relative;
     background: var(--card-bg, white);
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    border-radius: var(--radius-lg, 0.75rem);
+    border: 1px solid var(--border-color, #E5E7EB);
+    box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+    transition: all 0.2s ease;
     height: 100%;
     display: flex;
     flex-direction: column;
     cursor: pointer;
     overflow: hidden;
-    transform: translateY(0);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .recipe-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    border-color: var(--primary-color, #6366F1);
 }
 
 .badge {
     display: inline-flex;
     align-items: center;
     padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
+    border-radius: var(--radius-full, 9999px);
+    font-size: 0.75rem;
+    font-weight: 600;
     color: white;
     width: auto;
     flex-wrap: nowrap;
     white-space: nowrap;
     overflow: hidden;
+    letter-spacing: 0.025em;
 }
 
-/* Cooking Time Badges */
+/* Cooking Time Badges - Simplified Modern Style */
 .badge.time {
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);  /* Sky Blue to Blue */
+    background: #3B82F6;
 }
 .badge.time.quick { /* <= 30 mins */
-    background: linear-gradient(135deg, #93c5fd, #60a5fa);  /* Lighter Sky Blue to Sky Blue */
+    background: #60A5FA;
 }
 .badge.time.medium { /* 31-60 mins */
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);  /* Sky Blue to Blue */
+    background: #3B82F6;
 }
 .badge.time.long { /* > 60 mins */
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);  /* Blue to Dark Blue */
+    background: #1E40AF;
 }
 
 /* Difficulty Badges */
 .badge.difficulty.easy {
-    background: linear-gradient(135deg, #86efac, #22c55e);  /* Light Green to Green */
+    background: #10B981;
 }
 .badge.difficulty.medium {
-    background: linear-gradient(135deg, #fde047, #eab308);  /* Light Yellow to Yellow */
+    background: #F59E0B;
 }
 .badge.difficulty.hard {
-    background: linear-gradient(135deg, #fca5a5, #ef4444);  /* Light Red to Red */
+    background: #EF4444;
 }
 
-/* Category Badges */
+/* Category Badges - Modern Flat Colors */
 .badge.category.appetizers {
-    background: linear-gradient(135deg, #f9a8d4, #ec4899);  /* Light Pink to Pink */
+    background: #EC4899;
 }
 .badge.category.main-courses {
-    background: linear-gradient(135deg, #c084fc, #a855f7);  /* Light Purple to Purple */
+    background: #A855F7;
 }
 .badge.category.side-dishes {
-    background: linear-gradient(135deg, #5eead4, #0d9488);  /* Light Teal to Teal */
+    background: #14B8A6;
 }
 .badge.category.soups-stews {
-    background: linear-gradient(135deg, #bef264, #84cc16);  /* Light Lime to Lime */
+    background: #84CC16;
 }
 .badge.category.salads {
-    background: linear-gradient(135deg, #6ee7b7, #10b981);  /* Light Emerald to Emerald */
+    background: #10B981;
 }
 .badge.category.desserts {
-    background: linear-gradient(135deg, #fb923c, #ea580c);  /* Light Orange-Red to Orange-Red */
+    background: #F97316;
 }
 .badge.category.breakfast-brunch {
-    background: linear-gradient(135deg, #fcd34d, #d97706);  /* Light Amber to Amber */
+    background: #F59E0B;
 }
 .badge.category.breads-pastries {
-    background: linear-gradient(135deg, #ddd6fe, #8b5cf6);  /* Light Violet to Violet */
+    background: #8B5CF6;
 }
 .badge.category.snacks {
-    background: linear-gradient(135deg, #fdba74, #f97316);  /* Light Orange to Orange */
+    background: #FB923C;
 }
 .badge.category.beverages {
-    background: linear-gradient(135deg, #a5b4fc, #6366f1);  /* Light Indigo to Indigo */
+    background: #6366F1;
 }
 
 .recipe-image {
@@ -109,10 +110,9 @@ export const recipeCardStyles = `
     height: 50%;
     object-fit: cover;
     flex-shrink: 0;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
     opacity: 0;
     transition: opacity 0.3s ease;
-    background-color: #f0f0f0; /* Placeholder color while loading */
+    background-color: var(--neutral-100, #F3F4F6);
 }
 
 .recipe-image.loaded {
@@ -120,7 +120,7 @@ export const recipeCardStyles = `
 }
 
 .recipe-content {
-    padding: 0.5rem;
+    padding: 0.75rem;
     height: 50%;
     display: flex;
     flex-direction: column;
@@ -133,10 +133,13 @@ export const recipeCardStyles = `
 .recipe-title {
     text-align: center;
     margin: 0 auto;
-    font-size: 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.2;
+    line-height: 1.3;
+    color: var(--neutral-900, #111827);
+    letter-spacing: -0.01em;
 }
 
 .recipe-meta {
@@ -216,7 +219,7 @@ export const recipeCardStyles = `
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
 }
@@ -230,10 +233,10 @@ export const recipeCardStyles = `
 .error-state {
     padding: 1rem;
     text-align: center;
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 10px;
+    color: var(--error, #EF4444);
+    background-color: #FEF2F2;
+    border: 1px solid #FEE2E2;
+    border-radius: var(--radius-lg, 0.75rem);
     height: 100%;
     display: flex;
     align-items: center;

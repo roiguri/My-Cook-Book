@@ -1,17 +1,19 @@
 footer {
-  background-color: var(--text-color);
-  color: var(--background-color);
+  background-color: var(--neutral-900);
+  color: var(--neutral-100);
   text-align: center;
-  padding: 1rem;
+  padding: var(--spacing-8) var(--spacing-4);
   font-family: var(--nav-font);
-  font-size: var(--size-body-mobile);
+  font-size: var(--size-small);
   flex-shrink: 0;
+  border-top: 1px solid var(--border-color);
 }
 
 footer p {
   margin: 0;
+  color: var(--neutral-300);
 }
 
 #icon-attribute {
-  color: gray;
+  color: var(--neutral-500);
 }
