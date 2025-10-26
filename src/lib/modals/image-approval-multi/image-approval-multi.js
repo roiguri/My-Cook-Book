@@ -53,7 +53,29 @@ class ImageApprovalMulti extends HTMLElement {
 
   connectedCallback() {
     this.render();
+    this.setResponsiveWidth();
     this.setupEventListeners();
+
+    this.resizeHandler = () => this.setResponsiveWidth();
+    window.addEventListener('resize', this.resizeHandler);
+  }
+
+  disconnectedCallback() {
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
+
+    if (this.imageObserver) {
+      this.imageObserver.disconnect();
+    }
+  }
+
+  setResponsiveWidth() {
+    const modal = this.shadowRoot.querySelector('custom-modal');
+    if (modal) {
+      const isMobile = window.innerWidth <= 768;
+      modal.setAttribute('width', isMobile ? '90vw' : '700px');
+    }
   }
 
   render() {
@@ -70,7 +92,7 @@ class ImageApprovalMulti extends HTMLElement {
               <div class="loading-state" id="loading-state">
                 <p>טוען תמונות...</p>
               </div>
-              <image-handler id="pending-images-viewer"></image-handler>
+              <image-handler id="pending-images-viewer" hide-upload></image-handler>
             </div>
 
             <div class="selection-info" id="selection-info">
@@ -112,7 +134,6 @@ class ImageApprovalMulti extends HTMLElement {
         background: #f5f5f5;
         padding: 1rem;
         border-radius: 8px;
-        margin-bottom: 1.5rem;
       }
 
       .metadata p {
@@ -144,13 +165,7 @@ class ImageApprovalMulti extends HTMLElement {
       image-handler {
         display: block;
         width: 100%;
-        max-width: 100%;
         box-sizing: border-box;
-      }
-
-      /* Hide upload area in view-only mode without disabling buttons */
-      image-handler .upload-area {
-        display: none !important;
       }
 
       .selection-info {
@@ -254,11 +269,6 @@ class ImageApprovalMulti extends HTMLElement {
       .btn-cancel:hover {
         background-color: #5c4033;
       }
-
-      /* Override image-handler upload area for view-only mode */
-      image-handler::part(upload-area) {
-        display: none;
-      }
     `;
   }
 
@@ -307,17 +317,13 @@ class ImageApprovalMulti extends HTMLElement {
     this.updateSelectionInfo();
     this.updateButtonStates();
 
-    // Show loading state
     this.showLoadingState();
 
-    // Open modal immediately (don't wait for images)
     const modal = this.shadowRoot.querySelector('custom-modal');
     modal.open();
 
-    // Load images in background
     await this.populatePendingImages(recipe.pendingImages || []);
 
-    // Hide loading state
     this.hideLoadingState();
   }
 

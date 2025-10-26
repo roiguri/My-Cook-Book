@@ -12,9 +12,20 @@ class ImageHandler extends HTMLElement {
     this.removedImages = [];
   }
 
+  static get observedAttributes() {
+    return ['hide-upload'];
+  }
+
   connectedCallback() {
     this.render();
     this.setupEventListeners();
+    this.updateUploadAreaVisibility();
+  }
+
+  attributeChangedCallback(name) {
+    if (name === 'hide-upload') {
+      this.updateUploadAreaVisibility();
+    }
   }
 
   render() {
@@ -52,6 +63,10 @@ class ImageHandler extends HTMLElement {
         .upload-area[data-disabled="true"] {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+
+        :host([hide-upload]) .upload-area {
+          display: none;
         }
 
         .selected-files {
@@ -589,6 +604,21 @@ class ImageHandler extends HTMLElement {
   updateUploadAreaState() {
     const uploadArea = this.shadowRoot.querySelector('.upload-area');
     uploadArea.setAttribute('data-disabled', this.images.length >= this.maxImages);
+  }
+
+  updateUploadAreaVisibility() {
+    const uploadArea = this.shadowRoot?.querySelector('.upload-area');
+    if (!uploadArea) return;
+
+    const shouldHide = this.hasAttribute('hide-upload');
+
+    if (shouldHide) {
+      uploadArea.style.display = 'none';
+      uploadArea.setAttribute('data-disabled', 'true');
+    } else {
+      uploadArea.style.display = '';
+      uploadArea.setAttribute('data-disabled', this.images.length >= this.maxImages);
+    }
   }
 
   showError(message) {

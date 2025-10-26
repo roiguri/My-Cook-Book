@@ -99,6 +99,7 @@ export class Modal extends HTMLElement {
       ${this.existingStyles()}
       .modal-content {
         width: var(--modal-width, 300px);
+        max-width: 90vw;
         height: var(--modal-height, auto);
         background-color: var(--modal-background-color, var(--background-color, #f5f2e9));
       }
@@ -131,6 +132,7 @@ export class Modal extends HTMLElement {
         padding: 20px;
         border: 1px solid #888;
         border-radius: 10px;
+        box-sizing: border-box;
         display: flex;
         flex-direction: column;
         align-items: center;
