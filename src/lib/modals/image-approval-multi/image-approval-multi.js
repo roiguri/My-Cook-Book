@@ -471,6 +471,17 @@ class ImageApprovalMulti extends HTMLElement {
     rejectSelectedBtn.disabled = !hasSelection;
   }
 
+  /**
+   * Get IDs of currently visible images (excludes removed images)
+   * @returns {string[]} Array of visible image IDs
+   */
+  getVisibleImageIds() {
+    const imageHandler = this.shadowRoot.querySelector('image-handler');
+    if (!imageHandler || !imageHandler.images) return [];
+
+    return imageHandler.images.map((img) => img.id);
+  }
+
   async handleApproveSelected() {
     if (this.selectedImageIds.size === 0) return;
 
@@ -563,7 +574,10 @@ class ImageApprovalMulti extends HTMLElement {
   async handleApproveAll() {
     if (!this.recipe || !this.recipe.pendingImages) return;
 
-    const confirmed = confirm(`האם לאשר את כל ${this.recipe.pendingImages.length} התמונות?`);
+    const visibleImageIds = this.getVisibleImageIds();
+    if (visibleImageIds.length === 0) return;
+
+    const confirmed = confirm(`האם לאשר את כל ${visibleImageIds.length} התמונות?`);
     if (!confirmed) return;
 
     const spinner = this.shadowRoot.querySelector('loading-spinner');
@@ -572,11 +586,9 @@ class ImageApprovalMulti extends HTMLElement {
     try {
       const recipeHadImages = this.recipe.images && this.recipe.images.length > 0;
 
-      const allPendingImageIds = this.recipe.pendingImages.map((img) => img.id);
-
       const pendingToApprovedIds = new Map();
 
-      for (const pendingImageId of allPendingImageIds) {
+      for (const pendingImageId of visibleImageIds) {
         const newImageId = await approvePendingImageById(this.recipe.id, pendingImageId);
         pendingToApprovedIds.set(pendingImageId, newImageId);
       }
@@ -592,7 +604,7 @@ class ImageApprovalMulti extends HTMLElement {
           console.log('Primary image set to admin selection:', newPrimaryId);
         }
       } else if (!recipeHadImages) {
-        const firstPendingId = allPendingImageIds[0];
+        const firstPendingId = visibleImageIds[0];
         const firstNewId = pendingToApprovedIds.get(firstPendingId);
         if (firstNewId) {
           await setPrimaryImage(this.recipe.id, firstNewId);
@@ -608,7 +620,7 @@ class ImageApprovalMulti extends HTMLElement {
           composed: true,
           detail: {
             recipeId: this.recipe.id,
-            imageIds: allPendingImageIds,
+            imageIds: visibleImageIds,
           },
         }),
       );
@@ -625,16 +637,17 @@ class ImageApprovalMulti extends HTMLElement {
   async handleRejectAll() {
     if (!this.recipe || !this.recipe.pendingImages) return;
 
-    const confirmed = confirm(`האם לדחות את כל ${this.recipe.pendingImages.length} התמונות?`);
+    const visibleImageIds = this.getVisibleImageIds();
+    if (visibleImageIds.length === 0) return;
+
+    const confirmed = confirm(`האם לדחות את כל ${visibleImageIds.length} התמונות?`);
     if (!confirmed) return;
 
     const spinner = this.shadowRoot.querySelector('loading-spinner');
     spinner.setAttribute('active', '');
 
     try {
-      const allImageIds = this.recipe.pendingImages.map((img) => img.id);
-
-      for (const imageId of allImageIds) {
+      for (const imageId of visibleImageIds) {
         await rejectPendingImageById(this.recipe.id, imageId);
       }
 
@@ -644,7 +657,7 @@ class ImageApprovalMulti extends HTMLElement {
           composed: true,
           detail: {
             recipeId: this.recipe.id,
-            imageIds: allImageIds,
+            imageIds: visibleImageIds,
           },
         }),
       );
