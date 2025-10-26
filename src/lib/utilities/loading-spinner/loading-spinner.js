@@ -64,8 +64,23 @@ class LoadingSpinner extends HTMLElement {
     this._render();
   }
 
+  disconnectedCallback() {
+    if (this.hasAttribute('active') && this.hasAttribute('overlay')) {
+      this.unlockScroll();
+    }
+  }
+
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
+
+    if (name === 'active' && this.hasAttribute('overlay')) {
+      if (newValue !== null) {
+        this.lockScroll();
+      } else {
+        this.unlockScroll();
+      }
+    }
+
     this._render();
   }
 
@@ -108,6 +123,20 @@ class LoadingSpinner extends HTMLElement {
       <slot></slot>
       <div class="overlay"><div class="spinner"></div></div>
     `;
+  }
+
+  lockScroll() {
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = this.getScrollbarWidth() + 'px';
+  }
+
+  unlockScroll() {
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+  }
+
+  getScrollbarWidth() {
+    return window.innerWidth - document.documentElement.clientWidth;
   }
 }
 
