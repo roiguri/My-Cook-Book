@@ -19,7 +19,17 @@ class ImageHandler extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupEventListeners();
+
+    this.boundDocumentClickHandler = this.handleDocumentClick.bind(this);
+    document.addEventListener('click', this.boundDocumentClickHandler);
+
     this.updateUploadAreaVisibility();
+  }
+
+  disconnectedCallback() {
+    if (this.boundDocumentClickHandler) {
+      document.removeEventListener('click', this.boundDocumentClickHandler);
+    }
   }
 
   attributeChangedCallback(name) {
@@ -151,10 +161,6 @@ class ImageHandler extends HTMLElement {
           background: rgba(0, 0, 0, 0.5);
         }
 
-        .image-preview:hover .image-controls {
-          opacity: 1;
-        }
-
         .image-controls {
           position: absolute;
           top: 0;
@@ -168,6 +174,20 @@ class ImageHandler extends HTMLElement {
           justify-content: center;
           opacity: 0;
           transition: opacity 0.2s ease;
+          pointer-events: none;
+        }
+
+        .image-controls.visible {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        /* Desktop hover support */
+        @media (hover: hover) and (pointer: fine) {
+          .image-preview:hover .image-controls {
+            opacity: 1;
+            pointer-events: auto;
+          }
         }
 
         .control-button {
@@ -283,6 +303,14 @@ class ImageHandler extends HTMLElement {
         <div class="preview-container"></div>
       </div>
     `;
+  }
+
+  handleDocumentClick(e) {
+    const path = e.composedPath();
+    if (!path.includes(this)) {
+      const visibleControls = this.shadowRoot.querySelectorAll('.image-controls.visible');
+      visibleControls.forEach((ctrl) => ctrl.classList.remove('visible'));
+    }
   }
 
   setupEventListeners() {
@@ -586,12 +614,38 @@ class ImageHandler extends HTMLElement {
         </div>
       `;
 
-      preview.querySelector('.remove-button').addEventListener('click', () => {
+      const controls = preview.querySelector('.image-controls');
+      const removeButton = preview.querySelector('.remove-button');
+      const primaryButton = preview.querySelector('.primary-button');
+
+      // Toggle overlay visibility on click (for mobile)
+      preview.addEventListener('click', (e) => {
+        if (e.target.closest('.control-button')) {
+          return;
+        }
+
+        e.stopPropagation();
+
+        // Close all other overlays
+        container.querySelectorAll('.image-controls.visible').forEach((ctrl) => {
+          if (ctrl !== controls) {
+            ctrl.classList.remove('visible');
+          }
+        });
+
+        // Toggle this overlay
+        controls.classList.toggle('visible');
+      });
+
+      // Button event handlers (prevent event bubbling to avoid toggle)
+      removeButton.addEventListener('click', (e) => {
+        e.stopPropagation();
         this.removeImage(image.id);
       });
 
-      if (!image.isPrimary) {
-        preview.querySelector('.primary-button').addEventListener('click', () => {
+      if (primaryButton) {
+        primaryButton.addEventListener('click', (e) => {
+          e.stopPropagation();
           this.setPrimaryImage(image.id);
         });
       }
