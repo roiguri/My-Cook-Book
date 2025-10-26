@@ -119,6 +119,8 @@ class HeaderSearchBar extends HTMLElement {
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      // Close mobile keyboard by blurring the input
+      input.blur();
       this.navigateToSearch(input.value);
     });
 

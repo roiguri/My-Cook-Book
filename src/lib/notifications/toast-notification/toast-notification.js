@@ -36,9 +36,9 @@ class ToastNotification extends HTMLElement {
       <style>
         :host {
           position: fixed;
-          top: 80px;
-          right: 50%;
-          transform: translateX(50%);
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
           z-index: 10000;
           pointer-events: none;
         }
@@ -91,14 +91,14 @@ class ToastNotification extends HTMLElement {
 
         @media (max-width: 768px) {
           :host {
-            top: 70px;
-            right: 10px;
-            left: 10px;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
             transform: none;
           }
 
           .toast {
-            width: 100%;
+            width: auto;
             max-width: 100%;
           }
         }
