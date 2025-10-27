@@ -50,6 +50,18 @@ class RecipeComponent extends HTMLElement {
     this._originalIngredients = null;
   }
 
+  static get observedAttributes() {
+    return ['recipe-id'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    // Only reload if the component is already connected and the recipe-id actually changed
+    if (name === 'recipe-id' && oldValue !== newValue && this.isConnected && this.shadowRoot) {
+      this.recipeId = newValue;
+      this.fetchAndPopulateRecipeData();
+    }
+  }
+
   connectedCallback() {
     this.render();
     this.recipeId = this.getAttribute('recipe-id');
