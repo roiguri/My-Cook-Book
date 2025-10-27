@@ -1,3 +1,7 @@
+// Constants
+const DEFAULT_TOAST_DURATION_MS = 3000;
+const TOAST_Z_INDEX = 10000;
+
 /**
  * Toast Notification Component
  * @class
@@ -39,8 +43,10 @@ class ToastNotification extends HTMLElement {
           bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
-          z-index: 10000;
+          z-index: ${TOAST_Z_INDEX};
           pointer-events: none;
+          --toast-success-color: #4caf50;
+          --toast-error-color: #f44336;
         }
 
         .toast {
@@ -74,11 +80,11 @@ class ToastNotification extends HTMLElement {
         }
 
         .toast.success {
-          background-color: #4caf50;
+          background-color: var(--toast-success-color);
         }
 
         .toast.error {
-          background-color: #f44336;
+          background-color: var(--toast-error-color);
         }
 
         .toast-icon {
@@ -104,8 +110,8 @@ class ToastNotification extends HTMLElement {
         }
       </style>
 
-      <div class="toast">
-        <span class="toast-icon"></span>
+      <div class="toast" role="alert" aria-live="polite">
+        <span class="toast-icon" aria-hidden="true"></span>
         <span class="toast-message"></span>
       </div>
     `;
@@ -115,9 +121,9 @@ class ToastNotification extends HTMLElement {
    * Show a toast notification
    * @param {string} message - The message to display
    * @param {string} [type='info'] - Type: 'info', 'success', 'error'
-   * @param {number} [duration=3000] - Auto-dismiss duration in milliseconds (0 = no auto-dismiss)
+   * @param {number} [duration=DEFAULT_TOAST_DURATION_MS] - Auto-dismiss duration in milliseconds (0 = no auto-dismiss)
    */
-  show(message, type = 'info', duration = 3000) {
+  show(message, type = 'info', duration = DEFAULT_TOAST_DURATION_MS) {
     // Clear any existing timeout
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
@@ -183,7 +189,7 @@ class ToastNotification extends HTMLElement {
 customElements.define('toast-notification', ToastNotification);
 
 // Export a helper function to show toasts easily
-export function showToast(message, type = 'info', duration = 3000) {
+export function showToast(message, type = 'info', duration = DEFAULT_TOAST_DURATION_MS) {
   let toast = document.querySelector('toast-notification');
 
   // Create toast element if it doesn't exist

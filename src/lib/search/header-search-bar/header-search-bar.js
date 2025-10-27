@@ -2,6 +2,17 @@ import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { FilterUtils } from '../../../js/utils/filter-utils.js';
 import { showToast } from '../../notifications/toast-notification/toast-notification.js';
 
+// Constants
+const NAVIGATION_UPDATE_DELAY_MS = 100;
+const DEFAULT_TOAST_DURATION_MS = 3000;
+
+// UI Text Constants
+const UI_TEXT = {
+  SEARCH_PLACEHOLDER: 'חיפוש מתכונים...',
+  SEARCH_ARIA_LABEL: 'חיפוש מתכונים',
+  SINGLE_RESULT_FOUND: (recipeName) => `נמצא מתכון אחד: "${recipeName}" - מעבר ישיר למתכון`,
+};
+
 /**
  * HeaderSearchBar Component
  * @class
@@ -23,7 +34,7 @@ class HeaderSearchBar extends HTMLElement {
     if (name === 'placeholder' && this.shadowRoot) {
       const input = this.shadowRoot.querySelector('.search-input');
       if (input) {
-        input.placeholder = newValue || 'חיפוש מתכונים...';
+        input.placeholder = newValue || UI_TEXT.SEARCH_PLACEHOLDER;
       }
     }
   }
@@ -34,7 +45,7 @@ class HeaderSearchBar extends HTMLElement {
   }
 
   render() {
-    const placeholder = this.getAttribute('placeholder') || 'חיפוש מתכונים...';
+    const placeholder = this.getAttribute('placeholder') || UI_TEXT.SEARCH_PLACEHOLDER;
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -45,7 +56,7 @@ class HeaderSearchBar extends HTMLElement {
           display: flex;
           align-items: center;
           border-radius: 8px;
-          box-shadow: 
+          box-shadow:
             0 4px 0 var(--primary-dark),
             0 6px 4px rgba(0, 0, 0, 0.2);
           overflow: hidden;
@@ -55,7 +66,7 @@ class HeaderSearchBar extends HTMLElement {
 
         .search-form:active {
           transform: translateY(0);
-          box-shadow: 
+          box-shadow:
             0 0px 0 var(--primary-dark),
             0 2px 2px rgba(0, 0, 0, 0.2);
         }
@@ -102,10 +113,10 @@ class HeaderSearchBar extends HTMLElement {
       </style>
 
       <form dir="rtl" class="search-form">
-        <input type="text" 
-               class="search-input" 
+        <input type="text"
+               class="search-input"
                placeholder="${placeholder}"
-               aria-label="חיפוש מתכונים">
+               aria-label="${UI_TEXT.SEARCH_ARIA_LABEL}">
         <button type="submit" class="search-button">
           🔍
         </button>
@@ -159,7 +170,7 @@ class HeaderSearchBar extends HTMLElement {
         const recipeName = filteredRecipes[0].name;
 
         // Show toast notification
-        showToast(`נמצא מתכון אחד: "${recipeName}" - מעבר ישיר למתכון`, 'success', 3000);
+        showToast(UI_TEXT.SINGLE_RESULT_FOUND(recipeName), 'success', DEFAULT_TOAST_DURATION_MS);
 
         if (window.spa?.router) {
           window.spa.router.navigate(`/recipe/${recipeId}`);
@@ -174,7 +185,7 @@ class HeaderSearchBar extends HTMLElement {
             if (typeof window.updateActiveNavigation === 'function') {
               window.updateActiveNavigation();
             }
-          }, 100);
+          }, NAVIGATION_UPDATE_DELAY_MS);
 
           // Clear the search input
           this.clear();
@@ -209,7 +220,7 @@ class HeaderSearchBar extends HTMLElement {
         if (typeof window.updateActiveNavigation === 'function') {
           window.updateActiveNavigation();
         }
-      }, 100);
+      }, NAVIGATION_UPDATE_DELAY_MS);
 
       // Clear the navigation search input after navigation
       this.clear();
