@@ -1,6 +1,8 @@
 # Ignore chatbot rules files
 .copilotrc
 .cursor
+.claude
+.gemini
 
 # Ignore VS Code settings
 .vscode/

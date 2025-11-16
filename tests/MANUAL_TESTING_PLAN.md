@@ -1,5 +1,41 @@
 # Our Kitchen Chronicles - Manual Testing Checklist
 
+## Testing Workflow
+
+### Release Pipeline
+
+```
+feature/bug branch → development → staging → main (production)
+        ↓                ↓            ↓         ↓
+   Preview Deploy   Dev Deploy  Stage Deploy  Production
+```
+
+### Pre-Production Testing Checklist (STAGING REQUIRED)
+
+**Before merging staging → main:**
+
+- [ ] **Staging Deployment** - Merge development → staging, verify deployment succeeds
+- [ ] **Full Feature Testing** - Run complete 🆕 NEW features test suite on staging
+- [ ] **Critical Regression** - Run 🔴 Critical EXISTING features regression tests
+- [ ] **Cross-Browser Testing** - Test on Desktop (Chrome/Firefox) + Mobile (iOS/Android)
+- [ ] **User Role Testing** - Test all user roles (Guest/User/Manager)
+- [ ] **Console Verification** - Check browser DevTools for errors/warnings
+- [ ] **Performance Check** - Verify page load times and responsiveness
+- [ ] **Bug Documentation** - Document any issues → fix in development → re-test staging
+- [ ] **Sign-Off** - Get approval from tester before merging to main
+
+**Production Deployment (main):**
+
+- [ ] **Merge to Main** - Only merge from staging after all checks pass
+- [ ] **Smoke Test** - Quick verification of 🆕 NEW features in production
+- [ ] **Critical Path Test** - Quick verification of 🔴 Critical EXISTING features
+- [ ] **Monitor Deployment** - Watch for errors in production logs
+- [ ] **Archive Tests** - Move passing 🆕 NEW tests to ✅ EXISTING section
+
+**⚠️ CRITICAL RULE**: Never merge to `main` without successful staging verification!
+
+---
+
 ## Testing Priorities Legend
 
 - 🔴 **Critical** - Must test before production release
@@ -8,214 +44,118 @@
 
 ## Feature Categories
 
-- 🆕 **NEW** - Features added in current release (development → main)
+- 🆕 **NEW** - Features added in current release (staging → main)
 - ✅ **EXISTING** - Baseline regression test suite (reused each release)
 
 ---
 
-## 🆕 NEW FEATURES IN THIS RELEASE (development → main)
+## 🆕 NEW FEATURES IN THIS RELEASE (staging → main)
 
-> **Focus Area**: Test these comprehensively before release. After deployment, integrate passing tests into EXISTING section.
+> **Focus Area**: Test these comprehensively on STAGING before merging to main. After production deployment, integrate passing tests into EXISTING section.
 
-### 1. Media Instructions Feature
+**Release Info:**
 
-**Impact**: Recipe Page, Propose Recipe Page, Manager Dashboard
+- **Commits in staging ahead of main**: 23 commits
+- **Files changed**: 31 files (+2,015 insertions, -1,842 deletions)
+- **Key areas affected**: Image handling, search, modals, recipe display, loading states
 
-#### Recipe Page - Media Display
+---
 
-- [ ] 🔴 **Media instructions section** appears for recipes with media (titled "טיפים מצולמים")
-- [ ] 🔴 **Media instructions section** hidden when recipe has no media
-- [ ] 🔴 **Media scroller** displays all uploaded images/videos
-- [ ] 🔴 **Media items are clickable** and open fullscreen viewer
-- [ ] 🔴 **Fullscreen viewer displays** media at correct size
-- [ ] 🔴 **Fullscreen viewer navigation** works (next/previous buttons)
-- [ ] 🔴 **Fullscreen viewer captions** display correctly in Hebrew
-- [ ] 🔴 **Fullscreen viewer closes** with X button or ESC key
-- [ ] 🔴 **Media items display in correct order** (sorted by order field)
-- [ ] 🟡 **Failed media loads don't break the page** (section hidden if all fail)
-- [ ] 🟡 **Swipe navigation** works on mobile devices
-- [ ] 🟡 **Keyboard navigation** works (arrow keys, ESC)
-- [ ] 🟢 **Media loads progressively** (doesn't block page render)
+### 1. Image Approval System Improvements
 
-#### Propose Recipe - Media Editor
+**Impact**: Manager Dashboard, Recipe Cards, Recipe Detail Page
 
-- [ ] 🔴 **Media instructions section** appears in form (titled "טיפים מצולמים")
-- [ ] 🔴 **Help text** displays explaining the feature
-- [ ] 🔴 **File upload button** opens file picker for images/videos
-- [ ] 🔴 **File validation rejects invalid types** (e.g., .txt, .pdf, .doc)
-- [ ] 🔴 **File validation rejects oversized files** (>50MB)
-- [ ] 🔴 **Preview displays uploaded files** correctly
-- [ ] 🔴 **Caption input accepts Hebrew text** for each media item
-- [ ] 🔴 **Delete button removes individual items** without affecting others
-- [ ] 🔴 **Media uploads successfully** when recipe is submitted
-- [ ] 🔴 **Form validation includes media** (rejects corrupted files)
-- [ ] 🟡 **Drag & drop works** for adding media files
-- [ ] 🟡 **Reorder functionality** allows drag-and-drop reordering
-- [ ] 🟡 **Media persists** in form state when editing other fields
-- [ ] 🟡 **Preview scroller shows** how media will appear to users
-- [ ] 🟡 **Can upload multiple files** at once
-- [ ] 🟢 **Upload progress indicator** shows for large files
-- [ ] 🟢 **Error messages display** for failed uploads
-- [ ] 🟢 **ARIA labels present** for accessibility
+#### Multi-Image Batch Approval Modal
 
-#### Manager Dashboard - Media Editing
+- [ ] 🔴 **New consolidated modal** opens when approving images
+- [ ] 🔴 **Approve All button** approves all pending images at once
+- [ ] 🔴 **Reject All button** rejects all pending images at once
+- [ ] 🔴 **Individual approve/reject** works for each image
+- [ ] 🔴 **Removed images are respected** - deleted images don't get approved in batch operations
+- [ ] 🔴 **Modal is responsive** on mobile devices
+- [ ] 🔴 **Upload area is hidden** in approval-only mode
+- [ ] 🟡 **Click-to-toggle controls** work on mobile (tap to show/hide controls)
+- [ ] 🟡 **Image controls are mobile-friendly** (proper touch targets)
+- [ ] 🟡 **isPrimary flag** is respected when populating images in edit mode
+- [ ] 🟢 **Modal scrolls properly** with many images
 
-- [ ] 🔴 **Edit modal opens** for existing recipes
-- [ ] 🔴 **Media instructions section** appears in edit modal
-- [ ] 🔴 **Existing media loads correctly** in editor
-- [ ] 🔴 **Can add new media** to existing recipes
-- [ ] 🔴 **Can remove existing media** from recipes
-- [ ] 🔴 **Save button persists all changes** (media and other fields)
-- [ ] 🔴 **Modal closes properly** after save without errors
-- [ ] 🔴 **No data loss** when editing media (existing media preserved)
-- [ ] 🟡 **Can reorder existing media** items
-- [ ] 🟡 **Can edit captions** of existing media items
-- [ ] 🟡 **Recipe list updates** after editing media
-- [ ] 🟡 **Form dirty state** triggers on media changes
-- [ ] 🟢 **Can mix operations** (add + remove + reorder in single edit)
+#### Image Proposal Workflow
 
-#### Media Instructions Test Scenarios
+- [ ] 🔴 **Image proposal modal** opens from recipe menu
+- [ ] 🔴 **Success message displays** after proposing images
+- [ ] 🔴 **Proposed images appear** in pending images section
+- [ ] 🟡 **Upload area matches** styling between images and media instructions
+- [ ] 🟢 **Loading state shows** during image upload
 
-**File Type Testing**:
+#### Recipe Cards & Display
 
-- [ ] 🔴 **Single JPG image** uploads and displays
-- [ ] 🔴 **Single PNG image** uploads and displays
-- [ ] 🔴 **Single WEBP image** uploads and displays
-- [ ] 🔴 **Single MP4 video** uploads and displays
-- [ ] 🟡 **Multiple images** (5-10) upload and display
-- [ ] 🟡 **Mix of images and videos** works correctly
-- [ ] 🟡 **Large files** (near 50MB) upload successfully
-- [ ] 🟢 **Very large file** (>50MB) is rejected with clear error
+- [ ] 🔴 **Placeholder image** is displayed for recipe cards that are missing a primary image.
+- [ ] 🟡 **Recipe scroller** (new browser-native component) displays images smoothly
+- [ ] 🟡 **Modal overflow fixed** - images scroll horizontally without breaking layout
 
-**Edge Cases**:
+---
 
-- [ ] 🔴 **Recipe with no media** - section doesn't appear
-- [ ] 🔴 **Recipe with 1 media item** - displays correctly (no scroller needed)
-- [ ] 🟡 **Recipe with 20+ media items** - performance remains acceptable
-- [ ] 🟡 **Empty captions** are allowed (don't block save)
-- [ ] 🟡 **Very long captions** (500+ chars) - text wraps/truncates properly
-- [ ] 🟡 **Hebrew captions with emojis** display correctly
-- [ ] 🟢 **Special characters in captions** (quotes, brackets) are sanitized
+### 2. Category Change Image Migration
 
-**Upload Workflow**:
+**Impact**: Manager Dashboard, Edit Recipe Modal
 
-- [ ] 🔴 **Upload → Save** - media persists after page reload
-- [ ] 🟡 **Upload → Edit caption → Save** - caption changes persist
-- [ ] 🟡 **Upload → Reorder → Save** - order changes persist
-- [ ] 🟡 **Upload → Delete → Save** - deleted items don't appear
-- [ ] 🟡 **Upload partial set → Save → Edit later → Add more** - all media appears
-- [ ] 🟢 **Upload → Navigate away → Return** - unsaved media is lost (expected)
+#### Image Migration on Category Change
 
-**Security & Validation**:
+- [ ] 🔴 **Category change triggers migration** - images move to new category folder
+- [ ] 🔴 **Image URLs update correctly** after migration
+- [ ] 🔴 **Migration completes** before recipe save
+- [ ] 🔴 **No image loss** during migration
+- [ ] 🟡 **Multiple images migrate** correctly (not just first image)
+- [ ] 🟡 **Primary image flag preserved** during migration
+- [ ] 🟡 **Error handling** if migration fails (recipe save prevented)
+- [ ] 🟢 **Loading state shows** during migration process
 
-- [ ] 🔴 **XSS attempt in caption** - script tags are escaped/sanitized
-- [ ] 🔴 **HTML injection in caption** - tags are escaped
-- [ ] 🔴 **Malicious file disguised as image** - rejected by MIME validation
-- [ ] 🟡 **Firebase Storage rules** - unauthenticated users can't upload
-- [ ] 🟡 **Firebase Storage rules** - users can only delete their own media
+---
 
-### 2. Cook Mode Feature
+### 3. Search & Navigation Improvements
 
-**Impact**: Recipe Page
+**Impact**: Home Page, Header Search Bar
 
-#### Basic Functionality
+#### Direct Navigation for Single Results
 
-- [ ] 🔴 **Cook mode toggle** appears on recipe page
-- [ ] 🔴 **Toggle is accessible** (visible, clickable)
-- [ ] 🔴 **Toggle activates cook mode** - screen stays awake
-- [ ] 🔴 **Visual indicator shows** when cook mode is active
-- [ ] 🔴 **Toggle deactivates cook mode** - screen can sleep again
-- [ ] 🔴 **Cook mode releases** when page is closed
-- [ ] 🟡 **Cook mode persists** during recipe viewing (doesn't auto-deactivate)
-- [ ] 🟡 **Fallback works** for browsers without Wake Lock API
-- [ ] 🟡 **Fallback message displays** clearly for unsupported browsers
-- [ ] 🟢 **ARIA labels present** for accessibility
-- [ ] 🟢 **Keyboard accessible** (Space/Enter toggles)
+- [ ] 🔴 **Single search result** navigates directly to recipe page
+- [ ] 🔴 **Toast notification** appears showing "נמצא מתכון אחד: [recipe name]"
+- [ ] 🔴 **Multiple results** still show results page (existing behavior)
+- [ ] 🔴 **No results** shows appropriate message (existing behavior)
+- [ ] 🟡 **Toast notification auto-dismisses** after 3-5 seconds
+- [ ] 🟡 **Toast notification is clickable** (dismisses on click)
+- [ ] 🟡 **Toast notification styled properly** in Hebrew
+- [ ] 🟢 **Toast notification accessible** (ARIA labels)
 
-#### Device-Specific Testing
+#### Recipe Detail Page Improvements
 
-- [ ] 🔴 **Mobile Android (Chrome)** - Wake Lock works, screen stays on
-- [ ] 🔴 **Mobile iOS (Safari)** - Check support status or fallback
-- [ ] 🟡 **Desktop Chrome** - Works or shows fallback message
-- [ ] 🟡 **Desktop Firefox** - Works or shows fallback message
-- [ ] 🟡 **Desktop Safari** - Works or shows fallback message
-- [ ] 🟡 **Tablet Android** - Wake Lock works
-- [ ] 🟡 **Tablet iOS** - Check support status or fallback
+- [ ] 🔴 **Tab title shows recipe name** instead of recipe ID
+- [ ] 🔴 **Tab title updates** when navigating between recipes
+- [ ] 🟡 **Tab title fallback** shows appropriate text if recipe name unavailable
+- [ ] 🟢 **Browser history** shows correct recipe names
 
-#### Advanced Scenarios
+---
 
-- [ ] 🔴 **Enable → Lock screen** - Screen stays on while cooking
-- [ ] 🟡 **Enable → Switch to another app** - Wake Lock still active on return
-- [ ] 🟡 **Enable → Browser tab switch** - Wake Lock reacquires on return
-- [ ] 🟡 **Enable → Close page** - Wake Lock cleaned up properly
-- [ ] 🟢 **Enable → Phone call** - Wake Lock behavior after call ends
+### 4. Loading States & UX Improvements
 
-### 3. Dashboard Refresh Buttons
+**Impact**: Manager Dashboard, Modals, Recipe Forms
 
-**Impact**: Manager Dashboard
+#### Loading Overlays
 
-#### UI & Interaction
+- [ ] 🔴 **Loading overlay prevents scrolling** when active
+- [ ] 🔴 **Loading spinner shows** when submitting recipe edits
+- [ ] 🔴 **Page remains responsive** after loading completes
+- [ ] 🟡 **Loading spinner uses overlay mode** (simplified implementation)
+- [ ] 🟡 **Multiple loading states** don't conflict
+- [ ] 🟢 **Loading spinner accessible** (ARIA live region)
 
-- [ ] 🔴 **Master refresh button** appears in dashboard header
-- [ ] 🔴 **4 section refresh buttons** appear (Users, All Recipes, Pending Recipes, Pending Images)
-- [ ] 🔴 **Refresh icons are clickable** and respond to clicks
-- [ ] 🟡 **Refresh icons show loading state** (spinner/animation) during refresh
-- [ ] 🟡 **Tooltips display** on hover (Hebrew text)
-- [ ] 🟢 **Icons are accessible** (proper ARIA labels)
+#### Modal Responsiveness
 
-#### Functionality
-
-- [ ] 🔴 **Master refresh reloads all 4 sections** simultaneously
-- [ ] 🔴 **User section refresh** updates user list only
-- [ ] 🔴 **All recipes refresh** updates recipe list only
-- [ ] 🔴 **Pending recipes refresh** updates pending recipes only
-- [ ] 🔴 **Pending images refresh** updates pending images only
-- [ ] 🔴 **Refresh completes without page reload** (AJAX-style)
-- [ ] 🟡 **Counters update** after refresh (pending counts, etc.)
-- [ ] 🟡 **Scroll position preserved** after refresh (user doesn't lose place)
-- [ ] 🟡 **Refresh handles empty results** (no items to display)
-
-#### Edge Cases & Stress Testing
-
-- [ ] 🟡 **Rapid clicking same refresh button** - doesn't cause errors
-- [ ] 🟡 **Clicking master + section refresh simultaneously** - handles gracefully
-- [ ] 🟡 **Refresh while editing recipe** - doesn't close modal or lose changes
-- [ ] 🟡 **Refresh with network errors** - shows error message, doesn't break UI
-- [ ] 🟢 **Refresh with slow network** - loading state persists until complete
-- [ ] 🟢 **Multiple users refreshing simultaneously** - no data corruption
-
-### 4. Security & Performance Fixes
-
-**Impact**: Recipe Page, Propose Recipe Page, Manager Dashboard
-
-#### XSS Vulnerability Fixes
-
-- [ ] 🔴 **Media viewer captions** - script tags don't execute
-- [ ] 🔴 **Media viewer captions** - HTML tags are escaped
-- [ ] 🔴 **Media scroller items** - user content is sanitized
-- [ ] 🔴 **Caption input fields** - validation prevents script injection
-- [ ] 🟡 **Test with common XSS payloads** (`<script>alert('XSS')</script>`, etc.)
-- [ ] 🟡 **Test with encoded payloads** (`&lt;script&gt;`, etc.)
-- [ ] 🟢 **Console shows no CSP violations** during media operations
-
-#### Memory Leak Fixes
-
-- [ ] 🔴 **Navigate between 10+ recipe pages** - memory doesn't grow unbounded
-- [ ] 🔴 **Open/close fullscreen viewer 20+ times** - no memory leaks
-- [ ] 🔴 **Open/close media editor 10+ times** - no memory leaks
-- [ ] 🟡 **Event listeners cleaned up** - DevTools Event Listeners panel shows cleanup
-- [ ] 🟡 **Blob URLs released** - DevTools Memory panel shows blob cleanup
-- [ ] 🟡 **No "detached DOM" warnings** in DevTools after navigation
-- [ ] 🟢 **Page doesn't slow down** after 30+ minutes of use
-
-#### Performance Improvements
-
-- [ ] 🔴 **Recipe with 10 large media files** loads in <5 seconds
-- [ ] 🔴 **Fullscreen viewer opens instantly** (<500ms)
-- [ ] 🟡 **Media scroller scrolls smoothly** (60fps on desktop)
-- [ ] 🟡 **Mobile performance** acceptable on 3G connection
-- [ ] 🟡 **Multiple media render** without UI freezing
-- [ ] 🟢 **Lighthouse performance score** >80 for recipe pages with media
+- [ ] 🔴 **Modals are responsive** on mobile devices
+- [ ] 🔴 **Cook mode toggle is mobile-friendly** (proper size and touch targets)
+- [ ] 🟡 **Modal scroll behavior** works on iOS and Android
+- [ ] 🟡 **Modal close buttons** are accessible on mobile
+- [ ] 🟢 **Modals don't break** on very small screens (<375px)
 
 ---
 
@@ -477,20 +417,56 @@
 
 ### Required Test Environments
 
-1. **Staging** - Test all 🆕 NEW features thoroughly + 🔴 Critical existing features
-2. **Production** - Quick smoke test of 🆕 NEW features + 🔴 Critical existing features
+**⚠️ STAGING IS MANDATORY before production deployment**
 
-**Standard regression testing**:
+1. **Staging (REQUIRED)** - Complete testing before merging to main
 
-- **Desktop browsers**: Chrome, Firefox, Safari
-- **Mobile devices**: iOS Safari, Android Chrome
-- **Tablet**: Test on at least one platform
+   - Run ALL 🆕 NEW features test suite (comprehensive)
+   - Run ALL 🔴 Critical EXISTING features (regression)
+   - Run 🟡 High priority tests if time permits
+   - Test on all required browsers and devices
+   - Document ALL issues found
+   - Get sign-off approval before proceeding
 
-### User Role Coverage
+2. **Production (After staging passes)** - Post-deployment verification
+   - Quick smoke test of 🆕 NEW features (verify deployment worked)
+   - Quick smoke test of 🔴 Critical EXISTING features (verify no breakage)
+   - Monitor logs and error tracking
+
+**Standard regression testing** (both staging and production):
+
+- **Desktop browsers**: Chrome (required), Firefox (required), Safari (if available)
+- **Mobile devices**: iOS Safari (required), Android Chrome (required)
+- **Tablet**: Test on at least one platform (recommended)
+
+### User Role Coverage (test all roles in staging)
 
 - **Guest** (not logged in)
 - **Regular User** (authenticated)
 - **Manager** (manager role)
+
+### Staging-to-Main Workflow
+
+```bash
+# 1. Ensure staging is deployed and stable
+git checkout staging
+git pull origin staging
+
+# 2. Review changes between staging and main
+git log main..staging --oneline
+git diff main..staging --stat
+
+# 3. Run complete test suite on staging environment
+# → Use this checklist
+
+# 4. After ALL tests pass and sign-off received
+git checkout main
+git merge staging --ff-only  # Fast-forward merge only
+git push origin main
+
+# 5. Monitor production deployment
+# → Run smoke tests in production
+```
 
 ---
 
@@ -508,14 +484,40 @@
 
 After this release is deployed to production:
 
-1. Move passing NEW feature tests into appropriate EXISTING sections
-2. Clear NEW features section
-3. Add next batch of changes to NEW section
+1. **Update CHANGELOG** - Add new entry to [CHANGELOG.md](../CHANGELOG.md) with:
+   - Version number and deployment date
+   - Added/Changed/Fixed sections from this release
+   - Move current "Unreleased" items to new version section
+2. **Update EXISTING tests** - Move passing NEW feature tests into appropriate EXISTING sections
+3. **Clear NEW section** - Remove all items from NEW features section
+4. **Update metadata** - Update release version, commit count, and date below
+5. **Prepare next cycle** - Merge development → staging for next release
 
 ---
 
-**Release Version**: development → main (2025-10-22)
-**Last Updated**: 2025-10-22
-**Tested By**:
-**Test Environment**: Staging ☐ | Production ☐
-**Build/Commit**:
+## Release Tracking
+
+**Release Version**: staging → main (2025-11-16)
+**Commits in Release**: 23 commits
+**Files Changed**: 31 files (+2,015/-1,842)
+**Last Updated**: 2025-11-16
+
+### Testing Sign-Off
+
+**Staging Environment**:
+
+- [ ] Test Date:
+- [ ] Tested By:
+- [ ] Browser Coverage: Chrome ☐ | Firefox ☐ | Safari ☐ | Mobile iOS ☐ | Mobile Android ☐
+- [ ] All 🔴 Critical tests passed: ☐
+- [ ] All 🆕 NEW feature tests passed: ☐
+- [ ] Issues found (if any):
+- [ ] **APPROVED FOR PRODUCTION**: ☐ (signature required)
+
+**Production Environment**:
+
+- [ ] Deployment Date:
+- [ ] Smoke Test Passed: ☐
+- [ ] Critical Path Verified: ☐
+- [ ] Build/Commit Hash:
+- [ ] Rollback Plan (if needed):
