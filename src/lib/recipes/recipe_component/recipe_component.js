@@ -21,8 +21,6 @@ import '../../utilities/media-scroller/media-scroller.js';
 import '../../utilities/fullscreen-media-viewer/fullscreen-media-viewer.js';
 import './parts/cook-mode-container.js';
 
-// TODO - add support for missing image upload
-
 /**
  * Recipe Component
  *
