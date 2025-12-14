@@ -439,12 +439,7 @@ class RecipeComponent extends HTMLElement {
         const sectionList = document.createElement('ul');
         sectionList.classList.add('Recipe_component__section-ingredients');
         section.items.forEach((ingredient) => {
-          const li = document.createElement('li');
-          li.innerHTML = `
-            <span class="amount">${formatIngredientAmount(ingredient.amount)}</span>
-            <span class="unit">${ingredient.unit}</span>
-            <span class="item">${ingredient.item}</span>
-          `;
+          const li = this._createIngredientListItem(ingredient);
           sectionList.appendChild(li);
         });
         ingredientsList.appendChild(sectionList);
@@ -452,15 +447,35 @@ class RecipeComponent extends HTMLElement {
     } else if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
       // Fallback to flat ingredients array (original format)
       recipe.ingredients.forEach((ingredient) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span class="amount">${formatIngredientAmount(ingredient.amount)}</span>
-          <span class="unit">${ingredient.unit}</span>
-          <span class="item">${ingredient.item}</span>
-        `;
+        const li = this._createIngredientListItem(ingredient);
         ingredientsList.appendChild(li);
       });
     }
+  }
+
+  _createIngredientListItem(ingredient) {
+    const li = document.createElement('li');
+
+    const amountSpan = document.createElement('span');
+    amountSpan.className = 'amount';
+    amountSpan.textContent = formatIngredientAmount(ingredient.amount);
+
+    const unitSpan = document.createElement('span');
+    unitSpan.className = 'unit';
+    unitSpan.textContent = ingredient.unit;
+
+    const itemSpan = document.createElement('span');
+    itemSpan.className = 'item';
+    itemSpan.textContent = ingredient.item;
+
+    li.appendChild(amountSpan);
+    // Add spaces between elements to match original HTML spacing
+    li.appendChild(document.createTextNode(' '));
+    li.appendChild(unitSpan);
+    li.appendChild(document.createTextNode(' '));
+    li.appendChild(itemSpan);
+
+    return li;
   }
 
   populateInstructions(recipe) {
