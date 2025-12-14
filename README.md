@@ -1,14 +1,59 @@
-# My Cook Book
+# My Cook Book 🍳
 
-This is a my first web project.
+A Hebrew recipe sharing application built to preserve and share family culinary traditions.
 
-The project contains working with plain css and java script,
-working with firebase authentication, firestore and firebase storage.
+> **Project Context:**
+> This project represents my **first deep dive into full-stack web development**.
+> It was built with a deliberate educational goal: to master the fundamentals of web development (DOM manipulation, state management, routing) by building them from scratch using **Vanilla JavaScript** and **Web Components**, rather than relying on frameworks like React or Angular from the start.
 
-This project was created for learning purposes therfore involves different
-methods/technics for different parts of the website and currently does not
-follow a uniform design.
+---
 
-Future plans involves using a framework (react/angular), and adding tests.
+## 📖 About The Project
 
-Future feature plans can be found on docs/project-tracking.md
+My Cook Book is a Progressive Web Application (PWA) that allows users to browse, search, and contribute family recipes. It features a robust role-based system where authorized users can propose new recipes, and managers can review and approve them.
+
+The application is built as a Single Page Application (SPA) using a custom-built hash router and leverages the Firebase ecosystem for a serverless backend experience.
+
+## ✨ Key Features
+
+*   **Recipe Collection:** Browse and search a rich collection of family recipes with support for Hebrew text (RTL).
+*   **User Authentication:** Secure login and signup (Email/Password & Google OAuth) powered by **Firebase Auth**.
+*   **Role-Based Access:**
+    *   **Viewers:** Can browse and search recipes.
+    *   **Contributors:** Can propose new recipes and upload images.
+    *   **Managers:** dedicated dashboard to review, approve, or edit pending recipes.
+*   **Responsive Design:** A mobile-first interface that looks great on all devices.
+*   **Custom Router:** A lightweight, hash-based client-side router built from scratch.
+
+## 🛠 Tech Stack & Architecture
+
+This project was built to demonstrate a strong grasp of core web technologies:
+
+*   **Frontend:**
+    *   **Vanilla JavaScript (ES6+):** Core logic and state management.
+    *   **Web Components:** Encapsulated UI components using Shadow DOM for style isolation.
+    *   **Custom SPA Router:** Handles navigation and dynamic view rendering without page reloads.
+    *   **CSS3:** Custom styling with a focus on responsiveness.
+    *   **Vite:** Modern build tool for fast development and optimized production assets.
+
+*   **Backend (Firebase):**
+    *   **Cloud Firestore:** NoSQL database for real-time data syncing.
+    *   **Firebase Authentication:** Secure user identity management.
+    *   **Cloud Storage:** Scalable storage for user-uploaded recipe images.
+
+*   **Testing:**
+    *   **Jest:** Unit testing for core utilities and services.
+
+## 🚀 Live Demo
+
+You can view the live application hosted on Netlify here:
+[**https://our-kitchen-chronicles.netlify.app/**](https://our-kitchen-chronicles.netlify.app/)
+
+## 🔮 Future Plans
+
+While this project was a foundational learning experience, I plan to continue evolving it:
+*   **Social Features:** Adding comments, ratings, and social sharing capabilities.
+*   **Offline Support:** Enhancing PWA capabilities for fully offline access to saved recipes.
+
+---
+*Built by [Roi Guri](https://github.com/roiguri)*
