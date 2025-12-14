@@ -91,7 +91,8 @@ class LoginForm extends HTMLElement {
         }
 
         .submit-button:disabled {
-          background-color: var(--secondary-color);
+          background-color: var(--disabled-color);
+          color: var(--text-color);
           cursor: not-allowed;
           opacity: 0.7;
         }
@@ -221,7 +222,7 @@ class LoginForm extends HTMLElement {
 
         <button type="submit" class="submit-button">
           <span class="button-text">התחבר</span>
-          <loading-spinner size="16px" line-width="2px" color="white"></loading-spinner>
+          <loading-spinner size="16px" line-width="2px" color="var(--text-color)"></loading-spinner>
         </button>
 
         <div class="divider">או</div>

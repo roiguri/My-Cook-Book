@@ -10,11 +10,13 @@
 
 import './auth-content.js';
 import '../../modals/message-modal/message-modal.js';
+import '../../utilities/loading-spinner/loading-spinner.js';
 
 class SignupForm extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this.isSubmitting = false;
   }
 
   connectedCallback() {
@@ -92,10 +94,26 @@ class SignupForm extends HTMLElement {
           font-size: 1em;
           cursor: pointer;
           transition: background-color 0.3s ease;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 10px;
         }
 
         .submit-button:hover {
           background-color: var(--primary-hover);
+        }
+
+        .submit-button:disabled {
+          background-color: var(--disabled-color);
+          color: var(--text-color);
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+
+        /* Ensure loading spinner doesn't break layout */
+        loading-spinner {
+           /* ... */
         }
 
         .divider {
@@ -222,7 +240,10 @@ class SignupForm extends HTMLElement {
           <div class="error-message" id="signup-error"></div>
         </div>
 
-        <button type="submit" class="submit-button">הרשמה</button>
+        <button type="submit" class="submit-button">
+          <span class="button-text">הרשמה</span>
+          <loading-spinner size="16px" line-width="2px" color="var(--text-color)"></loading-spinner>
+        </button>
 
         <div class="divider">או</div>
 
@@ -255,6 +276,24 @@ class SignupForm extends HTMLElement {
     form.addEventListener('submit', (e) => this.handleSubmit(e));
     googleSignup.addEventListener('click', () => this.handleGoogleSignup());
     confirmPasswordInput.addEventListener('input', () => this.checkPasswordsMatch());
+  }
+
+  updateButtonState() {
+    const button = this.shadowRoot.querySelector('.submit-button');
+    const textSpan = this.shadowRoot.querySelector('.button-text');
+    const spinner = this.shadowRoot.querySelector('loading-spinner');
+
+    if (this.isSubmitting) {
+        button.disabled = true;
+        button.classList.add('loading');
+        textSpan.textContent = 'יוצר חשבון...';
+        spinner.setAttribute('active', '');
+    } else {
+        button.disabled = false;
+        button.classList.remove('loading');
+        textSpan.textContent = 'הרשמה';
+        spinner.removeAttribute('active');
+    }
   }
 
   checkPasswordStrength() {
@@ -291,6 +330,8 @@ class SignupForm extends HTMLElement {
   async handleSubmit(e) {
     e.preventDefault();
 
+    if (this.isSubmitting) return;
+
     const fullName = this.shadowRoot.getElementById('fullName').value;
     const email = this.shadowRoot.getElementById('signup-email').value;
     const password = this.shadowRoot.getElementById('signup-password').value;
@@ -306,6 +347,9 @@ class SignupForm extends HTMLElement {
       return;
     }
 
+    this.isSubmitting = true;
+    this.updateButtonState();
+
     try {
       const authController = this.closest('auth-controller');
       await authController.handleSignup(email, password, fullName);
@@ -318,6 +362,9 @@ class SignupForm extends HTMLElement {
       );
     } catch (error) {
       this.showError(error.message);
+    } finally {
+        this.isSubmitting = false;
+        this.updateButtonState();
     }
   }
 
