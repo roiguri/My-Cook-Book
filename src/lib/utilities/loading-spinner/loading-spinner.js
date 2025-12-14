@@ -8,7 +8,7 @@
  * - color: The color of the spinner (default: #333)
  * - length: The length of the spinner (default: 'three-quarters', options: 'quarter', 'half', 'three-quarters')
  * - background-color: The background color of the spinner (default: transparent)
- * - overlay: If present, spinner is centered in a full-cover overlay
+ * - overlay: If present, spinner is centered in a full-cover overlay. If absent, renders inline.
  * - active: If present, spinner is visible; if not, spinner is hidden
  */
 class LoadingSpinner extends HTMLElement {
