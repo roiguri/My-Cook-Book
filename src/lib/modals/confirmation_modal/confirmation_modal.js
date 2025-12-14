@@ -71,7 +71,7 @@ class ConfirmationModal extends Modal {
       <div dir="rtl" class="modal">
         <div class="modal-content">
           <button class="close-button">&times;</button>
-          <div class="confirmation-modal-content modal-scroll-area">
+          <div class="confirmation-modal-content">
             <h2 id="modal-title"></h2>
             <p id="modal-message"></p>
             <div class="modal-buttons">

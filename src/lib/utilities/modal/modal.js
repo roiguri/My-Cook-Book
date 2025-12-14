@@ -98,19 +98,10 @@ export class Modal extends HTMLElement {
     return `
       ${this.existingStyles()}
       .modal-content {
-        width: var(--modal-width, 300px);
+        width: var(--modal-width, 480px);
         max-width: 90vw;
         height: var(--modal-height, auto);
-        max-height: 90vh;
-        display: flex;
-        flex-direction: column;
         background-color: var(--modal-background-color, var(--background-color, #f5f2e9));
-      }
-      .modal-scroll-area {
-        width: 100%;
-        overflow-y: auto;
-        flex: 1;
-        min-height: 0;
       }
     `;
   }
@@ -186,9 +177,7 @@ export class Modal extends HTMLElement {
       <div dir="rtl" class="modal">
         <div class="modal-content">
           <button class="close-button">&times;</button>
-          <div class="modal-scroll-area">
-            <slot></slot>
-          </div>
+          <slot></slot>
         </div>
       </div>
     `;
