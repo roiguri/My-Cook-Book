@@ -98,7 +98,7 @@ export class Modal extends HTMLElement {
     return `
       ${this.existingStyles()}
       .modal-content {
-        width: var(--modal-width, 300px);
+        width: var(--modal-width, 480px);
         max-width: 90vw;
         height: var(--modal-height, auto);
         background-color: var(--modal-background-color, var(--background-color, #f5f2e9));
