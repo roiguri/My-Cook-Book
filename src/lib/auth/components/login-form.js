@@ -1,5 +1,6 @@
 import './auth-content.js';
 import '../../modals/message-modal/message-modal.js';
+import '../../utilities/loading-spinner/loading-spinner.js';
 
 class LoginForm extends HTMLElement {
   constructor() {
@@ -95,23 +96,9 @@ class LoginForm extends HTMLElement {
           opacity: 0.7;
         }
 
-        .spinner {
-          border: 2px solid #ffffff;
-          border-top: 2px solid transparent;
-          border-radius: 50%;
-          width: 16px;
-          height: 16px;
-          animation: spin 1s linear infinite;
-          display: none;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        .submit-button.loading .spinner {
-          display: block;
+        /* Loading Spinner usage inside button */
+        loading-spinner {
+          /* Ensure it doesn't break layout */
         }
 
         .divider {
@@ -234,7 +221,7 @@ class LoginForm extends HTMLElement {
 
         <button type="submit" class="submit-button">
           <span class="button-text">התחבר</span>
-          <div class="spinner"></div>
+          <loading-spinner size="16px" line-width="2px" color="white"></loading-spinner>
         </button>
 
         <div class="divider">או</div>
@@ -271,15 +258,18 @@ class LoginForm extends HTMLElement {
   updateButtonState() {
     const button = this.shadowRoot.querySelector('.submit-button');
     const textSpan = this.shadowRoot.querySelector('.button-text');
+    const spinner = this.shadowRoot.querySelector('loading-spinner');
 
     if (this.isSubmitting) {
         button.disabled = true;
         button.classList.add('loading');
         textSpan.textContent = 'מתחבר...';
+        spinner.setAttribute('active', '');
     } else {
         button.disabled = false;
         button.classList.remove('loading');
         textSpan.textContent = 'התחבר';
+        spinner.removeAttribute('active');
     }
   }
 

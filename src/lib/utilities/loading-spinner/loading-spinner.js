@@ -90,24 +90,33 @@ class LoadingSpinner extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
       :host {
-        display: block;
+        display: ${isOverlay ? 'block' : 'inline-block'};
         position: ${isOverlay ? 'relative' : 'static'};
+        vertical-align: middle;
       }
-      .overlay {
-        display: ${isActive && isOverlay ? 'flex' : 'none'};
+      .spinner-wrapper {
+        display: ${isActive ? (isOverlay ? 'flex' : 'inline-flex') : 'none'};
         align-items: center;
         justify-content: center;
+        ${
+          isOverlay
+            ? `
         position: fixed;
         inset: 0;
         background: rgba(255,255,255,0.7);
         z-index: 10000;
         pointer-events: all;
         border-radius: ${this.borderRadius};
+        `
+            : ''
+        }
       }
       .spinner {
         border: ${this.lineWidth} solid ${this.color};
         border-top-color: transparent;
-        border-right-color: ${this.length === 'half' || this.length === 'quarter' ? 'transparent' : this.color};
+        border-right-color: ${
+          this.length === 'half' || this.length === 'quarter' ? 'transparent' : this.color
+        };
         border-bottom-color: ${this.length === 'quarter' ? 'transparent' : this.color};
         border-radius: 50%;
         width: ${this.size};
@@ -121,7 +130,7 @@ class LoadingSpinner extends HTMLElement {
       }
       </style>
       <slot></slot>
-      <div class="overlay"><div class="spinner"></div></div>
+      <div class="spinner-wrapper"><div class="spinner"></div></div>
     `;
   }
 
