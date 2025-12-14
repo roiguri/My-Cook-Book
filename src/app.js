@@ -1,4 +1,12 @@
-// SPA Main Entry Point
+/**
+ * @fileoverview Main entry point for the My-Cook-Book Single Page Application (SPA).
+ * This file handles the initialization of the application, including:
+ * - Firebase service initialization
+ * - Core dependency loading (Auth, Search, etc.)
+ * - Router and PageManager setup
+ * - Route registration with code splitting (dynamic imports)
+ */
+
 import './styles/main.css';
 
 // Register Service Worker for PWA functionality
@@ -11,21 +19,18 @@ import firebaseConfig from './js/config/firebase-config.js';
 import { AppRouter } from './app/core/router.js';
 import { PageManager } from './app/core/page-manager.js';
 
-// Import all page modules statically
-import homePage from './app/pages/home-page.js';
-import categoriesPage from './app/pages/categories-page.js';
-import recipeDetailPage from './app/pages/recipe-detail-page.js';
-import proposeRecipePage from './app/pages/propose-recipe-page.js';
-import documentsPage from './app/pages/documents-page.js';
-import managerDashboardPage from './app/pages/manager-dashboard-page.js';
-
 // Initialize SPA when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeSPA);
 
+/**
+ * Initializes the SPA application when the DOM is ready.
+ * Sets up Firebase, preloads essential components, and starts the router.
+ */
 async function initializeSPA() {
   try {
     initFirebase(firebaseConfig);
 
+    // Preload critical components in parallel
     await Promise.all([
       import('./lib/auth/auth-controller.js'),
       import('./lib/auth/components/auth-avatar.js'),
@@ -59,41 +64,58 @@ async function initializeSPA() {
   }
 }
 
+/**
+ * Registers application routes and configures code splitting for pages.
+ * Each route uses dynamic imports to lazily load the page module only when requested.
+ *
+ * @param {AppRouter} router - The application router instance
+ * @param {PageManager} pageManager - The page manager instance for rendering pages
+ */
 function registerRoutes(router, pageManager) {
   router.registerRoute('/home', async (params) => {
-    await pageManager.loadPage(homePage, { ...params, route: '/home' });
+    // Dynamic import ensures home-page chunk is loaded only when needed
+    const module = await import('./app/pages/home-page.js');
+    await pageManager.loadPage(module.default || module, {
+      ...params,
+      route: '/home',
+    });
   });
 
   router.registerRoute('/categories', async (params) => {
-    await pageManager.loadPage(categoriesPage, {
+    const module = await import('./app/pages/categories-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/categories',
     });
   });
 
   router.registerRoute('/recipe/:id', async (params) => {
-    await pageManager.loadPage(recipeDetailPage, {
+    const module = await import('./app/pages/recipe-detail-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/recipe/:id',
     });
   });
 
   router.registerRoute('/propose-recipe', async (params) => {
-    await pageManager.loadPage(proposeRecipePage, {
+    const module = await import('./app/pages/propose-recipe-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/propose-recipe',
     });
   });
 
   router.registerRoute('/grandmas-cooking', async (params) => {
-    await pageManager.loadPage(documentsPage, {
+    const module = await import('./app/pages/documents-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/grandmas-cooking',
     });
   });
 
   router.registerRoute('/dashboard', async (params) => {
-    await pageManager.loadPage(managerDashboardPage, {
+    const module = await import('./app/pages/manager-dashboard-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/dashboard',
     });
