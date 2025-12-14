@@ -11,14 +11,6 @@ import firebaseConfig from './js/config/firebase-config.js';
 import { AppRouter } from './app/core/router.js';
 import { PageManager } from './app/core/page-manager.js';
 
-// Import all page modules statically
-import homePage from './app/pages/home-page.js';
-import categoriesPage from './app/pages/categories-page.js';
-import recipeDetailPage from './app/pages/recipe-detail-page.js';
-import proposeRecipePage from './app/pages/propose-recipe-page.js';
-import documentsPage from './app/pages/documents-page.js';
-import managerDashboardPage from './app/pages/manager-dashboard-page.js';
-
 // Initialize SPA when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeSPA);
 
@@ -61,39 +53,48 @@ async function initializeSPA() {
 
 function registerRoutes(router, pageManager) {
   router.registerRoute('/home', async (params) => {
-    await pageManager.loadPage(homePage, { ...params, route: '/home' });
+    const module = await import('./app/pages/home-page.js');
+    await pageManager.loadPage(module.default || module, {
+      ...params,
+      route: '/home',
+    });
   });
 
   router.registerRoute('/categories', async (params) => {
-    await pageManager.loadPage(categoriesPage, {
+    const module = await import('./app/pages/categories-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/categories',
     });
   });
 
   router.registerRoute('/recipe/:id', async (params) => {
-    await pageManager.loadPage(recipeDetailPage, {
+    const module = await import('./app/pages/recipe-detail-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/recipe/:id',
     });
   });
 
   router.registerRoute('/propose-recipe', async (params) => {
-    await pageManager.loadPage(proposeRecipePage, {
+    const module = await import('./app/pages/propose-recipe-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/propose-recipe',
     });
   });
 
   router.registerRoute('/grandmas-cooking', async (params) => {
-    await pageManager.loadPage(documentsPage, {
+    const module = await import('./app/pages/documents-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/grandmas-cooking',
     });
   });
 
   router.registerRoute('/dashboard', async (params) => {
-    await pageManager.loadPage(managerDashboardPage, {
+    const module = await import('./app/pages/manager-dashboard-page.js');
+    await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/dashboard',
     });
