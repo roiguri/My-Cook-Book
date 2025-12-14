@@ -3,7 +3,10 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['**/*.{js,mjs,cjs,jsx}'],
+    ignores: ['coverage/', 'dist/'],
+  },
+  {
+    files: ['**/*.{js,mjs,cjs}'],
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'module',
