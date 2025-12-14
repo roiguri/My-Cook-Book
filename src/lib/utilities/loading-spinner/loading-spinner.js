@@ -87,15 +87,22 @@ class LoadingSpinner extends HTMLElement {
   _render() {
     const isOverlay = this.hasAttribute('overlay');
     const isActive = this.hasAttribute('active');
+
+    // Hide the host element completely when not active to prevent layout shifts/spacing issues
+    let hostDisplay = 'none';
+    if (isActive) {
+      hostDisplay = isOverlay ? 'block' : 'inline-block';
+    }
+
     this.shadowRoot.innerHTML = `
       <style>
       :host {
-        display: ${isOverlay ? 'block' : 'inline-block'};
+        display: ${hostDisplay};
         position: ${isOverlay ? 'relative' : 'static'};
         vertical-align: middle;
       }
       .spinner-wrapper {
-        display: ${isActive ? (isOverlay ? 'flex' : 'inline-flex') : 'none'};
+        display: ${isOverlay ? 'flex' : 'inline-flex'};
         align-items: center;
         justify-content: center;
         ${
@@ -112,6 +119,7 @@ class LoadingSpinner extends HTMLElement {
         }
       }
       .spinner {
+        box-sizing: border-box;
         border: ${this.lineWidth} solid ${this.color};
         border-top-color: transparent;
         border-right-color: ${
