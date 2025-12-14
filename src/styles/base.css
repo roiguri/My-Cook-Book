@@ -11,25 +11,50 @@
   --secondary-light: #d47779;
   --secondary-dark: #9a3a3c;
 
+  /* New Design System Tokens */
+  --bg-main: #e2f5e7;
+  --bg-card: #ffffff;
+  --text-primary: #1f2937; /* gray-800 */
+  --text-secondary: #4b5563; /* gray-600 */
+  --radius-xl: 1rem; /* rounded-2xl - 16px */
+  --radius-lg: 0.5rem; /* rounded-lg - 8px */
+  --radius-full: 9999px;
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  /* Category Colors */
+  --color-appetizers: #d4eddb;
+  --color-main-courses: #bfdfe9;
+  --color-side-dishes: #4a6b51;
+  --color-soups: #f8d97e;
+  --color-salads: #b7e289;
+  --color-breads: #fde59b;
+  --color-desserts: #f7b9a8;
+  --color-breakfast: #fcd34d;
+  --color-snacks: #fdba74;
+  --color-beverages: #a5b4fc;
+
   /* fonts */
   --heading-font: 'Cormorant Garamond', 'Amatic SC', cursive;
   --heading-font-he: 'Fredoka', 'Amatic SC', cursive;
   --body-font: 'Assistant', 'Lora', serif;
   --nav-font: 'Source Sans Pro', sans-serif;
+
   /* colors */
   --primary-color: var(--primary);
   --primary-hover: var(--primary-dark);
   --secondary-color: var(--neutral);
   --secondary-hover: darken(var(--neutral), 10%);
-  --header-color: var(--neutral);
-  --text-color: #3a3a3a;
+  --header-color: var(--text-primary); /* Updated to match new design */
+  --text-color: var(--text-primary);
   --button-color: white;
-  --background-color: var(--neutral);
+  --background-color: var(--bg-main);
   --submenu-color: var(--secondary);
   --disabled-color: #cccccc;
   --tabs-color: white;
-  --card-bg: white;
-  --recipe-bg: var(--background-color);
+  --card-bg: var(--bg-card);
+  --recipe-bg: white;
+
   /* sizes */
   --size-xxl: 4.5rem;
   --size-header1: 3rem;
@@ -41,8 +66,6 @@
   --size-header2-mobile: 1.2rem;
   --size-body-mobile: 0.9rem;
   --size-icon-mobile: 1rem;
-
-  --background: url('/img/background/stone-counter-top.jpg');
 }
 
 /*------------------------------------*\
@@ -56,14 +79,38 @@ body {
 
 body {
   font-family: var(--body-font);
-  background-color: var(--background-color);
+  background-color: var(--bg-main);
   color: var(--text-color);
   line-height: 1.6;
   margin: 0;
   padding: 0;
-  background: var(--background) repeat center center;
-  background-size: cover;
 
+  /* Flex layout for sticky footer */
+  display: flex;
+  flex-direction: column;
+}
+
+/* New Container Wrapper Class */
+.app-container {
+  width: 100%;
+  max-width: 1536px; /* 2xl container */
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .app-container {
+    padding: 2rem;
+  }
+}
+
+.app-card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  min-height: calc(100vh - 4rem); /* Adjust for padding */
   display: flex;
   flex-direction: column;
 }
@@ -73,6 +120,7 @@ h2,
 h3 {
   font-family: var(--heading-font-he);
   font-weight: 700;
+  color: var(--text-primary);
 }
 
 a {
@@ -83,4 +131,24 @@ a {
 main {
   flex-grow: 1;
   margin: 0 auto;
+  width: 100%;
+}
+
+/* Utility Classes for Grid */
+.grid-cols-4 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }

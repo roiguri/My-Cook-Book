@@ -25,36 +25,41 @@ class AuthAvatar extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
+        :host {
+          display: block;
+        }
+
         .avatar {
-          height: 100%;
-          border-radius: 5px;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: bold;
           transition: all 0.3s ease;
-          background-color: var(--primary-color);
+          background-color: #e5e7eb; /* bg-gray-200 */
+          color: #4b5563; /* text-gray-600 */
+          overflow: hidden;
         }
 
-        .avatar.signed-out {
-          background-color: var(--primary-color);
-          color: var(--button-color);
-        }
-
+        /* Hover state */
         .avatar:hover {
-          background-color: var(--primary-hover)
-            box-shadow:
-              inset 0 0 0 3px var(--primary-color), 
-              0 4px 0 var(--primary-dark),
-              0 6px 4px rgba(0, 0, 0, 0.2);
-            }
+          background-color: #d1d5db; /* hover:bg-gray-300 */
+        }
+
+        /* Signed out state - use specific style if needed, otherwise default gray circle */
+        .avatar.signed-out {
+          background-color: #e5e7eb;
+          color: #4b5563;
+        }
 
         .avatar img {
-          width: 70%;
-          height: 70;
-          border-radius: 5px;
+          width: 100%;
+          height: 100%;
           object-fit: cover;
+          border-radius: 50%;
         }
 
         .initial {
@@ -66,13 +71,13 @@ class AuthAvatar extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 5px;
+          border-radius: 50%;
         }
       </style>
       
       <div class="avatar signed-out" id="auth-trigger">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
         </svg>
       </div>
     `;
@@ -121,9 +126,10 @@ class AuthAvatar extends HTMLElement {
       }
     } else {
       avatar.classList.add('signed-out');
+      // Reset to default user icon
       avatar.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
         </svg>
       `;
     }

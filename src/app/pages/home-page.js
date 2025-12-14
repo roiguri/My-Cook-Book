@@ -50,10 +50,22 @@ export default {
       return;
     }
 
-    const sectionContainer = document.querySelector('.featured-recipes');
+    // Updated selector to match new class name in home-page.html
+    const sectionContainer = document.querySelector('.featured-section');
+
+    // Safety check in case class name changes again
+    if (!sectionContainer) {
+      console.warn('Featured section container not found');
+      return;
+    }
+
     const messageContainer = document.createElement('p');
     messageContainer.dir = 'rtl';
     messageContainer.style.fontSize = 'var(--size-header2)';
+    messageContainer.style.textAlign = 'center'; // Center the message
+    messageContainer.style.fontFamily = 'var(--heading-font-he)';
+
+    // Insert before the grid
     sectionContainer.insertBefore(messageContainer, featuredRecipesGrid);
 
     messageContainer.innerHTML = 'טוען את המתכונים הכי חדשים...';

@@ -1,95 +1,106 @@
 <div class="home-page">
-  <section class="hero">
-    <div>Discover homemade goodness in every bite</div>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <img src="/img/hero-banner.jpg" alt="Fresh vegetables and salmon" class="hero-bg" />
+    <div class="hero-overlay">
+      <h2>גלו את הטעם הביתי בכל ביס</h2>
+    </div>
   </section>
 
-  <section class="quick-links">
-    <h2>Explore Recipes</h2>
-    <div class="category-jars">
-      <a href="/categories?category=appetizers" class="category-jar" aria-label="Appetizers">
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/appetizers.jpg')"
-        ></div>
-        <span>Appetizers</span>
+  <!-- Explore Recipes Section -->
+  <section class="explore-section">
+    <h3>קטגוריות</h3>
+    <div class="categories-grid">
+      <!-- Appetizers: מנות ראשונות -->
+      <a href="/categories?category=appetizers" class="category-card appetizers">
+        <div class="card-text">
+          <h4>מנות ראשונות</h4>
+        </div>
+        <img
+          src="/img/category-jars/optimized/appetizers.jpg"
+          alt="Appetizers"
+          class="category-img"
+        />
       </a>
-      <a href="/categories?category=main-courses" class="category-jar" aria-label="Main Courses">
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/main-course.webp')"
-        ></div>
-        <span>Main Courses</span>
+
+      <!-- Main Courses: מנות עיקריות -->
+      <a href="/categories?category=main-courses" class="category-card main-courses">
+        <div class="card-text">
+          <h4>מנות עיקריות</h4>
+        </div>
+        <img
+          src="/img/category-jars/optimized/main-course.webp"
+          alt="Main Courses"
+          class="category-img"
+        />
       </a>
-      <a href="/categories?category=side-dishes" class="category-jar" aria-label="Side Dishes">
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/side-dishes.jpeg')"
-        ></div>
-        <span>Side Dishes</span>
+
+      <!-- Side Dishes: תוספות -->
+      <a href="/categories?category=side-dishes" class="category-card side-dishes">
+        <div class="card-text">
+          <h4 style="color: white">תוספות</h4>
+        </div>
+        <img
+          src="/img/category-jars/optimized/side-dishes.jpeg"
+          alt="Side Dishes"
+          class="category-img"
+        />
       </a>
-      <a href="/categories?category=soups-stews" class="category-jar" aria-label="Soups & Stews">
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/soups&stews.jpg')"
-        ></div>
-        <span>Soups & Stews</span>
+
+      <!-- Soups & Stews: מרקים ותבשילים -->
+      <a href="/categories?category=soups-stews" class="category-card soups">
+        <div class="card-text">
+          <h4>מרקים ותבשילים</h4>
+        </div>
+        <img src="/img/category-jars/optimized/soups&stews.jpg" alt="Soups" class="category-img" />
       </a>
-      <a href="/categories?category=salads" class="category-jar" aria-label="Salads">
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/salad.jpg')"
-        ></div>
-        <span>Salads</span>
+
+      <!-- Salads: סלטים -->
+      <a href="/categories?category=salads" class="category-card salads">
+        <div class="card-text">
+          <h4>סלטים</h4>
+        </div>
+        <img src="/img/category-jars/optimized/salad.jpg" alt="Salads" class="category-img" />
       </a>
-      <a
-        href="/categories?category=breads-pastries"
-        class="category-jar"
-        aria-label="Breads & Pastries"
-      >
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/breads-pastries.jpg')"
-        ></div>
-        <span>Breads & Pastries</span>
+
+      <!-- Breads: לחמים ומאפים -->
+      <a href="/categories?category=breads-pastries" class="category-card breads">
+        <div class="card-text">
+          <h4>לחמים ומאפים</h4>
+        </div>
+        <img
+          src="/img/category-jars/optimized/breads-pastries.jpg"
+          alt="Breads"
+          class="category-img"
+        />
       </a>
-      <a href="/categories?category=desserts" class="category-jar" aria-label="Desserts">
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/dessert.jpg')"
-        ></div>
-        <span>Desserts</span>
+
+      <!-- Desserts: קינוחים -->
+      <a href="/categories?category=desserts" class="category-card desserts">
+        <div class="card-text">
+          <h4>קינוחים</h4>
+        </div>
+        <img src="/img/category-jars/optimized/dessert.jpg" alt="Desserts" class="category-img" />
       </a>
-      <a
-        href="/categories?category=breakfast-brunch"
-        class="category-jar"
-        aria-label="Breakfast & Brunch"
-      >
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/breakfast.jpeg')"
-        ></div>
-        <span>Breakfast & Brunch</span>
-      </a>
-      <a href="/categories?category=snacks" class="category-jar" aria-label="Snacks">
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/snacks.jpg')"
-        ></div>
-        <span>Snacks</span>
-      </a>
-      <a href="/categories?category=beverages" class="category-jar" aria-label="Beverages">
-        <div
-          class="jar-img"
-          style="background-image: url('/img/category-jars/optimized/beverages.jpg')"
-        ></div>
-        <span>Beverages</span>
+
+      <!-- Breakfast: ארוחות בוקר -->
+      <a href="/categories?category=breakfast-brunch" class="category-card breakfast">
+        <div class="card-text">
+          <h4>ארוחות בוקר</h4>
+        </div>
+        <img
+          src="/img/category-jars/optimized/breakfast.jpeg"
+          alt="Breakfast"
+          class="category-img"
+        />
       </a>
     </div>
   </section>
 
-  <section class="featured-recipes">
-    <h2>Recently Added</h2>
-    <recipe-scroller id="featured-recipes-grid" item-width="200px" gap="20px">
+  <!-- Featured Recipes Section -->
+  <section class="featured-section">
+    <h3>המתכונים החדשים ביותר</h3>
+    <recipe-scroller id="featured-recipes-grid" item-width="240px" gap="24px">
       <div slot="items">
         <!-- Featured recipes will be loaded here -->
       </div>
@@ -98,9 +109,9 @@
 
   <div class="quote-section">
     <blockquote>
-      "Cooking is like painting or writing a song. Just as there are only so many notes or colors,
-      there are only so many flavors—it's how you combine them that sets you apart."
+      "בישול הוא כמו ציור או כתיבת שיר. בדיוק כמו שיש רק מספר מוגבל של תווים או צבעים, כך יש רק מספר
+      מוגבל של טעמים - האופן שבו אתה משלב ביניהם הוא מה שמייחד אותך."
     </blockquote>
-    <cite>– Wolfgang Puck</cite>
+    <cite>– וולפגנג פאק</cite>
   </div>
 </div>

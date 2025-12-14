@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -39,50 +39,55 @@
     <script type="module" src="/src/app.js" defer></script>
   </head>
   <body class="spa-app">
-    <!-- Application Header -->
-    <header class="header-container">
-      <div class="menu-title-container">
-        <button class="nav-toggle" aria-label="Toggle navigation">
-          <span class="hamburger"></span>
-        </button>
-        <a href="/home">
-          <div class="logo">Our Kitchen Chronicles</div>
-        </a>
-      </div>
-      <div class="nav-search-container">
-        <nav dir="rtl">
-          <ul>
-            <li><a class="btn-3d" href="/home">דף הבית</a></li>
-            <li><a class="btn-3d" href="/categories">מתכונים</a></li>
-            <li><a class="btn-3d" href="/propose-recipe">הצעת מתכון</a></li>
-          </ul>
-        </nav>
-        <div class="search-auth-container">
-          <div class="search-bar header-search">
-            <header-search-bar></header-search-bar>
+    <!-- Main App Container for the new design -->
+    <div class="app-container">
+      <div class="app-card">
+        <!-- Application Header -->
+        <header class="header-container">
+          <div class="menu-title-container">
+            <button class="nav-toggle" aria-label="Toggle navigation">
+              <span class="hamburger"></span>
+            </button>
+            <a href="/home">
+              <div class="logo">Our Kitchen Chronicles</div>
+            </a>
           </div>
-          <auth-avatar class="btn-3d"></auth-avatar>
-        </div>
-      </div>
-    </header>
+          <div class="nav-search-container">
+            <nav>
+              <ul>
+                <li><a class="nav-link active" href="/home">דף הבית</a></li>
+                <li><a class="nav-link" href="/categories">מתכונים</a></li>
+                <li><a class="nav-link" href="/propose-recipe">הצעת מתכון</a></li>
+              </ul>
+            </nav>
+            <div class="search-auth-container">
+              <div class="search-bar header-search">
+                <header-search-bar></header-search-bar>
+              </div>
+              <auth-avatar class="btn-3d"></auth-avatar>
+            </div>
+          </div>
+        </header>
 
-    <!-- SPA Content Container -->
-    <main id="spa-content" class="spa-content">
-      <!-- Page content will be rendered here by the page manager -->
-      <div class="spa-loading">
-        <div style="text-align: center; padding: 2rem; color: #666">
-          <div>Loading application...</div>
-        </div>
-      </div>
-    </main>
+        <!-- SPA Content Container -->
+        <main id="spa-content" class="spa-content">
+          <!-- Page content will be rendered here by the page manager -->
+          <div class="spa-loading">
+            <div style="text-align: center; padding: 2rem; color: #666">
+              <div>Loading application...</div>
+            </div>
+          </div>
+        </main>
 
-    <!-- Application Footer -->
-    <footer>
-      <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
-      <a id="icon-attribute" href="https://www.flaticon.com/free-icons/spoon" title="spoon icons"
-        >Spoon icons created by Freepik - Flaticon</a
-      >
-    </footer>
+        <!-- Application Footer -->
+        <footer>
+          <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+          <a id="icon-attribute" href="https://www.flaticon.com/free-icons/spoon" title="spoon icons"
+            >Spoon icons created by Freepik - Flaticon</a
+          >
+        </footer>
+      </div>
+    </div>
 
     <!-- Auth Components -->
     <auth-controller>

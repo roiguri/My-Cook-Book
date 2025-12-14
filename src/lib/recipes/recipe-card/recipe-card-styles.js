@@ -9,111 +9,71 @@ export const recipeCardStyles = `
 :host {
     display: block;
     width: var(--card-width, 200px);
-    height: var(--card-height, 300px);
+    height: var(--card-height, 320px);
 }
 
 .recipe-card {
-    position: relative; /* Added for absolute positioning of arrow */
-    background: var(--card-bg, white);
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    background: var(--bg-card, #ffffff);
+    border-radius: var(--radius-xl, 16px);
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
     transition: all 0.3s ease;
-    width: var(--card-width, 100%);
+    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
     cursor: pointer;
     overflow: hidden;
-    transform: translateY(0);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
 .recipe-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
 }
 
 .badge {
     display: inline-flex;
     align-items: center;
     padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: white;
+    border-radius: 9999px; /* rounded-full */
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #1f2937; /* gray-800 */
     width: auto;
     flex-wrap: nowrap;
     white-space: nowrap;
     overflow: hidden;
+    background-color: #f3f4f6; /* gray-100 fallback */
 }
 
-/* Cooking Time Badges */
-.badge.time {
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);  /* Sky Blue to Blue */
-}
-.badge.time.quick { /* <= 30 mins */
-    background: linear-gradient(135deg, #93c5fd, #60a5fa);  /* Lighter Sky Blue to Sky Blue */
-}
-.badge.time.medium { /* 31-60 mins */
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);  /* Sky Blue to Blue */
-}
-.badge.time.long { /* > 60 mins */
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);  /* Blue to Dark Blue */
-}
-
-/* Difficulty Badges */
-.badge.difficulty.easy {
-    background: linear-gradient(135deg, #86efac, #22c55e);  /* Light Green to Green */
-}
-.badge.difficulty.medium {
-    background: linear-gradient(135deg, #fde047, #eab308);  /* Light Yellow to Yellow */
-}
-.badge.difficulty.hard {
-    background: linear-gradient(135deg, #fca5a5, #ef4444);  /* Light Red to Red */
-}
+/* Badge Colors - matching category colors but lighter/softer if needed */
+.badge.time { background-color: #e0f2fe; color: #0369a1; } /* Sky */
+.badge.difficulty.easy { background-color: #dcfce7; color: #15803d; } /* Green */
+.badge.difficulty.medium { background-color: #fef9c3; color: #a16207; } /* Yellow */
+.badge.difficulty.hard { background-color: #fee2e2; color: #b91c1c; } /* Red */
 
 /* Category Badges */
-.badge.category.appetizers {
-    background: linear-gradient(135deg, #f9a8d4, #ec4899);  /* Light Pink to Pink */
-}
-.badge.category.main-courses {
-    background: linear-gradient(135deg, #c084fc, #a855f7);  /* Light Purple to Purple */
-}
-.badge.category.side-dishes {
-    background: linear-gradient(135deg, #5eead4, #0d9488);  /* Light Teal to Teal */
-}
-.badge.category.soups-stews {
-    background: linear-gradient(135deg, #bef264, #84cc16);  /* Light Lime to Lime */
-}
-.badge.category.salads {
-    background: linear-gradient(135deg, #6ee7b7, #10b981);  /* Light Emerald to Emerald */
-}
-.badge.category.desserts {
-    background: linear-gradient(135deg, #fb923c, #ea580c);  /* Light Orange-Red to Orange-Red */
-}
-.badge.category.breakfast-brunch {
-    background: linear-gradient(135deg, #fcd34d, #d97706);  /* Light Amber to Amber */
-}
-.badge.category.breads-pastries {
-    background: linear-gradient(135deg, #ddd6fe, #8b5cf6);  /* Light Violet to Violet */
-}
-.badge.category.snacks {
-    background: linear-gradient(135deg, #fdba74, #f97316);  /* Light Orange to Orange */
-}
-.badge.category.beverages {
-    background: linear-gradient(135deg, #a5b4fc, #6366f1);  /* Light Indigo to Indigo */
-}
+.badge.category.appetizers { background-color: var(--color-appetizers, #d4eddb); }
+.badge.category.main-courses { background-color: var(--color-main-courses, #bfdfe9); }
+.badge.category.side-dishes { background-color: var(--color-side-dishes, #4a6b51); color: white; }
+.badge.category.soups-stews { background-color: var(--color-soups, #f8d97e); }
+.badge.category.salads { background-color: var(--color-salads, #b7e289); }
+.badge.category.desserts { background-color: var(--color-desserts, #f7b9a8); }
+.badge.category.breakfast-brunch { background-color: var(--color-breakfast, #fcd34d); }
+.badge.category.breads-pastries { background-color: var(--color-breads, #fde59b); }
+.badge.category.snacks { background-color: var(--color-snacks, #fdba74); }
+.badge.category.beverages { background-color: var(--color-beverages, #a5b4fc); }
 
 .recipe-image {
     position: relative;
     width: 100%;
-    height: 50%;
+    height: 180px; /* Fixed height for consistency */
     object-fit: cover;
     flex-shrink: 0;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+    background-color: #f3f4f6;
     opacity: 0;
     transition: opacity 0.3s ease;
-    background-color: #f0f0f0; /* Placeholder color while loading */
 }
 
 .recipe-image.loaded {
@@ -121,103 +81,99 @@ export const recipeCardStyles = `
 }
 
 .recipe-content {
-    padding: 0.5rem;
-    height: 50%;
+    padding: 1rem;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
+    gap: 0.75rem;
     justify-content: space-between;
-    gap: 0.5rem;
-    overflow: hidden;
-    box-sizing: border-box;
 }
 
 .recipe-title {
-    text-align: center;
-    margin: 0 auto;
-    font-size: 1.2rem;
+    font-family: var(--heading-font-he, sans-serif);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary, #1f2937);
+    margin: 0;
+    line-height: 1.4;
+    text-align: right; /* RTL default for Hebrew */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.2;
 }
 
 .recipe-meta {
     display: flex;
-    padding: 0.5rem;
-    align-items: right;
-    gap: 0.3rem;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-start; /* Align badges to start */
 }
 
-.recipe-meta span {
-    text-align: right;
-    white-space: nowrap; /* Allow text to wrap naturally */
-    line-height: 1.4;    /* Added for better readability */
-    display: block;      /* Added to ensure block-level behavior */
-    font-size: 0.9rem;
-}
-
-.recipe-info {
-    text-align: center;
-    width: 100%;
-}
-
-.category-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
+/* Stats Container for Time/Difficulty */
 .stats-container {
-    width: 100%;
     display: flex;
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 0.3rem;
+    gap: 0.5rem;
+    margin-top: auto; /* Push to bottom */
 }
 
 .favorite-btn {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
+    top: 0.75rem;
+    left: 0.75rem; /* Left side for RTL context usually better, or Right */
+    width: 2rem;
+    height: 2rem;
     padding: 0;
-    background: none;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
     border: none;
     cursor: pointer;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
 }
 
-.favorite-btn svg {
-    width: 100%;
-    height: 100%;
-    stroke: rgba(0, 0, 0, 0.2);
-    fill: white;
-    transition: fill 0.3s ease, transform 0.3s ease; /* Added fill transition */
+/* RTL Adjustment: If dir="rtl" is set on host or parent, we might want to flip.
+   For now, we'll keep it on the left (RTL 'start' position) or right depending on preference.
+   Let's put it on the TOP-LEFT which is standard 'action' area in some RTL designs, or TOP-RIGHT.
+   Current app had it right. Let's keep it right for consistency?
+   But wait, in RTL, 'start' is right.
+   Let's put it on the LEFT (end) to not obscure the image start?
+   Let's stick to Right for now as typical heart position.
+*/
+.favorite-btn {
+    left: auto;
+    right: 0.75rem;
 }
 
-.favorite-btn.active svg {
-    fill: #ff4b4b;
-}
-
-.favorite-btn:hover svg {
+.favorite-btn:hover {
     transform: scale(1.1);
 }
 
-/* Loading State Styles */
-.recipe-card.loading {
-    position: relative;
-    height: 100%;
+.favorite-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke: #ef4444; /* red-500 */
+    fill: transparent;
+    transition: fill 0.3s ease;
 }
 
+.favorite-btn.active svg {
+    fill: #ef4444;
+}
+
+/* Loading State */
+.recipe-card.loading {
+    background: #ffffff;
+}
 .loading::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    inset: 0;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
 }
@@ -227,47 +183,18 @@ export const recipeCardStyles = `
     100% { background-position: -200% 0; }
 }
 
-/* Error State Styles */
-.error-state {
-    padding: 1rem;
-    text-align: center;
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 10px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Responsive adjustments */
-@media (max-width: 260px) {
-    .stats-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .badge {
-        width: 90%;  /* Take most of the width but leave some margin */
-        justify-content: center;
-    }
-}
-
-/* No Image Placeholder Styles */
+/* No Image Placeholder */
 .no-image-placeholder.recipe-image {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-    opacity: 1; /* Override .recipe-image default opacity: 0 */
-    /* Inherits width: 100% and height: 50% from .recipe-image */
+    background: #f3f4f6;
+    opacity: 1;
 }
 
 .no-image-icon {
-    width: 60px;
-    height: 60px;
-    color: #999;
-    opacity: 0.5;
+    width: 3rem;
+    height: 3rem;
+    color: #9ca3af; /* gray-400 */
 }
 `;
