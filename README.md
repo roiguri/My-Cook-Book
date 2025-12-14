@@ -2,7 +2,7 @@
 
 A Hebrew recipe sharing application built to preserve and share family culinary traditions.
 
-> **Note to Portfolio Viewers:**
+> **Project Context:**
 > This project represents my **first deep dive into full-stack web development**.
 > It was built with a deliberate educational goal: to master the fundamentals of web development (DOM manipulation, state management, routing) by building them from scratch using **Vanilla JavaScript** and **Web Components**, rather than relying on frameworks like React or Angular from the start.
 
@@ -22,7 +22,6 @@ The application is built as a Single Page Application (SPA) using a custom-built
     *   **Viewers:** Can browse and search recipes.
     *   **Contributors:** Can propose new recipes and upload images.
     *   **Managers:** dedicated dashboard to review, approve, or edit pending recipes.
-*   **Image Optimization:** Automatic image compression and optimization using **Cloud Functions** and **Sharp**.
 *   **Responsive Design:** A mobile-first interface that looks great on all devices.
 *   **Custom Router:** A lightweight, hash-based client-side router built from scratch.
 
@@ -41,46 +40,14 @@ This project was built to demonstrate a strong grasp of core web technologies:
     *   **Cloud Firestore:** NoSQL database for real-time data syncing.
     *   **Firebase Authentication:** Secure user identity management.
     *   **Cloud Storage:** Scalable storage for user-uploaded recipe images.
-    *   **Cloud Functions:** Serverless backend logic (Node.js) for image processing.
 
 *   **Testing:**
     *   **Jest:** Unit testing for core utilities and services.
 
-## 🚀 Getting Started
+## 🚀 Live Demo
 
-### Prerequisites
-*   Node.js (v18 or higher)
-*   npm
-
-### Installation
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/roiguri/My-Cook-Book.git
-    cd My-Cook-Book
-    ```
-
-2.  **Install dependencies**
-    ```bash
-    npm install
-    ```
-
-3.  **Configuration**
-    This project uses Firebase. You will need to set up a Firebase project and configure the environment variables.
-    Create a `.env` file or configure your Firebase credentials in `src/js/config/firebase-config.js` (refer to the codebase for the specific config structure).
-
-4.  **Run the development server**
-    ```bash
-    npm run dev
-    ```
-
-### Running Tests
-
-To run the test suite:
-
-```bash
-npm test
-```
+You can view the live application hosted on Netlify here:
+[**https://our-kitchen-chronicles.netlify.app/**](https://our-kitchen-chronicles.netlify.app/)
 
 ## 🔮 Future Plans
 
