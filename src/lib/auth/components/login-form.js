@@ -5,6 +5,7 @@ class LoginForm extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this.isSubmitting = false;
   }
 
   connectedCallback() {
@@ -78,10 +79,39 @@ class LoginForm extends HTMLElement {
           font-size: 1em;
           cursor: pointer;
           transition: background-color 0.3s ease;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 10px;
         }
 
         .submit-button:hover {
           background-color: var(--primary-hover);
+        }
+
+        .submit-button:disabled {
+          background-color: var(--secondary-color);
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+
+        .spinner {
+          border: 2px solid #ffffff;
+          border-top: 2px solid transparent;
+          border-radius: 50%;
+          width: 16px;
+          height: 16px;
+          animation: spin 1s linear infinite;
+          display: none;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .submit-button.loading .spinner {
+          display: block;
         }
 
         .divider {
@@ -202,7 +232,10 @@ class LoginForm extends HTMLElement {
           <a class="forgot-password" id="forgot-password">שכחת סיסמה?</a>
         </div>
 
-        <button type="submit" class="submit-button">התחבר</button>
+        <button type="submit" class="submit-button">
+          <span class="button-text">התחבר</span>
+          <div class="spinner"></div>
+        </button>
 
         <div class="divider">או</div>
 
@@ -235,8 +268,28 @@ class LoginForm extends HTMLElement {
     googleSignIn.addEventListener('click', () => this.handleGoogleSignIn());
   }
 
+  updateButtonState() {
+    const button = this.shadowRoot.querySelector('.submit-button');
+    const textSpan = this.shadowRoot.querySelector('.button-text');
+
+    if (this.isSubmitting) {
+        button.disabled = true;
+        button.classList.add('loading');
+        textSpan.textContent = 'מתחבר...';
+    } else {
+        button.disabled = false;
+        button.classList.remove('loading');
+        textSpan.textContent = 'התחבר';
+    }
+  }
+
   async handleSubmit(e) {
     e.preventDefault();
+
+    if (this.isSubmitting) return;
+
+    this.isSubmitting = true;
+    this.updateButtonState();
 
     const email = this.shadowRoot.getElementById('login-email').value;
     const password = this.shadowRoot.getElementById('login-password').value;
@@ -255,6 +308,9 @@ class LoginForm extends HTMLElement {
         stack: error.stack,
       });
       this.showError(error);
+    } finally {
+      this.isSubmitting = false;
+      this.updateButtonState();
     }
   }
 
