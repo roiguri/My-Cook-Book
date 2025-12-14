@@ -1,4 +1,12 @@
-// SPA Main Entry Point
+/**
+ * @fileoverview Main entry point for the My-Cook-Book Single Page Application (SPA).
+ * This file handles the initialization of the application, including:
+ * - Firebase service initialization
+ * - Core dependency loading (Auth, Search, etc.)
+ * - Router and PageManager setup
+ * - Route registration with code splitting (dynamic imports)
+ */
+
 import './styles/main.css';
 
 // Register Service Worker for PWA functionality
@@ -14,10 +22,15 @@ import { PageManager } from './app/core/page-manager.js';
 // Initialize SPA when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeSPA);
 
+/**
+ * Initializes the SPA application when the DOM is ready.
+ * Sets up Firebase, preloads essential components, and starts the router.
+ */
 async function initializeSPA() {
   try {
     initFirebase(firebaseConfig);
 
+    // Preload critical components in parallel
     await Promise.all([
       import('./lib/auth/auth-controller.js'),
       import('./lib/auth/components/auth-avatar.js'),
@@ -51,8 +64,16 @@ async function initializeSPA() {
   }
 }
 
+/**
+ * Registers application routes and configures code splitting for pages.
+ * Each route uses dynamic imports to lazily load the page module only when requested.
+ *
+ * @param {AppRouter} router - The application router instance
+ * @param {PageManager} pageManager - The page manager instance for rendering pages
+ */
 function registerRoutes(router, pageManager) {
   router.registerRoute('/home', async (params) => {
+    // Dynamic import ensures home-page chunk is loaded only when needed
     const module = await import('./app/pages/home-page.js');
     await pageManager.loadPage(module.default || module, {
       ...params,
