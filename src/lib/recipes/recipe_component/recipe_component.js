@@ -469,7 +469,6 @@ class RecipeComponent extends HTMLElement {
     itemSpan.textContent = ingredient.item;
 
     li.appendChild(amountSpan);
-    // Add spaces between elements to match original HTML spacing
     li.appendChild(document.createTextNode(' '));
     li.appendChild(unitSpan);
     li.appendChild(document.createTextNode(' '));
