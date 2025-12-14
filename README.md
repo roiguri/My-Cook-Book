@@ -52,7 +52,6 @@ You can view the live application hosted on Netlify here:
 ## 🔮 Future Plans
 
 While this project was a foundational learning experience, I plan to continue evolving it:
-*   **Framework Migration:** Porting the application to **React** to compare the development experience and leverage the React ecosystem.
 *   **Social Features:** Adding comments, ratings, and social sharing capabilities.
 *   **Offline Support:** Enhancing PWA capabilities for fully offline access to saved recipes.
 
