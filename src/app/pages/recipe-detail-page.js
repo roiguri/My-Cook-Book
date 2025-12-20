@@ -1,4 +1,7 @@
 import { AppConfig } from '../../js/config/app-config.js';
+import authService from '../../js/services/auth-service.js';
+import { firestoreService } from '../../js/services/firestore-service.js';
+import { arrayUnion, serverTimestamp } from 'firebase/firestore';
 import '../../styles/pages/recipe-detail-spa.css';
 
 export default {
@@ -62,10 +65,17 @@ export default {
     const menuButton = container.querySelector('.recipe-menu-button');
     const menuDropdown = container.querySelector('.recipe-menu-dropdown');
     const suggestImagesBtn = container.querySelector('#suggest-images-btn');
+    const addToMealBtn = container.querySelector('#add-to-meal-btn');
 
     if (!menuButton || !menuDropdown || !suggestImagesBtn) {
       console.warn('Menu elements not found in container');
       return;
+    }
+
+    // Show "Add to Meal" only if user is logged in
+    const user = authService.getCurrentUser();
+    if (user && addToMealBtn) {
+      addToMealBtn.style.display = 'flex';
     }
 
     // Toggle dropdown on button click
@@ -97,6 +107,45 @@ export default {
         console.error('Image proposal modal not found');
       }
     });
+
+    // Handle "Add to Meal" click
+    if (addToMealBtn) {
+      addToMealBtn.addEventListener('click', async () => {
+        menuDropdown.classList.remove('open');
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser) return;
+
+        try {
+          const messageModal = container.querySelector('message-modal');
+          // Add to active_meals
+          // Use set with merge true to create if not exists or update
+          await firestoreService.batchWrite([
+              {
+                  type: 'set',
+                  collection: 'active_meals',
+                  id: currentUser.uid,
+                  data: {
+                      recipeIds: arrayUnion(recipeId),
+                      lastUpdated: serverTimestamp()
+                  }
+              }
+          ]);
+
+          // Also set default state if needed, but arrayUnion is enough to trigger the listener in my-meal-page
+          // which will fetch the recipe and default state
+
+          if (messageModal) {
+             messageModal.show('המתכון נוסף לארוחה שלך בהצלחה', 'נוסף לארוחה');
+          }
+        } catch (error) {
+          console.error('Error adding to meal:', error);
+          const messageModal = container.querySelector('message-modal');
+           if (messageModal) {
+             messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+          }
+        }
+      });
+    }
   },
 
   setupImageProposalListener(container) {

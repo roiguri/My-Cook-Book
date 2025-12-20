@@ -34,7 +34,7 @@
  * - Consistent dimensions to prevent layout shifts
  */
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
 import {
@@ -453,6 +453,7 @@ class RecipeCard extends HTMLElement {
 
     // Populate template with data
     const favoriteBtn = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtn}`);
+    const addToMealBtn = clone.querySelector('.add-to-meal-btn');
     const recipeImage = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.recipeImage}`);
     const recipeTitle = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.recipeTitle}`);
     const categoryBadge = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeCategory}`);
@@ -469,6 +470,14 @@ class RecipeCard extends HTMLElement {
         RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
         this._isFavorite(),
       );
+    }
+
+    // Handle add to meal button visibility
+    const user = authService.getCurrentUser();
+    if (!user && addToMealBtn) {
+        addToMealBtn.style.display = 'none';
+    } else if (addToMealBtn) {
+        addToMealBtn.style.display = 'block';
     }
 
     // Set image
@@ -533,6 +542,36 @@ class RecipeCard extends HTMLElement {
     } catch (error) {
       console.error('Error fetching favorites:', error);
     }
+  }
+
+  async _addToMeal() {
+      const user = authService.getCurrentUser();
+      if (!user) return;
+
+      try {
+          const db = getFirestoreInstance();
+          const batch = writeBatch(db);
+          const mealRef = doc(db, 'active_meals', user.uid);
+
+          batch.set(mealRef, {
+              recipeIds: arrayUnion(this.recipeId),
+              lastUpdated: serverTimestamp()
+          }, { merge: true });
+
+          await batch.commit();
+
+          // Show feedback
+          const messageModal = document.querySelector('message-modal');
+          if (messageModal) {
+              messageModal.show('המתכון נוסף לארוחה שלך בהצלחה', 'נוסף לארוחה');
+          }
+      } catch (error) {
+          console.error('Error adding to meal:', error);
+          const messageModal = document.querySelector('message-modal');
+          if (messageModal) {
+              messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+          }
+      }
   }
 
   async _toggleFavorite() {
