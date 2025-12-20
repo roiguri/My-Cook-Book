@@ -204,18 +204,18 @@ class UserProfile extends HTMLElement {
     signoutButton.addEventListener('click', () => this.handleSignout());
 
     if (myMealButton) {
-        myMealButton.addEventListener('click', () => {
-            const authController = this.closest('auth-controller');
-            if (authController) authController.closeModal();
+      myMealButton.addEventListener('click', () => {
+        const authController = this.closest('auth-controller');
+        if (authController) authController.closeModal();
 
-            // Navigate to my-meal
-            // We need to use the router from the window.spa object
-            if (window.spa && window.spa.router) {
-                window.spa.router.navigate('/my-meal');
-            } else {
-                window.location.hash = '/my-meal'; // Fallback
-            }
-        });
+        // Navigate to my-meal
+        // We need to use the router from the window.spa object
+        if (window.spa && window.spa.router) {
+          window.spa.router.navigate('/my-meal');
+        } else {
+          window.location.hash = '/my-meal'; // Fallback
+        }
+      });
     }
   }
 

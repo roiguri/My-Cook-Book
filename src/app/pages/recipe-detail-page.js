@@ -116,32 +116,27 @@ export default {
         if (!currentUser) return;
 
         try {
-          const messageModal = container.querySelector('message-modal');
-          // Add to active_meals
-          // Use set with merge true to create if not exists or update
-          await firestoreService.batchWrite([
-              {
-                  type: 'set',
-                  collection: 'active_meals',
-                  id: currentUser.uid,
-                  data: {
-                      recipeIds: arrayUnion(recipeId),
-                      lastUpdated: serverTimestamp()
-                  }
-              }
-          ]);
+          // Dynamic import of utils
+          const { ActiveMealUtils } = await import('../../js/utils/active-meal-utils.js');
 
-          // Also set default state if needed, but arrayUnion is enough to trigger the listener in my-meal-page
-          // which will fetch the recipe and default state
+          const result = await ActiveMealUtils.addToMeal(currentUser.uid, recipeId);
+
+          const messageModal = container.querySelector('message-modal');
 
           if (messageModal) {
-             messageModal.show('המתכון נוסף לארוחה שלך בהצלחה', 'נוסף לארוחה');
+            if (result.success) {
+              messageModal.show('המתכון נוסף לארוחה שלך בהצלחה', 'נוסף לארוחה');
+            } else if (result.reason === 'duplicate') {
+              messageModal.show('המתכון כבר נמצא בארוחה שלך', 'כבר קיים');
+            } else {
+              messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+            }
           }
         } catch (error) {
           console.error('Error adding to meal:', error);
           const messageModal = container.querySelector('message-modal');
-           if (messageModal) {
-             messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+          if (messageModal) {
+            messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
           }
         }
       });

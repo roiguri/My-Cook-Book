@@ -16,33 +16,35 @@ The application is built as a Single Page Application (SPA) using a custom-built
 
 ## ✨ Key Features
 
-*   **Recipe Collection:** Browse and search a rich collection of family recipes with support for Hebrew text (RTL).
-*   **User Authentication:** Secure login and signup (Email/Password & Google OAuth) powered by **Firebase Auth**.
-*   **Role-Based Access:**
-    *   **Viewers:** Can browse and search recipes.
-    *   **Contributors:** Can propose new recipes and upload images.
-    *   **Managers:** dedicated dashboard to review, approve, or edit pending recipes.
-*   **Responsive Design:** A mobile-first interface that looks great on all devices.
-*   **Custom Router:** A lightweight, hash-based client-side router built from scratch.
+- **Recipe Collection:** Browse and search a rich collection of family recipes with support for Hebrew text (RTL).
+- **User Authentication:** Secure login and signup (Email/Password & Google OAuth) powered by **Firebase Auth**.
+- **Role-Based Access:**
+  - **Viewers:** Can browse and search recipes.
+  - **Contributors:** Can propose new recipes and upload images.
+  - **Managers:** dedicated dashboard to review, approve, or edit pending recipes.
+- **Responsive Design:** A mobile-first interface that looks great on all devices.
+- **Custom Router:** A lightweight, hash-based client-side router built from scratch.
 
 ## 🛠 Tech Stack & Architecture
 
 This project was built to demonstrate a strong grasp of core web technologies:
 
-*   **Frontend:**
-    *   **Vanilla JavaScript (ES6+):** Core logic and state management.
-    *   **Web Components:** Encapsulated UI components using Shadow DOM for style isolation.
-    *   **Custom SPA Router:** Handles navigation and dynamic view rendering without page reloads.
-    *   **CSS3:** Custom styling with a focus on responsiveness.
-    *   **Vite:** Modern build tool for fast development and optimized production assets.
+- **Frontend:**
 
-*   **Backend (Firebase):**
-    *   **Cloud Firestore:** NoSQL database for real-time data syncing.
-    *   **Firebase Authentication:** Secure user identity management.
-    *   **Cloud Storage:** Scalable storage for user-uploaded recipe images.
+  - **Vanilla JavaScript (ES6+):** Core logic and state management.
+  - **Web Components:** Encapsulated UI components using Shadow DOM for style isolation.
+  - **Custom SPA Router:** Handles navigation and dynamic view rendering without page reloads.
+  - **CSS3:** Custom styling with a focus on responsiveness.
+  - **Vite:** Modern build tool for fast development and optimized production assets.
 
-*   **Testing:**
-    *   **Jest:** Unit testing for core utilities and services.
+- **Backend (Firebase):**
+
+  - **Cloud Firestore:** NoSQL database for real-time data syncing.
+  - **Firebase Authentication:** Secure user identity management.
+  - **Cloud Storage:** Scalable storage for user-uploaded recipe images.
+
+- **Testing:**
+  - **Jest:** Unit testing for core utilities and services.
 
 ## 🚀 Live Demo
 
@@ -52,8 +54,10 @@ You can view the live application hosted on Netlify here:
 ## 🔮 Future Plans
 
 While this project was a foundational learning experience, I plan to continue evolving it:
-*   **Social Features:** Adding comments, ratings, and social sharing capabilities.
-*   **Offline Support:** Enhancing PWA capabilities for fully offline access to saved recipes.
+
+- **Social Features:** Adding comments, ratings, and social sharing capabilities.
+- **Offline Support:** Enhancing PWA capabilities for fully offline access to saved recipes.
 
 ---
-*Built by [Roi Guri](https://github.com/roiguri)*
+
+_Built by [Roi Guri](https://github.com/roiguri)_

@@ -604,7 +604,9 @@ class RecipeComponent extends HTMLElement {
   }
 
   setActiveStep(index) {
-    const allSteps = this.shadowRoot.querySelectorAll('.Recipe_component__instruction-list li, .Recipe_component__stage-title');
+    const allSteps = this.shadowRoot.querySelectorAll(
+      '.Recipe_component__instruction-list li, .Recipe_component__stage-title',
+    );
     allSteps.forEach((step) => step.classList.remove('active-step'));
 
     // Search for both list items and headings

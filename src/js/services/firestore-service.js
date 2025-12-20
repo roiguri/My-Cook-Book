@@ -153,7 +153,7 @@ export class FirestoreService {
       for (const op of operations) {
         const docRef = doc(db, op.collection, op.id);
         if (op.type === 'set') {
-          batch.set(docRef, op.data);
+          batch.set(docRef, op.data, op.options);
         } else if (op.type === 'update') {
           batch.update(docRef, op.data);
         } else if (op.type === 'delete') {

@@ -310,6 +310,14 @@ class RecipeCard extends HTMLElement {
         );
       });
     }
+
+    const addToMealBtn = this.shadowRoot.querySelector('.add-to-meal-btn');
+    if (addToMealBtn) {
+      addToMealBtn.addEventListener('click', async (e) => {
+        e.stopPropagation(); // Prevent card navigation
+        await this._addToMeal();
+      });
+    }
   }
 
   _removeEventListeners() {
@@ -547,33 +555,41 @@ class RecipeCard extends HTMLElement {
   }
 
   async _addToMeal() {
-      const user = authService.getCurrentUser();
-      if (!user) return;
+    const user = authService.getCurrentUser();
+    if (!user) return;
 
-      try {
-          const db = getFirestoreInstance();
-          const batch = writeBatch(db);
-          const mealRef = doc(db, 'active_meals', user.uid);
+    try {
+      // Dynamic import to avoid circular dependencies if any, and ensure it's loaded
+      const { ActiveMealUtils } = await import('../../../js/utils/active-meal-utils.js');
 
-          batch.set(mealRef, {
-              recipeIds: arrayUnion(this.recipeId),
-              lastUpdated: serverTimestamp()
-          }, { merge: true });
+      // Ensure message-modal is available
+      await import('../../../lib/modals/message-modal/message-modal.js');
 
-          await batch.commit();
+      const result = await ActiveMealUtils.addToMeal(user.uid, this.recipeId);
 
-          // Show feedback
-          const messageModal = document.querySelector('message-modal');
-          if (messageModal) {
-              messageModal.show('המתכון נוסף לארוחה שלך בהצלחה', 'נוסף לארוחה');
-          }
-      } catch (error) {
-          console.error('Error adding to meal:', error);
-          const messageModal = document.querySelector('message-modal');
-          if (messageModal) {
-              messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
-          }
+      let messageModal = document.querySelector('message-modal');
+      // If not in document/shadow, might need to create one or find it in specific container
+      // For recipe-card which is used in lists, usually the page has a modal.
+      // If not, we might want to append one.
+      if (!messageModal) {
+        messageModal = document.createElement('message-modal');
+        document.body.appendChild(messageModal);
       }
+
+      if (result.success) {
+        messageModal.show('המתכון נוסף לארוחה שלך בהצלחה', 'נוסף לארוחה');
+      } else if (result.reason === 'duplicate') {
+        messageModal.show('המתכון כבר נמצא בארוחה שלך', 'כבר קיים');
+      } else {
+        messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+      }
+    } catch (error) {
+      console.error('Error adding to meal:', error);
+      const messageModal =
+        document.querySelector('message-modal') || document.createElement('message-modal');
+      if (!messageModal.isConnected) document.body.appendChild(messageModal);
+      messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+    }
   }
 
   async _toggleFavorite() {

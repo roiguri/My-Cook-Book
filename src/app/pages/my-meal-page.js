@@ -1,7 +1,13 @@
 import authService from '../../js/services/auth-service.js';
 import { firestoreService } from '../../js/services/firestore-service.js';
-import { getRecipeById, calculateTotalTime, scaleIngredientSections } from '../../js/utils/recipes/recipe-data-utils.js';
-import { formatIngredientAmount, scaleIngredients } from '../../js/utils/recipes/recipe-ingredients-utils.js';
+import {
+  getRecipeById,
+  scaleIngredientSections,
+} from '../../js/utils/recipes/recipe-data-utils.js';
+import {
+  formatIngredientAmount,
+  scaleIngredients,
+} from '../../js/utils/recipes/recipe-ingredients-utils.js';
 import { onSnapshot, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getFirestoreInstance } from '../../js/services/firebase-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
@@ -32,7 +38,7 @@ export default {
       recipes: {}, // Cache for recipe data
       activeTabId: null,
       drawerOpen: false,
-      ingredientsView: 'all' // 'all' or 'current'
+      ingredientsView: 'all', // 'all' or 'current'
     };
 
     await this.initializeRecipeComponent();
@@ -64,19 +70,21 @@ export default {
 
     // Fetch missing recipes
     const recipeIds = mealData.recipeIds || [];
-    const missingIds = recipeIds.filter(id => !this.state.recipes[id]);
+    const missingIds = recipeIds.filter((id) => !this.state.recipes[id]);
 
     if (missingIds.length > 0) {
-      await Promise.all(missingIds.map(async (id) => {
-        try {
-          const recipe = await getRecipeById(id);
-          if (recipe) {
-            this.state.recipes[id] = recipe;
+      await Promise.all(
+        missingIds.map(async (id) => {
+          try {
+            const recipe = await getRecipeById(id);
+            if (recipe) {
+              this.state.recipes[id] = recipe;
+            }
+          } catch (error) {
+            console.error(`Failed to fetch recipe ${id}`, error);
           }
-        } catch (error) {
-          console.error(`Failed to fetch recipe ${id}`, error);
-        }
-      }));
+        }),
+      );
     }
 
     // Determine active recipe
@@ -87,13 +95,13 @@ export default {
 
     // Render active recipe
     if (activeRecipeId && activeRecipeId !== this.state.activeTabId) {
-       this.renderActiveRecipe(activeRecipeId);
+      this.renderActiveRecipe(activeRecipeId);
     } else if (activeRecipeId) {
-       // Just update attributes if needed (e.g. if updated from another device)
-       // But we need to be careful not to override local interaction if it's lagging
-       // For now, let's assume RecipeComponent handles its own internal state unless we explicitly change activeRecipeId
-       // Actually, we should sync servings and step if they changed externally
-       this.syncActiveRecipeState(activeRecipeId);
+      // Just update attributes if needed (e.g. if updated from another device)
+      // But we need to be careful not to override local interaction if it's lagging
+      // For now, let's assume RecipeComponent handles its own internal state unless we explicitly change activeRecipeId
+      // Actually, we should sync servings and step if they changed externally
+      this.syncActiveRecipeState(activeRecipeId);
     }
 
     // Update ingredients list if drawer is open
@@ -106,27 +114,20 @@ export default {
     const tabList = this.container.querySelector('.kitchen-switcher');
     tabList.innerHTML = '';
 
-    recipeIds.forEach(id => {
+    recipeIds.forEach((id) => {
       const recipe = this.state.recipes[id];
       if (!recipe) return;
 
-      const totalTime = calculateTotalTime(recipe);
-      const timeClass = this.getTimeClass(totalTime);
       const isActive = id === activeId;
 
       const tab = document.createElement('button');
-      tab.className = `recipe-tab ${isActive ? 'active' : ''} ${timeClass}`;
+      tab.className = `recipe-tab ${isActive ? 'active' : ''}`;
 
       const tabName = document.createElement('span');
       tabName.className = 'tab-name';
       tabName.textContent = recipe.name;
 
-      const tabTime = document.createElement('span');
-      tabTime.className = 'tab-time';
-      tabTime.textContent = this.formatDuration(totalTime);
-
       tab.appendChild(tabName);
-      tab.appendChild(tabTime);
 
       tab.addEventListener('click', () => this.switchRecipe(id));
       tabList.appendChild(tab);
@@ -137,33 +138,14 @@ export default {
     }
   },
 
-  getTimeClass(minutes) {
-    if (minutes <= 30) return 'quick';
-    if (minutes <= 60) return 'medium';
-    return 'long';
-  },
-
-  formatDuration(minutes) {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (h > 0) return `${h} ש' ${m > 0 ? `${m} ד'` : ''}`;
-    return `${m} ד'`;
-  },
-
   async switchRecipe(recipeId) {
     if (this.state.activeTabId === recipeId) return;
 
     // Save current state is handled by event listeners on the component
 
     // Update active recipe in Firestore
-    try {
-      await firestoreService.updateDocument('active_meals', this.currentUser.uid, {
-        activeRecipeId: recipeId,
-        lastUpdated: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error switching recipe:', error);
-    }
+    const { ActiveMealUtils } = await import('../../js/utils/active-meal-utils.js');
+    await ActiveMealUtils.switchRecipe(this.currentUser.uid, recipeId);
   },
 
   renderActiveRecipe(recipeId) {
@@ -177,65 +159,59 @@ export default {
     component.setAttribute('recipe-id', recipeId);
 
     if (recipeState.servings) {
-        component.setAttribute('initial-servings', recipeState.servings);
+      component.setAttribute('initial-servings', recipeState.servings);
     }
 
     if (recipeState.currentStepIndex !== undefined) {
-        component.setAttribute('active-step', recipeState.currentStepIndex);
+      component.setAttribute('active-step', recipeState.currentStepIndex);
     }
 
     // Listen for state changes
     component.addEventListener('active-step-changed', (e) => {
-        this.updateRecipeState(recipeId, { currentStepIndex: e.detail.stepIndex });
+      this.updateRecipeState(recipeId, { currentStepIndex: e.detail.stepIndex });
     });
 
     component.addEventListener('servings-changed', (e) => {
-        this.updateRecipeState(recipeId, { servings: e.detail.servings });
-        if (this.state.drawerOpen) this.renderIngredientsList();
+      this.updateRecipeState(recipeId, { servings: e.detail.servings });
+      if (this.state.drawerOpen) this.renderIngredientsList();
     });
 
     container.appendChild(component);
   },
 
   syncActiveRecipeState(recipeId) {
-      const container = this.container.querySelector('#recipe-container');
-      const component = container.querySelector('recipe-component');
-      if (!component || component.getAttribute('recipe-id') !== recipeId) return;
+    const container = this.container.querySelector('#recipe-container');
+    const component = container.querySelector('recipe-component');
+    if (!component || component.getAttribute('recipe-id') !== recipeId) return;
 
-      const recipeState = this.state.meal.recipeStates?.[recipeId] || {};
+    const recipeState = this.state.meal.recipeStates?.[recipeId] || {};
 
-      // Update attributes if they differ from current (this might cause re-renders or updates in component)
-      // We check if the attribute is different to avoid unnecessary updates
-      if (recipeState.servings && component.getAttribute('initial-servings') != recipeState.servings) {
-          component.setAttribute('initial-servings', recipeState.servings);
-      }
+    // Update attributes if they differ from current (this might cause re-renders or updates in component)
+    // We check if the attribute is different to avoid unnecessary updates
+    if (
+      recipeState.servings &&
+      component.getAttribute('initial-servings') != recipeState.servings
+    ) {
+      component.setAttribute('initial-servings', recipeState.servings);
+    }
 
-      if (recipeState.currentStepIndex !== undefined && component.getAttribute('active-step') != recipeState.currentStepIndex) {
-          component.setAttribute('active-step', recipeState.currentStepIndex);
-      }
+    if (
+      recipeState.currentStepIndex !== undefined &&
+      component.getAttribute('active-step') != recipeState.currentStepIndex
+    ) {
+      component.setAttribute('active-step', recipeState.currentStepIndex);
+    }
   },
 
   async updateRecipeState(recipeId, updates) {
-    const currentStates = this.state.meal.recipeStates || {};
-    const currentState = currentStates[recipeId] || {};
+    // We don't need to manually merge state here anymore as the utils handle dot notation updates
+    // allowing us to update just specific fields without fetching the whole object.
 
-    const newState = {
-        ...currentStates,
-        [recipeId]: {
-            ...currentState,
-            ...updates
-        }
-    };
+    // However, for local consistency until next snapshot, we might want to update local state if needed.
+    // But since we rely on snapshot, it should be fine.
 
-    try {
-        // Debounce could be added here if needed
-        await firestoreService.updateDocument('active_meals', this.currentUser.uid, {
-            recipeStates: newState,
-            lastUpdated: serverTimestamp()
-        });
-    } catch (error) {
-        console.error('Error updating recipe state:', error);
-    }
+    const { ActiveMealUtils } = await import('../../js/utils/active-meal-utils.js');
+    await ActiveMealUtils.updateRecipeState(this.currentUser.uid, recipeId, updates);
   },
 
   setupIngredientsDrawer() {
@@ -263,17 +239,17 @@ export default {
     backdrop.addEventListener('click', toggleDrawer);
 
     viewAllBtn.addEventListener('click', () => {
-        this.state.ingredientsView = 'all';
-        viewAllBtn.classList.add('active');
-        viewRecipeBtn.classList.remove('active');
-        this.renderIngredientsList();
+      this.state.ingredientsView = 'all';
+      viewAllBtn.classList.add('active');
+      viewRecipeBtn.classList.remove('active');
+      this.renderIngredientsList();
     });
 
     viewRecipeBtn.addEventListener('click', () => {
-        this.state.ingredientsView = 'current';
-        viewRecipeBtn.classList.add('active');
-        viewAllBtn.classList.remove('active');
-        this.renderIngredientsList();
+      this.state.ingredientsView = 'current';
+      viewRecipeBtn.classList.add('active');
+      viewAllBtn.classList.remove('active');
+      this.renderIngredientsList();
     });
   },
 
@@ -281,35 +257,38 @@ export default {
     const listContainer = this.container.querySelector('#ingredients-list-container');
     listContainer.innerHTML = '';
 
-    const recipeIds = this.state.ingredientsView === 'current'
-        ? (this.state.activeTabId ? [this.state.activeTabId] : [])
-        : (this.state.meal?.recipeIds || []);
+    const recipeIds =
+      this.state.ingredientsView === 'current'
+        ? this.state.activeTabId
+          ? [this.state.activeTabId]
+          : []
+        : this.state.meal?.recipeIds || [];
 
     const allIngredients = [];
 
-    recipeIds.forEach(id => {
-        const recipe = this.state.recipes[id];
-        const state = this.state.meal.recipeStates?.[id];
+    recipeIds.forEach((id) => {
+      const recipe = this.state.recipes[id];
+      const state = this.state.meal.recipeStates?.[id];
 
-        if (!recipe) return;
+      if (!recipe) return;
 
-        const servings = state?.servings || recipe.servings;
-        const originalIngredients = recipe.ingredientSections || recipe.ingredients;
+      const servings = state?.servings || recipe.servings;
+      const originalIngredients = recipe.ingredientSections || recipe.ingredients;
 
-        let scaledIngredients;
-        if (recipe.ingredientSections) {
-             scaledIngredients = scaleIngredientSections(originalIngredients, recipe.servings, servings);
-             scaledIngredients.forEach(section => {
-                 section.items.forEach(item => {
-                     allIngredients.push({ ...item, recipeName: recipe.name });
-                 });
-            });
-        } else {
-             scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
-             scaledIngredients.forEach(item => {
-                allIngredients.push({ ...item, recipeName: recipe.name });
-            });
-        }
+      let scaledIngredients;
+      if (recipe.ingredientSections) {
+        scaledIngredients = scaleIngredientSections(originalIngredients, recipe.servings, servings);
+        scaledIngredients.forEach((section) => {
+          section.items.forEach((item) => {
+            allIngredients.push({ ...item, recipeName: recipe.name });
+          });
+        });
+      } else {
+        scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
+        scaledIngredients.forEach((item) => {
+          allIngredients.push({ ...item, recipeName: recipe.name });
+        });
+      }
     });
 
     // Consolidate ingredients (optional, simple list for now)
@@ -318,125 +297,133 @@ export default {
 
     // Group by recipe for clarity when viewing "All"
     if (this.state.ingredientsView === 'all') {
-        recipeIds.forEach(id => {
-            const recipe = this.state.recipes[id];
-            if (!recipe) return;
+      recipeIds.forEach((id) => {
+        const recipe = this.state.recipes[id];
+        if (!recipe) return;
 
-            const recipeHeader = document.createElement('h3');
-            recipeHeader.textContent = recipe.name;
-            listContainer.appendChild(recipeHeader);
+        const recipeHeader = document.createElement('h3');
+        recipeHeader.textContent = recipe.name;
+        listContainer.appendChild(recipeHeader);
 
-            const ul = document.createElement('ul');
-            const state = this.state.meal.recipeStates?.[id];
-            const servings = state?.servings || recipe.servings;
-            const originalIngredients = recipe.ingredientSections || recipe.ingredients;
+        const ul = document.createElement('ul');
+        const state = this.state.meal.recipeStates?.[id];
+        const servings = state?.servings || recipe.servings;
+        const originalIngredients = recipe.ingredientSections || recipe.ingredients;
 
-            let scaledIngredients;
-            if (recipe.ingredientSections) {
-                scaledIngredients = scaleIngredientSections(originalIngredients, recipe.servings, servings);
-            } else {
-                scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
-            }
-
-             const renderItems = (items) => {
-                 items.forEach(item => {
-                    const li = document.createElement('li');
-
-                    const amountSpan = document.createElement('span');
-                    amountSpan.className = 'amount';
-                    amountSpan.textContent = formatIngredientAmount(item.amount);
-
-                    const unitSpan = document.createElement('span');
-                    unitSpan.className = 'unit';
-                    unitSpan.textContent = item.unit;
-
-                    const itemSpan = document.createElement('span');
-                    itemSpan.className = 'item';
-                    itemSpan.textContent = item.item;
-
-                    li.appendChild(amountSpan);
-                    li.appendChild(document.createTextNode(' '));
-                    li.appendChild(unitSpan);
-                    li.appendChild(document.createTextNode(' '));
-                    li.appendChild(itemSpan);
-
-                    ul.appendChild(li);
-                 });
-             };
-
-             if (recipe.ingredientSections) {
-                 scaledIngredients.forEach(section => {
-                     if (section.title) {
-                         const sectionTitle = document.createElement('li');
-                         sectionTitle.className = 'section-title';
-                         sectionTitle.textContent = section.title;
-                         ul.appendChild(sectionTitle);
-                     }
-                     renderItems(section.items);
-                 });
-             } else {
-                 renderItems(scaledIngredients);
-             }
-             listContainer.appendChild(ul);
-        });
-    } else {
-        // Single recipe view
-        if (recipeIds.length > 0) {
-            const recipe = this.state.recipes[recipeIds[0]];
-            const state = this.state.meal.recipeStates?.[recipeIds[0]];
-            const servings = state?.servings || recipe.servings;
-            const originalIngredients = recipe.ingredientSections || recipe.ingredients;
-
-            let scaledIngredients;
-            if (recipe.ingredientSections) {
-                scaledIngredients = scaleIngredientSections(originalIngredients, recipe.servings, servings);
-            } else {
-                scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
-            }
-
-             const ul = document.createElement('ul');
-
-             const renderItems = (items) => {
-                 items.forEach(item => {
-                    const li = document.createElement('li');
-
-                    const amountSpan = document.createElement('span');
-                    amountSpan.className = 'amount';
-                    amountSpan.textContent = formatIngredientAmount(item.amount);
-
-                    const unitSpan = document.createElement('span');
-                    unitSpan.className = 'unit';
-                    unitSpan.textContent = item.unit;
-
-                    const itemSpan = document.createElement('span');
-                    itemSpan.className = 'item';
-                    itemSpan.textContent = item.item;
-
-                    li.appendChild(amountSpan);
-                    li.appendChild(document.createTextNode(' '));
-                    li.appendChild(unitSpan);
-                    li.appendChild(document.createTextNode(' '));
-                    li.appendChild(itemSpan);
-
-                    ul.appendChild(li);
-                 });
-             };
-
-             if (recipe.ingredientSections) {
-                 scaledIngredients.forEach(section => {
-                     if (section.title) {
-                         const sectionTitle = document.createElement('li');
-                         sectionTitle.className = 'section-title';
-                         sectionTitle.textContent = section.title;
-                         ul.appendChild(sectionTitle);
-                     }
-                     renderItems(section.items);
-                 });
-             } else {
-                 renderItems(scaledIngredients);
-             }
-             listContainer.appendChild(ul);
+        let scaledIngredients;
+        if (recipe.ingredientSections) {
+          scaledIngredients = scaleIngredientSections(
+            originalIngredients,
+            recipe.servings,
+            servings,
+          );
+        } else {
+          scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
         }
+
+        const renderItems = (items) => {
+          items.forEach((item) => {
+            const li = document.createElement('li');
+
+            const amountSpan = document.createElement('span');
+            amountSpan.className = 'amount';
+            amountSpan.textContent = formatIngredientAmount(item.amount);
+
+            const unitSpan = document.createElement('span');
+            unitSpan.className = 'unit';
+            unitSpan.textContent = item.unit;
+
+            const itemSpan = document.createElement('span');
+            itemSpan.className = 'item';
+            itemSpan.textContent = item.item;
+
+            li.appendChild(amountSpan);
+            li.appendChild(document.createTextNode(' '));
+            li.appendChild(unitSpan);
+            li.appendChild(document.createTextNode(' '));
+            li.appendChild(itemSpan);
+
+            ul.appendChild(li);
+          });
+        };
+
+        if (recipe.ingredientSections) {
+          scaledIngredients.forEach((section) => {
+            if (section.title) {
+              const sectionTitle = document.createElement('li');
+              sectionTitle.className = 'section-title';
+              sectionTitle.textContent = section.title;
+              ul.appendChild(sectionTitle);
+            }
+            renderItems(section.items);
+          });
+        } else {
+          renderItems(scaledIngredients);
+        }
+        listContainer.appendChild(ul);
+      });
+    } else {
+      // Single recipe view
+      if (recipeIds.length > 0) {
+        const recipe = this.state.recipes[recipeIds[0]];
+        const state = this.state.meal.recipeStates?.[recipeIds[0]];
+        const servings = state?.servings || recipe.servings;
+        const originalIngredients = recipe.ingredientSections || recipe.ingredients;
+
+        let scaledIngredients;
+        if (recipe.ingredientSections) {
+          scaledIngredients = scaleIngredientSections(
+            originalIngredients,
+            recipe.servings,
+            servings,
+          );
+        } else {
+          scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
+        }
+
+        const ul = document.createElement('ul');
+
+        const renderItems = (items) => {
+          items.forEach((item) => {
+            const li = document.createElement('li');
+
+            const amountSpan = document.createElement('span');
+            amountSpan.className = 'amount';
+            amountSpan.textContent = formatIngredientAmount(item.amount);
+
+            const unitSpan = document.createElement('span');
+            unitSpan.className = 'unit';
+            unitSpan.textContent = item.unit;
+
+            const itemSpan = document.createElement('span');
+            itemSpan.className = 'item';
+            itemSpan.textContent = item.item;
+
+            li.appendChild(amountSpan);
+            li.appendChild(document.createTextNode(' '));
+            li.appendChild(unitSpan);
+            li.appendChild(document.createTextNode(' '));
+            li.appendChild(itemSpan);
+
+            ul.appendChild(li);
+          });
+        };
+
+        if (recipe.ingredientSections) {
+          scaledIngredients.forEach((section) => {
+            if (section.title) {
+              const sectionTitle = document.createElement('li');
+              sectionTitle.className = 'section-title';
+              sectionTitle.textContent = section.title;
+              ul.appendChild(sectionTitle);
+            }
+            renderItems(section.items);
+          });
+        } else {
+          renderItems(scaledIngredients);
+        }
+        listContainer.appendChild(ul);
+      }
     }
   },
 
@@ -462,9 +449,9 @@ export default {
   },
 
   getMeta() {
-      return {
-          description: 'Manage your cooking session',
-          keywords: 'cooking, meal, recipes'
-      };
-  }
+    return {
+      description: 'Manage your cooking session',
+      keywords: 'cooking, meal, recipes',
+    };
+  },
 };
