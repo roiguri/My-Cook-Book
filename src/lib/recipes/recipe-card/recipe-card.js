@@ -474,10 +474,12 @@ class RecipeCard extends HTMLElement {
 
     // Handle add to meal button visibility
     const user = authService.getCurrentUser();
-    if (!user && addToMealBtn) {
-        addToMealBtn.style.display = 'none';
-    } else if (addToMealBtn) {
+    if (addToMealBtn) {
+      if (user && this.hasAttribute('show-add-to-meal')) {
         addToMealBtn.style.display = 'block';
+      } else {
+        addToMealBtn.style.display = 'none';
+      }
     }
 
     // Set image

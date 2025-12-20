@@ -281,6 +281,10 @@ class RecipePresentationGrid extends HTMLElement {
         recipeCard.setAttribute('show-favorites', 'true');
       }
 
+      if (authenticated && this.getAttribute('show-add-to-meal') !== 'false') {
+        recipeCard.setAttribute('show-add-to-meal', 'true');
+      }
+
       cardContainer.appendChild(recipeCard);
       container.appendChild(cardContainer);
     }
