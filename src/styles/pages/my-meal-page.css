@@ -157,12 +157,59 @@
   color: white;
   font-size: 1.2rem;
   cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.spa-content .my-meal-page .close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .spa-content .my-meal-page .drawer-controls {
   padding: 10px;
   border-bottom: 1px solid #e0e0e0;
   direction: rtl;
+}
+
+/* ... existing code ... */
+
+/* Clear All Button Styles */
+.spa-content .my-meal-page .clear-all-btn {
+  color: #ef5350 !important;
+  /* Lighter red usually */
+  border-bottom-color: transparent !important;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  width: 40px;
+  /* Fixed width for circle */
+  height: 40px;
+  /* Fixed height for circle */
+  border-radius: 50%;
+  /* Make it circular */
+  padding: 0;
+  /* Remove tab padding */
+  min-width: unset;
+  /* Remove tab min-width */
+  display: flex;
+  /* Ensure centering */
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  /* Center vertically in the container if needed */
+}
+
+.spa-content .my-meal-page .clear-all-btn:hover {
+  opacity: 1;
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+  /* Darker red on hover */
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .spa-content .my-meal-page .toggle-group {
@@ -257,8 +304,85 @@
   margin-bottom: 20px;
 }
 
+/* Remove Button Styles */
+.spa-content .my-meal-page .remove-recipe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #9e9e9e;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.spa-content .my-meal-page .remove-recipe-btn:hover {
+  background-color: #ffebee;
+  color: #d32f2f;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.spa-content .my-meal-page .recipe-tab.active .remove-recipe-btn {
+  color: var(--primary-color);
+  opacity: 0.8;
+}
+
+.spa-content .my-meal-page .recipe-tab.active .remove-recipe-btn:hover {
+  background-color: #ffebee;
+  color: #d32f2f;
+  opacity: 1;
+}
+
+/* Clear All Button Styles */
+.spa-content .my-meal-page .clear-all-btn {
+  color: #ef5350 !important;
+  /* Lighter red usually */
+  border-bottom-color: transparent !important;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  width: 40px;
+  /* Fixed width for circle */
+  height: 40px;
+  /* Fixed height for circle */
+  border-radius: 50%;
+  /* Make it circular */
+  padding: 0;
+  /* Remove tab padding */
+  min-width: unset;
+  /* Remove tab min-width */
+  display: flex;
+  /* Ensure centering */
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  /* Center vertically in the container */
+  margin-right: auto;
+  /* Push to the end if flex direction is rtl, or just good separation */
+}
+
+.spa-content .my-meal-page .clear-all-btn:hover {
+  opacity: 1;
+  background-color: #ffebee !important;
+  color: #c62828 !important;
+  /* Darker red on hover */
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
 @media (max-width: 768px) {
   .spa-content .my-meal-page .ingredients-drawer {
     width: 85%;
+  }
+
+  /* Increase touch targets for mobile */
+  .spa-content .my-meal-page .remove-recipe-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
   }
 }

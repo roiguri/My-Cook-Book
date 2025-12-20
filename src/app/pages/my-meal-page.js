@@ -127,9 +127,11 @@ export default {
     }
   },
 
-  renderTabs(recipeIds, activeId) {
+  async renderTabs(recipeIds, activeId) {
     const tabList = this.container.querySelector('.kitchen-switcher');
     tabList.innerHTML = '';
+
+    const { ActiveMealUtils } = await import('../../js/utils/active-meal-utils.js');
 
     recipeIds.forEach((id) => {
       const recipe = this.state.recipes[id];
@@ -140,19 +142,82 @@ export default {
       const tab = document.createElement('button');
       tab.className = `recipe-tab ${isActive ? 'active' : ''}`;
 
+      // Tab content container for better layout control
+      const tabContent = document.createElement('div');
+      tabContent.className = 'tab-content';
+      tabContent.style.display = 'flex';
+      tabContent.style.alignItems = 'center';
+      tabContent.style.gap = '8px';
+
       const tabName = document.createElement('span');
       tabName.className = 'tab-name';
       tabName.textContent = recipe.name;
 
-      tab.appendChild(tabName);
+      // Remove button
+      const removeBtn = document.createElement('span');
+      removeBtn.className = 'remove-recipe-btn';
+      removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+      removeBtn.title = 'הסר מתכון';
+      removeBtn.onclick = (e) => this.handleRemoveRecipe(e, id, ActiveMealUtils);
 
-      tab.addEventListener('click', () => this.switchRecipe(id));
+      tabContent.appendChild(tabName);
+      tabContent.appendChild(removeBtn);
+
+      tab.appendChild(tabContent);
+
+      tab.addEventListener('click', (e) => {
+        // Prevent switching if clicking remove button (though handled by propagation stop in remove handler, just in case)
+        if (e.target.closest('.remove-recipe-btn')) return;
+        this.switchRecipe(id);
+      });
       tabList.appendChild(tab);
     });
 
-    if (recipeIds.length === 0) {
+    if (recipeIds.length > 0) {
+      // Add Clear All button at the end
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'recipe-tab clear-all-btn';
+      clearBtn.title = 'נקה הכל';
+      clearBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+      clearBtn.onclick = () => this.handleClearMeal(ActiveMealUtils);
+      tabList.appendChild(clearBtn);
+    } else {
       this.renderEmptyState();
     }
+  },
+
+  async handleRemoveRecipe(e, recipeId, ActiveMealUtils) {
+    e.stopPropagation();
+    if (!confirm('האם להסיר את המתכון מהארוחה?')) return;
+
+    // Detect if we need to switch tabs
+    if (this.state.activeTabId === recipeId) {
+      const recipeIds = this.state.meal.recipeIds || [];
+      const index = recipeIds.indexOf(recipeId);
+
+      let nextId = null;
+      if (recipeIds.length > 1) {
+        // If there is a previous recipe, go to it. Otherwise go to the next one (which will become first)
+        if (index > 0) {
+          nextId = recipeIds[index - 1];
+        } else {
+          nextId = recipeIds[index + 1]; // It was the first one, so go to the second one
+        }
+      }
+
+      if (nextId) {
+        await this.switchRecipe(nextId);
+      }
+    }
+
+    await ActiveMealUtils.removeFromMeal(this.currentUser.uid, recipeId);
+  },
+
+  async handleClearMeal(ActiveMealUtils) {
+    if (!confirm('האם לנקות את כל הארוחה? פעולה זו תסיר את כל המתכונים.')) return;
+
+    await ActiveMealUtils.clearMeal(this.currentUser.uid);
+    // UI update will happen automatically via onSnapshot
   },
 
   async switchRecipe(recipeId) {

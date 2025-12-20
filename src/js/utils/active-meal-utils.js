@@ -1,5 +1,5 @@
 import { FirestoreService } from '../services/firestore-service.js';
-import { arrayUnion, serverTimestamp } from 'firebase/firestore';
+import { arrayUnion, arrayRemove, serverTimestamp, deleteField } from 'firebase/firestore';
 
 /**
  * Utility for managing active meal operations
@@ -53,6 +53,51 @@ export const ActiveMealUtils = {
     } catch (error) {
       console.error('Error adding recipe to meal:', error);
       return { success: false, reason: 'error', error };
+    }
+  },
+
+  /**
+   * Remove a recipe from the user's active meal
+   * @param {string} userId
+   * @param {string} recipeId
+   * @returns {Promise<{success: boolean, error?: any}>}
+   */
+  async removeFromMeal(userId, recipeId) {
+    if (!userId || !recipeId) return { success: false, error: 'invalid_inputs' };
+
+    try {
+      // We also want to remove the specific state for this recipe to clean up the document
+      const updates = {
+        recipeIds: arrayRemove(recipeId),
+        lastUpdated: serverTimestamp(),
+        [`recipeStates.${recipeId}`]: deleteField(),
+        // Check if this was the active recipe and clear it if so (handled in page logic generally, but safe to do validation)
+        // However, we can't condition updates on current values easily in one update call without transaction.
+        // Let's just remove the recipe. The page will handle switching active tab if needed.
+      };
+
+      await FirestoreService.updateDocument('active_meals', userId, updates);
+      return { success: true };
+    } catch (error) {
+      console.error('Error removing recipe from meal:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Clear user's active meal entirely
+   * @param {string} userId
+   * @returns {Promise<{success: boolean, error?: any}>}
+   */
+  async clearMeal(userId) {
+    if (!userId) return { success: false, error: 'invalid_user' };
+
+    try {
+      await FirestoreService.deleteDocument('active_meals', userId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error clearing meal:', error);
+      return { success: false, error };
     }
   },
 
