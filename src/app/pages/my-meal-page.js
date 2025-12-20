@@ -24,12 +24,12 @@ export default {
 
   async mount(container) {
     this.container = container;
-    this.currentUser = authService.getCurrentUser();
+
+    // Wait for authentication to resolve before checking
+    this.currentUser = await authService.waitForAuth();
 
     if (!this.currentUser) {
-      // Redirect to home or login if not authenticated
-      // For now, let's show a message
-      container.innerHTML = '<div class="error-message">יש להתחבר כדי להשתמש בארוחה שלי</div>';
+      this.redirectToHome();
       return;
     }
 
@@ -41,9 +41,26 @@ export default {
       ingredientsView: 'all', // 'all' or 'current'
     };
 
+    this.setupAuthObserver();
     await this.initializeRecipeComponent();
     this.setupIngredientsDrawer();
     this.subscribeToMealData();
+  },
+
+  redirectToHome() {
+    if (window.spa && window.spa.router) {
+      window.spa.router.navigate('/');
+    } else {
+      window.location.href = '/';
+    }
+  },
+
+  setupAuthObserver() {
+    this.authUnsubscribe = authService.onAuthStateChanged((user) => {
+      if (!user) {
+        this.redirectToHome();
+      }
+    });
   },
 
   async initializeRecipeComponent() {
@@ -441,6 +458,9 @@ export default {
   unmount() {
     if (this.unsubscribe) {
       this.unsubscribe();
+    }
+    if (this.authUnsubscribe) {
+      this.authUnsubscribe();
     }
   },
 
