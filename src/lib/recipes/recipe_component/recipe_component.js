@@ -503,14 +503,26 @@ class RecipeComponent extends HTMLElement {
       li.textContent = instruction;
       li.dataset.stepIndex = globalStepIndex;
       li.addEventListener('click', () => {
-        this.setActiveStep(parseInt(li.dataset.stepIndex));
-        this.dispatchEvent(
-          new CustomEvent('active-step-changed', {
-            detail: { stepIndex: parseInt(li.dataset.stepIndex) },
-            bubbles: true,
-            composed: true,
-          }),
-        );
+        const stepIndex = parseInt(li.dataset.stepIndex);
+        if (li.classList.contains('active-step')) {
+          this.setActiveStep(null);
+          this.dispatchEvent(
+            new CustomEvent('active-step-changed', {
+              detail: { stepIndex: null },
+              bubbles: true,
+              composed: true,
+            }),
+          );
+        } else {
+          this.setActiveStep(stepIndex);
+          this.dispatchEvent(
+            new CustomEvent('active-step-changed', {
+              detail: { stepIndex: stepIndex },
+              bubbles: true,
+              composed: true,
+            }),
+          );
+        }
       });
       globalStepIndex++;
       return li;
