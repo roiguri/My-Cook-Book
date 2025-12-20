@@ -1,0 +1,36 @@
+<div class="my-meal-page">
+  <div class="kitchen-switcher" role="tablist">
+    <!-- Tabs will be dynamically inserted here -->
+  </div>
+
+  <div class="my-meal-content">
+    <div id="recipe-container" class="recipe-container">
+      <!-- Active recipe component will be inserted here -->
+    </div>
+
+    <div class="ingredients-drawer-toggle">
+      <button id="toggle-ingredients-btn" class="btn-primary">
+        <i class="fas fa-shopping-basket"></i> רשימת מצרכים
+      </button>
+    </div>
+  </div>
+
+  <div id="ingredients-drawer" class="ingredients-drawer">
+    <div class="drawer-header">
+      <h2>רשימת מצרכים</h2>
+      <button id="close-drawer-btn" class="close-btn" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="drawer-controls">
+      <div class="toggle-group">
+        <button id="view-all-ingredients" class="toggle-btn active">כל המצרכים</button>
+        <button id="view-recipe-ingredients" class="toggle-btn">מתכון נוכחי</button>
+      </div>
+    </div>
+    <div id="ingredients-list-container" class="ingredients-list-container">
+      <!-- Ingredients list will be populated here -->
+    </div>
+  </div>
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+</div>

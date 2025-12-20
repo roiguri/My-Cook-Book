@@ -49,7 +49,7 @@ class RecipeComponent extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['recipe-id'];
+    return ['recipe-id', 'initial-servings', 'active-step'];
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
@@ -57,6 +57,8 @@ class RecipeComponent extends HTMLElement {
     if (name === 'recipe-id' && oldValue !== newValue && this.isConnected && this.shadowRoot) {
       this.recipeId = newValue;
       this.fetchAndPopulateRecipeData();
+    } else if (name === 'active-step' && this.isConnected && this.shadowRoot) {
+      this.scrollToStep(parseInt(newValue));
     }
   }
 
@@ -250,6 +252,20 @@ class RecipeComponent extends HTMLElement {
     .Recipe_component__instructions li {
       margin-bottom: 10px;
       line-height: 1.6;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .Recipe_component__instructions li:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .Recipe_component__instructions li.active-step {
+      background-color: var(--primary-color-light, #e0f2f1);
+      border-right: 4px solid var(--primary-color, #009688);
+      font-weight: bold;
     }
 
     .Recipe_component__comments ol {
@@ -480,6 +496,25 @@ class RecipeComponent extends HTMLElement {
   populateInstructions(recipe) {
     const instructionsList = this.shadowRoot.getElementById('Recipe_component__instructions-list');
     instructionsList.innerHTML = '';
+    let globalStepIndex = 0;
+
+    const createInstructionItem = (instruction) => {
+      const li = document.createElement('li');
+      li.textContent = instruction;
+      li.dataset.stepIndex = globalStepIndex;
+      li.addEventListener('click', () => {
+        this.setActiveStep(parseInt(li.dataset.stepIndex));
+        this.dispatchEvent(
+          new CustomEvent('active-step-changed', {
+            detail: { stepIndex: parseInt(li.dataset.stepIndex) },
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      });
+      globalStepIndex++;
+      return li;
+    };
 
     if (recipe.stages && recipe.stages.length > 0) {
       recipe.stages.forEach((stage, index) => {
@@ -491,9 +526,7 @@ class RecipeComponent extends HTMLElement {
         const stageList = document.createElement('ol');
         stageList.classList.add('Recipe_component__instruction-list');
         stage.instructions.forEach((instruction) => {
-          const li = document.createElement('li');
-          li.textContent = instruction;
-          stageList.appendChild(li);
+          stageList.appendChild(createInstructionItem(instruction));
         });
         instructionsList.appendChild(stageList);
       });
@@ -502,11 +535,33 @@ class RecipeComponent extends HTMLElement {
       const singleStageList = document.createElement('ol');
       singleStageList.classList.add('Recipe_component__instruction-list');
       recipe.instructions.forEach((instruction) => {
-        const li = document.createElement('li');
-        li.textContent = instruction;
-        singleStageList.appendChild(li);
+        singleStageList.appendChild(createInstructionItem(instruction));
       });
       instructionsList.appendChild(singleStageList);
+    }
+
+    // Set initial active step if provided
+    const initialStep = this.getAttribute('active-step');
+    if (initialStep !== null) {
+      this.scrollToStep(parseInt(initialStep));
+    }
+  }
+
+  setActiveStep(index) {
+    const allSteps = this.shadowRoot.querySelectorAll('.Recipe_component__instruction-list li');
+    allSteps.forEach((step) => step.classList.remove('active-step'));
+
+    const activeStep = this.shadowRoot.querySelector(`li[data-step-index="${index}"]`);
+    if (activeStep) {
+      activeStep.classList.add('active-step');
+    }
+  }
+
+  scrollToStep(index) {
+    this.setActiveStep(index);
+    const activeStep = this.shadowRoot.querySelector(`li[data-step-index="${index}"]`);
+    if (activeStep) {
+      activeStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
 
@@ -590,12 +645,30 @@ class RecipeComponent extends HTMLElement {
 
   setupServingsAdjuster(recipe) {
     const servingsInput = this.shadowRoot.getElementById('Recipe_component__servings');
-    servingsInput.setAttribute('value', recipe.servings);
+    const initialServings = this.getAttribute('initial-servings');
+    const currentServings = initialServings ? parseInt(initialServings) : recipe.servings;
+
+    servingsInput.setAttribute('value', currentServings);
+    servingsInput.value = currentServings; // Ensure property is updated too
 
     // Store original data in closure scope to avoid instance state issues
     const originalIngredients = recipe.ingredientSections || recipe.ingredients;
     const originalRecipeFormat = recipe.ingredientSections ? 'sectioned' : 'flat';
     const originalServings = recipe.servings;
+
+    // Perform initial scaling if needed
+    if (currentServings !== originalServings) {
+      const scaledIngredients = scaleIngredients(
+        originalIngredients,
+        originalServings,
+        currentServings,
+      );
+      const scaledRecipe =
+        originalRecipeFormat === 'sectioned'
+          ? { ingredientSections: scaledIngredients }
+          : { ingredients: scaledIngredients };
+      this.populateIngredientsList(scaledRecipe);
+    }
 
     servingsInput.addEventListener('change', () => {
       const newServings = parseInt(servingsInput.value);
@@ -613,6 +686,14 @@ class RecipeComponent extends HTMLElement {
           : { ingredients: scaledIngredients };
 
       this.populateIngredientsList(scaledRecipe);
+
+      this.dispatchEvent(
+        new CustomEvent('servings-changed', {
+          detail: { servings: newServings },
+          bubbles: true,
+          composed: true,
+        }),
+      );
     });
   }
 

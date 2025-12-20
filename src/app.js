@@ -19,6 +19,7 @@ import firebaseConfig from './js/config/firebase-config.js';
 import { AppRouter } from './app/core/router.js';
 import { PageManager } from './app/core/page-manager.js';
 
+
 // Initialize SPA when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeSPA);
 
@@ -118,6 +119,14 @@ function registerRoutes(router, pageManager) {
     await pageManager.loadPage(module.default || module, {
       ...params,
       route: '/dashboard',
+    });
+  });
+
+  router.registerRoute('/my-meal', async (params) => {
+    const module = await import('./app/pages/my-meal-page.js');
+    await pageManager.loadPage(module.default || module, {
+      ...params,
+      route: '/my-meal',
     });
   });
 }
