@@ -256,6 +256,7 @@ class RecipeComponent extends HTMLElement {
       padding: 5px;
       border-radius: 4px;
       transition: background-color 0.2s;
+      list-style-position: inside;
     }
 
     .Recipe_component__instructions li:hover {
@@ -266,6 +267,22 @@ class RecipeComponent extends HTMLElement {
       background-color: var(--primary-color-light, #e0f2f1);
       border-right: 4px solid var(--primary-color, #009688);
       font-weight: bold;
+    }
+
+    .Recipe_component__stage-title {
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .Recipe_component__stage-title:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .Recipe_component__stage-title.active-step {
+      background-color: var(--primary-color-light, #e0f2f1);
+      border-right: 4px solid var(--primary-color, #009688);
     }
 
     .Recipe_component__comments ol {
@@ -533,6 +550,33 @@ class RecipeComponent extends HTMLElement {
         const stageTitle = document.createElement('h3');
         stageTitle.textContent = `שלב ${index + 1}: ${stage.title}`;
         stageTitle.classList.add('Recipe_component__stage-title');
+
+        // Make stage title clickable
+        stageTitle.dataset.stepIndex = globalStepIndex;
+        stageTitle.addEventListener('click', () => {
+          const stepIndex = parseInt(stageTitle.dataset.stepIndex);
+          if (stageTitle.classList.contains('active-step')) {
+            this.setActiveStep(null);
+            this.dispatchEvent(
+              new CustomEvent('active-step-changed', {
+                detail: { stepIndex: null },
+                bubbles: true,
+                composed: true,
+              }),
+            );
+          } else {
+            this.setActiveStep(stepIndex);
+            this.dispatchEvent(
+              new CustomEvent('active-step-changed', {
+                detail: { stepIndex: stepIndex },
+                bubbles: true,
+                composed: true,
+              }),
+            );
+          }
+        });
+        globalStepIndex++; // Increment for the title itself
+
         instructionsList.appendChild(stageTitle);
 
         const stageList = document.createElement('ol');
@@ -560,10 +604,11 @@ class RecipeComponent extends HTMLElement {
   }
 
   setActiveStep(index) {
-    const allSteps = this.shadowRoot.querySelectorAll('.Recipe_component__instruction-list li');
+    const allSteps = this.shadowRoot.querySelectorAll('.Recipe_component__instruction-list li, .Recipe_component__stage-title');
     allSteps.forEach((step) => step.classList.remove('active-step'));
 
-    const activeStep = this.shadowRoot.querySelector(`li[data-step-index="${index}"]`);
+    // Search for both list items and headings
+    const activeStep = this.shadowRoot.querySelector(`[data-step-index="${index}"]`);
     if (activeStep) {
       activeStep.classList.add('active-step');
     }
@@ -571,7 +616,7 @@ class RecipeComponent extends HTMLElement {
 
   scrollToStep(index) {
     this.setActiveStep(index);
-    const activeStep = this.shadowRoot.querySelector(`li[data-step-index="${index}"]`);
+    const activeStep = this.shadowRoot.querySelector(`[data-step-index="${index}"]`);
     if (activeStep) {
       activeStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
