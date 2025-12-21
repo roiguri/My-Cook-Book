@@ -55,107 +55,47 @@ feature/bug branch → development → staging → main (production)
 
 **Release Info:**
 
-- **Commits in staging ahead of main**: 23 commits
-- **Files changed**: 31 files (+2,015 insertions, -1,842 deletions)
-- **Key areas affected**: Image handling, search, modals, recipe display, loading states
+- **Commits in staging ahead of main**: 6 commits
+- **Key areas affected**: Ingredients Drawer, Auth Modal, Security, Performance
 
 ---
 
-### 1. Image Approval System Improvements
+### 1. Ingredients Drawer Export & Improvements
 
-**Impact**: Manager Dashboard, Recipe Cards, Recipe Detail Page
+**Impact**: My Meal Page
 
-#### Multi-Image Batch Approval Modal
+#### Copy & Share Functionality
 
-- [ ] 🔴 **New consolidated modal** opens when approving images
-- [ ] 🔴 **Approve All button** approves all pending images at once
-- [ ] 🔴 **Reject All button** rejects all pending images at once
-- [ ] 🔴 **Individual approve/reject** works for each image
-- [ ] 🔴 **Removed images are respected** - deleted images don't get approved in batch operations
-- [ ] 🔴 **Modal is responsive** on mobile devices
-- [ ] 🔴 **Upload area is hidden** in approval-only mode
-- [ ] 🟡 **Click-to-toggle controls** work on mobile (tap to show/hide controls)
-- [ ] 🟡 **Image controls are mobile-friendly** (proper touch targets)
-- [ ] 🟡 **isPrimary flag** is respected when populating images in edit mode
-- [ ] 🟢 **Modal scrolls properly** with many images
+- [ ] 🔴 **Copy to Clipboard** - Click copy button, verify ingredients text is copied to clipboard
+- [ ] 🔴 **Copy Feedback** - Verify check icon appears briefly after copying
+- [ ] 🟡 **Share Sheet** - (Mobile/Supported devices) Click share button, verify native share sheet opens
+- [ ] 🟡 **Ingredients Text Format** - Paste copied text, verify format is readable (includes recipe names and formatted amounts)
 
-#### Image Proposal Workflow
+#### Drawer Drawer & Views
 
-- [ ] 🔴 **Image proposal modal** opens from recipe menu
-- [ ] 🔴 **Success message displays** after proposing images
-- [ ] 🔴 **Proposed images appear** in pending images section
-- [ ] 🟡 **Upload area matches** styling between images and media instructions
-- [ ] 🟢 **Loading state shows** during image upload
-
-#### Recipe Cards & Display
-
-- [ ] 🔴 **Placeholder image** is displayed for recipe cards that are missing a primary image.
-- [ ] 🟡 **Recipe scroller** (new browser-native component) displays images smoothly
-- [ ] 🟡 **Modal overflow fixed** - images scroll horizontally without breaking layout
+- [ ] 🔴 **Toggle Drawer** - Open/close via button, close icon, and clicking backdrop
+- [ ] 🔴 **View Switching** - Toggle between "All Ingredients" and "Current Recipe"
+- [ ] 🔴 **View Accuracy** - Verify "Current Recipe" only shows ingredients for active tab
+- [ ] 🔴 **View Accuracy** - Verify "All Ingredients" shows ingredients for all recipes in meal
 
 ---
 
-### 2. Category Change Image Migration
+### 2. Layout & Styling Fixes
 
-**Impact**: Manager Dashboard, Edit Recipe Modal
+**Impact**: Auth Modal, Mobile Layout
 
-#### Image Migration on Category Change
-
-- [ ] 🔴 **Category change triggers migration** - images move to new category folder
-- [ ] 🔴 **Image URLs update correctly** after migration
-- [ ] 🔴 **Migration completes** before recipe save
-- [ ] 🔴 **No image loss** during migration
-- [ ] 🟡 **Multiple images migrate** correctly (not just first image)
-- [ ] 🟡 **Primary image flag preserved** during migration
-- [ ] 🟡 **Error handling** if migration fails (recipe save prevented)
-- [ ] 🟢 **Loading state shows** during migration process
+- [ ] 🔴 **Auth Modal Overflow** - Verify content is fully visible and accessible (no cut-off content)
+- [ ] 🔴 **Mobile Drawer Z-Index** - Verify hamburger menu does NOT overlap ingredients drawer (or handles z-index correctly)
 
 ---
 
-### 3. Search & Navigation Improvements
+### 3. Security & Infrastructure
 
-**Impact**: Home Page, Header Search Bar
+**Impact**: General App Stability
 
-#### Direct Navigation for Single Results
-
-- [ ] 🔴 **Single search result** navigates directly to recipe page
-- [ ] 🔴 **Toast notification** appears showing "נמצא מתכון אחד: [recipe name]"
-- [ ] 🔴 **Multiple results** still show results page (existing behavior)
-- [ ] 🔴 **No results** shows appropriate message (existing behavior)
-- [ ] 🟡 **Toast notification auto-dismisses** after 3-5 seconds
-- [ ] 🟡 **Toast notification is clickable** (dismisses on click)
-- [ ] 🟡 **Toast notification styled properly** in Hebrew
-- [ ] 🟢 **Toast notification accessible** (ARIA labels)
-
-#### Recipe Detail Page Improvements
-
-- [ ] 🔴 **Tab title shows recipe name** instead of recipe ID
-- [ ] 🔴 **Tab title updates** when navigating between recipes
-- [ ] 🟡 **Tab title fallback** shows appropriate text if recipe name unavailable
-- [ ] 🟢 **Browser history** shows correct recipe names
-
----
-
-### 4. Loading States & UX Improvements
-
-**Impact**: Manager Dashboard, Modals, Recipe Forms
-
-#### Loading Overlays
-
-- [ ] 🔴 **Loading overlay prevents scrolling** when active
-- [ ] 🔴 **Loading spinner shows** when submitting recipe edits
-- [ ] 🔴 **Page remains responsive** after loading completes
-- [ ] 🟡 **Loading spinner uses overlay mode** (simplified implementation)
-- [ ] 🟡 **Multiple loading states** don't conflict
-- [ ] 🟢 **Loading spinner accessible** (ARIA live region)
-
-#### Modal Responsiveness
-
-- [ ] 🔴 **Modals are responsive** on mobile devices
-- [ ] 🔴 **Cook mode toggle is mobile-friendly** (proper size and touch targets)
-- [ ] 🟡 **Modal scroll behavior** works on iOS and Android
-- [ ] 🟡 **Modal close buttons** are accessible on mobile
-- [ ] 🟢 **Modals don't break** on very small screens (<375px)
+- [ ] 🔴 **Recipe XSS Fix** - Verify no regression in recipe display; attempt basic script injection in recipe fields (should be escaped)
+- [ ] 🟡 **Code Splitting** - Verify main routes (Home, Categories, Meal) load correctly without 404s
+- [ ] 🟢 **Dependency Updates** - Verify app builds and runs without errors after dependency cleanup
 
 ---
 
@@ -172,6 +112,8 @@ feature/bug branch → development → staging → main (production)
 - [ ] Featured recipes section displays recipe cards
 - [ ] Recipe cards are clickable and navigate to recipe page
 - [ ] Firebase connection established (no console errors)
+- [ ] **Search Navigation** - Single search result navigates directly to recipe page
+- [ ] **Search Toast** - Toast notification appears ("Found 1 recipe...") for single result
 
 #### 🟡 High
 
@@ -224,6 +166,8 @@ feature/bug branch → development → staging → main (production)
 - [ ] Ingredients list is readable and properly formatted
 - [ ] Step-by-step instructions display in correct order
 - [ ] Page works for both logged-in and guest users
+- [ ] **Image Proposal** - Image proposal modal opens from menu (for users)
+- [ ] **Browser History** - Browser history shows correct recipe names
 
 #### 🟡 High
 
@@ -231,9 +175,12 @@ feature/bug branch → development → staging → main (production)
 - [ ] Both flat and sectioned instructions displayed correctly
 - [ ] Stage numbering and formatting is correct for multi-stage instructions
 - [ ] Check recipes with one or multiple images
+- [ ] **Recipe Scroller** - Images scroll smoothly in new scroller component
+- [ ] **Modal Responsiveness** - Images/Modals scroll properly on mobile
 - [ ] Change amount of dishes (servings adjuster) works
 - [ ] Check recipes with media instructions
 - [ ] Check media instructions on fullscreen
+- [ ] **Tab Title** - Tab title updates to recipe name
 
 #### 🟢 Medium
 
@@ -335,6 +282,9 @@ feature/bug branch → development → staging → main (production)
 - [ ] User role management works (promote/demote users)
 - [ ] Page requires manager/admin authentication
 - [ ] Recipe search and category filter work correctly
+- [ ] **Image Approval** - Consolidated modal for batch approval works
+- [ ] **Image Approval** - Approve/Reject All buttons work
+- [ ] **Category Migration** - Changing category migrates images correctly
 
 #### 🟡 High
 
@@ -342,6 +292,7 @@ feature/bug branch → development → staging → main (production)
 - [ ] Recipe edit modal saves changes successfully
 - [ ] Recipe preview works
 - [ ] Modal closes properly after actions
+- [ ] **Loading States** - Loading overlays prevent interaction during saved/updates
 
 #### 🟢 Medium
 
