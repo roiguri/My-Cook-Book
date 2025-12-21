@@ -1,6 +1,6 @@
 <!-- Main Recipe Card Template -->
 <template id="recipe-card-template">
-  <div class="recipe-card">
+  <div class="recipe-card" role="article">
     <button class="favorite-btn" aria-label="Add to favorites">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
@@ -22,7 +22,9 @@
     </button>
     <img class="recipe-image" data-src="" alt="" data-fallback="/img/placeholder.jpg" />
     <div class="recipe-content">
-      <h3 class="recipe-title"></h3>
+      <h3 class="recipe-title">
+        <a class="recipe-link" href=""></a>
+      </h3>
       <div class="recipe-details">
         <div class="recipe-meta">
           <div class="category-container">
@@ -52,7 +54,7 @@
 
 <!-- No Image Card Template - Same structure as main, but with placeholder instead of img -->
 <template id="no-image-card-template">
-  <div class="recipe-card">
+  <div class="recipe-card" role="article">
     <button class="favorite-btn" aria-label="Add to favorites">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
@@ -81,7 +83,9 @@
       </svg>
     </div>
     <div class="recipe-content">
-      <h3 class="recipe-title"></h3>
+      <h3 class="recipe-title">
+        <a class="recipe-link" href=""></a>
+      </h3>
       <div class="recipe-details">
         <div class="recipe-meta">
           <div class="category-container">

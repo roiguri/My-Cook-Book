@@ -22,12 +22,14 @@ export const recipeCardStyles = `
     height: 100%;
     display: flex;
     flex-direction: column;
-    cursor: pointer;
+    /* Cursor handled by the link now, but good to keep default pointer for non-link areas if any */
+    cursor: default;
     overflow: hidden;
     transform: translateY(0);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Hover effect bubbles up from the link, so we can keep this */
 .recipe-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
@@ -140,6 +142,31 @@ export const recipeCardStyles = `
     line-height: 1.2;
 }
 
+/* Stretched Link Pattern */
+.recipe-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    outline: none;
+}
+
+.recipe-link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+/* Focus visible styles on the stretched link */
+.recipe-link:focus-visible::after {
+    outline: 3px solid #3b82f6;
+    outline-offset: -3px; /* Inside the card border */
+    border-radius: 10px;  /* Match card border radius */
+}
+
 .recipe-meta {
     display: flex;
     padding: 0.5rem;
@@ -185,7 +212,7 @@ export const recipeCardStyles = `
     background: none;
     border: none;
     cursor: pointer;
-    z-index: 10;
+    z-index: 10; /* Higher than recipe-link */
 }
 
 .favorite-btn svg {
