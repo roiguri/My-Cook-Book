@@ -35,10 +35,6 @@ async function initializeSPA() {
       import('./lib/auth/auth-controller.js'),
       import('./lib/auth/components/auth-avatar.js'),
       import('./lib/auth/components/auth-content.js'),
-      import('./lib/auth/components/login-form.js'),
-      import('./lib/auth/components/signup-form.js'),
-      import('./lib/auth/components/forgot-password.js'),
-      import('./lib/auth/components/user-profile.js'),
     ]);
 
     await Promise.all([
