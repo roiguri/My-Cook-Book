@@ -511,11 +511,17 @@ export default {
 
   renderEmptyState() {
     this.container.innerHTML = `
-      <div class="empty-state">
-        <i class="fas fa-utensils fa-3x"></i>
-        <h2>אין ארוחה פעילה</h2>
-        <p>התחל להוסיף מתכונים לארוחה שלך כדי לראות אותם כאן.</p>
-        <a href="/categories" class="btn-primary">חפש מתכונים</a>
+      <div class="my-meal-page">
+        <div class="empty-state">
+          <div class="empty-state-card">
+            <div class="empty-icon-wrapper">
+              <i class="fas fa-utensils"></i>
+            </div>
+            <h2>אין ארוחה פעילה</h2>
+            <p class="empty-subtitle">התחל להוסיף מתכונים לארוחה שלך<br>כדי לראות אותם כאן</p>
+            <a href="/categories" class="btn-primary empty-cta">חפש מתכונים</a>
+          </div>
+        </div>
       </div>
     `;
   },
