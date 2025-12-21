@@ -120,6 +120,14 @@ function registerRoutes(router, pageManager) {
       route: '/dashboard',
     });
   });
+
+  router.registerRoute('/my-meal', async (params) => {
+    const module = await import('./app/pages/my-meal-page.js');
+    await pageManager.loadPage(module.default || module, {
+      ...params,
+      route: '/my-meal',
+    });
+  });
 }
 
 function showInitializationError(error) {

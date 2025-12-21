@@ -1,4 +1,7 @@
 import { AppConfig } from '../../js/config/app-config.js';
+import authService from '../../js/services/auth-service.js';
+import { firestoreService } from '../../js/services/firestore-service.js';
+import { arrayUnion, serverTimestamp } from 'firebase/firestore';
 import '../../styles/pages/recipe-detail-spa.css';
 
 export default {
@@ -62,10 +65,17 @@ export default {
     const menuButton = container.querySelector('.recipe-menu-button');
     const menuDropdown = container.querySelector('.recipe-menu-dropdown');
     const suggestImagesBtn = container.querySelector('#suggest-images-btn');
+    const addToMealBtn = container.querySelector('#add-to-meal-btn');
 
     if (!menuButton || !menuDropdown || !suggestImagesBtn) {
       console.warn('Menu elements not found in container');
       return;
+    }
+
+    // Show "Add to Meal" only if user is logged in
+    const user = authService.getCurrentUser();
+    if (user && addToMealBtn) {
+      addToMealBtn.style.display = 'flex';
     }
 
     // Toggle dropdown on button click
@@ -97,6 +107,40 @@ export default {
         console.error('Image proposal modal not found');
       }
     });
+
+    // Handle "Add to Meal" click
+    if (addToMealBtn) {
+      addToMealBtn.addEventListener('click', async () => {
+        menuDropdown.classList.remove('open');
+        const currentUser = authService.getCurrentUser();
+        if (!currentUser) return;
+
+        try {
+          // Dynamic import of utils
+          const { ActiveMealUtils } = await import('../../js/utils/active-meal-utils.js');
+
+          const result = await ActiveMealUtils.addToMeal(currentUser.uid, recipeId);
+
+          const messageModal = container.querySelector('message-modal');
+
+          if (messageModal) {
+            if (result.success) {
+              messageModal.show('המתכון נוסף לארוחה שלך בהצלחה', 'נוסף לארוחה');
+            } else if (result.reason === 'duplicate') {
+              messageModal.show('המתכון כבר נמצא בארוחה שלך', 'כבר קיים');
+            } else {
+              messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+            }
+          }
+        } catch (error) {
+          console.error('Error adding to meal:', error);
+          const messageModal = container.querySelector('message-modal');
+          if (messageModal) {
+            messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+          }
+        }
+      });
+    }
   },
 
   setupImageProposalListener(container) {

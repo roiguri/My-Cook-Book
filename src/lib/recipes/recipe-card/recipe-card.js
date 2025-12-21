@@ -34,7 +34,7 @@
  * - Consistent dimensions to prevent layout shifts
  */
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
 import {
@@ -310,6 +310,40 @@ class RecipeCard extends HTMLElement {
         );
       });
     }
+
+    const addToMealBtn = this.shadowRoot.querySelector('.add-to-meal-btn');
+    if (addToMealBtn) {
+      addToMealBtn.addEventListener('click', async (e) => {
+        e.stopPropagation(); // Prevent card navigation
+        this._createRipple(e, addToMealBtn); // Trigger ripple
+        await this._addToMeal();
+      });
+    }
+  }
+
+  _createRipple(event, button) {
+    const circle = document.createElement('span');
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const radius = diameter / 2;
+
+    const rect = button.getBoundingClientRect();
+
+    // Calculate click position relative to button
+    const x = event.clientX - rect.left - radius;
+    const y = event.clientY - rect.top - radius;
+
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${x}px`;
+    circle.style.top = `${y}px`;
+    circle.classList.add('ripple');
+
+    // Remove existing ripple
+    const ripple = button.getElementsByClassName('ripple')[0];
+    if (ripple) {
+      ripple.remove();
+    }
+
+    button.appendChild(circle);
   }
 
   _removeEventListeners() {
@@ -453,6 +487,7 @@ class RecipeCard extends HTMLElement {
 
     // Populate template with data
     const favoriteBtn = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtn}`);
+    const addToMealBtn = clone.querySelector('.add-to-meal-btn');
     const recipeImage = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.recipeImage}`);
     const recipeTitle = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.recipeTitle}`);
     const categoryBadge = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeCategory}`);
@@ -469,6 +504,16 @@ class RecipeCard extends HTMLElement {
         RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
         this._isFavorite(),
       );
+    }
+
+    // Handle add to meal button visibility
+    const user = authService.getCurrentUser();
+    if (addToMealBtn) {
+      if (user && this.hasAttribute('show-add-to-meal')) {
+        addToMealBtn.style.display = 'block';
+      } else {
+        addToMealBtn.style.display = 'none';
+      }
     }
 
     // Set image
@@ -532,6 +577,44 @@ class RecipeCard extends HTMLElement {
       this._userFavorites = new Set(favoriteRecipeIds);
     } catch (error) {
       console.error('Error fetching favorites:', error);
+    }
+  }
+
+  async _addToMeal() {
+    const user = authService.getCurrentUser();
+    if (!user) return;
+
+    try {
+      // Dynamic import to avoid circular dependencies if any, and ensure it's loaded
+      const { ActiveMealUtils } = await import('../../../js/utils/active-meal-utils.js');
+
+      // Ensure message-modal is available
+      await import('../../../lib/modals/message-modal/message-modal.js');
+
+      const result = await ActiveMealUtils.addToMeal(user.uid, this.recipeId);
+
+      let messageModal = document.querySelector('message-modal');
+      // If not in document/shadow, might need to create one or find it in specific container
+      // For recipe-card which is used in lists, usually the page has a modal.
+      // If not, we might want to append one.
+      if (!messageModal) {
+        messageModal = document.createElement('message-modal');
+        document.body.appendChild(messageModal);
+      }
+
+      if (result.success) {
+        messageModal.show('המתכון נוסף לארוחה שלך בהצלחה', 'נוסף לארוחה');
+      } else if (result.reason === 'duplicate') {
+        messageModal.show('המתכון כבר נמצא בארוחה שלך', 'כבר קיים');
+      } else {
+        messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
+      }
+    } catch (error) {
+      console.error('Error adding to meal:', error);
+      const messageModal =
+        document.querySelector('message-modal') || document.createElement('message-modal');
+      if (!messageModal.isConnected) document.body.appendChild(messageModal);
+      messageModal.show('שגיאה בהוספת המתכון לארוחה', 'שגיאה');
     }
   }
 

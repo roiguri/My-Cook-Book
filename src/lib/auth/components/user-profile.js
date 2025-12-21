@@ -104,6 +104,25 @@ class UserProfile extends HTMLElement {
           margin-top: 10px;
         }
 
+        .my-meal-button {
+          background-color: var(--secondary-color);
+          color: var(--text-color);
+          padding: 12px;
+          border: 1px solid var(--primary-color);
+          border-radius: 5px;
+          font-size: 1em;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+        }
+
+        .my-meal-button:hover {
+          background-color: color-mix(in srgb, var(--primary-color), white 80%);
+        }
+
         .save-button {
           background-color: var(--primary-color);
           color: white;
@@ -164,6 +183,9 @@ class UserProfile extends HTMLElement {
         </div>
 
         <div class="buttons">
+          <button class="my-meal-button" id="my-meal-btn">
+            <i class="fas fa-utensils"></i> הארוחה שלי
+          </button>
           <button class="save-button">שמור שינויים</button>
           <button class="signout-button">התנתק</button>
         </div>
@@ -176,9 +198,25 @@ class UserProfile extends HTMLElement {
   setupEventListeners() {
     const saveButton = this.shadowRoot.querySelector('.save-button');
     const signoutButton = this.shadowRoot.querySelector('.signout-button');
+    const myMealButton = this.shadowRoot.querySelector('#my-meal-btn');
 
     saveButton.addEventListener('click', () => this.handleSave());
     signoutButton.addEventListener('click', () => this.handleSignout());
+
+    if (myMealButton) {
+      myMealButton.addEventListener('click', () => {
+        const authController = this.closest('auth-controller');
+        if (authController) authController.closeModal();
+
+        // Navigate to my-meal
+        // We need to use the router from the window.spa object
+        if (window.spa && window.spa.router) {
+          window.spa.router.navigate('/my-meal');
+        } else {
+          window.location.hash = '/my-meal'; // Fallback
+        }
+      });
+    }
   }
 
   updateWelcomeText() {
