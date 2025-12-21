@@ -315,9 +315,35 @@ class RecipeCard extends HTMLElement {
     if (addToMealBtn) {
       addToMealBtn.addEventListener('click', async (e) => {
         e.stopPropagation(); // Prevent card navigation
+        this._createRipple(e, addToMealBtn); // Trigger ripple
         await this._addToMeal();
       });
     }
+  }
+
+  _createRipple(event, button) {
+    const circle = document.createElement('span');
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const radius = diameter / 2;
+
+    const rect = button.getBoundingClientRect();
+
+    // Calculate click position relative to button
+    const x = event.clientX - rect.left - radius;
+    const y = event.clientY - rect.top - radius;
+
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${x}px`;
+    circle.style.top = `${y}px`;
+    circle.classList.add('ripple');
+
+    // Remove existing ripple
+    const ripple = button.getElementsByClassName('ripple')[0];
+    if (ripple) {
+      ripple.remove();
+    }
+
+    button.appendChild(circle);
   }
 
   _removeEventListeners() {

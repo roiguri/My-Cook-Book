@@ -215,6 +215,8 @@ export const recipeCardStyles = `
     border: none;
     cursor: pointer;
     z-index: 10;
+    overflow: hidden; /* Added for ripple effect */
+    border-radius: 50%; /* Ensure it's circular */
 }
 
 .add-to-meal-btn svg {
@@ -224,10 +226,29 @@ export const recipeCardStyles = `
     stroke-width: 2;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
     transition: transform 0.3s ease;
+    position: relative; /* Ensure SVG stays on top of ripple */
+    z-index: 2;
 }
 
 .add-to-meal-btn:hover svg {
     transform: scale(1.1);
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background-color: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
 
 /* Loading State Styles */
