@@ -304,6 +304,14 @@ export default {
     const viewAllBtn = this.container.querySelector('#view-all-ingredients');
     const viewRecipeBtn = this.container.querySelector('#view-recipe-ingredients');
 
+    const copyBtn = this.container.querySelector('#copy-ingredients-btn');
+    const shareBtn = this.container.querySelector('#share-ingredients-btn');
+
+    // Show share button if supported
+    if (navigator.share) {
+      shareBtn.classList.remove('hidden');
+    }
+
     const toggleDrawer = () => {
       this.state.drawerOpen = !this.state.drawerOpen;
       if (this.state.drawerOpen) {
@@ -315,6 +323,83 @@ export default {
         backdrop.classList.remove('open');
       }
     };
+
+    const getIngredientsText = () => {
+      const recipeIds =
+        this.state.ingredientsView === 'current'
+          ? this.state.activeTabId
+            ? [this.state.activeTabId]
+            : []
+          : this.state.meal?.recipeIds || [];
+
+      let text = 'רשימת מצרכים:\n\n';
+
+      recipeIds.forEach((id) => {
+        const recipe = this.state.recipes[id];
+        if (!recipe) return;
+
+        text += `${recipe.name}\n`;
+        text += '-'.repeat(recipe.name.length) + '\n';
+
+        const state = this.state.meal.recipeStates?.[id];
+        const servings = state?.servings || recipe.servings;
+        const originalIngredients = recipe.ingredientSections || recipe.ingredients;
+
+        let scaledIngredients;
+        if (recipe.ingredientSections) {
+          scaledIngredients = scaleIngredientSections(
+            originalIngredients,
+            recipe.servings,
+            servings,
+          );
+          scaledIngredients.forEach((section) => {
+            if (section.title) {
+              text += `\n${section.title}:\n`;
+            }
+            section.items.forEach((item) => {
+              text += `- ${formatIngredientAmount(item.amount)} ${item.unit} ${item.item}\n`;
+            });
+          });
+        } else {
+          scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
+          scaledIngredients.forEach((item) => {
+            text += `- ${formatIngredientAmount(item.amount)} ${item.unit} ${item.item}\n`;
+          });
+        }
+        text += '\n'; // Spacer between recipes
+      });
+
+      return text;
+    };
+
+    copyBtn.addEventListener('click', async () => {
+      const text = getIngredientsText();
+      try {
+        await navigator.clipboard.writeText(text);
+        // Simple visual feedback could be improved with a toast
+        const originalIcon = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalIcon;
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+      }
+    });
+
+    shareBtn.addEventListener('click', async () => {
+      const text = getIngredientsText();
+      try {
+        await navigator.share({
+          title: 'רשימת מצרכים',
+          text: text,
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error sharing:', err);
+        }
+      }
+    });
 
     toggleBtn.addEventListener('click', toggleDrawer);
     closeBtn.addEventListener('click', toggleDrawer);

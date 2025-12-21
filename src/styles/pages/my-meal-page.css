@@ -162,6 +162,35 @@
   background-color: rgba(255, 255, 255, 0.2);
 }
 
+.spa-content .my-meal-page .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spa-content .my-meal-page .action-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.spa-content .my-meal-page .action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.spa-content .my-meal-page .action-btn.hidden {
+  display: none;
+}
+
 .spa-content .my-meal-page .drawer-controls {
   padding: 10px;
   border-bottom: 1px solid #e0e0e0;
