@@ -1,9 +1,71 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isManager() {
+      return isAuthenticated() && getUserData().role == 'manager';
+    }
+
+    function isApproved() {
+      return isAuthenticated() && (getUserData().role == 'approved' || getUserData().role == 'manager');
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile, Managers can read all
+      allow read: if isOwner(userId) || isManager();
+
+      // Create: Must be owner and force role to be 'user' (prevent privilege escalation)
+      allow create: if isOwner(userId) && request.resource.data.role == 'user';
+
+      // Update: User can update their own doc, but CANNOT change role
+      // Manager can update anything
+      allow update: if (isOwner(userId) && (!request.resource.data.keys().has('role') || request.resource.data.role == resource.data.role)) || isManager();
+      allow delete: if isManager();
+    }
+
+    // Recipes collection
+    match /recipes/{recipeId} {
       allow read: if true;
-      allow write: if request.auth != null;
+
+      // Create: Must be authenticated and userId must match auth uid.
+      // Cannot set 'approved' to true (default is false/undefined).
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid
+                    && (!request.resource.data.keys().has('approved') || request.resource.data.approved == false);
+
+      // Update: Owner or Manager.
+      // Owner cannot change 'approved' status.
+      allow update: if isAuthenticated() && (
+        (resource.data.userId == request.auth.uid && (!request.resource.data.keys().has('approved') || request.resource.data.approved == resource.data.approved))
+        || isManager()
+      );
+
+      // Delete: Owner or Manager
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isManager());
+    }
+
+    // Grandmas Cookbook (Index)
+    match /grandmas_cookbook/{docId} {
+      allow read: if isApproved();
+      allow write: if isManager();
+    }
+
+    // Default catch-all
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
