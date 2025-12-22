@@ -69,7 +69,6 @@ class RecipePreviewModal extends HTMLElement {
     this.render();
     this.modal = this.shadowRoot.querySelector('custom-modal');
     this.modal.setAttribute('modal-title', `Preview: ${this.recipeName}`);
-    this.shadowRoot.querySelector('recipe-component').setAttribute('recipe-id', this.recipeId);
     this.setupButtons();
     this.setResponsiveWidth();
 
