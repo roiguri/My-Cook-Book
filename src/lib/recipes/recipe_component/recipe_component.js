@@ -46,6 +46,7 @@ class RecipeComponent extends HTMLElement {
     this.attachShadow({ mode: 'open' });
 
     this._originalIngredients = null;
+    this._imageRequestId = 0;
   }
 
   static get observedAttributes() {
@@ -372,10 +373,13 @@ class RecipeComponent extends HTMLElement {
   }
 
   async setRecipeImage(recipe) {
+    const requestId = ++this._imageRequestId;
     try {
       const imageContainer = this.shadowRoot.querySelector('.Recipe_component__image-container');
 
       let userRole = await authService.getCurrentUserRole();
+      if (this._imageRequestId !== requestId) return;
+
       if (userRole === 'user') userRole = 'public';
       const accessibleImages = getRecipeImages(recipe, userRole);
 
@@ -385,13 +389,14 @@ class RecipeComponent extends HTMLElement {
       } else {
         imageContainer.style.display = '';
         if (accessibleImages.length === 1) {
-          await this.showSingleImage(imageContainer, accessibleImages[0]);
+          await this.showSingleImage(imageContainer, accessibleImages[0], requestId);
         } else {
           this.showCarousel(imageContainer, accessibleImages);
         }
       }
       // TODO: add fallback to previous load system
     } catch (error) {
+      if (this._imageRequestId !== requestId) return;
       console.error('Error setting recipe images:', error);
       const container = this.shadowRoot.querySelector('.Recipe_component__image-container');
       if (container) {
@@ -400,7 +405,7 @@ class RecipeComponent extends HTMLElement {
     }
   }
 
-  async showPlaceholder(container) {
+  async showPlaceholder(container, requestId) {
     const img = document.createElement('img');
     img.className = 'Recipe_component__image';
     img.alt = 'תמונת מתכון לא זמינה';
@@ -409,14 +414,18 @@ class RecipeComponent extends HTMLElement {
     } catch (error) {
       console.error('Could not load placeholder image', error);
     }
+    if (this._imageRequestId !== requestId) return;
     container.appendChild(img);
   }
 
-  async showSingleImage(container, image) {
+  async showSingleImage(container, image, requestId) {
     const img = document.createElement('img');
     try {
       // Get download URL from util
       const url = await getImageUrl(image.full);
+
+      if (this._imageRequestId !== requestId) return;
+
       if (!url) {
         throw new Error('Failed to get image URL');
       }
@@ -425,8 +434,9 @@ class RecipeComponent extends HTMLElement {
       img.className = 'Recipe_component__image';
       container.appendChild(img);
     } catch (error) {
+      if (this._imageRequestId !== requestId) return;
       console.error('Error loading image:', error);
-      await this.showPlaceholder(container);
+      await this.showPlaceholder(container, requestId);
     }
   }
 
