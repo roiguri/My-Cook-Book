@@ -276,8 +276,7 @@ class RecipeCard extends HTMLElement {
     this._removeEventListeners();
 
     const card = this.shadowRoot.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.card}`);
-    // We also attach the click listener to the card as a fallback for areas not covered by the link,
-    // though the link covers everything via ::after
+    // Fallback click listener for areas potentially missed by the stretched link
     if (card) {
       card.addEventListener('click', this._handleCardClick);
     }
@@ -386,9 +385,7 @@ class RecipeCard extends HTMLElement {
   }
 
   _handleCardClick(event) {
-    // This handler catches clicks that bubble up from non-interactive elements
-    // if the stretched link somehow missed them, or if the user clicks somewhere else.
-    // Ideally, the stretched link covers everything.
+    // Fallback: Handle clicks that bubble up if not caught by the link
 
     // Check if the click came from the favorite button or link - ignore those
     if (event.target.closest('.favorite-btn') || event.target.closest('.recipe-link')) {
@@ -537,7 +534,6 @@ class RecipeCard extends HTMLElement {
       recipeImage.setAttribute('data-fallback', RECIPE_CARD_CONFIG.FALLBACKS.image);
     }
 
-    // Set title and link
     if (recipeLink) {
       recipeLink.textContent = name;
       recipeLink.href = `/recipe/${this.recipeId}`;

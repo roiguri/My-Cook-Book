@@ -22,14 +22,12 @@ export const recipeCardStyles = `
     height: 100%;
     display: flex;
     flex-direction: column;
-    /* Cursor handled by the link now, but good to keep default pointer for non-link areas if any */
     cursor: default;
     overflow: hidden;
     transform: translateY(0);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Hover effect bubbles up from the link, so we can keep this */
 .recipe-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
