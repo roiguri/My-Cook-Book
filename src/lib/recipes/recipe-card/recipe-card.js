@@ -74,6 +74,7 @@ class RecipeCard extends HTMLElement {
 
     // Bind methods
     this._handleCardClick = this._handleCardClick.bind(this);
+    this._handleLinkClick = this._handleLinkClick.bind(this);
 
     this._userFavorites = new Set();
   }
@@ -225,10 +226,12 @@ class RecipeCard extends HTMLElement {
   _createInlineMainTemplate() {
     const template = document.createElement('template');
     template.innerHTML = `
-      <div class="recipe-card">
+      <div class="recipe-card" role="article">
         <img class="recipe-image" data-src="" alt="" data-fallback="/img/placeholder.jpg">
         <div class="recipe-content">
-          <h3 class="recipe-title"></h3>
+          <h3 class="recipe-title">
+            <a class="recipe-link" href=""></a>
+          </h3>
           <div class="recipe-details"></div>
         </div>
       </div>
@@ -251,14 +254,16 @@ class RecipeCard extends HTMLElement {
   _createInlineNoImageTemplate() {
     const template = document.createElement('template');
     template.innerHTML = `
-      <div class="recipe-card">
+      <div class="recipe-card" role="article">
         <div class="no-image-placeholder recipe-image">
           <svg class="no-image-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/>
           </svg>
         </div>
         <div class="recipe-content">
-          <h3 class="recipe-title"></h3>
+          <h3 class="recipe-title">
+             <a class="recipe-link" href=""></a>
+          </h3>
           <div class="recipe-details"></div>
         </div>
       </div>
@@ -271,13 +276,19 @@ class RecipeCard extends HTMLElement {
     this._removeEventListeners();
 
     const card = this.shadowRoot.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.card}`);
-
+    // Fallback click listener for areas potentially missed by the stretched link
     if (card) {
       card.addEventListener('click', this._handleCardClick);
     }
 
+    const recipeLink = this.shadowRoot.querySelector('.recipe-link');
+    if (recipeLink) {
+      recipeLink.addEventListener('click', this._handleLinkClick);
+    }
+
     // Store references for cleanup
     this._card = card;
+    this._recipeLink = recipeLink;
 
     const favoriteBtn = this.shadowRoot.querySelector(
       `.${RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtn}`,
@@ -350,11 +361,38 @@ class RecipeCard extends HTMLElement {
     if (this._card) {
       this._card.removeEventListener('click', this._handleCardClick);
     }
+    if (this._recipeLink) {
+      this._recipeLink.removeEventListener('click', this._handleLinkClick);
+    }
+  }
+
+  _handleLinkClick(event) {
+    // Allow default behavior (navigation) if modifier keys are pressed
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+      return;
+    }
+
+    // Prevent default navigation for normal clicks and use SPA routing event
+    event.preventDefault();
+
+    // Emit the open event which the app likely listens to for SPA navigation
+    const customEvent = new CustomEvent(RECIPE_CARD_CONFIG.EVENTS.cardOpen, {
+      detail: { recipeId: this.recipeId },
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(customEvent);
   }
 
   _handleCardClick(event) {
-    // For modifier keys and non-left clicks, create and click a temporary link
-    // This ensures proper browser behavior for opening in new tabs
+    // Fallback: Handle clicks that bubble up if not caught by the link
+
+    // Check if the click came from the favorite button or link - ignore those
+    if (event.target.closest('.favorite-btn') || event.target.closest('.recipe-link')) {
+      return;
+    }
+
+    // Otherwise, treat it as a navigation attempt (fallback)
     if (
       event.defaultPrevented ||
       event.button !== 0 ||
@@ -363,35 +401,9 @@ class RecipeCard extends HTMLElement {
       event.shiftKey ||
       event.altKey
     ) {
-      if (this.recipeId) {
-        // Create a temporary link element
-        const tempLink = document.createElement('a');
-        tempLink.href = `/recipe/${this.recipeId}`;
-        tempLink.style.display = 'none';
-        document.body.appendChild(tempLink);
-
-        // Create a new click event with the same properties
-        const linkClickEvent = new MouseEvent('click', {
-          button: event.button,
-          buttons: event.buttons,
-          ctrlKey: event.ctrlKey,
-          metaKey: event.metaKey,
-          shiftKey: event.shiftKey,
-          altKey: event.altKey,
-          bubbles: true,
-          cancelable: true,
-        });
-
-        // Click the link (this will be handled by the global navigation script)
-        tempLink.dispatchEvent(linkClickEvent);
-
-        // Clean up
-        document.body.removeChild(tempLink);
-      }
       return;
     }
 
-    // Emit recipe-card-open event for the modal
     const customEvent = new CustomEvent(RECIPE_CARD_CONFIG.EVENTS.cardOpen, {
       detail: { recipeId: this.recipeId },
       bubbles: true,
@@ -489,7 +501,7 @@ class RecipeCard extends HTMLElement {
     const favoriteBtn = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtn}`);
     const addToMealBtn = clone.querySelector('.add-to-meal-btn');
     const recipeImage = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.recipeImage}`);
-    const recipeTitle = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.recipeTitle}`);
+    const recipeLink = clone.querySelector('.recipe-link');
     const categoryBadge = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeCategory}`);
     const timeBadge = clone.querySelector(`.${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeTime}`);
     const difficultyBadge = clone.querySelector(
@@ -500,10 +512,9 @@ class RecipeCard extends HTMLElement {
     if (!this.hasAttribute('show-favorites') && favoriteBtn) {
       favoriteBtn.remove();
     } else if (favoriteBtn) {
-      favoriteBtn.classList.toggle(
-        RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
-        this._isFavorite(),
-      );
+      const isFav = this._isFavorite();
+      favoriteBtn.classList.toggle(RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive, isFav);
+      favoriteBtn.setAttribute('aria-label', isFav ? 'Remove from favorites' : 'Add to favorites');
     }
 
     // Handle add to meal button visibility
@@ -523,9 +534,9 @@ class RecipeCard extends HTMLElement {
       recipeImage.setAttribute('data-fallback', RECIPE_CARD_CONFIG.FALLBACKS.image);
     }
 
-    // Set title
-    if (recipeTitle) {
-      recipeTitle.textContent = name;
+    if (recipeLink) {
+      recipeLink.textContent = name;
+      recipeLink.href = `/recipe/${this.recipeId}`;
     }
 
     // Set category badge
