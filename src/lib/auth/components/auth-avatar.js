@@ -27,21 +27,27 @@ class AuthAvatar extends HTMLElement {
       <style>
         :host {
           display: block;
-          width: 45px;
-          height: 45px;
+          width: 44px;
+          height: 44px;
         }
 
         .avatar {
           width: 100%;
           height: 100%;
-          border-radius: 5px;
+          border-radius: 8px;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          transition: all 0.3s ease;
+          transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.2s ease;
           background-color: var(--primary-color);
+          color: white;
+          box-shadow:
+            0 4px 0 var(--primary-dark),
+            0 6px 4px rgba(0, 0, 0, 0.2);
+          transform: translateY(-2px);
+          box-sizing: border-box;
         }
 
         .avatar.signed-out {
@@ -50,12 +56,20 @@ class AuthAvatar extends HTMLElement {
         }
 
         .avatar:hover {
-          background-color: var(--primary-hover)
-            box-shadow:
-              inset 0 0 0 3px var(--primary-color), 
-              0 4px 0 var(--primary-dark),
-              0 6px 4px rgba(0, 0, 0, 0.2);
-            }
+          background-color: var(--primary-dark);
+          box-shadow:
+            inset 0 0 0 3px var(--primary-color), 
+            0 4px 0 var(--primary-dark),
+            0 6px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .avatar:active {
+          background-color: var(--primary-dark);
+          transform: translateY(0);
+          box-shadow:
+            inset 0 0 0 3px var(--primary-color), 
+            0 6px 4px rgba(0, 0, 0, 0.2);
+        }
 
         .avatar img {
           width: 70%;

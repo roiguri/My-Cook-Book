@@ -111,8 +111,11 @@ header nav ul li a {
   border-radius: 5px;
 
   transition: background-color 0.3s;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   white-space: nowrap;
+  height: 44px;
+  box-sizing: border-box;
 }
 
 header .search-auth-container {
