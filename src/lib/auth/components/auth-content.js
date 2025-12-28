@@ -127,9 +127,9 @@ class AuthContent extends HTMLElement {
           const signupForm = this.querySelector('[slot="signup-form"]');
           const forgotPasswordForm = this.querySelector('[slot="forgot-password"]');
 
-          loginForm?.reset();
-          signupForm?.reset();
-          forgotPasswordForm?.reset();
+          if (typeof loginForm?.reset === 'function') loginForm.reset();
+          if (typeof signupForm?.reset === 'function') signupForm.reset();
+          if (typeof forgotPasswordForm?.reset === 'function') forgotPasswordForm.reset();
 
           // Clear any visible error messages
           const forms = [loginForm, signupForm, forgotPasswordForm];

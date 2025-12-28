@@ -98,6 +98,12 @@ class SignupForm extends HTMLElement {
           background-color: var(--primary-hover);
         }
 
+        .submit-button:disabled {
+          background-color: var(--secondary-color);
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+
         .divider {
           display: flex;
           align-items: center;
@@ -306,6 +312,13 @@ class SignupForm extends HTMLElement {
       return;
     }
 
+    const submitButton = this.shadowRoot.querySelector('.submit-button');
+    const originalText = submitButton.textContent;
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'נרשם...';
+    submitButton.setAttribute('aria-busy', 'true');
+
     try {
       const authController = this.closest('auth-controller');
       await authController.handleSignup(email, password, fullName);
@@ -318,10 +331,18 @@ class SignupForm extends HTMLElement {
       );
     } catch (error) {
       this.showError(error.message);
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = originalText;
+      submitButton.removeAttribute('aria-busy');
     }
   }
 
   async handleGoogleSignup() {
+    const googleButton = this.shadowRoot.querySelector('.gsi-material-button');
+    googleButton.style.opacity = '0.7';
+    googleButton.style.pointerEvents = 'none';
+
     try {
       const authController = this.closest('auth-controller');
       await authController.handleGoogleSignIn();
@@ -333,6 +354,9 @@ class SignupForm extends HTMLElement {
       );
     } catch (error) {
       this.showError(error.message);
+    } finally {
+      googleButton.style.opacity = '1';
+      googleButton.style.pointerEvents = 'auto';
     }
   }
 

@@ -152,6 +152,12 @@ class ForgotPassword extends HTMLElement {
   async handleSubmit(e) {
     e.preventDefault();
     const email = this.shadowRoot.getElementById('forgot-email').value;
+    const submitButton = this.shadowRoot.querySelector('.submit-button');
+    const originalText = submitButton.textContent;
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'שולח...';
+    submitButton.setAttribute('aria-busy', 'true');
 
     try {
       const authController = this.closest('auth-controller');
@@ -164,6 +170,10 @@ class ForgotPassword extends HTMLElement {
       }, 3000);
     } catch (error) {
       this.showError(error.message);
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = originalText;
+      submitButton.removeAttribute('aria-busy');
     }
   }
 

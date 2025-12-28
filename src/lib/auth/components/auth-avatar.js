@@ -25,7 +25,14 @@ class AuthAvatar extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
+        :host {
+          display: block;
+          width: 45px;
+          height: 45px;
+        }
+
         .avatar {
+          width: 100%;
           height: 100%;
           border-radius: 5px;
           cursor: pointer;
@@ -52,7 +59,7 @@ class AuthAvatar extends HTMLElement {
 
         .avatar img {
           width: 70%;
-          height: 70;
+          height: 70%;
           border-radius: 5px;
           object-fit: cover;
         }
@@ -67,6 +74,28 @@ class AuthAvatar extends HTMLElement {
           align-items: center;
           justify-content: center;
           border-radius: 5px;
+        }
+
+        /* Loading state */
+        .avatar.loading {
+          opacity: 0.7;
+          pointer-events: none;
+          cursor: wait;
+        }
+
+        .avatar.loading::after {
+          content: '';
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          border: 2px solid white;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
       </style>
       
@@ -147,7 +176,7 @@ class AuthAvatar extends HTMLElement {
       authContent.showAuthForms();
     }
 
-    authController.openModal();
+    authController.openModal(this.shadowRoot.getElementById('auth-trigger'));
   }
 }
 

@@ -84,6 +84,12 @@ class LoginForm extends HTMLElement {
           background-color: var(--primary-hover);
         }
 
+        .submit-button:disabled {
+          background-color: var(--secondary-color);
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+
         .divider {
           display: flex;
           align-items: center;
@@ -242,6 +248,13 @@ class LoginForm extends HTMLElement {
     const password = this.shadowRoot.getElementById('login-password').value;
     const remember = this.shadowRoot.getElementById('remember').checked;
 
+    const submitButton = this.shadowRoot.querySelector('.submit-button');
+    const originalText = submitButton.textContent;
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'מתחבר...';
+    submitButton.setAttribute('aria-busy', 'true');
+
     try {
       const authController = this.closest('auth-controller');
       await authController.handleLogin(email, password, remember);
@@ -255,6 +268,10 @@ class LoginForm extends HTMLElement {
         stack: error.stack,
       });
       this.showError(error);
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = originalText;
+      submitButton.removeAttribute('aria-busy');
     }
   }
 
@@ -274,6 +291,10 @@ class LoginForm extends HTMLElement {
   }
 
   async handleGoogleSignIn() {
+    const googleButton = this.shadowRoot.querySelector('.gsi-material-button');
+    googleButton.style.opacity = '0.7';
+    googleButton.style.pointerEvents = 'none';
+
     try {
       const authController = this.closest('auth-controller');
       await authController.handleGoogleSignIn();
@@ -281,6 +302,9 @@ class LoginForm extends HTMLElement {
       authController.closeModal();
     } catch (error) {
       this.showError(error);
+    } finally {
+      googleButton.style.opacity = '1';
+      googleButton.style.pointerEvents = 'auto';
     }
   }
 

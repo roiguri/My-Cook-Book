@@ -211,9 +211,50 @@ class AuthController extends HTMLElement {
   }
 
   // Modal Control Methods
-  openModal() {
-    const modal = this.shadowRoot.querySelector('custom-modal');
-    modal.open();
+  async openModal(triggerElement = null) {
+    // Show loading state on trigger if provided
+    let originalText = '';
+    if (triggerElement) {
+      triggerElement.classList.add('loading');
+      // Optional: disable button
+      if (typeof triggerElement.disabled !== 'undefined') {
+        triggerElement.disabled = true;
+      }
+    }
+
+    try {
+      // Lazy load auth components if not already loaded
+      if (!this._authComponentsLoaded) {
+        await this.loadAuthComponents();
+      }
+      const modal = this.shadowRoot.querySelector('custom-modal');
+      modal.open();
+    } catch (error) {
+      console.error('Error opening auth modal:', error);
+      // Fallback or user notification could go here
+    } finally {
+      // Reset trigger state
+      if (triggerElement) {
+        triggerElement.classList.remove('loading');
+        if (typeof triggerElement.disabled !== 'undefined') {
+          triggerElement.disabled = false;
+        }
+      }
+    }
+  }
+
+  async loadAuthComponents() {
+    try {
+      await Promise.all([
+        import('./components/login-form.js'),
+        import('./components/signup-form.js'),
+        import('./components/forgot-password.js'),
+        import('./components/user-profile.js'),
+      ]);
+      this._authComponentsLoaded = true;
+    } catch (error) {
+      console.error('Failed to lazy load auth components:', error);
+    }
   }
 
   closeModal() {

@@ -291,6 +291,14 @@ class UserProfile extends HTMLElement {
       this.showError('אנא בחר תמונת פרופיל');
       return;
     }
+
+    const saveButton = this.shadowRoot.querySelector('.save-button');
+    const originalText = saveButton.textContent;
+
+    saveButton.disabled = true;
+    saveButton.textContent = 'שומר...';
+    saveButton.setAttribute('aria-busy', 'true');
+
     try {
       const authController = this.closest('auth-controller');
       await authController.updateUserAvatar(this.selectedAvatarUrl);
@@ -306,10 +314,21 @@ class UserProfile extends HTMLElement {
     } catch (error) {
       console.error('Error saving avatar:', error);
       this.showError('שגיאה בשמירת תמונת הפרופיל. אנא נסה שנית.');
+    } finally {
+      saveButton.disabled = false;
+      saveButton.textContent = originalText;
+      saveButton.removeAttribute('aria-busy');
     }
   }
 
   async handleSignout() {
+    const signoutButton = this.shadowRoot.querySelector('.signout-button');
+    const originalText = signoutButton.textContent;
+
+    signoutButton.disabled = true;
+    signoutButton.textContent = 'מתנתק...';
+    signoutButton.setAttribute('aria-busy', 'true');
+
     try {
       const authController = this.closest('auth-controller');
       await authController.handleLogout();
@@ -320,6 +339,10 @@ class UserProfile extends HTMLElement {
     } catch (error) {
       console.error('Error signing out:', error);
       this.showError('שגיאה בהתנתקות. אנא נסה שנית.');
+    } finally {
+      signoutButton.disabled = false;
+      signoutButton.textContent = originalText;
+      signoutButton.removeAttribute('aria-busy');
     }
   }
 
