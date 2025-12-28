@@ -128,13 +128,46 @@ class RecipeCard extends HTMLElement {
 
     const templatesPromise = this._loadTemplates();
 
-    const dataPromise = Promise.all([this._fetchRecipeData(), this._fetchUserFavorites()]);
+    // If data is already set (via property), we don't need to fetch it
+    // but we still need to fetch favorites
+    const promises = [this._fetchUserFavorites()];
+
+    if (!this._recipeData && this.recipeId) {
+      promises.push(this._fetchRecipeData());
+    } else if (this._recipeData) {
+      // If we already have data, ensure image logic runs
+      promises.push(this._fetchRecipeImage());
+    }
+
+    const dataPromise = Promise.all(promises);
 
     await templatesPromise;
     this._render();
     await dataPromise;
     this._render();
     this._setupEventListeners();
+  }
+
+  /**
+   * Set recipe data directly to avoid fetching
+   * @param {Object} data - Recipe data object
+   */
+  set recipeData(data) {
+    if (!data) return;
+    this._recipeData = data;
+
+    // If already connected, we might want to render or update
+    if (this.isConnected) {
+      // We still need to process the image URL
+      this._fetchRecipeImage().then(() => {
+        this._isLoading = false;
+        this._render();
+      });
+    }
+  }
+
+  get recipeData() {
+    return this._recipeData;
   }
 
   _showImmediateLoadingState() {

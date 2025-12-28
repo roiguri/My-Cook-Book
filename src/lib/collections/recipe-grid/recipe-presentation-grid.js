@@ -277,6 +277,9 @@ class RecipePresentationGrid extends HTMLElement {
       recipeCard.setAttribute('recipe-id', recipe.id);
       recipeCard.setAttribute('layout', 'vertical');
 
+      // PERFORMANCE: Pass recipe data directly to avoid N+1 fetches
+      recipeCard.recipeData = recipe;
+
       if (authenticated && this.showFavorites) {
         recipeCard.setAttribute('show-favorites', 'true');
       }
