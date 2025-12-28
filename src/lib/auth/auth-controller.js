@@ -27,6 +27,7 @@
  */
 
 import authService from '../../js/services/auth-service.js';
+import '../utilities/modal/modal.js';
 
 class AuthController extends HTMLElement {
   constructor() {

@@ -87,3 +87,10 @@ main {
   flex-grow: 1;
   margin: 0 auto;
 }
+
+/* Prevent FOUC for Custom Elements */
+auth-controller:not(:defined),
+custom-modal:not(:defined) {
+  display: none;
+  visibility: hidden;
+}
