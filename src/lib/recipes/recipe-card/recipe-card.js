@@ -144,6 +144,12 @@ class RecipeCard extends HTMLElement {
     await templatesPromise;
     this._render();
     await dataPromise;
+
+    // Ensure loading state is cleared if we have data
+    if (this._recipeData) {
+      this._isLoading = false;
+    }
+
     this._render();
     this._setupEventListeners();
   }
