@@ -48,7 +48,10 @@
 /*------------------------------------*\
     #Basic-Elements
 \*------------------------------------*/
-html,
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   height: 100%;
   margin: 0;
