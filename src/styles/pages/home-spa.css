@@ -93,6 +93,7 @@
   font-family: var(--heading-font);
   font-size: var(--size-header1);
   text-align: center;
+  margin-bottom: 0.5rem;
 }
 
 /* Quote section styles - positioned at bottom, full width, no grow */

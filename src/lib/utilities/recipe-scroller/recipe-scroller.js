@@ -121,7 +121,8 @@ class RecipeScroller extends HTMLElement {
           min-width: 200px;
           overflow-x: auto;
           overflow-y: hidden;
-          padding-bottom: 10px;
+          padding-top: 15px;
+          padding-bottom: 15px;
           scroll-behavior: smooth;
           -webkit-overflow-scrolling: touch;
         }
