@@ -65,3 +65,5 @@ dev-debug.log
 *.njsproj
 *.sln
 *.sw?
+playwright-report/
+test-results/
