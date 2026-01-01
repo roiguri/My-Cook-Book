@@ -1,16 +1,16 @@
 import { jest } from '@jest/globals';
 // Import extracted mocks
-import '../common/mocks/firebase-app.mock.js';
-import '../common/mocks/firebase-auth.mock.js';
-import '../common/mocks/firebase-firestore.mock.js';
-import '../common/mocks/firebase-storage.mock.js';
+import '../../common/mocks/firebase-app.mock.js';
+import '../../common/mocks/firebase-auth.mock.js';
+import '../../common/mocks/firebase-firestore.mock.js';
+import '../../common/mocks/firebase-storage.mock.js';
 
 describe('firebase-service', () => {
   let firebaseService;
 
   beforeEach(async () => {
     jest.resetModules();
-    firebaseService = await import('../../src/js/services/firebase-service.js');
+    firebaseService = await import('src/js/services/firebase-service.js');
   });
 
   it('should export initFirebase function', () => {

@@ -2,11 +2,11 @@
 import { jest } from '@jest/globals';
 
 // Import mocks
-import '../common/mocks/firebase-service.mock.js';
-import '../common/mocks/firebase-auth.mock.js';
-import '../common/mocks/firebase-firestore.mock.js';
-import '../common/mocks/document.mock.js';
-import { mockDocRef } from '../common/mocks/firebase-firestore.mock.js';
+import '../../common/mocks/firebase-service.mock.js';
+import '../../common/mocks/firebase-auth.mock.js';
+import '../../common/mocks/firebase-firestore.mock.js';
+import '../../common/mocks/document.mock.js';
+import { mockDocRef } from '../../common/mocks/firebase-firestore.mock.js';
 
 describe('AuthService', () => {
   let AuthService;
@@ -36,8 +36,8 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     jest.resetModules();
-    firebaseService = await import('../../src/js/services/firebase-service.js');
-    ({ AuthService } = await import('../../src/js/services/auth-service.js'));
+    firebaseService = await import('src/js/services/firebase-service.js');
+    ({ AuthService } = await import('src/js/services/auth-service.js'));
 
     // Dynamically import the Firebase Auth mocks
     ({

@@ -1,4 +1,4 @@
-import { FilterUtils } from '../../src/js/utils/filter-utils.js';
+import { FilterUtils } from 'src/js/utils/filter-utils.js';
 
 describe('FilterUtils', () => {
   const mockRecipes = [

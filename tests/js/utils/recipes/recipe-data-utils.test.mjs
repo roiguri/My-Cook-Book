@@ -3,7 +3,7 @@ import { jest } from '@jest/globals';
 // Inline FirestoreService mock for this test file
 export const mockQueryDocuments = jest.fn();
 export const mockGetDocument = jest.fn();
-jest.unstable_mockModule('../../../src/js/services/firestore-service.js', () => ({
+jest.unstable_mockModule('src/js/services/firestore-service.js', () => ({
   FirestoreService: {
     queryDocuments: mockQueryDocuments,
     getDocument: mockGetDocument,
@@ -26,7 +26,7 @@ let calculateTotalTime,
 describe('recipe-data-utils', () => {
   beforeEach(async () => {
     jest.resetModules();
-    const utils = await import('../../../src/js/utils/recipes/recipe-data-utils.js');
+    const utils = await import('src/js/utils/recipes/recipe-data-utils.js');
     calculateTotalTime = utils.calculateTotalTime;
     formatCookingTime = utils.formatCookingTime;
     getTimeClass = utils.getTimeClass;

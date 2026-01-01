@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 
 // Mock auth service
 const mockGetCurrentUser = jest.fn();
-jest.unstable_mockModule('../../../src/js/services/auth-service.js', () => ({
+jest.unstable_mockModule('src/js/services/auth-service.js', () => ({
   default: {
     getCurrentUser: mockGetCurrentUser,
   },
@@ -15,7 +15,7 @@ describe('form-data-collector', () => {
   beforeEach(async () => {
     jest.resetModules();
     jest.clearAllMocks();
-    const utils = await import('../../../src/js/utils/form/form-data-collector.js');
+    const utils = await import('src/js/utils/form/form-data-collector.js');
     collectRecipeFormData = utils.collectRecipeFormData;
     collectSectionData = utils.collectSectionData;
     hasMinimumRequiredData = utils.hasMinimumRequiredData;

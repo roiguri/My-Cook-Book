@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
 
 // Mocks for Firebase/Firestore/Storage
-import '../../common/mocks/firebase-firestore.mock.js';
-import '../../common/mocks/firebase-storage.mock.js';
-import '../../common/mocks/firebase-service.mock.js';
+import '../../../common/mocks/firebase-firestore.mock.js';
+import '../../../common/mocks/firebase-storage.mock.js';
+import '../../../common/mocks/firebase-service.mock.js';
 
 let validateImageFile,
   compressImage,
@@ -29,14 +29,14 @@ const deleteFileMock = jest.fn();
 const getDocumentMock = jest.fn();
 const updateDocumentMock = jest.fn();
 
-jest.unstable_mockModule('../../../src/js/services/storage-service.js', () => ({
+jest.unstable_mockModule('src/js/services/storage-service.js', () => ({
   StorageService: {
     uploadFile: uploadFileMock,
     getFileUrl: getFileUrlMock,
     deleteFile: deleteFileMock,
   },
 }));
-jest.unstable_mockModule('../../../src/js/services/firestore-service.js', () => ({
+jest.unstable_mockModule('src/js/services/firestore-service.js', () => ({
   FirestoreService: {
     getDocument: getDocumentMock,
     updateDocument: updateDocumentMock,
@@ -62,7 +62,7 @@ describe('recipe-image-utils', () => {
     deleteFileMock.mockImplementation(() => Promise.resolve());
     getDocumentMock.mockReset();
     updateDocumentMock.mockReset();
-    const utils = await import('../../../src/js/utils/recipes/recipe-image-utils.js');
+    const utils = await import('src/js/utils/recipes/recipe-image-utils.js');
     validateImageFile = utils.validateImageFile;
     compressImage = utils.compressImage;
     getImageStoragePath = utils.getImageStoragePath;

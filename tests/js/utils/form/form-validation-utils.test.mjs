@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 
 // Mock the recipe-data-utils module
 const mockValidateRecipeData = jest.fn();
-jest.unstable_mockModule('../../../src/js/utils/recipes/recipe-data-utils.js', () => ({
+jest.unstable_mockModule('src/js/utils/recipes/recipe-data-utils.js', () => ({
   validateRecipeData: mockValidateRecipeData,
 }));
 
@@ -13,7 +13,7 @@ describe('form-validation-utils', () => {
   beforeEach(async () => {
     jest.resetModules();
     jest.clearAllMocks();
-    const utils = await import('../../../src/js/utils/form/form-validation-utils.js');
+    const utils = await import('src/js/utils/form/form-validation-utils.js');
     validateRecipeForm = utils.validateRecipeForm;
     clearValidationErrors = utils.clearValidationErrors;
     validateField = utils.validateField;
