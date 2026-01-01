@@ -3,8 +3,8 @@
 import { jest } from '@jest/globals';
 
 // Import the mocks (side-effect import to activate jest.unstable_mockModule)
-import '../common/mocks/firebase-storage.mock.js';
-import '../common/mocks/firebase-service.mock.js';
+import '../../common/mocks/firebase-storage.mock.js';
+import '../../common/mocks/firebase-service.mock.js';
 
 describe('StorageService', () => {
   let StorageService, ref, uploadBytes, getDownloadURL, deleteObject, firebaseService;
@@ -16,9 +16,9 @@ describe('StorageService', () => {
   beforeEach(async () => {
     jest.resetModules();
     // Dynamically import after mocks are in place
-    ({ StorageService } = await import('../../src/js/services/storage-service.js'));
+    ({ StorageService } = await import('src/js/services/storage-service.js'));
     ({ ref, uploadBytes, getDownloadURL, deleteObject } = await import('firebase/storage'));
-    firebaseService = await import('../../src/js/services/firebase-service.js');
+    firebaseService = await import('src/js/services/firebase-service.js');
     firebaseService.getStorageInstance.mockReturnValue(mockStorage);
     ref.mockImplementation((storage, path) => ({ storage, path }));
   });

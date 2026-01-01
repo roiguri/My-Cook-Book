@@ -9,7 +9,7 @@ let scaleIngredients,
 describe('recipe-ingredients-utils', () => {
   beforeEach(async () => {
     jest.resetModules();
-    const utils = await import('../../../src/js/utils/recipes/recipe-ingredients-utils.js');
+    const utils = await import('src/js/utils/recipes/recipe-ingredients-utils.js');
     scaleIngredients = utils.scaleIngredients;
     formatIngredientAmount = utils.formatIngredientAmount;
     extractIngredientNames = utils.extractIngredientNames;

@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 // Keep top-level mock imports to register jest.unstable_mockModule
-import '../common/mocks/firebase-firestore.mock.js';
-import '../common/mocks/firebase-service.mock.js';
+import '../../common/mocks/firebase-firestore.mock.js';
+import '../../common/mocks/firebase-service.mock.js';
 
 let FirestoreService;
 let firebaseServiceMocks;
@@ -10,10 +10,10 @@ let firebaseService;
 
 beforeEach(async () => {
   jest.clearAllMocks();
-  ({ FirestoreService } = await import('../../src/js/services/firestore-service.js'));
-  ({ firebaseServiceMocks } = await import('../common/mocks/firebase-service.mock.js'));
+  ({ FirestoreService } = await import('src/js/services/firestore-service.js'));
+  ({ firebaseServiceMocks } = await import('../../common/mocks/firebase-service.mock.js'));
   ({ getDocs, addDoc, updateDoc, deleteDoc, writeBatch } = await import('firebase/firestore'));
-  ({ firebaseService } = await import('../common/mocks/firebase-firestore.mock.js'));
+  ({ firebaseService } = await import('../../common/mocks/firebase-firestore.mock.js'));
   firebaseService._mockUserDoc = firebaseServiceMocks.userDocMock;
 });
 

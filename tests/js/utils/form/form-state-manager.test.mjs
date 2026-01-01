@@ -7,7 +7,7 @@ describe('form-state-manager', () => {
   beforeEach(async () => {
     jest.resetModules();
     jest.clearAllMocks();
-    const utils = await import('../../../src/js/utils/form/form-state-manager.js');
+    const utils = await import('src/js/utils/form/form-state-manager.js');
     setFormDisabledState = utils.setFormDisabledState;
     clearForm = utils.clearForm;
     populateFormWithData = utils.populateFormWithData;

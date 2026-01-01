@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals';
 
 // Mocks for Firebase/Firestore/Storage
-import '../../common/mocks/firebase-firestore.mock.js';
-import '../../common/mocks/firebase-storage.mock.js';
-import '../../common/mocks/firebase-service.mock.js';
+import '../../../common/mocks/firebase-firestore.mock.js';
+import '../../../common/mocks/firebase-storage.mock.js';
+import '../../../common/mocks/firebase-service.mock.js';
 
 let validateMediaFile,
   validateMediaInstructionData,
@@ -18,7 +18,7 @@ const uploadFileMock = jest.fn();
 const getFileUrlMock = jest.fn();
 const deleteFileMock = jest.fn();
 
-jest.unstable_mockModule('../../../src/js/services/storage-service.js', () => ({
+jest.unstable_mockModule('src/js/services/storage-service.js', () => ({
   StorageService: {
     uploadFile: uploadFileMock,
     getFileUrl: getFileUrlMock,
@@ -54,7 +54,7 @@ describe('recipe-media-utils', () => {
     deleteFileMock.mockReset();
     deleteFileMock.mockImplementation(() => Promise.resolve());
 
-    const utils = await import('../../../src/js/utils/recipes/recipe-media-utils.js');
+    const utils = await import('src/js/utils/recipes/recipe-media-utils.js');
     validateMediaFile = utils.validateMediaFile;
     validateMediaInstructionData = utils.validateMediaInstructionData;
     generateMediaInstructionId = utils.generateMediaInstructionId;
