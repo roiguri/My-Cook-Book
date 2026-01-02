@@ -112,7 +112,7 @@ _Unit tests for business logic._
 - [x] `firestore-service.js`
 - [x] `storage-service.js`
 - [x] `auth-service.js`
-- [ ] `favorites-service.js`
+- [x] `favorites-service.js`
 - [x] `recipe-data-utils.js`
 - [x] `recipe-image-utils.js`
 - [x] `form-validation-utils.js`
