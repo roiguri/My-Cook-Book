@@ -4,15 +4,20 @@ import { firestoreService } from '../../js/services/firestore-service.js';
 import { arrayUnion, serverTimestamp } from 'firebase/firestore';
 import '../../styles/pages/recipe-detail-spa.css';
 
+let templateCache = null;
+
 export default {
   async render() {
+    if (templateCache) return templateCache;
+
     const response = await fetch(new URL('./recipe-detail-page.html', import.meta.url));
 
     if (!response.ok) {
       throw new Error(`Failed to load template: ${response.status} ${response.statusText}`);
     }
 
-    return await response.text();
+    templateCache = await response.text();
+    return templateCache;
   },
 
   async mount(container, params) {

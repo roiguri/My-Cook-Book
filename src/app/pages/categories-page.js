@@ -8,15 +8,20 @@ import favoritesService from '../../js/services/favorites-service.js';
 import '../../styles/pages/categories-spa.css';
 
 // TODO: implement recipe-per-page change on screen resize
+let templateCache = null;
+
 export default {
   async render() {
+    if (templateCache) return templateCache;
+
     try {
       // Resolve relative to this module so it works no matter where the SPA is mounted
       const response = await fetch(new URL('./categories-page.html', import.meta.url));
       if (!response.ok) {
         throw new Error(`Failed to load categories template: ${response.status}`);
       }
-      return await response.text();
+      templateCache = await response.text();
+      return templateCache;
     } catch (error) {
       console.error('Error loading categories page template:', error);
       throw error;

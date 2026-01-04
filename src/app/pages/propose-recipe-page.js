@@ -2,14 +2,19 @@ import authService from '../../js/services/auth-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/propose-recipe-spa.css';
 
+let templateCache = null;
+
 export default {
   async render() {
+    if (templateCache) return templateCache;
+
     try {
       const response = await fetch(new URL('./propose-recipe-page.html', import.meta.url));
       if (!response.ok) {
         throw new Error(`Failed to load propose recipe template: ${response.status}`);
       }
-      return await response.text();
+      templateCache = await response.text();
+      return templateCache;
     } catch (error) {
       console.error('Error loading propose recipe page template:', error);
       throw error;

@@ -3,15 +3,20 @@ import authService from '../../js/services/auth-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/documents-spa.css';
 
+let templateCache = null;
+
 export default {
   async render(params) {
+    if (templateCache) return templateCache;
+
     const response = await fetch(new URL('./documents-page.html', import.meta.url));
     if (!response.ok) {
       throw new Error(
         `Failed to load documents page template: ${response.status} ${response.statusText}`,
       );
     }
-    return await response.text();
+    templateCache = await response.text();
+    return templateCache;
   },
 
   async mount(container, params) {

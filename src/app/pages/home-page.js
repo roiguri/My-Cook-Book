@@ -2,13 +2,18 @@ import { FirestoreService } from '../../js/services/firestore-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
 import '../../styles/pages/home-spa.css';
 
+let templateCache = null;
+
 export default {
   async render() {
+    if (templateCache) return templateCache;
+
     const response = await fetch(new URL('./home-page.html', import.meta.url));
     if (!response.ok) {
       throw new Error(`Failed to load home page template: ${response.status}`);
     }
-    return await response.text();
+    templateCache = await response.text();
+    return templateCache;
   },
 
   async mount() {

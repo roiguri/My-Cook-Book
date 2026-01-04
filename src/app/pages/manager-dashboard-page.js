@@ -8,15 +8,20 @@ import {
 } from '../../lib/utilities/dashboard-refresh-manager.js';
 import '../../styles/pages/manager-dashboard-spa.css';
 
+let templateCache = null;
+
 export default {
   async render(params) {
+    if (templateCache) return templateCache;
+
     const response = await fetch(new URL('./manager-dashboard-page.html', import.meta.url));
     if (!response.ok) {
       throw new Error(
         `Failed to load manager dashboard template: ${response.status} ${response.statusText}`,
       );
     }
-    return await response.text();
+    templateCache = await response.text();
+    return templateCache;
   },
 
   async mount(container, params) {

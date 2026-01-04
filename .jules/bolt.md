@@ -7,3 +7,8 @@
 
 **Learning:** Web Components often default to fetching their own data based on ID attributes. This causes N+1 fetch cascades in lists.
 **Action:** Always implement a property setter (e.g., `set data(val)`) on list item components to allow parent lists to pass pre-fetched data directly, bypassing the internal fetch.
+
+## 2025-10-24 - [Template Caching]
+
+**Learning:** SPA page components often fetch their HTML templates on every render. Caching these templates in module-level variables drastically reduces network requests (or cache hits) and parsing overhead during navigation.
+**Action:** Implement a module-level `templateCache` variable in page components to store the fetched HTML string after the first load.
