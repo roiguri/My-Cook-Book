@@ -116,7 +116,7 @@ _Unit tests for business logic._
 - [x] `recipe-data-utils.js`
 - [x] `recipe-image-utils.js`
 - [x] `form-validation-utils.js`
-- [ ] `active-meal-utils.js` (Partial)
+- [x] `active-meal-utils.js`
 - [ ] `router.js` (Core routing logic)
 
 ## 🐛 Known Bugs / Issues
