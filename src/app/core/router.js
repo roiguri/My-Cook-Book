@@ -235,6 +235,12 @@ export class AppRouter {
       this.currentRoute = '/404';
       this.executeRoute('/404');
     } else {
+      if (path === this.defaultRoute) {
+        console.error(
+          `Infinite redirect loop detected. Default route ${this.defaultRoute} is missing.`,
+        );
+        return;
+      }
       console.warn(`No 404 handler found, redirecting to default route: ${this.defaultRoute}`);
       this.navigate(this.defaultRoute);
     }
