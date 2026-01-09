@@ -216,6 +216,45 @@ describe('AppRouter', () => {
       router.updateParams({ q: 'updated' });
       expect(mockReplaceState).toHaveBeenCalledWith(null, '', '/search?q=updated');
     });
+
+    test('buildCategoriesParams should construct correct parameters', () => {
+      const activeFilters = { favoritesOnly: true };
+      const params = router.buildCategoriesParams('main-dishes', 'chicken', activeFilters);
+      expect(params).toEqual({
+        category: 'main-dishes',
+        q: 'chicken',
+        favorites: 'true',
+      });
+    });
+
+    test('updateCategoriesParams should update URL with correct parameters', () => {
+      window.location.pathname = '/categories';
+      window.location.search = '';
+      router.currentRoute = '/categories';
+
+      const activeFilters = { favoritesOnly: true };
+      router.updateCategoriesParams('desserts', null, activeFilters);
+
+      expect(mockReplaceState).toHaveBeenCalledWith(
+        null,
+        '',
+        '/categories?category=desserts&favorites=true',
+      );
+    });
+
+    test('navigateToCategoriesWithParams should navigate with correct parameters', async () => {
+      // Register route so it doesn't redirect to default
+      router.registerRoute('/categories', jest.fn());
+
+      const activeFilters = { favoritesOnly: false };
+      router.navigateToCategoriesWithParams('all', 'pasta', activeFilters);
+
+      // Wait for async navigation
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      // Expect pushState since it's a navigation
+      expect(mockPushState).toHaveBeenCalledWith(null, '', '/categories?q=pasta');
+    });
   });
 
   describe('Error Handling', () => {
@@ -246,19 +285,6 @@ describe('AppRouter', () => {
       // Navigate to missing route
       await router.navigate('/missing');
 
-      // It should try to go to /home (default)
-      // /home is missing.
-      // It should NOT try to go to /home again.
-
-      // We expect it to stop or throw.
-      // With current code, it loops.
-      // We will assert that it logs an error about "Infinite loop detected" or similar (after we fix it).
-      // For now, let's see what happens.
-
-      // Since we know it loops, we can't assert yet.
-      // But we put this test here to verify the fix later.
-
-      // Assuming we implement a check:
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Infinite redirect loop detected'),
       );
