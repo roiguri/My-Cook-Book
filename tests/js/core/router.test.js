@@ -250,7 +250,7 @@ describe('AppRouter', () => {
       router.navigateToCategoriesWithParams('all', 'pasta', activeFilters);
 
       // Wait for async navigation
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Expect pushState since it's a navigation
       expect(mockPushState).toHaveBeenCalledWith(null, '', '/categories?q=pasta');
