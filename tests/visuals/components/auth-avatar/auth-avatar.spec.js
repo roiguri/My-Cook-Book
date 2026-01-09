@@ -32,7 +32,7 @@ test.describe('Auth Avatar Visuals', () => {
 
       const mockUser = {
         uid: 'user123',
-        email: 'tester@example.com'
+        email: 'tester@example.com',
       };
 
       authService.getCurrentUser = () => mockUser;
@@ -59,12 +59,13 @@ test.describe('Auth Avatar Visuals', () => {
 
       const mockUser = {
         uid: 'user123',
-        email: 'tester@example.com'
+        email: 'tester@example.com',
       };
 
       authService.getCurrentUser = () => mockUser;
       // Use data URI for test image
-      authService.getCurrentAvatarUrl = () => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+      authService.getCurrentAvatarUrl = () =>
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
       const avatar = document.querySelector('auth-avatar');
       avatar.updateAvatar(mockUser);
@@ -95,8 +96,12 @@ test.describe('Auth Avatar Visuals', () => {
       window.modalOpened = false;
       window.authFormsShown = false;
 
-      authController.openModal = () => { window.modalOpened = true; };
-      authContent.showAuthForms = () => { window.authFormsShown = true; };
+      authController.openModal = () => {
+        window.modalOpened = true;
+      };
+      authContent.showAuthForms = () => {
+        window.authFormsShown = true;
+      };
     });
 
     const avatar = page.locator('auth-avatar');
@@ -104,7 +109,7 @@ test.describe('Auth Avatar Visuals', () => {
 
     const result = await page.evaluate(() => ({
       modalOpened: window.modalOpened,
-      authFormsShown: window.authFormsShown
+      authFormsShown: window.authFormsShown,
     }));
 
     expect(result.modalOpened).toBe(true);
@@ -127,8 +132,12 @@ test.describe('Auth Avatar Visuals', () => {
       window.modalOpened = false;
       window.userProfileShown = false;
 
-      authController.openModal = () => { window.modalOpened = true; };
-      authContent.showUserProfile = () => { window.userProfileShown = true; };
+      authController.openModal = () => {
+        window.modalOpened = true;
+      };
+      authContent.showUserProfile = () => {
+        window.userProfileShown = true;
+      };
     });
 
     const avatar = page.locator('auth-avatar');
@@ -136,7 +145,7 @@ test.describe('Auth Avatar Visuals', () => {
 
     const result = await page.evaluate(() => ({
       modalOpened: window.modalOpened,
-      userProfileShown: window.userProfileShown
+      userProfileShown: window.userProfileShown,
     }));
 
     expect(result.modalOpened).toBe(true);

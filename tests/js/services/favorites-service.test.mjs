@@ -1,4 +1,3 @@
-
 import { jest } from '@jest/globals';
 
 describe('FavoritesService', () => {
@@ -122,39 +121,39 @@ describe('FavoritesService', () => {
     });
 
     test('should not update cache if user does not match', () => {
-        // Manually set cache
-        favoritesService.cache = {
-            userId: 'user123',
-            favorites: ['recipe1'],
-            isLoaded: true
-        };
+      // Manually set cache
+      favoritesService.cache = {
+        userId: 'user123',
+        favorites: ['recipe1'],
+        isLoaded: true,
+      };
 
-        // Simulate different user
-        authServiceMock.getCurrentUser.mockReturnValue({ uid: 'otherUser' });
+      // Simulate different user
+      authServiceMock.getCurrentUser.mockReturnValue({ uid: 'otherUser' });
 
-        favoritesService.updateCache('recipe2', true);
+      favoritesService.updateCache('recipe2', true);
 
-        expect(favoritesService.cache.favorites).toEqual(['recipe1']);
+      expect(favoritesService.cache.favorites).toEqual(['recipe1']);
     });
 
-     test('should not update cache if user is null', () => {
-        // Manually set cache
-        favoritesService.cache = {
-            userId: 'user123',
-            favorites: ['recipe1'],
-            isLoaded: true
-        };
+    test('should not update cache if user is null', () => {
+      // Manually set cache
+      favoritesService.cache = {
+        userId: 'user123',
+        favorites: ['recipe1'],
+        isLoaded: true,
+      };
 
-        // Simulate no user
-        authServiceMock.getCurrentUser.mockReturnValue(null);
+      // Simulate no user
+      authServiceMock.getCurrentUser.mockReturnValue(null);
 
-        favoritesService.updateCache('recipe2', true);
+      favoritesService.updateCache('recipe2', true);
 
-        expect(favoritesService.cache.favorites).toEqual(['recipe1']);
+      expect(favoritesService.cache.favorites).toEqual(['recipe1']);
     });
 
     test('should not add duplicate recipe ID', async () => {
-        // Setup initial cache
+      // Setup initial cache
       firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1'] });
       await favoritesService.getUserFavorites();
 
@@ -184,28 +183,28 @@ describe('FavoritesService', () => {
     });
 
     test('should handle invalid recipeId', async () => {
-        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-        const result = await favoritesService.isFavorite(null);
-        expect(result).toBe(false);
-        expect(consoleSpy).toHaveBeenCalled();
-        consoleSpy.mockRestore();
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+      const result = await favoritesService.isFavorite(null);
+      expect(result).toBe(false);
+      expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
     });
   });
 
   describe('getCacheStatus', () => {
-      test('should return current cache state', () => {
-          favoritesService.cache = {
-            userId: 'testUser',
-            favorites: ['1', '2'],
-            isLoaded: true,
-          };
+    test('should return current cache state', () => {
+      favoritesService.cache = {
+        userId: 'testUser',
+        favorites: ['1', '2'],
+        isLoaded: true,
+      };
 
-          const status = favoritesService.getCacheStatus();
-          expect(status).toEqual({
-            userId: 'testUser',
-            favorites: ['1', '2'],
-            isLoaded: true,
-          });
+      const status = favoritesService.getCacheStatus();
+      expect(status).toEqual({
+        userId: 'testUser',
+        favorites: ['1', '2'],
+        isLoaded: true,
       });
+    });
   });
 });

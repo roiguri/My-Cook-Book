@@ -48,13 +48,13 @@ _Visual and interaction tests for UI blocks._
 
 ### Auth
 
-| Component         | 📸  | 🖱️  | 🧠  | Status   |
-| ----------------- | :-: | :-: | :-: | -------- |
+| Component         | 📸  | 🖱️  | 🧠  | Status     |
+| ----------------- | :-: | :-: | :-: | ---------- |
 | `auth-avatar`     | ✅  | ✅  | [ ] | **Stable** |
-| `login-form`      | [ ] | [ ] | [ ] | Untested |
-| `signup-form`     | [ ] | [ ] | [ ] | Untested |
-| `forgot-password` | [ ] | [ ] | [ ] | Untested |
-| `user-profile`    | [ ] | [ ] | [ ] | Untested |
+| `login-form`      | [ ] | [ ] | [ ] | Untested   |
+| `signup-form`     | [ ] | [ ] | [ ] | Untested   |
+| `forgot-password` | [ ] | [ ] | [ ] | Untested   |
+| `user-profile`    | [ ] | [ ] | [ ] | Untested   |
 
 ### Collections (Feeds & Grids)
 
@@ -117,7 +117,7 @@ _Unit tests for business logic._
 - [x] `recipe-image-utils.js`
 - [x] `form-validation-utils.js`
 - [x] `active-meal-utils.js`
-- [ ] `router.js` (Core routing logic)
+- [x] `router.js` (Core routing logic)
 
 ## 🐛 Known Bugs / Issues
 
