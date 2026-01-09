@@ -50,7 +50,7 @@ _Visual and interaction tests for UI blocks._
 
 | Component         | 📸  | 🖱️  | 🧠  | Status   |
 | ----------------- | :-: | :-: | :-: | -------- |
-| `auth-avatar`     | [ ] | [ ] | [ ] | Untested |
+| `auth-avatar`     | ✅  | ✅  | [ ] | **Stable** |
 | `login-form`      | [ ] | [ ] | [ ] | Untested |
 | `signup-form`     | [ ] | [ ] | [ ] | Untested |
 | `forgot-password` | [ ] | [ ] | [ ] | Untested |
