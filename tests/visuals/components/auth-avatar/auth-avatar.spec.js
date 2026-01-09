@@ -2,35 +2,26 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Auth Avatar Visuals', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the test page
     await page.goto('/tests/visuals/components/auth-avatar/index.html');
   });
 
   test('renders signed-out state correctly', async ({ page }) => {
-    // Mock Authentication Service for Signed Out State
+    // Mock Authentication Service
     await page.evaluate(async () => {
       const authServiceModule = await import('/src/js/services/auth-service.js');
       const authService = authServiceModule.default;
 
-      // Reset state
       authService.getCurrentUser = () => null;
       authService.getCurrentAvatarUrl = () => null;
 
-      // Trigger update manually since we can't easily access the listener
-      // added in connectedCallback unless we re-create the element or expose methods.
-      // But we can just grab the element and call updateAvatar if we want to be explicit,
-      // or rely on the initial render if we set up mocks *before* navigation (which is hard here).
-      // Easier: Get the element and force an update.
+      // Force update since listener is already attached
       const avatar = document.querySelector('auth-avatar');
       avatar.updateAvatar(null);
     });
 
     const avatar = page.locator('auth-avatar');
 
-    // Check visual state
     await expect(avatar.locator('.avatar')).toHaveClass(/signed-out/);
-
-    // Snapshot
     await expect(avatar).toHaveScreenshot('auth-avatar-signed-out.png');
   });
 
@@ -55,7 +46,7 @@ test.describe('Auth Avatar Visuals', () => {
     const initialDiv = avatar.locator('.initial');
 
     await expect(initialDiv).toBeVisible();
-    await expect(initialDiv).toHaveText('T'); // First letter of tester@example.com
+    await expect(initialDiv).toHaveText('T');
     await expect(avatar.locator('.avatar')).not.toHaveClass(/signed-out/);
 
     await expect(avatar).toHaveScreenshot('auth-avatar-initials.png');
@@ -72,7 +63,7 @@ test.describe('Auth Avatar Visuals', () => {
       };
 
       authService.getCurrentUser = () => mockUser;
-      // Use a simple data URI for the image
+      // Use data URI for test image
       authService.getCurrentAvatarUrl = () => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
       const avatar = document.querySelector('auth-avatar');
@@ -89,7 +80,6 @@ test.describe('Auth Avatar Visuals', () => {
   });
 
   test('opens auth modal when clicked (signed out)', async ({ page }) => {
-    // Check signed out state click
     await page.evaluate(async () => {
       const authServiceModule = await import('/src/js/services/auth-service.js');
       const authService = authServiceModule.default;
@@ -98,7 +88,7 @@ test.describe('Auth Avatar Visuals', () => {
       const avatar = document.querySelector('auth-avatar');
       avatar.updateAvatar(null);
 
-      // Mock auth controller and content methods
+      // Mock interactions
       const authController = document.querySelector('auth-controller');
       const authContent = document.querySelector('auth-content');
 
