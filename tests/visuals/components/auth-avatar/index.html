@@ -4,25 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auth Avatar Test</title>
-    <!-- Base styles needed for the component -->
-    <style>
-        :root {
-            --primary-color: #ff6b6b;
-            --primary-dark: #e05e5e;
-            --button-color: #ffffff;
-            --body-font: 'Arial', sans-serif;
-        }
-        body {
-            font-family: var(--body-font);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-    </style>
+    <!-- Import centralized test styles -->
+    <link rel="stylesheet" href="/tests/visuals/styles/visual-test-base.css">
+
     <!-- Import the component -->
-    <!-- Corrected path for auth-controller.js -->
     <script type="module" src="/src/lib/auth/auth-controller.js"></script>
     <script type="module" src="/src/lib/auth/components/auth-avatar.js"></script>
     <script type="module" src="/src/lib/auth/components/auth-content.js"></script>
