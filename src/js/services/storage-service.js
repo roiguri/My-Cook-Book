@@ -4,6 +4,7 @@
 import {
   ref,
   uploadBytes,
+  uploadBytesResumable,
   getDownloadURL,
   deleteObject,
   listAll,
@@ -32,6 +33,49 @@ export class StorageService {
       console.error('Error uploading file:', error);
       throw new Error('Failed to upload file');
     }
+  }
+
+  /**
+   * Uploads a file to Firebase Storage with progress tracking.
+   * @param {File|Blob} file - The file to upload
+   * @param {string} path - The storage path
+   * @param {Function} [onProgress] - Callback for progress (percent: number) => void
+   * @returns {Promise<string>} The download URL of the uploaded file
+   */
+  static uploadFileWithProgress(file, path, onProgress) {
+    return new Promise((resolve, reject) => {
+      try {
+        const storage = getStorageInstance();
+        const storageRef = ref(storage, path);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            if (onProgress && typeof onProgress === 'function') {
+              onProgress(progress);
+            }
+          },
+          (error) => {
+            console.error('Error uploading file with progress:', error);
+            reject(new Error('Failed to upload file'));
+          },
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve(downloadURL);
+            } catch (error) {
+              console.error('Error getting download URL:', error);
+              reject(new Error('Failed to get download URL'));
+            }
+          },
+        );
+      } catch (error) {
+        console.error('Error initiating upload:', error);
+        reject(new Error('Failed to initiate upload'));
+      }
+    });
   }
 
   /**

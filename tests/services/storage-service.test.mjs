@@ -7,7 +7,13 @@ import '../common/mocks/firebase-storage.mock.js';
 import '../common/mocks/firebase-service.mock.js';
 
 describe('StorageService', () => {
-  let StorageService, ref, uploadBytes, getDownloadURL, deleteObject, firebaseService;
+  let StorageService,
+    ref,
+    uploadBytes,
+    uploadBytesResumable,
+    getDownloadURL,
+    deleteObject,
+    firebaseService;
   const mockStorage = 'mockStorage';
   const mockFile = new Blob(['test content'], { type: 'text/plain' });
   const mockPath = 'uploads/test.txt';
@@ -17,7 +23,9 @@ describe('StorageService', () => {
     jest.resetModules();
     // Dynamically import after mocks are in place
     ({ StorageService } = await import('../../src/js/services/storage-service.js'));
-    ({ ref, uploadBytes, getDownloadURL, deleteObject } = await import('firebase/storage'));
+    ({ ref, uploadBytes, uploadBytesResumable, getDownloadURL, deleteObject } = await import(
+      'firebase/storage'
+    ));
     firebaseService = await import('../../src/js/services/firebase-service.js');
     firebaseService.getStorageInstance.mockReturnValue(mockStorage);
     ref.mockImplementation((storage, path) => ({ storage, path }));
@@ -43,6 +51,78 @@ describe('StorageService', () => {
       await expect(StorageService.uploadFile(mockFile, mockPath)).rejects.toThrow(
         'Failed to upload file',
       );
+      errorSpy.mockRestore();
+    });
+  });
+
+  describe('uploadFileWithProgress', () => {
+    let mockUploadTask;
+    let onStateChanged;
+    let onError;
+    let onComplete;
+
+    beforeEach(() => {
+      mockUploadTask = {
+        on: jest.fn((event, next, error, complete) => {
+          onStateChanged = next;
+          onError = error;
+          onComplete = complete;
+        }),
+        snapshot: {
+          ref: { storage: mockStorage, path: mockPath },
+          bytesTransferred: 0,
+          totalBytes: 100,
+        },
+      };
+      uploadBytesResumable.mockReturnValue(mockUploadTask);
+    });
+
+    it('uploads a file, reports progress, and returns download URL', async () => {
+      getDownloadURL.mockResolvedValue(mockUrl);
+      const onProgress = jest.fn();
+
+      const uploadPromise = StorageService.uploadFileWithProgress(mockFile, mockPath, onProgress);
+
+      // Simulate progress
+      mockUploadTask.snapshot.bytesTransferred = 50;
+      onStateChanged(mockUploadTask.snapshot);
+      expect(onProgress).toHaveBeenCalledWith(50);
+
+      // Simulate completion
+      await onComplete();
+
+      const url = await uploadPromise;
+
+      expect(firebaseService.getStorageInstance).toHaveBeenCalled();
+      expect(ref).toHaveBeenCalledWith(mockStorage, mockPath);
+      expect(uploadBytesResumable).toHaveBeenCalledWith(
+        { storage: mockStorage, path: mockPath },
+        mockFile,
+      );
+      expect(getDownloadURL).toHaveBeenCalledWith({ storage: mockStorage, path: mockPath });
+      expect(url).toBe(mockUrl);
+    });
+
+    it('handles upload errors', async () => {
+      const uploadPromise = StorageService.uploadFileWithProgress(mockFile, mockPath);
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Simulate error
+      onError(new Error('Upload failed'));
+
+      await expect(uploadPromise).rejects.toThrow('Failed to upload file');
+      errorSpy.mockRestore();
+    });
+
+    it('handles getDownloadURL errors', async () => {
+      getDownloadURL.mockRejectedValue(new Error('URL failed'));
+      const uploadPromise = StorageService.uploadFileWithProgress(mockFile, mockPath);
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // Simulate completion
+      await onComplete();
+
+      await expect(uploadPromise).rejects.toThrow('Failed to get download URL');
       errorSpy.mockRestore();
     });
   });

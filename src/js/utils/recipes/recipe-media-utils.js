@@ -178,18 +178,8 @@ export async function uploadMediaInstructionFile(file, recipeId, userId, onProgr
       throw new Error('Unable to determine media type');
     }
 
-    // TODO: Implement progress tracking with Firebase Storage 'state_changed' listener
-    // For now, onProgress is accepted but not used (can be implemented later)
-    if (onProgress && typeof onProgress === 'function') {
-      onProgress(0);
-    }
-
-    // Upload to Firebase Storage
-    await StorageService.uploadFile(file, storagePath);
-
-    if (onProgress && typeof onProgress === 'function') {
-      onProgress(100);
-    }
+    // Upload to Firebase Storage with progress tracking
+    await StorageService.uploadFileWithProgress(file, storagePath, onProgress);
 
     // Build and return metadata
     const metadata = {

@@ -18,6 +18,7 @@ jest.unstable_mockModule('firebase/storage', () => ({
   getStorage: jest.fn(() => 'mockStorage'),
   ref: jest.fn((storage, path) => ({ storage, path })),
   uploadBytes: jest.fn(),
+  uploadBytesResumable: jest.fn(),
   getDownloadURL: jest.fn(),
   deleteObject: jest.fn(),
   listAll: jest.fn(),
