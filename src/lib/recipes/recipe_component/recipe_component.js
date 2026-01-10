@@ -246,6 +246,10 @@ class RecipeComponent extends HTMLElement {
       margin-bottom: 20px;
     }
 
+    .Recipe_component__instruction-list {
+      padding-right: 0;
+    }
+
     .Recipe_component__instructions > ol {
       padding-right: 0;
     }
@@ -254,11 +258,9 @@ class RecipeComponent extends HTMLElement {
       margin-bottom: 10px;
       line-height: 1.6;
       cursor: pointer;
-      padding: 5px;
       border-radius: 4px;
       transition: background-color 0.2s;
-      list-style-position: outside;
-      margin-right: 1.2rem;
+      list-style-position: inside;
     }
 
     .Recipe_component__instructions li:hover {
