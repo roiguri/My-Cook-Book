@@ -14,6 +14,15 @@ test.describe('Recipe Card Visuals', () => {
     await page.evaluate(async () => {
       const card = document.querySelector('recipe-card');
 
+      // Wait for templates to load (fix race condition)
+      if (!card.constructor._templateCache) {
+        let retries = 0;
+        while (!card.constructor._templateCache && retries < 10) {
+          await new Promise((r) => setTimeout(r, 100));
+          retries++;
+        }
+      }
+
       // Verify usage of external templates (checks if static cache is populated)
       if (!card.constructor._templateCache) {
         throw new Error(
@@ -95,12 +104,7 @@ test.describe('Recipe Card Visuals', () => {
     await page.evaluate(async () => {
       const card = document.querySelector('recipe-card');
 
-      // Enable features
-      card.setAttribute('show-favorites', 'true');
-      card.setAttribute('show-add-to-meal', 'true'); // Assuming this attribute controls it, based on typical patterns
-      card.setAttribute('recipe-id', 'mock-recipe-auth');
-
-      // Mock Data Fetching
+      // Mock Data Fetching BEFORE setting attributes that trigger it
       card._fetchRecipeData = async () => {};
       card._fetchRecipeImage = async () => {
         card._imageUrl =
@@ -109,6 +113,11 @@ test.describe('Recipe Card Visuals', () => {
       // Explicitly set favorites and disable the fetch method so it doesn't overwrite
       card._userFavorites = new Set(['mock-recipe-auth']);
       card._fetchUserFavorites = async () => {};
+
+      // Enable features
+      card.setAttribute('show-favorites', 'true');
+      card.setAttribute('show-add-to-meal', 'true');
+      card.setAttribute('recipe-id', 'mock-recipe-auth');
 
       // Patch render to ensure image loads
       const originalRender = card._renderRecipe;
