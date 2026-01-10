@@ -193,7 +193,5 @@ test.describe('Recipe Component Visuals', () => {
 
     // Verify amount doubled (4 servings -> 200g)
     await expect(ingredientAmount).toHaveText('200');
-
-    // Snapshot removed as per PR feedback
   });
 });
