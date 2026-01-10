@@ -7,28 +7,28 @@
     <!-- Import centralized test styles -->
     <link rel="stylesheet" href="/tests/visuals/styles/visual-test-base.css" />
     <style>
-        /* Override base style to allow scrolling if content is long,
+      /* Override base style to allow scrolling if content is long,
            or adjust container to be suitable for a full recipe page view */
-        body {
-            height: auto;
-            align-items: flex-start;
-            padding: 20px;
-            direction: rtl; /* Since it's Hebrew */
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+      body {
+        height: auto;
+        align-items: flex-start;
+        padding: 20px;
+        direction: rtl; /* Since it's Hebrew */
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
     </style>
   </head>
 
   <body>
     <div class="container">
-        <recipe-component id="test-component"></recipe-component>
+      <recipe-component id="test-component"></recipe-component>
     </div>
     <script type="module" src="/src/lib/recipes/recipe_component/recipe_component.js"></script>
   </body>

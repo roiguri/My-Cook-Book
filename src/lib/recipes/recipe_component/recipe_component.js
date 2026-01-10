@@ -242,7 +242,6 @@ class RecipeComponent extends HTMLElement {
     }
 
     .Recipe_component__instructions ol {
-      padding-right: 20px;
       margin-bottom: 20px;
     }
 
@@ -275,7 +274,6 @@ class RecipeComponent extends HTMLElement {
 
     .Recipe_component__stage-title {
       cursor: pointer;
-      padding: 5px;
       border-radius: 4px;
       transition: background-color 0.2s;
     }
@@ -290,7 +288,7 @@ class RecipeComponent extends HTMLElement {
     }
 
     .Recipe_component__comments ol {
-      padding-right: 20px;
+      padding-right: 15px;
       margin-bottom: 20px;
     }
 
