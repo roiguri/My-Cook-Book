@@ -258,7 +258,7 @@ class RecipeComponent extends HTMLElement {
       border-radius: 4px;
       transition: background-color 0.2s;
       list-style-position: outside;
-      margin-right: 1.5em;
+      margin-right: 1.2rem;
     }
 
     .Recipe_component__instructions li:hover {
