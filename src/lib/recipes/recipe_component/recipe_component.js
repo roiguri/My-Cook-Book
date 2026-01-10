@@ -242,8 +242,11 @@ class RecipeComponent extends HTMLElement {
     }
 
     .Recipe_component__instructions ol {
-      padding-right: 20px;
       margin-bottom: 20px;
+    }
+
+    .Recipe_component__instruction-list {
+      padding-right: 0;
     }
 
     .Recipe_component__instructions > ol {
@@ -254,7 +257,6 @@ class RecipeComponent extends HTMLElement {
       margin-bottom: 10px;
       line-height: 1.6;
       cursor: pointer;
-      padding: 5px;
       border-radius: 4px;
       transition: background-color 0.2s;
       list-style-position: inside;
@@ -268,11 +270,11 @@ class RecipeComponent extends HTMLElement {
       background-color: var(--primary-color-light, #e0f2f1);
       border-right: 4px solid var(--primary-color, #009688);
       font-weight: bold;
+      padding-right: 12px;
     }
 
     .Recipe_component__stage-title {
       cursor: pointer;
-      padding: 5px;
       border-radius: 4px;
       transition: background-color 0.2s;
     }
@@ -284,10 +286,11 @@ class RecipeComponent extends HTMLElement {
     .Recipe_component__stage-title.active-step {
       background-color: var(--primary-color-light, #e0f2f1);
       border-right: 4px solid var(--primary-color, #009688);
+      padding-right: 12px;
     }
 
     .Recipe_component__comments ol {
-      padding-right: 20px;
+      padding-right: 15px;
       margin-bottom: 20px;
     }
 

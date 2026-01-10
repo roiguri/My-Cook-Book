@@ -38,7 +38,7 @@ _Visual and interaction tests for UI blocks._
 | Component                   | 📸  | 🖱️  | 🧠  | Status     |
 | --------------------------- | :-: | :-: | :-: | ---------- |
 | `recipe-card`               | ✅  | ✅  | ✅  | **Stable** |
-| `recipe-component`          | [ ] | [ ] | [ ] | Untested   |
+| `recipe-component`          | ✅  | ✅  | [ ] | **Stable** |
 | `recipe-form-component`     | [ ] | [ ] | [ ] | Untested   |
 | `edit-recipe-component`     | [ ] | [ ] | [ ] | Untested   |
 | `propose-recipe-component`  | [ ] | [ ] | [ ] | Untested   |
