@@ -270,6 +270,7 @@ class RecipeComponent extends HTMLElement {
       background-color: var(--primary-color-light, #e0f2f1);
       border-right: 4px solid var(--primary-color, #009688);
       font-weight: bold;
+      padding-right: 12px;
     }
 
     .Recipe_component__stage-title {
@@ -285,6 +286,7 @@ class RecipeComponent extends HTMLElement {
     .Recipe_component__stage-title.active-step {
       background-color: var(--primary-color-light, #e0f2f1);
       border-right: 4px solid var(--primary-color, #009688);
+      padding-right: 12px;
     }
 
     .Recipe_component__comments ol {

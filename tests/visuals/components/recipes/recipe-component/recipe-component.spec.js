@@ -194,4 +194,24 @@ test.describe('Recipe Component Visuals', () => {
     // Verify amount doubled (4 servings -> 200g)
     await expect(ingredientAmount).toHaveText('200');
   });
+
+  test('handles stage/instruction selection', async ({ page }) => {
+    await setupComponentWithMock(page, FULL_RECIPE_DATA);
+
+    const component = page.locator('recipe-component');
+    const firstInstruction = component.locator('.Recipe_component__instructions li').first();
+
+    // Determine initial state (not active)
+    await expect(firstInstruction).not.toHaveClass(/active-step/);
+
+    // Click to activate
+    await firstInstruction.click();
+
+    // Verify active
+    await expect(firstInstruction).toHaveClass(/active-step/);
+
+    // Verify styling via screenshot of the instructions section
+    const instructionsSection = component.locator('.Recipe_component__instructions');
+    await expect(instructionsSection).toHaveScreenshot('instructions-selection.png');
+  });
 });
