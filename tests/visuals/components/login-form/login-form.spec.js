@@ -2,71 +2,45 @@ import { test, expect } from '@playwright/test';
 
 test.describe('LoginForm Component', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the app root to ensure we are in the correct context/origin
-    // This loads index.html and its styles (src/styles/main.css via src/app.js)
-    await page.goto('/');
-
-    // Inject the component script and styles dynamically
-    await page.evaluate(async () => {
-      // Import the component module
-      await import('/src/lib/auth/components/login-form.js');
-
-      // Create and append the component to the body, clearing existing content to isolate
-      // IMPORTANT: We preserve the document head to keep styles loaded from index.html/app.js
-      document.body.innerHTML = '';
-      const loginForm = document.createElement('login-form');
-
-      // Style it to be visible in isolation
-      loginForm.style.display = 'block';
-      loginForm.style.width = '100%';
-      loginForm.style.maxWidth = '500px';
-      loginForm.style.margin = '20px auto';
-      // Use variables if possible, but for test container validation, borders help debug
-      loginForm.style.padding = '20px';
-
-      // We don't force background color here to verify if it inherits/uses defaults correctly
-      // But usually modals have their own background. login-form might transparently sit on a modal.
-      // Let's add a wrapper with a background to simulate the modal content if needed.
-      // Checking login-form.js, it seems to not set a background itself.
-      const wrapper = document.createElement('div');
-      wrapper.style.backgroundColor = 'var(--background-color, #fff)';
-      wrapper.style.padding = '20px';
-      wrapper.appendChild(loginForm);
-
-      document.body.appendChild(wrapper);
-
-      // Mock auth controller and close modal functionality via closest
-      const mockAuthController = {
-        handleLogin: async (email, password, remember) => {
-          console.log(`Login attempted with: ${email}, ${password}, ${remember}`);
-          return Promise.resolve();
-        },
-        handleGoogleSignIn: async () => {
-          console.log('Google Sign In attempted');
-          return Promise.resolve();
-        },
-        closeModal: () => {
-          console.log('Modal closed');
-        },
-      };
-
-      // We need to override closest on the instance since it's a native method
-      // Using Object.defineProperty to shadow the prototype method
-      Object.defineProperty(loginForm, 'closest', {
-        value: (selector) => {
-          if (selector === 'auth-controller') {
-            return mockAuthController;
-          }
-          // Fallback to original behavior if needed, though for this test likely not
-          return HTMLElement.prototype.closest.call(loginForm, selector);
-        },
-        writable: true,
-        configurable: true,
-      });
-    });
+    // Navigate to the test harness page
+    await page.goto('/tests/visuals/components/login-form/index.html');
 
     // Wait for the component to be defined and upgraded
     await page.waitForSelector('login-form', { state: 'visible' });
+
+    // Mock auth controller and close modal functionality via closest
+    await page.evaluate(() => {
+        const loginForm = document.querySelector('login-form');
+
+        const mockAuthController = {
+            handleLogin: async (email, password, remember) => {
+            console.log(`Login attempted with: ${email}, ${password}, ${remember}`);
+            return Promise.resolve();
+            },
+            handleGoogleSignIn: async () => {
+            console.log('Google Sign In attempted');
+            return Promise.resolve();
+            },
+            closeModal: () => {
+            console.log('Modal closed');
+            },
+        };
+
+        // We need to override closest on the instance since it's a native method
+        // Using Object.defineProperty to shadow the prototype method
+        Object.defineProperty(loginForm, 'closest', {
+            value: (selector) => {
+            if (selector === 'auth-controller') {
+                return mockAuthController;
+            }
+            // Fallback to original behavior if needed, though for this test likely not
+            return HTMLElement.prototype.closest.call(loginForm, selector);
+            },
+            writable: true,
+            configurable: true,
+        });
+    });
+
     // Wait for any animations or fonts
     await page.waitForLoadState('networkidle');
   });
@@ -87,8 +61,9 @@ test.describe('LoginForm Component', () => {
     await expect(submitBtn).toBeVisible();
     await expect(submitBtn).toHaveText('התחבר');
 
-    // Visual Snapshot
-    await expect(loginForm).toHaveScreenshot('login-form-default.png');
+    // Visual Snapshot of the container to capture the form context
+    const container = page.locator('.test-container');
+    await expect(container).toHaveScreenshot('login-form-default.png');
   });
 
   test('should show validation error for invalid email', async ({ page }) => {
@@ -168,6 +143,7 @@ test.describe('LoginForm Component', () => {
     await expect(errorMsg).toHaveText('שם משתמש או סיסמה שגויים');
 
     // Visual Snapshot for error state
-    await expect(loginForm).toHaveScreenshot('login-form-error.png');
+    const container = page.locator('.test-container');
+    await expect(container).toHaveScreenshot('login-form-error.png');
   });
 });
