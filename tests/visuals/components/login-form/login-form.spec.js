@@ -10,35 +10,34 @@ test.describe('LoginForm Component', () => {
 
     // Mock auth controller and close modal functionality via closest
     await page.evaluate(() => {
-        const loginForm = document.querySelector('login-form');
+      const loginForm = document.querySelector('login-form');
 
-        const mockAuthController = {
-            handleLogin: async (email, password, remember) => {
-            console.log(`Login attempted with: ${email}, ${password}, ${remember}`);
-            return Promise.resolve();
-            },
-            handleGoogleSignIn: async () => {
-            console.log('Google Sign In attempted');
-            return Promise.resolve();
-            },
-            closeModal: () => {
-            console.log('Modal closed');
-            },
-        };
+      const mockAuthController = {
+        handleLogin: async (email, password, remember) => {
+          console.log(`Login attempted with: ${email}, ${password}, ${remember}`);
+          return Promise.resolve();
+        },
+        handleGoogleSignIn: async () => {
+          console.log('Google Sign In attempted');
+          return Promise.resolve();
+        },
+        closeModal: () => {
+          console.log('Modal closed');
+        },
+      };
 
-        // We need to override closest on the instance since it's a native method
-        // Using Object.defineProperty to shadow the prototype method
-        Object.defineProperty(loginForm, 'closest', {
-            value: (selector) => {
-            if (selector === 'auth-controller') {
-                return mockAuthController;
-            }
-            // Fallback to original behavior if needed, though for this test likely not
-            return HTMLElement.prototype.closest.call(loginForm, selector);
-            },
-            writable: true,
-            configurable: true,
-        });
+      // We need to override closest on the instance since it's a native method
+      // Using Object.defineProperty to shadow the prototype method
+      Object.defineProperty(loginForm, 'closest', {
+        value: (selector) => {
+          if (selector === 'auth-controller') {
+            return mockAuthController;
+          }
+          return null;
+        },
+        writable: true,
+        configurable: true,
+      });
     });
 
     // Wait for any animations or fonts
