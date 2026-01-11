@@ -359,10 +359,10 @@ class RecipeFormComponent extends HTMLElement {
 
     const ingredientsList = this.shadowRoot.getElementById('ingredients-list');
     if (ingredientsList) {
-      if (data.ingredients) {
-        ingredientsList.populateData(data.ingredients);
-      } else if (data.ingredientSections) {
+      if (data.ingredientSections && data.ingredientSections.length > 0) {
         ingredientsList.populateData({ sections: data.ingredientSections });
+      } else if (data.ingredients) {
+        ingredientsList.populateData(data.ingredients);
       }
     }
 

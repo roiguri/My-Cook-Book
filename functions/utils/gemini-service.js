@@ -46,7 +46,7 @@ const RECIPE_SCHEMA = {
     },
     ingredients: {
       type: SchemaType.ARRAY,
-      description: 'List of ingredients',
+      description: 'List of ingredients (Flat list). Use ONLY if there are no sections.',
       items: {
         type: SchemaType.OBJECT,
         properties: {
@@ -68,14 +68,68 @@ const RECIPE_SCHEMA = {
         },
         required: ['item'],
       },
+      nullable: true,
+    },
+    ingredientSections: {
+      type: SchemaType.ARRAY,
+      description:
+        'List of ingredient sections (e.g. for "Cake", "Frosting"). Use ONLY if there are sections.',
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          title: {
+            type: SchemaType.STRING,
+            description: 'Section title',
+            nullable: false,
+          },
+          items: {
+            type: SchemaType.ARRAY,
+            description: 'Ingredients in this section',
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                item: { type: SchemaType.STRING, nullable: false },
+                amount: { type: SchemaType.STRING, nullable: true },
+                unit: { type: SchemaType.STRING, nullable: true },
+              },
+              required: ['item'],
+            },
+          },
+        },
+        required: ['title', 'items'],
+      },
+      nullable: true,
     },
     instructions: {
       type: SchemaType.ARRAY,
-      description: 'List of instruction steps',
+      description: 'List of instruction steps (Flat list). Use ONLY if there are no stages.',
       items: {
         type: SchemaType.STRING,
         description: 'A single instruction step',
       },
+      nullable: true,
+    },
+    stages: {
+      type: SchemaType.ARRAY,
+      description:
+        'List of preparation stages. Use ONLY if the instructions are divided into named stages.',
+      items: {
+        type: SchemaType.OBJECT,
+        properties: {
+          title: {
+            type: SchemaType.STRING,
+            description: 'Stage title',
+            nullable: false,
+          },
+          instructions: {
+            type: SchemaType.ARRAY,
+            description: 'List of instructions for this stage',
+            items: { type: SchemaType.STRING },
+          },
+        },
+        required: ['title', 'instructions'],
+      },
+      nullable: true,
     },
     comments: {
       type: SchemaType.ARRAY,
@@ -94,7 +148,7 @@ const RECIPE_SCHEMA = {
       nullable: true,
     },
   },
-  required: ['name', 'ingredients', 'instructions'],
+  required: ['name'],
 };
 
 /**
@@ -121,10 +175,17 @@ async function extractRecipeFromImage(imageBase64, mimeType = 'image/jpeg') {
   });
 
   const prompt = `Extract the recipe details from this image. 
-  If any field is missing or cannot be inferred, leave it null or empty.
-  Ensure ingredients are split into item, amount, and unit where possible.
-  Ensure instructions are split into logical steps.
-  Translate to Hebrew if the recipe is in another language, but keep original if it is already in Hebrew.`;
+  
+  CRITICAL RULES FOR STRUCTURE:
+  1. ANALYZE STRUCTURE FIRST: Look specifically for titled sections (e.g., "For the Dough", "For the Sauce", "Preparation", "Baking").
+  2. FORCE SECTIONS: If ANY titled sections are present in the image for ingredients, you MUST use 'ingredientSections' and set 'ingredients' to null.
+  3. FORCE STAGES: If ANY titled sections are present for instructions, you MUST use 'stages' and set 'instructions' to null.
+  4. EXCLUSIVITY: Never populate both flat lists and sections.
+  
+  Data Formatting:
+  - Ingredients: Split into item, amount, and unit.
+  - Instructions: Split into logical steps.
+  - Language: Translate to Hebrew if not already in Hebrew.`;
 
   const imagePart = {
     inlineData: {

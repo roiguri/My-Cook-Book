@@ -15,27 +15,53 @@ export function mapExtractedDataToForm(extractedData) {
     servings: extractedData.servings || 1,
     difficulty: extractedData.difficulty || 'Medium',
     description: extractedData.description || '', // Kept for future use
-    ingredients: [],
-    instructions: [],
     comments: extractedData.comments || [],
     tags: extractedData.tags || [],
   };
 
-  // Map ingredients
-  if (Array.isArray(extractedData.ingredients)) {
+  // Map ingredients - prioritize sections if available
+  if (
+    extractedData.ingredientSections &&
+    Array.isArray(extractedData.ingredientSections) &&
+    extractedData.ingredientSections.length > 0
+  ) {
+    mappedData.ingredientSections = extractedData.ingredientSections.map((section) => ({
+      title: section.title || 'General',
+      items: (section.items || []).map((ing) => ({
+        item: ing.item || '',
+        amount: ing.amount || '',
+        unit: ing.unit || '',
+      })),
+    }));
+    // Explicitly set ingredients to empty/undefined to avoid conflicts
+    mappedData.ingredients = null;
+  } else if (extractedData.ingredients && Array.isArray(extractedData.ingredients)) {
     mappedData.ingredients = extractedData.ingredients.map((ing) => ({
       item: ing.item || '',
       amount: ing.amount || '',
       unit: ing.unit || '',
     }));
+    mappedData.ingredientSections = null;
+  } else {
+    mappedData.ingredients = []; // Default to empty flat list
   }
 
-  // Map instructions (stages or flat list)
-  // The schema asks for a flat list of instructions, so we map to flat list.
-  // If the form supports stages, we might want to enhance the schema later,
-  // but for now we follow the schema which outputs an array of strings.
-  if (Array.isArray(extractedData.instructions)) {
+  // Map instructions - prioritize stages if available
+  if (
+    extractedData.stages &&
+    Array.isArray(extractedData.stages) &&
+    extractedData.stages.length > 0
+  ) {
+    mappedData.stages = extractedData.stages.map((stage) => ({
+      title: stage.title || 'Step',
+      instructions: stage.instructions || [],
+    }));
+    mappedData.instructions = null;
+  } else if (extractedData.instructions && Array.isArray(extractedData.instructions)) {
     mappedData.instructions = extractedData.instructions;
+    mappedData.stages = null;
+  } else {
+    mappedData.instructions = []; // Default to empty flat list
   }
 
   return mappedData;

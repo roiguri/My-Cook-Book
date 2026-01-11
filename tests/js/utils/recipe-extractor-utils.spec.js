@@ -64,5 +64,56 @@ describe('Recipe Extractor Utils', () => {
       const result = mapExtractedDataToForm(input);
       expect(result.ingredients[0]).toEqual({ item: 'Salt', amount: '', unit: '' });
     });
+
+    it('should map recipe with sections and stages correctly', () => {
+      const input = {
+        name: 'Complex Cake',
+        ingredientSections: [
+          {
+            title: 'Cake',
+            items: [{ item: 'Flour', amount: '2', unit: 'cups' }],
+          },
+          {
+            title: 'Frosting',
+            items: [{ item: 'Sugar', amount: '1', unit: 'cup' }],
+          },
+        ],
+        stages: [
+          {
+            title: 'Bake Cake',
+            instructions: ['Mix flour', 'Bake'],
+          },
+          {
+            title: 'Make Frosting',
+            instructions: ['Mix sugar'],
+          },
+        ],
+      };
+
+      const result = mapExtractedDataToForm(input);
+
+      expect(result.name).toBe('Complex Cake');
+
+      // Check sections
+      expect(result.ingredientSections).toHaveLength(2);
+      expect(result.ingredientSections[0].title).toBe('Cake');
+      expect(result.ingredientSections[0].items[0]).toEqual({
+        item: 'Flour',
+        amount: '2',
+        unit: 'cups',
+      });
+      expect(result.ingredientSections[1].title).toBe('Frosting');
+
+      // Check that flat ingredients are null
+      expect(result.ingredients).toBeNull();
+
+      // Check stages
+      expect(result.stages).toHaveLength(2);
+      expect(result.stages[0].title).toBe('Bake Cake');
+      expect(result.stages[0].instructions).toEqual(['Mix flour', 'Bake']);
+
+      // Check that flat instructions are null
+      expect(result.instructions).toBeNull();
+    });
   });
 });
