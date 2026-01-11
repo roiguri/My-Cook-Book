@@ -1,5 +1,7 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
+import { getAuthInstance } from '../../../js/services/firebase-service.js';
+import { isApproved, isManager } from '../../../js/services/auth-service.js';
 import { getImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
 import { validateRecipeForm } from '../../../js/utils/form/form-validation-utils.js';
@@ -10,6 +12,7 @@ import { formProtectionManager } from '../../../js/utils/form/form-protection-ma
 import '../../images/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
 import '../../modals/confirmation_modal/confirmation_modal.js';
+import '../../modals/recipe-import-modal/recipe-import-modal.js';
 import './parts/recipe-metadata-fields.js';
 import './parts/form-button-group.js';
 import './parts/recipe-ingredients-list.js';
@@ -71,7 +74,12 @@ class RecipeFormComponent extends HTMLElement {
   template() {
     return `
       <div dir="rtl" class="recipe-form">
-        <h2 class="recipe-form__title">פרטי המתכון</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 class="recipe-form__title" style="margin: 0;">פרטי המתכון</h2>
+          <button id="import-btn" class="recipe-form__btn-secondary" style="display: none; padding: 6px 12px; font-size: 0.9em;">
+            <span style="margin-left: 6px;">📷</span> ייבוא מתמונה
+          </button>
+        </div>
         
         <div class="recipe-form__error-message" style="display: none;">
           נא למלא את כל שדות החובה
@@ -116,10 +124,38 @@ class RecipeFormComponent extends HTMLElement {
         </form>
       </div>
       <message-modal></message-modal>
+      <recipe-import-modal></recipe-import-modal>
     `;
   }
 
   setupEventListeners() {
+    // Add event listener for Import button
+    const importBtn = this.shadowRoot.getElementById('import-btn');
+    const importModal = this.shadowRoot.querySelector('recipe-import-modal');
+
+    // Check permissions and show button
+    const auth = getAuthInstance();
+    if (auth && auth.currentUser) {
+      auth.currentUser.getIdTokenResult().then((idTokenResult) => {
+        if (idTokenResult.claims.approved || idTokenResult.claims.manager) {
+          if (importBtn) importBtn.style.display = 'flex';
+        }
+      });
+    }
+
+    if (importBtn && importModal) {
+      importBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        importModal.open();
+      });
+    }
+
+    if (importModal) {
+      importModal.addEventListener('recipe-extracted', (e) => {
+        this.populateForm(e.detail.recipeData);
+      });
+    }
+
     // Add event listener for Instructions List component
     const instructionsList = this.shadowRoot.getElementById('instructions-list');
     instructionsList.addEventListener('instructions-changed', () => {
@@ -278,6 +314,50 @@ class RecipeFormComponent extends HTMLElement {
     }
   }
 
+  populateForm(data) {
+    this.recipeData = { ...this.recipeData, ...data };
+
+    const metadataFields = this.shadowRoot.getElementById('metadata-fields');
+    if (metadataFields) {
+      metadataFields.populateFields(data);
+    }
+
+    const commentsField = this.shadowRoot.getElementById('comments');
+    if (commentsField && data.comments) {
+      commentsField.value = Array.isArray(data.comments) ? data.comments.join('\n') : data.comments;
+    }
+
+    const ingredientsList = this.shadowRoot.getElementById('ingredients-list');
+    if (ingredientsList) {
+      // Clear existing
+      if (data.ingredients) {
+        ingredientsList.populateData(data.ingredients);
+      } else if (data.ingredientSections) {
+        ingredientsList.populateData({ sections: data.ingredientSections });
+      }
+    }
+
+    const instructionsList = this.shadowRoot.getElementById('instructions-list');
+    if (instructionsList) {
+      // Clear existing
+      if (data.stages && data.stages.length > 0) {
+        instructionsList.populateInstructions({ stages: data.stages });
+      } else if (data.instructions && data.instructions.length > 0) {
+        instructionsList.populateInstructions(data.instructions);
+      }
+    }
+
+    // Trigger dirty state
+    this.isDirty = true;
+    this.updateDirtyStateIndicators(true);
+
+    // Show success message
+    const messageModal = this.shadowRoot.querySelector('message-modal');
+    if (messageModal) {
+      messageModal.show('המתכון חולץ בהצלחה! נא לעבור על הפרטים ולתקן במידת הצורך.', 'success');
+    }
+  }
+
   async setRecipeData(recipeId) {
     try {
       const db = getFirestoreInstance();
@@ -286,34 +366,9 @@ class RecipeFormComponent extends HTMLElement {
       if (docSnap.exists()) {
         const data = docSnap.data();
         this.recipeData = data;
-
-        const metadataFields = this.shadowRoot.getElementById('metadata-fields');
-        if (metadataFields) {
-          metadataFields.populateFields(data);
-        }
-
-        const commentsField = this.shadowRoot.getElementById('comments');
-        if (commentsField) {
-          commentsField.value = data.comments ? data.comments.join('\n') : '';
-        }
-
-        const ingredientsList = this.shadowRoot.getElementById('ingredients-list');
-        if (ingredientsList) {
-          if (data.ingredients) {
-            ingredientsList.populateData(data.ingredients);
-          } else if (data.ingredientSections) {
-            ingredientsList.populateData({ sections: data.ingredientSections });
-          }
-        }
-
-        const instructionsList = this.shadowRoot.getElementById('instructions-list');
-        if (instructionsList) {
-          if (data.stages && data.stages.length > 0) {
-            instructionsList.populateInstructions({ stages: data.stages });
-          } else if (data.instructions && data.instructions.length > 0) {
-            instructionsList.populateInstructions(data.instructions);
-          }
-        }
+        this.populateForm(data);
+        this.isDirty = false; // Reset dirty after loading existing
+        this.updateDirtyStateIndicators(false);
 
         if (data.images) {
           await this.populateImages(data.images);

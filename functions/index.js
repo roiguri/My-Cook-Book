@@ -3,11 +3,14 @@ const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const sharp = require('sharp');
+const { extractRecipeFromImage } = require('./recipe-extraction');
 
 // Initialize Firebase Admin
 initializeApp();
 const db = getFirestore();
 const storage = getStorage();
+
+exports.extractRecipeFromImage = extractRecipeFromImage;
 
 async function processRecipeImages(recipeId, images, category, originalUserId) {
   const processedImages = [];
