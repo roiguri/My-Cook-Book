@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Form Visual Test</title>
+    <!-- Import base styles to ensure CSS variables are available -->
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background-color: #f4f4f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      /* Container simulating the modal content dimensions */
+      .test-container {
+        width: 480px;
+        max-width: 90vw;
+        background-color: var(--background-color, #fff);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="test-container">
+      <login-form></login-form>
+    </div>
+    <script type="module" src="/src/lib/auth/components/login-form.js"></script>
+  </body>
+</html>

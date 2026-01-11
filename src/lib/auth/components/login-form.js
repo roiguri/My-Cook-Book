@@ -135,7 +135,6 @@ class LoginForm extends HTMLElement {
           vertical-align: middle;
           white-space: nowrap;
           width: 100%;
-          max-width: 400px;
           margin-top: -10px;
         }
         
