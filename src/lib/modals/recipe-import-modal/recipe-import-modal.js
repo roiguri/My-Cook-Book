@@ -11,6 +11,7 @@ class RecipeImportModal extends HTMLElement {
     this.activeCropIndex = -1;
     this.cropper = null;
     this.isLoading = false;
+    this.error = null;
   }
 
   connectedCallback() {
@@ -41,7 +42,7 @@ class RecipeImportModal extends HTMLElement {
           </div>
 
           <div class="recipe-import-modal__body" id="modal-body">
-            ${this.isLoading ? this.renderLoading() : this.renderContent()}
+            ${this.isLoading ? this.renderLoading() : this.error ? this.renderError() : this.renderContent()}
           </div>
 
           <div class="recipe-import-modal__footer" id="modal-footer">
@@ -139,6 +140,16 @@ class RecipeImportModal extends HTMLElement {
     `;
   }
 
+  renderError() {
+    return `
+      <div class="recipe-import-modal__error">
+        <p class="recipe-import-modal__error-title">שגיאה בפענוח המתכון</p>
+        <p class="recipe-import-modal__error-message">${this.error}</p>
+        <button class="recipe-import-modal__btn recipe-import-modal__btn--secondary" id="retry-btn">נסה שוב</button>
+      </div>
+    `;
+  }
+
   renderLoading() {
     return `
       <div class="recipe-import-modal__loading">
@@ -160,6 +171,14 @@ class RecipeImportModal extends HTMLElement {
     const closeHandler = () => this.close();
     if (closeBtn) closeBtn.addEventListener('click', closeHandler);
     if (cancelBtn) cancelBtn.addEventListener('click', closeHandler);
+
+    const retryBtn = this.shadowRoot.getElementById('retry-btn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => {
+        this.error = null;
+        this.refresh();
+      });
+    }
 
     // Upload events
     if (dropZone) {
@@ -302,6 +321,7 @@ class RecipeImportModal extends HTMLElement {
     if (this.images.length === 0) return;
 
     this.isLoading = true;
+    this.error = null;
     this.refresh();
 
     try {
@@ -323,10 +343,18 @@ class RecipeImportModal extends HTMLElement {
       this.close();
     } catch (error) {
       console.error('Error processing recipe:', error);
-      alert('שגיאה בפענוח המתכון: ' + error.message);
-    } finally {
+      this.error = error.message;
       this.isLoading = false;
       this.refresh();
+    } finally {
+      if (!this.error) {
+        this.isLoading = false;
+        // Don't refresh here if successful as we closed the modal,
+        // preventing a flash of content before closing animation finishes if any.
+        // But since we closed, refreshing might re-open if we are not careful?
+        // this.close() removes the class. this.refresh() adds it back.
+        // So we must NOT call refresh() if successful.
+      }
     }
   }
 
@@ -343,6 +371,7 @@ class RecipeImportModal extends HTMLElement {
     this.images = [];
     this.activeCropIndex = -1;
     this.isLoading = false;
+    this.error = null;
     this.refresh();
     const modal = this.shadowRoot.getElementById('modal');
     modal.classList.add('recipe-import-modal--open');

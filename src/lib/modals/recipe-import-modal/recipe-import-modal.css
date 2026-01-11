@@ -186,3 +186,24 @@
     transform: rotate(360deg);
   }
 }
+
+.recipe-import-modal__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.recipe-import-modal__error-title {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #d32f2f;
+  margin: 0;
+}
+
+.recipe-import-modal__error-message {
+  color: #333;
+  margin: 0;
+}
