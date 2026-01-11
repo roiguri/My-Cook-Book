@@ -8,7 +8,8 @@ class RecipeImportModal extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.cropper = null;
-    this.currentFile = null;
+    this.images = []; // Array of { id, file, imageUrl, processedBase64 }
+    this.activeImageId = null;
     this.isLoading = false;
   }
 
@@ -36,8 +37,16 @@ class RecipeImportModal extends HTMLElement {
             <!-- Initial State: Upload -->
             <div id="upload-view" class="upload-area">
               <div class="upload-icon">📷</div>
-              <p class="upload-text">לחץ להעלאת תמונה או גרור לכאן</p>
-              <input type="file" id="file-input" accept="image/*" style="display: none;">
+              <p class="upload-text">לחץ להעלאת תמונות או גרור לכאן</p>
+              <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+            </div>
+
+            <!-- Preview State: List & Reorder -->
+            <div id="preview-view" style="display: none; width: 100%;">
+              <div class="images-list" id="images-list"></div>
+              <div class="add-more-area" id="add-more-btn">
+                <span>+ הוסף תמונה נוספת</span>
+              </div>
             </div>
 
             <!-- Editor State: Crop & Rotate -->
@@ -48,7 +57,8 @@ class RecipeImportModal extends HTMLElement {
               <div class="toolbar">
                 <button class="tool-btn" id="rotate-left" title="סובב שמאלה">↶</button>
                 <button class="tool-btn" id="rotate-right" title="סובב ימינה">↷</button>
-                <button class="tool-btn" id="reset-crop" title="אפס חיתוך">↺</button>
+                <button class="tool-btn" id="cancel-crop" title="ביטול">✕</button>
+                <button class="tool-btn" id="save-crop" title="שמור חיתוך">✓</button>
               </div>
             </div>
 
@@ -79,11 +89,13 @@ class RecipeImportModal extends HTMLElement {
     const uploadArea = this.shadowRoot.getElementById('upload-view');
     const fileInput = this.shadowRoot.getElementById('file-input');
     const extractBtn = this.shadowRoot.getElementById('extract-btn');
+    const addMoreBtn = this.shadowRoot.getElementById('add-more-btn');
 
     // Tools
     const rotateLeftBtn = this.shadowRoot.getElementById('rotate-left');
     const rotateRightBtn = this.shadowRoot.getElementById('rotate-right');
-    const resetBtn = this.shadowRoot.getElementById('reset-crop');
+    const saveCropBtn = this.shadowRoot.getElementById('save-crop');
+    const cancelCropBtn = this.shadowRoot.getElementById('cancel-crop');
 
     // Error handling
     const tryAgainBtn = this.shadowRoot.getElementById('try-again-btn');
@@ -99,10 +111,13 @@ class RecipeImportModal extends HTMLElement {
 
     // Upload Actions
     uploadArea.addEventListener('click', () => fileInput.click());
+    addMoreBtn.addEventListener('click', () => fileInput.click());
+
     fileInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
-        this.handleFileSelect(e.target.files[0]);
+        this.addImages(e.target.files);
       }
+      fileInput.value = ''; // Reset input
     });
 
     // Drag & Drop
@@ -117,14 +132,15 @@ class RecipeImportModal extends HTMLElement {
       e.preventDefault();
       uploadArea.style.borderColor = '#ccc';
       if (e.dataTransfer.files.length > 0) {
-        this.handleFileSelect(e.dataTransfer.files[0]);
+        this.addImages(e.dataTransfer.files);
       }
     });
 
     // Editor Actions
     rotateLeftBtn.addEventListener('click', () => this.cropper?.rotate(-90));
     rotateRightBtn.addEventListener('click', () => this.cropper?.rotate(90));
-    resetBtn.addEventListener('click', () => this.cropper?.reset());
+    saveCropBtn.addEventListener('click', () => this.saveCrop());
+    cancelCropBtn.addEventListener('click', () => this.closeEditor());
 
     // Extract
     extractBtn.addEventListener('click', () => this.extractRecipe());
@@ -133,30 +149,110 @@ class RecipeImportModal extends HTMLElement {
     tryAgainBtn.addEventListener('click', () => this.resetToUpload());
   }
 
-  handleFileSelect(file) {
-    if (!file.type.startsWith('image/')) {
-      alert('נא לבחור קובץ תמונה');
+  addImages(files) {
+    const currentCount = this.images.length;
+    const newCount = files.length;
+
+    if (currentCount + newCount > 5) {
+      alert('ניתן להעלות עד 5 תמונות בלבד');
       return;
     }
 
-    this.currentFile = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.initCropper(e.target.result);
-    };
-    reader.readAsDataURL(file);
+    Array.from(files).forEach((file) => {
+      if (!file.type.startsWith('image/')) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.images.push({
+          id: Date.now() + Math.random().toString(36).substr(2, 9),
+          file: file,
+          imageUrl: e.target.result,
+          processedBase64: null, // Will be populated on demand or on save
+        });
+        this.updatePreviewList();
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
-  initCropper(imageUrl) {
+  updatePreviewList() {
     const uploadView = this.shadowRoot.getElementById('upload-view');
-    const editorView = this.shadowRoot.getElementById('editor-view');
-    const imagePreview = this.shadowRoot.getElementById('image-preview');
+    const previewView = this.shadowRoot.getElementById('preview-view');
     const extractBtn = this.shadowRoot.getElementById('extract-btn');
+    const imagesList = this.shadowRoot.getElementById('images-list');
+
+    if (this.images.length === 0) {
+      uploadView.style.display = 'block';
+      previewView.style.display = 'none';
+      extractBtn.disabled = true;
+      return;
+    }
 
     uploadView.style.display = 'none';
+    previewView.style.display = 'block';
+    extractBtn.disabled = false;
+
+    imagesList.innerHTML = '';
+    this.images.forEach((img, index) => {
+      const item = document.createElement('div');
+      item.className = 'image-item';
+      item.innerHTML = `
+        <div class="image-thumb-container">
+          <img src="${img.imageUrl}" class="image-thumb">
+        </div>
+        <div class="image-controls">
+          <button class="control-btn move-up" ${index === 0 ? 'disabled' : ''}>↑</button>
+          <button class="control-btn move-down" ${index === this.images.length - 1 ? 'disabled' : ''}>↓</button>
+          <button class="control-btn edit-btn">✏️</button>
+          <button class="control-btn delete-btn">🗑️</button>
+        </div>
+        <div class="image-number">${index + 1}</div>
+      `;
+
+      item.querySelector('.move-up').onclick = () => this.moveImage(index, -1);
+      item.querySelector('.move-down').onclick = () => this.moveImage(index, 1);
+      item.querySelector('.edit-btn').onclick = () => this.openEditor(img.id);
+      item.querySelector('.delete-btn').onclick = () => this.deleteImage(index);
+
+      imagesList.appendChild(item);
+    });
+  }
+
+  moveImage(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < this.images.length) {
+      const temp = this.images[index];
+      this.images[index] = this.images[newIndex];
+      this.images[newIndex] = temp;
+      this.updatePreviewList();
+    }
+  }
+
+  deleteImage(index) {
+    this.images.splice(index, 1);
+    this.updatePreviewList();
+  }
+
+  openEditor(imageId) {
+    const img = this.images.find((i) => i.id === imageId);
+    if (!img) return;
+
+    this.activeImageId = imageId;
+    const previewView = this.shadowRoot.getElementById('preview-view');
+    const editorView = this.shadowRoot.getElementById('editor-view');
+    const imagePreview = this.shadowRoot.getElementById('image-preview');
+
+    previewView.style.display = 'none';
     editorView.style.display = 'block';
 
-    imagePreview.src = imageUrl;
+    // Use processed image if exists, otherwise original
+    const src = img.processedBase64
+      ? `data:image/jpeg;base64,${img.processedBase64}`
+      : img.imageUrl;
+    imagePreview.src = src;
+
+    // Hide footer (submit/cancel) when editing
+    this.shadowRoot.querySelector('.modal-footer').style.display = 'none';
 
     if (this.cropper) {
       this.cropper.destroy();
@@ -174,12 +270,45 @@ class RecipeImportModal extends HTMLElement {
       cropBoxResizable: true,
       toggleDragModeOnDblclick: false,
     });
+  }
 
-    extractBtn.disabled = false;
+  saveCrop() {
+    if (!this.cropper || !this.activeImageId) return;
+
+    const img = this.images.find((i) => i.id === this.activeImageId);
+    if (img) {
+      const canvas = this.cropper.getCroppedCanvas({
+        maxWidth: 1024,
+        maxHeight: 1024,
+      });
+      // Store pure base64
+      img.processedBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+      // Update thumbnail (optional, might be heavy if full res, but let's try)
+      // Actually finding the thumb by index might be better, but let's just refresh list
+    }
+    this.closeEditor();
+    this.updatePreviewList();
+  }
+
+  closeEditor() {
+    this.activeImageId = null;
+    if (this.cropper) {
+      this.cropper.destroy();
+      this.cropper = null;
+    }
+    const editorView = this.shadowRoot.getElementById('editor-view');
+    const previewView = this.shadowRoot.getElementById('preview-view');
+
+    editorView.style.display = 'none';
+    previewView.style.display = 'block';
+
+    // Show footer again
+    this.shadowRoot.querySelector('.modal-footer').style.display = 'flex';
   }
 
   resetToUpload() {
-    this.currentFile = null;
+    this.images = [];
+    this.activeImageId = null;
     if (this.cropper) {
       this.cropper.destroy();
       this.cropper = null;
@@ -188,6 +317,7 @@ class RecipeImportModal extends HTMLElement {
     const uploadView = this.shadowRoot.getElementById('upload-view');
     if (uploadView) {
       uploadView.style.display = 'block';
+      this.shadowRoot.getElementById('preview-view').style.display = 'none'; // reset preview
       this.shadowRoot.getElementById('editor-view').style.display = 'none';
       this.shadowRoot.getElementById('loading-view').style.display = 'none';
       this.shadowRoot.getElementById('error-view').style.display = 'none';
@@ -197,29 +327,37 @@ class RecipeImportModal extends HTMLElement {
   }
 
   async extractRecipe() {
-    if (!this.cropper) return;
+    if (this.images.length === 0) return;
 
     this.setLoading(true);
 
     try {
-      // Get cropped canvas
-      const canvas = this.cropper.getCroppedCanvas({
-        maxWidth: 1024,
-        maxHeight: 1024,
-      });
+      const imagesToSend = await Promise.all(
+        this.images.map(async (img) => {
+          let base64 = img.processedBase64;
 
-      // Get base64
-      const base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+          if (!base64) {
+            // If not processed (cropped), use original.
+            // Since imageUrl is dataURL, split it.
+            // Note: imageUrl came from FileReader so it's a data URL.
+            base64 = img.imageUrl.split(',')[1];
+          }
+
+          return {
+            base64: base64,
+            mimeType: 'image/jpeg', // Assuming jpeg for simplicity or extracting from header
+          };
+        }),
+      );
 
       const functions = getFunctions();
       const extractRecipeFromImage = httpsCallable(functions, 'extractRecipeFromImage');
 
       const result = await extractRecipeFromImage({
-        imageBase64: base64Image,
-        mimeType: 'image/jpeg',
+        images: imagesToSend,
       });
 
-      this.setLoading(false); // Stop loading before success actions
+      this.setLoading(false);
 
       // Emit success event
       this.dispatchEvent(
@@ -233,7 +371,6 @@ class RecipeImportModal extends HTMLElement {
       this.close();
     } catch (error) {
       console.error('Extraction failed:', error);
-      // Ensure loading is off before showing error
       this.isLoading = false;
       this.setError(error);
     }
@@ -247,11 +384,11 @@ class RecipeImportModal extends HTMLElement {
 
     if (isLoading) {
       loadingView.style.display = 'flex';
-      editorView.style.display = 'none';
-      footer.style.display = 'none'; // Hide buttons during load
+      // editorView.style.display = 'none'; // Editor is already closed or irrelevant
+      this.shadowRoot.getElementById('preview-view').style.display = 'none'; // Hide preview
+      footer.style.display = 'none';
     } else {
       loadingView.style.display = 'none';
-      // Don't show editorView here, implementation of extractRecipe handles close or error show
       footer.style.display = 'flex';
     }
   }
@@ -284,8 +421,9 @@ class RecipeImportModal extends HTMLElement {
     // Hide other views
     this.shadowRoot.getElementById('loading-view').style.display = 'none';
     this.shadowRoot.getElementById('editor-view').style.display = 'none';
+    this.shadowRoot.getElementById('preview-view').style.display = 'none';
     this.shadowRoot.getElementById('upload-view').style.display = 'none';
-    this.shadowRoot.querySelector('.modal-footer').style.display = 'none'; // Footer hidden in error view (has its own button)
+    this.shadowRoot.querySelector('.modal-footer').style.display = 'none';
   }
 
   open() {

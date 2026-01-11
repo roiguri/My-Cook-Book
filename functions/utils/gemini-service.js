@@ -158,7 +158,7 @@ const RECIPE_SCHEMA = {
  * @param {string} mimeType - The mime type of the image (e.g. 'image/jpeg').
  * @returns {Promise<Object>} The extracted recipe data.
  */
-async function extractRecipeFromImage(imageBase64, mimeType = 'image/jpeg') {
+async function extractRecipeFromImage(images) {
   if (!geminiApiKey.value()) {
     throw new Error('GEMINI_API_KEY is not set');
   }
@@ -174,28 +174,29 @@ async function extractRecipeFromImage(imageBase64, mimeType = 'image/jpeg') {
     },
   });
 
-  const prompt = `Extract the recipe details from this image. 
+  const prompt = `Extract the complete recipe details from the provided image(s). 
   
   CRITICAL RULES FOR STRUCTURE:
-  1. ANALYZE STRUCTURE FIRST: Look specifically for titled sections (e.g., "For the Dough", "For the Sauce", "Preparation", "Baking").
-  2. FORCE SECTIONS: If ANY titled sections are present in the image for ingredients, you MUST use 'ingredientSections' and set 'ingredients' to null.
-  3. FORCE STAGES: If ANY titled sections are present for instructions, you MUST use 'stages' and set 'instructions' to null.
-  4. EXCLUSIVITY: Never populate both flat lists and sections.
+  1. COMBINE INFORMATION: The images may be pages of the same recipe or different parts. Combine all information into a single recipe.
+  2. ANALYZE STRUCTURE FIRST: Look specifically for titled sections (e.g., "For the Dough", "For the Sauce", "Preparation", "Baking").
+  3. FORCE SECTIONS: If ANY titled sections are present in the image for ingredients, you MUST use 'ingredientSections' and set 'ingredients' to null.
+  4. FORCE STAGES: If ANY titled sections are present for instructions, you MUST use 'stages' and set 'instructions' to null.
+  5. EXCLUSIVITY: Never populate both flat lists and sections.
   
   Data Formatting:
   - Ingredients: Split into item, amount, and unit.
   - Instructions: Split into logical steps.
   - Language: Translate to Hebrew if not already in Hebrew.`;
 
-  const imagePart = {
+  const imageParts = images.map((img) => ({
     inlineData: {
-      data: imageBase64,
-      mimeType: mimeType,
+      data: img.base64,
+      mimeType: img.mimeType || 'image/jpeg',
     },
-  };
+  }));
 
   try {
-    const result = await model.generateContent([prompt, imagePart]);
+    const result = await model.generateContent([prompt, ...imageParts]);
     const responseText = result.response.text();
     return JSON.parse(responseText);
   } catch (error) {

@@ -504,14 +504,11 @@ exports.extractRecipeFromImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (
   }
 
   const { uid, token } = request.auth;
-  const { imageBase64, mimeType } = request.data;
+  const { images } = request.data;
 
   // Verify inputs
-  if (!imageBase64) {
-    throw new HttpsError(
-      'invalid-argument',
-      'The function must be called with an imageBase64 argument.',
-    );
+  if (!images || !Array.isArray(images) || images.length === 0) {
+    throw new HttpsError('invalid-argument', 'The function must be called with an images array.');
   }
 
   try {
@@ -535,7 +532,7 @@ exports.extractRecipeFromImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (
       );
     }
 
-    const recipeData = await extractRecipeFromImage(imageBase64, mimeType);
+    const recipeData = await extractRecipeFromImage(images);
     return recipeData;
   } catch (error) {
     console.error('Error extracting recipe:', error);
