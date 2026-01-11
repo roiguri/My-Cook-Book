@@ -182,6 +182,9 @@ class RecipeCard extends HTMLElement {
 
   /**
    * Set favorite status directly to avoid fetching
+   * This optimization allows parent components (like recipe-grid) to batch fetch
+   * favorites for all recipes and pass the status down, preventing N+1 Firestore reads.
+   *
    * @param {boolean} isFavorite - Whether the recipe is favorite
    */
   set isFavorite(isFavorite) {
