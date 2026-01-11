@@ -68,9 +68,9 @@ class ConfirmationModal extends Modal {
 
   template() {
     return `
-      <div dir="rtl" class="modal">
+      <div dir="rtl" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-message">
         <div class="modal-content">
-          <button class="close-button">&times;</button>
+          <button class="close-button" aria-label="סגור">&times;</button>
           <div class="confirmation-modal-content">
             <h2 id="modal-title"></h2>
             <p id="modal-message"></p>
