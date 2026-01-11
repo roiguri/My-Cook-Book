@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('LoginForm Component', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app root to ensure we are in the correct context/origin
+    // This loads index.html and its styles (src/styles/main.css via src/app.js)
     await page.goto('/');
 
     // Inject the component script and styles dynamically
@@ -11,20 +12,28 @@ test.describe('LoginForm Component', () => {
       await import('/src/lib/auth/components/login-form.js');
 
       // Create and append the component to the body, clearing existing content to isolate
+      // IMPORTANT: We preserve the document head to keep styles loaded from index.html/app.js
       document.body.innerHTML = '';
       const loginForm = document.createElement('login-form');
 
-      // Style it to be visible
+      // Style it to be visible in isolation
       loginForm.style.display = 'block';
       loginForm.style.width = '100%';
       loginForm.style.maxWidth = '500px';
       loginForm.style.margin = '20px auto';
-      loginForm.style.border = '1px solid #ccc';
-      // Add padding for better snapshot
+      // Use variables if possible, but for test container validation, borders help debug
       loginForm.style.padding = '20px';
-      loginForm.style.backgroundColor = '#fff';
 
-      document.body.appendChild(loginForm);
+      // We don't force background color here to verify if it inherits/uses defaults correctly
+      // But usually modals have their own background. login-form might transparently sit on a modal.
+      // Let's add a wrapper with a background to simulate the modal content if needed.
+      // Checking login-form.js, it seems to not set a background itself.
+      const wrapper = document.createElement('div');
+      wrapper.style.backgroundColor = 'var(--background-color, #fff)';
+      wrapper.style.padding = '20px';
+      wrapper.appendChild(loginForm);
+
+      document.body.appendChild(wrapper);
 
       // Mock auth controller and close modal functionality via closest
       const mockAuthController = {
