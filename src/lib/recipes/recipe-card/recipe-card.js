@@ -71,6 +71,7 @@ class RecipeCard extends HTMLElement {
     this._error = null;
     this._templatesLoaded = false;
     this._stylesLoaded = false;
+    this._isFavoriteProvided = false;
 
     // Bind methods
     this._handleCardClick = this._handleCardClick.bind(this);
@@ -128,7 +129,12 @@ class RecipeCard extends HTMLElement {
     this._showImmediateLoadingState();
 
     const templatesPromise = this._loadTemplates();
-    const promises = [this._fetchUserFavorites()];
+    const promises = [];
+
+    // PERFORMANCE: Only fetch favorites if not provided by parent
+    if (!this._isFavoriteProvided) {
+      promises.push(this._fetchUserFavorites());
+    }
 
     if (!this._recipeData && this.recipeId) {
       promises.push(this._fetchRecipeData());
@@ -172,6 +178,28 @@ class RecipeCard extends HTMLElement {
 
   get recipeData() {
     return this._recipeData;
+  }
+
+  /**
+   * Set favorite status directly to avoid fetching
+   * @param {boolean} isFavorite - Whether the recipe is favorite
+   */
+  set isFavorite(isFavorite) {
+    this._isFavoriteProvided = true;
+    if (isFavorite) {
+      this._userFavorites.add(this.recipeId);
+    } else {
+      this._userFavorites.delete(this.recipeId);
+    }
+
+    // If already connected, update render state
+    if (this.isConnected && !this._isLoading) {
+      this._render();
+    }
+  }
+
+  get isFavorite() {
+    return this._isFavorite();
   }
 
   _showImmediateLoadingState() {
