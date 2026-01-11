@@ -1,0 +1,186 @@
+:host {
+  display: block;
+}
+
+.modal-body-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.modal-title {
+  font-family: var(--heading-font-he);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  color: var(--primary-color);
+  text-align: center;
+  width: 100%;
+}
+
+.upload-area {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.upload-area:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.upload-text {
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.editor-container {
+  width: 100%;
+  height: 400px;
+  position: relative;
+  background: #f9f9f9;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+.img-preview-container {
+  width: 100%;
+  height: 100%;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.tool-btn {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  transition: all 0.2s ease;
+}
+
+.tool-btn:hover {
+  background: var(--neutral);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--neutral);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-container {
+  text-align: center;
+  color: var(--secondary);
+  background: #ffebee;
+  padding: 16px;
+  border-radius: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+  border: 1px solid var(--secondary-light);
+}
+
+.error-message {
+  margin-bottom: 12px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 5px;
+  /* Soft UI style from base_button */
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: var(--body-font);
+  min-width: 120px;
+}
+
+.btn-secondary {
+  background-color: #918772;
+  /* White/Transparent */
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5c4033;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+  background-color: var(--disabled-color);
+  cursor: not-allowed;
+}
+
+/* CropperJS overrides for isolation */
+.cropper-container {
+  direction: ltr;
+  /* Ensure cropper UI is LTR */
+}

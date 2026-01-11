@@ -21,21 +21,64 @@
   box-sizing: border-box;
 }
 
+.recipe-form__header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
 .recipe-form__title {
   font-family: var(--heading-font-he, 'Amatic SC', cursive);
   font-size: 2.5rem;
   color: var(--primary-color, #bb6016);
   text-align: center;
   margin: 0;
-  margin-bottom: 1.5rem;
   position: relative;
+  /* Remove margin-bottom from title, let header handle it */
+}
+
+.recipe-form__button--import {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #e3f2fd;
+  /* Light blue - distinct but soft */
+  color: #1565c0;
+  border: 1px solid #1565c0;
+  font-weight: bold;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.recipe-form__button--import:hover {
+  background-color: #bbdefb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow, no large transform */
+}
+
+/* Responsive adjustment for import button */
+@media (max-width: 768px) {
+  .recipe-form__button--import {
+    position: static;
+    transform: none;
+    width: 100%;
+    margin-bottom: 0;
+  }
 }
 
 /* Always reserve space for the indicator to prevent layout shifts */
 .recipe-form__title::after {
   content: '';
   display: block;
-  height: 1rem; /* Reserve space for indicator line */
+  height: 1rem;
+  /* Reserve space for indicator line */
   margin-top: 0.5rem;
 }
 
@@ -204,6 +247,12 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .recipe-form__header {
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 1.5rem;
+  }
+
   .recipe-form__row {
     flex-direction: column;
   }
@@ -249,7 +298,8 @@
   font-size: 0.75rem;
   font-weight: normal;
   color: var(--text-color-secondary, #666);
-  height: 1rem; /* Same height as reserved space */
+  height: 1rem;
+  /* Same height as reserved space */
   line-height: 1rem;
   margin-top: 0.5rem;
 }
@@ -260,6 +310,7 @@
   100% {
     box-shadow: 0 0 0 rgba(245, 158, 11, 0);
   }
+
   50% {
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
   }
