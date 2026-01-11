@@ -2,6 +2,9 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import Cropper from 'cropperjs';
 import styles from './recipe_import_modal.css?inline';
 import cropperStyles from 'cropperjs/dist/cropper.css?inline';
+import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { CookingMemoryGame } from '../../games/memory_game.js';
+import { GameWrapper } from '../../games/game_wrapper.js';
 
 class RecipeImportModal extends HTMLElement {
   constructor() {
@@ -11,6 +14,9 @@ class RecipeImportModal extends HTMLElement {
     this.images = []; // Array of { id, file, imageUrl, processedBase64 }
     this.activeImageId = null;
     this.isLoading = false;
+    this.gameWrapper = null;
+    this.game = null;
+    this.extractedData = null;
   }
 
   connectedCallback() {
@@ -64,8 +70,20 @@ class RecipeImportModal extends HTMLElement {
 
             <!-- Loading State -->
             <div id="loading-view" class="loading-container" style="display: none;">
-              <div class="spinner"></div>
-              <p>מנתח את המתכון... זה עשוי לקחת מספר שניות</p>
+              <div class="loading-status-row" id="loading-status">
+                 <div class="loading-dots">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                 </div>
+                 <p id="loading-text" style="margin: 0;">מנתח את המתכון... זה עשוי לקחת מספר שניות</p>
+              </div>
+              
+              <div id="success-overlay" class="success-overlay" style="display: none;">
+                  <div class="success-badge">המתכון מוכן!</div>
+                  <button class="btn btn-primary" id="view-recipe-btn">צפה במתכון</button>
+              </div>
+              <div id="game-container" style="width: 100%; margin-top: 10px;"></div>
             </div>
 
             <!-- Error State -->
@@ -144,6 +162,10 @@ class RecipeImportModal extends HTMLElement {
 
     // Extract
     extractBtn.addEventListener('click', () => this.extractRecipe());
+
+    // View Recipe (Success State)
+    const viewRecipeBtn = this.shadowRoot.getElementById('view-recipe-btn');
+    viewRecipeBtn.addEventListener('click', () => this.finishImport());
 
     // Try Again
     tryAgainBtn.addEventListener('click', () => this.resetToUpload());
@@ -323,6 +345,15 @@ class RecipeImportModal extends HTMLElement {
       this.shadowRoot.getElementById('error-view').style.display = 'none';
       this.shadowRoot.getElementById('extract-btn').disabled = true;
       this.shadowRoot.getElementById('file-input').value = '';
+
+      // Reset loading state internals
+      const loadingStatus = this.shadowRoot.getElementById('loading-status');
+      if (loadingStatus) loadingStatus.style.display = 'flex';
+
+      this.shadowRoot.getElementById('loading-text').textContent =
+        'מנתח את המתכון... זה עשוי לקחת מספר שניות';
+      this.shadowRoot.getElementById('success-overlay').style.display = 'none';
+      this.extractedData = null;
     }
   }
 
@@ -357,18 +388,8 @@ class RecipeImportModal extends HTMLElement {
         images: imagesToSend,
       });
 
-      this.setLoading(false);
-
-      // Emit success event
-      this.dispatchEvent(
-        new CustomEvent('recipe-extracted', {
-          detail: { data: result.data },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-
-      this.close();
+      // Show success state but keep modal open
+      this.showSuccessState(result.data);
     } catch (error) {
       console.error('Extraction failed:', error);
       this.isLoading = false;
@@ -381,15 +402,28 @@ class RecipeImportModal extends HTMLElement {
     const loadingView = this.shadowRoot.getElementById('loading-view');
     const editorView = this.shadowRoot.getElementById('editor-view');
     const footer = this.shadowRoot.querySelector('.modal-footer');
+    const gameContainer = this.shadowRoot.getElementById('game-container');
 
     if (isLoading) {
       loadingView.style.display = 'flex';
       // editorView.style.display = 'none'; // Editor is already closed or irrelevant
       this.shadowRoot.getElementById('preview-view').style.display = 'none'; // Hide preview
       footer.style.display = 'none';
+
+      // Start Game Wrapper
+      if (!this.gameWrapper && gameContainer) {
+        this.gameWrapper = new GameWrapper(gameContainer, CookingMemoryGame, { rows: 2 });
+        this.gameWrapper.init();
+      }
     } else {
       loadingView.style.display = 'none';
       footer.style.display = 'flex';
+
+      // Stop/Destroy Game
+      if (this.gameWrapper) {
+        this.gameWrapper.destroy();
+        this.gameWrapper = null;
+      }
     }
   }
 
@@ -415,6 +449,8 @@ class RecipeImportModal extends HTMLElement {
       displayMessage = 'השירות אינו זמין כעת (404). אנא פנה למנהל המערכת.';
     }
 
+    this.shadowRoot.getElementById('loading-view').style.display = 'none'; // Ensure loading is hidden
+
     errorView.style.display = 'block';
     errorMessage.textContent = 'שגיאה: ' + displayMessage;
 
@@ -429,6 +465,41 @@ class RecipeImportModal extends HTMLElement {
   open() {
     this.resetToUpload();
     this.shadowRoot.getElementById('import-modal').open();
+  }
+
+  showSuccessState(data) {
+    this.extractedData = data;
+
+    // Hide loading dots row
+    const loadingStatus = this.shadowRoot.getElementById('loading-status');
+    const loadingText = this.shadowRoot.getElementById('loading-text');
+    const successOverlay = this.shadowRoot.getElementById('success-overlay');
+
+    if (loadingStatus) loadingStatus.style.display = 'none';
+
+    // Optional: could reuse loadingText for success message, but we used overlay instead.
+    // We already have "Recipe Ready" in the badge.
+    // If we want to show text:
+    // loadingText.textContent = 'הניתוח הושלם! אתה יכול להמשיך לשחק או לצפות במתכון.';
+
+    successOverlay.style.display = 'flex';
+  }
+
+  finishImport() {
+    if (!this.extractedData) return;
+
+    this.setLoading(false); // This will destroy the game
+
+    // Emit success event now
+    this.dispatchEvent(
+      new CustomEvent('recipe-extracted', {
+        detail: { data: this.extractedData },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+
+    this.close();
   }
 
   close() {

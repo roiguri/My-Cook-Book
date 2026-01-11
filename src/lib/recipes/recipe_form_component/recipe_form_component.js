@@ -422,12 +422,6 @@ class RecipeFormComponent extends HTMLElement {
     this.collectFormData(); // Update internal state
     this.isDirty = true;
     this.updateDirtyStateIndicators(true);
-
-    // Show success message
-    const messageModal = this.shadowRoot.querySelector('message-modal');
-    if (messageModal) {
-      messageModal.show('המתכון יובא בהצלחה! אנא עבור על הפרטים ושמור.', 'ייבוא הושלם');
-    }
   }
 
   // FIXME: create file object before re-uploading images
