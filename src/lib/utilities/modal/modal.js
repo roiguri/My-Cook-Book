@@ -174,9 +174,9 @@ export class Modal extends HTMLElement {
 
   template() {
     return `
-      <div dir="rtl" class="modal">
+      <div dir="rtl" class="modal" role="dialog" aria-modal="true">
         <div class="modal-content">
-          <button class="close-button">&times;</button>
+          <button class="close-button" aria-label="סגור">&times;</button>
           <slot></slot>
         </div>
       </div>
