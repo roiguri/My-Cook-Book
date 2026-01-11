@@ -26,7 +26,7 @@ export function mapExtractedDataToForm(extractedData) {
     extractedData.ingredientSections.length > 0
   ) {
     mappedData.ingredientSections = extractedData.ingredientSections.map((section) => ({
-      title: section.title || 'General',
+      title: section.title || 'כללי',
       items: (section.items || []).map((ing) => ({
         item: ing.item || '',
         amount: ing.amount || '',
@@ -53,7 +53,7 @@ export function mapExtractedDataToForm(extractedData) {
     extractedData.stages.length > 0
   ) {
     mappedData.stages = extractedData.stages.map((stage) => ({
-      title: stage.title || 'Step',
+      title: stage.title || 'שלב',
       instructions: stage.instructions || [],
     }));
     mappedData.instructions = null;

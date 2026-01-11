@@ -426,7 +426,7 @@ class RecipeFormComponent extends HTMLElement {
     // Show success message
     const messageModal = this.shadowRoot.querySelector('message-modal');
     if (messageModal) {
-      messageModal.show('המתכון יובא בהצלחה! אנא עבור על הפרטים ושמור.', 'success');
+      messageModal.show('המתכון יובא בהצלחה! אנא עבור על הפרטים ושמור.', 'ייבוא הושלם');
     }
   }
 

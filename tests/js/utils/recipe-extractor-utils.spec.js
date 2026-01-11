@@ -115,5 +115,25 @@ describe('Recipe Extractor Utils', () => {
       // Check that flat instructions are null
       expect(result.instructions).toBeNull();
     });
+    it('should use Hebrew defaults for missing section titles', () => {
+      const input = {
+        name: 'Untitled Sections',
+        ingredientSections: [
+          {
+            items: [{ item: 'Salt' }], // Missing title
+          },
+        ],
+        stages: [
+          {
+            instructions: ['Do this'], // Missing title
+          },
+        ],
+      };
+
+      const result = mapExtractedDataToForm(input);
+
+      expect(result.ingredientSections[0].title).toBe('כללי');
+      expect(result.stages[0].title).toBe('שלב');
+    });
   });
 });
