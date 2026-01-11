@@ -20,6 +20,9 @@ test.describe('LoginForm Component', () => {
       loginForm.style.maxWidth = '500px';
       loginForm.style.margin = '20px auto';
       loginForm.style.border = '1px solid #ccc';
+      // Add padding for better snapshot
+      loginForm.style.padding = '20px';
+      loginForm.style.backgroundColor = '#fff';
 
       document.body.appendChild(loginForm);
 
@@ -55,9 +58,11 @@ test.describe('LoginForm Component', () => {
 
     // Wait for the component to be defined and upgraded
     await page.waitForSelector('login-form', { state: 'visible' });
+    // Wait for any animations or fonts
+    await page.waitForLoadState('networkidle');
   });
 
-  test('should render login form correctly', async ({ page }) => {
+  test('should render login form correctly (visual)', async ({ page }) => {
     const loginForm = page.locator('login-form');
     await expect(loginForm).toBeVisible();
 
@@ -72,6 +77,9 @@ test.describe('LoginForm Component', () => {
     const submitBtn = loginForm.locator('button[type="submit"]');
     await expect(submitBtn).toBeVisible();
     await expect(submitBtn).toHaveText('התחבר');
+
+    // Visual Snapshot
+    await expect(loginForm).toHaveScreenshot('login-form-default.png');
   });
 
   test('should show validation error for invalid email', async ({ page }) => {
@@ -98,6 +106,23 @@ test.describe('LoginForm Component', () => {
     await page.waitForTimeout(100);
 
     expect(consoleLogs).toContain('Login attempted with: test@example.com, password123, false');
+    expect(consoleLogs).toContain('Modal closed');
+  });
+
+  test('should trigger google login', async ({ page }) => {
+    const loginForm = page.locator('login-form');
+    const googleBtn = loginForm.locator('.gsi-material-button');
+
+    await expect(googleBtn).toBeVisible();
+
+    const consoleLogs = [];
+    page.on('console', (msg) => consoleLogs.push(msg.text()));
+
+    await googleBtn.click();
+
+    await page.waitForTimeout(100);
+
+    expect(consoleLogs).toContain('Google Sign In attempted');
     expect(consoleLogs).toContain('Modal closed');
   });
 
@@ -132,5 +157,8 @@ test.describe('LoginForm Component', () => {
     const errorMsg = loginForm.locator('#login-error');
     await expect(errorMsg).toBeVisible();
     await expect(errorMsg).toHaveText('שם משתמש או סיסמה שגויים');
+
+    // Visual Snapshot for error state
+    await expect(loginForm).toHaveScreenshot('login-form-error.png');
   });
 });
