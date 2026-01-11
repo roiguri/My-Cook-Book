@@ -1,7 +1,6 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
-import { getAuthInstance } from '../../../js/services/firebase-service.js';
-import { isApproved, isManager } from '../../../js/services/auth-service.js';
+import authService from '../../../js/services/auth-service.js';
 import { getImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
 import { validateRecipeForm } from '../../../js/utils/form/form-validation-utils.js';
@@ -62,6 +61,9 @@ class RecipeFormComponent extends HTMLElement {
 
   disconnectedCallback() {
     this.cleanupFormProtection();
+    if (this.authObserver) {
+      authService.removeAuthObserver(this.authObserver);
+    }
   }
 
   render() {
@@ -134,14 +136,14 @@ class RecipeFormComponent extends HTMLElement {
     const importModal = this.shadowRoot.querySelector('recipe-import-modal');
 
     // Check permissions and show button
-    const auth = getAuthInstance();
-    if (auth && auth.currentUser) {
-      auth.currentUser.getIdTokenResult().then((idTokenResult) => {
-        if (idTokenResult.claims.approved || idTokenResult.claims.manager) {
-          if (importBtn) importBtn.style.display = 'flex';
-        }
-      });
-    }
+    this.authObserver = (authState) => {
+      if (authState.isApproved && importBtn) {
+        importBtn.style.display = 'flex';
+      } else if (importBtn) {
+        importBtn.style.display = 'none';
+      }
+    };
+    authService.addAuthObserver(this.authObserver);
 
     if (importBtn && importModal) {
       importBtn.addEventListener('click', (e) => {
