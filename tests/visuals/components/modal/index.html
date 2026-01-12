@@ -4,12 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modal Visual Test</title>
+    <link rel="stylesheet" href="/src/styles/base.css">
     <style>
       body {
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
+        /* Override base styles for test isolation if needed, but keeping consistent is better */
         background-color: #f4f4f5;
         display: flex;
         justify-content: center;
@@ -22,24 +20,14 @@
 
   <body>
     <custom-modal id="test-modal">
-      <h2 slot="header">Test Modal</h2>
-      <div slot="content">
-        <p>This is a test modal content.</p>
-        <button id="inside-btn">Action</button>
-      </div>
-      <div slot="footer">
-        <button id="close-btn">Close</button>
-      </div>
+        <h2 slot="header">Test Modal Header</h2>
+        <div slot="content">
+            <p>This is a test modal content.</p>
+        </div>
+        <div slot="footer">
+            <button id="close-btn">Close</button>
+        </div>
     </custom-modal>
     <script type="module" src="/src/lib/utilities/modal/modal.js"></script>
-    <script>
-      const modal = document.getElementById('test-modal');
-      // Add content dynamically if needed, but slots work best
-      modal.innerHTML = `
-            <h2>Test Modal Header</h2>
-            <p>This is a test modal content.</p>
-            <button id="action-btn">Action</button>
-        `;
-    </script>
   </body>
 </html>
