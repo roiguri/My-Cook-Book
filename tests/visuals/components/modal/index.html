@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modal Visual Test</title>
+    <link rel="stylesheet" href="/src/styles/base.css">
+    <style>
+      body {
+        /* Override base styles for test isolation if needed, but keeping consistent is better */
+        background-color: #f4f4f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <custom-modal id="test-modal">
+        <div class="test-content-container" style="padding: 20px; text-align: center;">
+            <h2>כותרת בדיקה</h2>
+            <p>זהו תוכן בדיקה למודל.</p>
+        </div>
+    </custom-modal>
+    <script type="module" src="/src/lib/utilities/modal/modal.js"></script>
+  </body>
+</html>

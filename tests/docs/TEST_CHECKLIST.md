@@ -76,11 +76,11 @@ _Visual and interaction tests for UI blocks._
 
 ### Modals & Media
 
-| Component                 | 📸  | 🖱️  | 🧠  | Status   |
-| ------------------------- | :-: | :-: | :-: | -------- |
-| `modal-component`         | [ ] | [ ] | [ ] | Untested |
-| `confirmation-modal`      | [ ] | [ ] | [ ] | Untested |
-| `image-approval-multi`    | [ ] | [ ] | [ ] | Untested |
+| Component                 | 📸  | 🖱️  | 🧠  | Status     |
+| ------------------------- | :-: | :-: | :-: | ---------- |
+| `modal-component`         | ✅  | ✅  | [ ] | **Stable** |
+| `confirmation-modal`      | [ ] | [ ] | [ ] | Untested   |
+| `image-approval-multi`    | [ ] | [ ] | [ ] | Untested   |
 | `fullscreen-media-viewer` | [ ] | [ ] | [ ] | Untested |
 | `pdf-viewer`              | [ ] | [ ] | [ ] | Untested |
 | `image-carousel`          | [ ] | [ ] | [ ] | Untested |
