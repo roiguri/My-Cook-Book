@@ -1,3 +1,5 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
+
 /**
  * Recipe Form Component Styles
  * ----------------------------
@@ -24,9 +26,10 @@
 .recipe-form__header {
   position: relative;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
   width: 100%;
 }
 
@@ -41,45 +44,53 @@
 }
 
 .recipe-form__button--import {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: #e3f2fd;
-  /* Light blue - distinct but soft */
-  color: #1565c0;
-  border: 1px solid #1565c0;
+  margin-top: 4px;
   font-weight: bold;
   min-width: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  padding: 8px 24px;
+  border-radius: 50px;
+  font-family: inherit;
+}
+
+.recipe-form__button.recipe-form__button--import {
+  border-radius: 50px;
 }
 
 .recipe-form__button--import:hover {
   background-color: #bbdefb;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  /* Subtle shadow, no large transform */
 }
 
 /* Responsive adjustment for import button */
 @media (max-width: 768px) {
   .recipe-form__button--import {
-    position: static;
-    transform: none;
-    width: 100%;
-    margin-bottom: 0;
+    width: auto;
+    /* Don't force full width on mobile anymore, stick to oval tag look */
+    min-width: 140px;
   }
 }
 
 /* Always reserve space for the indicator to prevent layout shifts */
-.recipe-form__title::after {
+/* Using header::after to place it below the button (last child in flex column) */
+.recipe-form__header::after {
   content: '';
   display: block;
   height: 1rem;
   /* Reserve space for indicator line */
-  margin-top: 0.5rem;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--text-color-secondary, #666);
+  text-align: center;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.recipe-form__header.unsaved-changes::after {
+  content: 'יש שינויים שלא נשמרו';
 }
 
 .recipe-form__error-message {
@@ -290,18 +301,6 @@
   border-radius: 8px;
   pointer-events: none;
   opacity: 0.6;
-}
-
-.recipe-form__title.unsaved-changes::after {
-  content: 'יש שינויים שלא נשמרו';
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: normal;
-  color: var(--text-color-secondary, #666);
-  height: 1rem;
-  /* Same height as reserved space */
-  line-height: 1rem;
-  margin-top: 0.5rem;
 }
 
 /* Dirty state animation */

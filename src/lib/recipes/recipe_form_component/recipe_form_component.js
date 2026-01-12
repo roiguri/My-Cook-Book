@@ -74,6 +74,8 @@ class RecipeFormComponent extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         ${baseButtonStyles}
+      </style>
+      <style>
         ${styles}
       </style>
       ${this.template()}
@@ -86,7 +88,8 @@ class RecipeFormComponent extends HTMLElement {
         <div class="recipe-form__header">
           <h2 class="recipe-form__title">פרטי המתכון</h2>
           <button id="import-btn" class="recipe-form__button recipe-form__button--import" style="display: none;">
-             ✨ יבא מתמונה
+             יבא מתמונה
+             <i class="fas fa-magic"></i>
           </button>
         </div>
         
@@ -567,13 +570,13 @@ class RecipeFormComponent extends HTMLElement {
       }
     }
 
-    // Update title to show unsaved changes indicator
-    const title = this.shadowRoot.querySelector('.recipe-form__title');
-    if (title) {
+    // Update header to show unsaved changes indicator via CSS pseudo-element
+    const header = this.shadowRoot.querySelector('.recipe-form__header');
+    if (header) {
       if (isDirty) {
-        title.classList.add('unsaved-changes');
+        header.classList.add('unsaved-changes');
       } else {
-        title.classList.remove('unsaved-changes');
+        header.classList.remove('unsaved-changes');
       }
     }
   }
