@@ -95,7 +95,7 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 10px;
+  padding: 5px;
   width: 100%;
 }
 
@@ -311,88 +311,6 @@
   /* Ensure cropper UI is LTR */
 }
 
-/* Memory Game Styles */
-.memory-game-board {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 350px;
-  margin: 0 auto;
-  perspective: 1000px;
-}
-
-.memory-card {
-  width: 100%;
-  aspect-ratio: 1;
-  /* Square cards */
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.5s;
-  cursor: pointer;
-}
-
-.memory-card.flipped {
-  transform: rotateY(180deg);
-}
-
-.memory-card-front,
-.memory-card-back {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  backface-visibility: hidden;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  user-select: none;
-}
-
-.memory-card-front {
-  background-color: white;
-  transform: rotateY(180deg);
-  border: 2px solid var(--primary-color);
-}
-
-.memory-card-back {
-  background-color: var(--primary-color);
-  color: white;
-  transform: rotateY(0deg);
-  font-size: 1.5rem;
-}
-
-.memory-game-info {
-  text-align: center;
-  margin-bottom: 15px;
-  font-weight: bold;
-  color: var(--text-color);
-  font-size: 1.1rem;
-}
-
-.win-anim {
-  animation: pop 0.5s ease;
-  color: var(--primary-color);
-}
-
-@keyframes pop {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.2);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
 /* Success Overlay in Loading View */
 .success-overlay {
   text-align: center;
@@ -426,68 +344,4 @@
     transform: translateY(0);
     opacity: 1;
   }
-}
-
-/* Game Wrapper Styles */
-.game-wrapper {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: relative;
-}
-
-.game-header {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 5px;
-}
-
-.timer {
-  font-family: monospace;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--text-color);
-  background: rgba(255, 255, 255, 0.8);
-  padding: 4px 12px;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-}
-
-.game-success-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 105%;
-  background: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 100;
-  backdrop-filter: blur(4px);
-}
-
-.game-success-overlay.show {
-  opacity: 1;
-}
-
-.success-content {
-  text-align: center;
-  animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.success-icon {
-  font-size: 3rem;
-  margin-bottom: 10px;
-}
-
-.final-time {
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--primary-color);
-  margin-top: 5px;
 }

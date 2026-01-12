@@ -2,6 +2,8 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import Cropper from 'cropperjs';
 import styles from './recipe_import_modal.css?inline';
 import cropperStyles from 'cropperjs/dist/cropper.css?inline';
+import memoryGameStyles from '../../games/memory_game.css?inline';
+import gameWrapperStyles from '../../games/game_wrapper.css?inline';
 import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { CookingMemoryGame } from '../../games/memory_game.js';
 import { GameWrapper } from '../../games/game_wrapper.js';
@@ -35,6 +37,8 @@ class RecipeImportModal extends HTMLElement {
       <style>
         ${cropperStyles}
         ${styles}
+        ${memoryGameStyles}
+        ${gameWrapperStyles}
       </style>
       <custom-modal id="import-modal" width="600px">
           <div class="modal-body-content">

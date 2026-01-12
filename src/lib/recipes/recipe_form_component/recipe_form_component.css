@@ -31,6 +31,7 @@
   align-items: center;
   margin-bottom: 0.5rem;
   width: 100%;
+  gap: 5px;
 }
 
 .recipe-form__title {
@@ -260,8 +261,7 @@
 @media (max-width: 768px) {
   .recipe-form__header {
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 1.5rem;
+    gap: 5px;
   }
 
   .recipe-form__row {
