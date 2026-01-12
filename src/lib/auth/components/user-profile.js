@@ -26,6 +26,13 @@ class UserProfile extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupEventListeners();
+
+    // Initialize with current user's avatar
+    const currentAvatarUrl = authService.getCurrentAvatarUrl();
+    if (currentAvatarUrl) {
+      this.selectedAvatarUrl = currentAvatarUrl;
+    }
+
     this.loadAvatars();
 
     // Re-render if user data loads after component mount
@@ -67,7 +74,7 @@ class UserProfile extends HTMLElement {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 5px;
-          padding: 15px;
+          padding: 10px;
           background-color: var(--secondary-color);
           border-radius: 10px;
           min-height: 200px; /* Prevent collapse during loading */
