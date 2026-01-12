@@ -1,8 +1,10 @@
 const { onMessagePublished } = require('firebase-functions/v2/pubsub');
+const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const sharp = require('sharp');
+const { extractRecipeFromImage } = require('./utils/gemini-service');
 
 // Initialize Firebase Admin
 initializeApp();
@@ -492,5 +494,52 @@ exports.processRecipeTransfer = onMessagePublished('recipe-transfers', async (ev
 
     // Re-throw to trigger retry mechanism
     throw error;
+  }
+});
+
+exports.extractRecipeFromImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (request) => {
+  // Check if user is authenticated
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { uid, token } = request.auth;
+  const { images } = request.data;
+
+  // Verify inputs
+  if (!images || !Array.isArray(images) || images.length === 0) {
+    throw new HttpsError('invalid-argument', 'The function must be called with an images array.');
+  }
+
+  try {
+    // Check for approved/manager role
+    // We can check the custom claims in the token or fetch the user from Firestore
+    // For performance, checking claims is better if they are set.
+    // Fallback to Firestore if needed or if claims aren't fully trusted for this op.
+
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      throw new HttpsError('permission-denied', 'User not found.');
+    }
+
+    const userData = userDoc.data();
+    const role = userData.role;
+
+    if (role !== 'approved' && role !== 'manager') {
+      throw new HttpsError(
+        'permission-denied',
+        'User must be approved or a manager to use this feature.',
+      );
+    }
+
+    const recipeData = await extractRecipeFromImage(images);
+    return recipeData;
+  } catch (error) {
+    console.error('Error extracting recipe:', error);
+    // Re-throw HTTPS errors as-is
+    if (error.code && error.details) {
+      throw error;
+    }
+    throw new HttpsError('internal', 'Recipe extraction failed', error.message);
   }
 });

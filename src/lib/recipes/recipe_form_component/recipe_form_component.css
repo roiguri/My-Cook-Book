@@ -1,3 +1,5 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
+
 /**
  * Recipe Form Component Styles
  * ----------------------------
@@ -21,22 +23,75 @@
   box-sizing: border-box;
 }
 
+.recipe-form__header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  gap: 5px;
+}
+
 .recipe-form__title {
   font-family: var(--heading-font-he, 'Amatic SC', cursive);
   font-size: 2.5rem;
   color: var(--primary-color, #bb6016);
   text-align: center;
   margin: 0;
-  margin-bottom: 1.5rem;
   position: relative;
+  /* Remove margin-bottom from title, let header handle it */
+}
+
+.recipe-form__button--import {
+  margin-top: 4px;
+  font-weight: bold;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 24px;
+  border-radius: 50px;
+  font-family: inherit;
+}
+
+.recipe-form__button.recipe-form__button--import {
+  border-radius: 50px;
+}
+
+.recipe-form__button--import:hover {
+  background-color: #bbdefb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustment for import button */
+@media (max-width: 768px) {
+  .recipe-form__button--import {
+    width: auto;
+    /* Don't force full width on mobile anymore, stick to oval tag look */
+    min-width: 140px;
+  }
 }
 
 /* Always reserve space for the indicator to prevent layout shifts */
-.recipe-form__title::after {
+/* Using header::after to place it below the button (last child in flex column) */
+.recipe-form__header::after {
   content: '';
   display: block;
-  height: 1rem; /* Reserve space for indicator line */
-  margin-top: 0.5rem;
+  height: 1rem;
+  /* Reserve space for indicator line */
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--text-color-secondary, #666);
+  text-align: center;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.recipe-form__header.unsaved-changes::after {
+  content: 'יש שינויים שלא נשמרו';
 }
 
 .recipe-form__error-message {
@@ -204,6 +259,11 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .recipe-form__header {
+    flex-direction: column;
+    gap: 5px;
+  }
+
   .recipe-form__row {
     flex-direction: column;
   }
@@ -243,23 +303,13 @@
   opacity: 0.6;
 }
 
-.recipe-form__title.unsaved-changes::after {
-  content: 'יש שינויים שלא נשמרו';
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: normal;
-  color: var(--text-color-secondary, #666);
-  height: 1rem; /* Same height as reserved space */
-  line-height: 1rem;
-  margin-top: 0.5rem;
-}
-
 /* Dirty state animation */
 @keyframes dirty-glow {
   0%,
   100% {
     box-shadow: 0 0 0 rgba(245, 158, 11, 0);
   }
+
   50% {
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
   }

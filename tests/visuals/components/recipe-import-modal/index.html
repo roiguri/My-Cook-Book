@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe Import Modal Visual Test</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background-color: #f4f4f5;
+        height: 100vh;
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="open-modal">Open Modal</button>
+    <recipe-import-modal id="import-modal"></recipe-import-modal>
+
+    <script type="module" src="/src/lib/utilities/modal/modal.js"></script>
+    <script
+      type="module"
+      src="/src/lib/recipes/recipe_import_modal/recipe_import_modal.js"
+    ></script>
+    <script>
+      document.getElementById('open-modal').addEventListener('click', () => {
+        document.getElementById('import-modal').open();
+      });
+    </script>
+  </body>
+</html>

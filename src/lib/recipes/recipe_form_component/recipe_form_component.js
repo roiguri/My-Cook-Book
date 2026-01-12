@@ -15,8 +15,12 @@ import './parts/form-button-group.js';
 import './parts/recipe-ingredients-list.js';
 import './parts/recipe-instructions-list.js';
 import '../media-instructions-editor/media-instructions-editor.js';
+import '../recipe_import_modal/recipe_import_modal.js';
+import { mapExtractedDataToForm } from '../../../js/utils/recipe-extractor-utils.js';
+import authService from '../../../js/services/auth-service.js';
 
 import styles from './recipe_form_component.css?inline';
+import baseButtonStyles from '../../../styles/components/base_button.css?inline';
 
 class RecipeFormComponent extends HTMLElement {
   constructor() {
@@ -43,6 +47,10 @@ class RecipeFormComponent extends HTMLElement {
       this.setupFormProtection();
     }
 
+    // Auth observer for dynamic button visibility
+    this.handleAuthUpdate = this.handleAuthUpdate.bind(this);
+    authService.addAuthObserver(this.handleAuthUpdate);
+
     const recipeId = this.getAttribute('recipe-id');
     if (recipeId) {
       await this.setRecipeData(recipeId);
@@ -59,11 +67,17 @@ class RecipeFormComponent extends HTMLElement {
 
   disconnectedCallback() {
     this.cleanupFormProtection();
+    authService.removeAuthObserver(this.handleAuthUpdate);
   }
 
   render() {
     this.shadowRoot.innerHTML = `
-      <style>${styles}</style>
+      <style>
+        ${baseButtonStyles}
+      </style>
+      <style>
+        ${styles}
+      </style>
       ${this.template()}
     `;
   }
@@ -71,7 +85,15 @@ class RecipeFormComponent extends HTMLElement {
   template() {
     return `
       <div dir="rtl" class="recipe-form">
-        <h2 class="recipe-form__title">פרטי המתכון</h2>
+        <div class="recipe-form__header">
+          <h2 class="recipe-form__title">פרטי המתכון</h2>
+          <button id="import-btn" class="recipe-form__button recipe-form__button--import" style="display: none;">
+             יבא מתמונה
+             <i class="fas fa-magic"></i>
+          </button>
+        </div>
+        
+        <recipe-import-modal id="import-modal"></recipe-import-modal>
         
         <div class="recipe-form__error-message" style="display: none;">
           נא למלא את כל שדות החובה
@@ -139,6 +161,21 @@ class RecipeFormComponent extends HTMLElement {
     if (mediaEditor) {
       mediaEditor.addEventListener('media-changed', (e) => {
         this.recipeData.mediaInstructions = e.detail.mediaInstructions;
+      });
+    }
+
+    // Import button
+    const importBtn = this.shadowRoot.getElementById('import-btn');
+    const importModal = this.shadowRoot.getElementById('import-modal');
+
+    if (importBtn && importModal) {
+      importBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        importModal.open();
+      });
+
+      importModal.addEventListener('recipe-extracted', (e) => {
+        this.handleRecipeExtracted(e.detail.data);
       });
     }
 
@@ -286,48 +323,7 @@ class RecipeFormComponent extends HTMLElement {
       if (docSnap.exists()) {
         const data = docSnap.data();
         this.recipeData = data;
-
-        const metadataFields = this.shadowRoot.getElementById('metadata-fields');
-        if (metadataFields) {
-          metadataFields.populateFields(data);
-        }
-
-        const commentsField = this.shadowRoot.getElementById('comments');
-        if (commentsField) {
-          commentsField.value = data.comments ? data.comments.join('\n') : '';
-        }
-
-        const ingredientsList = this.shadowRoot.getElementById('ingredients-list');
-        if (ingredientsList) {
-          if (data.ingredients) {
-            ingredientsList.populateData(data.ingredients);
-          } else if (data.ingredientSections) {
-            ingredientsList.populateData({ sections: data.ingredientSections });
-          }
-        }
-
-        const instructionsList = this.shadowRoot.getElementById('instructions-list');
-        if (instructionsList) {
-          if (data.stages && data.stages.length > 0) {
-            instructionsList.populateInstructions({ stages: data.stages });
-          } else if (data.instructions && data.instructions.length > 0) {
-            instructionsList.populateInstructions(data.instructions);
-          }
-        }
-
-        if (data.images) {
-          await this.populateImages(data.images);
-        }
-
-        // Populate media instructions if present
-        const mediaEditor = this.shadowRoot.getElementById('media-instructions-editor');
-        if (mediaEditor && data.mediaInstructions) {
-          mediaEditor.setAttribute('media-data', JSON.stringify(data.mediaInstructions));
-          mediaEditor.setAttribute('recipe-id', recipeId);
-        } else if (mediaEditor) {
-          // Set recipe ID even if no media yet (for new uploads)
-          mediaEditor.setAttribute('recipe-id', recipeId);
-        }
+        await this.populateFromData(data, recipeId);
 
         // Enable protection only if not disabled
         if (!this.formProtectionDisabled) {
@@ -351,6 +347,84 @@ class RecipeFormComponent extends HTMLElement {
         }, 500);
       }
     }
+  }
+
+  async populateFromData(data, recipeId = null) {
+    const metadataFields = this.shadowRoot.getElementById('metadata-fields');
+    if (metadataFields) {
+      metadataFields.populateFields(data);
+    }
+
+    const commentsField = this.shadowRoot.getElementById('comments');
+    if (commentsField) {
+      commentsField.value = data.comments ? data.comments.join('\n') : '';
+    }
+
+    const ingredientsList = this.shadowRoot.getElementById('ingredients-list');
+    if (ingredientsList) {
+      if (data.ingredientSections && data.ingredientSections.length > 0) {
+        ingredientsList.populateData({ sections: data.ingredientSections });
+      } else if (data.ingredients) {
+        ingredientsList.populateData(data.ingredients);
+      }
+    }
+
+    const instructionsList = this.shadowRoot.getElementById('instructions-list');
+    if (instructionsList) {
+      if (data.stages && data.stages.length > 0) {
+        instructionsList.populateInstructions({ stages: data.stages });
+      } else if (data.instructions && data.instructions.length > 0) {
+        // For flat instructions, ensure it's an array of strings
+        instructionsList.populateInstructions(data.instructions);
+      }
+    }
+
+    if (data.images) {
+      await this.populateImages(data.images);
+    }
+
+    // Populate media instructions if present
+    const mediaEditor = this.shadowRoot.getElementById('media-instructions-editor');
+    if (mediaEditor) {
+      if (data.mediaInstructions) {
+        mediaEditor.setAttribute('media-data', JSON.stringify(data.mediaInstructions));
+      }
+      if (recipeId) {
+        mediaEditor.setAttribute('recipe-id', recipeId);
+      }
+    }
+  }
+
+  /**
+   * Updates UI based on authentication state
+   * @param {Object} state - Auth state object
+   */
+  handleAuthUpdate(state) {
+    const btn = this.shadowRoot.getElementById('import-btn');
+    if (btn) {
+      // Only show for approved users (mimics navigation logic)
+      if (state.isApproved) {
+        // Use flex to maintain layout defined in CSS
+        btn.style.display = 'flex';
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+  }
+
+  handleRecipeExtracted(extractedData) {
+    console.log('Extracted data:', extractedData);
+    const mappedData = mapExtractedDataToForm(extractedData);
+
+    // Merge with current data if needed, or just populate
+    // For now, we populate the form fields directly.
+    // We might want to preserve existing images if any?
+    // The import overwrites fields.
+
+    this.populateFromData(mappedData);
+    this.collectFormData(); // Update internal state
+    this.isDirty = true;
+    this.updateDirtyStateIndicators(true);
   }
 
   // FIXME: create file object before re-uploading images
@@ -496,13 +570,13 @@ class RecipeFormComponent extends HTMLElement {
       }
     }
 
-    // Update title to show unsaved changes indicator
-    const title = this.shadowRoot.querySelector('.recipe-form__title');
-    if (title) {
+    // Update header to show unsaved changes indicator via CSS pseudo-element
+    const header = this.shadowRoot.querySelector('.recipe-form__header');
+    if (header) {
       if (isDirty) {
-        title.classList.add('unsaved-changes');
+        header.classList.add('unsaved-changes');
       } else {
-        title.classList.remove('unsaved-changes');
+        header.classList.remove('unsaved-changes');
       }
     }
   }
