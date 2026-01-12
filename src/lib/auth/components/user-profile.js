@@ -13,6 +13,9 @@ import { getDownloadURL } from 'firebase/storage';
 import { StorageService } from '../../../js/services/storage-service.js';
 import authService from '../../../js/services/auth-service.js';
 
+// Cache for avatar URLs to avoid re-fetching
+let avatarCache = null;
+
 class UserProfile extends HTMLElement {
   constructor() {
     super();
@@ -67,6 +70,7 @@ class UserProfile extends HTMLElement {
           padding: 15px;
           background-color: var(--secondary-color);
           border-radius: 10px;
+          min-height: 200px; /* Prevent collapse during loading */
         }
 
         .avatar-button {
@@ -79,6 +83,8 @@ class UserProfile extends HTMLElement {
           display: flex;
           align-items: center;
           justify-content: center;
+          overflow: hidden;
+          position: relative;
         }
 
         .avatar-button:hover {
@@ -95,6 +101,12 @@ class UserProfile extends HTMLElement {
           height: 100%;
           border-radius: 5px;
           object-fit: cover;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .avatar-image.loaded {
+          opacity: 1;
         }
 
         .buttons {
@@ -153,10 +165,17 @@ class UserProfile extends HTMLElement {
           background-color: color-mix(in srgb, var(--background-color), black 20%);
         }
 
-        .loading {
-          text-align: center;
-          padding: 20px;
-          color: var(--text-color);
+        /* Skeleton Loading Animation */
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+
+        .avatar-button.loading {
+          background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          cursor: wait;
         }
 
         .error-message {
@@ -177,7 +196,7 @@ class UserProfile extends HTMLElement {
         <div>
           <div class="section-title">בחר תמונת פרופיל:</div>
           <div class="avatar-grid">
-            <div class="loading">טוען תמונות פרופיל...</div>
+            <!-- Avatars will be injected here -->
           </div>
           <div class="error-message" id="avatar-error"></div>
         </div>
@@ -229,27 +248,75 @@ class UserProfile extends HTMLElement {
   }
 
   async loadAvatars() {
-    try {
-      const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
-      // Get avatar URLs from Firebase Storage
-      const avatarList = await StorageService.listFiles('Avatars');
-      // Clear loading message
-      avatarGrid.innerHTML = '';
+    const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
 
-      // Add avatars to grid
-      for (const avatarRef of avatarList.items) {
-        const url = await getDownloadURL(avatarRef);
-        const button = document.createElement('button');
-        button.className = 'avatar-button';
-        button.innerHTML = `<img src="${url}" alt="Avatar" class="avatar-image">`;
-        button.addEventListener('click', () => this.selectAvatar(button, url));
-        avatarGrid.appendChild(button);
+    try {
+      // If we don't have cached URLs, show skeleton loaders first
+      if (!avatarCache) {
+        // Show 6 dummy skeletons while fetching the list
+        avatarGrid.innerHTML = '';
+        for (let i = 0; i < 6; i++) {
+          const btn = document.createElement('button');
+          btn.className = 'avatar-button loading';
+          avatarGrid.appendChild(btn);
+        }
+
+        // Get avatar list from Firebase Storage
+        const avatarList = await StorageService.listFiles('Avatars');
+
+        // Fetch all URLs in parallel
+        avatarCache = await Promise.all(
+          avatarList.items.map(ref => getDownloadURL(ref))
+        );
       }
 
+      // Clear skeletons (or previous content)
+      avatarGrid.innerHTML = '';
+
+      // Create buttons for all avatars
+      avatarCache.forEach(url => {
+        const button = document.createElement('button');
+        button.className = 'avatar-button loading'; // Start in loading state
+        button.dataset.url = url; // Store URL for robust selection matching
+
+        // Create image object for preloading
+        const img = new Image();
+        img.className = 'avatar-image';
+        img.alt = 'Avatar';
+
+        img.onload = () => {
+          button.classList.remove('loading');
+          img.classList.add('loaded');
+          button.appendChild(img);
+        };
+
+        img.onerror = () => {
+          console.error(`Failed to load avatar image: ${url}`);
+          button.classList.remove('loading');
+          button.innerHTML = '<span style="color: red">!</span>';
+        };
+
+        // Start loading the image
+        img.src = url;
+
+        // Check if this is the currently selected avatar
+        if (this.selectedAvatarUrl === url) {
+          button.classList.add('selected');
+        }
+
+        button.addEventListener('click', () => this.selectAvatar(button, url));
+        avatarGrid.appendChild(button);
+      });
+
+      // Ensure selection state is correct if selectedAvatarUrl was set before render
       const currentAvatarUrl = authService.getCurrentAvatarUrl();
-      this.updateAvatarSelection(currentAvatarUrl);
+      if (currentAvatarUrl) {
+         this.updateAvatarSelection(currentAvatarUrl);
+      }
+
     } catch (error) {
       console.error('Error loading avatars:', error);
+      avatarGrid.innerHTML = ''; // Clear skeletons
       this.showError('שגיאה בטעינת תמונות הפרופיל. אנא נסה שנית.');
     }
   }
@@ -267,6 +334,12 @@ class UserProfile extends HTMLElement {
     if (currentAvatarUrl) {
       const avatarButtons = this.shadowRoot.querySelectorAll('.avatar-button');
       for (const button of avatarButtons) {
+        // Check dataset URL (more robust) or image src
+        if (button.dataset.url === currentAvatarUrl) {
+          button.classList.add('selected');
+          break;
+        }
+
         const img = button.querySelector('img');
         if (img && img.src === currentAvatarUrl) {
           button.classList.add('selected');
