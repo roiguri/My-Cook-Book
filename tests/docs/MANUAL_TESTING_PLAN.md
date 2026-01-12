@@ -55,47 +55,70 @@ feature/bug branch → development → staging → main (production)
 
 **Release Info:**
 
-- **Commits in staging ahead of main**: 6 commits
-- **Key areas affected**: Ingredients Drawer, Auth Modal, Security, Performance
+- **Key areas affected**:
+  - **Recipe Population**: Auto-fill from image (Magic Wand).
+  - **Security**: Strict Firestore/Storage rules & Dependency updates (`qs`).
+  - **Performance**: Recipe Grid N+1 fix.
+  - **Router & Arch**: Lazy loading Auth components, Infinite redirect loop fixes.
+  - **UI/UX**: Auth Avatar 3D styling, Recipe Card "stretched link", Stable scrollbars.
+  - **Accessibility**: Modal Focus Trapping.
+  - **Bug Fixes**: Manager Dashboard Double Image.
 
 ---
 
-### 1. Ingredients Drawer Export & Improvements
+### 1. Auto-Population (Magic Wand)
 
-**Impact**: My Meal Page
+**Impact**: Import Recipe Modal
 
-#### Copy & Share Functionality
+- [ ] 🔴 **Magic Wand Button** - Verify button appears in Import Modal and has correct styling.
+- [ ] 🔴 **Image Analysis** - Upload an image via the Magic Wand and verify analysis triggers (loading state).
+- [ ] 🔴 **Field Population** - Verify Recipe Name, Cooking Time, and Ingredients are populated correctly from the analyzed image.
+- [ ] 🟡 **Error Handling** - Verify appropriate error message if analysis fails or image is invalid.
 
-- [ ] 🔴 **Copy to Clipboard** - Click copy button, verify ingredients text is copied to clipboard
-- [ ] 🔴 **Copy Feedback** - Verify check icon appears briefly after copying
-- [ ] 🟡 **Share Sheet** - (Mobile/Supported devices) Click share button, verify native share sheet opens
-- [ ] 🟡 **Ingredients Text Format** - Paste copied text, verify format is readable (includes recipe names and formatted amounts)
+### 2. Router & Lazy Loading (NEW)
 
-#### Drawer Drawer & Views
+**Impact**: Application Architecture, Performance
 
-- [ ] 🔴 **Toggle Drawer** - Open/close via button, close icon, and clicking backdrop
-- [ ] 🔴 **View Switching** - Toggle between "All Ingredients" and "Current Recipe"
-- [ ] 🔴 **View Accuracy** - Verify "Current Recipe" only shows ingredients for active tab
-- [ ] 🔴 **View Accuracy** - Verify "All Ingredients" shows ingredients for all recipes in meal
-
----
-
-### 2. Layout & Styling Fixes
-
-**Impact**: Auth Modal, Mobile Layout
-
-- [ ] 🔴 **Auth Modal Overflow** - Verify content is fully visible and accessible (no cut-off content)
-- [ ] 🔴 **Mobile Drawer Z-Index** - Verify hamburger menu does NOT overlap ingredients drawer (or handles z-index correctly)
-
----
+- [ ] 🔴 **Lazy Loading** - Open Network tab, clear it. Refresh page. Verify "Auth" code chunk (e.g., `auth-*.js`) is **NOT** loaded.
+- [ ] 🔴 **Lazy Loading Interaction** - Click "Login". Verify "Auth" chunk is loaded **on demand** and login modal opens.
+- [ ] 🔴 **Protected Routes** - Go to `/propose` (while logged out). Verify redirect to Home (or Login) without infinite loop.
+- [ ] 🟡 **Navigation** - Open Login modal -> Click Browser Back button. Verify modal closes effectively (or handles history correctly).
 
 ### 3. Security & Infrastructure
 
-**Impact**: General App Stability
+**Impact**: General App Security, Cloud Functions
 
-- [ ] 🔴 **Recipe XSS Fix** - Verify no regression in recipe display; attempt basic script injection in recipe fields (should be escaped)
-- [ ] 🟡 **Code Splitting** - Verify main routes (Home, Categories, Meal) load correctly without 404s
-- [ ] 🟢 **Dependency Updates** - Verify app builds and runs without errors after dependency cleanup
+- [ ] 🔴 **Strict Rules (User)** - Log in as regular user. Create a recipe. Verify success.
+- [ ] 🔴 **Strict Rules (Guest)** - Log out (Guest). Try to save a recipe (via console or UI if accessible). Verify permission denied error.
+- [ ] 🔴 **Cloud Functions** - Verify Cloud Functions (e.g., image resizing or specialized tasks) still execute correctly after `qs` update.
+
+### 4. UI/UX & Interactivity
+
+**Impact**: Home, Header, Recipe Cards
+
+- [ ] 🟡 **3D Auth Avatar** - Hover over user avatar. Verify 3D tilt effect. Click and verify menu opens.
+- [ ] 🟡 **Recipe Card Stretched Link** - Hover over _any part_ of a recipe card. Verify pointer cursor. Click anywhere on card -> navigates to recipe.
+- [ ] 🟡 **Layout Stability** - Open a modal (e.g., Login). Verify page background does **not** shift (check scrollbar gutter).
+
+### 5. Accessibility
+
+**Impact**: Modals
+
+- [ ] 🔴 **Focus Trap** - Open any modal (Import, Login, etc.). Press `Tab` repeatedly. Verify focus stays **inside** the modal and does not escape to background content.
+- [ ] 🟡 **Focus Return** - Close the modal (Esc or Close button). Verify focus returns to the element that opened it.
+
+### 6. Performance
+
+**Impact**: Home Page, Category Page
+
+- [ ] 🔴 **Recipe Grid** - Load Home Page. Check Network tab. Verify no "waterfall" of individual requests for recipe favorites (N+1 probem fixed).
+- [ ] 🟢 **Rendering** - Verify grid renders smoothly without visible staggering of cards.
+
+### 7. Bug Fixes
+
+**Impact**: Manager Dashboard
+
+- [ ] 🔴 **Double Image** - (Manager) Open Recipe Preview. Verify main image appears only **once**.
 
 ---
 
@@ -162,6 +185,7 @@ feature/bug branch → development → staging → main (production)
 #### 🔴 Critical
 
 - [ ] Recipe details display correctly (name, ingredients, instructions)
+- [ ] **Security**: Content handles special characters safely (XSS check)
 - [ ] Recipe images load and display properly (carousel)
 - [ ] Ingredients list is readable and properly formatted
 - [ ] Step-by-step instructions display in correct order
@@ -329,6 +353,7 @@ feature/bug branch → development → staging → main (production)
 #### 🟡 High
 
 - [ ] Sign in with Google
+- [ ] Auth modal content is fully visible (no overflow)
 - [ ] Sign up with Google
 - [ ] Signup form creates new user account successfully
 - [ ] Signup form validates email format and password requirements
@@ -354,6 +379,7 @@ feature/bug branch → development → staging → main (production)
 #### 🟡 High
 
 - [ ] Mobile side menu opens and closes properly
+- [ ] Mobile menu does not overlap other interface elements (e.g. drawers)
 - [ ] Side menu closes after search/navigation
 - [ ] Back button functionality works as expected
 - [ ] Navigation preserves user state (auth, filters)
@@ -361,6 +387,16 @@ feature/bug branch → development → staging → main (production)
 #### 🟢 Medium
 
 - [ ] External links open in appropriate tabs
+
+---
+
+### 10. Ingredients Drawer (my-meal.html)
+
+#### 🔴 Critical
+
+- [ ] Drawer opens/closes correctly via button and backdrop
+- [ ] "Current Recipe" vs "All Ingredients" view switching works
+- [ ] **Copy to Clipboard** - Copies text and shows feedback toast
 
 ---
 
@@ -417,6 +453,10 @@ git push origin main
 
 # 5. Monitor production deployment
 # → Run smoke tests in production
+
+# 6. Deploy Infrastructure (Rules & Functions)
+# → MANDATORY: Deploy updated security rules and functions
+firebase deploy --only firestore:rules,storage,functions
 ```
 
 ---
@@ -448,10 +488,10 @@ After this release is deployed to production:
 
 ## Release Tracking
 
-**Release Version**: staging → main (2025-11-16)
-**Commits in Release**: 23 commits
-**Files Changed**: 31 files (+2,015/-1,842)
-**Last Updated**: 2025-11-16
+**Release Version**: staging → main (2026-01-12)
+**Commits in Release**: 25 commits
+**Files Changed**: 104 files (+5,379/-290)
+**Last Updated**: 2026-01-12
 
 ### Testing Sign-Off
 

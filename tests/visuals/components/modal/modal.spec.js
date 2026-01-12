@@ -16,7 +16,7 @@ test.describe('Modal Component Visuals', () => {
 
     // Open the modal
     await page.evaluate(() => {
-        document.getElementById('test-modal').open();
+      document.getElementById('test-modal').open();
     });
 
     // Wait for animation
@@ -37,7 +37,7 @@ test.describe('Modal Component Visuals', () => {
 
     // Open the modal
     await page.evaluate(() => {
-        document.getElementById('test-modal').open();
+      document.getElementById('test-modal').open();
     });
 
     // Wait for open
@@ -60,10 +60,10 @@ test.describe('Modal Component Visuals', () => {
 
     // Set attributes
     await page.evaluate(() => {
-        const m = document.getElementById('test-modal');
-        m.setAttribute('width', '600px');
-        m.setAttribute('background-color', '#ffcccc');
-        m.open();
+      const m = document.getElementById('test-modal');
+      m.setAttribute('width', '600px');
+      m.setAttribute('background-color', '#ffcccc');
+      m.open();
     });
 
     await page.waitForTimeout(500);
