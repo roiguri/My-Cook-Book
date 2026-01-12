@@ -1,9 +1,104 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Role checks using the users collection
+    // Note: get() incurs a document read charge
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isManager() {
+      return isAuthenticated() && getUserData().role == 'manager';
+    }
+    
+    function isApproved() {
+      let role = getUserData().role;
+      return isAuthenticated() && (role == 'approved' || role == 'manager');
+    }
+
+    // =========================================================================
+    // USERS COLLECTION
+    // =========================================================================
+    match /users/{userId} {
+      // READ: 
+      // - Users can read their own profile (for favorites, settings)
+      // - Managers can read all profiles (for dashboard)
+      // - Public read for basic profile? (Use specific query if needed, currently restricted)
+      allow read: if isOwner(userId) || isManager();
+      
+      // CREATE:
+      // - Users can create their own profile on signup
+      // - Must set role to 'user' (default) - prevent self-promotion
+      allow create: if isOwner(userId)
+                    && request.resource.data.role == 'user';
+      
+      // UPDATE:
+      // - Users can update their own profile (avatar, favorites, name)
+      // - CRITICAL: Users CANNOT change their role
+      // - Managers can update anything (including roles)
+      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role)
+                    || isManager();
+                    
+      // DELETE:
+      // - Users can delete their own account
+      // - Managers can delete users
+      allow delete: if isOwner(userId) || isManager();
+    }
+
+    // =========================================================================
+    // ACTIVE MEALS COLLECTION
+    // =========================================================================
+    match /active_meals/{userId} {
+      // Users can only access their own active meal data
+      allow read, write, delete: if isOwner(userId);
+    }
+    
+    // =========================================================================
+    // COOKBOOK COLLECTION (Legacy/Static PDF Index)
+    // =========================================================================
+    match /cookbook/{document=**} {
+      allow read: if isApproved();
+    }
+
+    // =========================================================================
+    // RECIPES COLLECTION
+    // =========================================================================
+    match /recipes/{recipeId} {
+      // READ:
+      // - Public access allowed (viewing recipes)
       allow read: if true;
-      allow write: if request.auth != null;
+      
+      // CREATE:
+      // - "Propose a recipe": Any authenticated user can suggest a recipe
+      allow create: if isAuthenticated();
+      
+      // UPDATE:
+      // - Managers can edit any recipe
+      // - Users can update their own recipes (e.g., adding images after creation)
+      allow update: if isManager() 
+                    || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      
+      // DELETE:
+      // - Managers only
+      allow delete: if isManager();
+    }
+    
+    // =========================================================================
+    // DEFAULT LOCK
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

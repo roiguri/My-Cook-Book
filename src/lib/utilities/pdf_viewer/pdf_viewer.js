@@ -1,5 +1,6 @@
-import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
+import { getFirestoreInstance, getStorageInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
+import { ref, getDownloadURL } from 'firebase/storage';
 
 // TODO: Add fullpage state
 class PDFViewer extends HTMLElement {
@@ -16,11 +17,17 @@ class PDFViewer extends HTMLElement {
 
     if (this.hasPageIndex) {
       this.pageIndex = await this.fetchPageIndex();
-      this.categories = Object.keys(this.pageIndex.categories);
+      if (this.pageIndex && this.pageIndex.categories) {
+        this.categories = Object.keys(this.pageIndex.categories);
+      } else {
+        this.categories = [];
+      }
     }
 
     this.render();
     this.addEventListeners();
+    // Load initial image
+    this.updateImage(this.currentPage);
   }
 
   async fetchPageIndex() {
@@ -33,7 +40,7 @@ class PDFViewer extends HTMLElement {
       const [collectionName, fileName] = this.getAttribute('page-index').split('/'); // Split the attribute value
       const pageIndexRef = doc(db, collectionName, fileName);
       const pageIndexDocSnap = await getDoc(pageIndexRef);
-      return pageIndexDocSnap.data();
+      return pageIndexDocSnap.exists() ? pageIndexDocSnap.data() : {};
     } catch (error) {
       console.error('Error fetching page index:', error);
       return {};
@@ -65,6 +72,7 @@ class PDFViewer extends HTMLElement {
                     padding: 20px;
                     background: #ffffff;
                     position: relative;
+                    min-height: 400px; /* Min height to prevent jump during load */
                 }
 
                 .pdf_viewer__pdf-page::before {
@@ -84,12 +92,37 @@ class PDFViewer extends HTMLElement {
                     object-fit: contain;
                     border-radius: 8px;
                     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+                    opacity: 0; /* Hidden initially until loaded */
+                }
+                
+                .pdf_viewer__pdf-page img.loaded {
+                    opacity: 1;
                 }
 
                 .pdf_viewer__pdf-page img:hover {
                     transform: scale(1.02);
                     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16);
+                }
+
+                .loading-spinner {
+                    position: absolute;
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid var(--primary-color, #bb6016);
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    display: none;
+                }
+                
+                .loading-spinner.visible {
+                    display: block;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
                 }
 
                 .pdf_viewer__pdf-navigation {
@@ -238,7 +271,7 @@ class PDFViewer extends HTMLElement {
                     <div dir="rtl" class="recipe-search">  
                       <select id="category-select" class="category-select">
                           <option value="">כל הקטגוריות</option>
-                          ${this.categories.map((category) => `<option value="${category}">${category}</option>`).join('')}
+                          ${this.categories ? this.categories.map((category) => `<option value="${category}">${category}</option>`).join('') : ''}
                       </select>
                       <input list="recipe-list" type="text" class="search-input" id="search-input" placeholder="חיפוש...">
                       <datalist id="recipe-list"></datalist>
@@ -247,7 +280,8 @@ class PDFViewer extends HTMLElement {
                       : ''
                   }
                   <div class="pdf_viewer__pdf-page">
-                      <img id="pdf_viewer__pdfImage" src="${this.getImageSrc(this.currentPage)}" alt="Page ${this.currentPage}">
+                      <div class="loading-spinner"></div>
+                      <img id="pdf_viewer__pdfImage" src="" alt="Page ${this.currentPage}">
                   </div>
                   <div class="pdf_viewer__pdf-navigation">
                       <button id="pdf_viewer__nextPage">הבא</button>
@@ -258,10 +292,7 @@ class PDFViewer extends HTMLElement {
           `;
       this.addEventListeners(); // Attach event listeners after initial rendering
     } else {
-      // Update only the necessary parts
-      this.shadowRoot.getElementById('pdf_viewer__pdfImage').src = this.getImageSrc(
-        this.currentPage,
-      );
+      // Update only navigation state if already rendered (image update handled by updateImage)
       this.shadowRoot.getElementById('pdf_viewer__pageNumber').textContent =
         `עמוד ${this.currentPage}`;
     }
@@ -307,6 +338,9 @@ class PDFViewer extends HTMLElement {
   performSearch() {
     const searchTerm = this.searchInput.value.toLowerCase();
     const selectedCategory = this.categorySelect.value;
+
+    if (!this.pageIndex || !this.pageIndex.recipes) return;
+
     let recipes = Object.entries(this.pageIndex.recipes);
 
     if (selectedCategory) {
@@ -335,6 +369,8 @@ class PDFViewer extends HTMLElement {
   }
 
   getCategoryForPage(pageNumber) {
+    if (!this.pageIndex || !this.pageIndex.categories) return null;
+
     for (const [categoryName, categoryData] of Object.entries(this.pageIndex.categories)) {
       if (pageNumber >= categoryData.startPage && pageNumber <= categoryData.endPage) {
         return categoryName;
@@ -343,15 +379,62 @@ class PDFViewer extends HTMLElement {
     return null; // Or a default category if needed
   }
 
-  getImageSrc(pageNumber) {
-    // Use the pdf-path attribute to construct the URL
-    const storageBucket = 'cook-book-test-479e8.appspot.com';
-    return `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${encodeURIComponent(`${this.pdfPath}page.${pageNumber}.jpg`)}?alt=media`;
+  async updateImage(pageNumber) {
+    const img = this.shadowRoot.getElementById('pdf_viewer__pdfImage');
+    const spinner = this.shadowRoot.querySelector('.loading-spinner');
+
+    if (!img) return;
+
+    // Show loading state
+    img.classList.remove('loaded');
+    if (spinner) spinner.classList.add('visible');
+
+    // Update alt text
+    img.alt = `Page ${pageNumber}`;
+
+    try {
+      const storage = getStorageInstance();
+      if (!storage) {
+        console.error('Storage not initialized');
+        return;
+      }
+
+      // Construct reference to the file
+      // pdfPath usually has form "grandmas_cookbook/original/"
+      // We need to ensure we don't have double slashes if pdfPath ends with /
+      const path = `${this.pdfPath}page.${pageNumber}.jpg`;
+      const imageRef = ref(storage, path);
+
+      const url = await getDownloadURL(imageRef);
+
+      img.src = url;
+
+      // Once loaded, show image and hide spinner
+      img.onload = () => {
+        img.classList.add('loaded');
+        if (spinner) spinner.classList.remove('visible');
+      };
+
+      img.onerror = (e) => {
+        console.error('Error loading image:', e);
+        if (spinner) spinner.classList.remove('visible');
+        // Could show an error placeholder here
+      };
+    } catch (error) {
+      console.error('Error fetching image URL:', error);
+      if (spinner) spinner.classList.remove('visible');
+    }
   }
 
   goToPage(pageNumber) {
-    this.currentPage = Math.max(1, Math.min(pageNumber, this.totalPages));
-    this.render();
+    const newPage = Math.max(1, Math.min(pageNumber, this.totalPages));
+    if (newPage !== this.currentPage) {
+      this.currentPage = newPage;
+      // Update navigation text immediately
+      this.render();
+      // Asynchronously update image
+      this.updateImage(this.currentPage);
+    }
   }
 }
 
