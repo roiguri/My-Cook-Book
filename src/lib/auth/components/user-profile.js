@@ -251,16 +251,16 @@ class UserProfile extends HTMLElement {
     const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
 
     try {
-      // If we don't have cached URLs, show skeleton loaders first
-      if (!avatarCache) {
-        // Show 6 dummy skeletons while fetching the list
-        avatarGrid.innerHTML = '';
-        for (let i = 0; i < 6; i++) {
-          const btn = document.createElement('button');
-          btn.className = 'avatar-button loading';
-          avatarGrid.appendChild(btn);
-        }
+      // Always show skeletons initially to prevent pop-in
+      avatarGrid.innerHTML = '';
+      for (let i = 0; i < 6; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'avatar-button loading';
+        avatarGrid.appendChild(btn);
+      }
 
+      // 1. Fetch URLs if not cached
+      if (!avatarCache) {
         // Get avatar list from Firebase Storage
         const avatarList = await StorageService.listFiles('Avatars');
 
@@ -270,42 +270,45 @@ class UserProfile extends HTMLElement {
         );
       }
 
-      // Clear skeletons (or previous content)
-      avatarGrid.innerHTML = '';
+      // 2. Preload ALL images
+      const imagePromises = avatarCache.map(url => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.className = 'avatar-image';
+          img.alt = 'Avatar';
+          img.src = url;
+          // Resolve with result object whether success or error
+          img.onload = () => resolve({ success: true, url, img });
+          img.onerror = () => {
+            console.error(`Failed to load avatar image: ${url}`);
+            resolve({ success: false, url });
+          };
+        });
+      });
 
-      // Create buttons for all avatars
-      avatarCache.forEach(url => {
-        const button = document.createElement('button');
-        button.className = 'avatar-button loading'; // Start in loading state
-        button.dataset.url = url; // Store URL for robust selection matching
+      // Wait for ALL images to load (or fail)
+      const results = await Promise.all(imagePromises);
 
-        // Create image object for preloading
-        const img = new Image();
-        img.className = 'avatar-image';
-        img.alt = 'Avatar';
+      // 3. Render ALL at once
+      avatarGrid.innerHTML = ''; // Clear skeletons
 
-        img.onload = () => {
-          button.classList.remove('loading');
-          img.classList.add('loaded');
-          button.appendChild(img);
-        };
+      results.forEach(result => {
+        if (result.success) {
+          const button = document.createElement('button');
+          button.className = 'avatar-button'; // Ready state
+          button.dataset.url = result.url;
 
-        img.onerror = () => {
-          console.error(`Failed to load avatar image: ${url}`);
-          button.classList.remove('loading');
-          button.innerHTML = '<span style="color: red">!</span>';
-        };
+          result.img.classList.add('loaded');
+          button.appendChild(result.img);
 
-        // Start loading the image
-        img.src = url;
+          // Check if this is the currently selected avatar
+          if (this.selectedAvatarUrl === result.url) {
+            button.classList.add('selected');
+          }
 
-        // Check if this is the currently selected avatar
-        if (this.selectedAvatarUrl === url) {
-          button.classList.add('selected');
+          button.addEventListener('click', () => this.selectAvatar(button, result.url));
+          avatarGrid.appendChild(button);
         }
-
-        button.addEventListener('click', () => this.selectAvatar(button, url));
-        avatarGrid.appendChild(button);
       });
 
       // Ensure selection state is correct if selectedAvatarUrl was set before render
