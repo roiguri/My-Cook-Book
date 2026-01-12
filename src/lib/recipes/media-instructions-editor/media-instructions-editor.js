@@ -360,22 +360,10 @@ class MediaInstructionsEditor extends HTMLElement {
           pointer-events: none;
         }
 
-        .upload-icon {
-          font-size: 48px;
+        .status-message {
+          margin-top: 0.5rem;
+          font-size: 0.9rem;
           color: var(--text-muted, #999);
-          margin-bottom: 10px;
-        }
-
-        .upload-text {
-          font-size: 16px;
-          color: var(--text-secondary, #666);
-          direction: rtl;
-        }
-
-        .upload-subtext {
-          font-size: 12px;
-          color: var(--text-muted, #999);
-          margin-top: 5px;
           direction: rtl;
         }
 
@@ -384,6 +372,26 @@ class MediaInstructionsEditor extends HTMLElement {
         }
 
         /* Media List */
+        .media-list-container {
+          display: none; /* Initially hidden */
+        }
+
+        .media-list-container.has-items {
+          display: block;
+          animation: fadeInSlideDown 0.4s ease forwards;
+        }
+
+        @keyframes fadeInSlideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
         .media-list {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -521,14 +529,6 @@ class MediaInstructionsEditor extends HTMLElement {
           font-weight: bold;
         }
 
-        /* Empty State */
-        .empty-state {
-          text-align: center;
-          padding: 40px;
-          color: var(--text-muted, #999);
-          direction: rtl;
-        }
-
         /* Errors */
         .errors-container {
           background-color: var(--danger-light, #ffebee);
@@ -604,9 +604,10 @@ class MediaInstructionsEditor extends HTMLElement {
       <div class="editor-container">
         <!-- Upload Zone -->
         <div class="upload-zone" role="button" tabindex="0" aria-label="העלאת קבצי מדיה - גרור קבצים או לחץ לבחירה">
-          <div class="upload-icon" aria-hidden="true">📤</div>
-          <div class="upload-text">גרור תמונות או סרטונים לכאן, או לחץ לבחירה</div>
-          <div class="upload-subtext">תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB</div>
+          גרור תמונות או סרטונים לכאן או לחץ להעלאה
+          <div class="status-message">
+            (תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)
+          </div>
           <input type="file" class="file-input" multiple accept="image/*,video/*" aria-label="בחר קבצי מדיה">
         </div>
 
@@ -633,10 +634,11 @@ class MediaInstructionsEditor extends HTMLElement {
       uploadZone.classList.remove('uploading');
       // Restore original content
       uploadZone.innerHTML = `
-        <div class="upload-icon">📤</div>
-        <div class="upload-text">גרור תמונות או סרטונים לכאן, או לחץ לבחירה</div>
-        <div class="upload-subtext">תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB</div>
-        <input type="file" class="file-input" multiple accept="image/*,video/*">
+          גרור תמונות או סרטונים לכאן או לחץ להעלאה
+          <div class="status-message">
+            (תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)
+          </div>
+          <input type="file" class="file-input" multiple accept="image/*,video/*" aria-label="בחר קבצי מדיה">
       `;
 
       // Re-attach file input change listener (new element created by innerHTML)
@@ -652,13 +654,17 @@ class MediaInstructionsEditor extends HTMLElement {
     const container = this.shadowRoot.querySelector('.media-list-container');
 
     if (this.mediaItems.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <p>עדיין לא נוספו מדיה להוראות ההכנה</p>
-          <p>התחל בגרירת קבצים לאזור העלאה או לחץ עליו לבחירה</p>
-        </div>
-      `;
+      container.innerHTML = '';
+      container.style.display = 'none';
+      container.classList.remove('has-items');
       return;
+    }
+
+    container.style.display = 'block';
+
+    // Add animation class if not already present
+    if (!container.classList.contains('has-items')) {
+      container.classList.add('has-items');
     }
 
     // Render all items from unified array
@@ -833,7 +839,7 @@ class MediaInstructionsEditor extends HTMLElement {
         // Replace pending item with uploaded metadata at the same position
         this.mediaItems[originalIndex] = metadata;
 
-        // Clean up Blob URL
+        // Clean up blob URL
         if (pending.preview) {
           URL.revokeObjectURL(pending.preview);
         }
