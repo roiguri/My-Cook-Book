@@ -19,13 +19,12 @@
   </head>
 
   <body>
+    <!-- The component actually uses a single default slot, not named slots like 'header', 'content', 'footer' -->
     <custom-modal id="test-modal">
-        <h2 slot="header">Test Modal Header</h2>
-        <div slot="content">
+        <div class="test-content-container" style="padding: 20px; text-align: center;">
+            <h2>Test Modal Header</h2>
             <p>This is a test modal content.</p>
-        </div>
-        <div slot="footer">
-            <button id="close-btn">Close</button>
+            <button id="close-btn" onclick="document.getElementById('test-modal').close()">Close</button>
         </div>
     </custom-modal>
     <script type="module" src="/src/lib/utilities/modal/modal.js"></script>
