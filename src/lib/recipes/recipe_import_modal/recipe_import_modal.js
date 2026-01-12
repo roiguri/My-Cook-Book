@@ -128,6 +128,17 @@ class RecipeImportModal extends HTMLElement {
 
     // Listen to modal close event to reset state
     modal.addEventListener('modal-closed', () => {
+      // If we have extracted data when closing (e.g. user closed without clicking 'View Recipe'),
+      // still emit the event so the parent form can use the data.
+      if (this.extractedData) {
+        this.dispatchEvent(
+          new CustomEvent('recipe-extracted', {
+            detail: { data: this.extractedData },
+            bubbles: true,
+            composed: true,
+          }),
+        );
+      }
       this.resetToUpload();
     });
 
@@ -355,7 +366,7 @@ class RecipeImportModal extends HTMLElement {
       if (loadingStatus) loadingStatus.style.display = 'flex';
 
       this.shadowRoot.getElementById('loading-text').textContent =
-        'מנתח את המתכון... זה עשוי לקחת מספר שניות';
+        'זה עשוי לקחת מספר שניות... הנה משחק קטן בינתיים!';
       this.shadowRoot.getElementById('success-overlay').style.display = 'none';
       this.extractedData = null;
     }
@@ -493,17 +504,7 @@ class RecipeImportModal extends HTMLElement {
     if (!this.extractedData) return;
 
     this.setLoading(false); // This will destroy the game
-
-    // Emit success event now
-    this.dispatchEvent(
-      new CustomEvent('recipe-extracted', {
-        detail: { data: this.extractedData },
-        bubbles: true,
-        composed: true,
-      }),
-    );
-
-    this.close();
+    this.close(); // This triggers 'modal-closed' which will emit the event
   }
 
   close() {
