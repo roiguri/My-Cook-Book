@@ -555,7 +555,10 @@ exports.extractRecipeFromUrl = onCall({ secrets: ['GEMINI_API_KEY'] }, async (re
 
   // Verify inputs
   if (!url || typeof url !== 'string') {
-    throw new HttpsError('invalid-argument', 'The function must be called with a valid URL string.');
+    throw new HttpsError(
+      'invalid-argument',
+      'The function must be called with a valid URL string.',
+    );
   }
 
   // Validate URL format

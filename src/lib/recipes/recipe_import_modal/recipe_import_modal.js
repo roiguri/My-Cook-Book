@@ -410,7 +410,7 @@ class RecipeImportModal extends HTMLElement {
       if (loadingStatus) loadingStatus.style.display = 'flex';
 
       this.shadowRoot.getElementById('loading-text').textContent =
-        'מנתח את המתכון... זה עשוי לקחת מספר שניות';
+        'זה עשוי לקחת מספר שניות... הנה משחק קטן בינתיים!';
       this.shadowRoot.getElementById('success-overlay').style.display = 'none';
       this.extractedData = null;
     }

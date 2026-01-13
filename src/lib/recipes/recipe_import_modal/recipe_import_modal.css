@@ -235,8 +235,11 @@
   padding: 16px;
   border-radius: 8px;
   width: 100%;
-  margin-bottom: 16px;
+  margin-top: 16px;
   border: 1px solid var(--secondary-light);
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .error-message {
