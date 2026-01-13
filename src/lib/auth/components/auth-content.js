@@ -126,10 +126,12 @@ class AuthContent extends HTMLElement {
           const loginForm = this.querySelector('[slot="login-form"]');
           const signupForm = this.querySelector('[slot="signup-form"]');
           const forgotPasswordForm = this.querySelector('[slot="forgot-password"]');
+          const userProfile = this.querySelector('[slot="user-profile"]');
 
           if (typeof loginForm?.reset === 'function') loginForm.reset();
           if (typeof signupForm?.reset === 'function') signupForm.reset();
           if (typeof forgotPasswordForm?.reset === 'function') forgotPasswordForm.reset();
+          if (typeof userProfile?.resetState === 'function') userProfile.resetState();
 
           // Clear any visible error messages
           const forms = [loginForm, signupForm, forgotPasswordForm];
@@ -178,6 +180,9 @@ class AuthContent extends HTMLElement {
     const userProfile = this.querySelector('[slot="user-profile"]');
     if (userProfile) {
       userProfile.classList.add('active');
+      if (typeof userProfile.resetState === 'function') {
+        userProfile.resetState();
+      }
     }
   }
 
