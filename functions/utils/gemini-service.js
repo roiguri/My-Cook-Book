@@ -35,13 +35,33 @@ const RECIPE_SCHEMA = {
     },
     difficulty: {
       type: 'string',
-      description: 'Difficulty level (Easy, Medium, Hard)',
-      enum: ['Easy', 'Medium', 'Hard'],
-      nullable: true,
+      description:
+        'Difficulty level in Hebrew. Infer from recipe complexity if not explicitly stated: קלה (few ingredients, simple techniques), בינונית (moderate effort), קשה (many steps, advanced techniques)',
+      enum: ['קלה', 'בינונית', 'קשה'],
+      nullable: false,
     },
     category: {
       type: 'string',
-      description: 'Recipe category (e.g., Main Course, Dessert, Salad)',
+      description:
+        'Recipe category ID. MUST be one of the allowed values. Infer based on recipe type if not explicitly stated.',
+      enum: [
+        'appetizers',
+        'main-courses',
+        'side-dishes',
+        'soups-stews',
+        'salads',
+        'desserts',
+        'breakfast-brunch',
+        'breads-pastries',
+        'snacks',
+        'beverages',
+      ],
+      nullable: false,
+    },
+    mainIngredient: {
+      type: 'string',
+      description:
+        'The primary/main ingredient of the recipe (e.g., chicken, pasta, chocolate). Infer from the most prominent ingredient if not stated.',
       nullable: true,
     },
     ingredients: {
@@ -160,10 +180,15 @@ CRITICAL RULES FOR STRUCTURE:
 4. FORCE STAGES: If ANY titled sections are present for instructions, you MUST use 'stages' and set 'instructions' to null.
 5. EXCLUSIVITY: Never populate both flat lists and sections.
 
+REQUIRED METADATA (always populate these based on recipe content):
+- category: Choose the BEST matching category from the allowed enum values based on recipe type
+- difficulty: Assess complexity based on number of ingredients, steps, and techniques required
+- mainIngredient: Identify the primary/central ingredient (in Hebrew)
+
 Data Formatting:
 - Ingredients: Split into item, amount, and unit.
 - Instructions: Split into logical steps.
-- Language: Translate to Hebrew if not already in Hebrew.`;
+- Language: Translate ALL text to Hebrew.`;
 
 const URL_EXTRACTION_PROMPT = `Extract the complete recipe details from the webpage at the provided URL.
 
@@ -173,10 +198,15 @@ CRITICAL RULES FOR STRUCTURE:
 3. FORCE STAGES: If ANY titled sections are present for instructions, you MUST use 'stages' and set 'instructions' to null.
 4. EXCLUSIVITY: Never populate both flat lists and sections.
 
+REQUIRED METADATA (always populate these based on recipe content):
+- category: Choose the BEST matching category from the allowed enum values based on recipe type
+- difficulty: Assess complexity based on number of ingredients, steps, and techniques required
+- mainIngredient: Identify the primary/central ingredient (in Hebrew)
+
 Data Formatting:
 - Ingredients: Split into item, amount, and unit.
 - Instructions: Split into logical steps.
-- Language: Translate to Hebrew if not already in Hebrew.
+- Language: Translate ALL text to Hebrew.
 
 IMPORTANT: If you cannot find a valid recipe on the page, return a response with name set to null to indicate failure.`;
 
@@ -275,8 +305,9 @@ Return the recipe data as a valid JSON object with this structure:
   "prepTime": number (minutes),
   "waitTime": number (minutes),
   "servings": number,
-  "difficulty": "Easy" | "Medium" | "Hard",
-  "category": "category name",
+  "difficulty": "קלה" | "בינונית" | "קשה",
+  "category": "appetizers" | "main-courses" | "side-dishes" | "soups-stews" | "salads" | "desserts" | "breakfast-brunch" | "breads-pastries" | "snacks" | "beverages",
+  "mainIngredient": "main ingredient in Hebrew",
   "ingredients": [{"item": "name", "amount": "amount", "unit": "unit"}] OR null if using sections,
   "ingredientSections": [{"title": "section name", "items": [...]}] OR null if using flat list,
   "instructions": ["step 1", "step 2"] OR null if using stages,

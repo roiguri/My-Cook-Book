@@ -10,10 +10,11 @@ export function mapExtractedDataToForm(extractedData) {
   const mappedData = {
     name: extractedData.name || '',
     category: extractedData.category || '',
+    mainIngredient: extractedData.mainIngredient || '',
     prepTime: extractedData.prepTime || 0,
     waitTime: extractedData.waitTime || 0,
     servings: extractedData.servings || 1,
-    difficulty: extractedData.difficulty || 'Medium',
+    difficulty: extractedData.difficulty || 'בינונית',
     description: extractedData.description || '', // Kept for future use
     comments: extractedData.comments || [],
     tags: extractedData.tags || [],
