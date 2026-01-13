@@ -494,20 +494,34 @@ class RecipeImportModal extends HTMLElement {
     const errorView = this.shadowRoot.getElementById('error-view');
     const errorMessage = this.shadowRoot.getElementById('error-message');
 
-    // Error mapping
-    let displayMessage = 'אירעה שגיאה בעיבוד התמונה. אנא נסה שוב.';
+    // Determine if we're in URL or image mode
+    const isUrlMode = this.importMode === 'url';
+    const modeLabel = isUrlMode ? 'כתובת ה-URL' : 'התמונה';
+
+    // Error mapping - mode aware
+    let displayMessage = isUrlMode
+      ? 'אירעה שגיאה בייבוא המתכון מהכתובת. אנא נסה שוב.'
+      : 'אירעה שגיאה בעיבוד התמונה. אנא נסה שוב.';
     const rawMessage = error.message || '';
 
     if (rawMessage.includes('permission-denied') || rawMessage.includes('unauthenticated')) {
       displayMessage = 'אין לך הרשאה לבצע פעולה זו. אנא וודא שאתה מחובר כמשתמש מאושר.';
     } else if (rawMessage.includes('invalid-argument')) {
-      displayMessage = 'התמונה שנשלחה אינה תקינה. אנא נסה תמונה אחרת.';
+      displayMessage = isUrlMode
+        ? 'כתובת ה-URL שנשלחה אינה תקינה. אנא בדוק את הכתובת ונסה שוב.'
+        : 'התמונה שנשלחה אינה תקינה. אנא נסה תמונה אחרת.';
+    } else if (rawMessage.includes('Could not extract')) {
+      displayMessage = isUrlMode
+        ? 'לא ניתן היה לחלץ מתכון מכתובת זו. ייתכן שהדף מוגן, דורש התחברות, או שאינו מכיל מתכון מזוהה.'
+        : 'לא ניתן היה לחלץ מתכון מהתמונה. אנא ודא שהתמונה מכילה מתכון קריא.';
     } else if (rawMessage.includes('internal')) {
       displayMessage = 'שגיאה בשרת העיבוד. אנא נסה שוב מאוחר יותר.';
     } else if (rawMessage.includes('quota-exceeded')) {
       displayMessage = 'הגענו למכסת השימוש היומית. אנא נסה שוב מחר.';
     } else if (rawMessage.includes('deadline-exceeded') || rawMessage.includes('timeout')) {
-      displayMessage = 'הפעולה לקחה זמן רב מדי. נסה לחתוך את התמונה לאזור הרלוונטי בלבד.';
+      displayMessage = isUrlMode
+        ? 'הפעולה לקחה זמן רב מדי. נסה כתובת אחרת.'
+        : 'הפעולה לקחה זמן רב מדי. נסה לחתוך את התמונה לאזור הרלוונטי בלבד.';
     } else if (rawMessage.includes('not-found')) {
       displayMessage = 'השירות אינו זמין כעת (404). אנא פנה למנהל המערכת.';
     }
