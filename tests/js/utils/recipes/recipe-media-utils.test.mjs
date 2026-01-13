@@ -23,6 +23,8 @@ jest.unstable_mockModule('src/js/services/storage-service.js', () => ({
     uploadFile: uploadFileMock,
     getFileUrl: getFileUrlMock,
     deleteFile: deleteFileMock,
+    // Add dummy _urlCache for testing interaction if needed, or ignore it
+    _urlCache: new Map(),
   },
 }));
 

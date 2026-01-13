@@ -15,7 +15,17 @@ import { getStorageInstance } from './firebase-service.js';
 /**
  * StorageService: General-purpose file upload, retrieval, and deletion using Firebase Storage.
  */
+// In-memory cache for download URLs to reduce Firebase requests
+const _urlCache = new Map();
+
 export class StorageService {
+  /**
+   * Expose cache for testing purposes
+   */
+  static get _urlCache() {
+    return _urlCache;
+  }
+
   /**
    * Uploads a file to Firebase Storage.
    * @param {File|Blob} file - The file to upload
@@ -27,7 +37,17 @@ export class StorageService {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
       await uploadBytes(storageRef, file);
-      return await getDownloadURL(storageRef);
+
+      // Invalidate cache for this path as the content has changed
+      if (_urlCache.has(path)) {
+        _urlCache.delete(path);
+      }
+
+      const url = await getDownloadURL(storageRef);
+      // Cache the new URL
+      _urlCache.set(path, url);
+
+      return url;
     } catch (error) {
       console.error('Error uploading file:', error);
       throw new Error('Failed to upload file');
@@ -41,9 +61,19 @@ export class StorageService {
    */
   static async getFileUrl(path) {
     try {
+      // Check cache first to avoid unnecessary network requests
+      if (_urlCache.has(path)) {
+        return _urlCache.get(path);
+      }
+
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
-      return await getDownloadURL(storageRef);
+      const url = await getDownloadURL(storageRef);
+
+      // Cache the result
+      _urlCache.set(path, url);
+
+      return url;
     } catch (error) {
       console.error('Error getting file URL:', error);
       throw new Error('Failed to get file URL');
@@ -60,6 +90,11 @@ export class StorageService {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
       await deleteObject(storageRef);
+
+      // Remove from cache
+      if (_urlCache.has(path)) {
+        _urlCache.delete(path);
+      }
     } catch (error) {
       console.error('Error deleting file:', error);
       throw new Error('Failed to delete file');

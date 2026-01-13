@@ -17,6 +17,8 @@ describe('StorageService', () => {
     jest.resetModules();
     // Dynamically import after mocks are in place
     ({ StorageService } = await import('src/js/services/storage-service.js'));
+    // Clear cache before each test
+    StorageService._urlCache.clear();
     ({ ref, uploadBytes, getDownloadURL, deleteObject } = await import('firebase/storage'));
     firebaseService = await import('src/js/services/firebase-service.js');
     firebaseService.getStorageInstance.mockReturnValue(mockStorage);
@@ -35,6 +37,19 @@ describe('StorageService', () => {
       expect(uploadBytes).toHaveBeenCalledWith({ storage: mockStorage, path: mockPath }, mockFile);
       expect(getDownloadURL).toHaveBeenCalledWith({ storage: mockStorage, path: mockPath });
       expect(url).toBe(mockUrl);
+      // Verify cache update
+      expect(StorageService._urlCache.get(mockPath)).toBe(mockUrl);
+    });
+
+    it('invalidates existing cache and updates with new URL', async () => {
+      StorageService._urlCache.set(mockPath, 'old-url');
+      uploadBytes.mockResolvedValue({});
+      getDownloadURL.mockResolvedValue(mockUrl);
+
+      const url = await StorageService.uploadFile(mockFile, mockPath);
+
+      expect(url).toBe(mockUrl);
+      expect(StorageService._urlCache.get(mockPath)).toBe(mockUrl);
     });
 
     it('throws an error if upload fails', async () => {
@@ -48,13 +63,20 @@ describe('StorageService', () => {
   });
 
   describe('getFileUrl', () => {
-    it('returns the download URL for a file', async () => {
+    it('returns the download URL for a file and caches it', async () => {
       getDownloadURL.mockResolvedValue(mockUrl);
-      const url = await StorageService.getFileUrl(mockPath);
+
+      // First call - should hit Firebase
+      const url1 = await StorageService.getFileUrl(mockPath);
       expect(firebaseService.getStorageInstance).toHaveBeenCalled();
-      expect(ref).toHaveBeenCalledWith(mockStorage, mockPath);
-      expect(getDownloadURL).toHaveBeenCalledWith({ storage: mockStorage, path: mockPath });
-      expect(url).toBe(mockUrl);
+      expect(getDownloadURL).toHaveBeenCalledTimes(1);
+      expect(url1).toBe(mockUrl);
+      expect(StorageService._urlCache.get(mockPath)).toBe(mockUrl);
+
+      // Second call - should use cache
+      const url2 = await StorageService.getFileUrl(mockPath);
+      expect(getDownloadURL).toHaveBeenCalledTimes(1); // Call count should remain 1
+      expect(url2).toBe(mockUrl);
     });
 
     it('throws an error if getDownloadURL fails', async () => {
@@ -66,12 +88,15 @@ describe('StorageService', () => {
   });
 
   describe('deleteFile', () => {
-    it('deletes a file from storage', async () => {
+    it('deletes a file from storage and removes it from cache', async () => {
+      StorageService._urlCache.set(mockPath, mockUrl);
       deleteObject.mockResolvedValue();
+
       await StorageService.deleteFile(mockPath);
+
       expect(firebaseService.getStorageInstance).toHaveBeenCalled();
-      expect(ref).toHaveBeenCalledWith(mockStorage, mockPath);
       expect(deleteObject).toHaveBeenCalledWith({ storage: mockStorage, path: mockPath });
+      expect(StorageService._urlCache.has(mockPath)).toBe(false);
     });
 
     it('throws an error if deleteObject fails', async () => {
