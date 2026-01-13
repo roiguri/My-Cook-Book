@@ -54,7 +54,6 @@ class UserProfile extends HTMLElement {
           display: flex;
           flex-direction: column;
           padding: 20px;
-          gap: 20px;
         }
 
         .welcome-text {
@@ -62,6 +61,7 @@ class UserProfile extends HTMLElement {
           color: var(--text-color);
           text-align: center;
           font-family: var(--heading-font-he);
+          margin-bottom: 20px;
         }
 
         .section-title {
