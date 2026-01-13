@@ -101,7 +101,7 @@ class RecipeImportModal extends HTMLElement {
                   <div class="success-badge">המתכון מוכן!</div>
                   <button class="btn btn-primary" id="view-recipe-btn">צפה במתכון</button>
               </div>
-              <div id="game-container" style="width: 100%; margin-top: 10px;"></div>
+              <div id="game-container" style="width: 100%; max-width: 100%; margin-top: 10px; overflow: hidden; box-sizing: border-box;"></div>
             </div>
 
             <!-- Error State -->
@@ -462,11 +462,14 @@ class RecipeImportModal extends HTMLElement {
     const editorView = this.shadowRoot.getElementById('editor-view');
     const footer = this.shadowRoot.querySelector('.modal-footer');
     const gameContainer = this.shadowRoot.getElementById('game-container');
+    const importTabs = this.shadowRoot.querySelector('.import-tabs');
 
     if (isLoading) {
       loadingView.style.display = 'flex';
       // editorView.style.display = 'none'; // Editor is already closed or irrelevant
       this.shadowRoot.getElementById('preview-view').style.display = 'none'; // Hide preview
+      this.shadowRoot.getElementById('url-view').style.display = 'none'; // Hide URL input
+      if (importTabs) importTabs.style.display = 'none'; // Hide tabs
       footer.style.display = 'none';
 
       // Start Game Wrapper
@@ -476,6 +479,7 @@ class RecipeImportModal extends HTMLElement {
       }
     } else {
       loadingView.style.display = 'none';
+      if (importTabs) importTabs.style.display = 'flex'; // Show tabs
       footer.style.display = 'flex';
 
       // Stop/Destroy Game

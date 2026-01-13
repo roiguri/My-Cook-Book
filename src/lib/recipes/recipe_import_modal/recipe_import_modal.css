@@ -8,6 +8,7 @@
   flex-direction: column;
   align-items: center;
   max-height: 80vh;
+  overflow-x: hidden;
   overflow-y: auto;
   box-sizing: border-box;
 }
@@ -179,8 +180,11 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 5px;
+  padding: 5px 5px 15px 5px;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .loading-status-row {
