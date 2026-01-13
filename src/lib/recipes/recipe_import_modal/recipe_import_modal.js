@@ -112,7 +112,7 @@ class RecipeImportModal extends HTMLElement {
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancel-btn">ביטול</button>
-                <button class="btn btn-primary" id="extract-btn" disabled>חלץ מתכון</button>
+                <button class="btn btn-primary" id="extract-btn" disabled><span id="extract-btn-text">חלץ מתכון</span></button>
             </div>
           </div>
       </custom-modal>
@@ -564,11 +564,13 @@ class RecipeImportModal extends HTMLElement {
     const urlView = this.shadowRoot.getElementById('url-view');
     const previewView = this.shadowRoot.getElementById('preview-view');
     const extractBtn = this.shadowRoot.getElementById('extract-btn');
+    const extractBtnText = this.shadowRoot.getElementById('extract-btn-text');
 
     if (mode === 'image') {
       tabImage.classList.add('active');
       tabUrl.classList.remove('active');
       urlView.style.display = 'none';
+      extractBtnText.textContent = 'חלץ מתכון';
 
       if (this.images.length === 0) {
         uploadView.style.display = 'block';
@@ -585,6 +587,7 @@ class RecipeImportModal extends HTMLElement {
       uploadView.style.display = 'none';
       previewView.style.display = 'none';
       urlView.style.display = 'block';
+      extractBtnText.textContent = 'ייבא מכתובת';
 
       this.validateUrlInput();
     }
