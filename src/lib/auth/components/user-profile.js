@@ -254,6 +254,15 @@ class UserProfile extends HTMLElement {
     }
   }
 
+  resetState() {
+    // Reset to current user's actual avatar
+    const currentAvatarUrl = authService.getCurrentAvatarUrl();
+    if (currentAvatarUrl) {
+      this.selectedAvatarUrl = currentAvatarUrl;
+      this.updateAvatarSelection(currentAvatarUrl);
+    }
+  }
+
   async loadAvatars() {
     const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
 
