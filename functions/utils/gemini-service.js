@@ -205,6 +205,67 @@ async function extractRecipeFromImage(images) {
   }
 }
 
+/**
+ * Extracts recipe data from a URL using Gemini.
+ *
+ * @param {string} url - The URL of the recipe webpage.
+ * @returns {Promise<Object>} The extracted recipe data.
+ */
+async function extractRecipeFromUrl(url) {
+  if (!geminiApiKey.value()) {
+    throw new Error('GEMINI_API_KEY is not set');
+  }
+
+  // Fetch the webpage content
+  let htmlContent;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+    }
+    htmlContent = await response.text();
+  } catch (error) {
+    console.error('Error fetching URL:', error);
+    throw new Error(`Failed to fetch recipe from URL: ${error.message}`);
+  }
+
+  const genAI = new GoogleGenerativeAI(geminiApiKey.value());
+
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-3-flash-preview',
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: RECIPE_SCHEMA,
+    },
+  });
+
+  const prompt = `Extract the complete recipe details from the provided webpage HTML content.
+
+  CRITICAL RULES FOR STRUCTURE:
+  1. ANALYZE STRUCTURE FIRST: Look specifically for titled sections (e.g., "For the Dough", "For the Sauce", "Preparation", "Baking").
+  2. FORCE SECTIONS: If ANY titled sections are present in the HTML for ingredients, you MUST use 'ingredientSections' and set 'ingredients' to null.
+  3. FORCE STAGES: If ANY titled sections are present for instructions, you MUST use 'stages' and set 'instructions' to null.
+  4. EXCLUSIVITY: Never populate both flat lists and sections.
+
+  Data Formatting:
+  - Ingredients: Split into item, amount, and unit.
+  - Instructions: Split into logical steps.
+  - Language: Translate to Hebrew if not already in Hebrew.
+
+  HTML Content:
+  ${htmlContent}`;
+
+  try {
+    const result = await model.generateContent([prompt]);
+    const responseText = result.response.text();
+    return JSON.parse(responseText);
+  } catch (error) {
+    console.error('Error calling Gemini API:', error);
+    throw new Error('Failed to extract recipe from URL');
+  }
+}
+
 module.exports = {
   extractRecipeFromImage,
+  extractRecipeFromUrl,
 };

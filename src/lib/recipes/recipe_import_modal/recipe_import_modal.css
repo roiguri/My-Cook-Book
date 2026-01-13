@@ -19,6 +19,84 @@
   width: 100%;
 }
 
+.import-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  width: 100%;
+  justify-content: center;
+}
+
+.tab-btn {
+  padding: 10px 24px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--body-font);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.tab-btn:hover {
+  border-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.tab-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.url-input-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.url-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  text-align: right;
+}
+
+.url-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--body-font);
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.url-input::placeholder {
+  color: #999;
+}
+
+.url-help-text {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: right;
+  margin: 0;
+}
+
 .upload-area {
   border: 2px dashed #ccc;
   border-radius: 8px;
