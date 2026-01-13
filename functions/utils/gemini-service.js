@@ -165,9 +165,9 @@ async function extractRecipeFromImage(images) {
 
   const genAI = new GoogleGenerativeAI(geminiApiKey.value());
 
-  // Use gemini-3.0-flash-preview as requested, or fallback to stable if needed
+  // Use gemini-1.5-flash as the stable, fast model
   const model = genAI.getGenerativeModel({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-1.5-flash',
     generationConfig: {
       responseMimeType: 'application/json',
       responseSchema: RECIPE_SCHEMA,
@@ -205,6 +205,57 @@ async function extractRecipeFromImage(images) {
   }
 }
 
+/**
+ * Extracts recipe data from HTML content using Gemini.
+ *
+ * @param {string} htmlContent - The HTML content of the page.
+ * @param {string} url - The source URL (for context).
+ * @returns {Promise<Object>} The extracted recipe data.
+ */
+async function extractRecipeFromHtml(htmlContent, url) {
+  if (!geminiApiKey.value()) {
+    throw new Error('GEMINI_API_KEY is not set');
+  }
+
+  const genAI = new GoogleGenerativeAI(geminiApiKey.value());
+
+  // Use gemini-1.5-flash as the stable, fast model
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-1.5-flash',
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: RECIPE_SCHEMA,
+    },
+  });
+
+  const prompt = `Extract the complete recipe details from the provided HTML content.
+  Source URL: ${url}
+
+  CRITICAL RULES FOR STRUCTURE:
+  1. ANALYZE STRUCTURE FIRST: Look specifically for titled sections (e.g., "For the Dough", "For the Sauce", "Preparation", "Baking").
+  2. FORCE SECTIONS: If ANY titled sections are present in the HTML for ingredients, you MUST use 'ingredientSections' and set 'ingredients' to null.
+  3. FORCE STAGES: If ANY titled sections are present for instructions, you MUST use 'stages' and set 'instructions' to null.
+  4. EXCLUSIVITY: Never populate both flat lists and sections.
+
+  Data Formatting:
+  - Ingredients: Split into item, amount, and unit.
+  - Instructions: Split into logical steps.
+  - Language: Translate to Hebrew if not already in Hebrew.
+
+  HTML CONTENT:
+  ${htmlContent.substring(0, 100000)} ... (truncated if too long)`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+    return JSON.parse(responseText);
+  } catch (error) {
+    console.error('Error calling Gemini API for HTML:', error);
+    throw new Error('Failed to extract recipe from HTML');
+  }
+}
+
 module.exports = {
   extractRecipeFromImage,
+  extractRecipeFromHtml,
 };

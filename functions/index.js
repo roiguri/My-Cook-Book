@@ -4,7 +4,7 @@ const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const sharp = require('sharp');
-const { extractRecipeFromImage } = require('./utils/gemini-service');
+const { extractRecipeFromImage, extractRecipeFromHtml } = require('./utils/gemini-service');
 
 // Initialize Firebase Admin
 initializeApp();
@@ -541,5 +541,60 @@ exports.extractRecipeFromImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (
       throw error;
     }
     throw new HttpsError('internal', 'Recipe extraction failed', error.message);
+  }
+});
+
+exports.extractRecipeFromUrl = onCall({ secrets: ['GEMINI_API_KEY'] }, async (request) => {
+  // Check if user is authenticated
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { uid } = request.auth;
+  const { url } = request.data;
+
+  // Verify inputs
+  if (!url || typeof url !== 'string') {
+    throw new HttpsError('invalid-argument', 'The function must be called with a URL string.');
+  }
+
+  try {
+    // Check for approved/manager role
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      throw new HttpsError('permission-denied', 'User not found.');
+    }
+
+    const userData = userDoc.data();
+    const role = userData.role;
+
+    if (role !== 'approved' && role !== 'manager') {
+      throw new HttpsError(
+        'permission-denied',
+        'User must be approved or a manager to use this feature.',
+      );
+    }
+
+    // Fetch the URL content
+    let htmlContent;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+      }
+      htmlContent = await response.text();
+    } catch (fetchError) {
+      console.error('Error fetching URL:', fetchError);
+      throw new HttpsError('invalid-argument', 'Failed to fetch the provided URL.', fetchError.message);
+    }
+
+    const recipeData = await extractRecipeFromHtml(htmlContent, url);
+    return recipeData;
+  } catch (error) {
+    console.error('Error extracting recipe from URL:', error);
+    if (error.code && error.details) {
+      throw error;
+    }
+    throw new HttpsError('internal', 'Recipe extraction from URL failed', error.message);
   }
 });

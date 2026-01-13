@@ -87,7 +87,7 @@ class RecipeFormComponent extends HTMLElement {
       <div dir="rtl" class="recipe-form">
         <div class="recipe-form__header">
           <h2 class="recipe-form__title">פרטי המתכון</h2>
-          <button id="import-btn" class="recipe-form__button recipe-form__button--import" style="display: none;">
+          <button id="import-btn" class="recipe-form__button recipe-form__button--import">
              יבא מתמונה
              <i class="fas fa-magic"></i>
           </button>
@@ -403,7 +403,7 @@ class RecipeFormComponent extends HTMLElement {
     const btn = this.shadowRoot.getElementById('import-btn');
     if (btn) {
       // Only show for approved users (mimics navigation logic)
-      if (state.isApproved) {
+      if (state && (state.isApproved || state.isManager)) {
         // Use flex to maintain layout defined in CSS
         btn.style.display = 'flex';
       } else {

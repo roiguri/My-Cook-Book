@@ -19,6 +19,7 @@ class RecipeImportModal extends HTMLElement {
     this.gameWrapper = null;
     this.game = null;
     this.extractedData = null;
+    this.activeTab = 'image'; // 'image' or 'url'
   }
 
   connectedCallback() {
@@ -39,36 +40,91 @@ class RecipeImportModal extends HTMLElement {
         ${styles}
         ${memoryGameStyles}
         ${gameWrapperStyles}
+        .tabs {
+          display: flex;
+          margin-bottom: 20px;
+          border-bottom: 2px solid #e0e0e0;
+        }
+        .tab-btn {
+          padding: 10px 20px;
+          background: none;
+          border: none;
+          border-bottom: 2px solid transparent;
+          cursor: pointer;
+          font-size: 1rem;
+          color: #666;
+          margin-bottom: -2px;
+        }
+        .tab-btn.active {
+          border-bottom-color: var(--primary-color, #4CAF50);
+          color: var(--primary-color, #4CAF50);
+          font-weight: bold;
+        }
+        .url-input-container {
+          padding: 20px;
+          text-align: center;
+        }
+        .url-input {
+          width: 100%;
+          padding: 10px;
+          margin-bottom: 15px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-size: 1rem;
+          box-sizing: border-box;
+        }
+        .url-helper-text {
+          color: #666;
+          font-size: 0.9rem;
+          margin-bottom: 15px;
+          text-align: right;
+        }
       </style>
       <custom-modal id="import-modal" width="600px">
           <div class="modal-body-content">
-            <h2 class="modal-title">ייבא מתכון מתמונה</h2>
+            <h2 class="modal-title">ייבא מתכון</h2>
             
-            <!-- Initial State: Upload -->
-            <div id="upload-view" class="upload-area">
-              <div class="upload-icon">📷</div>
-              <p class="upload-text">לחץ להעלאת תמונות או גרור לכאן</p>
-              <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="image">מתמונה</button>
+              <button class="tab-btn" data-tab="url">מקישור (URL)</button>
             </div>
 
-            <!-- Preview State: List & Reorder -->
-            <div id="preview-view" style="display: none; width: 100%;">
-              <div class="images-list" id="images-list"></div>
-              <div class="add-more-area" id="add-more-btn">
-                <span>+ הוסף תמונה נוספת</span>
+            <!-- Image Upload View -->
+            <div id="image-tab-content">
+              <!-- Initial State: Upload -->
+              <div id="upload-view" class="upload-area">
+                <div class="upload-icon">📷</div>
+                <p class="upload-text">לחץ להעלאת תמונות או גרור לכאן</p>
+                <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+              </div>
+
+              <!-- Preview State: List & Reorder -->
+              <div id="preview-view" style="display: none; width: 100%;">
+                <div class="images-list" id="images-list"></div>
+                <div class="add-more-area" id="add-more-btn">
+                  <span>+ הוסף תמונה נוספת</span>
+                </div>
+              </div>
+
+              <!-- Editor State: Crop & Rotate -->
+              <div id="editor-view" style="display: none; width: 100%;">
+                <div class="editor-container">
+                   <img id="image-preview" style="max-width: 100%; display: block;">
+                </div>
+                <div class="toolbar">
+                  <button class="tool-btn" id="rotate-left" title="סובב שמאלה">↶</button>
+                  <button class="tool-btn" id="rotate-right" title="סובב ימינה">↷</button>
+                  <button class="tool-btn" id="cancel-crop" title="ביטול">✕</button>
+                  <button class="tool-btn" id="save-crop" title="שמור חיתוך">✓</button>
+                </div>
               </div>
             </div>
 
-            <!-- Editor State: Crop & Rotate -->
-            <div id="editor-view" style="display: none; width: 100%;">
-              <div class="editor-container">
-                 <img id="image-preview" style="max-width: 100%; display: block;">
-              </div>
-              <div class="toolbar">
-                <button class="tool-btn" id="rotate-left" title="סובב שמאלה">↶</button>
-                <button class="tool-btn" id="rotate-right" title="סובב ימינה">↷</button>
-                <button class="tool-btn" id="cancel-crop" title="ביטול">✕</button>
-                <button class="tool-btn" id="save-crop" title="שמור חיתוך">✓</button>
+            <!-- URL Import View -->
+            <div id="url-tab-content" style="display: none;">
+              <div class="url-input-container">
+                <p class="url-helper-text">הדבק קישור למתכון מאתר אינטרנט:</p>
+                <input type="url" id="url-input" class="url-input" placeholder="https://www.example.com/recipe...">
               </div>
             </div>
 
@@ -112,6 +168,13 @@ class RecipeImportModal extends HTMLElement {
     const fileInput = this.shadowRoot.getElementById('file-input');
     const extractBtn = this.shadowRoot.getElementById('extract-btn');
     const addMoreBtn = this.shadowRoot.getElementById('add-more-btn');
+    const urlInput = this.shadowRoot.getElementById('url-input');
+
+    // Tabs
+    const tabBtns = this.shadowRoot.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
+    });
 
     // Tools
     const rotateLeftBtn = this.shadowRoot.getElementById('rotate-left');
@@ -153,6 +216,11 @@ class RecipeImportModal extends HTMLElement {
       fileInput.value = ''; // Reset input
     });
 
+    // URL Input Action
+    urlInput.addEventListener('input', () => {
+      this.updateExtractButtonState();
+    });
+
     // Drag & Drop
     uploadArea.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -176,7 +244,13 @@ class RecipeImportModal extends HTMLElement {
     cancelCropBtn.addEventListener('click', () => this.closeEditor());
 
     // Extract
-    extractBtn.addEventListener('click', () => this.extractRecipe());
+    extractBtn.addEventListener('click', () => {
+      if (this.activeTab === 'image') {
+        this.extractRecipe();
+      } else {
+        this.extractFromUrl();
+      }
+    });
 
     // View Recipe (Success State)
     const viewRecipeBtn = this.shadowRoot.getElementById('view-recipe-btn');
@@ -184,6 +258,41 @@ class RecipeImportModal extends HTMLElement {
 
     // Try Again
     tryAgainBtn.addEventListener('click', () => this.resetToUpload());
+  }
+
+  switchTab(tabName) {
+    this.activeTab = tabName;
+    const tabBtns = this.shadowRoot.querySelectorAll('.tab-btn');
+    const imageContent = this.shadowRoot.getElementById('image-tab-content');
+    const urlContent = this.shadowRoot.getElementById('url-tab-content');
+
+    tabBtns.forEach(btn => {
+      if (btn.dataset.tab === tabName) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    if (tabName === 'image') {
+      imageContent.style.display = 'block';
+      urlContent.style.display = 'none';
+    } else {
+      imageContent.style.display = 'none';
+      urlContent.style.display = 'block';
+    }
+
+    this.updateExtractButtonState();
+  }
+
+  updateExtractButtonState() {
+    const extractBtn = this.shadowRoot.getElementById('extract-btn');
+    if (this.activeTab === 'image') {
+      extractBtn.disabled = this.images.length === 0;
+    } else {
+      const urlInput = this.shadowRoot.getElementById('url-input');
+      extractBtn.disabled = !urlInput.value || urlInput.value.trim() === '';
+    }
   }
 
   addImages(files) {
@@ -215,19 +324,17 @@ class RecipeImportModal extends HTMLElement {
   updatePreviewList() {
     const uploadView = this.shadowRoot.getElementById('upload-view');
     const previewView = this.shadowRoot.getElementById('preview-view');
-    const extractBtn = this.shadowRoot.getElementById('extract-btn');
     const imagesList = this.shadowRoot.getElementById('images-list');
 
     if (this.images.length === 0) {
       uploadView.style.display = 'block';
       previewView.style.display = 'none';
-      extractBtn.disabled = true;
-      return;
+    } else {
+      uploadView.style.display = 'none';
+      previewView.style.display = 'block';
     }
 
-    uploadView.style.display = 'none';
-    previewView.style.display = 'block';
-    extractBtn.disabled = false;
+    this.updateExtractButtonState();
 
     imagesList.innerHTML = '';
     this.images.forEach((img, index) => {
@@ -346,20 +453,21 @@ class RecipeImportModal extends HTMLElement {
   resetToUpload() {
     this.images = [];
     this.activeImageId = null;
+    this.activeTab = 'image'; // Reset tab to image default
     if (this.cropper) {
       this.cropper.destroy();
       this.cropper = null;
     }
 
+    // Reset UI elements visibility
     const uploadView = this.shadowRoot.getElementById('upload-view');
     if (uploadView) {
-      uploadView.style.display = 'block';
       this.shadowRoot.getElementById('preview-view').style.display = 'none'; // reset preview
       this.shadowRoot.getElementById('editor-view').style.display = 'none';
       this.shadowRoot.getElementById('loading-view').style.display = 'none';
       this.shadowRoot.getElementById('error-view').style.display = 'none';
-      this.shadowRoot.getElementById('extract-btn').disabled = true;
       this.shadowRoot.getElementById('file-input').value = '';
+      this.shadowRoot.getElementById('url-input').value = '';
 
       // Reset loading state internals
       const loadingStatus = this.shadowRoot.getElementById('loading-status');
@@ -369,6 +477,9 @@ class RecipeImportModal extends HTMLElement {
         'זה עשוי לקחת מספר שניות... הנה משחק קטן בינתיים!';
       this.shadowRoot.getElementById('success-overlay').style.display = 'none';
       this.extractedData = null;
+
+      // Reset tabs
+      this.switchTab('image');
     }
   }
 
@@ -412,17 +523,42 @@ class RecipeImportModal extends HTMLElement {
     }
   }
 
+  async extractFromUrl() {
+    const urlInput = this.shadowRoot.getElementById('url-input');
+    const url = urlInput.value;
+
+    if (!url) return;
+
+    this.setLoading(true);
+
+    try {
+      const functions = getFunctions();
+      const extractRecipeFromUrl = httpsCallable(functions, 'extractRecipeFromUrl');
+
+      const result = await extractRecipeFromUrl({
+        url: url,
+      });
+
+      this.showSuccessState(result.data);
+    } catch (error) {
+      console.error('URL Extraction failed:', error);
+      this.isLoading = false;
+      this.setError(error);
+    }
+  }
+
   setLoading(isLoading) {
     this.isLoading = isLoading;
     const loadingView = this.shadowRoot.getElementById('loading-view');
-    const editorView = this.shadowRoot.getElementById('editor-view');
     const footer = this.shadowRoot.querySelector('.modal-footer');
     const gameContainer = this.shadowRoot.getElementById('game-container');
+    const imageContent = this.shadowRoot.getElementById('image-tab-content');
+    const urlContent = this.shadowRoot.getElementById('url-tab-content');
 
     if (isLoading) {
       loadingView.style.display = 'flex';
-      // editorView.style.display = 'none'; // Editor is already closed or irrelevant
-      this.shadowRoot.getElementById('preview-view').style.display = 'none'; // Hide preview
+      imageContent.style.display = 'none';
+      urlContent.style.display = 'none';
       footer.style.display = 'none';
 
       // Start Game Wrapper
@@ -433,6 +569,8 @@ class RecipeImportModal extends HTMLElement {
     } else {
       loadingView.style.display = 'none';
       footer.style.display = 'flex';
+      // Restore view based on tab
+      this.switchTab(this.activeTab);
 
       // Stop/Destroy Game
       if (this.gameWrapper) {
@@ -447,19 +585,19 @@ class RecipeImportModal extends HTMLElement {
     const errorMessage = this.shadowRoot.getElementById('error-message');
 
     // Error mapping
-    let displayMessage = 'אירעה שגיאה בעיבוד התמונה. אנא נסה שוב.';
+    let displayMessage = 'אירעה שגיאה בעיבוד. אנא נסה שוב.';
     const rawMessage = error.message || '';
 
     if (rawMessage.includes('permission-denied') || rawMessage.includes('unauthenticated')) {
       displayMessage = 'אין לך הרשאה לבצע פעולה זו. אנא וודא שאתה מחובר כמשתמש מאושר.';
     } else if (rawMessage.includes('invalid-argument')) {
-      displayMessage = 'התמונה שנשלחה אינה תקינה. אנא נסה תמונה אחרת.';
+      displayMessage = 'הקלט אינו תקין. אנא בדוק את הקישור או התמונה.';
     } else if (rawMessage.includes('internal')) {
       displayMessage = 'שגיאה בשרת העיבוד. אנא נסה שוב מאוחר יותר.';
     } else if (rawMessage.includes('quota-exceeded')) {
       displayMessage = 'הגענו למכסת השימוש היומית. אנא נסה שוב מחר.';
     } else if (rawMessage.includes('deadline-exceeded') || rawMessage.includes('timeout')) {
-      displayMessage = 'הפעולה לקחה זמן רב מדי. נסה לחתוך את התמונה לאזור הרלוונטי בלבד.';
+      displayMessage = 'הפעולה לקחה זמן רב מדי.';
     } else if (rawMessage.includes('not-found')) {
       displayMessage = 'השירות אינו זמין כעת (404). אנא פנה למנהל המערכת.';
     }
@@ -472,8 +610,8 @@ class RecipeImportModal extends HTMLElement {
     // Hide other views
     this.shadowRoot.getElementById('loading-view').style.display = 'none';
     this.shadowRoot.getElementById('editor-view').style.display = 'none';
-    this.shadowRoot.getElementById('preview-view').style.display = 'none';
-    this.shadowRoot.getElementById('upload-view').style.display = 'none';
+    this.shadowRoot.getElementById('image-tab-content').style.display = 'none';
+    this.shadowRoot.getElementById('url-tab-content').style.display = 'none';
     this.shadowRoot.querySelector('.modal-footer').style.display = 'none';
   }
 
@@ -487,15 +625,9 @@ class RecipeImportModal extends HTMLElement {
 
     // Hide loading dots row
     const loadingStatus = this.shadowRoot.getElementById('loading-status');
-    const loadingText = this.shadowRoot.getElementById('loading-text');
     const successOverlay = this.shadowRoot.getElementById('success-overlay');
 
     if (loadingStatus) loadingStatus.style.display = 'none';
-
-    // Optional: could reuse loadingText for success message, but we used overlay instead.
-    // We already have "Recipe Ready" in the badge.
-    // If we want to show text:
-    // loadingText.textContent = 'הניתוח הושלם! אתה יכול להמשיך לשחק או לצפות במתכון.';
 
     successOverlay.style.display = 'flex';
   }
