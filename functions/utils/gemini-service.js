@@ -210,6 +210,29 @@ Data Formatting:
 
 IMPORTANT: If you cannot find a valid recipe on the page, return a response with name set to null to indicate failure.`;
 
+const VIDEO_EXTRACTION_PROMPT = `Extract the complete recipe details from the provided video.
+
+CRITICAL RULES FOR STRUCTURE:
+1. WATCH CAREFULLY: Pay attention to visual cues, spoken instructions, text overlays, and on-screen captions.
+2. ANALYZE STRUCTURE: Look for titled sections mentioned in the video (e.g., "For the Dough", "For the Sauce", "Preparation", "Baking").
+3. FORCE SECTIONS: If ANY titled sections are present for ingredients, you MUST use 'ingredientSections' and set 'ingredients' to null.
+4. FORCE STAGES: If ANY titled sections are present for instructions, you MUST use 'stages' and set 'instructions' to null.
+5. EXCLUSIVITY: Never populate both flat lists and sections.
+6. EXTRACT FROM DESCRIPTION: Also check the video description for additional recipe details.
+
+REQUIRED METADATA (always populate these based on recipe content):
+- category: Choose the BEST matching category from the allowed enum values based on recipe type
+- difficulty: Assess complexity based on number of ingredients, steps, and techniques required
+- mainIngredient: Identify the primary/central ingredient (in Hebrew)
+
+Data Formatting:
+- Ingredients: Extract from visual cues, spoken words, or on-screen text. Split into item, amount, and unit.
+- Instructions: Extract step-by-step instructions from the video. Split into logical steps.
+- Language: Translate ALL text to Hebrew.
+- Comments: Extract any useful tips, notes, or additional information mentioned in the video.
+
+IMPORTANT: If you cannot find a valid recipe in the video, return a response with name set to null to indicate failure.`;
+
 /**
  * Creates a configured Gemini client
  */
@@ -397,7 +420,146 @@ ${responseText}`,
   }
 }
 
+/**
+ * Extracts recipe data from a video URL using Gemini.
+ * Supports YouTube URLs and publicly accessible video file URLs (up to 100MB per request).
+ *
+ * @param {string} url - The video URL (YouTube or direct video link)
+ * @returns {Promise<Object>} The extracted recipe data.
+ */
+async function extractRecipeFromVideo(url) {
+  const client = createClient();
+
+  try {
+    // Gemini supports video processing by providing the URL
+    // Format the prompt to include video URL and extraction instructions
+    const extractionPrompt = `${VIDEO_EXTRACTION_PROMPT}
+
+Video URL to analyze: ${url}
+
+Please watch this video and extract the recipe information. Pay attention to:
+- Visual elements showing ingredients and their quantities
+- Spoken instructions and measurements
+- Text overlays and captions
+- Video description and any on-screen text
+
+Return the recipe data as a valid JSON object with this structure:
+{
+  "name": "recipe name in Hebrew",
+  "description": "short description based on video content",
+  "prepTime": number (minutes),
+  "waitTime": number (minutes),
+  "servings": number,
+  "difficulty": "קלה" | "בינונית" | "קשה",
+  "category": "appetizers" | "main-courses" | "side-dishes" | "soups-stews" | "salads" | "desserts" | "breakfast-brunch" | "breads-pastries" | "snacks" | "beverages",
+  "mainIngredient": "main ingredient in Hebrew",
+  "ingredients": [{"item": "name", "amount": "amount", "unit": "unit"}] OR null if using sections,
+  "ingredientSections": [{"title": "section name", "items": [...]}] OR null if using flat list,
+  "instructions": ["step 1", "step 2"] OR null if using stages,
+  "stages": [{"title": "stage name", "instructions": [...]}] OR null if using flat list,
+  "comments": ["note 1", "note 2"] - include any tips or notes from the video,
+  "tags": ["tag1", "tag2"]
+}
+
+IMPORTANT: Return ONLY the JSON object, no markdown formatting or additional text.`;
+
+    // First attempt: Try with text prompt containing video URL
+    // Note: Gemini's video processing works best when the video URL is included in the prompt
+    try {
+      const response = await client.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [extractionPrompt],
+      });
+
+      let responseText = response.text;
+
+      // Clean up response - remove markdown code blocks if present
+      responseText = responseText.trim();
+      if (responseText.startsWith('```json')) {
+        responseText = responseText.slice(7);
+      } else if (responseText.startsWith('```')) {
+        responseText = responseText.slice(3);
+      }
+      if (responseText.endsWith('```')) {
+        responseText = responseText.slice(0, -3);
+      }
+      responseText = responseText.trim();
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.log('JSON parsing failed, attempting cleanup with structured output...');
+
+        // Fallback: Use another Gemini call with JSON response type to clean up
+        const cleanupResponse = await client.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [
+            `Convert the following recipe text into a valid JSON object matching the schema.
+Extract all recipe information and return ONLY the JSON object.
+
+Recipe text:
+${responseText}`,
+          ],
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: RECIPE_SCHEMA,
+          },
+        });
+
+        data = JSON.parse(cleanupResponse.text);
+        console.log('Successfully parsed recipe using cleanup call');
+      }
+
+      if (!validateRecipeData(data)) {
+        throw new Error(
+          'Could not extract valid recipe data from this video. The video may be private, not contain a recognizable recipe, or the content is unclear.',
+        );
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Initial video extraction attempt failed:', error.message);
+
+      // Second attempt: Try with structured JSON output directly
+      console.log('Retrying with structured output...');
+      try {
+        const structuredResponse = await client.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [extractionPrompt],
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: RECIPE_SCHEMA,
+          },
+        });
+
+        const data = JSON.parse(structuredResponse.text);
+
+        if (!validateRecipeData(data)) {
+          throw new Error(
+            'Could not extract valid recipe data from this video. The video may be private, not contain a recognizable recipe, or the content is unclear.',
+          );
+        }
+
+        return data;
+      } catch (structuredError) {
+        console.error('Structured output attempt also failed:', structuredError.message);
+        throw new Error(
+          'Failed to extract recipe from video. The video may be private, require authentication, or not contain a recognizable recipe.',
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Error calling Gemini API for video:', error);
+    if (error.message.includes('Could not extract') || error.message.includes('Failed to extract')) {
+      throw error;
+    }
+    throw new Error('Failed to process video: ' + error.message);
+  }
+}
+
 module.exports = {
   extractRecipeFromImage,
   extractRecipeFromUrl,
+  extractRecipeFromVideo,
 };

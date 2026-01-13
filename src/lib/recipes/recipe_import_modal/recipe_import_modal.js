@@ -19,7 +19,7 @@ class RecipeImportModal extends HTMLElement {
     this.gameWrapper = null;
     this.game = null;
     this.extractedData = null;
-    this.importMode = 'image'; // 'image' or 'url'
+    this.importMode = 'image'; // 'image', 'url', or 'video'
   }
 
   connectedCallback() {
@@ -49,6 +49,7 @@ class RecipeImportModal extends HTMLElement {
             <div class="import-tabs">
               <button class="tab-btn active" id="tab-image">מתמונה</button>
               <button class="tab-btn" id="tab-url">מכתובת URL</button>
+              <button class="tab-btn" id="tab-video">מוידאו</button>
             </div>
 
             <!-- Initial State: Upload -->
@@ -63,6 +64,13 @@ class RecipeImportModal extends HTMLElement {
               <label for="url-input" class="url-label">הכנס כתובת URL של מתכון:</label>
               <input type="url" id="url-input" class="url-input" placeholder="https://example.com/recipe" dir="ltr">
               <p class="url-help-text">הדבק קישור למתכון מאתר בישול כלשהו</p>
+            </div>
+
+            <!-- Video URL Input View -->
+            <div id="video-view" style="display: none;" class="url-input-container">
+              <label for="video-input" class="url-label">הכנס כתובת וידאו של מתכון:</label>
+              <input type="url" id="video-input" class="url-input" placeholder="https://youtube.com/watch?v=..." dir="ltr">
+              <p class="url-help-text">תומך בסרטוני YouTube או קישורים ישירים לקבצי וידאו (עד 100MB)</p>
             </div>
 
             <!-- Preview State: List & Reorder -->
@@ -130,8 +138,11 @@ class RecipeImportModal extends HTMLElement {
     // Tab switching
     const tabImage = this.shadowRoot.getElementById('tab-image');
     const tabUrl = this.shadowRoot.getElementById('tab-url');
+    const tabVideo = this.shadowRoot.getElementById('tab-video');
     const urlView = this.shadowRoot.getElementById('url-view');
     const urlInput = this.shadowRoot.getElementById('url-input');
+    const videoView = this.shadowRoot.getElementById('video-view');
+    const videoInput = this.shadowRoot.getElementById('video-input');
 
     // Tools
     const rotateLeftBtn = this.shadowRoot.getElementById('rotate-left');
@@ -145,9 +156,11 @@ class RecipeImportModal extends HTMLElement {
     // Tab switching
     tabImage.addEventListener('click', () => this.switchToTab('image'));
     tabUrl.addEventListener('click', () => this.switchToTab('url'));
+    tabVideo.addEventListener('click', () => this.switchToTab('video'));
 
     // URL input validation
     urlInput.addEventListener('input', () => this.validateUrlInput());
+    videoInput.addEventListener('input', () => this.validateVideoInput());
 
     // Close Actions
     const close = () => modal.close({ byUser: true });
@@ -206,8 +219,10 @@ class RecipeImportModal extends HTMLElement {
     extractBtn.addEventListener('click', () => {
       if (this.importMode === 'image') {
         this.extractRecipe();
-      } else {
+      } else if (this.importMode === 'url') {
         this.extractRecipeFromUrl();
+      } else if (this.importMode === 'video') {
+        this.extractRecipeFromVideo();
       }
     });
 
@@ -392,17 +407,21 @@ class RecipeImportModal extends HTMLElement {
       this.shadowRoot.getElementById('loading-view').style.display = 'none';
       this.shadowRoot.getElementById('error-view').style.display = 'none';
       this.shadowRoot.getElementById('url-view').style.display = 'none';
+      this.shadowRoot.getElementById('video-view').style.display = 'none';
       this.shadowRoot.getElementById('extract-btn').disabled = true;
       this.shadowRoot.getElementById('file-input').value = '';
       this.shadowRoot.getElementById('url-input').value = '';
+      this.shadowRoot.getElementById('video-input').value = '';
 
       // Reset tab to image mode
       this.importMode = 'image';
       const tabImage = this.shadowRoot.getElementById('tab-image');
       const tabUrl = this.shadowRoot.getElementById('tab-url');
-      if (tabImage && tabUrl) {
+      const tabVideo = this.shadowRoot.getElementById('tab-video');
+      if (tabImage && tabUrl && tabVideo) {
         tabImage.classList.add('active');
         tabUrl.classList.remove('active');
+        tabVideo.classList.remove('active');
       }
 
       // Reset loading state internals
@@ -469,6 +488,7 @@ class RecipeImportModal extends HTMLElement {
       // editorView.style.display = 'none'; // Editor is already closed or irrelevant
       this.shadowRoot.getElementById('preview-view').style.display = 'none'; // Hide preview
       this.shadowRoot.getElementById('url-view').style.display = 'none'; // Hide URL input
+      this.shadowRoot.getElementById('video-view').style.display = 'none'; // Hide video input
       if (importTabs) importTabs.style.display = 'none'; // Hide tabs
       footer.style.display = 'none';
 
@@ -494,34 +514,53 @@ class RecipeImportModal extends HTMLElement {
     const errorView = this.shadowRoot.getElementById('error-view');
     const errorMessage = this.shadowRoot.getElementById('error-message');
 
-    // Determine if we're in URL or image mode
+    // Determine the mode for error messages
     const isUrlMode = this.importMode === 'url';
-    const modeLabel = isUrlMode ? 'כתובת ה-URL' : 'התמונה';
+    const isVideoMode = this.importMode === 'video';
+    const isImageMode = this.importMode === 'image';
 
     // Error mapping - mode aware
-    let displayMessage = isUrlMode
-      ? 'אירעה שגיאה בייבוא המתכון מהכתובת. אנא נסה שוב.'
-      : 'אירעה שגיאה בעיבוד התמונה. אנא נסה שוב.';
+    let displayMessage = '';
+    if (isVideoMode) {
+      displayMessage = 'אירעה שגיאה בייבוא המתכון מהוידאו. אנא נסה שוב.';
+    } else if (isUrlMode) {
+      displayMessage = 'אירעה שגיאה בייבוא המתכון מהכתובת. אנא נסה שוב.';
+    } else {
+      displayMessage = 'אירעה שגיאה בעיבוד התמונה. אנא נסה שוב.';
+    }
+
     const rawMessage = error.message || '';
 
     if (rawMessage.includes('permission-denied') || rawMessage.includes('unauthenticated')) {
       displayMessage = 'אין לך הרשאה לבצע פעולה זו. אנא וודא שאתה מחובר כמשתמש מאושר.';
     } else if (rawMessage.includes('invalid-argument')) {
-      displayMessage = isUrlMode
-        ? 'כתובת ה-URL שנשלחה אינה תקינה. אנא בדוק את הכתובת ונסה שוב.'
-        : 'התמונה שנשלחה אינה תקינה. אנא נסה תמונה אחרת.';
+      if (isVideoMode) {
+        displayMessage = 'כתובת הוידאו שנשלחה אינה תקינה. אנא בדוק את הכתובת ונסה שוב.';
+      } else if (isUrlMode) {
+        displayMessage = 'כתובת ה-URL שנשלחה אינה תקינה. אנא בדוק את הכתובת ונסה שוב.';
+      } else {
+        displayMessage = 'התמונה שנשלחה אינה תקינה. אנא נסה תמונה אחרת.';
+      }
     } else if (rawMessage.includes('Could not extract')) {
-      displayMessage = isUrlMode
-        ? 'לא ניתן היה לחלץ מתכון מכתובת זו. ייתכן שהדף מוגן, דורש התחברות, או שאינו מכיל מתכון מזוהה.'
-        : 'לא ניתן היה לחלץ מתכון מהתמונה. אנא ודא שהתמונה מכילה מתכון קריא.';
+      if (isVideoMode) {
+        displayMessage = 'לא ניתן היה לחלץ מתכון מהוידאו. ייתכן שהוידאו אינו מכיל מתכון מזוהה או שהוא פרטי.';
+      } else if (isUrlMode) {
+        displayMessage = 'לא ניתן היה לחלץ מתכון מכתובת זו. ייתכן שהדף מוגן, דורש התחברות, או שאינו מכיל מתכון מזוהה.';
+      } else {
+        displayMessage = 'לא ניתן היה לחלץ מתכון מהתמונה. אנא ודא שהתמונה מכילה מתכון קריא.';
+      }
     } else if (rawMessage.includes('internal')) {
       displayMessage = 'שגיאה בשרת העיבוד. אנא נסה שוב מאוחר יותר.';
     } else if (rawMessage.includes('quota-exceeded')) {
       displayMessage = 'הגענו למכסת השימוש היומית. אנא נסה שוב מחר.';
     } else if (rawMessage.includes('deadline-exceeded') || rawMessage.includes('timeout')) {
-      displayMessage = isUrlMode
-        ? 'הפעולה לקחה זמן רב מדי. נסה כתובת אחרת.'
-        : 'הפעולה לקחה זמן רב מדי. נסה לחתוך את התמונה לאזור הרלוונטי בלבד.';
+      if (isVideoMode) {
+        displayMessage = 'הפעולה לקחה זמן רב מדי. נסה וידאו קצר יותר או כתובת אחרת.';
+      } else if (isUrlMode) {
+        displayMessage = 'הפעולה לקחה זמן רב מדי. נסה כתובת אחרת.';
+      } else {
+        displayMessage = 'הפעולה לקחה זמן רב מדי. נסה לחתוך את התמונה לאזור הרלוונטי בלבד.';
+      }
     } else if (rawMessage.includes('not-found')) {
       displayMessage = 'השירות אינו זמין כעת (404). אנא פנה למנהל המערכת.';
     }
@@ -578,8 +617,10 @@ class RecipeImportModal extends HTMLElement {
 
     const tabImage = this.shadowRoot.getElementById('tab-image');
     const tabUrl = this.shadowRoot.getElementById('tab-url');
+    const tabVideo = this.shadowRoot.getElementById('tab-video');
     const uploadView = this.shadowRoot.getElementById('upload-view');
     const urlView = this.shadowRoot.getElementById('url-view');
+    const videoView = this.shadowRoot.getElementById('video-view');
     const previewView = this.shadowRoot.getElementById('preview-view');
     const extractBtn = this.shadowRoot.getElementById('extract-btn');
     const extractBtnText = this.shadowRoot.getElementById('extract-btn-text');
@@ -587,7 +628,9 @@ class RecipeImportModal extends HTMLElement {
     if (mode === 'image') {
       tabImage.classList.add('active');
       tabUrl.classList.remove('active');
+      tabVideo.classList.remove('active');
       urlView.style.display = 'none';
+      videoView.style.display = 'none';
       extractBtnText.textContent = 'חלץ מתכון';
 
       if (this.images.length === 0) {
@@ -599,15 +642,28 @@ class RecipeImportModal extends HTMLElement {
         previewView.style.display = 'block';
         extractBtn.disabled = false;
       }
-    } else {
+    } else if (mode === 'url') {
       tabImage.classList.remove('active');
       tabUrl.classList.add('active');
+      tabVideo.classList.remove('active');
       uploadView.style.display = 'none';
       previewView.style.display = 'none';
       urlView.style.display = 'block';
+      videoView.style.display = 'none';
       extractBtnText.textContent = 'ייבא מכתובת';
 
       this.validateUrlInput();
+    } else if (mode === 'video') {
+      tabImage.classList.remove('active');
+      tabUrl.classList.remove('active');
+      tabVideo.classList.add('active');
+      uploadView.style.display = 'none';
+      previewView.style.display = 'none';
+      urlView.style.display = 'none';
+      videoView.style.display = 'block';
+      extractBtnText.textContent = 'חלץ מתכון מוידאו';
+
+      this.validateVideoInput();
     }
   }
 
@@ -615,6 +671,26 @@ class RecipeImportModal extends HTMLElement {
     const urlInput = this.shadowRoot.getElementById('url-input');
     const extractBtn = this.shadowRoot.getElementById('extract-btn');
     const url = urlInput.value.trim();
+
+    if (url === '') {
+      extractBtn.disabled = true;
+      return false;
+    }
+
+    try {
+      new URL(url);
+      extractBtn.disabled = false;
+      return true;
+    } catch (e) {
+      extractBtn.disabled = true;
+      return false;
+    }
+  }
+
+  validateVideoInput() {
+    const videoInput = this.shadowRoot.getElementById('video-input');
+    const extractBtn = this.shadowRoot.getElementById('extract-btn');
+    const url = videoInput.value.trim();
 
     if (url === '') {
       extractBtn.disabled = true;
@@ -650,6 +726,30 @@ class RecipeImportModal extends HTMLElement {
       this.showSuccessState(result.data);
     } catch (error) {
       console.error('URL extraction failed:', error);
+      this.isLoading = false;
+      this.setError(error);
+    }
+  }
+
+  async extractRecipeFromVideo() {
+    const videoInput = this.shadowRoot.getElementById('video-input');
+    const url = videoInput.value.trim();
+
+    if (!this.validateVideoInput()) {
+      return;
+    }
+
+    this.setLoading(true);
+
+    try {
+      const functions = getFunctions();
+      const extractRecipeFromVideoFn = httpsCallable(functions, 'extractRecipeFromVideo');
+
+      const result = await extractRecipeFromVideoFn({ url });
+
+      this.showSuccessState(result.data);
+    } catch (error) {
+      console.error('Video extraction failed:', error);
       this.isLoading = false;
       this.setError(error);
     }
