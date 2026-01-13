@@ -422,7 +422,7 @@ ${responseText}`,
 
 /**
  * Extracts recipe data from a video URL using Gemini.
- * Supports YouTube URLs and publicly accessible video file URLs (up to 100MB per request).
+ * Supports YouTube URLs and publicly accessible video file URLs.
  *
  * @param {string} url - The video URL (YouTube or direct video link)
  * @returns {Promise<Object>} The extracted recipe data.
@@ -431,11 +431,8 @@ async function extractRecipeFromVideo(url) {
   const client = createClient();
 
   try {
-    // Gemini supports video processing by providing the URL
-    // Format the prompt to include video URL and extraction instructions
-    const extractionPrompt = `${VIDEO_EXTRACTION_PROMPT}
-
-Video URL to analyze: ${url}
+    // Construct the prompt with detailed instructions
+    const promptText = `${VIDEO_EXTRACTION_PROMPT}
 
 Please watch this video and extract the recipe information. Pay attention to:
 - Visual elements showing ingredients and their quantities
@@ -463,12 +460,27 @@ Return the recipe data as a valid JSON object with this structure:
 
 IMPORTANT: Return ONLY the JSON object, no markdown formatting or additional text.`;
 
-    // First attempt: Try with text prompt containing video URL
-    // Note: Gemini's video processing works best when the video URL is included in the prompt
+    // Build the content with correct API format: parts array containing text and fileData
+    const contents = [
+      {
+        parts: [
+          {
+            text: promptText,
+          },
+          {
+            fileData: {
+              fileUri: url,
+            },
+          },
+        ],
+      },
+    ];
+
+    // First attempt: Try with text response and parse manually
     try {
       const response = await client.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: [extractionPrompt],
+        contents: contents,
       });
 
       let responseText = response.text;
@@ -526,7 +538,7 @@ ${responseText}`,
       try {
         const structuredResponse = await client.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: [extractionPrompt],
+          contents: contents,
           config: {
             responseMimeType: 'application/json',
             responseSchema: RECIPE_SCHEMA,
