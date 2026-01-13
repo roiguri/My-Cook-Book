@@ -4,7 +4,7 @@ const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const sharp = require('sharp');
-const { extractRecipeFromImage } = require('./utils/gemini-service');
+const { extractRecipeFromImage, extractRecipeFromUrl } = require('./utils/gemini-service');
 
 // Initialize Firebase Admin
 initializeApp();
@@ -541,5 +541,58 @@ exports.extractRecipeFromImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (
       throw error;
     }
     throw new HttpsError('internal', 'Recipe extraction failed', error.message);
+  }
+});
+
+exports.extractRecipeFromUrl = onCall({ secrets: ['GEMINI_API_KEY'] }, async (request) => {
+  // Check if user is authenticated
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { uid } = request.auth;
+  const { url } = request.data;
+
+  // Verify inputs
+  if (!url || typeof url !== 'string') {
+    throw new HttpsError(
+      'invalid-argument',
+      'The function must be called with a valid URL string.',
+    );
+  }
+
+  // Validate URL format
+  try {
+    new URL(url);
+  } catch (urlError) {
+    throw new HttpsError('invalid-argument', 'Invalid URL format provided.');
+  }
+
+  try {
+    // Check for approved/manager role
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      throw new HttpsError('permission-denied', 'User not found.');
+    }
+
+    const userData = userDoc.data();
+    const role = userData.role;
+
+    if (role !== 'approved' && role !== 'manager') {
+      throw new HttpsError(
+        'permission-denied',
+        'User must be approved or a manager to use this feature.',
+      );
+    }
+
+    const recipeData = await extractRecipeFromUrl(url);
+    return recipeData;
+  } catch (error) {
+    console.error('Error extracting recipe from URL:', error);
+    // Re-throw HTTPS errors as-is
+    if (error.code && error.details) {
+      throw error;
+    }
+    throw new HttpsError('internal', 'Recipe extraction from URL failed', error.message);
   }
 });

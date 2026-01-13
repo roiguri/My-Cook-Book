@@ -281,13 +281,11 @@ class UserProfile extends HTMLElement {
         const avatarList = await StorageService.listFiles('Avatars');
 
         // Fetch all URLs in parallel
-        avatarCache = await Promise.all(
-          avatarList.items.map(ref => getDownloadURL(ref))
-        );
+        avatarCache = await Promise.all(avatarList.items.map((ref) => getDownloadURL(ref)));
       }
 
       // 2. Preload ALL images
-      const imagePromises = avatarCache.map(url => {
+      const imagePromises = avatarCache.map((url) => {
         return new Promise((resolve) => {
           const img = new Image();
           img.className = 'avatar-image';
@@ -308,7 +306,7 @@ class UserProfile extends HTMLElement {
       // 3. Render ALL at once
       avatarGrid.innerHTML = ''; // Clear skeletons
 
-      results.forEach(result => {
+      results.forEach((result) => {
         if (result.success) {
           const button = document.createElement('button');
           button.className = 'avatar-button'; // Ready state
@@ -330,9 +328,8 @@ class UserProfile extends HTMLElement {
       // Ensure selection state is correct if selectedAvatarUrl was set before render
       const currentAvatarUrl = authService.getCurrentAvatarUrl();
       if (currentAvatarUrl) {
-         this.updateAvatarSelection(currentAvatarUrl);
+        this.updateAvatarSelection(currentAvatarUrl);
       }
-
     } catch (error) {
       console.error('Error loading avatars:', error);
       avatarGrid.innerHTML = ''; // Clear skeletons

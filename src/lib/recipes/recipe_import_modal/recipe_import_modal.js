@@ -19,6 +19,7 @@ class RecipeImportModal extends HTMLElement {
     this.gameWrapper = null;
     this.game = null;
     this.extractedData = null;
+    this.importMode = 'image'; // 'image' or 'url'
   }
 
   connectedCallback() {
@@ -42,13 +43,26 @@ class RecipeImportModal extends HTMLElement {
       </style>
       <custom-modal id="import-modal" width="600px">
           <div class="modal-body-content">
-            <h2 class="modal-title">ייבא מתכון מתמונה</h2>
-            
+            <h2 class="modal-title">ייבא מתכון</h2>
+
+            <!-- Tab Switcher -->
+            <div class="import-tabs">
+              <button class="tab-btn active" id="tab-image">מתמונה</button>
+              <button class="tab-btn" id="tab-url">מכתובת URL</button>
+            </div>
+
             <!-- Initial State: Upload -->
             <div id="upload-view" class="upload-area">
               <div class="upload-icon">📷</div>
               <p class="upload-text">לחץ להעלאת תמונות או גרור לכאן</p>
               <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+            </div>
+
+            <!-- URL Input View -->
+            <div id="url-view" style="display: none;" class="url-input-container">
+              <label for="url-input" class="url-label">הכנס כתובת URL של מתכון:</label>
+              <input type="url" id="url-input" class="url-input" placeholder="https://example.com/recipe" dir="ltr">
+              <p class="url-help-text">הדבק קישור למתכון מאתר בישול כלשהו</p>
             </div>
 
             <!-- Preview State: List & Reorder -->
@@ -87,7 +101,7 @@ class RecipeImportModal extends HTMLElement {
                   <div class="success-badge">המתכון מוכן!</div>
                   <button class="btn btn-primary" id="view-recipe-btn">צפה במתכון</button>
               </div>
-              <div id="game-container" style="width: 100%; margin-top: 10px;"></div>
+              <div id="game-container" style="width: 100%; max-width: 100%; margin-top: 10px; overflow: hidden; box-sizing: border-box;"></div>
             </div>
 
             <!-- Error State -->
@@ -98,7 +112,7 @@ class RecipeImportModal extends HTMLElement {
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancel-btn">ביטול</button>
-                <button class="btn btn-primary" id="extract-btn" disabled>חלץ מתכון</button>
+                <button class="btn btn-primary" id="extract-btn" disabled><span id="extract-btn-text">חלץ מתכון</span></button>
             </div>
           </div>
       </custom-modal>
@@ -113,6 +127,12 @@ class RecipeImportModal extends HTMLElement {
     const extractBtn = this.shadowRoot.getElementById('extract-btn');
     const addMoreBtn = this.shadowRoot.getElementById('add-more-btn');
 
+    // Tab switching
+    const tabImage = this.shadowRoot.getElementById('tab-image');
+    const tabUrl = this.shadowRoot.getElementById('tab-url');
+    const urlView = this.shadowRoot.getElementById('url-view');
+    const urlInput = this.shadowRoot.getElementById('url-input');
+
     // Tools
     const rotateLeftBtn = this.shadowRoot.getElementById('rotate-left');
     const rotateRightBtn = this.shadowRoot.getElementById('rotate-right');
@@ -121,6 +141,13 @@ class RecipeImportModal extends HTMLElement {
 
     // Error handling
     const tryAgainBtn = this.shadowRoot.getElementById('try-again-btn');
+
+    // Tab switching
+    tabImage.addEventListener('click', () => this.switchToTab('image'));
+    tabUrl.addEventListener('click', () => this.switchToTab('url'));
+
+    // URL input validation
+    urlInput.addEventListener('input', () => this.validateUrlInput());
 
     // Close Actions
     const close = () => modal.close({ byUser: true });
@@ -176,7 +203,13 @@ class RecipeImportModal extends HTMLElement {
     cancelCropBtn.addEventListener('click', () => this.closeEditor());
 
     // Extract
-    extractBtn.addEventListener('click', () => this.extractRecipe());
+    extractBtn.addEventListener('click', () => {
+      if (this.importMode === 'image') {
+        this.extractRecipe();
+      } else {
+        this.extractRecipeFromUrl();
+      }
+    });
 
     // View Recipe (Success State)
     const viewRecipeBtn = this.shadowRoot.getElementById('view-recipe-btn');
@@ -358,8 +391,19 @@ class RecipeImportModal extends HTMLElement {
       this.shadowRoot.getElementById('editor-view').style.display = 'none';
       this.shadowRoot.getElementById('loading-view').style.display = 'none';
       this.shadowRoot.getElementById('error-view').style.display = 'none';
+      this.shadowRoot.getElementById('url-view').style.display = 'none';
       this.shadowRoot.getElementById('extract-btn').disabled = true;
       this.shadowRoot.getElementById('file-input').value = '';
+      this.shadowRoot.getElementById('url-input').value = '';
+
+      // Reset tab to image mode
+      this.importMode = 'image';
+      const tabImage = this.shadowRoot.getElementById('tab-image');
+      const tabUrl = this.shadowRoot.getElementById('tab-url');
+      if (tabImage && tabUrl) {
+        tabImage.classList.add('active');
+        tabUrl.classList.remove('active');
+      }
 
       // Reset loading state internals
       const loadingStatus = this.shadowRoot.getElementById('loading-status');
@@ -418,11 +462,14 @@ class RecipeImportModal extends HTMLElement {
     const editorView = this.shadowRoot.getElementById('editor-view');
     const footer = this.shadowRoot.querySelector('.modal-footer');
     const gameContainer = this.shadowRoot.getElementById('game-container');
+    const importTabs = this.shadowRoot.querySelector('.import-tabs');
 
     if (isLoading) {
       loadingView.style.display = 'flex';
       // editorView.style.display = 'none'; // Editor is already closed or irrelevant
       this.shadowRoot.getElementById('preview-view').style.display = 'none'; // Hide preview
+      this.shadowRoot.getElementById('url-view').style.display = 'none'; // Hide URL input
+      if (importTabs) importTabs.style.display = 'none'; // Hide tabs
       footer.style.display = 'none';
 
       // Start Game Wrapper
@@ -432,6 +479,7 @@ class RecipeImportModal extends HTMLElement {
       }
     } else {
       loadingView.style.display = 'none';
+      if (importTabs) importTabs.style.display = 'flex'; // Show tabs
       footer.style.display = 'flex';
 
       // Stop/Destroy Game
@@ -446,20 +494,34 @@ class RecipeImportModal extends HTMLElement {
     const errorView = this.shadowRoot.getElementById('error-view');
     const errorMessage = this.shadowRoot.getElementById('error-message');
 
-    // Error mapping
-    let displayMessage = 'אירעה שגיאה בעיבוד התמונה. אנא נסה שוב.';
+    // Determine if we're in URL or image mode
+    const isUrlMode = this.importMode === 'url';
+    const modeLabel = isUrlMode ? 'כתובת ה-URL' : 'התמונה';
+
+    // Error mapping - mode aware
+    let displayMessage = isUrlMode
+      ? 'אירעה שגיאה בייבוא המתכון מהכתובת. אנא נסה שוב.'
+      : 'אירעה שגיאה בעיבוד התמונה. אנא נסה שוב.';
     const rawMessage = error.message || '';
 
     if (rawMessage.includes('permission-denied') || rawMessage.includes('unauthenticated')) {
       displayMessage = 'אין לך הרשאה לבצע פעולה זו. אנא וודא שאתה מחובר כמשתמש מאושר.';
     } else if (rawMessage.includes('invalid-argument')) {
-      displayMessage = 'התמונה שנשלחה אינה תקינה. אנא נסה תמונה אחרת.';
+      displayMessage = isUrlMode
+        ? 'כתובת ה-URL שנשלחה אינה תקינה. אנא בדוק את הכתובת ונסה שוב.'
+        : 'התמונה שנשלחה אינה תקינה. אנא נסה תמונה אחרת.';
+    } else if (rawMessage.includes('Could not extract')) {
+      displayMessage = isUrlMode
+        ? 'לא ניתן היה לחלץ מתכון מכתובת זו. ייתכן שהדף מוגן, דורש התחברות, או שאינו מכיל מתכון מזוהה.'
+        : 'לא ניתן היה לחלץ מתכון מהתמונה. אנא ודא שהתמונה מכילה מתכון קריא.';
     } else if (rawMessage.includes('internal')) {
       displayMessage = 'שגיאה בשרת העיבוד. אנא נסה שוב מאוחר יותר.';
     } else if (rawMessage.includes('quota-exceeded')) {
       displayMessage = 'הגענו למכסת השימוש היומית. אנא נסה שוב מחר.';
     } else if (rawMessage.includes('deadline-exceeded') || rawMessage.includes('timeout')) {
-      displayMessage = 'הפעולה לקחה זמן רב מדי. נסה לחתוך את התמונה לאזור הרלוונטי בלבד.';
+      displayMessage = isUrlMode
+        ? 'הפעולה לקחה זמן רב מדי. נסה כתובת אחרת.'
+        : 'הפעולה לקחה זמן רב מדי. נסה לחתוך את התמונה לאזור הרלוונטי בלבד.';
     } else if (rawMessage.includes('not-found')) {
       displayMessage = 'השירות אינו זמין כעת (404). אנא פנה למנהל המערכת.';
     }
@@ -509,6 +571,88 @@ class RecipeImportModal extends HTMLElement {
 
   close() {
     this.shadowRoot.getElementById('import-modal').close();
+  }
+
+  switchToTab(mode) {
+    this.importMode = mode;
+
+    const tabImage = this.shadowRoot.getElementById('tab-image');
+    const tabUrl = this.shadowRoot.getElementById('tab-url');
+    const uploadView = this.shadowRoot.getElementById('upload-view');
+    const urlView = this.shadowRoot.getElementById('url-view');
+    const previewView = this.shadowRoot.getElementById('preview-view');
+    const extractBtn = this.shadowRoot.getElementById('extract-btn');
+    const extractBtnText = this.shadowRoot.getElementById('extract-btn-text');
+
+    if (mode === 'image') {
+      tabImage.classList.add('active');
+      tabUrl.classList.remove('active');
+      urlView.style.display = 'none';
+      extractBtnText.textContent = 'חלץ מתכון';
+
+      if (this.images.length === 0) {
+        uploadView.style.display = 'block';
+        previewView.style.display = 'none';
+        extractBtn.disabled = true;
+      } else {
+        uploadView.style.display = 'none';
+        previewView.style.display = 'block';
+        extractBtn.disabled = false;
+      }
+    } else {
+      tabImage.classList.remove('active');
+      tabUrl.classList.add('active');
+      uploadView.style.display = 'none';
+      previewView.style.display = 'none';
+      urlView.style.display = 'block';
+      extractBtnText.textContent = 'ייבא מכתובת';
+
+      this.validateUrlInput();
+    }
+  }
+
+  validateUrlInput() {
+    const urlInput = this.shadowRoot.getElementById('url-input');
+    const extractBtn = this.shadowRoot.getElementById('extract-btn');
+    const url = urlInput.value.trim();
+
+    if (url === '') {
+      extractBtn.disabled = true;
+      return false;
+    }
+
+    try {
+      new URL(url);
+      extractBtn.disabled = false;
+      return true;
+    } catch (e) {
+      extractBtn.disabled = true;
+      return false;
+    }
+  }
+
+  async extractRecipeFromUrl() {
+    const urlInput = this.shadowRoot.getElementById('url-input');
+    const url = urlInput.value.trim();
+
+    if (!this.validateUrlInput()) {
+      return;
+    }
+
+    this.setLoading(true);
+
+    try {
+      const functions = getFunctions();
+      const extractRecipeFromUrlFn = httpsCallable(functions, 'extractRecipeFromUrl');
+
+      const result = await extractRecipeFromUrlFn({ url });
+
+      this.showSuccessState(result.data);
+    } catch (error) {
+      console.error('URL extraction failed:', error);
+      this.isLoading = false;
+      this.setError(error);
+    }
   }
 }
 

@@ -44,8 +44,17 @@ describe('Recipe Extractor Utils', () => {
       expect(result.name).toBe('Minimal Recipe');
       expect(result.category).toBe('');
       expect(result.prepTime).toBe(0);
-      expect(result.difficulty).toBe('Medium'); // Default
+      expect(result.difficulty).toBe('בינונית'); // Default
       expect(result.ingredients).toEqual([]);
+    });
+
+    it('should map mainIngredient correctly', () => {
+      const input = {
+        name: 'Chicken Soup',
+        mainIngredient: 'Chicken',
+      };
+      const result = mapExtractedDataToForm(input);
+      expect(result.mainIngredient).toBe('Chicken');
     });
 
     it('should handle null input', () => {

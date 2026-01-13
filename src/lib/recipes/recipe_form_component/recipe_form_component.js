@@ -88,7 +88,7 @@ class RecipeFormComponent extends HTMLElement {
         <div class="recipe-form__header">
           <h2 class="recipe-form__title">פרטי המתכון</h2>
           <button id="import-btn" class="recipe-form__button recipe-form__button--import" style="display: none;">
-             יבא מתמונה
+             ייבא מתכון
              <i class="fas fa-magic"></i>
           </button>
         </div>
