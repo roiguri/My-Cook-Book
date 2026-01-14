@@ -52,7 +52,7 @@ _Visual and interaction tests for UI blocks._
 | ----------------- | :-: | :-: | :-: | ---------- |
 | `auth-avatar`     | ✅  | ✅  | [ ] | **Stable** |
 | `login-form`      | ✅  | ✅  | [ ] | **Stable** |
-| `signup-form`     | [ ] | [ ] | [ ] | Untested   |
+| `signup-form`     | ✅  | ✅  | [ ] | **Stable** |
 | `forgot-password` | [ ] | [ ] | [ ] | Untested   |
 | `user-profile`    | [ ] | [ ] | [ ] | Untested   |
 
