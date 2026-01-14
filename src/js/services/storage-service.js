@@ -16,6 +16,8 @@ import { getStorageInstance } from './firebase-service.js';
  * StorageService: General-purpose file upload, retrieval, and deletion using Firebase Storage.
  */
 export class StorageService {
+  static _urlCache = new Map();
+
   /**
    * Uploads a file to Firebase Storage.
    * @param {File|Blob} file - The file to upload
@@ -27,9 +29,14 @@ export class StorageService {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
       await uploadBytes(storageRef, file);
-      return await getDownloadURL(storageRef);
+      const urlPromise = getDownloadURL(storageRef);
+      // Update cache with the new URL promise
+      this._urlCache.set(path, urlPromise);
+      return await urlPromise;
     } catch (error) {
       console.error('Error uploading file:', error);
+      // Ensure we don't hold onto a failed promise if we tried to cache it
+      this._urlCache.delete(path);
       throw new Error('Failed to upload file');
     }
   }
@@ -40,10 +47,25 @@ export class StorageService {
    * @returns {Promise<string>} The download URL
    */
   static async getFileUrl(path) {
+    if (this._urlCache.has(path)) {
+      return this._urlCache.get(path);
+    }
+
     try {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
-      return await getDownloadURL(storageRef);
+      const promise = getDownloadURL(storageRef);
+
+      this._urlCache.set(path, promise);
+
+      // If the promise fails, remove it from cache so we can retry later
+      promise.catch(() => {
+        if (this._urlCache.get(path) === promise) {
+          this._urlCache.delete(path);
+        }
+      });
+
+      return await promise;
     } catch (error) {
       console.error('Error getting file URL:', error);
       throw new Error('Failed to get file URL');
@@ -56,6 +78,8 @@ export class StorageService {
    * @returns {Promise<void>}
    */
   static async deleteFile(path) {
+    // Remove from cache immediately
+    this._urlCache.delete(path);
     try {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
