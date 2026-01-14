@@ -101,7 +101,7 @@ class RecipeImportModal extends HTMLElement {
                   <div class="success-badge">המתכון מוכן!</div>
                   <button class="btn btn-primary" id="view-recipe-btn">צפה במתכון</button>
               </div>
-              <div id="game-container" style="width: 100%; max-width: 100%; margin-top: 10px; overflow: hidden; box-sizing: border-box;"></div>
+              <div id="game-container" style="width: 100%; max-width: 100%; margin-top: 10px; box-sizing: border-box;"></div>
             </div>
 
             <!-- Error State -->

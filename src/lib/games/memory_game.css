@@ -8,7 +8,8 @@
   margin: 0 auto;
   perspective: 1000px;
   box-sizing: border-box;
-  padding-bottom: 8px;
+  padding: 10px;
+  padding-bottom: 20px;
 }
 
 .memory-card {
@@ -19,6 +20,7 @@
   transform-style: preserve-3d;
   transition: transform 0.5s;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .memory-card.flipped {
@@ -40,6 +42,7 @@
   font-size: 2rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   user-select: none;
+  box-sizing: border-box;
 }
 
 .memory-card-front {
@@ -53,6 +56,7 @@
   color: white;
   transform: rotateY(0deg);
   font-size: 1.5rem;
+  border: 2px solid var(--primary-color);
 }
 
 .memory-game-info {
