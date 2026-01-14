@@ -166,7 +166,7 @@ class RecipeImportModal extends HTMLElement {
           }),
         );
       }
-      this.resetToUpload();
+      this.reset();
     });
 
     // Upload Actions
@@ -216,7 +216,7 @@ class RecipeImportModal extends HTMLElement {
     viewRecipeBtn.addEventListener('click', () => this.finishImport());
 
     // Try Again
-    tryAgainBtn.addEventListener('click', () => this.resetToUpload());
+    tryAgainBtn.addEventListener('click', () => this.reset());
   }
 
   addImages(files) {
@@ -376,22 +376,44 @@ class RecipeImportModal extends HTMLElement {
     this.shadowRoot.querySelector('.modal-footer').style.display = 'flex';
   }
 
-  resetToUpload() {
+  reset() {
+    // Reset State Variables
     this.images = [];
     this.activeImageId = null;
+    this.extractedData = null;
+    this.isLoading = false;
+    this.importMode = 'image';
+
+    // Cleanup Instances
     if (this.cropper) {
       this.cropper.destroy();
       this.cropper = null;
     }
+    if (this.gameWrapper) {
+      this.gameWrapper.destroy();
+      this.gameWrapper = null;
+    }
 
+    // Reset Elements
     const uploadView = this.shadowRoot.getElementById('upload-view');
+    const importTabs = this.shadowRoot.querySelector('.import-tabs');
+    const footer = this.shadowRoot.querySelector('.modal-footer');
+
     if (uploadView) {
+      // Visibility Reset
       uploadView.style.display = 'block';
-      this.shadowRoot.getElementById('preview-view').style.display = 'none'; // reset preview
+      this.shadowRoot.getElementById('preview-view').style.display = 'none';
       this.shadowRoot.getElementById('editor-view').style.display = 'none';
       this.shadowRoot.getElementById('loading-view').style.display = 'none';
       this.shadowRoot.getElementById('error-view').style.display = 'none';
       this.shadowRoot.getElementById('url-view').style.display = 'none';
+      this.shadowRoot.getElementById('success-overlay').style.display = 'none';
+
+      // Restore visibility of persistent elements
+      if (importTabs) importTabs.style.display = 'flex';
+      if (footer) footer.style.display = 'flex';
+
+      // Input Reset
       this.shadowRoot.getElementById('extract-btn').disabled = true;
       this.shadowRoot.getElementById('file-input').value = '';
       this.shadowRoot.getElementById('url-input').value = '';
@@ -411,8 +433,6 @@ class RecipeImportModal extends HTMLElement {
 
       this.shadowRoot.getElementById('loading-text').textContent =
         'זה עשוי לקחת מספר שניות... הנה משחק קטן בינתיים!';
-      this.shadowRoot.getElementById('success-overlay').style.display = 'none';
-      this.extractedData = null;
     }
   }
 
@@ -540,7 +560,7 @@ class RecipeImportModal extends HTMLElement {
   }
 
   open() {
-    this.resetToUpload();
+    this.reset();
     this.shadowRoot.getElementById('import-modal').open();
   }
 
