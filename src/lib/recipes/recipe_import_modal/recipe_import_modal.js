@@ -106,6 +106,13 @@ class RecipeImportModal extends HTMLElement {
                   <div class="success-badge">המתכון מוכן!</div>
                   <button class="btn btn-primary" id="view-recipe-btn">צפה במתכון</button>
               </div>
+
+              <!-- Inline Error (Non-blocking) -->
+              <div id="inline-error-container" class="inline-error" style="display: none;">
+                  <span id="inline-error-text">שגיאה</span>
+                  <button id="inline-try-again-btn" class="btn-text">נסה שוב</button>
+              </div>
+
               <div id="game-container" style="width: 100%; max-width: 100%; margin-top: 10px; box-sizing: border-box;"></div>
             </div>
 
@@ -222,6 +229,12 @@ class RecipeImportModal extends HTMLElement {
 
     // Try Again
     tryAgainBtn.addEventListener('click', () => this.reset());
+
+    // Inline Try Again
+    const inlineTryAgainBtn = this.shadowRoot.getElementById('inline-try-again-btn');
+    if (inlineTryAgainBtn) {
+      inlineTryAgainBtn.addEventListener('click', () => this.reset());
+    }
   }
 
   addImages(files) {
@@ -413,6 +426,8 @@ class RecipeImportModal extends HTMLElement {
       this.shadowRoot.getElementById('error-view').style.display = 'none';
       this.shadowRoot.getElementById('url-view').style.display = 'none';
       this.shadowRoot.getElementById('success-overlay').style.display = 'none';
+      // Reset Inline Error
+      this.shadowRoot.getElementById('inline-error-container').style.display = 'none';
 
       // Restore visibility of persistent elements
       if (importTabs) importTabs.style.display = 'flex';
@@ -497,6 +512,10 @@ class RecipeImportModal extends HTMLElement {
       if (importTabs) importTabs.style.display = 'none'; // Hide tabs
       footer.style.display = 'none';
 
+      // Ensure inline error is hidden when starting new loading
+      this.shadowRoot.getElementById('inline-error-container').style.display = 'none';
+      this.shadowRoot.getElementById('loading-status').style.display = 'flex';
+
       // Start Game Wrapper
       if (!this.gameWrapper && gameContainer) {
         // Random game selection
@@ -534,12 +553,14 @@ class RecipeImportModal extends HTMLElement {
   }
 
   setError(error) {
-    const errorView = this.shadowRoot.getElementById('error-view');
-    const errorMessage = this.shadowRoot.getElementById('error-message');
+    // Non-blocking Inline Error Handling
+    const inlineErrorContainer = this.shadowRoot.getElementById('inline-error-container');
+    const inlineErrorText = this.shadowRoot.getElementById('inline-error-text');
+    const loadingStatus = this.shadowRoot.getElementById('loading-status');
+    const loadingView = this.shadowRoot.getElementById('loading-view');
 
     // Determine if we're in URL or image mode
     const isUrlMode = this.importMode === 'url';
-    const modeLabel = isUrlMode ? 'כתובת ה-URL' : 'התמונה';
 
     // Error mapping - mode aware
     let displayMessage = isUrlMode
@@ -548,38 +569,34 @@ class RecipeImportModal extends HTMLElement {
     const rawMessage = error.message || '';
 
     if (rawMessage.includes('permission-denied') || rawMessage.includes('unauthenticated')) {
-      displayMessage = 'אין לך הרשאה לבצע פעולה זו. אנא וודא שאתה מחובר כמשתמש מאושר.';
+      displayMessage = 'אין לך הרשאה לבצע פעולה זו.';
     } else if (rawMessage.includes('invalid-argument')) {
-      displayMessage = isUrlMode
-        ? 'כתובת ה-URL שנשלחה אינה תקינה. אנא בדוק את הכתובת ונסה שוב.'
-        : 'התמונה שנשלחה אינה תקינה. אנא נסה תמונה אחרת.';
+      displayMessage = isUrlMode ? 'כתובת ה-URL אינה תקינה.' : 'התמונה שנשלחה אינה תקינה.';
     } else if (rawMessage.includes('Could not extract')) {
-      displayMessage = isUrlMode
-        ? 'לא ניתן היה לחלץ מתכון מכתובת זו. ייתכן שהדף מוגן, דורש התחברות, או שאינו מכיל מתכון מזוהה.'
-        : 'לא ניתן היה לחלץ מתכון מהתמונה. אנא ודא שהתמונה מכילה מתכון קריא.';
+      displayMessage = isUrlMode ? 'לא ניתן לחלץ מתכון מכתובת זו.' : 'לא ניתן לחלץ מתכון מהתמונה.';
     } else if (rawMessage.includes('internal')) {
-      displayMessage = 'שגיאה בשרת העיבוד. אנא נסה שוב מאוחר יותר.';
+      displayMessage = 'שגיאה בשרת העיבוד.';
     } else if (rawMessage.includes('quota-exceeded')) {
-      displayMessage = 'הגענו למכסת השימוש היומית. אנא נסה שוב מחר.';
+      displayMessage = 'הגענו למכסת השימוש היומית.';
     } else if (rawMessage.includes('deadline-exceeded') || rawMessage.includes('timeout')) {
-      displayMessage = isUrlMode
-        ? 'הפעולה לקחה זמן רב מדי. נסה כתובת אחרת.'
-        : 'הפעולה לקחה זמן רב מדי. נסה לחתוך את התמונה לאזור הרלוונטי בלבד.';
+      displayMessage = 'הפעולה לקחה זמן רב מדי.';
     } else if (rawMessage.includes('not-found')) {
-      displayMessage = 'השירות אינו זמין כעת (404). אנא פנה למנהל המערכת.';
+      displayMessage = 'השירות אינו זמין כעת (404).';
     }
 
-    this.shadowRoot.getElementById('loading-view').style.display = 'none'; // Ensure loading is hidden
+    // Hide status, Show Error, KEEP GAME RUNNING
+    if (loadingStatus) loadingStatus.style.display = 'none';
 
-    errorView.style.display = 'block';
-    errorMessage.textContent = 'שגיאה: ' + displayMessage;
+    if (inlineErrorContainer) {
+      inlineErrorContainer.style.display = 'flex';
+      inlineErrorText.textContent = displayMessage;
+    }
 
-    // Hide other views
-    this.shadowRoot.getElementById('loading-view').style.display = 'none';
-    this.shadowRoot.getElementById('editor-view').style.display = 'none';
-    this.shadowRoot.getElementById('preview-view').style.display = 'none';
-    this.shadowRoot.getElementById('upload-view').style.display = 'none';
-    this.shadowRoot.querySelector('.modal-footer').style.display = 'none';
+    // Ensure loading view stays visible (game continues)
+    if (loadingView) loadingView.style.display = 'flex';
+
+    // We do NOT destroy the game here.
+    // The user can keep playing until they click "Try Again".
   }
 
   open() {
