@@ -27,9 +27,14 @@ export class StorageService {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
       await uploadBytes(storageRef, file);
-      return await getDownloadURL(storageRef);
+      const urlPromise = getDownloadURL(storageRef);
+      // Update cache with the new URL promise
+      StorageService._urlCache.set(path, urlPromise);
+      return await urlPromise;
     } catch (error) {
       console.error('Error uploading file:', error);
+      // Ensure we don't store failed promises
+      StorageService._urlCache.delete(path);
       throw new Error('Failed to upload file');
     }
   }
@@ -40,10 +45,25 @@ export class StorageService {
    * @returns {Promise<string>} The download URL
    */
   static async getFileUrl(path) {
+    if (StorageService._urlCache.has(path)) {
+      return StorageService._urlCache.get(path);
+    }
+
     try {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
-      return await getDownloadURL(storageRef);
+      const promise = getDownloadURL(storageRef);
+
+      StorageService._urlCache.set(path, promise);
+
+      // If the promise rejects, remove it from the cache so we can retry later
+      promise.catch(() => {
+        if (StorageService._urlCache.get(path) === promise) {
+          StorageService._urlCache.delete(path);
+        }
+      });
+
+      return await promise;
     } catch (error) {
       console.error('Error getting file URL:', error);
       throw new Error('Failed to get file URL');
@@ -57,6 +77,9 @@ export class StorageService {
    */
   static async deleteFile(path) {
     try {
+      // Remove from cache first
+      StorageService._urlCache.delete(path);
+
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
       await deleteObject(storageRef);
@@ -105,3 +128,4 @@ export class StorageService {
 
 // Optionally, export a singleton instance
 export const storageService = StorageService;
+StorageService._urlCache = new Map();
