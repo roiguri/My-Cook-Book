@@ -148,7 +148,7 @@ export class BurgerStackerGame {
     item.className = 'falling-item';
 
     if (type === 'bad') {
-      item.innerHTML = '<div class="bad-item">🥾</div>';
+      item.innerHTML = '<div class="bad-item"></div>';
       item.dataset.type = 'bad';
     } else {
       item.innerHTML = `<div class="ingredient-art ${type}"></div>`;
