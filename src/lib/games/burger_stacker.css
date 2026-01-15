@@ -162,53 +162,59 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center bottom;
-  position: relative;
-  margin-bottom: -15px;
 }
+
+/* Specific Assets (Updated for trimmed assets & tighter stacking) */
 
 .bun-bottom {
   width: 110px;
   height: 25px;
   background-image: url('./assets/bun_bottom_small.png');
   margin-bottom: 0;
+  z-index: 1;
 }
 
 .patty {
   width: 105px;
   height: 28px;
   background-image: url('./assets/patty_small.png');
-  margin-bottom: -5px;
+  margin-bottom: -12px;
+  z-index: 2;
 }
 
 .cheese {
   width: 115px;
   height: 23px;
   background-image: url('./assets/cheese_small.png');
-  margin-bottom: -8px;
+  margin-bottom: -14px;
+  z-index: 3;
 }
 
 .tomato {
   width: 100px;
   height: 24px;
   background-image: url('./assets/tomato_small.png');
-  margin-bottom: -2px;
+  margin-bottom: -12px;
+  z-index: 4;
 }
 
 .lettuce {
   width: 115px;
   height: 28px;
   background-image: url('./assets/lettuce_small.png');
-  margin-bottom: -5px;
+  margin-bottom: -12px;
+  z-index: 5;
 }
 
 .bun-top {
   width: 110px;
   height: 50px;
   background-image: url('./assets/bun_top_small.png');
-  z-index: 100;
-  margin-bottom: -5px;
+  z-index: 6;
+  margin-bottom: -12px;
 }
 
+/* Bad Item (Shoe/Boot) */
 .bad-item {
   width: 70px;
   height: 55px;
@@ -220,9 +226,10 @@
 
 .catcher .ingredient-art {
   position: relative;
-  z-index: auto;
+  /* Z-index handled by specific classes or natural DOM order */
 }
 
+/* Mobile Tweaks */
 @media (max-width: 600px) {
   .burger-game-container {
     height: 350px;
@@ -235,7 +242,11 @@
 
   .ingredient-art {
     transform: scale(0.85);
-    margin-bottom: -18px;
+    margin-bottom: -10px !important;
+  }
+
+  .cheese {
+    margin-bottom: -18px !important;
   }
 
   .falling-item {
