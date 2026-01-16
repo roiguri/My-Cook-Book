@@ -7,3 +7,8 @@
 
 **Learning:** Web Components often default to fetching their own data based on ID attributes. This causes N+1 fetch cascades in lists.
 **Action:** Always implement a property setter (e.g., `set data(val)`) on list item components to allow parent lists to pass pre-fetched data directly, bypassing the internal fetch.
+
+## 2025-10-26 - [Raw vs Formatted Data Injection]
+
+**Learning:** When passing pre-fetched Firestore data to components to avoid re-fetching, ensure the data is formatted/normalized exactly as the component expects (e.g., using `formatRecipeData`), as raw Firestore docs may miss default values or derived fields that the component relies on.
+**Action:** Always wrap raw Firestore data with the appropriate formatter function before passing it to child components via properties.

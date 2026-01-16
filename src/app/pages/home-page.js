@@ -1,5 +1,8 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
+import authService from '../../js/services/auth-service.js';
+import favoritesService from '../../js/services/favorites-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
+import { formatRecipeData } from '../../js/utils/recipes/recipe-data-utils.js';
 import '../../styles/pages/home-spa.css';
 
 export default {
@@ -89,10 +92,24 @@ export default {
 
       messageContainer.remove();
 
+      // PERFORMANCE: Fetch user favorites once for all cards to avoid N+1 fetches
+      const user = authService.getCurrentUser();
+      const favorites = user ? await favoritesService.getUserFavorites() : [];
+
       recentRecipes.forEach((doc) => {
         const recipeCard = document.createElement('recipe-card');
         recipeCard.setAttribute('recipe-id', doc.id);
         recipeCard.setAttribute('layout', 'vertical');
+
+        // PERFORMANCE: Pass recipe data directly to avoid additional Firestore fetch
+        recipeCard.recipeData = formatRecipeData(doc);
+
+        if (user) {
+          recipeCard.setAttribute('show-favorites', 'true');
+          // PERFORMANCE: Pass favorite status to avoid additional Firestore fetch
+          recipeCard.isFavorite = favorites.includes(doc.id);
+        }
+
         recipesContainer.appendChild(recipeCard);
       });
 
