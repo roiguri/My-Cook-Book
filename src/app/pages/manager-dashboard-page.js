@@ -168,6 +168,7 @@ export default {
     this.loadAllRecipes();
     this.loadPendingRecipes();
     this.loadPendingImages();
+    this.loadFailedUrls();
   },
 
   /**
@@ -504,6 +505,116 @@ export default {
     console.log('Rejected image IDs:', event.detail.imageIds);
     // Only refresh the pending images list
     this.refreshManager.refreshPendingImages();
+  },
+
+  /**
+   * Failed URLs
+   */
+  async loadFailedUrls() {
+    const failedUrlsList = document.getElementById('failed-urls-list');
+    const failedUrlsSection = document.getElementById('failed-urls');
+    const noItemsMessage = failedUrlsSection.querySelector('.no-items-message');
+
+    try {
+      const failedUrls = await FirestoreService.queryDocuments('failed_url_extractions', {
+        orderBy: [['lastAttempt', 'desc']],
+      });
+
+      const items = failedUrls.map((item) => ({
+        header: this.createFailedUrlHeader(item),
+        content: this.createFailedUrlContent(item),
+      }));
+
+      if (items.length === 0) {
+        noItemsMessage.textContent = 'אין כתובות שנכשלו';
+      } else {
+        noItemsMessage.textContent = '';
+      }
+
+      if (failedUrlsList) {
+        failedUrlsList.setItems(items);
+      } else {
+        console.error('Cannot find failed urls list element');
+      }
+    } catch (error) {
+      this.handleError(error);
+    }
+  },
+
+  createFailedUrlHeader(item) {
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+
+    const urlSpan = document.createElement('span');
+    urlSpan.textContent = item.url;
+    urlSpan.title = item.url;
+    urlSpan.style.overflow = 'hidden';
+    urlSpan.style.textOverflow = 'ellipsis';
+    urlSpan.style.whiteSpace = 'nowrap';
+    urlSpan.style.maxWidth = '300px';
+    urlSpan.style.direction = 'ltr';
+
+    const countSpan = document.createElement('span');
+    countSpan.textContent = `נכשל ${item.count} פעמים`;
+    countSpan.style.flexShrink = '0';
+    countSpan.style.marginLeft = '10px';
+
+    header.appendChild(urlSpan);
+    header.appendChild(countSpan);
+    return header;
+  },
+
+  createFailedUrlContent(item) {
+    const content = document.createElement('div');
+    content.style.display = 'flex';
+    content.style.flexDirection = 'column';
+    content.style.gap = '10px';
+    content.style.padding = '10px';
+
+    const errorMsg = document.createElement('div');
+    errorMsg.textContent = `שגיאה: ${item.error?.message || 'שגיאה לא ידועה'}`;
+    errorMsg.style.color = 'red';
+
+    const actions = document.createElement('div');
+    actions.style.display = 'flex';
+    actions.style.gap = '10px';
+
+    const showFullErrorBtn = document.createElement('button');
+    showFullErrorBtn.textContent = 'הצג שגיאה מלאה';
+    showFullErrorBtn.addEventListener('click', () => this.showFullError(item));
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'מחק';
+    deleteBtn.style.backgroundColor = '#ff4444';
+    deleteBtn.style.color = 'white';
+    deleteBtn.addEventListener('click', () => this.deleteFailedUrl(item.id));
+
+    actions.appendChild(showFullErrorBtn);
+    actions.appendChild(deleteBtn);
+
+    content.appendChild(errorMsg);
+    content.appendChild(actions);
+
+    return content;
+  },
+
+  showFullError(item) {
+    const errorText = JSON.stringify(item.error, null, 2);
+    // Simple modal for now
+    alert(errorText);
+  },
+
+  async deleteFailedUrl(id) {
+    if (confirm('האם אתה בטוח שברצונך למחוק רשומה זו?')) {
+      try {
+        await FirestoreService.deleteDocument('failed_url_extractions', id);
+        this.loadFailedUrls(); // Reload list
+      } catch (error) {
+        this.handleError(error);
+      }
+    }
   },
 
   /**

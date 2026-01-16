@@ -1,7 +1,7 @@
 const { onMessagePublished } = require('firebase-functions/v2/pubsub');
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { initializeApp } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const sharp = require('sharp');
 const { extractRecipeFromImage, extractRecipeFromUrl } = require('./utils/gemini-service');
@@ -112,6 +112,40 @@ async function processRecipeImages(recipeId, images, category, originalUserId) {
 
   console.log(`Successfully processed ${processedImages.length}/${images.length} images`);
   return processedImages;
+}
+
+async function logFailedUrlExtraction(url, error, userId) {
+  try {
+    const collectionRef = db.collection('failed_url_extractions');
+    const snapshot = await collectionRef.where('url', '==', url).limit(1).get();
+
+    const errorData = {
+      message: error.message || 'Unknown error',
+      stack: error.stack || 'No stack trace',
+      code: error.code || 'unknown',
+    };
+
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      await doc.ref.update({
+        count: FieldValue.increment(1),
+        lastAttempt: new Date(),
+        error: errorData,
+        lastUserId: userId,
+      });
+    } else {
+      await collectionRef.add({
+        url: url,
+        count: 1,
+        firstAttempt: new Date(),
+        lastAttempt: new Date(),
+        error: errorData,
+        lastUserId: userId,
+      });
+    }
+  } catch (logError) {
+    console.error('Failed to log failed URL extraction:', logError);
+  }
 }
 
 // Validates sectioned ingredient structure
@@ -589,6 +623,10 @@ exports.extractRecipeFromUrl = onCall({ secrets: ['GEMINI_API_KEY'] }, async (re
     return recipeData;
   } catch (error) {
     console.error('Error extracting recipe from URL:', error);
+
+    // Log the failure
+    await logFailedUrlExtraction(url, error, uid);
+
     // Re-throw HTTPS errors as-is
     if (error.code && error.details) {
       throw error;

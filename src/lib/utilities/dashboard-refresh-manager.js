@@ -8,6 +8,7 @@ export const DASHBOARD_SECTIONS = {
   ALL_RECIPES: 'all-recipes',
   PENDING_RECIPES: 'pending-recipes',
   PENDING_IMAGES: 'pending-images',
+  FAILED_URLS: 'failed-urls',
 };
 
 export class DashboardRefreshManager {
@@ -121,6 +122,9 @@ export class DashboardRefreshManager {
         break;
       case DASHBOARD_SECTIONS.PENDING_IMAGES:
         await this.controller.loadPendingImages();
+        break;
+      case DASHBOARD_SECTIONS.FAILED_URLS:
+        await this.controller.loadFailedUrls();
         break;
       default:
         console.warn(`Unknown section: ${section}`);
