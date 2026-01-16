@@ -517,7 +517,7 @@ export default {
 
     try {
       const failedUrls = await FirestoreService.queryDocuments('failed_url_extractions', {
-        orderBy: [['lastAttempt', 'desc']],
+        orderBy: ['lastAttempt', 'desc'],
       });
 
       const items = failedUrls.map((item) => ({
