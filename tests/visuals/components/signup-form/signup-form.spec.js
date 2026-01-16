@@ -99,8 +99,13 @@ test.describe('SignupForm Component', () => {
   });
 
   test('should show error message on failed signup', async ({ page }) => {
-    // Re-configure mock to fail
-    await setupAuthControllerMock(page, 'signup-form', { failSignupWith: 'Email already in use' });
+    // Re-configure mock to fail with specific code
+    await setupAuthControllerMock(page, 'signup-form', {
+      failSignupWith: {
+        code: 'auth/email-already-in-use',
+        message: 'The email address is already in use by another account.'
+      }
+    });
 
     const signupForm = page.locator('signup-form');
 
@@ -113,7 +118,7 @@ test.describe('SignupForm Component', () => {
 
     const errorMsg = signupForm.locator('#signup-error');
     await expect(errorMsg).toBeVisible();
-    await expect(errorMsg).toHaveText('Email already in use');
+    await expect(errorMsg).toHaveText('כתובת האימייל הזו כבר נמצאת בשימוש.'); // Expect localized message
 
     // Visual Snapshot for error state
     const container = page.locator('.test-container');

@@ -5,27 +5,36 @@
  * @param {import('@playwright/test').Page} page - The Playwright page object
  * @param {string} componentSelector - Selector for the component to mock context for (e.g. 'signup-form')
  * @param {Object} options - Mock behavior options
- * @param {string|null} options.failSignupWith - If set, handleSignup will throw error with this message
- * @param {string|null} options.failLoginWith - If set, handleLogin will throw error with this message
+ * @param {string|Object} options.failSignupWith - If set, handleSignup will throw error. Can be string or { code, message }
+ * @param {string|Object} options.failLoginWith - If set, handleLogin will throw error. Can be string or { code, message }
  */
 export async function setupAuthControllerMock(page, componentSelector, options = {}) {
   await page.evaluate(({ selector, opts }) => {
     const component = document.querySelector(selector);
     if (!component) return;
 
+    const createError = (errorInput) => {
+      if (typeof errorInput === 'string') {
+        return new Error(errorInput);
+      }
+      const error = new Error(errorInput.message || 'Auth Error');
+      if (errorInput.code) {
+        error.code = errorInput.code;
+      }
+      return error;
+    };
+
     const mockAuthController = {
       handleSignup: async (email, password, fullName) => {
         if (opts.failSignupWith) {
-          throw new Error(opts.failSignupWith);
+          throw createError(opts.failSignupWith);
         }
         console.log(`Signup attempted with: ${email}, ${password}, ${fullName}`);
         return Promise.resolve();
       },
       handleLogin: async (email, password, remember) => {
         if (opts.failLoginWith) {
-           const error = new Error(opts.failLoginWith);
-           // Add code property if it looks like a Firebase error code, but simple message is usually enough for UI tests
-           throw error;
+           throw createError(opts.failLoginWith);
         }
         console.log(`Login attempted with: ${email}, ${password}, ${remember}`);
         return Promise.resolve();
@@ -45,7 +54,7 @@ export async function setupAuthControllerMock(page, componentSelector, options =
         if (selector === 'auth-controller') {
           return mockAuthController;
         }
-        return null; // For other selectors, return null (or could try to call original if we stored it)
+        return null;
       },
       writable: true,
       configurable: true,

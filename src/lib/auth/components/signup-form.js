@@ -329,7 +329,7 @@ class SignupForm extends HTMLElement {
         }),
       );
     } catch (error) {
-      this.showError(error.message);
+      this.handleError(error);
     } finally {
       submitButton.disabled = false;
       submitButton.textContent = originalText;
@@ -352,11 +352,41 @@ class SignupForm extends HTMLElement {
         }),
       );
     } catch (error) {
-      this.showError(error.message);
+      this.handleError(error);
     } finally {
       googleButton.style.opacity = '1';
       googleButton.style.pointerEvents = 'auto';
     }
+  }
+
+  handleError(error) {
+    let message = 'אירעה שגיאה בהרשמה. אנא נסו שוב מאוחר יותר.';
+
+    if (error.code) {
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          message = 'כתובת האימייל הזו כבר נמצאת בשימוש.';
+          break;
+        case 'auth/invalid-email':
+          message = 'כתובת האימייל אינה תקינה.';
+          break;
+        case 'auth/weak-password':
+          message = 'הסיסמה חלשה מדי. אנא בחרו סיסמה חזקה יותר.';
+          break;
+        case 'auth/network-request-failed':
+          message = 'שגיאת תקשורת. אנא בדקו את החיבור לאינטרנט.';
+          break;
+      }
+    } else if (error.message) {
+      // Fallback to error message if present, but prefer localized general error if not specific
+      // Sometimes we might want to just show the technical error in dev but localized in prod
+      // checking for common text fragments if code is missing?
+      if (error.message.includes('email-already-in-use')) {
+        message = 'כתובת האימייל הזו כבר נמצאת בשימוש.';
+      }
+    }
+
+    this.showError(message);
   }
 
   showError(message) {
