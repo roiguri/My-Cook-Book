@@ -93,6 +93,14 @@ service cloud.firestore {
       // - Managers only
       allow delete: if isManager();
     }
+
+    // =========================================================================
+    // FAILED URL EXTRACTIONS
+    // =========================================================================
+    match /failed_url_extractions/{document=**} {
+      // Only managers can view and clean up failed URL logs
+      allow read, delete: if isManager();
+    }
     
     // =========================================================================
     // DEFAULT LOCK
