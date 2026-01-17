@@ -118,6 +118,8 @@ _Unit tests for business logic._
 - [x] `form-validation-utils.js`
 - [x] `active-meal-utils.js`
 - [x] `router.js` (Core routing logic)
+- [x] `common-utils.js`
+- [ ] `error-handler.js`
 
 ## 🐛 Known Bugs / Issues
 
