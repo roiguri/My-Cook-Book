@@ -48,7 +48,9 @@ export class PageManager {
 
   async importPageModule(modulePath) {
     try {
-      const module = await import(/* webpackChunkName: "page-[request]" */ modulePath);
+      const module = await import(
+        /* @vite-ignore */ /* webpackChunkName: "page-[request]" */ modulePath
+      );
       return module.default || module;
     } catch (error) {
       throw new Error(`Failed to import page module: ${modulePath}. ${error.message}`);

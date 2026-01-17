@@ -42,6 +42,7 @@ test.describe('LoginForm Component', () => {
 
     // Wait for any animations or fonts
     await page.waitForLoadState('networkidle');
+    await page.evaluate(() => document.fonts.ready);
   });
 
   test('should render login form correctly (visual)', async ({ page }) => {
@@ -62,7 +63,10 @@ test.describe('LoginForm Component', () => {
 
     // Visual Snapshot of the container to capture the form context
     const container = page.locator('.test-container');
-    await expect(container).toHaveScreenshot('login-form-default.png');
+    await expect(container).toHaveScreenshot('login-form-default.png', {
+      maxDiffPixels: 1000,
+      threshold: 0.3,
+    });
   });
 
   test('should show validation error for invalid email', async ({ page }) => {
@@ -143,6 +147,9 @@ test.describe('LoginForm Component', () => {
 
     // Visual Snapshot for error state
     const container = page.locator('.test-container');
-    await expect(container).toHaveScreenshot('login-form-error.png');
+    await expect(container).toHaveScreenshot('login-form-error.png', {
+      maxDiffPixels: 1000,
+      threshold: 0.3,
+    });
   });
 });

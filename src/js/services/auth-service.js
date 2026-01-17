@@ -389,7 +389,11 @@ class AuthService {
    * @returns {string} The current user's role
    */
   async getCurrentUserRole() {
-    // FIXME: remove this once state management is implemented
+    if (this._userRoles) {
+      return this._userRoles.role;
+    }
+    if (!this._currentUser) return 'public';
+
     this._userRoles = await this._fetchUserRoles(this._currentUser);
     return this._userRoles?.role || 'public';
   }

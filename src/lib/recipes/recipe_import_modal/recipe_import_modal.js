@@ -40,8 +40,6 @@ class RecipeImportModal extends HTMLElement {
       <style>
         ${cropperStyles}
         ${styles}
-        ${cropperStyles}
-        ${styles}
         ${memoryGameStyles}
         ${burgerStackerStyles}
         ${gameWrapperStyles}

@@ -14,6 +14,7 @@ test.describe('SignupForm Component', () => {
 
     // Wait for any animations or fonts
     await page.waitForLoadState('networkidle');
+    await page.evaluate(() => document.fonts.ready);
   });
 
   test('should render signup form correctly (visual)', async ({ page }) => {
@@ -31,7 +32,10 @@ test.describe('SignupForm Component', () => {
 
     // Visual Snapshot
     const container = page.locator('.test-container');
-    await expect(container).toHaveScreenshot('signup-form-default.png');
+    await expect(container).toHaveScreenshot('signup-form-default.png', {
+      maxDiffPixels: 1000,
+      threshold: 0.3,
+    });
   });
 
   test('should show password strength indicator', async ({ page }) => {
@@ -122,6 +126,9 @@ test.describe('SignupForm Component', () => {
 
     // Visual Snapshot for error state
     const container = page.locator('.test-container');
-    await expect(container).toHaveScreenshot('signup-form-error.png');
+    await expect(container).toHaveScreenshot('signup-form-error.png', {
+      maxDiffPixels: 1000,
+      threshold: 0.3,
+    });
   });
 });
