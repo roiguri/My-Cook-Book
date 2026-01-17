@@ -55,6 +55,7 @@ class RecipePresentationGrid extends HTMLElement {
     this.isLoading = false;
     this.isReady = false;
     this.pendingRecipes = null; // Store recipes if set before component is ready
+    this._cachedFavorites = null; // Cache for user favorites to avoid N+1 fetches on pagination
 
     // Bind methods
     this.handleRecipeCardOpen = this.handleRecipeCardOpen.bind(this);
@@ -271,14 +272,30 @@ class RecipePresentationGrid extends HTMLElement {
     const user = authService.getCurrentUser();
     const authenticated = !!user;
     let favoritesPromise;
+    const usingCache = !!this._cachedFavorites;
 
     // PERFORMANCE: Fetch user favorites once for all cards (N+1 optimization)
-    // Non-blocking fetch to avoid delaying render
+    // We cache the favorites to avoid fetching on every page change
     if (authenticated && this.showFavorites) {
-      favoritesPromise = FirestoreService.getDocument('users', user.uid).catch((error) => {
-        console.error('Error pre-fetching favorites:', error);
-        return null;
-      });
+      if (usingCache) {
+        // Use cached favorites immediately
+        favoritesPromise = Promise.resolve(this._cachedFavorites);
+      } else {
+        // Non-blocking fetch to avoid delaying render
+        favoritesPromise = FirestoreService.getDocument('users', user.uid)
+          .then((userDoc) => {
+            if (userDoc && userDoc.favorites) {
+              this._cachedFavorites = new Set(userDoc.favorites);
+            } else {
+              this._cachedFavorites = new Set();
+            }
+            return this._cachedFavorites;
+          })
+          .catch((error) => {
+            console.error('Error pre-fetching favorites:', error);
+            return new Set();
+          });
+      }
     }
 
     // PERFORMANCE: Use DocumentFragment to batch DOM insertions (Layout thrashing optimization)
@@ -297,9 +314,16 @@ class RecipePresentationGrid extends HTMLElement {
 
       if (authenticated && this.showFavorites) {
         recipeCard.setAttribute('show-favorites', 'true');
-        // PERFORMANCE: Initialize as false to prevent card's internal fetch (N+1 prevention)
-        // We will update it asynchronously once the bulk fetch completes
-        recipeCard.isFavorite = false;
+
+        // PERFORMANCE: If we have cached favorites, set state immediately
+        // This prevents double-rendering (first empty heart, then filled)
+        if (usingCache) {
+          recipeCard.isFavorite = this._cachedFavorites.has(recipe.id);
+        } else {
+          // PERFORMANCE: Initialize as false to prevent card's internal fetch (N+1 prevention)
+          // We will update it asynchronously once the bulk fetch completes
+          recipeCard.isFavorite = false;
+        }
       }
 
       if (authenticated && this.getAttribute('show-add-to-meal') !== 'false') {
@@ -312,11 +336,10 @@ class RecipePresentationGrid extends HTMLElement {
 
     container.appendChild(fragment);
 
-    // Update favorites once data is available
-    if (favoritesPromise) {
-      favoritesPromise.then((userDoc) => {
-        if (userDoc && userDoc.favorites) {
-          const favSet = new Set(userDoc.favorites);
+    // Update favorites once data is available (only needed if we didn't use cache)
+    if (favoritesPromise && !usingCache) {
+      favoritesPromise.then((favSet) => {
+        if (favSet) {
           const cards = container.querySelectorAll('recipe-card');
           cards.forEach((card) => {
             if (favSet.has(card.recipeId)) {
@@ -349,6 +372,17 @@ class RecipePresentationGrid extends HTMLElement {
    * Handle favorite status change
    */
   handleFavoriteChanged(event) {
+    const { recipeId, isFavorite } = event.detail;
+
+    // Update local cache if exists
+    if (this._cachedFavorites) {
+      if (isFavorite) {
+        this._cachedFavorites.add(recipeId);
+      } else {
+        this._cachedFavorites.delete(recipeId);
+      }
+    }
+
     this.dispatchEvent(
       new CustomEvent('favorite-changed', {
         detail: event.detail,
