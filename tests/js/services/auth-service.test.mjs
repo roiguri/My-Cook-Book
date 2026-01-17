@@ -525,6 +525,7 @@ describe('AuthService', () => {
 
   describe('getCurrentUserRole', () => {
     test('fetches and returns the user role if not set', async () => {
+      authService._currentUser = mockUser; // Set current user
       // Mock the fetch to resolve to a manager role
       jest.spyOn(authService, '_fetchUserRoles').mockResolvedValue({ role: 'manager' });
 
@@ -534,12 +535,19 @@ describe('AuthService', () => {
     });
 
     test('returns the cached role if already set', async () => {
-      jest.spyOn(authService, '_fetchUserRoles').mockResolvedValue({ role: 'approved' });
+      authService._currentUser = mockUser;
+      authService._userRoles = { role: 'approved' }; // Set cached role
+      // _fetchUserRoles should NOT be called
+      const fetchSpy = jest.spyOn(authService, '_fetchUserRoles');
+
       const role = await authService.getCurrentUserRole();
       expect(role).toBe('approved');
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
 
     test('returns public if no user and no roles', async () => {
+      authService._currentUser = null;
+      authService._userRoles = null;
       jest.spyOn(authService, '_fetchUserRoles').mockResolvedValue();
 
       const role = await authService.getCurrentUserRole();

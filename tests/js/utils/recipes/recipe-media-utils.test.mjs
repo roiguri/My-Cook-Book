@@ -396,12 +396,16 @@ describe('recipe-media-utils', () => {
 
     it('handles upload failure', async () => {
       uploadFileMock.mockRejectedValue(new Error('Storage error'));
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       const file = createFakeFile('test.jpg', 'image/jpeg', 1000);
 
       await expect(uploadMediaInstructionFile(file, 'recipe-123', 'user-456')).rejects.toThrow(
         'העלאת הקובץ נכשלה',
       );
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
 
     it('sanitizes file names with special characters', async () => {
@@ -454,17 +458,24 @@ describe('recipe-media-utils', () => {
       deleteFileMock.mockRejectedValue(notFoundError);
 
       // Should NOT throw
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       await expect(
         deleteMediaInstructionFile('recipes/test/media-instructions/missing.jpg'),
       ).resolves.toBeUndefined();
+      expect(consoleWarnSpy).toHaveBeenCalled();
+      consoleWarnSpy.mockRestore();
     });
 
     it('throws error for other storage errors', async () => {
       deleteFileMock.mockRejectedValue(new Error('Permission denied'));
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(
         deleteMediaInstructionFile('recipes/test/media-instructions/file.jpg'),
       ).rejects.toThrow('מחיקת הקובץ נכשלה');
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -525,10 +536,14 @@ describe('recipe-media-utils', () => {
 
     it('handles error getting URL', async () => {
       getFileUrlMock.mockRejectedValue(new Error('File not found'));
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       await expect(
         getMediaInstructionUrl('recipes/test/media-instructions/missing.jpg'),
       ).rejects.toThrow('קבלת כתובת המדיה נכשלה');
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
   });
 });

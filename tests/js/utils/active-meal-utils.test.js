@@ -34,6 +34,8 @@ describe('ActiveMealUtils', () => {
 
   describe('addToMeal', () => {
     it('returns error if userId or recipeId is missing', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
       expect(await ActiveMealUtils.addToMeal(null, 'recipe1')).toEqual({
         success: false,
         reason: 'invalid_input',
@@ -42,6 +44,9 @@ describe('ActiveMealUtils', () => {
         success: false,
         reason: 'invalid_input',
       });
+
+      expect(consoleErrorSpy).toHaveBeenCalled();
+      consoleErrorSpy.mockRestore();
     });
 
     it('returns duplicate if recipe already in meal', async () => {
