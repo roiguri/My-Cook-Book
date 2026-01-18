@@ -1,6 +1,0 @@
-{
-  "workbench.colorTheme": "Visual Studio Dark - C++",
-  "jest.nodeEnv": {
-    "NODE_OPTIONS": "--experimental-vm-modules"
-  }
-}
