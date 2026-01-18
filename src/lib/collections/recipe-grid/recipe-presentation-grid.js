@@ -55,6 +55,8 @@ class RecipePresentationGrid extends HTMLElement {
     this.isLoading = false;
     this.isReady = false;
     this.pendingRecipes = null; // Store recipes if set before component is ready
+    this._cachedFavorites = null; // Cache for user favorites to prevent redundant fetches
+    this._cachedFavoritesUserId = null; // Track which user the cache belongs to
 
     // Bind methods
     this.handleRecipeCardOpen = this.handleRecipeCardOpen.bind(this);
@@ -270,15 +272,31 @@ class RecipePresentationGrid extends HTMLElement {
 
     const user = authService.getCurrentUser();
     const authenticated = !!user;
-    let favoritesPromise;
+    let favoritesPromise = null;
+
+    // Invalidate cache if user changed
+    if (this._cachedFavoritesUserId !== (user ? user.uid : null)) {
+      this._cachedFavorites = null;
+      this._cachedFavoritesUserId = user ? user.uid : null;
+    }
 
     // PERFORMANCE: Fetch user favorites once for all cards (N+1 optimization)
     // Non-blocking fetch to avoid delaying render
     if (authenticated && this.showFavorites) {
-      favoritesPromise = FirestoreService.getDocument('users', user.uid).catch((error) => {
-        console.error('Error pre-fetching favorites:', error);
-        return null;
-      });
+      if (!this._cachedFavorites) {
+        favoritesPromise = FirestoreService.getDocument('users', user.uid)
+          .then((userDoc) => {
+            const favs = userDoc && userDoc.favorites ? userDoc.favorites : [];
+            this._cachedFavorites = new Set(favs);
+            return this._cachedFavorites;
+          })
+          .catch((error) => {
+            console.error('Error pre-fetching favorites:', error);
+            // On error, initialize empty cache so we don't retry immediately
+            this._cachedFavorites = new Set();
+            return this._cachedFavorites;
+          });
+      }
     }
 
     // PERFORMANCE: Use DocumentFragment to batch DOM insertions (Layout thrashing optimization)
@@ -297,9 +315,15 @@ class RecipePresentationGrid extends HTMLElement {
 
       if (authenticated && this.showFavorites) {
         recipeCard.setAttribute('show-favorites', 'true');
-        // PERFORMANCE: Initialize as false to prevent card's internal fetch (N+1 prevention)
-        // We will update it asynchronously once the bulk fetch completes
-        recipeCard.isFavorite = false;
+
+        // PERFORMANCE: Use cached favorites if available to avoid re-render
+        if (this._cachedFavorites) {
+          recipeCard.isFavorite = this._cachedFavorites.has(recipe.id);
+        } else {
+          // PERFORMANCE: Initialize as false to prevent card's internal fetch (N+1 prevention)
+          // We will update it asynchronously once the bulk fetch completes
+          recipeCard.isFavorite = false;
+        }
       }
 
       if (authenticated && this.getAttribute('show-add-to-meal') !== 'false') {
@@ -312,11 +336,10 @@ class RecipePresentationGrid extends HTMLElement {
 
     container.appendChild(fragment);
 
-    // Update favorites once data is available
+    // Update favorites once data is available (only needed if we didn't have cache)
     if (favoritesPromise) {
-      favoritesPromise.then((userDoc) => {
-        if (userDoc && userDoc.favorites) {
-          const favSet = new Set(userDoc.favorites);
+      favoritesPromise.then((favSet) => {
+        if (favSet && favSet.size > 0) {
           const cards = container.querySelectorAll('recipe-card');
           cards.forEach((card) => {
             if (favSet.has(card.recipeId)) {
@@ -349,6 +372,16 @@ class RecipePresentationGrid extends HTMLElement {
    * Handle favorite status change
    */
   handleFavoriteChanged(event) {
+    // Update local cache if exists
+    if (this._cachedFavorites) {
+      const { recipeId, isFavorite } = event.detail;
+      if (isFavorite) {
+        this._cachedFavorites.add(recipeId);
+      } else {
+        this._cachedFavorites.delete(recipeId);
+      }
+    }
+
     this.dispatchEvent(
       new CustomEvent('favorite-changed', {
         detail: event.detail,
