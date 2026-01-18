@@ -87,14 +87,18 @@ class LoadingSpinner extends HTMLElement {
   _render() {
     const isOverlay = this.hasAttribute('overlay');
     const isActive = this.hasAttribute('active');
+
     this.shadowRoot.innerHTML = `
       <style>
       :host {
+        display: ${isActive ? 'inline-block' : 'none'};
+      }
+      :host([overlay]) {
         display: block;
-        position: ${isOverlay ? 'relative' : 'static'};
+        position: relative;
       }
       .overlay {
-        display: ${isActive && isOverlay ? 'flex' : 'none'};
+        display: flex;
         align-items: center;
         justify-content: center;
         position: fixed;
@@ -121,7 +125,10 @@ class LoadingSpinner extends HTMLElement {
       }
       </style>
       <slot></slot>
-      <div class="overlay"><div class="spinner"></div></div>
+      ${isOverlay
+        ? (isActive ? '<div class="overlay"><div class="spinner"></div></div>' : '')
+        : (isActive ? '<div class="spinner"></div>' : '')
+      }
     `;
   }
 

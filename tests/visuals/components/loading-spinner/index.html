@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading Spinner Visual Test</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f5;
+      }
+      .test-container {
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+      h2 { margin-top: 0; font-size: 1rem; color: #666; }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <h2>Default (Active)</h2>
+      <loading-spinner id="default-spinner" active></loading-spinner>
+    </div>
+
+    <div class="test-container">
+      <h2>Custom (Blue, 60px, Active)</h2>
+      <loading-spinner id="custom-spinner" color="blue" size="60px" active></loading-spinner>
+    </div>
+
+    <div class="test-container">
+      <h2>Overlay (Inactive initially)</h2>
+      <loading-spinner id="overlay-spinner" overlay></loading-spinner>
+    </div>
+
+    <script type="module" src="/src/lib/utilities/loading-spinner/loading-spinner.js"></script>
+  </body>
+</html>
