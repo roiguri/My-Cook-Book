@@ -37,6 +37,7 @@ export default {
       await Promise.all([
         import('../../lib/recipes/recipe-card/recipe-card.js'),
         import('../../lib/utilities/recipe-scroller/recipe-scroller.js'),
+        import('../../lib/utilities/loading-spinner/loading-spinner.js'),
       ]);
     } catch (error) {
       console.error('Error importing home page components:', error);
@@ -44,6 +45,39 @@ export default {
   },
 
   async loadFeaturedRecipes() {
+    // Start loading critical images in parallel
+    const backgroundImages = [
+      '/img/background/navigation/wood-texture.webp',
+      '/img/background/stone-counter-top.webp',
+    ];
+
+    const imageLoadPromises = backgroundImages.map((src) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = resolve;
+        img.onerror = resolve; // Resolve anyway to avoid blocking
+      });
+    });
+
+    // Wait for images with a timeout
+    const imagesLoaded = Promise.all(imageLoadPromises);
+    const timeout = new Promise((resolve) => setTimeout(resolve, 2000)); // Max wait 2s
+
+    Promise.race([imagesLoaded, timeout]).then(() => {
+      const loader = document.getElementById('home-page-loader');
+      if (loader) {
+        loader.removeAttribute('active');
+        // Force check for lazy loaded images that might be in viewport
+        const lazyImages = document.querySelectorAll('.jar-img');
+        lazyImages.forEach((img) => {
+          if (img.complete) {
+            img.classList.add('loaded');
+          }
+        });
+      }
+    });
+
     const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
     if (!featuredRecipesGrid) {
       console.warn('Featured recipes grid not found');
