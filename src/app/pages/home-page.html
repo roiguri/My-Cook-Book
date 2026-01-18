@@ -1,138 +1,140 @@
 <div class="home-page">
   <loading-spinner id="home-page-loader" overlay active size="60px" color="var(--primary-color)"></loading-spinner>
 
-  <section class="hero">
-    <div>Discover homemade goodness in every bite</div>
-  </section>
+  <div class="content-wrapper" style="opacity: 0; transition: opacity 0.5s ease-in-out;">
+    <section class="hero">
+      <div>Discover homemade goodness in every bite</div>
+    </section>
 
-  <section class="quick-links">
-    <h2>Explore Recipes</h2>
-    <div class="category-jars">
-      <a href="/categories?category=appetizers" class="category-jar" aria-label="Appetizers">
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/appetizers.webp"
-          alt="Appetizers"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Appetizers</span>
-      </a>
-      <a href="/categories?category=main-courses" class="category-jar" aria-label="Main Courses">
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/main-course.webp"
-          alt="Main Courses"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Main Courses</span>
-      </a>
-      <a href="/categories?category=side-dishes" class="category-jar" aria-label="Side Dishes">
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/side-dishes.webp"
-          alt="Side Dishes"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Side Dishes</span>
-      </a>
-      <a href="/categories?category=soups-stews" class="category-jar" aria-label="Soups & Stews">
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/soups&stews.webp"
-          alt="Soups & Stews"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Soups & Stews</span>
-      </a>
-      <a href="/categories?category=salads" class="category-jar" aria-label="Salads">
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/salad.webp"
-          alt="Salads"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Salads</span>
-      </a>
-      <a
-        href="/categories?category=breads-pastries"
-        class="category-jar"
-        aria-label="Breads & Pastries"
-      >
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/breads-pastries.webp"
-          alt="Breads & Pastries"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Breads & Pastries</span>
-      </a>
-      <a href="/categories?category=desserts" class="category-jar" aria-label="Desserts">
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/dessert.webp"
-          alt="Desserts"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Desserts</span>
-      </a>
-      <a
-        href="/categories?category=breakfast-brunch"
-        class="category-jar"
-        aria-label="Breakfast & Brunch"
-      >
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/breakfast.webp"
-          alt="Breakfast & Brunch"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Breakfast & Brunch</span>
-      </a>
-      <a href="/categories?category=snacks" class="category-jar" aria-label="Snacks">
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/snacks.webp"
-          alt="Snacks"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Snacks</span>
-      </a>
-      <a href="/categories?category=beverages" class="category-jar" aria-label="Beverages">
-        <img
-          class="jar-img"
-          src="/img/category-jars/optimized/beverages.webp"
-          alt="Beverages"
-          loading="lazy"
-          onload="this.classList.add('loaded')"
-        />
-        <span>Beverages</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="featured-recipes">
-    <h2>Recently Added</h2>
-    <recipe-scroller id="featured-recipes-grid" item-width="200px" gap="20px">
-      <div slot="items">
-        <!-- Featured recipes will be loaded here -->
+    <section class="quick-links">
+      <h2>Explore Recipes</h2>
+      <div class="category-jars">
+        <a href="/categories?category=appetizers" class="category-jar" aria-label="Appetizers">
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/appetizers.webp"
+            alt="Appetizers"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Appetizers</span>
+        </a>
+        <a href="/categories?category=main-courses" class="category-jar" aria-label="Main Courses">
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/main-course.webp"
+            alt="Main Courses"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Main Courses</span>
+        </a>
+        <a href="/categories?category=side-dishes" class="category-jar" aria-label="Side Dishes">
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/side-dishes.webp"
+            alt="Side Dishes"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Side Dishes</span>
+        </a>
+        <a href="/categories?category=soups-stews" class="category-jar" aria-label="Soups & Stews">
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/soups&stews.webp"
+            alt="Soups & Stews"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Soups & Stews</span>
+        </a>
+        <a href="/categories?category=salads" class="category-jar" aria-label="Salads">
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/salad.webp"
+            alt="Salads"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Salads</span>
+        </a>
+        <a
+          href="/categories?category=breads-pastries"
+          class="category-jar"
+          aria-label="Breads & Pastries"
+        >
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/breads-pastries.webp"
+            alt="Breads & Pastries"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Breads & Pastries</span>
+        </a>
+        <a href="/categories?category=desserts" class="category-jar" aria-label="Desserts">
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/dessert.webp"
+            alt="Desserts"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Desserts</span>
+        </a>
+        <a
+          href="/categories?category=breakfast-brunch"
+          class="category-jar"
+          aria-label="Breakfast & Brunch"
+        >
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/breakfast.webp"
+            alt="Breakfast & Brunch"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Breakfast & Brunch</span>
+        </a>
+        <a href="/categories?category=snacks" class="category-jar" aria-label="Snacks">
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/snacks.webp"
+            alt="Snacks"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Snacks</span>
+        </a>
+        <a href="/categories?category=beverages" class="category-jar" aria-label="Beverages">
+          <img
+            class="jar-img"
+            src="/img/category-jars/optimized/beverages.webp"
+            alt="Beverages"
+            loading="lazy"
+            onload="this.classList.add('loaded')"
+          />
+          <span>Beverages</span>
+        </a>
       </div>
-    </recipe-scroller>
-  </section>
+    </section>
 
-  <div class="quote-section">
-    <blockquote>
-      "Cooking is like painting or writing a song. Just as there are only so many notes or colors,
-      there are only so many flavors—it's how you combine them that sets you apart."
-    </blockquote>
-    <cite>– Wolfgang Puck</cite>
+    <section class="featured-recipes">
+      <h2>Recently Added</h2>
+      <recipe-scroller id="featured-recipes-grid" item-width="200px" gap="20px">
+        <div slot="items">
+          <!-- Featured recipes will be loaded here -->
+        </div>
+      </recipe-scroller>
+    </section>
+
+    <div class="quote-section">
+      <blockquote>
+        "Cooking is like painting or writing a song. Just as there are only so many notes or colors,
+        there are only so many flavors—it's how you combine them that sets you apart."
+      </blockquote>
+      <cite>– Wolfgang Puck</cite>
+    </div>
   </div>
 </div>

@@ -13,7 +13,9 @@ export default {
 
   async mount() {
     await this.importComponents();
-    await this.loadFeaturedRecipes();
+    // Load data and images in parallel, but handle spinner visibility in handlePageLoading
+    const dataPromise = this.loadFeaturedRecipes();
+    this.handlePageLoading(dataPromise);
   },
 
   async unmount() {
@@ -44,7 +46,7 @@ export default {
     }
   },
 
-  async loadFeaturedRecipes() {
+  async handlePageLoading(dataPromise) {
     // Start loading critical images in parallel
     const backgroundImages = [
       '/img/background/navigation/wood-texture.webp',
@@ -60,24 +62,42 @@ export default {
       });
     });
 
-    // Wait for images with a timeout
+    // Wait for BOTH images and data (dataPromise is passed from mount)
     const imagesLoaded = Promise.all(imageLoadPromises);
-    const timeout = new Promise((resolve) => setTimeout(resolve, 2000)); // Max wait 2s
+    const allResourcesLoaded = Promise.all([imagesLoaded, dataPromise]);
 
-    Promise.race([imagesLoaded, timeout]).then(() => {
-      const loader = document.getElementById('home-page-loader');
-      if (loader) {
-        loader.removeAttribute('active');
+    // Set a reasonable timeout to prevent hanging if something fails
+    const timeout = new Promise((resolve) => setTimeout(resolve, 2500)); // Max wait 2.5s
+
+    await Promise.race([allResourcesLoaded, timeout]);
+
+    // Transition: Fade out spinner, Fade in content
+    const loader = document.getElementById('home-page-loader');
+    const content = document.querySelector('.content-wrapper');
+
+    if (loader) {
+      loader.removeAttribute('active');
+    }
+
+    if (content) {
+      // Small delay to ensure spinner fade-out starts
+      requestAnimationFrame(() => {
+        content.style.opacity = '1';
+
         // Force check for lazy loaded images that might be in viewport
-        const lazyImages = document.querySelectorAll('.jar-img');
-        lazyImages.forEach((img) => {
-          if (img.complete) {
-            img.classList.add('loaded');
-          }
-        });
-      }
-    });
+        setTimeout(() => {
+            const lazyImages = document.querySelectorAll('.jar-img');
+            lazyImages.forEach((img) => {
+            if (img.complete) {
+                img.classList.add('loaded');
+            }
+            });
+        }, 100);
+      });
+    }
+  },
 
+  async loadFeaturedRecipes() {
     const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
     if (!featuredRecipesGrid) {
       console.warn('Featured recipes grid not found');
