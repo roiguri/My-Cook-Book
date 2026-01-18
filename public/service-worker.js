@@ -1,4 +1,4 @@
-const CACHE_NAME = 'our-kitchen-chronicles-spa-2024.12.18';
+const CACHE_NAME = 'our-kitchen-chronicles-spa-2025.01.18';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,17 +7,18 @@ const urlsToCache = [
   '/src/styles/components/spa.css',
   '/src/styles/components/header.css',
   '/src/styles/components/footer.css',
-  '/img/background/stone-counter-top.jpg',
-  '/img/background/wood-texture.jpg',
-  '/img/category-jars/optimized/appetizers.jpg',
+  '/img/background/stone-counter-top.webp',
+  '/img/background/navigation/wood-texture.webp',
+  '/img/category-jars/optimized/appetizers.webp',
   '/img/category-jars/optimized/main-course.webp',
-  '/img/category-jars/optimized/side-dishes.jpeg',
-  '/img/category-jars/optimized/soups&stews.jpg',
-  '/img/category-jars/optimized/salad.jpg',
-  '/img/category-jars/optimized/dessert.jpg',
-  '/img/category-jars/optimized/breakfast.jpeg',
-  '/img/category-jars/optimized/snacks.jpg',
-  '/img/category-jars/optimized/beverages.jpg',
+  '/img/category-jars/optimized/side-dishes.webp',
+  '/img/category-jars/optimized/soups&stews.webp',
+  '/img/category-jars/optimized/salad.webp',
+  '/img/category-jars/optimized/breads-pastries.webp',
+  '/img/category-jars/optimized/dessert.webp',
+  '/img/category-jars/optimized/breakfast.webp',
+  '/img/category-jars/optimized/snacks.webp',
+  '/img/category-jars/optimized/beverages.webp',
   // Add other critical assets here
 ];
 
