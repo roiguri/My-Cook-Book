@@ -7,3 +7,8 @@
 
 **Learning:** Web Components often default to fetching their own data based on ID attributes. This causes N+1 fetch cascades in lists.
 **Action:** Always implement a property setter (e.g., `set data(val)`) on list item components to allow parent lists to pass pre-fetched data directly, bypassing the internal fetch.
+
+## 2025-10-26 - [Firebase Storage URL Caching]
+
+**Learning:** `getDownloadURL` from Firebase Storage SDK often incurs a network round-trip, causing N+1 request issues when rendering lists of images (like recipe cards).
+**Action:** Implement an in-memory cache for storage URLs (keyed by path) in the service layer to prevent redundant network requests for immutable assets.
