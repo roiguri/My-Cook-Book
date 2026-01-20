@@ -89,8 +89,8 @@ _Visual and interaction tests for UI blocks._
 
 | Component            | 📸  | 🖱️  | 🧠  | Status   |
 | -------------------- | :-: | :-: | :-: | -------- |
-| `toast-notification` | [ ] | [ ] | [ ] | Untested |
-| `loading-spinner`    | [ ] | [ ] | [ ] | Untested |
+| `toast-notification` | [ ] | [ ] | ✅  | Partial  |
+| `loading-spinner`    | [ ] | [ ] | ✅  | Partial  |
 | `scroll-list`        | [ ] | [ ] | [ ] | Untested |
 
 ## 📄 Pages
