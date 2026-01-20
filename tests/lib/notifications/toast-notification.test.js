@@ -78,6 +78,25 @@ describe('ToastNotification', () => {
     expect(el.shadowRoot.querySelector('.toast').classList.contains('show')).toBe(false);
   });
 
+  test('can be closed programmatically before duration expires', () => {
+    const el = document.createElement('toast-notification');
+    document.body.appendChild(el);
+    const duration = 5000;
+
+    el.show('Quick Close', 'info', duration);
+
+    expect(el.shadowRoot.querySelector('.toast').classList.contains('show')).toBe(true);
+
+    // Close immediately (simulating a close action if there was a button, or app logic closing it)
+    el.hide();
+
+    expect(el.shadowRoot.querySelector('.toast').classList.contains('show')).toBe(false);
+
+    // Ensure timer doesn't cause error or re-show (though timeout callback just calls hide which is safe)
+    jest.advanceTimersByTime(duration);
+    expect(el.shadowRoot.querySelector('.toast').classList.contains('show')).toBe(false);
+  });
+
   test('does not auto-dismiss if duration is 0', () => {
     const el = document.createElement('toast-notification');
     document.body.appendChild(el);
