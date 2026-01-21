@@ -55,6 +55,7 @@ class RecipePresentationGrid extends HTMLElement {
     this.isLoading = false;
     this.isReady = false;
     this.pendingRecipes = null; // Store recipes if set before component is ready
+    this._cachedFavorites = null; // OPTIMIZATION: Cache favorites to avoid redundant fetches
 
     // Bind methods
     this.handleRecipeCardOpen = this.handleRecipeCardOpen.bind(this);
@@ -272,13 +273,28 @@ class RecipePresentationGrid extends HTMLElement {
     const authenticated = !!user;
     let favoritesPromise;
 
-    // PERFORMANCE: Fetch user favorites once for all cards (N+1 optimization)
-    // Non-blocking fetch to avoid delaying render
+    // PERFORMANCE: Pre-fetch or use cached favorites
     if (authenticated && this.showFavorites) {
-      favoritesPromise = FirestoreService.getDocument('users', user.uid).catch((error) => {
-        console.error('Error pre-fetching favorites:', error);
-        return null;
-      });
+      if (!this._cachedFavorites) {
+        // Fetch only if not cached
+        favoritesPromise = FirestoreService.getDocument('users', user.uid)
+          .then((userDoc) => {
+            if (userDoc && userDoc.favorites) {
+              this._cachedFavorites = new Set(userDoc.favorites);
+            } else {
+              this._cachedFavorites = new Set();
+            }
+            return this._cachedFavorites;
+          })
+          .catch((error) => {
+            console.error('Error pre-fetching favorites:', error);
+            // On error, initialize empty set but don't cache null to allow retry
+            return new Set();
+          });
+      }
+    } else if (!authenticated) {
+      // Clear cache if user logged out
+      this._cachedFavorites = null;
     }
 
     // PERFORMANCE: Use DocumentFragment to batch DOM insertions (Layout thrashing optimization)
@@ -297,9 +313,15 @@ class RecipePresentationGrid extends HTMLElement {
 
       if (authenticated && this.showFavorites) {
         recipeCard.setAttribute('show-favorites', 'true');
-        // PERFORMANCE: Initialize as false to prevent card's internal fetch (N+1 prevention)
-        // We will update it asynchronously once the bulk fetch completes
-        recipeCard.isFavorite = false;
+
+        if (this._cachedFavorites) {
+          // OPTIMIZATION: Use cached favorites to set state immediately
+          // This avoids "flash of un-favorited content" and prevents double-rendering
+          recipeCard.isFavorite = this._cachedFavorites.has(recipe.id);
+        } else {
+          // Fallback: Initialize as false, will update when promise resolves
+          recipeCard.isFavorite = false;
+        }
       }
 
       if (authenticated && this.getAttribute('show-add-to-meal') !== 'false') {
@@ -312,18 +334,17 @@ class RecipePresentationGrid extends HTMLElement {
 
     container.appendChild(fragment);
 
-    // Update favorites once data is available
+    // Update favorites if we needed to fetch them
     if (favoritesPromise) {
-      favoritesPromise.then((userDoc) => {
-        if (userDoc && userDoc.favorites) {
-          const favSet = new Set(userDoc.favorites);
-          const cards = container.querySelectorAll('recipe-card');
-          cards.forEach((card) => {
-            if (favSet.has(card.recipeId)) {
-              card.isFavorite = true;
-            }
-          });
-        }
+      favoritesPromise.then((favSet) => {
+        if (!favSet) return;
+        const cards = container.querySelectorAll('recipe-card');
+        cards.forEach((card) => {
+          // Only update if different to avoid unnecessary work
+          if (favSet.has(card.recipeId)) {
+            card.isFavorite = true;
+          }
+        });
       });
     }
 
@@ -349,6 +370,16 @@ class RecipePresentationGrid extends HTMLElement {
    * Handle favorite status change
    */
   handleFavoriteChanged(event) {
+    // Update local cache if exists
+    if (this._cachedFavorites) {
+      const { recipeId, isFavorite } = event.detail;
+      if (isFavorite) {
+        this._cachedFavorites.add(recipeId);
+      } else {
+        this._cachedFavorites.delete(recipeId);
+      }
+    }
+
     this.dispatchEvent(
       new CustomEvent('favorite-changed', {
         detail: event.detail,

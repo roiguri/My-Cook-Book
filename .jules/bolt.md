@@ -7,3 +7,8 @@
 
 **Learning:** Web Components often default to fetching their own data based on ID attributes. This causes N+1 fetch cascades in lists.
 **Action:** Always implement a property setter (e.g., `set data(val)`) on list item components to allow parent lists to pass pre-fetched data directly, bypassing the internal fetch.
+
+## 2025-10-27 - [Component State Caching]
+
+**Learning:** Fetching user data (like favorites) in `render()` methods without caching causes redundant network requests on every re-render (e.g., pagination, filtering).
+**Action:** Cache expensive fetch results in component instance variables (e.g., `this._cachedFavorites`) and invalidate only when necessary (e.g., user action). Use the cache to synchronously update child components to avoid layout thrashing and double renders.
