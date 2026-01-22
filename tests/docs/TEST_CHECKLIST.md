@@ -87,11 +87,11 @@ _Visual and interaction tests for UI blocks._
 
 ### Utilities
 
-| Component            | 📸  | 🖱️  | 🧠  | Status   |
-| -------------------- | :-: | :-: | :-: | -------- |
-| `toast-notification` | [ ] | [ ] | [ ] | Untested |
-| `loading-spinner`    | [ ] | [ ] | [ ] | Untested |
-| `scroll-list`        | [ ] | [ ] | [ ] | Untested |
+| Component            | 📸  | 🖱️  | 🧠  | Status     |
+| -------------------- | :-: | :-: | :-: | ---------- |
+| `toast-notification` | [ ] | [ ] | [ ] | Untested   |
+| `loading-spinner`    | ✅  | ✅  | ✅  | **Stable** |
+| `scroll-list`        | [ ] | [ ] | [ ] | Untested   |
 
 ## 📄 Pages
 

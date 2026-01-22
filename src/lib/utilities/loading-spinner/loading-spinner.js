@@ -94,15 +94,24 @@ class LoadingSpinner extends HTMLElement {
         position: ${isOverlay ? 'relative' : 'static'};
       }
       .overlay {
-        display: ${isActive && isOverlay ? 'flex' : 'none'};
+        display: ${isActive ? 'flex' : 'none'};
         align-items: center;
         justify-content: center;
+        ${
+          isOverlay
+            ? `
         position: fixed;
         inset: 0;
         background: rgba(255,255,255,0.7);
         z-index: 10000;
         pointer-events: all;
         border-radius: ${this.borderRadius};
+        `
+            : `
+        width: 100%;
+        height: 100%;
+        `
+        }
       }
       .spinner {
         border: ${this.lineWidth} solid ${this.color};
