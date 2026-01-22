@@ -37,6 +37,19 @@ describe('StorageService', () => {
       expect(url).toBe(mockUrl);
     });
 
+    it('updates the cache with the new URL', async () => {
+      uploadBytes.mockResolvedValue({});
+      getDownloadURL.mockResolvedValue(mockUrl);
+
+      await StorageService.uploadFile(mockFile, mockPath);
+
+      // Verify cache by calling getFileUrl and checking getDownloadURL isn't called again
+      getDownloadURL.mockClear();
+      const url = await StorageService.getFileUrl(mockPath);
+      expect(url).toBe(mockUrl);
+      expect(getDownloadURL).not.toHaveBeenCalled();
+    });
+
     it('throws an error if upload fails', async () => {
       uploadBytes.mockRejectedValue(new Error('fail'));
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -57,6 +70,19 @@ describe('StorageService', () => {
       expect(url).toBe(mockUrl);
     });
 
+    it('caches the download URL for subsequent calls', async () => {
+      getDownloadURL.mockResolvedValue(mockUrl);
+
+      // First call
+      await StorageService.getFileUrl(mockPath);
+      expect(getDownloadURL).toHaveBeenCalledTimes(1);
+
+      // Second call
+      const url = await StorageService.getFileUrl(mockPath);
+      expect(url).toBe(mockUrl);
+      expect(getDownloadURL).toHaveBeenCalledTimes(1); // Still 1
+    });
+
     it('throws an error if getDownloadURL fails', async () => {
       getDownloadURL.mockRejectedValue(new Error('fail'));
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -66,12 +92,19 @@ describe('StorageService', () => {
   });
 
   describe('deleteFile', () => {
-    it('deletes a file from storage', async () => {
+    it('deletes a file from storage and removes it from cache', async () => {
+      // Setup cache
+      getDownloadURL.mockResolvedValue(mockUrl);
+      await StorageService.getFileUrl(mockPath);
+      expect(StorageService.urlCache.has(mockPath)).toBe(true);
+
       deleteObject.mockResolvedValue();
       await StorageService.deleteFile(mockPath);
+
       expect(firebaseService.getStorageInstance).toHaveBeenCalled();
       expect(ref).toHaveBeenCalledWith(mockStorage, mockPath);
       expect(deleteObject).toHaveBeenCalledWith({ storage: mockStorage, path: mockPath });
+      expect(StorageService.urlCache.has(mockPath)).toBe(false);
     });
 
     it('throws an error if deleteObject fails', async () => {
