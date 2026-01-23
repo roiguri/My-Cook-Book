@@ -4,15 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recipe Presentation Grid Visual Test</title>
+    <link rel="stylesheet" href="../../styles/visual-test-base.css" />
     <style>
       body {
         margin: 0;
         padding: 20px;
-        font-family:
-          system-ui,
-          -apple-system,
-          sans-serif;
         background: #f5f5f5;
+        /* visual-test-base sets height: 100vh and display: flex, we override for grid */
+        height: auto;
+        display: block;
       }
       recipe-presentation-grid {
         display: block;

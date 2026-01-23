@@ -1,22 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-// Test Data
-const MOCK_RECIPES = Array.from({ length: 6 }, (_, i) => ({
-  id: `recipe-${i + 1}`,
-  name: `Test Recipe ${i + 1}`,
-  category: 'main-courses',
-  prepTime: 20 + i,
-  waitTime: 15,
-  difficulty: 'medium',
-  images: [{ id: 'img1', isPrimary: true }],
-}));
-
-const PAGINATION_MOCK_RECIPES = Array.from({ length: 12 }, (_, i) => ({
-  id: `recipe-${i + 1}`,
-  name: `Recipe ${i + 1}`,
-  category: 'dessert',
-  images: [],
-}));
+import { MOCK_RECIPES, PAGINATION_MOCK_RECIPES } from '../../utils/recipe-mocks.js';
 
 test.describe('Recipe Presentation Grid Visuals', () => {
   test.beforeEach(async ({ page }) => {
