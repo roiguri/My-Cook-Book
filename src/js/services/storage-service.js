@@ -16,6 +16,9 @@ import { getStorageInstance } from './firebase-service.js';
  * StorageService: General-purpose file upload, retrieval, and deletion using Firebase Storage.
  */
 export class StorageService {
+  // Simple in-memory cache for download URLs to reduce network requests
+  static _urlCache = new Map();
+
   /**
    * Uploads a file to Firebase Storage.
    * @param {File|Blob} file - The file to upload
@@ -27,7 +30,9 @@ export class StorageService {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
       await uploadBytes(storageRef, file);
-      return await getDownloadURL(storageRef);
+      const url = await getDownloadURL(storageRef);
+      this._urlCache.set(path, url);
+      return url;
     } catch (error) {
       console.error('Error uploading file:', error);
       throw new Error('Failed to upload file');
@@ -40,10 +45,16 @@ export class StorageService {
    * @returns {Promise<string>} The download URL
    */
   static async getFileUrl(path) {
+    if (this._urlCache.has(path)) {
+      return this._urlCache.get(path);
+    }
+
     try {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
-      return await getDownloadURL(storageRef);
+      const url = await getDownloadURL(storageRef);
+      this._urlCache.set(path, url);
+      return url;
     } catch (error) {
       console.error('Error getting file URL:', error);
       throw new Error('Failed to get file URL');
@@ -60,6 +71,7 @@ export class StorageService {
       const storage = getStorageInstance();
       const storageRef = ref(storage, path);
       await deleteObject(storageRef);
+      this._urlCache.delete(path);
     } catch (error) {
       console.error('Error deleting file:', error);
       throw new Error('Failed to delete file');

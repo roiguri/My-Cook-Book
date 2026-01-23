@@ -63,6 +63,16 @@ describe('StorageService', () => {
       await expect(StorageService.getFileUrl(mockPath)).rejects.toThrow('Failed to get file URL');
       errorSpy.mockRestore();
     });
+
+    it('returns cached URL on second call', async () => {
+      getDownloadURL.mockResolvedValue(mockUrl);
+      const url1 = await StorageService.getFileUrl(mockPath);
+      const url2 = await StorageService.getFileUrl(mockPath);
+
+      expect(getDownloadURL).toHaveBeenCalledTimes(1);
+      expect(url1).toBe(mockUrl);
+      expect(url2).toBe(mockUrl);
+    });
   });
 
   describe('deleteFile', () => {
