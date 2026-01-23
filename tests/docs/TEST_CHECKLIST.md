@@ -62,7 +62,7 @@ _Visual and interaction tests for UI blocks._
 | -------------------------- | :-: | :-: | :-: | ------------- |
 | `recipe-scroller`          | ✅  | [ ] | [ ] | Partial (E2E) |
 | `recipe-pagination`        | [ ] | [ ] | [ ] | Untested      |
-| `recipe-presentation-grid` | [ ] | [ ] | [ ] | Untested      |
+| `recipe-presentation-grid` | ✅  | ✅  | [ ] | **Stable**    |
 | `category-navigation`      | [ ] | [ ] | [ ] | Untested      |
 | `unified-recipe-filter`    | [ ] | [ ] | [ ] | Untested      |
 

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe Presentation Grid Visual Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #f5f5f5;
+      }
+      recipe-presentation-grid {
+        display: block;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <recipe-presentation-grid id="test-grid" recipes-per-page="6"></recipe-presentation-grid>
+
+    <!-- Import dependencies -->
+    <script type="module" src="/src/lib/recipes/recipe-card/recipe-card.js"></script>
+    <script
+      type="module"
+      src="/src/lib/collections/recipe-grid/recipe-presentation-grid.js"
+    ></script>
+  </body>
+</html>
