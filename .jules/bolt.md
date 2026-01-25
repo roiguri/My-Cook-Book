@@ -7,3 +7,8 @@
 
 **Learning:** Web Components often default to fetching their own data based on ID attributes. This causes N+1 fetch cascades in lists.
 **Action:** Always implement a property setter (e.g., `set data(val)`) on list item components to allow parent lists to pass pre-fetched data directly, bypassing the internal fetch.
+
+## 2025-10-24 - [Package Lock Noise & Memory Leaks]
+
+**Learning:** `npm install` can generate significant noise in `package-lock.json` if local environment differs from CI/CD. Also, simple `Map` caches in SPAs can leak memory if unbounded.
+**Action:** Revert `package-lock.json` if no dependencies added. Always implement LRU or size limits for in-memory caches in long-running applications.

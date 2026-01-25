@@ -1,4 +1,3 @@
-
 import { jest } from '@jest/globals';
 import { showToast } from 'src/lib/notifications/toast-notification/toast-notification.js';
 
