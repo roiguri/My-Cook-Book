@@ -326,7 +326,6 @@ class RecipePresentationGrid extends HTMLElement {
         }
       });
     }
-
   }
 
   /**
