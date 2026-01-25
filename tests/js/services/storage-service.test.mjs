@@ -57,6 +57,16 @@ describe('StorageService', () => {
       expect(url).toBe(mockUrl);
     });
 
+    it('returns cached URL on second call', async () => {
+      getDownloadURL.mockResolvedValue(mockUrl);
+      const url1 = await StorageService.getFileUrl(mockPath);
+      const url2 = await StorageService.getFileUrl(mockPath);
+
+      expect(getDownloadURL).toHaveBeenCalledTimes(1);
+      expect(url1).toBe(mockUrl);
+      expect(url2).toBe(mockUrl);
+    });
+
     it('throws an error if getDownloadURL fails', async () => {
       getDownloadURL.mockRejectedValue(new Error('fail'));
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});

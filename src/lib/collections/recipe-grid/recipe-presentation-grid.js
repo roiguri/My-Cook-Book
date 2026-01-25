@@ -327,8 +327,6 @@ class RecipePresentationGrid extends HTMLElement {
       });
     }
 
-    // Initialize lazy loading for images
-    initLazyLoading(container);
   }
 
   /**
