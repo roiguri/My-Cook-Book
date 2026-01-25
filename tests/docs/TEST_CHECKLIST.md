@@ -53,7 +53,7 @@ _Visual and interaction tests for UI blocks._
 | `auth-avatar`     | ✅  | ✅  | [ ] | **Stable** |
 | `login-form`      | ✅  | ✅  | [ ] | **Stable** |
 | `signup-form`     | ✅  | ✅  | [ ] | **Stable** |
-| `forgot-password` | [ ] | [ ] | [ ] | Untested   |
+| `forgot-password` | ✅  | ✅  | [ ] | **Stable** |
 | `user-profile`    | [ ] | [ ] | [ ] | Untested   |
 
 ### Collections (Feeds & Grids)
@@ -89,7 +89,7 @@ _Visual and interaction tests for UI blocks._
 
 | Component            | 📸  | 🖱️  | 🧠  | Status   |
 | -------------------- | :-: | :-: | :-: | -------- |
-| `toast-notification` | [ ] | [ ] | [ ] | Untested |
+| `toast-notification` | [ ] | [ ] | ✅  | Partial  |
 | `loading-spinner`    | [ ] | [ ] | [ ] | Untested |
 | `scroll-list`        | [ ] | [ ] | [ ] | Untested |
 
