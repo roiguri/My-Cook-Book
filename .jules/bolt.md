@@ -12,3 +12,8 @@
 
 **Learning:** `npm install` can generate significant noise in `package-lock.json` if local environment differs from CI/CD. Also, simple `Map` caches in SPAs can leak memory if unbounded.
 **Action:** Revert `package-lock.json` if no dependencies added. Always implement LRU or size limits for in-memory caches in long-running applications.
+
+## 2025-10-24 - [Service Request Deduplication]
+
+**Learning:** When multiple components (like list items) call the same service method simultaneously on mount, simple caching isn't enough because all requests fire before the cache is populated.
+**Action:** Implement request deduplication by storing and returning the in-flight promise (`_fetchPromise`) in service methods, so concurrent calls await the same network request.

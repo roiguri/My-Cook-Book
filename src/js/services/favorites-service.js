@@ -4,6 +4,7 @@
  * Centralized service for managing user favorites with caching
  */
 
+import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import authService from './auth-service.js';
 import { FirestoreService } from './firestore-service.js';
 
@@ -14,6 +15,7 @@ class FavoritesService {
       favorites: [],
       isLoaded: false,
     };
+    this._fetchPromise = null;
   }
 
   /**
@@ -30,20 +32,79 @@ class FavoritesService {
       return this.cache.favorites;
     }
 
+    // Return existing promise if one is in flight to deduplicate requests
+    if (this._fetchPromise) {
+      return this._fetchPromise;
+    }
+
+    this._fetchPromise = (async () => {
+      try {
+        const userDoc = await FirestoreService.getDocument('users', user.uid);
+        const favoriteRecipeIds = userDoc?.favorites || [];
+
+        this.cache = {
+          userId: user.uid,
+          favorites: favoriteRecipeIds,
+          isLoaded: true,
+        };
+
+        return favoriteRecipeIds;
+      } catch (error) {
+        console.error('Error fetching user favorites:', error);
+        return [];
+      } finally {
+        this._fetchPromise = null;
+      }
+    })();
+
+    return this._fetchPromise;
+  }
+
+  /**
+   * Add a recipe to favorites
+   * @param {string} recipeId - Recipe ID to add
+   * @returns {Promise<void>}
+   */
+  async addFavorite(recipeId) {
+    const user = authService.getCurrentUser();
+    if (!user) return;
+
     try {
-      const userDoc = await FirestoreService.getDocument('users', user.uid);
-      const favoriteRecipeIds = userDoc?.favorites || [];
+      // Optimistic update
+      this.updateCache(recipeId, true);
 
-      this.cache = {
-        userId: user.uid,
-        favorites: favoriteRecipeIds,
-        isLoaded: true,
-      };
-
-      return favoriteRecipeIds;
+      await FirestoreService.updateDocument('users', user.uid, {
+        favorites: arrayUnion(recipeId),
+      });
     } catch (error) {
-      console.error('Error fetching user favorites:', error);
-      return [];
+      console.error('Error adding favorite:', error);
+      // Revert cache on error
+      this.updateCache(recipeId, false);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove a recipe from favorites
+   * @param {string} recipeId - Recipe ID to remove
+   * @returns {Promise<void>}
+   */
+  async removeFavorite(recipeId) {
+    const user = authService.getCurrentUser();
+    if (!user) return;
+
+    try {
+      // Optimistic update
+      this.updateCache(recipeId, false);
+
+      await FirestoreService.updateDocument('users', user.uid, {
+        favorites: arrayRemove(recipeId),
+      });
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+      // Revert cache on error
+      this.updateCache(recipeId, true);
+      throw error;
     }
   }
 
@@ -56,6 +117,7 @@ class FavoritesService {
       favorites: [],
       isLoaded: false,
     };
+    this._fetchPromise = null;
   }
 
   /**
@@ -67,19 +129,32 @@ class FavoritesService {
     const user = authService.getCurrentUser();
 
     // Skip cache update if no user or user doesn't match cached user
-    if (!user || this.cache.userId !== user.uid) {
+    if (!user || (this.cache.userId && this.cache.userId !== user.uid)) {
       return;
     }
 
-    if (this.cache.isLoaded) {
-      if (isAdding) {
-        if (!this.cache.favorites.includes(recipeId)) {
-          this.cache.favorites.push(recipeId);
-        }
-      } else {
-        this.cache.favorites = this.cache.favorites.filter((id) => id !== recipeId);
-      }
+    // Initialize cache if empty but user matches (or just set user id)
+    if (!this.cache.userId) {
+      this.cache.userId = user.uid;
     }
+
+    // Ensure favorites array exists
+    if (!this.cache.favorites) {
+      this.cache.favorites = [];
+    }
+
+    if (isAdding) {
+      if (!this.cache.favorites.includes(recipeId)) {
+        this.cache.favorites.push(recipeId);
+      }
+    } else {
+      this.cache.favorites = this.cache.favorites.filter((id) => id !== recipeId);
+    }
+
+    // Mark as loaded if we have data now?
+    // No, strictly speaking we only know about THIS favorite, not the full list.
+    // But for isFavorite check it might be tricky.
+    // Let's keep isLoaded false until full fetch, unless it was already true.
   }
 
   /**
