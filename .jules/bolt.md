@@ -12,3 +12,7 @@
 
 **Learning:** `npm install` can generate significant noise in `package-lock.json` if local environment differs from CI/CD. Also, simple `Map` caches in SPAs can leak memory if unbounded.
 **Action:** Revert `package-lock.json` if no dependencies added. Always implement LRU or size limits for in-memory caches in long-running applications.
+
+## 2025-10-25 - [User Data Caching & Event Listening]
+**Learning:** Firestore `getDoc` calls are not automatically deduped or cached in memory across components if not using a listener. Centralizing user data fetching in `AuthService` and listening for update events (like `recipe-favorite-changed`) significantly reduces redundant network requests.
+**Action:** Always prefer a centralized data service with caching and event listeners for frequently accessed, user-specific data that changes based on UI actions.

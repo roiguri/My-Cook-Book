@@ -8,6 +8,7 @@
  *   - initialize(): Initializes the service and sets up the authentication state listener.
  *   - getCurrentUser(): Returns the current authenticated user (or null if not authenticated).
  *   - isAuthenticated(): Returns true if a user is currently authenticated.
+ *   - getUserData(): Returns the full user document data (cached).
  *   - login(email, password, remember = false): Logs in a user with email and password. Optionally persists the session.
  *   - loginWithGoogle(): Logs in a user using Google authentication.
  *   - signup(email, password, fullName): Registers a new user with email, password, and full name.
@@ -47,7 +48,8 @@ class AuthService {
   constructor() {
     this._initialized = false;
     this._currentUser = null;
-    this._userRoles = null;
+    this._userData = null; // Full user document data
+    this._userRoles = null; // Backward compatibility (same as _userData)
     this._currentAvatarUrl = null;
     this._observers = [];
     this._unsubscribeFromAuth = null;
@@ -74,10 +76,10 @@ class AuthService {
       this._currentUser = user;
 
       if (user) {
-        // Fetch user roles from Firestore when logged in
-        this._userRoles = await this._fetchUserRoles(user);
-        this._currentAvatarUrl = await this._fetchAvatarUrl(user);
+        // Fetch full user data once
+        await this.getUserData({ forceRefresh: true });
       } else {
+        this._userData = null;
         this._userRoles = null;
         this._currentAvatarUrl = null;
       }
@@ -105,7 +107,82 @@ class AuthService {
       });
     });
 
+    // Listen for favorite changes to keep cache fresh
+    document.addEventListener('recipe-favorite-changed', (event) => {
+      this._handleFavoriteChanged(event.detail);
+    });
+
     this._initialized = true;
+  }
+
+  /**
+   * Handle favorite changed event to update local cache
+   * @private
+   * @param {Object} detail - Event detail { recipeId, isFavorite, userId }
+   */
+  _handleFavoriteChanged({ recipeId, isFavorite, userId }) {
+    // Only update if it's the current user
+    if (!this._currentUser || this._currentUser.uid !== userId) return;
+    if (!this._userData) return;
+
+    // Initialize favorites array if missing
+    if (!this._userData.favorites) {
+      this._userData.favorites = [];
+    }
+
+    const favorites = new Set(this._userData.favorites);
+
+    if (isFavorite) {
+      favorites.add(recipeId);
+    } else {
+      favorites.delete(recipeId);
+    }
+
+    // Update local cache
+    this._userData.favorites = Array.from(favorites);
+    // _userRoles references the same object, so it's updated too
+  }
+
+  /**
+   * Get the full user document data
+   * @param {Object} options - Options
+   * @param {boolean} options.forceRefresh - Whether to force a fetch from Firestore
+   * @returns {Promise<Object>} The user document data
+   */
+  async getUserData({ forceRefresh = false } = {}) {
+    if (!this._currentUser) return null;
+
+    // Return cached data if available and not forced
+    if (!forceRefresh && this._userData) {
+      return this._userData;
+    }
+
+    try {
+      const db = getFirestoreInstance();
+      const userDocRef = doc(db, 'users', this._currentUser.uid);
+      const docSnap = await getDoc(userDocRef);
+
+      if (docSnap.exists()) {
+        this._userData = docSnap.data();
+      } else {
+        // If document doesn't exist, use default structure
+        this._userData = { role: 'user', favorites: [] };
+      }
+
+      // Update derived properties
+      this._userRoles = this._userData;
+      this._currentAvatarUrl = this._userData.avatarUrl || this._currentUser.photoURL || null;
+
+      return this._userData;
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      // Fallback to minimal data if fetch fails
+      if (!this._userData) {
+        this._userData = { role: 'user', favorites: [] };
+        this._userRoles = this._userData;
+      }
+      return this._userData;
+    }
   }
 
   /**
@@ -272,10 +349,21 @@ class AuthService {
         ...profileData,
         updatedAt: serverTimestamp(),
       });
+
+      // Update local cache manually since we just updated the doc
+      if (this._userData) {
+        this._userData = { ...this._userData, ...profileData };
+        // Don't overwrite existing fields that aren't in profileData
+      } else {
+        await this.getUserData({ forceRefresh: true });
+      }
+
       // Update cached avatar URL if it was changed
       if (profileData.avatarUrl !== undefined) {
         this._currentAvatarUrl = profileData.avatarUrl;
+        if (this._userData) this._userData.avatarUrl = profileData.avatarUrl;
       }
+
       // Dispatch profile updated event
       const event = new CustomEvent('profile-updated', {
         detail: {
@@ -394,7 +482,8 @@ class AuthService {
     }
     if (!this._currentUser) return 'public';
 
-    this._userRoles = await this._fetchUserRoles(this._currentUser);
+    // Use getUserData instead of private _fetchUserRoles
+    await this.getUserData();
     return this._userRoles?.role || 'public';
   }
 
@@ -436,19 +525,24 @@ class AuthService {
    * @private
    * @param {Object} user - Firebase user object
    * @returns {Promise<Object>} Promise resolving to user roles
+   * @deprecated Use getUserData() instead
    */
   async _fetchUserRoles(user) {
+    if (this._currentUser && user.uid === this._currentUser.uid) {
+        return this.getUserData();
+    }
+    // Fallback for direct calls with different user (shouldn't happen often)
     try {
       const db = getFirestoreInstance();
       const userDocRef = doc(db, 'users', user.uid);
       const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists) {
+      if (docSnap.exists()) {
         return docSnap.data();
       }
-      return { role: 'user' }; // Default role
+      return { role: 'user' };
     } catch (error) {
       console.error('Error fetching user roles:', error);
-      return { role: 'user' }; // Default role on error
+      return { role: 'user' };
     }
   }
 
@@ -457,8 +551,14 @@ class AuthService {
    * @private
    * @param {Object} user - Firebase user object
    * @returns {Promise<string|null>} Promise resolving to avatar URL or null
+   * @deprecated Use getUserData() instead
    */
   async _fetchAvatarUrl(user) {
+    if (this._currentUser && user.uid === this._currentUser.uid) {
+        const data = await this.getUserData();
+        return data?.avatarUrl || user.photoURL || null;
+    }
+    // Fallback
     try {
       const db = getFirestoreInstance();
       const userDocRef = doc(db, 'users', user.uid);
