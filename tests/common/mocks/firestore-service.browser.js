@@ -47,11 +47,42 @@ export const MOCK_RECIPES = [
 
 export class FirestoreService {
   static async queryDocuments(collectionName, queryParams = {}) {
-    console.log('[Mock] FirestoreService.queryDocuments', collectionName);
-    if (collectionName === 'recipes') {
-      return [...MOCK_RECIPES];
+    console.log('[Mock] FirestoreService.queryDocuments', collectionName, queryParams);
+
+    if (collectionName !== 'recipes') return [];
+
+    let results = [...MOCK_RECIPES];
+
+    // Filter
+    if (queryParams.where) {
+      for (const [field, op, value] of queryParams.where) {
+        results = results.filter((item) => {
+          if (op === '==') return item[field] === value;
+          return true; // Simplification for mock
+        });
+      }
     }
-    return [];
+
+    // Order
+    if (queryParams.orderBy) {
+      const [field, direction] = queryParams.orderBy;
+      results.sort((a, b) => {
+        const valA = a[field]?.seconds || a[field];
+        const valB = b[field]?.seconds || b[field];
+
+        if (direction === 'desc') {
+          return valB > valA ? 1 : -1;
+        }
+        return valA > valB ? 1 : -1;
+      });
+    }
+
+    // Limit
+    if (queryParams.limit) {
+      results = results.slice(0, queryParams.limit);
+    }
+
+    return results;
   }
 
   static async getDocument(collectionName, id) {
