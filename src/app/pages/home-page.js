@@ -68,24 +68,20 @@ export default {
     }
 
     try {
-      // Get most recent approved recipes
-      const queryParams = { where: [['approved', '==', true]] };
-      const recipes = await FirestoreService.queryDocuments('recipes', queryParams);
+      // Get most recent 3 approved recipes
+      // ⚡ Bolt Optimization: Use Firestore limit and orderBy to avoid fetching all recipes
+      // and sorting on the client.
+      const queryParams = {
+        where: [['approved', '==', true]],
+        orderBy: ['creationTime', 'desc'],
+        limit: 3,
+      };
+      const recentRecipes = await FirestoreService.queryDocuments('recipes', queryParams);
 
-      if (!recipes.length) {
+      if (!recentRecipes.length) {
         messageContainer.innerHTML = 'לא נמצאו מתכונים מומלצים.';
         return;
       }
-
-      // Sort by creationTime, newest first
-      recipes.sort((a, b) => {
-        const timeA = a.creationTime?.seconds || 0;
-        const timeB = b.creationTime?.seconds || 0;
-        return timeB - timeA;
-      });
-
-      // Take only first 3 recipes
-      const recentRecipes = recipes.slice(0, 3);
 
       messageContainer.remove();
 

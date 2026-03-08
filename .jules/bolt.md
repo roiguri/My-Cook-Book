@@ -12,3 +12,7 @@
 
 **Learning:** `npm install` can generate significant noise in `package-lock.json` if local environment differs from CI/CD. Also, simple `Map` caches in SPAs can leak memory if unbounded.
 **Action:** Revert `package-lock.json` if no dependencies added. Always implement LRU or size limits for in-memory caches in long-running applications.
+
+## 2025-10-24 - [Firestore N+1 Query & Client-Side Sorting]
+**Learning:** Avoid fetching entire Firestore collections only to sort and slice them on the client-side. This is inefficient in terms of document reads, network payload, and client-side processing.
+**Action:** Always use Firestore's `orderBy` and `limit` clauses to push the sorting and filtering logic to the database. Remember that combining equality filters (e.g., `approved == true`) with `orderBy` on a different field requires a composite index in Firestore. Also note that `orderBy` will exclude documents missing that field.
