@@ -1,3 +1,5 @@
+import { debounce } from '../../../js/utils/common-utils.js';
+
 /**
  * FilterSearchBar Component
  * Search bar component for filtering recipes with real-time functionality.
@@ -6,6 +8,17 @@ class FilterSearchBar extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+
+    // Debounce the search event to improve performance and prevent excessive re-renders
+    this.debouncedSearchInput = debounce((searchText) => {
+      this.dispatchEvent(
+        new CustomEvent('search-input', {
+          bubbles: true,
+          composed: true,
+          detail: { searchText },
+        }),
+      );
+    }, 300);
   }
 
   connectedCallback() {
@@ -191,13 +204,8 @@ class FilterSearchBar extends HTMLElement {
 
       this.updateClearButtonVisibility();
 
-      this.dispatchEvent(
-        new CustomEvent('search-input', {
-          bubbles: true,
-          composed: true,
-          detail: { searchText },
-        }),
-      );
+      // Use the debounced function instead of immediately dispatching
+      this.debouncedSearchInput(searchText);
     });
 
     clearButton.addEventListener('click', () => {
@@ -219,6 +227,11 @@ class FilterSearchBar extends HTMLElement {
     if (input.value !== '') {
       input.value = '';
       this.updateClearButtonVisibility();
+
+      // Dispatch immediately when cleared, but also cancel any pending debounced calls
+      // (Though the debounce function provided doesn't have a cancel method,
+      // calling it here would still queue an empty search, so we dispatch immediately
+      // to ensure UI updates instantly on clear)
       this.dispatchEvent(
         new CustomEvent('search-input', {
           bubbles: true,
@@ -226,6 +239,8 @@ class FilterSearchBar extends HTMLElement {
           detail: { searchText: '' },
         }),
       );
+      // We also update the pending debounced search to an empty string just in case
+      this.debouncedSearchInput('');
     }
   }
 

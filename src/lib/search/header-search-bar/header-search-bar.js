@@ -1,6 +1,7 @@
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { FilterUtils } from '../../../js/utils/filter-utils.js';
 import { showToast } from '../../notifications/toast-notification/toast-notification.js';
+import { debounce } from '../../../js/utils/common-utils.js';
 
 // Constants
 const NAVIGATION_UPDATE_DELAY_MS = 100;
@@ -24,6 +25,16 @@ class HeaderSearchBar extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+
+    this.debouncedHandleInput = debounce((searchText) => {
+      this.dispatchEvent(
+        new CustomEvent('search-input', {
+          bubbles: true,
+          composed: true,
+          detail: { searchText },
+        }),
+      );
+    }, 300);
   }
 
   static get observedAttributes() {
@@ -142,14 +153,8 @@ class HeaderSearchBar extends HTMLElement {
   handleInput(e) {
     const searchText = e.target.value.trim();
 
-    // Dispatch event for real-time search
-    this.dispatchEvent(
-      new CustomEvent('search-input', {
-        bubbles: true,
-        composed: true,
-        detail: { searchText },
-      }),
-    );
+    // Dispatch debounced event for real-time search
+    this.debouncedHandleInput(searchText);
   }
 
   async navigateToSearch(searchText) {
