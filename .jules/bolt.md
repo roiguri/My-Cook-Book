@@ -12,3 +12,6 @@
 
 **Learning:** `npm install` can generate significant noise in `package-lock.json` if local environment differs from CI/CD. Also, simple `Map` caches in SPAs can leak memory if unbounded.
 **Action:** Revert `package-lock.json` if no dependencies added. Always implement LRU or size limits for in-memory caches in long-running applications.
+## 2025-10-24 - [Firestore Pagination & Limiting]
+**Learning:** In the `home-page.js`, the code was fetching all approved recipes just to display the top 3 newest ones, then sorting them client-side. This results in heavy over-fetching of unnecessary data.
+**Action:** Always use Firestore's native `orderBy` and `limit` on the query object `queryParams` whenever possible to limit results directly on the database level before fetching.

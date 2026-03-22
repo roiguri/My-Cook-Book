@@ -68,8 +68,12 @@ export default {
     }
 
     try {
-      // Get most recent approved recipes
-      const queryParams = { where: [['approved', '==', true]] };
+      // Get most recent approved recipes (limit to 3 to prevent overfetching)
+      const queryParams = {
+        where: [['approved', '==', true]],
+        orderBy: ['creationTime', 'desc'],
+        limit: 3
+      };
       const recipes = await FirestoreService.queryDocuments('recipes', queryParams);
 
       if (!recipes.length) {
@@ -77,19 +81,9 @@ export default {
         return;
       }
 
-      // Sort by creationTime, newest first
-      recipes.sort((a, b) => {
-        const timeA = a.creationTime?.seconds || 0;
-        const timeB = b.creationTime?.seconds || 0;
-        return timeB - timeA;
-      });
-
-      // Take only first 3 recipes
-      const recentRecipes = recipes.slice(0, 3);
-
       messageContainer.remove();
 
-      recentRecipes.forEach((doc) => {
+      recipes.forEach((doc) => {
         const recipeCard = document.createElement('recipe-card');
         recipeCard.setAttribute('recipe-id', doc.id);
         recipeCard.setAttribute('layout', 'vertical');
