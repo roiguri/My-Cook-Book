@@ -244,13 +244,6 @@ export default {
         'recipe-selected',
         this.handleRecipeSelected.bind(this),
       );
-      recipePresentationGrid.addEventListener('favorite-changed', (event) => {
-        const { recipeId, isFavorite } = event.detail;
-        favoritesService.updateCache(recipeId, isFavorite);
-        if (this.activeFilters.favoritesOnly) {
-          this.loadInitialRecipes().then(() => this.displayCurrentPageRecipes());
-        }
-      });
     }
 
     const unifiedFilter = document.getElementById('unified-filter');
@@ -269,19 +262,48 @@ export default {
       );
     }
 
-    document.addEventListener('recipe-favorite-changed', (event) => {
+    this._boundFavoriteChanged = async (event) => {
       const { recipeId, isFavorite } = event.detail;
       favoritesService.updateCache(recipeId, isFavorite);
-      if (this.activeFilters.favoritesOnly) {
-        this.loadInitialRecipes().then(() => this.displayCurrentPageRecipes());
+
+      if (this.activeFilters.favoritesOnly && !isFavorite) {
+        // Smoothly animate removal if we are looking at the favorites view
+        const grid = document.getElementById('recipe-presentation-grid');
+        if (grid && typeof grid.removeRecipeAnimated === 'function') {
+          await grid.removeRecipeAnimated(recipeId);
+
+          // Silently update state locally to prevent full grid re-render twitch
+          this.allRecipes = this.allRecipes.filter((r) => r.id !== recipeId);
+          this.displayedRecipes = this.displayedRecipes.filter((r) => r.id !== recipeId);
+
+          grid.recipes = this.displayedRecipes;
+          grid.recalculatePages();
+          grid.updatePagination();
+
+          // Smoothly append any incoming cards to fill gaps
+          if (typeof grid.fillPageGap === 'function') {
+            await grid.fillPageGap();
+          }
+        } else {
+          await this.loadInitialRecipes();
+          await this.displayCurrentPageRecipes();
+        }
+      } else if (this.activeFilters.favoritesOnly) {
+        await this.loadInitialRecipes();
+        await this.displayCurrentPageRecipes();
       }
-    });
+    };
+
+    document.addEventListener('recipe-favorite-changed', this._boundFavoriteChanged);
 
     this.setupNavigationInterception();
   },
 
   removeEventListeners() {
     this.removeNavigationInterception();
+    if (this._boundFavoriteChanged) {
+      document.removeEventListener('recipe-favorite-changed', this._boundFavoriteChanged);
+    }
   },
 
   updateUI() {
