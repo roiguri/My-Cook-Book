@@ -392,23 +392,39 @@ class RecipeCard extends HTMLElement {
           RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
         );
         favoriteBtn.classList.toggle(RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive);
-
-        await this._toggleFavorite();
-
-        this.dispatchEvent(
-          new CustomEvent(
-            isFavorite
-              ? RECIPE_CARD_CONFIG.EVENTS.removeFavorite
-              : RECIPE_CARD_CONFIG.EVENTS.addFavorite,
-            {
-              bubbles: true,
-              composed: true,
-              detail: {
-                recipeId: this.recipeId,
-              },
-            },
-          ),
+        favoriteBtn.setAttribute(
+          'aria-label',
+          !isFavorite ? 'Remove from favorites' : 'Add to favorites',
         );
+
+        try {
+          await this._toggleFavorite();
+
+          this.dispatchEvent(
+            new CustomEvent(
+              isFavorite
+                ? RECIPE_CARD_CONFIG.EVENTS.removeFavorite
+                : RECIPE_CARD_CONFIG.EVENTS.addFavorite,
+              {
+                bubbles: true,
+                composed: true,
+                detail: {
+                  recipeId: this.recipeId,
+                },
+              },
+            ),
+          );
+        } catch (error) {
+          // Revert optimistic UI if network request fails
+          favoriteBtn.classList.toggle(
+            RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
+            isFavorite,
+          );
+          favoriteBtn.setAttribute(
+            'aria-label',
+            isFavorite ? 'Remove from favorites' : 'Add to favorites',
+          );
+        }
       });
     }
 
@@ -754,11 +770,9 @@ class RecipeCard extends HTMLElement {
           },
         }),
       );
-
-      this._renderRecipe(); // Re-render to reflect the change
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      // Consider adding user-facing error handling
+      throw error;
     }
   }
 

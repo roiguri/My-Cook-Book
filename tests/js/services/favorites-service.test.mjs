@@ -130,11 +130,9 @@ describe('FavoritesService', () => {
 
       // Check Firestore call
       expect(arrayUnionMock).toHaveBeenCalledWith('recipe2');
-      expect(firestoreServiceMock.updateDocument).toHaveBeenCalledWith(
-        'users',
-        mockUser.uid,
-        { favorites: { type: 'arrayUnion', value: 'recipe2' } }
-      );
+      expect(firestoreServiceMock.updateDocument).toHaveBeenCalledWith('users', mockUser.uid, {
+        favorites: { type: 'arrayUnion', value: 'recipe2' },
+      });
 
       // Check cache update
       const result = await favoritesService.getUserFavorites();
@@ -171,11 +169,9 @@ describe('FavoritesService', () => {
 
       // Check Firestore call
       expect(arrayRemoveMock).toHaveBeenCalledWith('recipe1');
-      expect(firestoreServiceMock.updateDocument).toHaveBeenCalledWith(
-        'users',
-        mockUser.uid,
-        { favorites: { type: 'arrayRemove', value: 'recipe1' } }
-      );
+      expect(firestoreServiceMock.updateDocument).toHaveBeenCalledWith('users', mockUser.uid, {
+        favorites: { type: 'arrayRemove', value: 'recipe1' },
+      });
 
       // Check cache update
       const result = await favoritesService.getUserFavorites();
