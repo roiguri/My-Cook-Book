@@ -35,6 +35,7 @@
  * - Configurable recipes per page
  */
 import authService from '../../../js/services/auth-service.js';
+import favoritesService from '../../../js/services/favorites-service.js';
 import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { initLazyLoading } from '../../../js/utils/lazy-loading.js';
 import { RECIPE_PRESENTATION_GRID_CONFIG } from './recipe-presentation-grid-config.js';
@@ -228,8 +229,8 @@ class RecipePresentationGrid extends HTMLElement {
     // Add transition class for smooth updates
     gridContainer.classList.add('transitioning');
 
-    // Small delay for transition effect
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    // Wait for fade out
+    await new Promise((resolve) => setTimeout(resolve, 250));
 
     // Clear existing content
     gridContainer.innerHTML = '';
@@ -275,7 +276,7 @@ class RecipePresentationGrid extends HTMLElement {
     // PERFORMANCE: Fetch user favorites once for all cards (N+1 optimization)
     // Non-blocking fetch to avoid delaying render
     if (authenticated && this.showFavorites) {
-      favoritesPromise = FirestoreService.getDocument('users', user.uid).catch((error) => {
+      favoritesPromise = favoritesService.getUserFavorites().catch((error) => {
         console.error('Error pre-fetching favorites:', error);
         return null;
       });
@@ -283,6 +284,7 @@ class RecipePresentationGrid extends HTMLElement {
 
     // PERFORMANCE: Use DocumentFragment to batch DOM insertions (Layout thrashing optimization)
     const fragment = document.createDocumentFragment();
+    const createdCards = [];
 
     for (const recipe of recipes) {
       const cardContainer = document.createElement('div');
@@ -300,6 +302,7 @@ class RecipePresentationGrid extends HTMLElement {
         // PERFORMANCE: Initialize as false to prevent card's internal fetch (N+1 prevention)
         // We will update it asynchronously once the bulk fetch completes
         recipeCard.isFavorite = false;
+        createdCards.push(recipeCard);
       }
 
       if (authenticated && this.getAttribute('show-add-to-meal') !== 'false') {
@@ -314,11 +317,10 @@ class RecipePresentationGrid extends HTMLElement {
 
     // Update favorites once data is available
     if (favoritesPromise) {
-      favoritesPromise.then((userDoc) => {
-        if (userDoc && userDoc.favorites) {
-          const favSet = new Set(userDoc.favorites);
-          const cards = container.querySelectorAll('recipe-card');
-          cards.forEach((card) => {
+      favoritesPromise.then((favoriteList) => {
+        if (favoriteList) {
+          const favSet = new Set(favoriteList);
+          createdCards.forEach((card) => {
             if (favSet.has(card.recipeId)) {
               card.isFavorite = true;
             }
@@ -451,6 +453,115 @@ class RecipePresentationGrid extends HTMLElement {
 
   getRecipesPerPage() {
     return this.recipesPerPage;
+  }
+
+  /**
+   * Visually removes a recipe card with an animation before grid re-render
+   * @param {string} recipeId The ID of the recipe to remove
+   */
+  async removeRecipeAnimated(recipeId) {
+    const gridContainer = this.shadowRoot.querySelector('.recipe-grid');
+    if (!gridContainer) return;
+
+    const cards = gridContainer.querySelectorAll('recipe-card');
+    let targetContainer = null;
+
+    for (const card of cards) {
+      if (card.recipeId === recipeId) {
+        targetContainer = card.closest('.recipe-card-container');
+        break;
+      }
+    }
+
+    if (targetContainer) {
+      targetContainer.classList.add('removing');
+      // Wait for the fade-out transition to finish
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      // Remove from DOM cleanly, use View Transitions api to smooth out the resulting layout gap shift
+      if (document.startViewTransition) {
+        const transition = document.startViewTransition(() => {
+          if (targetContainer && targetContainer.isConnected) {
+            targetContainer.remove();
+          }
+        });
+
+        // Prevent Uncaught (in promise) AbortError when transition is skipped
+        transition.ready.catch(() => {});
+        transition.finished.catch(() => {});
+        transition.updateCallbackDone.catch(() => {});
+      } else {
+        targetContainer.remove();
+      }
+    }
+  }
+
+  /**
+   * Smoothly fill any gaps in the current page after an item was removed silently
+   */
+  async fillPageGap() {
+    const gridContainer = this.shadowRoot.querySelector('.recipe-grid');
+    if (!gridContainer) return;
+
+    const currentPageRecipes = this.getCurrentPageRecipes();
+    const existingCards = Array.from(gridContainer.querySelectorAll('recipe-card'));
+
+    if (currentPageRecipes.length === 0 && this.recipes.length === 0) {
+      // Nothing to show, render no results
+      gridContainer.innerHTML = '';
+      this.renderNoResults(gridContainer);
+      return;
+    }
+
+    // Find recipes that should be here but aren't
+    const newRecipes = currentPageRecipes.filter(
+      (recipe) => !existingCards.some((card) => card.recipeId === recipe.id),
+    );
+
+    // Find any stragglers and remove them instantly
+    const extraCards = existingCards.filter(
+      (card) => !currentPageRecipes.some((recipe) => recipe.id === card.recipeId),
+    );
+
+    for (const card of extraCards) {
+      const container = card.closest('.recipe-card-container');
+      if (container) container.remove();
+    }
+
+    if (newRecipes.length > 0) {
+      if (gridContainer.classList.contains('no-results')) {
+        gridContainer.innerHTML = '';
+        gridContainer.className = 'recipe-grid';
+      }
+
+      // Render new cards into a temporary container
+      const tempContainer = document.createElement('div');
+      await this.renderRecipeCards(tempContainer, newRecipes);
+
+      const newCardContainers = Array.from(
+        tempContainer.querySelectorAll('.recipe-card-container'),
+      );
+      for (const cardContainer of newCardContainers) {
+        cardContainer.style.opacity = '0';
+        cardContainer.style.transform = 'translateY(10px)';
+        cardContainer.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
+
+        gridContainer.appendChild(cardContainer);
+
+        // Trigger reflow
+        cardContainer.offsetHeight;
+
+        cardContainer.style.opacity = '1';
+        cardContainer.style.transform = 'translateY(0)';
+
+        // Clean up inline styles after transition
+        setTimeout(() => {
+          cardContainer.style.opacity = '';
+          cardContainer.style.transform = '';
+          cardContainer.style.transition = '';
+        }, 400);
+      }
+    }
   }
 
   /**

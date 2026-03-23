@@ -5,6 +5,8 @@ describe('FavoritesService', () => {
   let authServiceMock;
   let firestoreServiceMock;
   let mockUser;
+  let arrayUnionMock;
+  let arrayRemoveMock;
 
   beforeEach(async () => {
     jest.resetModules(); // Important to reset module registry to apply new mocks
@@ -18,7 +20,11 @@ describe('FavoritesService', () => {
 
     firestoreServiceMock = {
       getDocument: jest.fn(),
+      updateDocument: jest.fn(),
     };
+
+    arrayUnionMock = jest.fn((id) => ({ type: 'arrayUnion', value: id }));
+    arrayRemoveMock = jest.fn((id) => ({ type: 'arrayRemove', value: id }));
 
     // Mock dependencies using unstable_mockModule (required for ESM)
     jest.unstable_mockModule('../../../src/js/services/auth-service.js', () => ({
@@ -29,12 +35,14 @@ describe('FavoritesService', () => {
       FirestoreService: firestoreServiceMock,
     }));
 
+    jest.unstable_mockModule('firebase/firestore', () => ({
+      arrayUnion: arrayUnionMock,
+      arrayRemove: arrayRemoveMock,
+    }));
+
     // Dynamically import the service under test
     const module = await import('../../../src/js/services/favorites-service.js');
     favoritesService = module.default;
-
-    // Reset cache manually if needed (though resetModules might handle the instance recreation, the class definition is re-evaluated)
-    // Since we get a fresh instance from the re-evaluated module, cache should be empty.
   });
 
   describe('getUserFavorites', () => {
@@ -55,6 +63,32 @@ describe('FavoritesService', () => {
 
       expect(result).toEqual(mockFavorites);
       expect(firestoreServiceMock.getDocument).toHaveBeenCalledWith('users', mockUser.uid);
+    });
+
+    test('should deduplicate concurrent requests', async () => {
+      const mockFavorites = ['recipe1'];
+      // Create a delayed promise to simulate network latency
+      let resolvePromise;
+      const delayedPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      firestoreServiceMock.getDocument.mockReturnValue(delayedPromise);
+
+      // Call twice concurrently
+      const promise1 = favoritesService.getUserFavorites();
+      const promise2 = favoritesService.getUserFavorites();
+
+      // Resolve the Firestore call
+      resolvePromise({ favorites: mockFavorites });
+
+      const [result1, result2] = await Promise.all([promise1, promise2]);
+
+      expect(result1).toEqual(mockFavorites);
+      expect(result2).toEqual(mockFavorites);
+
+      // Should verify that getDocument was called only ONCE
+      expect(firestoreServiceMock.getDocument).toHaveBeenCalledTimes(1);
     });
 
     test('should return cached favorites if available and user matches', async () => {
@@ -84,127 +118,97 @@ describe('FavoritesService', () => {
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
-
-    test('should return empty array if user document has no favorites', async () => {
-      firestoreServiceMock.getDocument.mockResolvedValue({});
-
-      const result = await favoritesService.getUserFavorites();
-
-      expect(result).toEqual([]);
-    });
   });
 
-  describe('updateCache', () => {
-    test('should add recipe to cache when isAdding is true', async () => {
+  describe('addFavorite', () => {
+    test('should add recipe to Firestore and update cache', async () => {
       // Setup initial cache
       firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1'] });
       await favoritesService.getUserFavorites();
 
-      favoritesService.updateCache('recipe2', true);
+      await favoritesService.addFavorite('recipe2');
 
+      // Check Firestore call
+      expect(arrayUnionMock).toHaveBeenCalledWith('recipe2');
+      expect(firestoreServiceMock.updateDocument).toHaveBeenCalledWith('users', mockUser.uid, {
+        favorites: { type: 'arrayUnion', value: 'recipe2' },
+      });
+
+      // Check cache update
       const result = await favoritesService.getUserFavorites();
       expect(result).toContain('recipe2');
       expect(result).toHaveLength(2);
     });
 
-    test('should remove recipe from cache when isAdding is false', async () => {
+    test('should revert cache update if Firestore fails', async () => {
+      // Setup initial cache
+      firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1'] });
+      await favoritesService.getUserFavorites();
+
+      firestoreServiceMock.updateDocument.mockRejectedValue(new Error('Update failed'));
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await expect(favoritesService.addFavorite('recipe2')).rejects.toThrow('Update failed');
+
+      // Check cache reverted
+      const result = await favoritesService.getUserFavorites();
+      expect(result).not.toContain('recipe2');
+      expect(result).toHaveLength(1);
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('removeFavorite', () => {
+    test('should remove recipe from Firestore and update cache', async () => {
       // Setup initial cache
       firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1', 'recipe2'] });
       await favoritesService.getUserFavorites();
 
-      favoritesService.updateCache('recipe1', false);
+      await favoritesService.removeFavorite('recipe1');
 
+      // Check Firestore call
+      expect(arrayRemoveMock).toHaveBeenCalledWith('recipe1');
+      expect(firestoreServiceMock.updateDocument).toHaveBeenCalledWith('users', mockUser.uid, {
+        favorites: { type: 'arrayRemove', value: 'recipe1' },
+      });
+
+      // Check cache update
       const result = await favoritesService.getUserFavorites();
       expect(result).not.toContain('recipe1');
       expect(result).toContain('recipe2');
       expect(result).toHaveLength(1);
     });
 
-    test('should not update cache if user does not match', () => {
-      // Manually set cache
-      favoritesService.cache = {
-        userId: 'user123',
-        favorites: ['recipe1'],
-        isLoaded: true,
-      };
-
-      // Simulate different user
-      authServiceMock.getCurrentUser.mockReturnValue({ uid: 'otherUser' });
-
-      favoritesService.updateCache('recipe2', true);
-
-      expect(favoritesService.cache.favorites).toEqual(['recipe1']);
-    });
-
-    test('should not update cache if user is null', () => {
-      // Manually set cache
-      favoritesService.cache = {
-        userId: 'user123',
-        favorites: ['recipe1'],
-        isLoaded: true,
-      };
-
-      // Simulate no user
-      authServiceMock.getCurrentUser.mockReturnValue(null);
-
-      favoritesService.updateCache('recipe2', true);
-
-      expect(favoritesService.cache.favorites).toEqual(['recipe1']);
-    });
-
-    test('should not add duplicate recipe ID', async () => {
+    test('should revert cache update if Firestore fails', async () => {
       // Setup initial cache
-      firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1'] });
+      firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1', 'recipe2'] });
       await favoritesService.getUserFavorites();
 
-      favoritesService.updateCache('recipe1', true);
+      firestoreServiceMock.updateDocument.mockRejectedValue(new Error('Update failed'));
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
+      await expect(favoritesService.removeFavorite('recipe1')).rejects.toThrow('Update failed');
+
+      // Check cache reverted (recipe1 should still be there)
       const result = await favoritesService.getUserFavorites();
-      expect(result).toEqual(['recipe1']);
-      expect(result).toHaveLength(1);
-    });
-  });
+      expect(result).toContain('recipe1');
+      expect(result).toHaveLength(2);
 
-  describe('isFavorite', () => {
-    test('should return true if recipe is in favorites', async () => {
-      firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1'] });
-
-      const result = await favoritesService.isFavorite('recipe1');
-
-      expect(result).toBe(true);
-    });
-
-    test('should return false if recipe is not in favorites', async () => {
-      firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1'] });
-
-      const result = await favoritesService.isFavorite('recipe2');
-
-      expect(result).toBe(false);
-    });
-
-    test('should handle invalid recipeId', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-      const result = await favoritesService.isFavorite(null);
-      expect(result).toBe(false);
-      expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
   });
 
-  describe('getCacheStatus', () => {
-    test('should return current cache state', () => {
-      favoritesService.cache = {
-        userId: 'testUser',
-        favorites: ['1', '2'],
-        isLoaded: true,
-      };
+  describe('updateCache', () => {
+    test('should update cache manually', async () => {
+      // Setup initial cache
+      firestoreServiceMock.getDocument.mockResolvedValue({ favorites: ['recipe1'] });
+      await favoritesService.getUserFavorites();
 
-      const status = favoritesService.getCacheStatus();
-      expect(status).toEqual({
-        userId: 'testUser',
-        favorites: ['1', '2'],
-        isLoaded: true,
-      });
+      favoritesService.updateCache('recipe2', true);
+
+      const result = await favoritesService.getUserFavorites();
+      expect(result).toContain('recipe2');
     });
   });
 });

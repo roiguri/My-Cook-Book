@@ -46,25 +46,12 @@ const mockUser = {
 };
 
 // Mock Dependencies
-// Mock Dependencies
-jest.unstable_mockModule('src/js/services/firebase-service.js', () => ({
-  getFirestoreInstance: jest.fn(),
-}));
-
-jest.unstable_mockModule('firebase/firestore', () => ({
-  doc: jest.fn(),
-  getDoc: jest.fn(() =>
-    Promise.resolve({
-      exists: () => true,
-      data: () => ({ favorites: [] }),
-      id: 'user-123',
-    }),
-  ),
-  updateDoc: jest.fn(),
-  writeBatch: jest.fn(),
-  serverTimestamp: jest.fn(),
-  arrayUnion: jest.fn(),
-  arrayRemove: jest.fn(),
+jest.unstable_mockModule('src/js/services/favorites-service.js', () => ({
+  default: {
+    getUserFavorites: jest.fn(() => Promise.resolve(['recipe-123'])),
+    addFavorite: jest.fn(() => Promise.resolve()),
+    removeFavorite: jest.fn(() => Promise.resolve()),
+  },
 }));
 
 jest.unstable_mockModule('src/js/services/auth-service.js', () => ({
@@ -140,7 +127,5 @@ describe('RecipeCard Component', () => {
 
     const recipeImage = element.shadowRoot.querySelector('.recipe-image');
     expect(recipeImage.getAttribute('data-src')).toBe('http://example.com/img.jpg');
-
-    // Note: Visual snapshot removed. Visuals will be tested via Playwright.
   });
 });

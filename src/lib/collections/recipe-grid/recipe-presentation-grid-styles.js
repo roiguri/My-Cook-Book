@@ -30,18 +30,25 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
   gap: 1rem;
   width: 100%;
   justify-content: center;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
   align-content: start; /* Align items to top */
 }
 
 .recipe-grid.transitioning {
-  opacity: 0.3;
+  opacity: 0;
+  transform: translateY(10px);
 }
 
 /* Recipe Card Container - Matching Original Aspect Ratio */
 .recipe-card-container {
   aspect-ratio: 3/4;
   width: 100%;
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.recipe-card-container.removing {
+  opacity: 0;
+  transform: scale(0.95);
 }
 
 .recipe-card-container recipe-card {

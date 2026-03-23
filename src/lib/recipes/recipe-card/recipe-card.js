@@ -33,10 +33,8 @@
  * - Lazy loading for images
  * - Consistent dimensions to prevent layout shifts
  */
-import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
-import { doc, getDoc, updateDoc, writeBatch, serverTimestamp } from 'firebase/firestore';
-import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
+import favoritesService from '../../../js/services/favorites-service.js';
 import {
   getLocalizedCategoryName,
   formatCookingTime,
@@ -394,23 +392,39 @@ class RecipeCard extends HTMLElement {
           RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
         );
         favoriteBtn.classList.toggle(RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive);
-
-        await this._toggleFavorite();
-
-        this.dispatchEvent(
-          new CustomEvent(
-            isFavorite
-              ? RECIPE_CARD_CONFIG.EVENTS.removeFavorite
-              : RECIPE_CARD_CONFIG.EVENTS.addFavorite,
-            {
-              bubbles: true,
-              composed: true,
-              detail: {
-                recipeId: this.recipeId,
-              },
-            },
-          ),
+        favoriteBtn.setAttribute(
+          'aria-label',
+          !isFavorite ? 'Remove from favorites' : 'Add to favorites',
         );
+
+        try {
+          await this._toggleFavorite();
+
+          this.dispatchEvent(
+            new CustomEvent(
+              isFavorite
+                ? RECIPE_CARD_CONFIG.EVENTS.removeFavorite
+                : RECIPE_CARD_CONFIG.EVENTS.addFavorite,
+              {
+                bubbles: true,
+                composed: true,
+                detail: {
+                  recipeId: this.recipeId,
+                },
+              },
+            ),
+          );
+        } catch (error) {
+          // Revert optimistic UI if network request fails
+          favoriteBtn.classList.toggle(
+            RECIPE_CARD_CONFIG.CSS_CLASSES.favoriteBtnActive,
+            isFavorite,
+          );
+          favoriteBtn.setAttribute(
+            'aria-label',
+            isFavorite ? 'Remove from favorites' : 'Add to favorites',
+          );
+        }
       });
     }
 
@@ -668,15 +682,9 @@ class RecipeCard extends HTMLElement {
     }
   }
 
-  // TODO: create and extract to favorites-utils file
   async _fetchUserFavorites() {
     try {
-      const user = authService.getCurrentUser();
-      const userId = user?.uid;
-      if (!userId) return; // No user logged in
-      const db = getFirestoreInstance();
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      const favoriteRecipeIds = userDoc.data()?.favorites || [];
+      const favoriteRecipeIds = await favoritesService.getUserFavorites();
       this._userFavorites = new Set(favoriteRecipeIds);
     } catch (error) {
       console.error('Error fetching favorites:', error);
@@ -728,20 +736,14 @@ class RecipeCard extends HTMLElement {
       if (!userId) return; // No user logged in
 
       const wasFavorite = this._isFavorite();
-      const db = getFirestoreInstance();
-      const userDocRef = doc(db, 'users', userId);
 
       if (wasFavorite) {
         // Remove from favorites
-        await updateDoc(userDocRef, {
-          favorites: arrayRemove(this.recipeId),
-        });
+        await favoritesService.removeFavorite(this.recipeId);
         this._userFavorites.delete(this.recipeId);
       } else {
         // Add to favorites
-        await updateDoc(userDocRef, {
-          favorites: arrayUnion(this.recipeId),
-        });
+        await favoritesService.addFavorite(this.recipeId);
         this._userFavorites.add(this.recipeId);
       }
 
@@ -768,11 +770,9 @@ class RecipeCard extends HTMLElement {
           },
         }),
       );
-
-      this._renderRecipe(); // Re-render to reflect the change
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      // Consider adding user-facing error handling
+      throw error;
     }
   }
 
