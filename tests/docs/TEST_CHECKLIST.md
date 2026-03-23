@@ -119,7 +119,7 @@ _Unit tests for business logic._
 - [x] `active-meal-utils.js`
 - [x] `router.js` (Core routing logic)
 - [x] `common-utils.js`
-- [ ] `error-handler.js`
+- [x] `error-handler.js`
 
 ## 🐛 Known Bugs / Issues
 
