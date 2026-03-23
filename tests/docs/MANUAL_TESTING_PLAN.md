@@ -49,76 +49,49 @@ feature/bug branch → development → staging → main (production)
 
 ---
 
-## 🆕 NEW FEATURES IN THIS RELEASE (staging → main)
+## 🆕 NEW FEATURES IN THIS RELEASE (development → staging)
 
 > **Focus Area**: Test these comprehensively on STAGING before merging to main. After production deployment, integrate passing tests into EXISTING section.
 
 **Release Info:**
 
 - **Key areas affected**:
-  - **Recipe Population**: Auto-fill from image (Magic Wand).
-  - **Security**: Strict Firestore/Storage rules & Dependency updates (`qs`).
-  - **Performance**: Recipe Grid N+1 fix.
-  - **Router & Arch**: Lazy loading Auth components, Infinite redirect loop fixes.
-  - **UI/UX**: Auth Avatar 3D styling, Recipe Card "stretched link", Stable scrollbars.
-  - **Accessibility**: Modal Focus Trapping.
-  - **Bug Fixes**: Manager Dashboard Double Image.
+  - **Performance**: Optimize URL caching with LRU policy for images.
+  - **Auth/UI**: visual tests for forgot password, toast notifications.
+  - **Auth/Roles**: improve user role fetching, refine auth service role caching.
+  - **Recipe Import**: refine recipe import modal UI flows.
 
 ---
 
-### 1. Auto-Population (Magic Wand)
+### 1. URL Caching Optimization (LRU Policy)
 
-**Impact**: Import Recipe Modal
+**Impact**: Image loading across the application
 
-- [ ] 🔴 **Magic Wand Button** - Verify button appears in Import Modal and has correct styling.
-- [ ] 🔴 **Image Analysis** - Upload an image via the Magic Wand and verify analysis triggers (loading state).
-- [ ] 🔴 **Field Population** - Verify Recipe Name, Cooking Time, and Ingredients are populated correctly from the analyzed image.
-- [ ] 🟡 **Error Handling** - Verify appropriate error message if analysis fails or image is invalid.
+- [ ] 🔴 **Image Loading** - Scroll through Home Page, Categories, and Recipe Viewer. Verify images load correctly without excessive memory or errors.
 
-### 2. Router & Lazy Loading (NEW)
+### 2. Forgot Password Refinements
 
-**Impact**: Application Architecture, Performance
+**Impact**: Authentication
 
-- [ ] 🔴 **Lazy Loading** - Open Network tab, clear it. Refresh page. Verify "Auth" code chunk (e.g., `auth-*.js`) is **NOT** loaded.
-- [ ] 🔴 **Lazy Loading Interaction** - Click "Login". Verify "Auth" chunk is loaded **on demand** and login modal opens.
-- [ ] 🔴 **Protected Routes** - Go to `/propose` (while logged out). Verify redirect to Home (or Login) without infinite loop.
-- [ ] 🟡 **Navigation** - Open Login modal -> Click Browser Back button. Verify modal closes effectively (or handles history correctly).
+- [ ] 🔴 **Forgot Password UI** - Access forgot password, check UI correctness and the email sending flow.
 
-### 3. Security & Infrastructure
+### 3. Toast Notifications
 
-**Impact**: General App Security, Cloud Functions
+**Impact**: Global Alerts
 
-- [ ] 🔴 **Strict Rules (User)** - Log in as regular user. Create a recipe. Verify success.
-- [ ] 🔴 **Strict Rules (Guest)** - Log out (Guest). Try to save a recipe (via console or UI if accessible). Verify permission denied error.
-- [ ] 🔴 **Cloud Functions** - Verify Cloud Functions (e.g., image resizing or specialized tasks) still execute correctly after `qs` update.
+- [ ] 🟡 **Toast Triggers** - Trigger toast notifications (e.g., via "Copy to clipboard" or search results) and verify they appear and disappear correctly.
 
-### 4. UI/UX & Interactivity
+### 4. User Role Fetching
 
-**Impact**: Home, Header, Recipe Cards
+**Impact**: Authentication, Authorization
 
-- [ ] 🟡 **3D Auth Avatar** - Hover over user avatar. Verify 3D tilt effect. Click and verify menu opens.
-- [ ] 🟡 **Recipe Card Stretched Link** - Hover over _any part_ of a recipe card. Verify pointer cursor. Click anywhere on card -> navigates to recipe.
-- [ ] 🟡 **Layout Stability** - Open a modal (e.g., Login). Verify page background does **not** shift (check scrollbar gutter).
+- [ ] 🔴 **Role Assignment** - Login as regular user, verify lack of Manager Dashboard access. Login as Manager, verify access is granted correctly.
 
-### 5. Accessibility
+### 5. Recipe Import Modal UI Flows
 
-**Impact**: Modals
+**Impact**: Propose Recipe / Import Modal
 
-- [ ] 🔴 **Focus Trap** - Open any modal (Import, Login, etc.). Press `Tab` repeatedly. Verify focus stays **inside** the modal and does not escape to background content.
-- [ ] 🟡 **Focus Return** - Close the modal (Esc or Close button). Verify focus returns to the element that opened it.
-
-### 6. Performance
-
-**Impact**: Home Page, Category Page
-
-- [ ] 🔴 **Recipe Grid** - Load Home Page. Check Network tab. Verify no "waterfall" of individual requests for recipe favorites (N+1 probem fixed).
-- [ ] 🟢 **Rendering** - Verify grid renders smoothly without visible staggering of cards.
-
-### 7. Bug Fixes
-
-**Impact**: Manager Dashboard
-
-- [ ] 🔴 **Double Image** - (Manager) Open Recipe Preview. Verify main image appears only **once**.
+- [ ] 🟡 **Modal Flow** - Verify the improved layouts and flows when opening and using the Recipe Import modal.
 
 ---
 
@@ -140,6 +113,10 @@ feature/bug branch → development → staging → main (production)
 
 #### 🟡 High
 
+- [ ] **Recipe Grid Performance** - Load Home Page. Verify no "waterfall" of individual requests for recipe favorites (N+1 probem fixed).
+- [ ] **3D Auth Avatar** - Hover over user avatar. Verify 3D tilt effect. Click and verify menu opens.
+- [ ] **Recipe Card** - Hover over any part of a recipe card. Verify pointer cursor. Click anywhere on card -> navigates to recipe.
+- [ ] **Layout Stability** - Open a modal (e.g., Login). Verify page background does not shift (check scrollbar gutter).
 - [ ] Logo link stays on home page (doesn't navigate away)
 - [ ] Auth avatar shows correct state (login prompt vs user avatar)
 - [ ] Page is responsive on mobile devices
@@ -251,6 +228,10 @@ feature/bug branch → development → staging → main (production)
 - [ ] Page requires user authentication
 - [ ] If closing the modal without logging in - reroutes to home
 - [ ] If logging in returns to the same page
+- [ ] **Magic Wand Button** - Verify button appears in Import Modal and has correct styling.
+- [ ] **Image Analysis** - Upload an image via the Magic Wand and verify analysis triggers (loading state).
+- [ ] **Field Population** - Verify fields are populated correctly from the analyzed image.
+- [ ] **Security (Strict Rules)** - Log in as regular user. Create a recipe. Verify success.
 
 #### 🟡 High - Ingredients
 
@@ -309,6 +290,7 @@ feature/bug branch → development → staging → main (production)
 - [ ] **Image Approval** - Consolidated modal for batch approval works
 - [ ] **Image Approval** - Approve/Reject All buttons work
 - [ ] **Category Migration** - Changing category migrates images correctly
+- [ ] **Bug Fix (Double Image)** - Open Recipe Preview. Verify main image appears only once.
 
 #### 🟡 High
 
@@ -349,6 +331,8 @@ feature/bug branch → development → staging → main (production)
 - [ ] Logout functionality works and clears user session
 - [ ] Auth state persists across page refreshes
 - [ ] Protected pages redirect unauthenticated users appropriately
+- [ ] **Security (Strict Rules)** - Log out (Guest). Try to save a recipe. Verify permission denied error.
+- [ ] **Lazy Loading** - Verify "Auth" code chunk is NOT loaded until "Login" is clicked.
 
 #### 🟡 High
 
@@ -383,6 +367,9 @@ feature/bug branch → development → staging → main (production)
 - [ ] Side menu closes after search/navigation
 - [ ] Back button functionality works as expected
 - [ ] Navigation preserves user state (auth, filters)
+- [ ] **Protected Routes** - Verify redirect to Home (or Login) without infinite loop when accessing `/propose` logged out.
+- [ ] **Focus Trap** - Open any modal. Press Tab. Verify focus stays inside the modal and does not escape.
+- [ ] **Focus Return** - Close modal. Verify focus returns to the element that opened it.
 
 #### 🟢 Medium
 
@@ -488,10 +475,8 @@ After this release is deployed to production:
 
 ## Release Tracking
 
-**Release Version**: staging → main (2026-01-12)
-**Commits in Release**: 25 commits
-**Files Changed**: 104 files (+5,379/-290)
-**Last Updated**: 2026-01-12
+**Release Version**: development → staging
+**Last Updated**: 2026-03-23
 
 ### Testing Sign-Off
 
