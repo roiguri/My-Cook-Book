@@ -9,7 +9,6 @@ class FilterSearchBar extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
 
-    // Debounce the search event to improve performance and prevent excessive re-renders
     this.debouncedSearchInput = debounce((searchText) => {
       this.dispatchEvent(
         new CustomEvent('search-input', {
@@ -204,7 +203,6 @@ class FilterSearchBar extends HTMLElement {
 
       this.updateClearButtonVisibility();
 
-      // Use the debounced function instead of immediately dispatching
       this.debouncedSearchInput(searchText);
     });
 
@@ -228,10 +226,6 @@ class FilterSearchBar extends HTMLElement {
       input.value = '';
       this.updateClearButtonVisibility();
 
-      // Dispatch immediately when cleared, but also cancel any pending debounced calls
-      // (Though the debounce function provided doesn't have a cancel method,
-      // calling it here would still queue an empty search, so we dispatch immediately
-      // to ensure UI updates instantly on clear)
       this.dispatchEvent(
         new CustomEvent('search-input', {
           bubbles: true,
@@ -239,8 +233,7 @@ class FilterSearchBar extends HTMLElement {
           detail: { searchText: '' },
         }),
       );
-      // We also update the pending debounced search to an empty string just in case
-      this.debouncedSearchInput('');
+      this.debouncedSearchInput.cancel();
     }
   }
 

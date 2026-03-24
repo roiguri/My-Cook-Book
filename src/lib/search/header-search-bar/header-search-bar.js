@@ -153,7 +153,6 @@ class HeaderSearchBar extends HTMLElement {
   handleInput(e) {
     const searchText = e.target.value.trim();
 
-    // Dispatch debounced event for real-time search
     this.debouncedHandleInput(searchText);
   }
 
@@ -261,6 +260,7 @@ class HeaderSearchBar extends HTMLElement {
   // Method to clear search
   clear() {
     this.shadowRoot.querySelector('.search-input').value = '';
+    this.debouncedHandleInput.cancel();
   }
 }
 
