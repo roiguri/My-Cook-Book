@@ -65,7 +65,7 @@ import { formatIngredientAmount } from './recipe-ingredients-utils.js';
  * @property {Array<{ file: string, isPrimary: boolean, access: string, uploadedBy: string }>} [images]
  * @property {string[]} [comments]
  * @property {boolean} [approved]
- * @property {Date|string|number} [createdAt]
+ * @property {Date|string|number} [creationTime]
  * @property {Date|string|number} [updatedAt]
  */
 
@@ -238,7 +238,7 @@ export function formatRecipeData(rawData) {
     mediaInstructions: Array.isArray(rawData.mediaInstructions) ? rawData.mediaInstructions : [],
     comments: Array.isArray(rawData.comments) ? rawData.comments : [],
     approved: typeof rawData.approved === 'boolean' ? rawData.approved : false,
-    createdAt: rawData.createdAt || null,
+    creationTime: rawData.creationTime || null,
     updatedAt: rawData.updatedAt || null,
   };
 }
@@ -344,18 +344,14 @@ export function validateRecipeData(recipeData) {
     }
   }
   if (
-    'createdAt' in recipeData &&
-    recipeData.createdAt !== undefined &&
-    recipeData.createdAt !== null
+    'creationTime' in recipeData &&
+    recipeData.creationTime !== undefined &&
+    recipeData.creationTime !== null
   ) {
-    if (
-      !(
-        typeof recipeData.createdAt === 'number' ||
-        typeof recipeData.createdAt === 'string' ||
-        recipeData.createdAt instanceof Date
-      )
-    ) {
-      errors.createdAt = 'טעות לא ידועה, אנא נסה שנית.';
+    const ct = recipeData.creationTime;
+    const isTimestamp = ct && typeof ct === 'object' && 'seconds' in ct;
+    if (!(typeof ct === 'number' || typeof ct === 'string' || ct instanceof Date || isTimestamp)) {
+      errors.creationTime = 'פורמט זמן לא תקין.';
     }
   }
   if (
@@ -363,14 +359,10 @@ export function validateRecipeData(recipeData) {
     recipeData.updatedAt !== undefined &&
     recipeData.updatedAt !== null
   ) {
-    if (
-      !(
-        typeof recipeData.updatedAt === 'number' ||
-        typeof recipeData.updatedAt === 'string' ||
-        recipeData.updatedAt instanceof Date
-      )
-    ) {
-      errors.updatedAt = 'טעות לא ידועה, אנא נסה שנית.';
+    const ut = recipeData.updatedAt;
+    const isTimestamp = ut && typeof ut === 'object' && 'seconds' in ut;
+    if (!(typeof ut === 'number' || typeof ut === 'string' || ut instanceof Date || isTimestamp)) {
+      errors.updatedAt = 'פורמט זמן לא תקין.';
     }
   }
 
@@ -451,9 +443,10 @@ export function getCategoryIcon(category) {
  * Fetch recipes for display in recipe cards (lightweight version)
  * @param {Object} options - Query options (category, limit, approved only, etc.)
  * @returns {Promise<Array>} Array of recipe card data objects
+ * @property {Date|string|number} [creationTime]
  */
 export async function getRecipesForCards(options = {}) {
-  const queryParams = { where: [], orderBy: ['createdAt', 'desc'] };
+  const queryParams = { where: [], orderBy: ['creationTime', 'desc'] };
   if (options.category) {
     queryParams.where.push(['category', '==', options.category]);
   }

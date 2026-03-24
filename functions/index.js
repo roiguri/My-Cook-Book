@@ -1,7 +1,7 @@
 const { onMessagePublished } = require('firebase-functions/v2/pubsub');
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { initializeApp } = require('firebase-admin/app');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const sharp = require('sharp');
 const { extractRecipeFromImage, extractRecipeFromUrl } = require('./utils/gemini-service');
@@ -97,7 +97,7 @@ async function processRecipeImages(recipeId, images, category, originalUserId) {
         full: fullPath,
         id: imageId,
         isPrimary: index === 0, // First image is primary
-        uploadTimestamp: new Date(),
+        uploadTimestamp: Timestamp.now(),
         uploadedBy: originalUserId,
       };
 
@@ -129,7 +129,7 @@ async function logFailedUrlExtraction(url, error, userId) {
       const doc = snapshot.docs[0];
       await doc.ref.update({
         count: FieldValue.increment(1),
-        lastAttempt: new Date(),
+        lastAttempt: Timestamp.now(),
         error: errorData,
         lastUserId: userId,
       });
@@ -137,8 +137,8 @@ async function logFailedUrlExtraction(url, error, userId) {
       await collectionRef.add({
         url: url,
         count: 1,
-        firstAttempt: new Date(),
-        lastAttempt: new Date(),
+        firstAttempt: Timestamp.now(),
+        lastAttempt: Timestamp.now(),
         error: errorData,
         lastUserId: userId,
       });
@@ -353,11 +353,7 @@ function validateCookbookRecipe(recipeData) {
 
 // Prepare recipe for Firestore storage
 function prepareCookbookRecipe(recipeData, metadata) {
-  const now = new Date();
-  const firestoreTimestamp = {
-    seconds: Math.floor(now.getTime() / 1000),
-    nanoseconds: 0,
-  };
+  const firestoreTimestamp = Timestamp.now();
 
   // TODO: Remove these logs once description and sourceUrl are added to database schema
   if (recipeData.description) {

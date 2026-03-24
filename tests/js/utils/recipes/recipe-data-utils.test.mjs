@@ -149,7 +149,7 @@ describe('recipe-data-utils', () => {
         mediaInstructions: [],
         comments: ['Yum!'],
         approved: true,
-        createdAt: 1234567890,
+        creationTime: 1234567890,
         updatedAt: 1234567891,
       };
       const formatted = formatRecipeData(raw);
@@ -177,7 +177,7 @@ describe('recipe-data-utils', () => {
         mediaInstructions: [],
         comments: [],
         approved: false,
-        createdAt: null,
+        creationTime: null,
         updatedAt: null,
       });
     });
@@ -390,7 +390,7 @@ describe('recipe-data-utils', () => {
       expect(result.errors['stages[0].instructions[0]']).toBeUndefined();
     });
 
-    it('validates optional fields types (tags, images, comments, approved, createdAt, updatedAt)', () => {
+    it('validates optional fields types (tags, images, comments, approved, creationTime, updatedAt)', () => {
       // Valid types
       let r = {
         ...baseRecipe,
@@ -398,11 +398,21 @@ describe('recipe-data-utils', () => {
         images: [{}],
         comments: ['c'],
         approved: true,
-        createdAt: 123,
+        creationTime: 1234,
         updatedAt: new Date(),
       };
       let result = validateRecipeData(r);
       expect(result.isValid).toBe(true);
+
+      // Valid Timestamp-like object
+      r = {
+        ...baseRecipe,
+        creationTime: { seconds: 1234, nanoseconds: 5678 },
+        updatedAt: { seconds: 5678, nanoseconds: 1234 },
+      };
+      result = validateRecipeData(r);
+      expect(result.isValid).toBe(true);
+
       // Invalid tags
       r = { ...baseRecipe, tags: [1, 2] };
       result = validateRecipeData(r);
@@ -423,11 +433,11 @@ describe('recipe-data-utils', () => {
       result = validateRecipeData(r);
       expect(result.isValid).toBe(false);
       expect(result.errors.approved).toBeDefined();
-      // Invalid createdAt
-      r = { ...baseRecipe, createdAt: {} };
+      // Invalid creationTime (object without seconds)
+      r = { ...baseRecipe, creationTime: { notSeconds: 123 } };
       result = validateRecipeData(r);
       expect(result.isValid).toBe(false);
-      expect(result.errors.createdAt).toBeDefined();
+      expect(result.errors.creationTime).toBeDefined();
       // Invalid updatedAt
       r = { ...baseRecipe, updatedAt: [] };
       result = validateRecipeData(r);
