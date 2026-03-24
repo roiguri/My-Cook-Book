@@ -245,6 +245,50 @@
   color: white;
 }
 
+.spa-content .my-meal-page .selection-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.spa-content .my-meal-page .text-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.spa-content .my-meal-page .text-btn:hover {
+  color: var(--primary-color-dark, #00796b);
+}
+
+.spa-content .my-meal-page .separator {
+  color: #ccc;
+}
+
+.spa-content .my-meal-page .ingredient-checkbox {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.spa-content .my-meal-page .ingredient-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.spa-content .my-meal-page .ingredient-label.unselected {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
 .spa-content .my-meal-page .ingredients-list-container {
   flex: 1;
   overflow-y: auto;
