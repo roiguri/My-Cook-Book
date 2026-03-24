@@ -89,6 +89,14 @@ describe('AuthService', () => {
       expect(authService._initialized).toBe(true);
     });
 
+    test('should register event listener for favorites', () => {
+      const spy = jest.spyOn(document, 'addEventListener');
+      authService._initialized = false;
+      authService.initialize();
+      expect(spy).toHaveBeenCalledWith('recipe-favorite-changed', expect.any(Function));
+      spy.mockRestore();
+    });
+
     test('should not reinitialize if already initialized', () => {
       const initialCallCount = mockAuth.onAuthStateChanged.mock.calls.length;
       authService.initialize();
@@ -106,21 +114,22 @@ describe('AuthService', () => {
       // Mock user roles for authenticated user
       getDoc.mockResolvedValue({
         exists: () => true,
-        data: () => ({ role: 'user' }),
+        data: () => ({ role: 'user', favorites: [] }),
       });
 
       // Simulate auth state change
       await mockAuthStateCallback(mockUser);
 
       expect(authService._currentUser).toBe(mockUser);
-      expect(authService._userRoles).toEqual({ role: 'user' });
+      expect(authService._userData).toEqual({ role: 'user', favorites: [] });
+
       expect(document.dispatchEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'auth-state-changed',
           detail: expect.objectContaining({
             user: mockUser,
             isAuthenticated: true,
-            roles: { role: 'user' },
+            roles: { role: 'user', favorites: [] },
             isManager: false,
             isApproved: false,
           }),
@@ -131,13 +140,14 @@ describe('AuthService', () => {
     test('should update state when user logs out', async () => {
       // Set initial state as logged in
       authService._currentUser = mockUser;
-      authService._userRoles = { role: 'user' };
+      authService._userData = { role: 'user' };
 
       // Simulate auth state change to null (logout)
       await mockAuthStateCallback(null);
 
       expect(authService._currentUser).toBeNull();
-      expect(authService._userRoles).toBeNull();
+      expect(authService._userData).toBeNull();
+
       expect(document.dispatchEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'auth-state-changed',
@@ -180,7 +190,7 @@ describe('AuthService', () => {
 
     test('should immediately notify new observers of current state', () => {
       authService._currentUser = mockUser;
-      authService._userRoles = { role: 'approved' };
+      authService._userData = { role: 'approved' };
 
       const observer = jest.fn();
       authService.addAuthObserver(observer);
@@ -211,6 +221,81 @@ describe('AuthService', () => {
 
       // Observer should not be called
       expect(observer).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('User Data Caching & Event Handling', () => {
+    test('getUserData should return cached data without fetching', async () => {
+      authService._currentUser = mockUser;
+      const mockData = { role: 'user', favorites: ['rec1'] };
+      authService._userData = mockData;
+
+      const getDocSpy = jest.spyOn(mockUserDoc, 'get');
+      getDoc.mockClear(); // Clear previous calls if any
+
+      const result = await authService.getUserData();
+
+      expect(result).toEqual(mockData);
+      // Verify getDoc was NOT called
+      expect(getDoc).not.toHaveBeenCalled();
+    });
+
+    test('getUserData with forceRefresh should fetch data', async () => {
+      authService._currentUser = mockUser;
+      authService._userData = { role: 'user', favorites: ['old'] };
+
+      const newData = { role: 'user', favorites: ['new'] };
+      getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => newData,
+      });
+
+      const result = await authService.getUserData({ forceRefresh: true });
+
+      expect(result).toEqual(newData);
+      expect(authService._userData).toEqual(newData);
+    });
+
+    test('_handleFavoriteChanged should update cached favorites', () => {
+      authService._currentUser = mockUser;
+      authService._userData = { role: 'user', favorites: ['rec1'] };
+
+      // Call handler directly because document.dispatchEvent is mocked
+      authService._handleFavoriteChanged({
+        recipeId: 'rec2',
+        isFavorite: true,
+        userId: mockUser.uid,
+      });
+
+      // Verify cache updated (rec2 added)
+      expect(authService._userData.favorites).toContain('rec2');
+      expect(authService._userData.favorites).toContain('rec1');
+
+      // Remove favorite
+      authService._handleFavoriteChanged({
+        recipeId: 'rec1',
+        isFavorite: false,
+        userId: mockUser.uid,
+      });
+
+      // Verify cache updated (rec1 removed)
+      expect(authService._userData.favorites).not.toContain('rec1');
+      expect(authService._userData.favorites).toContain('rec2');
+    });
+
+    test('_handleFavoriteChanged should ignore other users', () => {
+      authService._currentUser = mockUser;
+      authService._userData = { role: 'user', favorites: [] };
+
+      // Call handler for different user
+      authService._handleFavoriteChanged({
+        recipeId: 'rec1',
+        isFavorite: true,
+        userId: 'other-user',
+      });
+
+      // Verify cache NOT updated
+      expect(authService._userData.favorites).toHaveLength(0);
     });
   });
 
@@ -351,6 +436,8 @@ describe('AuthService', () => {
       };
 
       updateDoc.mockResolvedValue(undefined);
+      // Pre-fill user data
+      authService._userData = { role: 'user' };
 
       await authService.updateProfile(profileData);
 
@@ -369,15 +456,8 @@ describe('AuthService', () => {
         }),
       );
 
-      expect(document.dispatchEvent).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'profile-updated',
-          detail: expect.objectContaining({
-            user: mockUser,
-            updatedFields: ['displayName', 'photoURL', 'favoriteFood'],
-          }),
-        }),
-      );
+      // Verify local cache updated
+      expect(authService._userData.favoriteFood).toBe('Pizza');
     });
 
     test('updateProfile should throw error if no user is signed in', async () => {
@@ -409,20 +489,20 @@ describe('AuthService', () => {
       authService._currentUser = mockUser;
 
       // Test with user role
-      authService._userRoles = { role: 'user' };
+      authService._userData = { role: 'user' };
       expect(authService.hasRole('user')).toBe(true);
       expect(authService.hasRole('approved')).toBe(false);
       expect(authService.hasRole('manager')).toBe(false);
 
       // Test with manager role
-      authService._userRoles = { role: 'manager' };
+      authService._userData = { role: 'manager' };
       expect(authService.hasRole('manager')).toBe(true);
       expect(authService.hasRole('user')).toBe(false);
     });
 
     test('hasRole should return false when not authenticated', () => {
       authService._currentUser = null;
-      authService._userRoles = null;
+      authService._userData = null;
 
       expect(authService.hasRole('user')).toBe(false);
     });
@@ -431,11 +511,11 @@ describe('AuthService', () => {
       authService._currentUser = mockUser;
 
       // Test with user role
-      authService._userRoles = { role: 'user' };
+      authService._userData = { role: 'user' };
       expect(authService.isManager()).toBe(false);
 
       // Test with manager role
-      authService._userRoles = { role: 'manager' };
+      authService._userData = { role: 'manager' };
       expect(authService.isManager()).toBe(true);
     });
 
@@ -443,15 +523,15 @@ describe('AuthService', () => {
       authService._currentUser = mockUser;
 
       // Test with user role
-      authService._userRoles = { role: 'user' };
+      authService._userData = { role: 'user' };
       expect(authService.isApproved()).toBe(false);
 
       // Test with approved role
-      authService._userRoles = { role: 'approved' };
+      authService._userData = { role: 'approved' };
       expect(authService.isApproved()).toBe(true);
 
       // Test with manager role
-      authService._userRoles = { role: 'manager' };
+      authService._userData = { role: 'manager' };
       expect(authService.isApproved()).toBe(true);
     });
   });
@@ -469,10 +549,10 @@ describe('AuthService', () => {
       await mockAuthStateCallback(mockUser);
 
       // Verify error was logged
-      expect(console.error).toHaveBeenCalledWith('Error fetching user roles:', expect.any(Error));
+      expect(console.error).toHaveBeenCalledWith('Error fetching user data:', expect.any(Error));
 
       // Verify default role was used
-      expect(authService._userRoles).toEqual({ role: 'user' });
+      expect(authService._userData).toEqual({ role: 'user', favorites: [] });
 
       // Restore console.error
       console.error = originalConsoleError;
@@ -490,7 +570,7 @@ describe('AuthService', () => {
       await mockAuthStateCallback(mockUser);
 
       // Should default to user role
-      expect(authService._userRoles).toEqual({ role: 'user' });
+      expect(authService._userData).toEqual({ role: 'user', favorites: [] });
     });
   });
 
@@ -526,29 +606,38 @@ describe('AuthService', () => {
   describe('getCurrentUserRole', () => {
     test('fetches and returns the user role if not set', async () => {
       authService._currentUser = mockUser; // Set current user
-      // Mock the fetch to resolve to a manager role
-      jest.spyOn(authService, '_fetchUserRoles').mockResolvedValue({ role: 'manager' });
+
+      // Mock getUserData to mimic the side effect of setting _userData
+      const getUserDataSpy = jest.spyOn(authService, 'getUserData').mockImplementation(async () => {
+        authService._userData = { role: 'manager' };
+        return { role: 'manager' };
+      });
+
+      // Clear _userData initially so it attempts fetch
+      authService._userData = null;
 
       const role = await authService.getCurrentUserRole();
       expect(role).toBe('manager');
-      expect(authService._userRoles).toEqual({ role: 'manager' });
+      expect(getUserDataSpy).toHaveBeenCalled();
     });
 
     test('returns the cached role if already set', async () => {
       authService._currentUser = mockUser;
-      authService._userRoles = { role: 'approved' }; // Set cached role
-      // _fetchUserRoles should NOT be called
-      const fetchSpy = jest.spyOn(authService, '_fetchUserRoles');
+      authService._userData = { role: 'approved' }; // Set cached role
+
+      const getUserDataSpy = jest.spyOn(authService, 'getUserData');
 
       const role = await authService.getCurrentUserRole();
       expect(role).toBe('approved');
-      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(getUserDataSpy).not.toHaveBeenCalled();
     });
 
     test('returns public if no user and no roles', async () => {
       authService._currentUser = null;
-      authService._userRoles = null;
-      jest.spyOn(authService, '_fetchUserRoles').mockResolvedValue();
+      authService._userData = null;
+
+      // Mock getUserData call inside getCurrentUserRole if it's called
+      const getUserDataSpy = jest.spyOn(authService, 'getUserData').mockResolvedValue(null);
 
       const role = await authService.getCurrentUserRole();
       expect(role).toBe('public');
