@@ -76,6 +76,21 @@ describe('Common Utilities', () => {
       jest.advanceTimersByTime(500);
       expect(func).toHaveBeenCalledTimes(1);
     });
+
+    test('cancels pending execution', () => {
+      const func = jest.fn();
+      const debouncedFunc = debounce(func, 1000);
+
+      debouncedFunc();
+      jest.advanceTimersByTime(500);
+      debouncedFunc.cancel();
+
+      jest.advanceTimersByTime(500);
+      expect(func).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(1000);
+      expect(func).not.toHaveBeenCalled();
+    });
   });
 
   describe('throttle', () => {

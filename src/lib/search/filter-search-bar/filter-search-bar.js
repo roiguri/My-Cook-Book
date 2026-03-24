@@ -1,3 +1,5 @@
+import { debounce } from '../../../js/utils/common-utils.js';
+
 /**
  * FilterSearchBar Component
  * Search bar component for filtering recipes with real-time functionality.
@@ -6,6 +8,16 @@ class FilterSearchBar extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+
+    this.debouncedSearchInput = debounce((searchText) => {
+      this.dispatchEvent(
+        new CustomEvent('search-input', {
+          bubbles: true,
+          composed: true,
+          detail: { searchText },
+        }),
+      );
+    }, 300);
   }
 
   connectedCallback() {
@@ -191,13 +203,7 @@ class FilterSearchBar extends HTMLElement {
 
       this.updateClearButtonVisibility();
 
-      this.dispatchEvent(
-        new CustomEvent('search-input', {
-          bubbles: true,
-          composed: true,
-          detail: { searchText },
-        }),
-      );
+      this.debouncedSearchInput(searchText);
     });
 
     clearButton.addEventListener('click', () => {
@@ -219,6 +225,7 @@ class FilterSearchBar extends HTMLElement {
     if (input.value !== '') {
       input.value = '';
       this.updateClearButtonVisibility();
+
       this.dispatchEvent(
         new CustomEvent('search-input', {
           bubbles: true,
@@ -226,6 +233,7 @@ class FilterSearchBar extends HTMLElement {
           detail: { searchText: '' },
         }),
       );
+      this.debouncedSearchInput.cancel();
     }
   }
 
