@@ -22,3 +22,8 @@
 
 **Learning:** Firestore `getDoc` calls are not automatically deduped or cached in memory across components if not using a listener. Centralizing user data fetching in `AuthService` and listening for update events (like `recipe-favorite-changed`) significantly reduces redundant network requests.
 **Action:** Always prefer a centralized data service with caching and event listeners for frequently accessed, user-specific data that changes based on UI actions.
+
+## 2025-10-25 - [Non-blocking Component Preloading]
+
+**Learning:** `await`ing every component import in the application initialization path (e.g., in `initializeSPA`) delays the Time to Interactive (TTI) because the router waits for all components to load before rendering.
+**Action:** Separate truly critical shell components (like `navigation-script`) from supplemental ones (like Auth and Search). `await` only critical shell dependencies to avoid race conditions, but let supplemental ones load in parallel via non-blocking `Promise.all().catch()`.

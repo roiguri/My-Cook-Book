@@ -30,17 +30,17 @@ async function initializeSPA() {
   try {
     initFirebase(firebaseConfig);
 
-    // Preload critical components in parallel
-    await Promise.all([
+    // Start loading supplemental components in parallel (non-blocking for faster TTI)
+    Promise.all([
       import('./lib/auth/auth-controller.js'),
       import('./lib/auth/components/auth-avatar.js'),
       import('./lib/auth/components/auth-content.js'),
-    ]);
-
-    await Promise.all([
       import('./lib/search/header-search-bar/header-search-bar.js'),
-      import('./js/navigation-script.js'),
-    ]);
+    ]).catch((err) => console.warn('Failed to preload supplemental components:', err));
+
+    // Await components critical for the UI shell to avoid race conditions
+    // (e.g., navigation-script handles link interception which the router depends on)
+    await import('./js/navigation-script.js');
 
     const contentContainer = document.getElementById('spa-content');
     if (!contentContainer) {
