@@ -75,6 +75,10 @@ jest.unstable_mockModule('src/js/utils/recipes/recipe-image-utils.js', () => ({
 
 jest.unstable_mockModule('src/js/utils/lazy-loading.js', () => ({
   initLazyLoading: jest.fn(),
+  lazyImageLoader: {
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+  },
 }));
 
 // Import Component under test (Dynamic import after mocks)

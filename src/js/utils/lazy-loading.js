@@ -1,13 +1,10 @@
-// src/js/utils/lazy-loading.js
-// Lazy loading utilities for images and components
-
 /**
  * Image lazy loading using Intersection Observer API
  */
 export class LazyImageLoader {
   constructor(options = {}) {
     this.options = {
-      rootMargin: '50px',
+      rootMargin: '200px',
       threshold: 0.1,
       ...options,
     };
@@ -43,15 +40,23 @@ export class LazyImageLoader {
   }
 
   /**
+   * Stop observing an image element
+   * @param {HTMLImageElement} img - Image element to unobserve
+   */
+  unobserve(img) {
+    if (this.observer && img) {
+      this.observer.unobserve(img);
+    }
+  }
+
+  /**
    * Load image by setting src from data-src
    * @param {HTMLImageElement} img - Image element to load
    */
   loadImage(img) {
     if (img.dataset.src) {
-      // Add loading state
       img.classList.add('loading');
 
-      // Create a new image to preload
       const imageLoader = new Image();
 
       imageLoader.onload = () => {
@@ -59,7 +64,6 @@ export class LazyImageLoader {
         img.classList.remove('loading');
         img.classList.add('loaded');
 
-        // Remove data-src attribute
         delete img.dataset.src;
       };
 
@@ -67,7 +71,6 @@ export class LazyImageLoader {
         img.classList.remove('loading');
         img.classList.add('error');
 
-        // Set fallback image if available
         if (img.dataset.fallback) {
           img.src = img.dataset.fallback;
         }
@@ -96,7 +99,6 @@ export class LazyImageLoader {
   }
 }
 
-// Global lazy image loader instance
 export const lazyImageLoader = new LazyImageLoader();
 
 /**
@@ -122,11 +124,9 @@ export function createLazyImage(src, alt = '', className = '', fallback = '/img/
   img.alt = alt;
   img.className = className;
 
-  // Set placeholder or loading state
   img.src =
     'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcuLi48L3RleHQ+PC9zdmc+';
 
-  // Initialize lazy loading for this image
   lazyImageLoader.observe(img);
 
   return img;
@@ -146,7 +146,6 @@ export class LazyComponentLoader {
    * @returns {Promise<Object>} Component module
    */
   async loadComponent(componentPath) {
-    // Return cached module if already loaded
     if (this.loadedComponents.has(componentPath)) {
       return this.loadedComponents.get(componentPath);
     }

@@ -46,22 +46,19 @@ import {
   getPrimaryImageUrl,
   getPlaceholderImageUrl,
 } from '../../../js/utils/recipes/recipe-image-utils.js';
-import { initLazyLoading } from '../../../js/utils/lazy-loading.js';
+import { initLazyLoading, lazyImageLoader } from '../../../js/utils/lazy-loading.js';
 import RECIPE_CARD_CONFIG from './recipe-card-config.js';
 import { recipeCardStyles } from './recipe-card-styles.js';
 
 class RecipeCard extends HTMLElement {
-  // Define observed attributes
   static get observedAttributes() {
     return RECIPE_CARD_CONFIG.OBSERVED_ATTRIBUTES;
   }
 
   constructor() {
     super();
-    // Create shadow DOM
     this.attachShadow({ mode: 'open' });
 
-    // Initialize default values
     this._defaults = RECIPE_CARD_CONFIG.DEFAULT_DIMENSIONS;
     this._isLoading = true;
     this._recipeData = null;
@@ -71,14 +68,12 @@ class RecipeCard extends HTMLElement {
     this._stylesLoaded = false;
     this._isFavoriteProvided = false;
 
-    // Bind methods
     this._handleCardClick = this._handleCardClick.bind(this);
     this._handleLinkClick = this._handleLinkClick.bind(this);
 
     this._userFavorites = new Set();
   }
 
-  // Getters for attribute values
   get recipeId() {
     return this.getAttribute('recipe-id');
   }
@@ -98,12 +93,12 @@ class RecipeCard extends HTMLElement {
     };
   }
 
-  // Lifecycle methods
   connectedCallback() {
     this._initialize();
   }
 
   disconnectedCallback() {
+    this._cleanupImageObserver();
     this._removeEventListeners();
   }
 
@@ -121,7 +116,6 @@ class RecipeCard extends HTMLElement {
     }
   }
 
-  // Initialization
   async _initialize() {
     this._loadStyles();
     this._showImmediateLoadingState();
@@ -518,7 +512,6 @@ class RecipeCard extends HTMLElement {
     this.dispatchEvent(customEvent);
   }
 
-  // Data fetching
   async _fetchRecipeData() {
     if (!this.recipeId) {
       this._handleError('No recipe ID provided');
@@ -546,14 +539,12 @@ class RecipeCard extends HTMLElement {
     }
   }
 
-  // Error handling
   _handleError(error) {
     console.error('Recipe Card Error:', error);
     this._isLoading = false;
     this._error = error.message || RECIPE_CARD_CONFIG.FALLBACKS.errorMessage;
   }
 
-  // Rendering
   _render() {
     if (!this._templatesLoaded || !this._stylesLoaded) {
       // Templates/styles not loaded yet, wait
@@ -633,7 +624,6 @@ class RecipeCard extends HTMLElement {
       }
     }
 
-    // Set image
     if (recipeImage) {
       recipeImage.setAttribute('data-src', this._imageUrl);
       recipeImage.setAttribute('alt', name);
@@ -645,19 +635,16 @@ class RecipeCard extends HTMLElement {
       recipeLink.href = `/recipe/${this.recipeId}`;
     }
 
-    // Set category badge
     if (categoryBadge) {
       categoryBadge.className = `${RECIPE_CARD_CONFIG.CSS_CLASSES.badge} ${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeCategory} ${category}`;
       categoryBadge.textContent = getLocalizedCategoryName(category);
     }
 
-    // Set time badge
     if (timeBadge) {
       timeBadge.className = `${RECIPE_CARD_CONFIG.CSS_CLASSES.badge} ${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeTime} ${timeClass}`;
       timeBadge.textContent = formatCookingTime(totalTime);
     }
 
-    // Set difficulty badge
     if (difficultyBadge) {
       difficultyBadge.className = `${RECIPE_CARD_CONFIG.CSS_CLASSES.badge} ${RECIPE_CARD_CONFIG.CSS_CLASSES.badgeDifficulty} ${difficultyClass}`;
       const iconSpan = difficultyBadge.querySelector('.icon');
@@ -669,16 +656,22 @@ class RecipeCard extends HTMLElement {
     this.shadowRoot.appendChild(clone);
     this._setupEventListeners();
 
-    // Initialize lazy loading for images in this component
     initLazyLoading(this.shadowRoot);
   }
 
   _clearShadowRoot() {
-    // Clear shadow root but preserve styles if they exist
+    this._cleanupImageObserver();
     const existingStyle = this.shadowRoot.querySelector('style');
     this.shadowRoot.innerHTML = '';
     if (existingStyle) {
       this.shadowRoot.appendChild(existingStyle);
+    }
+  }
+
+  _cleanupImageObserver() {
+    const img = this.shadowRoot.querySelector('img');
+    if (img) {
+      lazyImageLoader.unobserve(img);
     }
   }
 
@@ -696,18 +689,13 @@ class RecipeCard extends HTMLElement {
     if (!user) return;
 
     try {
-      // Dynamic import to avoid circular dependencies if any, and ensure it's loaded
       const { ActiveMealUtils } = await import('../../../js/utils/active-meal-utils.js');
 
-      // Ensure message-modal is available
       await import('../../../lib/modals/message-modal/message-modal.js');
 
       const result = await ActiveMealUtils.addToMeal(user.uid, this.recipeId);
 
       let messageModal = document.querySelector('message-modal');
-      // If not in document/shadow, might need to create one or find it in specific container
-      // For recipe-card which is used in lists, usually the page has a modal.
-      // If not, we might want to append one.
       if (!messageModal) {
         messageModal = document.createElement('message-modal');
         document.body.appendChild(messageModal);
@@ -784,7 +772,6 @@ class RecipeCard extends HTMLElement {
     return '';
   }
 
-  // Utility methods
   _updateDimensions() {
     const dimensions = this._getCurrentDimensions();
     this.style.setProperty('--card-width', dimensions.width);
