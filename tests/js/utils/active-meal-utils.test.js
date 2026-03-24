@@ -161,13 +161,14 @@ describe('ActiveMealUtils', () => {
   describe('updateRecipeState', () => {
     it('updates specific recipe fields using dot notation', async () => {
       FirestoreService.updateDocument.mockResolvedValue(undefined);
-      const updates = { servings: 4, checked: true };
+      const updates = { servings: 4, checked: true, unselectedIngredients: ['recipe1-0-1'] };
       const result = await ActiveMealUtils.updateRecipeState('user1', 'recipe1', updates);
 
       expect(result).toEqual({ success: true });
       expect(FirestoreService.updateDocument).toHaveBeenCalledWith('active_meals', 'user1', {
         'recipeStates.recipe1.servings': 4,
         'recipeStates.recipe1.checked': true,
+        'recipeStates.recipe1.unselectedIngredients': ['recipe1-0-1'],
         lastUpdated: 'MOCK_TIMESTAMP',
       });
     });

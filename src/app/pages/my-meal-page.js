@@ -39,6 +39,7 @@ export default {
       activeTabId: null,
       drawerOpen: false,
       ingredientsView: 'all', // 'all' or 'current'
+      unselectedIngredients: new Set(),
     };
 
     this.setupAuthObserver();
@@ -83,6 +84,15 @@ export default {
   },
 
   async updateMealState(mealData) {
+    // Sync unselectedIngredients state from firebase
+    if (mealData.recipeStates) {
+      this.state.unselectedIngredients = new Set();
+      Object.entries(mealData.recipeStates).forEach(([recipeId, state]) => {
+        if (state.unselectedIngredients && Array.isArray(state.unselectedIngredients)) {
+          state.unselectedIngredients.forEach((key) => this.state.unselectedIngredients.add(key));
+        }
+      });
+    }
     this.state.meal = mealData;
 
     // Fetch missing recipes
@@ -107,8 +117,13 @@ export default {
     // Determine active recipe
     const activeRecipeId = mealData.activeRecipeId || (recipeIds.length > 0 ? recipeIds[0] : null);
 
-    // Render tabs
-    this.renderTabs(recipeIds, activeRecipeId);
+    // Only re-render tabs when the recipe list or active recipe changes — not on every snapshot
+    // (e.g. ingredient selection writes trigger snapshots but shouldn't rebuild tab DOM)
+    const tabKey = `${recipeIds.join(',')}_${activeRecipeId}`;
+    if (tabKey !== this.state._lastTabKey) {
+      this.renderTabs(recipeIds, activeRecipeId);
+      this.state._lastTabKey = tabKey;
+    }
 
     // Render active recipe
     if (activeRecipeId && activeRecipeId !== this.state.activeTabId) {
@@ -304,6 +319,9 @@ export default {
     const viewAllBtn = this.container.querySelector('#view-all-ingredients');
     const viewRecipeBtn = this.container.querySelector('#view-recipe-ingredients');
 
+    const selectAllBtn = this.container.querySelector('#select-all-btn');
+    const deselectAllBtn = this.container.querySelector('#deselect-all-btn');
+
     const copyBtn = this.container.querySelector('#copy-ingredients-btn');
     const shareBtn = this.container.querySelector('#share-ingredients-btn');
 
@@ -338,6 +356,9 @@ export default {
         const recipe = this.state.recipes[id];
         if (!recipe) return;
 
+        let recipeHasItems = this._recipeHasSelectedItems(recipe, id);
+        if (!recipeHasItems) return;
+
         text += `${recipe.name}\n`;
         text += '-'.repeat(recipe.name.length) + '\n';
 
@@ -352,18 +373,31 @@ export default {
             recipe.servings,
             servings,
           );
-          scaledIngredients.forEach((section) => {
+          scaledIngredients.forEach((section, sIndex) => {
+            let sectionHasItems = false;
+            let sectionText = '';
+
             if (section.title) {
-              text += `\n${section.title}:\n`;
+              sectionText += `\n${section.title}:\n`;
             }
-            section.items.forEach((item) => {
-              text += `- ${formatIngredientAmount(item.amount)} ${item.unit} ${item.item}\n`;
+            section.items.forEach((item, iIndex) => {
+              const key = `${id}-${sIndex}-${iIndex}`;
+              if (!this.state.unselectedIngredients.has(key)) {
+                sectionText += `- ${formatIngredientAmount(item.amount)} ${item.unit} ${item.item}\n`;
+                sectionHasItems = true;
+              }
             });
+            if (sectionHasItems) {
+              text += sectionText;
+            }
           });
         } else {
           scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
-          scaledIngredients.forEach((item) => {
-            text += `- ${formatIngredientAmount(item.amount)} ${item.unit} ${item.item}\n`;
+          scaledIngredients.forEach((item, iIndex) => {
+            const key = `${id}-0-${iIndex}`;
+            if (!this.state.unselectedIngredients.has(key)) {
+              text += `- ${formatIngredientAmount(item.amount)} ${item.unit} ${item.item}\n`;
+            }
           });
         }
         text += '\n'; // Spacer between recipes
@@ -417,6 +451,104 @@ export default {
       viewRecipeBtn.classList.add('active');
       viewAllBtn.classList.remove('active');
       this.renderIngredientsList();
+    });
+
+    selectAllBtn.addEventListener('click', () => this.handleBulkIngredientSelection(true));
+    deselectAllBtn.addEventListener('click', () => this.handleBulkIngredientSelection(false));
+  },
+
+  async handleBulkIngredientSelection(shouldSelect) {
+    const keys = this.getCurrentViewIngredientKeys();
+    const recipesToUpdate = new Set();
+    let hasChanges = false;
+
+    keys.forEach(({ recipeId, key }) => {
+      const isUnselected = this.state.unselectedIngredients.has(key);
+      if (shouldSelect && isUnselected) {
+        this.state.unselectedIngredients.delete(key);
+        hasChanges = true;
+        recipesToUpdate.add(recipeId);
+      } else if (!shouldSelect && !isUnselected) {
+        this.state.unselectedIngredients.add(key);
+        hasChanges = true;
+        recipesToUpdate.add(recipeId);
+      }
+    });
+
+    if (hasChanges) {
+      const { ActiveMealUtils } = await import('../../js/utils/active-meal-utils.js');
+      const promises = Array.from(recipesToUpdate).map((recipeId) => {
+        const unselectedArr = Array.from(this.state.unselectedIngredients).filter((k) =>
+          k.startsWith(`${recipeId}-`),
+        );
+        return ActiveMealUtils.updateRecipeState(this.currentUser.uid, recipeId, {
+          unselectedIngredients: unselectedArr,
+        });
+      });
+      await Promise.all(promises);
+      this.renderIngredientsList();
+    }
+  },
+
+  _recipeHasSelectedItems(recipe, recipeId) {
+    if (recipe.ingredientSections) {
+      return recipe.ingredientSections.some((section, sIndex) =>
+        section.items.some(
+          (_, iIndex) => !this.state.unselectedIngredients.has(`${recipeId}-${sIndex}-${iIndex}`),
+        ),
+      );
+    }
+    if (recipe.ingredients) {
+      return recipe.ingredients.some(
+        (_, iIndex) => !this.state.unselectedIngredients.has(`${recipeId}-0-${iIndex}`),
+      );
+    }
+    return false;
+  },
+
+  getCurrentViewIngredientKeys() {
+    const keys = [];
+    const recipeIds =
+      this.state.ingredientsView === 'current'
+        ? this.state.activeTabId
+          ? [this.state.activeTabId]
+          : []
+        : this.state.meal?.recipeIds || [];
+
+    recipeIds.forEach((id) => {
+      const recipe = this.state.recipes[id];
+      if (!recipe) return;
+
+      if (recipe.ingredientSections) {
+        recipe.ingredientSections.forEach((section, sIndex) => {
+          section.items.forEach((item, iIndex) => {
+            keys.push({ recipeId: id, key: `${id}-${sIndex}-${iIndex}` });
+          });
+        });
+      } else {
+        recipe.ingredients.forEach((item, iIndex) => {
+          keys.push({ recipeId: id, key: `${id}-0-${iIndex}` });
+        });
+      }
+    });
+    return keys;
+  },
+
+  async toggleIngredientSelection(recipeId, key) {
+    if (this.state.unselectedIngredients.has(key)) {
+      this.state.unselectedIngredients.delete(key);
+    } else {
+      this.state.unselectedIngredients.add(key);
+    }
+    this.renderIngredientsList();
+
+    // Save state
+    const { ActiveMealUtils } = await import('../../js/utils/active-meal-utils.js');
+    const unselectedArr = Array.from(this.state.unselectedIngredients).filter((k) =>
+      k.startsWith(recipeId + '-'),
+    );
+    await ActiveMealUtils.updateRecipeState(this.currentUser.uid, recipeId, {
+      unselectedIngredients: unselectedArr,
     });
   },
 
@@ -488,9 +620,20 @@ export default {
           scaledIngredients = scaleIngredients(originalIngredients, recipe.servings, servings);
         }
 
-        const renderItems = (items) => {
-          items.forEach((item) => {
+        const renderItems = (items, sIndex) => {
+          items.forEach((item, iIndex) => {
             const li = document.createElement('li');
+            const key = `${id}-${sIndex}-${iIndex}`;
+            const isUnselected = this.state.unselectedIngredients.has(key);
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'ingredient-checkbox';
+            checkbox.checked = !isUnselected;
+            checkbox.addEventListener('change', () => this.toggleIngredientSelection(id, key));
+
+            const label = document.createElement('label');
+            label.className = `ingredient-label ${isUnselected ? 'unselected' : ''}`;
 
             const amountSpan = document.createElement('span');
             amountSpan.className = 'amount';
@@ -504,28 +647,30 @@ export default {
             itemSpan.className = 'item';
             itemSpan.textContent = item.item;
 
-            li.appendChild(amountSpan);
-            li.appendChild(document.createTextNode(' '));
-            li.appendChild(unitSpan);
-            li.appendChild(document.createTextNode(' '));
-            li.appendChild(itemSpan);
+            label.appendChild(amountSpan);
+            label.appendChild(document.createTextNode(' '));
+            label.appendChild(unitSpan);
+            label.appendChild(document.createTextNode(' '));
+            label.appendChild(itemSpan);
 
+            li.appendChild(checkbox);
+            li.appendChild(label);
             ul.appendChild(li);
           });
         };
 
         if (recipe.ingredientSections) {
-          scaledIngredients.forEach((section) => {
+          scaledIngredients.forEach((section, sIndex) => {
             if (section.title) {
               const sectionTitle = document.createElement('li');
               sectionTitle.className = 'section-title';
               sectionTitle.textContent = section.title;
               ul.appendChild(sectionTitle);
             }
-            renderItems(section.items);
+            renderItems(section.items, sIndex);
           });
         } else {
-          renderItems(scaledIngredients);
+          renderItems(scaledIngredients, 0);
         }
         listContainer.appendChild(ul);
       });
@@ -550,9 +695,22 @@ export default {
 
         const ul = document.createElement('ul');
 
-        const renderItems = (items) => {
-          items.forEach((item) => {
+        const renderItems = (items, sIndex) => {
+          items.forEach((item, iIndex) => {
             const li = document.createElement('li');
+            const key = `${recipeIds[0]}-${sIndex}-${iIndex}`;
+            const isUnselected = this.state.unselectedIngredients.has(key);
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'ingredient-checkbox';
+            checkbox.checked = !isUnselected;
+            checkbox.addEventListener('change', () =>
+              this.toggleIngredientSelection(recipeIds[0], key),
+            );
+
+            const label = document.createElement('label');
+            label.className = `ingredient-label ${isUnselected ? 'unselected' : ''}`;
 
             const amountSpan = document.createElement('span');
             amountSpan.className = 'amount';
@@ -566,28 +724,30 @@ export default {
             itemSpan.className = 'item';
             itemSpan.textContent = item.item;
 
-            li.appendChild(amountSpan);
-            li.appendChild(document.createTextNode(' '));
-            li.appendChild(unitSpan);
-            li.appendChild(document.createTextNode(' '));
-            li.appendChild(itemSpan);
+            label.appendChild(amountSpan);
+            label.appendChild(document.createTextNode(' '));
+            label.appendChild(unitSpan);
+            label.appendChild(document.createTextNode(' '));
+            label.appendChild(itemSpan);
 
+            li.appendChild(checkbox);
+            li.appendChild(label);
             ul.appendChild(li);
           });
         };
 
         if (recipe.ingredientSections) {
-          scaledIngredients.forEach((section) => {
+          scaledIngredients.forEach((section, sIndex) => {
             if (section.title) {
               const sectionTitle = document.createElement('li');
               sectionTitle.className = 'section-title';
               sectionTitle.textContent = section.title;
               ul.appendChild(sectionTitle);
             }
-            renderItems(section.items);
+            renderItems(section.items, sIndex);
           });
         } else {
-          renderItems(scaledIngredients);
+          renderItems(scaledIngredients, 0);
         }
         listContainer.appendChild(ul);
       }
