@@ -2,7 +2,6 @@ import { getFirestoreInstance, getStorageInstance } from '../../../js/services/f
 import { doc, getDoc } from 'firebase/firestore';
 import { ref, getDownloadURL } from 'firebase/storage';
 
-// TODO: Add fullpage state
 class PDFViewer extends HTMLElement {
   constructor() {
     super();
@@ -10,6 +9,8 @@ class PDFViewer extends HTMLElement {
     this.pdfPath = this.getAttribute('pdf-path');
     this.currentPage = this.getAttribute('start-page') || 1;
     this.totalPages = parseInt(this.getAttribute('total-pages')) || 92;
+    this.isFullPage = false;
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
   async connectedCallback() {
@@ -28,6 +29,43 @@ class PDFViewer extends HTMLElement {
     this.addEventListeners();
     // Load initial image
     this.updateImage(this.currentPage);
+    window.addEventListener('keydown', this.handleKeyDown);
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('keydown', this.handleKeyDown);
+    if (this.isFullPage) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  handleKeyDown(e) {
+    if (!this.isFullPage) return;
+
+    switch (e.key) {
+      case 'Escape':
+        this.toggleFullPage();
+        break;
+      case 'ArrowRight':
+        this.goToPage(this.currentPage - 1); // Previous in RTL
+        break;
+      case 'ArrowLeft':
+        this.goToPage(this.currentPage + 1); // Next in RTL
+        break;
+    }
+  }
+
+  toggleFullPage() {
+    this.isFullPage = !this.isFullPage;
+    const container = this.shadowRoot.querySelector('.pdf_viewer');
+
+    if (this.isFullPage) {
+      container.classList.add('full-page');
+      document.body.style.overflow = 'hidden';
+    } else {
+      container.classList.remove('full-page');
+      document.body.style.overflow = '';
+    }
   }
 
   async fetchPageIndex() {
@@ -63,6 +101,17 @@ class PDFViewer extends HTMLElement {
                     border: 1px solid rgba(0, 0, 0, 0.06);
                 }
 
+                .pdf_viewer.full-page {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    z-index: 10000;
+                    border-radius: 0;
+                    margin: 0;
+                }
+
                 .pdf_viewer__pdf-page {
                     display: flex;
                     justify-content: center;
@@ -73,6 +122,11 @@ class PDFViewer extends HTMLElement {
                     background: #ffffff;
                     position: relative;
                     min-height: 400px; /* Min height to prevent jump during load */
+                }
+
+                .pdf_viewer.full-page .pdf_viewer__pdf-page {
+                    height: 100vh;
+                    padding: 0;
                 }
 
                 .pdf_viewer__pdf-page::before {
@@ -105,6 +159,11 @@ class PDFViewer extends HTMLElement {
                     box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16);
                 }
 
+                .pdf_viewer.full-page .pdf_viewer__pdf-page img {
+                    border-radius: 0;
+                    box-shadow: none;
+                }
+
                 .loading-spinner {
                     position: absolute;
                     width: 40px;
@@ -135,6 +194,10 @@ class PDFViewer extends HTMLElement {
                     border-top: 1px solid rgba(0, 0, 0, 0.06);
                 }
 
+                .pdf_viewer.full-page .pdf_viewer__pdf-navigation {
+                    display: none;
+                }
+
                 .recipe-search {
                     display: flex;
                     justify-content: center;
@@ -144,6 +207,10 @@ class PDFViewer extends HTMLElement {
                     gap: 12px;
                     flex-shrink: 0;
                     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+                }
+
+                .pdf_viewer.full-page .recipe-search {
+                    display: none;
                 }
 
                 .pdf_viewer__pdf-navigation button {
@@ -159,6 +226,85 @@ class PDFViewer extends HTMLElement {
                     box-shadow: 0 2px 8px rgba(187, 96, 22, 0.3);
                     position: relative;
                     overflow: hidden;
+                }
+
+                /* Full Page Controls */
+                .fp-control {
+                    display: none;
+                    position: absolute;
+                    background: rgba(0, 0, 0, 0.5);
+                    color: white;
+                    border: none;
+                    cursor: pointer;
+                    z-index: 10001;
+                    transition: background 0.2s ease;
+                }
+
+                .pdf_viewer.full-page .fp-control {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                .fp-control:hover {
+                    background: rgba(0, 0, 0, 0.7);
+                }
+
+                .fp-close {
+                    top: 20px;
+                    left: 20px;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    font-size: 24px;
+                    line-height: 1;
+                }
+
+                .fp-nav {
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 50px;
+                    height: 80px;
+                    font-size: 30px;
+                    border-radius: 8px;
+                }
+
+                .fp-prev {
+                    right: 20px;
+                }
+
+                .fp-next {
+                    left: 20px;
+                }
+
+                /* Full-page open button (top-right overlay, always visible) */
+                .fp-open {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 6px;
+                    background: rgba(0, 0, 0, 0.35);
+                    color: white;
+                    border: none;
+                    cursor: pointer;
+                    z-index: 5;
+                    font-size: 14px;
+                    transition: background 0.2s ease, opacity 0.2s ease;
+                    opacity: 0.6;
+                }
+
+                .fp-open:hover {
+                    background: rgba(0, 0, 0, 0.6);
+                    opacity: 1;
+                }
+
+                .pdf_viewer.full-page .fp-open {
+                    display: none;
                 }
 
                 .pdf_viewer__pdf-navigation button::before {
@@ -282,7 +428,15 @@ class PDFViewer extends HTMLElement {
                   <div class="pdf_viewer__pdf-page">
                       <div class="loading-spinner"></div>
                       <img id="pdf_viewer__pdfImage" src="" alt="Page ${this.currentPage}">
+                      <!-- Open full-page overlay button -->
+                      <button class="fp-open" id="fp-open" title="מסך מלא (לחץ פעמיים על התמונה)">⛶</button>
                   </div>
+
+                  <!-- Full Page Controls -->
+                  <button class="fp-control fp-close" id="fp-close" title="סגור מסך מלא">✕</button>
+                  <button class="fp-control fp-nav fp-prev" id="fp-prev" title="הקודם">❯</button>
+                  <button class="fp-control fp-nav fp-next" id="fp-next" title="הבא">❮</button>
+
                   <div class="pdf_viewer__pdf-navigation">
                       <button id="pdf_viewer__nextPage">הבא</button>
                       <span id="pdf_viewer__pageNumber">עמוד ${this.currentPage}</span>
@@ -300,6 +454,7 @@ class PDFViewer extends HTMLElement {
 
   addEventListeners() {
     if (!this.shadowRoot.querySelector('#pdf_viewer__prevPage').hasAttribute('listener')) {
+      // Standard Navigation
       this.shadowRoot
         .getElementById('pdf_viewer__prevPage')
         .addEventListener('click', () => this.goToPage(this.currentPage - 1));
@@ -308,6 +463,25 @@ class PDFViewer extends HTMLElement {
         .getElementById('pdf_viewer__nextPage')
         .addEventListener('click', () => this.goToPage(this.currentPage + 1));
       this.shadowRoot.getElementById('pdf_viewer__nextPage').setAttribute('listener', 'true');
+
+      // Full-page open: small overlay button + double-tap on image
+      this.shadowRoot
+        .getElementById('fp-open')
+        .addEventListener('click', () => this.toggleFullPage());
+      this.shadowRoot
+        .getElementById('pdf_viewer__pdfImage')
+        .addEventListener('dblclick', () => this.toggleFullPage());
+
+      // Full Page Navigation
+      this.shadowRoot
+        .getElementById('fp-close')
+        .addEventListener('click', () => this.toggleFullPage());
+      this.shadowRoot
+        .getElementById('fp-prev')
+        .addEventListener('click', () => this.goToPage(this.currentPage - 1));
+      this.shadowRoot
+        .getElementById('fp-next')
+        .addEventListener('click', () => this.goToPage(this.currentPage + 1));
 
       // Moved search-related event listeners here
       if (this.hasPageIndex) {
