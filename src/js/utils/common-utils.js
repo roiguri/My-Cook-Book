@@ -12,7 +12,7 @@
  */
 export function debounce(func, wait) {
   let timeout;
-  return function executedFunction(...args) {
+  const executedFunction = function (...args) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);
@@ -20,6 +20,12 @@ export function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
+
+  executedFunction.cancel = function () {
+    clearTimeout(timeout);
+  };
+
+  return executedFunction;
 }
 
 /**
