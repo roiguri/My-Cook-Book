@@ -2,6 +2,7 @@ import { FirestoreService } from '../../js/services/firestore-service.js';
 import authService from '../../js/services/auth-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
 import { CATEGORY_MAP } from '../../js/utils/recipes/recipe-data-utils.js';
+import { debounce } from '../../js/utils/common-utils.js';
 import {
   DashboardRefreshManager,
   DASHBOARD_SECTIONS,
@@ -242,8 +243,11 @@ export default {
       this.updateRecipeList(recipes);
       this.populateFilterOptions(recipes);
 
+      // Create a debounced version of filterRecipes
+      this.debouncedFilterRecipes = debounce(() => this.filterRecipes(), 300);
+
       // Set up event listeners
-      searchInput.addEventListener('input', () => this.filterRecipes());
+      searchInput.addEventListener('input', this.debouncedFilterRecipes);
       filterSelect.addEventListener('change', () => this.filterRecipes());
     } catch (error) {
       this.handleError(error);
