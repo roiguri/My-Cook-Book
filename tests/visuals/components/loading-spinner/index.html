@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading Spinner Test</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <link rel="stylesheet" href="/tests/visuals/styles/visual-test-base.css" />
+    <style>
+      .test-container {
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        background: white;
+        position: relative;
+        min-height: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Default Spinner</h2>
+    <div class="test-container" id="default-container">
+      <loading-spinner id="default-spinner" active></loading-spinner>
+    </div>
+
+    <h2>Custom Attributes</h2>
+    <div class="test-container" id="custom-container">
+      <loading-spinner
+        id="custom-spinner"
+        size="60px"
+        line-width="6px"
+        color="red"
+        length="half"
+        background-color="#e0e0e0"
+        border-radius="10px"
+        active
+      ></loading-spinner>
+    </div>
+
+    <h2>Overlay Mode (Closed initially)</h2>
+    <div class="test-container" id="overlay-container">
+      <loading-spinner id="overlay-spinner" overlay></loading-spinner>
+    </div>
+
+    <script type="module" src="/src/lib/utilities/loading-spinner/loading-spinner.js"></script>
+  </body>
+</html>
