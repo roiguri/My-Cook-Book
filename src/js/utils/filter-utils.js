@@ -1,3 +1,6 @@
+// ⚡ Bolt Optimization: WeakMap cache for search text to avoid polluting recipe objects
+const searchableTextCache = new WeakMap();
+
 /**
  * FilterUtils - Pure functions for recipe filtering
  * No side effects, no async operations, no Firebase dependencies
@@ -162,11 +165,19 @@ export class FilterUtils {
     const searchTerms = searchText.toLowerCase().trim().split(/\s+/);
 
     return recipes.filter((recipe) => {
-      const searchableText = [recipe.name, recipe.category, ...(recipe.tags || [])]
-        .join(' ')
-        .toLowerCase();
+      // ⚡ Bolt Optimization: Cache derived search text.
+      // 💡 What: Use WeakMap to store the concatenated, lowercased string for each recipe object.
+      // 🎯 Why: Prevents expensive array spread, join, and string manipulation on every keystroke.
+      // 📊 Impact: Turns O(N*M) string operations into O(1) lookups during active searching, preventing main thread blocking.
+      let text = searchableTextCache.get(recipe);
+      if (!text) {
+        text = [recipe.name, recipe.category, ...(recipe.tags || [])]
+          .join(' ')
+          .toLowerCase();
+        searchableTextCache.set(recipe, text);
+      }
 
-      return searchTerms.every((term) => searchableText.includes(term));
+      return searchTerms.every((term) => text.includes(term));
     });
   }
 }

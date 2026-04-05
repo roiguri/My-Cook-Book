@@ -41,6 +41,9 @@
 import { CONFIG, ATTRIBUTES, DEFAULT_CATEGORIES } from './unified-recipe-filter-config.js';
 import { styles } from './unified-recipe-filter-styles.js';
 
+// ⚡ Bolt Optimization: WeakMap cache for search text
+const searchableTextCache = new WeakMap();
+
 class UnifiedRecipeFilter extends HTMLElement {
   constructor() {
     super();
@@ -341,11 +344,19 @@ class UnifiedRecipeFilter extends HTMLElement {
     if (this.state.searchQuery.trim()) {
       const searchTerms = this.state.searchQuery.toLowerCase().trim().split(/\s+/);
       filteredRecipes = filteredRecipes.filter((recipe) => {
-        const searchableText = [recipe.name, recipe.category, ...(recipe.tags || [])]
-          .join(' ')
-          .toLowerCase();
+        // ⚡ Bolt Optimization: Cache derived search text using WeakMap.
+        // 💡 What: Store concatenated string per recipe object reference.
+        // 🎯 Why: Avoids recalculating the searchable string on every input change.
+        // 📊 Impact: Significantly reduces processing time for large recipe sets during real-time search.
+        let text = searchableTextCache.get(recipe);
+        if (!text) {
+          text = [recipe.name, recipe.category, ...(recipe.tags || [])]
+            .join(' ')
+            .toLowerCase();
+          searchableTextCache.set(recipe, text);
+        }
 
-        return searchTerms.every((term) => searchableText.includes(term));
+        return searchTerms.every((term) => text.includes(term));
       });
     }
 
