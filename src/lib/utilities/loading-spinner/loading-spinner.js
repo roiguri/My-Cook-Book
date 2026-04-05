@@ -93,10 +93,12 @@ class LoadingSpinner extends HTMLElement {
         display: block;
         position: ${isOverlay ? 'relative' : 'static'};
       }
-      .overlay {
-        display: ${isActive && isOverlay ? 'flex' : 'none'};
+      .container {
+        display: ${isActive ? 'flex' : 'none'};
         align-items: center;
         justify-content: center;
+      }
+      .container.overlay {
         position: fixed;
         inset: 0;
         background: rgba(255,255,255,0.7);
@@ -121,7 +123,7 @@ class LoadingSpinner extends HTMLElement {
       }
       </style>
       <slot></slot>
-      <div class="overlay"><div class="spinner"></div></div>
+      <div class="container ${isOverlay ? 'overlay' : ''}"><div class="spinner"></div></div>
     `;
   }
 
