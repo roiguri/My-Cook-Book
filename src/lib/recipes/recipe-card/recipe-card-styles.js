@@ -8,136 +8,140 @@ export const recipeCardStyles = `
 
 :host {
     display: block;
-    width: var(--card-width, 200px);
-    height: var(--card-height, 300px);
+    width: var(--card-width, 100%);
 }
 
 .recipe-card {
-    position: relative; /* Added for absolute positioning of arrow */
-    background: var(--card-bg, white);
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    width: var(--card-width, 100%);
-    height: 100%;
+    position: relative;
+    background: var(--surface-1, #ffffff);
+    border-radius: var(--r-lg, 20px);
+    box-shadow: var(--shadow-1, 0 1px 2px rgba(31,29,24,0.04), 0 2px 6px rgba(31,29,24,0.04));
+    width: 100%;
     display: flex;
     flex-direction: column;
     cursor: default;
     overflow: hidden;
-    transform: translateY(0);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform var(--dur-2, 280ms) var(--ease, ease), box-shadow var(--dur-2, 280ms) var(--ease, ease);
 }
 
 .recipe-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-2, 0 2px 4px rgba(31,29,24,0.05), 0 10px 30px -8px rgba(31,29,24,0.1));
 }
 
-.badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: white;
-    width: auto;
-    flex-wrap: nowrap;
-    white-space: nowrap;
+/* ---- Photo ---- */
+.photo {
+    position: relative;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
+    background: var(--surface-2, #f6eed6);
+    flex-shrink: 0;
 }
 
-/* Cooking Time Badges */
-.badge.time {
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);  /* Sky Blue to Blue */
-}
-.badge.time.quick { /* <= 30 mins */
-    background: linear-gradient(135deg, #93c5fd, #60a5fa);  /* Lighter Sky Blue to Sky Blue */
-}
-.badge.time.medium { /* 31-60 mins */
-    background: linear-gradient(135deg, #60a5fa, #3b82f6);  /* Sky Blue to Blue */
-}
-.badge.time.long { /* > 60 mins */
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);  /* Blue to Dark Blue */
+/* Warm tint */
+.photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(242, 232, 207, 0.12);
+    z-index: 1;
+    pointer-events: none;
 }
 
-/* Difficulty Badges */
-.badge.difficulty.easy {
-    background: linear-gradient(135deg, #86efac, #22c55e);  /* Light Green to Green */
-}
-.badge.difficulty.medium {
-    background: linear-gradient(135deg, #fde047, #eab308);  /* Light Yellow to Yellow */
-}
-.badge.difficulty.hard {
-    background: linear-gradient(135deg, #fca5a5, #ef4444);  /* Light Red to Red */
-}
-
-/* Category Badges */
-.badge.category.appetizers {
-    background: linear-gradient(135deg, #f9a8d4, #ec4899);  /* Light Pink to Pink */
-}
-.badge.category.main-courses {
-    background: linear-gradient(135deg, #c084fc, #a855f7);  /* Light Purple to Purple */
-}
-.badge.category.side-dishes {
-    background: linear-gradient(135deg, #5eead4, #0d9488);  /* Light Teal to Teal */
-}
-.badge.category.soups-stews {
-    background: linear-gradient(135deg, #bef264, #84cc16);  /* Light Lime to Lime */
-}
-.badge.category.salads {
-    background: linear-gradient(135deg, #6ee7b7, #10b981);  /* Light Emerald to Emerald */
-}
-.badge.category.desserts {
-    background: linear-gradient(135deg, #fb923c, #ea580c);  /* Light Orange-Red to Orange-Red */
-}
-.badge.category.breakfast-brunch {
-    background: linear-gradient(135deg, #fcd34d, #d97706);  /* Light Amber to Amber */
-}
-.badge.category.breads-pastries {
-    background: linear-gradient(135deg, #ddd6fe, #8b5cf6);  /* Light Violet to Violet */
-}
-.badge.category.snacks {
-    background: linear-gradient(135deg, #fdba74, #f97316);  /* Light Orange to Orange */
-}
-.badge.category.beverages {
-    background: linear-gradient(135deg, #a5b4fc, #6366f1);  /* Light Indigo to Indigo */
+/* Bottom fade into card */
+.photo::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 40%;
+    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.55));
+    z-index: 2;
+    pointer-events: none;
 }
 
 .recipe-image {
-    position: relative;
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: 50%;
+    height: 100%;
     object-fit: cover;
-    flex-shrink: 0;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
     opacity: 0;
-    transition: opacity 0.3s ease;
-    background-color: #f0f0f0; /* Placeholder color while loading */
+    transition: opacity var(--dur-2, 280ms) var(--ease, ease);
 }
 
 .recipe-image.loaded {
     opacity: 1;
 }
 
-.recipe-content {
-    padding: 0.5rem;
-    height: 50%;
+/* ---- No-image placeholder ---- */
+.no-image-placeholder {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 0.5rem;
-    overflow: hidden;
-    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in oklab, var(--surface-2, #f6eed6) 70%, var(--neutral, #f2e8cf));
 }
 
-.recipe-title {
-    text-align: center;
-    margin: 0 auto;
-    font-size: 1.2rem;
+.no-image-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--ink-4, #a6a49a);
+}
+
+/* ---- Content ---- */
+.recipe-content {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    direction: rtl;
+    text-align: right;
+}
+
+/* Category label */
+.badge.category {
+    display: block;
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary-dark, #386641);
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.2;
+}
+
+/* Category color accents */
+.badge.category.appetizers     { color: #be185d; }
+.badge.category.main-courses   { color: #7e22ce; }
+.badge.category.side-dishes    { color: #0f766e; }
+.badge.category.soups-stews    { color: #3f6212; }
+.badge.category.salads         { color: #065f46; }
+.badge.category.desserts       { color: #c2410c; }
+.badge.category.breakfast-brunch { color: #b45309; }
+.badge.category.breads-pastries  { color: #5b21b6; }
+.badge.category.snacks         { color: #c2410c; }
+.badge.category.beverages      { color: #4338ca; }
+
+/* Title */
+.recipe-title {
+    margin: 0;
+    font-family: var(--font-display, serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.2rem);
+    line-height: 1.25;
+    color: var(--ink, #1f1d18);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 /* Stretched Link Pattern */
@@ -158,105 +162,149 @@ export const recipeCardStyles = `
     z-index: 1;
 }
 
-/* Focus visible styles on the stretched link */
 .recipe-link:focus-visible::after {
-    outline: 3px solid #3b82f6;
-    outline-offset: -3px; /* Inside the card border */
-    border-radius: 10px;  /* Match card border radius */
+    outline: 3px solid var(--primary, #6a994e);
+    outline-offset: -3px;
+    border-radius: var(--r-lg, 20px);
 }
 
+/* Meta row */
 .recipe-meta {
     display: flex;
-    padding: 0.5rem;
-    align-items: right;
-    gap: 0.3rem;
-    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid rgba(31, 29, 24, 0.10);
+    direction: rtl;
 }
 
-.recipe-meta span {
-    text-align: right;
-    white-space: nowrap; /* Allow text to wrap naturally */
-    line-height: 1.4;    /* Added for better readability */
-    display: block;      /* Added to ensure block-level behavior */
-    font-size: 0.9rem;
+.badge.time,
+.badge.difficulty {
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--ink-3, #6b6a63);
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    white-space: nowrap;
 }
 
-.recipe-info {
-    text-align: center;
-    width: 100%;
+.badge.time::before {
+    content: '⏱ ';
 }
 
-.category-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+.badge.difficulty::before {
+    content: '· ';
 }
 
-.stats-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 0.3rem;
+.badge.difficulty .icon {
+    text-transform: capitalize;
 }
 
+/* ---- Favorite button ---- */
 .favorite-btn {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: none;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: none;
+    border-radius: 50%;
+    box-shadow: var(--shadow-1, 0 1px 2px rgba(31,29,24,0.04), 0 2px 6px rgba(31,29,24,0.04));
     cursor: pointer;
-    z-index: 10; /* Higher than recipe-link */
+    z-index: 10;
+    transition:
+        transform var(--dur-1, 160ms) var(--ease, ease),
+        box-shadow var(--dur-1, 160ms) var(--ease, ease),
+        background var(--dur-1, 160ms) var(--ease, ease);
+}
+
+.favorite-btn:hover {
+    transform: scale(1.12);
+    box-shadow: var(--shadow-2, 0 2px 4px rgba(31,29,24,0.05), 0 10px 30px -8px rgba(31,29,24,0.1));
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.favorite-btn:active {
+    transform: scale(0.9);
+    box-shadow: var(--shadow-1, 0 1px 2px rgba(31,29,24,0.04), 0 2px 6px rgba(31,29,24,0.04));
 }
 
 .favorite-btn svg {
     width: 100%;
     height: 100%;
-    stroke: rgba(0, 0, 0, 0.2);
-    fill: white;
-    transition: fill 0.3s ease, transform 0.3s ease; /* Added fill transition */
+    stroke: var(--ink-3, #6b6a63);
+    fill: transparent;
+    transition:
+        fill var(--dur-1, 160ms) var(--ease, ease),
+        stroke var(--dur-1, 160ms) var(--ease, ease);
 }
 
 .favorite-btn.active svg {
     fill: #ff4b4b;
+    stroke: #ff4b4b;
 }
 
 .favorite-btn:hover svg {
-    transform: scale(1.1);
+    stroke: var(--ink, #1f1d18);
 }
 
+.favorite-btn.active:hover svg {
+    stroke: #ff4b4b;
+}
+
+/* ---- Add to meal button ---- */
 .add-to-meal-btn {
     position: absolute;
-    top: 40px; /* Below favorite button */
-    right: 8px;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    background: none;
+    top: 48px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: none;
+    border-radius: 50%;
+    box-shadow: var(--shadow-1, 0 1px 2px rgba(31,29,24,0.04), 0 2px 6px rgba(31,29,24,0.04));
     cursor: pointer;
     z-index: 10;
-    overflow: hidden; /* Added for ripple effect */
-    border-radius: 50%; /* Ensure it's circular */
+    overflow: hidden;
+    transition:
+        transform var(--dur-1, 160ms) var(--ease, ease),
+        box-shadow var(--dur-1, 160ms) var(--ease, ease),
+        background var(--dur-1, 160ms) var(--ease, ease);
+}
+
+.add-to-meal-btn:hover {
+    transform: scale(1.12);
+    box-shadow: var(--shadow-2, 0 2px 4px rgba(31,29,24,0.05), 0 10px 30px -8px rgba(31,29,24,0.1));
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.add-to-meal-btn:active {
+    transform: scale(0.9);
+    box-shadow: var(--shadow-1, 0 1px 2px rgba(31,29,24,0.04), 0 2px 6px rgba(31,29,24,0.04));
 }
 
 .add-to-meal-btn svg {
     width: 100%;
     height: 100%;
-    stroke: white;
+    stroke: var(--ink-2, #3a3a3a);
     stroke-width: 2;
-    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
-    transition: transform 0.3s ease;
-    position: relative; /* Ensure SVG stays on top of ripple */
+    transition: stroke var(--dur-1, 160ms) var(--ease, ease);
+    position: relative;
     z-index: 2;
 }
 
 .add-to-meal-btn:hover svg {
-    transform: scale(1.1);
+    stroke: var(--primary-dark, #386641);
 }
 
 .ripple {
@@ -276,20 +324,57 @@ export const recipeCardStyles = `
     }
 }
 
-/* Loading State Styles */
+/* ---- Loading state ---- */
 .recipe-card.loading {
     position: relative;
-    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
 }
 
-.loading::after {
+.recipe-card.loading .photo {
+    aspect-ratio: 4 / 3;
+    background: var(--surface-2, #f6eed6);
+}
+
+/* Skeleton lines */
+.skel {
+    border-radius: 4px;
+    background: var(--surface-2, #f6eed6);
+}
+
+/* matches .badge.category: 10px font × ~1.2 line-height */
+.skel-cat {
+    height: 12px;
+    width: 50%;
+}
+
+/* matches .recipe-title: clamp(1rem…) × line-height 1.25 */
+.skel-title {
+    height: 20px;
+    width: 90%;
+}
+
+/* mirrors the border-top + padding-top of .recipe-meta */
+.skel-divider {
+    margin-top: auto;
+    height: 0;
+    padding-top: 8px;
+    border-top: 1px solid rgba(31, 29, 24, 0.10);
+}
+
+/* matches badge.time/difficulty: 10px font × ~1.2 line-height */
+.skel-meta {
+    height: 12px;
+    width: 70%;
+    margin-top: -6px; /* cancel flex gap so spacing matches rendered */
+}
+
+/* Shimmer sweeps across entire card */
+.recipe-card.loading::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    inset: 0;
+    background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.55) 50%, transparent 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
 }
@@ -299,47 +384,17 @@ export const recipeCardStyles = `
     100% { background-position: -200% 0; }
 }
 
-/* Error State Styles */
+/* ---- Error state ---- */
 .error-state {
     padding: 1rem;
     text-align: center;
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 10px;
-    height: 100%;
+    color: var(--secondary-dark, #9a3a3c);
+    background: color-mix(in oklab, var(--secondary, #bc4749) 8%, white);
+    border: 1px solid color-mix(in oklab, var(--secondary, #bc4749) 20%, white);
+    border-radius: var(--r-lg, 20px);
+    aspect-ratio: 4 / 3;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* Responsive adjustments */
-@media (max-width: 260px) {
-    .stats-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .badge {
-        width: 90%;  /* Take most of the width but leave some margin */
-        justify-content: center;
-    }
-}
-
-/* No Image Placeholder Styles */
-.no-image-placeholder.recipe-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-    opacity: 1; /* Override .recipe-image default opacity: 0 */
-    /* Inherits width: 100% and height: 50% from .recipe-image */
-}
-
-.no-image-icon {
-    width: 60px;
-    height: 60px;
-    color: #999;
-    opacity: 0.5;
 }
 `;
