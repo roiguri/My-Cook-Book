@@ -112,7 +112,6 @@ class AuthController extends HTMLElement {
       // Use clean URLs for History API routing
       link.href = href;
       link.textContent = text;
-      link.classList.add('btn-3d');
       item.appendChild(link);
       return item;
     };
