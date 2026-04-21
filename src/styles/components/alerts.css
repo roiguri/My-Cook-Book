@@ -1,0 +1,87 @@
+/* ==========================================================================
+   Alert / feedback components — v2
+
+   Usage:
+     <div class="alert alert--ok">
+       <span class="alert__icon">✓</span>
+       <div><b>Saved.</b> Your draft is in review.</div>
+     </div>
+   ========================================================================== */
+
+/* ---- Base alert ---- */
+
+.alert {
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  line-height: 1.5;
+  border: 1px solid;
+}
+
+.alert__icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert b {
+  font-weight: 600;
+}
+
+/* ---- Success ---- */
+
+.alert--ok {
+  background: color-mix(in oklab, var(--primary) 8%, white);
+  border-color: color-mix(in oklab, var(--primary) 20%, transparent);
+  color: var(--primary-dark);
+}
+
+.alert--ok .alert__icon {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ---- Warning ---- */
+
+.alert--warn {
+  background: color-mix(in oklab, #eab308 10%, white);
+  border-color: color-mix(in oklab, #eab308 25%, transparent);
+  color: #7a5a07;
+}
+
+.alert--warn .alert__icon {
+  background: #eab308;
+  color: #fff;
+}
+
+/* ---- Error ---- */
+
+.alert--err {
+  background: color-mix(in oklab, var(--secondary) 8%, white);
+  border-color: color-mix(in oklab, var(--secondary) 20%, transparent);
+  color: var(--secondary-dark);
+}
+
+.alert--err .alert__icon {
+  background: var(--secondary);
+  color: #fff;
+}
+
+/* ---- Stack of alerts ---- */
+
+.alerts {
+  display: grid;
+  gap: 10px;
+}

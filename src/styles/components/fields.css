@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Form field components — v2
+
+   Usage:
+     <div class="field">
+       <label class="field__label">Recipe title</label>
+       <input type="text" class="field__input" value="Sourdough challah" />
+       <span class="field__hint">Required · shown on the card</span>
+     </div>
+
+     Error state:
+     <div class="field field--err">
+       <label class="field__label">Cook time (min)</label>
+       <input type="text" class="field__input" value="abc" />
+       <span class="field__hint">Must be a number</span>
+     </div>
+   ========================================================================== */
+
+/* ---- Field wrapper ---- */
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+/* ---- Label ---- */
+
+.field__label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---- Input / textarea / select ---- */
+
+.field__input,
+.field input,
+.field textarea,
+.field select {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text-strong);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  width: 100%;
+  transition:
+    border-color var(--dur-1) var(--ease),
+    box-shadow var(--dur-1) var(--ease);
+  appearance: none;
+  -webkit-appearance: none;
+  line-height: 1.4;
+}
+
+.field__input:focus,
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ---- Hint text ---- */
+
+.field__hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ---- Error state ---- */
+
+.field--err .field__input,
+.field--err input,
+.field--err textarea,
+.field--err select {
+  border-color: var(--secondary);
+}
+
+.field--err .field__input:focus,
+.field--err input:focus,
+.field--err textarea:focus,
+.field--err select:focus {
+  box-shadow: 0 0 0 3px rgba(188, 71, 73, 0.2);
+}
+
+.field--err .field__hint {
+  color: var(--secondary);
+}
+
+/* ---- Disabled state ---- */
+
+.field__input:disabled,
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--surface-2);
+}
+
+/* ---- Field grid layout ---- */
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.fields-grid .field--full {
+  grid-column: span 2;
+}

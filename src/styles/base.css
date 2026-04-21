@@ -1,48 +1,33 @@
 /*------------------------------------*\
-    #CSS-Variables
+    #Bridge aliases (v1 → v2 tokens)
+    Remove as pages migrate to new tokens
 \*------------------------------------*/
 :root {
-  /* chosen pallete */
-  --primary-dark: #386641;
-  --primary: #6a994e;
-  --primary-bright: #a7c957;
-  --neutral: #f2e8cf;
-  --secondary: #bc4749;
-  --secondary-light: #d47779;
-  --secondary-dark: #9a3a3c;
+  /* font bridges */
+  --heading-font: var(--font-display);
+  --heading-font-he: var(--font-display-he);
+  --body-font: var(--font-ui);
+  --nav-font: var(--font-ui);
 
-  /* fonts */
-  --heading-font: 'Cormorant Garamond', 'Amatic SC', cursive;
-  --heading-font-he: 'Fredoka', 'Amatic SC', cursive;
-  --body-font: 'Assistant', 'Lora', serif;
-  --nav-font: 'Source Sans Pro', sans-serif;
-  /* colors */
-  --primary-color: var(--primary);
-  --primary-hover: var(--primary-dark);
-  --secondary-color: var(--neutral);
-  --secondary-hover: darken(var(--neutral), 10%);
+  /* color bridges */
+  --background: var(--bg);
+  --background-color: var(--bg);
   --header-color: var(--neutral);
-  --text-color: #3a3a3a;
-  --button-color: white;
-  --background-color: var(--neutral);
   --submenu-color: var(--secondary);
+  --tabs-color: var(--surface-1);
+  --recipe-bg: var(--bg);
   --disabled-color: #cccccc;
-  --tabs-color: white;
-  --card-bg: white;
-  --recipe-bg: var(--background-color);
-  /* sizes */
-  --size-xxl: 4.5rem;
-  --size-header1: 3rem;
-  --size-header2: 1.5rem;
-  --size-body: 1rem;
-  --size-icon: 1.2rem;
 
-  --size-header1-mobile: 2.5rem;
-  --size-header2-mobile: 1.2rem;
-  --size-body-mobile: 0.9rem;
-  --size-icon-mobile: 1rem;
-
-  --background: url('/img/background/stone-counter-top.jpg');
+  /* size bridges */
+  --size-xxl: var(--step-6);
+  --size-header1: var(--step-5);
+  --size-header2: var(--step-3);
+  --size-body: var(--step-1);
+  --size-icon: var(--step-1);
+  --size-header1-mobile: var(--step-4);
+  --size-header2-mobile: var(--step-2);
+  --size-body-mobile: var(--step-0);
+  --size-icon-mobile: var(--step-0);
 }
 
 /*------------------------------------*\
@@ -54,19 +39,6 @@ html {
 
 body {
   height: 100%;
-  margin: 0;
-}
-
-body {
-  font-family: var(--body-font);
-  background-color: var(--background-color);
-  color: var(--text-color);
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-  background: var(--background) repeat center center;
-  background-size: cover;
-
   display: flex;
   flex-direction: column;
 }
@@ -74,8 +46,8 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--heading-font-he);
-  font-weight: 700;
+  font-family: var(--heading-font);
+  font-weight: 400;
 }
 
 a {

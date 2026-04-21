@@ -1,0 +1,144 @@
+/* ==========================================================================
+   Badge / tag components — v2
+   Use --bdg-color CSS var (inline or via data attribute) for the dot color.
+
+   Example:
+     <span class="bdg" style="--bdg-color: #6a994e">Breads</span>
+     <span class="bdg bdg--active" style="--bdg-color: #a7c957">All</span>
+   ========================================================================== */
+
+/* ---- Base badge ---- */
+
+.bdg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  background: var(--surface-2);
+  color: var(--text-strong);
+  border: 1px solid var(--hairline);
+  cursor: default;
+  white-space: nowrap;
+  transition:
+    background var(--dur-1) var(--ease),
+    color var(--dur-1) var(--ease),
+    border-color var(--dur-1) var(--ease);
+}
+
+.bdg::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bdg-color, var(--primary));
+  flex-shrink: 0;
+}
+
+/* ---- Active state ---- */
+
+.bdg--active {
+  background: var(--primary-dark);
+  color: #fff;
+  border-color: transparent;
+}
+
+.bdg--active::before {
+  background: var(--primary-bright);
+}
+
+/* ---- Clickable badges (filter chips) ---- */
+
+.bdg--clickable {
+  cursor: pointer;
+}
+
+.bdg--clickable:hover:not(.bdg--active) {
+  background: var(--card-bg);
+  border-color: var(--hairline-strong);
+}
+
+/* ---- Category color map ---- */
+/* Apply as: <span class="bdg bdg--cat-breads"> */
+
+.bdg--cat-all {
+  --bdg-color: #a7c957;
+}
+.bdg--cat-breads {
+  --bdg-color: #6a994e;
+}
+.bdg--cat-mains {
+  --bdg-color: #bc4749;
+}
+.bdg--cat-desserts {
+  --bdg-color: #eab308;
+}
+.bdg--cat-salads {
+  --bdg-color: #22c55e;
+}
+.bdg--cat-soups {
+  --bdg-color: #60a5fa;
+}
+.bdg--cat-appetizers {
+  --bdg-color: #d47779;
+}
+.bdg--cat-preserves {
+  --bdg-color: #836418;
+}
+.bdg--cat-drinks {
+  --bdg-color: #a855f7;
+}
+.bdg--cat-holiday {
+  --bdg-color: #f97316;
+}
+
+/* ---- Difficulty badges (gradient fill, no dot) ---- */
+
+.bdg--easy,
+.bdg--medium,
+.bdg--hard {
+  color: #fff;
+  border-color: transparent;
+}
+
+.bdg--easy::before,
+.bdg--medium::before,
+.bdg--hard::before {
+  display: none;
+}
+
+.bdg--easy {
+  background: linear-gradient(135deg, #86efac, #22c55e);
+  color: #14532d;
+}
+.bdg--medium {
+  background: linear-gradient(135deg, #fde047, #eab308);
+  color: #713f12;
+}
+.bdg--hard {
+  background: linear-gradient(135deg, #fca5a5, #ef4444);
+}
+
+/* ---- Time badges ---- */
+
+.bdg--time-short,
+.bdg--time-long {
+  color: #fff;
+  border-color: transparent;
+}
+
+.bdg--time-short::before,
+.bdg--time-long::before {
+  display: none;
+}
+
+.bdg--time-short {
+  background: linear-gradient(135deg, #93c5fd, #60a5fa);
+}
+.bdg--time-long {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}

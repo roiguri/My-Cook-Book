@@ -1,11 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Assistant&family=Cormorant+Garamond:ital,wght@1,700&family=Fredoka:wght@300&family=Rubik:wght@600&family=Lora:ital,wght@0,400;0,700;1,400&family=Source+Sans+Pro&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+Hebrew:wght@300;400;500;600;700&family=Noto+Serif+Hebrew:wght@400;600&display=swap');
 
+@import 'tokens.css';
 @import 'base.css';
 
-/* reusable components */
+/* design system components */
+@import 'components/typography.css';
+@import 'components/spacing.css';
+@import 'components/cards.css';
+@import 'components/badges.css';
+@import 'components/alerts.css';
+@import 'components/fields.css';
+
+/* reusable ui components */
+@import 'components/base_button.css';
 @import 'components/header.css';
 @import 'components/footer.css';
-@import 'components/base_button.css';
 @import 'components/search_bar.css';
 @import 'components/quote.css';
 @import 'components/spa.css';
