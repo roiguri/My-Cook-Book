@@ -60,34 +60,37 @@ class HeaderSearchBar extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
-        .search-form {
-          border: 2px solid var(--primary-color);
-          background-color: var(--primary-color);
-          transition: transform 0.2s ease;
-          display: flex;
-          align-items: center;
-          border-radius: 8px;
-          box-shadow:
-            0 4px 0 var(--primary-dark),
-            0 6px 4px rgba(0, 0, 0, 0.2);
-          overflow: hidden;
-          height: 40px;
-          transform: translateY(-2px);
+        :host {
+          display: block;
+          width: 100%;
         }
 
-        .search-form:active {
-          transform: translateY(0);
-          box-shadow:
-            0 0px 0 var(--primary-dark),
-            0 2px 2px rgba(0, 0, 0, 0.2);
+        .search-form {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          background: var(--surface-2, #f6eed6);
+          border: 1px solid var(--hairline, rgba(31,29,24,0.1));
+          border-radius: var(--r-pill, 9999px);
+          overflow: hidden;
+          height: 36px;
+          transition:
+            border-color var(--dur-1, 160ms) var(--ease, ease),
+            box-shadow var(--dur-1, 160ms) var(--ease, ease);
+        }
+
+        .search-form:focus-within {
+          border-color: var(--primary, #6a994e);
+          box-shadow: var(--ring, 0 0 0 3px rgba(106,153,78,0.25));
         }
 
         .search-input {
-          background: var(--button-color);
+          background: transparent;
           border: none;
-          font-family: var(--body-font);
-          font-size: var(--size-body);
-          padding: 0 10px;
+          font-family: var(--font-ui, sans-serif);
+          font-size: 13px;
+          color: var(--ink, #1f1d18);
+          padding: 0 0.75rem;
           flex-grow: 1;
           outline: none;
           height: 100%;
@@ -95,32 +98,28 @@ class HeaderSearchBar extends HTMLElement {
           width: 100%;
         }
 
+        .search-input::placeholder {
+          color: var(--ink-4, #a6a49a);
+        }
+
         .search-button {
-          background: var(--primary-color);
+          background: transparent;
           border: none;
           cursor: pointer;
-          padding: 0 15px;
+          padding: 0 0.75rem;
           height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--button-color);
-          font-size: var(--size-icon);
-          transition: background-color 0.3s;
+          color: var(--ink-3, #6b6a63);
+          font-size: 14px;
+          transition: color var(--dur-1, 160ms) var(--ease, ease);
         }
 
-        .search-form:hover .search-button,
         .search-button:hover {
-          box-shadow: inset 0 0 0 1px var(--primary-color);
-          background: var(--primary-dark);
+          color: var(--primary-dark, #386641);
         }
 
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-          .search-form {
-            width: 100%;
-          }
-        }
       </style>
 
       <form dir="rtl" class="search-form">
