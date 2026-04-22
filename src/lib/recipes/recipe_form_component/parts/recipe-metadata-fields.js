@@ -1,10 +1,7 @@
 /**
  * RecipeMetadataFields Component
- * -----------------------------
- * Handles static metadata fields for recipe forms including:
- * - Name, Category, Times, Servings, Difficulty, Main Ingredient, Tags
- *
- * This component is focused on simple data binding without complex interactions.
+ * Handles recipe detail + metadata fields:
+ * name, category, description, times, servings + unit, difficulty, main ingredient, tags
  */
 
 import styles from '../recipe_form_component.css?inline';
@@ -28,10 +25,6 @@ class RecipeMetadataFields extends HTMLElement {
     `;
   }
 
-  /**
-   * Generates category options from CATEGORY_MAP
-   * @returns {string} HTML string of option elements
-   */
   generateCategoryOptions() {
     return Object.entries(CATEGORY_MAP)
       .map(([value, label]) => `<option value="${value}">${label}</option>`)
@@ -40,39 +33,70 @@ class RecipeMetadataFields extends HTMLElement {
 
   template() {
     return `
-      <div class="recipe-metadata-fields">
+      <div class="recipe-metadata-fields" dir="rtl">
+
+        <!-- Name (full width, large) -->
         <div class="recipe-form__row">
           <div class="recipe-form__group">
-            <label for="name" class="recipe-form__label">שם המנה:</label>
-            <input type="text" id="name" name="name" class="recipe-form__input">
+            <label for="name" class="recipe-form__label">שם המנה <span class="recipe-form__req">*</span></label>
+            <input type="text" id="name" name="name" class="recipe-form__input recipe-form__input--title"
+              placeholder="שם המתכון..." />
+            <span class="recipe-form__hint">השם שהמשפחה קוראת לו.</span>
           </div>
+        </div>
+
+        <!-- Category + Main ingredient -->
+        <div class="recipe-form__row">
           <div class="recipe-form__group">
-            <label for="dish-type" class="recipe-form__label">סוג מנה:</label>
+            <label for="dish-type" class="recipe-form__label">קטגוריה <span class="recipe-form__req">*</span></label>
             <select id="dish-type" name="dish-type" class="recipe-form__select">
-              <option value="">בחר סוג מנה</option>
+              <option value="">בחר קטגוריה</option>
               ${this.generateCategoryOptions()}
             </select>
           </div>
-        </div>
-
-        <div class="recipe-form__row">
           <div class="recipe-form__group">
-            <label for="prep-time" class="recipe-form__label">זמן הכנה (בדקות):</label>
-            <input type="number" id="prep-time" name="prep-time" class="recipe-form__input" min="0">
-          </div>
-          <div class="recipe-form__group">
-            <label for="wait-time" class="recipe-form__label">זמן המתנה (בדקות):</label>
-            <input type="number" id="wait-time" name="wait-time" class="recipe-form__input" min="0">
+            <label for="main-ingredient" class="recipe-form__label">מרכיב עיקרי</label>
+            <input type="text" id="main-ingredient" name="main-ingredient" class="recipe-form__input"
+              placeholder="עוף, בצק, גבינה..." />
           </div>
         </div>
 
+        <!-- Description -->
         <div class="recipe-form__row">
           <div class="recipe-form__group">
-            <label for="servings-form" class="recipe-form__label">מספר מנות:</label>
-            <input type="number" id="servings-form" name="servings" class="recipe-form__input" min="1">
+            <label for="description" class="recipe-form__label">תיאור קצר</label>
+            <textarea id="description" name="description" class="recipe-form__textarea"
+              style="min-height: 72px;"
+              placeholder="משפט-שניים. יוצג על כרטיס המתכון."></textarea>
+            <span class="recipe-form__hint">אופציונלי · מוצג על כרטיס המתכון ובדף המתכון.</span>
+          </div>
+        </div>
+
+        <!-- Times -->
+        <div class="recipe-form__row">
+          <div class="recipe-form__group">
+            <label for="prep-time" class="recipe-form__label">זמן הכנה פעיל (דקות) <span class="recipe-form__req">*</span></label>
+            <input type="number" id="prep-time" name="prep-time" class="recipe-form__input" min="0" placeholder="45" />
           </div>
           <div class="recipe-form__group">
-            <label for="difficulty" class="recipe-form__label">דרגת קושי:</label>
+            <label for="wait-time" class="recipe-form__label">זמן כולל (דקות) <span class="recipe-form__req">*</span></label>
+            <input type="number" id="wait-time" name="wait-time" class="recipe-form__input" min="0" placeholder="360" />
+          </div>
+        </div>
+
+        <!-- Servings + unit -->
+        <div class="recipe-form__row">
+          <div class="recipe-form__group">
+            <label for="servings-form" class="recipe-form__label">כמות <span class="recipe-form__req">*</span></label>
+            <div class="recipe-form__yield-row">
+              <input type="number" id="servings-form" name="servings" class="recipe-form__input recipe-form__input--number" min="1" placeholder="4" />
+              <input type="text" id="servings-unit" name="servings-unit"
+                class="recipe-form__input recipe-form__select--unit"
+                placeholder="מנות, כיכרות..." />
+            </div>
+          </div>
+          <div class="recipe-form__group">
+            <label for="difficulty" class="recipe-form__label">דרגת קושי <span class="recipe-form__req">*</span></label>
             <select id="difficulty" name="difficulty" class="recipe-form__select">
               <option value="">בחר דרגת קושי</option>
               <option value="קלה">קלה</option>
@@ -82,33 +106,31 @@ class RecipeMetadataFields extends HTMLElement {
           </div>
         </div>
 
+        <!-- Tags -->
         <div class="recipe-form__row">
           <div class="recipe-form__group">
-            <label for="main-ingredient" class="recipe-form__label">מרכיב עיקרי:</label>
-            <input type="text" id="main-ingredient" name="main-ingredient" class="recipe-form__input">
-          </div>
-          <div class="recipe-form__group">
-            <label for="tags" class="recipe-form__label">תגיות:</label>
-            <input type="text" id="tags" name="tags" class="recipe-form__input">
+            <label for="tags" class="recipe-form__label">תגיות</label>
+            <input type="text" id="tags" name="tags" class="recipe-form__input"
+              placeholder="פסח, שבת, טבעוני..." />
+            <span class="recipe-form__hint">מופרדות בפסיק.</span>
           </div>
         </div>
+
       </div>
     `;
   }
 
-  /**
-   * Populates the metadata fields with recipe data
-   * @param {Object} data - Recipe data object
-   */
   populateFields(data) {
     if (!data) return;
 
     const fieldMappings = [
       { field: 'name', id: 'name' },
       { field: 'category', id: 'dish-type' },
+      { field: 'description', id: 'description' },
       { field: 'prepTime', id: 'prep-time' },
       { field: 'waitTime', id: 'wait-time' },
       { field: 'servings', id: 'servings-form' },
+      { field: 'servingsUnit', id: 'servings-unit' },
       { field: 'difficulty', id: 'difficulty' },
       { field: 'mainIngredient', id: 'main-ingredient' },
       {
@@ -126,54 +148,45 @@ class RecipeMetadataFields extends HTMLElement {
     });
   }
 
-  /**
-   * Clears all metadata fields
-   */
   clearFields() {
-    const inputs = this.shadowRoot.querySelectorAll('input, select');
+    const inputs = this.shadowRoot.querySelectorAll('input, select, textarea');
     inputs.forEach((input) => {
-      if (input.type === 'number') {
-        input.value = '';
-      } else {
-        input.value = '';
-        if (input.tagName === 'SELECT') {
-          input.selectedIndex = 0;
-        }
-      }
+      input.value = '';
+      if (input.tagName === 'SELECT') input.selectedIndex = 0;
       input.classList.remove('recipe-form__input--invalid');
     });
   }
 
-  /**
-   * Sets disabled state for all fields
-   * @param {boolean} disabled - Whether to disable the fields
-   */
   setDisabled(disabled) {
-    const inputs = this.shadowRoot.querySelectorAll('input, select');
+    const inputs = this.shadowRoot.querySelectorAll('input, select, textarea');
     inputs.forEach((input) => {
       input.disabled = disabled;
     });
   }
 
-  /**
-   * Gets all form data from metadata fields
-   * @returns {Object} - Object containing all metadata field values
-   */
   getFormData() {
     const data = {};
 
     const fieldMappings = [
       { field: 'name', id: 'name' },
       { field: 'category', id: 'dish-type' },
+      { field: 'description', id: 'description' },
       { field: 'prepTime', id: 'prep-time', isNumeric: true },
       { field: 'waitTime', id: 'wait-time', isNumeric: true },
       { field: 'servings', id: 'servings-form', isNumeric: true },
+      { field: 'servingsUnit', id: 'servings-unit' },
       { field: 'difficulty', id: 'difficulty' },
       { field: 'mainIngredient', id: 'main-ingredient' },
       {
         field: 'tags',
         id: 'tags',
-        transform: (value) => (value ? value.split(',').map((tag) => tag.trim()) : []),
+        transform: (value) =>
+          value
+            ? value
+                .split(',')
+                .map((tag) => tag.trim())
+                .filter(Boolean)
+            : [],
       },
     ];
 
@@ -187,7 +200,8 @@ class RecipeMetadataFields extends HTMLElement {
         } else if (transform) {
           value = transform(value);
         } else if (field === 'mainIngredient' && value === '') {
-          // Convert empty main ingredient to null for consistency
+          value = null;
+        } else if (field === 'description' && value === '') {
           value = null;
         }
 
@@ -198,23 +212,15 @@ class RecipeMetadataFields extends HTMLElement {
     return data;
   }
 
-  /**
-   * Sets up input event listeners to clear errors on value change
-   */
   setupInputListeners() {
-    const inputs = this.shadowRoot.querySelectorAll('input, select');
-    inputs.forEach((input) => {
-      input.addEventListener('input', () => {
-        // Clear error highlighting when user changes the value
-        input.classList.remove('recipe-form__input--invalid');
-      });
+    this.shadowRoot.addEventListener('input', (event) => {
+      const target = event.target;
+      if (target.matches('input, select, textarea')) {
+        target.classList.remove('recipe-form__input--invalid');
+      }
     });
   }
 
-  /**
-   * Sets validation state for specific fields
-   * @param {Object} fieldErrors - Object mapping field names to error states
-   */
   setValidationState(fieldErrors = {}) {
     const fieldMappings = [
       { field: 'name', id: 'name' },

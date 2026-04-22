@@ -71,6 +71,13 @@ export function collectRecipeFormData(shadowRoot) {
     recipeData.comments = comments;
   }
 
+  // Collect attribution (single free-text field)
+  const attributionEl = shadowRoot.getElementById('attribution');
+  if (attributionEl) {
+    const attribution = attributionEl.value.trim();
+    if (attribution) recipeData.attribution = attribution;
+  }
+
   return recipeData;
 }
 

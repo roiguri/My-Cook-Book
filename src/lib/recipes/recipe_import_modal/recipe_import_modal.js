@@ -382,14 +382,9 @@ class RecipeImportModal extends HTMLElement {
       this.cropper.destroy();
       this.cropper = null;
     }
-    const editorView = this.shadowRoot.getElementById('editor-view');
-    const previewView = this.shadowRoot.getElementById('preview-view');
-
-    editorView.style.display = 'none';
-    previewView.style.display = 'block';
-
-    // Show footer again
+    this.shadowRoot.getElementById('editor-view').style.display = 'none';
     this.shadowRoot.querySelector('.modal-footer').style.display = 'flex';
+    this.updatePreviewList();
   }
 
   reset() {

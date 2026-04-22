@@ -163,8 +163,13 @@ export class Modal extends HTMLElement {
         overflow-y: auto;
         display: flex;
         flex-direction: column;
+        padding: 28px 32px 32px;
       }
     `;
+  }
+
+  existingStyles() {
+    return '';
   }
 
   template() {

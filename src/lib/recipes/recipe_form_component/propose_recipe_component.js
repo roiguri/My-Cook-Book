@@ -47,7 +47,7 @@ class ProposeRecipeComponent extends HTMLElement {
       </style>
       <loading-spinner overlay>
         <div class="propose-recipe-container">
-          <recipe-form-component></recipe-form-component>
+          <recipe-form-component hide-actions></recipe-form-component>
           <message-modal></message-modal>
         </div>
       </loading-spinner>
@@ -186,6 +186,21 @@ class ProposeRecipeComponent extends HTMLElement {
     if (recipeFormComponent && typeof recipeFormComponent.setDisabled === 'function') {
       recipeFormComponent.setDisabled(isDisabled);
     }
+  }
+
+  submitForm() {
+    const formComponent = this.shadowRoot.querySelector('recipe-form-component');
+    if (formComponent) formComponent.submitForm();
+  }
+
+  requestClear() {
+    const formComponent = this.shadowRoot.querySelector('recipe-form-component');
+    if (formComponent) formComponent.requestClear();
+  }
+
+  openImportModal() {
+    const formComponent = this.shadowRoot.querySelector('recipe-form-component');
+    if (formComponent) formComponent.openImportModal();
   }
 }
 
