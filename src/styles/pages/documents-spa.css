@@ -16,7 +16,7 @@
   margin-bottom: 0;
   margin-top: 0;
   text-align: center;
-  padding: 0.5rem;
+  padding: 1rem 0.5rem 0.5rem;
   flex-shrink: 0;
 }
 
@@ -29,19 +29,7 @@
   height: 100%;
 }
 
-.spa-content .documents .documents-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
 @media (max-width: 768px) {
-  .spa-content .documents .documents-container {
-    margin-top: 20px;
-    padding: 0 0.5rem;
-  }
-
   .spa-content .documents h1 {
     padding: 0.5rem;
     margin-bottom: 1rem;
@@ -72,6 +60,7 @@
   color: var(--secondary-dark);
   background: rgba(188, 71, 73, 0.06);
   border-radius: var(--r-md, 14px);
+  border: 1px solid rgba(188, 71, 73, 0.15);
   margin: 1rem;
 }
 
@@ -85,10 +74,10 @@
   color: #fff;
   border: none;
   padding: 10px 20px;
-  border-radius: var(--r-sm, 10px);
+  border-radius: var(--r-pill, 999px);
   cursor: pointer;
   margin-top: 1rem;
-  font-family: var(--font-ui);
+  font-family: var(--font-ui-he);
   font-size: 14px;
   font-weight: 500;
   transition: background var(--dur-1, 160ms);
