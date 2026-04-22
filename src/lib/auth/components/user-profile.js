@@ -184,7 +184,7 @@ class UserProfile extends HTMLElement {
           padding: 14px 40px;
           background: var(--surface-2, #f2e8cf);
           border-radius: var(--r-lg, 16px) var(--r-lg, 16px) var(--r-xl, 20px) var(--r-xl, 20px);
-          display: flex; justify-content: center; align-items: center;
+          display: flex; justify-content: space-between; align-items: center; gap: 12px;
         }
 
         /* ---- Inline error / success ---- */
@@ -288,6 +288,7 @@ class UserProfile extends HTMLElement {
 
       <!-- Footer -->
       <div class="profile-foot">
+        <button class="btn btn-primary" type="button" id="my-meal-btn">הארוחה שלי</button>
         <button class="btn btn-quiet" type="button" id="signout-btn">התנתק</button>
       </div>
 
@@ -297,6 +298,11 @@ class UserProfile extends HTMLElement {
   }
 
   setupEventListeners() {
+    this.shadowRoot.getElementById('my-meal-btn').addEventListener('click', () => {
+      this.closest('auth-controller')?.closeModal();
+      if (window.spa?.router) window.spa.router.navigate('/my-meal');
+      else window.location.hash = '/my-meal';
+    });
     this.shadowRoot
       .getElementById('signout-btn')
       .addEventListener('click', () => this._handleSignout());

@@ -1,4 +1,4 @@
-/* SPA Manager Dashboard Styles - Scoped for SPA Content Container */
+/* SPA Manager Dashboard Styles */
 
 .spa-content .manager-dashboard {
   max-width: 1200px;
@@ -8,7 +8,6 @@
   flex-grow: 1;
 }
 
-/* Dashboard Header with Master Refresh */
 .spa-content .manager-dashboard .dashboard-header {
   display: flex;
   align-items: center;
@@ -18,14 +17,13 @@
 }
 
 .spa-content .manager-dashboard h1 {
-  font-size: 2.5rem;
-  color: var(--text-color);
-  font-family: var(--heading-font);
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--ink);
   margin: 0;
   text-align: center;
 }
 
-/* Master Refresh Icon - Top Left */
 .spa-content .manager-dashboard .master-refresh {
   position: absolute;
   left: 0;
@@ -44,22 +42,20 @@
 .spa-content .manager-dashboard .sections {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
   gap: 20px;
 }
 
 .spa-content .manager-dashboard section {
-  background-color: var(--background-color);
-  border-radius: 8px;
+  background: var(--surface-1);
+  border-radius: var(--r-lg, 20px);
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-2, 0 4px 16px rgba(31, 29, 24, 0.1));
   height: 500px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Section Header with Refresh Icon */
 .spa-content .manager-dashboard .section-header {
   display: flex;
   align-items: center;
@@ -68,38 +64,39 @@
 }
 
 .spa-content .manager-dashboard h2 {
-  font-size: 1.8rem;
-  color: var(--primary-color);
+  font-family: var(--font-display-he);
+  font-size: var(--step-3);
+  color: var(--primary-dark);
   margin: 0;
   flex: 1;
 }
 
-/* Refresh Icon Styles */
 .spa-content .manager-dashboard .refresh-icon {
-  background-color: rgba(255, 255, 255, 0.9);
-  border: 2px solid var(--primary-color);
+  background: var(--surface-1);
+  border: 1.5px solid var(--primary);
   padding: 8px;
   cursor: pointer;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  color: var(--primary-color);
+  transition:
+    background var(--dur-1, 160ms),
+    color var(--dur-1, 160ms),
+    transform var(--dur-1, 160ms);
+  color: var(--primary);
   width: 40px;
   height: 40px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-1, 0 1px 4px rgba(31, 29, 24, 0.08));
   flex-shrink: 0;
 }
 
 .spa-content .manager-dashboard .refresh-icon:hover {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
 }
 
-/* Section icons only (not master) */
 .spa-content .manager-dashboard .section-refresh:hover {
   transform: scale(1.05);
 }
@@ -114,7 +111,6 @@
   fill: currentColor;
 }
 
-/* Spinning Animation for Loading State */
 .spa-content .manager-dashboard .refresh-icon.spinning svg {
   animation: spin 1s linear infinite;
 }
@@ -128,62 +124,66 @@
   }
 }
 
-/* User Management Styles */
-.spa-content .manager-dashboard #user-list {
-  gap: 10px;
-}
-
 .spa-content .manager-dashboard .user-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-}
-
-/* Recipe Approval Styles */
-.spa-content .manager-dashboard #pending-recipes {
-  gap: 10px;
+  background: var(--surface-2);
+  border-radius: var(--r-xs, 6px);
 }
 
 .spa-content .manager-dashboard .recipe-item {
-  background-color: #f5f5f5;
+  background: var(--surface-2);
   padding: 15px;
-  border-radius: 4px;
+  border-radius: var(--r-xs, 6px);
 }
 
 .spa-content .manager-dashboard .recipe-item h3 {
   margin-bottom: 10px;
-  color: var(--primary-color);
+  color: var(--primary-dark);
 }
 
-/* Button Styles */
 .spa-content .manager-dashboard button {
-  background-color: var(--primary-color);
-  color: var(--button-color);
+  background: var(--primary);
+  color: #fff;
   border: none;
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: var(--r-xs, 6px);
   cursor: pointer;
-  transition: background-color 0.3s;
+  font-family: var(--font-ui);
+  transition: background var(--dur-1, 160ms);
 }
 
 .spa-content .manager-dashboard button:hover {
-  background-color: var(--primary-hover);
+  background: var(--primary-dark);
 }
 
 .spa-content .manager-dashboard .no-pending-message {
   align-self: center;
+  color: var(--ink-3);
+  font-family: var(--font-ui);
 }
 
-/* Search and filter controls */
 .spa-content .manager-dashboard #recipe-search,
 .spa-content .manager-dashboard #recipe-filter {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 14px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-sm, 10px);
+  font-family: var(--font-ui);
   font-size: 14px;
+  background: var(--surface-0);
+  color: var(--ink);
+  outline: none;
+  transition:
+    border-color var(--dur-1, 160ms),
+    box-shadow var(--dur-1, 160ms);
+}
+
+.spa-content .manager-dashboard #recipe-search:focus,
+.spa-content .manager-dashboard #recipe-filter:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(106, 153, 78, 0.12);
 }
 
 .spa-content .manager-dashboard #recipe-search {
@@ -196,7 +196,6 @@
   box-sizing: border-box;
 }
 
-/* Mobile responsive */
 @media (max-width: 768px) {
   .spa-content .manager-dashboard {
     padding: 10px;
@@ -204,16 +203,7 @@
 
   .spa-content .manager-dashboard .sections {
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, auto);
     gap: 10px;
-  }
-
-  .spa-content .manager-dashboard h1 {
-    font-size: 2rem;
-  }
-
-  .spa-content .manager-dashboard h2 {
-    font-size: 1.5rem;
   }
 
   .spa-content .manager-dashboard section {
@@ -226,7 +216,6 @@
     max-height: 400px;
   }
 
-  /* Make refresh icons slightly smaller on mobile */
   .spa-content .manager-dashboard .refresh-icon {
     width: 32px;
     height: 32px;

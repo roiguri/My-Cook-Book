@@ -233,7 +233,7 @@ class RecipeComponent extends HTMLElement {
        HERO IMAGE
        ========================================================= */
     .Recipe_component__image-container {
-      margin: 16px 0 32px;
+      margin: 16px 0 0;
       border-radius: var(--r-xl, 28px);
       overflow: hidden;
       border: 1px solid var(--hairline, rgba(31,29,24,0.1));
@@ -254,6 +254,7 @@ class RecipeComponent extends HTMLElement {
       grid-template-columns: 1fr 300px;
       gap: 48px;
       align-items: start;
+      margin-top: 32px;
       padding-bottom: 56px;
       border-bottom: 1px solid var(--hairline, rgba(31,29,24,0.1));
     }
@@ -625,9 +626,14 @@ class RecipeComponent extends HTMLElement {
         font-size: 17px;
       }
 
+      cook-mode-container {
+        margin-top: 16px;
+      }
+
       .Recipe_component__content {
         grid-template-columns: 1fr;
         gap: 28px;
+        margin-top: 0;
       }
 
       .Recipe_component__details {

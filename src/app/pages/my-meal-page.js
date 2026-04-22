@@ -626,14 +626,17 @@ export default {
             const key = `${id}-${sIndex}-${iIndex}`;
             const isUnselected = this.state.unselectedIngredients.has(key);
 
+            const label = document.createElement('label');
+            label.className = `ingredient-label${isUnselected ? ' unselected' : ''}`;
+
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'ingredient-checkbox';
             checkbox.checked = !isUnselected;
             checkbox.addEventListener('change', () => this.toggleIngredientSelection(id, key));
 
-            const label = document.createElement('label');
-            label.className = `ingredient-label ${isUnselected ? 'unselected' : ''}`;
+            const box = document.createElement('span');
+            box.className = 'check-box';
 
             const amountSpan = document.createElement('span');
             amountSpan.className = 'amount';
@@ -647,13 +650,14 @@ export default {
             itemSpan.className = 'item';
             itemSpan.textContent = item.item;
 
+            label.appendChild(checkbox);
+            label.appendChild(box);
             label.appendChild(amountSpan);
             label.appendChild(document.createTextNode(' '));
             label.appendChild(unitSpan);
             label.appendChild(document.createTextNode(' '));
             label.appendChild(itemSpan);
 
-            li.appendChild(checkbox);
             li.appendChild(label);
             ul.appendChild(li);
           });
@@ -701,6 +705,9 @@ export default {
             const key = `${recipeIds[0]}-${sIndex}-${iIndex}`;
             const isUnselected = this.state.unselectedIngredients.has(key);
 
+            const label = document.createElement('label');
+            label.className = `ingredient-label${isUnselected ? ' unselected' : ''}`;
+
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'ingredient-checkbox';
@@ -709,8 +716,8 @@ export default {
               this.toggleIngredientSelection(recipeIds[0], key),
             );
 
-            const label = document.createElement('label');
-            label.className = `ingredient-label ${isUnselected ? 'unselected' : ''}`;
+            const box = document.createElement('span');
+            box.className = 'check-box';
 
             const amountSpan = document.createElement('span');
             amountSpan.className = 'amount';
@@ -724,13 +731,14 @@ export default {
             itemSpan.className = 'item';
             itemSpan.textContent = item.item;
 
+            label.appendChild(checkbox);
+            label.appendChild(box);
             label.appendChild(amountSpan);
             label.appendChild(document.createTextNode(' '));
             label.appendChild(unitSpan);
             label.appendChild(document.createTextNode(' '));
             label.appendChild(itemSpan);
 
-            li.appendChild(checkbox);
             li.appendChild(label);
             ul.appendChild(li);
           });
@@ -760,15 +768,23 @@ export default {
         <div class="empty-state">
           <div class="empty-state-card">
             <div class="empty-icon-wrapper">
-              <i class="fas fa-utensils"></i>
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
+                <path d="M7 2v20"/>
+                <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+              </svg>
             </div>
-            <h2>אין ארוחה פעילה</h2>
+            <h2 class="heading-2-he">אין ארוחה פעילה</h2>
             <p class="empty-subtitle">התחל להוסיף מתכונים לארוחה שלך<br>כדי לראות אותם כאן</p>
-            <a href="/categories" class="btn-primary empty-cta">חפש מתכונים</a>
+            <button id="empty-go-categories" class="btn btn-primary btn-lg empty-cta">חפש מתכונים</button>
           </div>
         </div>
       </div>
     `;
+    this.container.querySelector('#empty-go-categories').addEventListener('click', () => {
+      if (window.spa?.router) window.spa.router.navigate('/categories');
+      else window.location.hash = '#/categories';
+    });
   },
 
   unmount() {

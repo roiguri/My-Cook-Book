@@ -213,7 +213,6 @@
 
 .spa-content .home-page .quote-open,
 .spa-content .home-page .quote-close {
-  color: var(--primary);
   font-size: 1.4em;
   line-height: 0;
   vertical-align: -0.35em;

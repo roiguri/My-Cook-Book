@@ -167,7 +167,6 @@
 
 .recipe-form__input--title {
   font-family: var(--font-display-he, serif);
-  font-style: italic;
   font-size: 24px;
   padding: 14px 16px;
   letter-spacing: -0.01em;
