@@ -35,6 +35,7 @@ class AuthAvatar extends HTMLElement {
           width: 100%;
           height: 100%;
           border-radius: 50%;
+          overflow: hidden;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -42,18 +43,27 @@ class AuthAvatar extends HTMLElement {
           background: linear-gradient(135deg, var(--primary-bright), var(--primary-dark));
           color: #ffffff;
           box-sizing: border-box;
-          transition: box-shadow var(--dur-1, 160ms) var(--ease, ease);
+          transition: box-shadow var(--dur-1, 160ms) var(--ease, ease),
+                      transform var(--dur-1, 160ms) var(--ease, ease);
         }
 
         .avatar:hover {
-          box-shadow: var(--shadow-2, 0 2px 4px rgba(0,0,0,0.1), 0 10px 30px -8px rgba(0,0,0,0.1));
+          transform: scale(1.08);
+          box-shadow: 0 0 0 3px rgba(106,153,78,0.3), 0 2px 8px rgba(31,29,24,0.15);
+        }
+
+        .avatar:active {
+          transform: scale(0.93);
+          box-shadow: 0 0 0 2px rgba(106,153,78,0.4);
+          transition-duration: 80ms;
         }
 
         .avatar img {
           width: 100%;
           height: 100%;
-          border-radius: 50%;
           object-fit: cover;
+          display: block;
+          transform: scale(1.12) translateY(4%);
         }
 
         .initial {
