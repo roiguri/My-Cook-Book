@@ -13,55 +13,46 @@ export const styles = `
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     margin-top: auto;
-    margin-bottom: 20px;
-    padding-top: 20px;
     width: 100%;
   }
 
   .pagination-button {
-    background: linear-gradient(135deg, var(--submenu-color), var(--secondary-light));
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    margin: 0 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-1, #fff);
+    color: var(--ink-2, #3a3a3a);
+    border: 1px solid var(--hairline-strong, rgba(31, 29, 24, 0.2));
+    padding: 8px 18px;
     cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    font-family: inherit;
-    font-size: var(--size-body);
+    border-radius: var(--r-pill, 999px);
+    transition: background var(--dur-1, 160ms) var(--ease, ease),
+                border-color var(--dur-1, 160ms) var(--ease, ease);
+    font-family: var(--font-ui, system-ui, sans-serif);
+    font-size: 13px;
     font-weight: 500;
-    box-shadow: 0 2px 4px rgba(188, 71, 73, 0.2);
+    height: 36px;
   }
 
-  .pagination-button:hover {
-    background: linear-gradient(135deg, var(--secondary-dark), var(--submenu-color));
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(188, 71, 73, 0.3);
+  .pagination-button:hover:not(:disabled) {
+    background: var(--surface-2, #f2e8cf);
+    border-color: var(--hairline-strong, rgba(31, 29, 24, 0.2));
   }
 
   .pagination-button:disabled {
-    background: linear-gradient(135deg, var(--disabled-color), #e0e0e0);
-    color: #999;
+    opacity: 0.35;
     cursor: not-allowed;
-    opacity: 0.6;
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-
-  .pagination-button:disabled:hover {
-    background: linear-gradient(135deg, var(--disabled-color), #e0e0e0);
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   .page-info {
-    margin: 0 10px;
-    font-size: var(--size-body);
-    color: var(--text-color);
-    font-weight: 500;
+    font-family: var(--font-mono, monospace);
+    font-size: 12px;
+    color: var(--ink-3, #7c7562);
+    letter-spacing: 0.04em;
     white-space: nowrap;
+    padding: 0 6px;
   }
 
   /* RTL support */
@@ -69,17 +60,21 @@ export const styles = `
     direction: rtl;
   }
 
-  /* Mobile responsiveness */
+  /* Mobile — tighter bottom spacing */
   @media (max-width: 768px) {
+    .recipe-pagination {
+      margin-bottom: 12px;
+      padding-top: 16px;
+    }
+
     .pagination-button {
-      padding: 8px 12px;
-      margin: 0 3px;
-      font-size: var(--size-body-mobile, 0.9rem);
+      padding: 6px 14px;
+      font-size: 12px;
+      height: 32px;
     }
 
     .page-info {
-      margin: 0 8px;
-      font-size: var(--size-body-mobile, 0.9rem);
+      font-size: 11px;
     }
   }
 `;

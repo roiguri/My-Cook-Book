@@ -10,64 +10,53 @@ export const styles = `
     direction: rtl;
   }
 
-  /* Categories Page Layout Mode - replaces .filters-container */
+  /* Categories Page Layout Mode */
   .unified-recipe-filter.categories-page-layout {
+    max-width: var(--content-max, 1200px);
+    margin: 0 auto;
+    padding: 16px var(--gutter, 2rem) 0;
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 10px;
+    gap: 16px;
     align-items: center;
     width: 100%;
     box-sizing: border-box;
-    margin-bottom: 1rem;
-  }
-
-  /* Search bar styling to match .categories-search */
-  .unified-recipe-filter.categories-page-layout .categories-search .search-button {
-    background-color: var(--submenu-color);
-    color: var(--button-color);
-    border-radius: 0 4px 4px 0;
-    font-size: var(--size-body);
   }
 
   /* Filter manager positioning */
   .unified-recipe-filter.categories-page-layout filter-manager {
-    align-self: stretch;
+    align-self: center;
   }
 
-  /* Category navigation spanning full width */
+  /* Category navigation spanning full width with bottom padding */
   .unified-recipe-filter.categories-page-layout category-navigation {
-    margin-bottom: 20px;
     grid-column: span 2;
+    padding-bottom: 14px;
+    margin-bottom: 0;
   }
 
-  /* Mobile layout for categories page - matches existing responsive design */
+  /* Mobile layout for categories page */
   @media (max-width: 768px) {
     .unified-recipe-filter.categories-page-layout {
+      padding: 10px var(--sp-md, 1rem) 10px;
+      gap: 8px;
       grid-template-columns: 1fr auto;
-      grid-template-rows: auto auto;
-      gap: 10px;
-      align-items: start;
-      margin-bottom: 1rem;
+      align-items: center;
     }
 
     .unified-recipe-filter.categories-page-layout .categories-search {
-      order: 1;
-      grid-column: 1 / -1;
-      grid-row: 1;
+      display: none;
     }
 
     .unified-recipe-filter.categories-page-layout category-navigation {
-      order: 2;
       grid-column: 1;
-      grid-row: 2;
-      margin-bottom: 0;
+      grid-row: 1;
+      padding-bottom: 0;
     }
 
     .unified-recipe-filter.categories-page-layout filter-manager {
-      order: 3;
       grid-column: 2;
-      grid-row: 2;
-      margin-bottom: 0;
+      grid-row: 1;
     }
   }
 
@@ -116,11 +105,11 @@ export const styles = `
 
   /* Error State */
   .unified-recipe-filter .error {
-    color: var(--error-color, #dc3545);
+    color: var(--secondary-dark, #b03537);
     text-align: center;
     padding: 1rem;
-    font-size: var(--size-body, 1rem);
-    font-family: var(--body-font, Arial, sans-serif);
+    font-size: var(--step--1, 0.875rem);
+    font-family: var(--font-ui, system-ui, sans-serif);
   }
 
   /* Remove focus outline to avoid blue border */

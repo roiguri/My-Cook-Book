@@ -23,15 +23,14 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
   flex-direction: column;
 }
 
-/* Grid Layout Styles - Matching Original Categories Page */
+/* Grid Layout Styles */
 .recipe-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-lg, 1.5rem);
   width: 100%;
-  justify-content: center;
   transition: opacity 0.25s ease-out, transform 0.25s ease-out;
-  align-content: start; /* Align items to top */
+  align-content: start;
 }
 
 .recipe-grid.transitioning {
@@ -39,9 +38,8 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
   transform: translateY(10px);
 }
 
-/* Recipe Card Container - Matching Original Aspect Ratio */
+/* Recipe Card Container */
 .recipe-card-container {
-  aspect-ratio: 3/4;
   width: 100%;
   transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
@@ -53,7 +51,6 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
 
 .recipe-card-container recipe-card {
   width: 100%;
-  height: 100%;
 }
 
 /* No Results State - Matching Original Categories Page */
@@ -67,9 +64,9 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
 .no-results-message {
   text-align: center;
   padding: 1rem;
-  color: var(--text-color);
+  color: var(--ink-2, #3a3a3a);
   align-self: start;
-  font-family: var(--body-font);
+  font-family: var(--font-ui, system-ui, sans-serif);
   grid-column: 1 / -1;
   width: 100%;
   box-sizing: border-box;
@@ -77,7 +74,7 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
 
 .no-results-message p {
   margin: 0.5rem 0;
-  font-size: var(--size-header2);
+  font-size: var(--step-1, 1.125rem);
 }
 
 /* Loading State */
@@ -86,7 +83,7 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
   justify-content: center;
   align-items: center;
   min-height: 300px;
-  color: var(--text-secondary, #666);
+  color: var(--ink-3, #7c7562);
 }
 
 .loading-state p {
@@ -100,7 +97,7 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
   justify-content: center;
   align-items: center;
   min-height: 300px;
-  color: var(--error-color, #dc3545);
+  color: var(--secondary-dark, #b03537);
   text-align: center;
 }
 
@@ -122,12 +119,11 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
   width: 100%;
 }
 
-/* Responsive Design - Minimal, letting parent page handle main responsive behavior */
-
-/* The original grid layout is responsive via auto-fit, so minimal overrides needed */
+/* Responsive Design */
 @media (max-width: 768px) {
-  .recipe-presentation-grid {
-    gap: 1.5rem;
+  .recipe-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-md, 1rem);
   }
 }
 
@@ -154,14 +150,4 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
   }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .no-results-message {
-    color: var(--text-secondary-dark, #ccc);
-  }
-  
-  .loading-state {
-    color: var(--text-secondary-dark, #ccc);
-  }
-}
 `;

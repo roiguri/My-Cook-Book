@@ -30,46 +30,68 @@ export const styles = `
   .category-tabs-item {
     flex: 0 0 auto;
     display: flex;
-    margin-right: 0;
   }
 
+  /* Badge base — mirrors .bdg from badges.css */
   .category-tabs-link {
-    display: inline-block;
-    padding: 8px 16px;
-    text-align: center;
-    background-color: white;
-    color: var(--text-color-secondary, #666);
-    text-decoration: none;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    border: 1px solid var(--border-light, #e0e0e0);
-    font-family: inherit;
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--r-pill, 999px);
+    font-family: var(--font-ui, system-ui, sans-serif);
+    font-size: 12px;
     font-weight: 500;
+    line-height: 1;
+    background: var(--surface-2, #f2e8cf);
+    color: var(--text-strong, #1a1a1a);
+    border: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
+    cursor: pointer;
     white-space: nowrap;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition:
+      background var(--dur-1, 160ms) var(--ease, ease),
+      color var(--dur-1, 160ms) var(--ease, ease),
+      border-color var(--dur-1, 160ms) var(--ease, ease);
   }
 
-  .category-tabs-link:hover {
-    background-color: var(--secondary-light, #f8f9fa);
-    border-color: var(--secondary, #6c757d);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  /* Colored dot — mirrors .bdg::before */
+  .category-tabs-link::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bdg-color, var(--primary, #6a994e));
+    flex-shrink: 0;
   }
 
+  /* Hover — mirrors .bdg--clickable:hover */
+  .category-tabs-link:hover:not(.active) {
+    background: var(--surface-1, #fff);
+    border-color: var(--hairline-strong, rgba(31, 29, 24, 0.2));
+  }
+
+  /* Active — mirrors .bdg--active */
   .category-tabs-link.active {
-    background-color: var(--secondary, #6c757d);
-    color: white;
-    border-color: var(--secondary, #6c757d);
-    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+    background: var(--primary-dark, #386641);
+    color: #fff;
+    border-color: transparent;
   }
 
-  .category-tabs-link.active:hover {
-    background-color: var(--secondary-dark, #545b62);
-    border-color: var(--secondary-dark, #545b62);
-    transform: translateY(-1px);
+  .category-tabs-link.active::before {
+    background: var(--primary-bright, #a7c957);
   }
+
+  /* Category color map — mirrors .bdg--cat-* */
+  .category-tabs-link[data-category="all"]        { --bdg-color: #a7c957; }
+  .category-tabs-link[data-category="breads"]     { --bdg-color: #6a994e; }
+  .category-tabs-link[data-category="mains"]      { --bdg-color: #bc4749; }
+  .category-tabs-link[data-category="desserts"]   { --bdg-color: #eab308; }
+  .category-tabs-link[data-category="salads"]     { --bdg-color: #22c55e; }
+  .category-tabs-link[data-category="soups"]      { --bdg-color: #60a5fa; }
+  .category-tabs-link[data-category="appetizers"] { --bdg-color: #d47779; }
+  .category-tabs-link[data-category="preserves"]  { --bdg-color: #836418; }
+  .category-tabs-link[data-category="drinks"]     { --bdg-color: #a855f7; }
+  .category-tabs-link[data-category="holiday"]    { --bdg-color: #f97316; }
 
   .category-dropdown {
     display: none;
@@ -77,60 +99,44 @@ export const styles = `
     width: 100%;
   }
 
+  /* Mirrors .select-ctrl from fields.css — RTL: chevron on right, text padding on left */
   .category-dropdown-select {
-    width: 100%;
     display: block;
-    height: 36px;
-    padding: 0 16px;
-    font-size: var(--size-body);
-    border: 2px solid var(--border-light, #e0e0e0);
-    border-radius: 8px;
-    appearance: none;
-    color: var(--text-color);
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    background-color: white;
-    font-family: inherit;
+    width: 100%;
+    height: 38px;
+    padding: 0 32px 0 14px;
+    font-family: var(--font-ui, system-ui, sans-serif);
+    font-size: 13px;
     font-weight: 500;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--ink-1, #1a1a1a);
+    background-color: var(--surface-1, #fff);
+    border: 1px solid var(--hairline-strong, rgba(31, 29, 24, 0.2));
+    border-radius: var(--r-pill, 999px);
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    outline: none;
     box-sizing: border-box;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 12px center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237c7562' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
+    background-position: right 10px center;
     background-size: 16px;
-    padding-right: 40px;
+    transition: border-color var(--dur-1, 160ms) ease, box-shadow var(--dur-1, 160ms) ease;
   }
 
   .category-dropdown-select:hover {
-    border-color: var(--secondary);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    border-color: var(--hairline-strong, rgba(31, 29, 24, 0.2));
   }
 
   .category-dropdown-select:focus {
-    outline: none;
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgba(188, 71, 73, 0.1);
+    border-color: var(--primary, #6a994e);
+    box-shadow: 0 0 0 3px rgba(106, 153, 78, 0.12);
   }
 
   .category-dropdown-select option {
-    padding: 12px 16px;
-    background-color: white;
-    color: var(--text-color);
+    background-color: var(--surface-1, #fff);
+    color: var(--ink-1, #1a1a1a);
     font-weight: 500;
-    border: none;
-  }
-
-  .category-dropdown-select option:hover,
-  .category-dropdown-select option:focus {
-    background-color: var(--secondary-light);
-    color: white;
-  }
-
-  .category-dropdown-select option:checked {
-    background-color: var(--secondary);
-    color: white;
   }
 
   /* Mobile styles */
@@ -141,11 +147,6 @@ export const styles = `
 
     .category-dropdown {
       display: block;
-    }
-
-    .category-dropdown-select:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
   }
 

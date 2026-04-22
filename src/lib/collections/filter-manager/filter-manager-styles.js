@@ -4,8 +4,6 @@
  */
 
 export const styles = `
-  @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
-
   :host {
     display: block;
     width: auto;
@@ -19,89 +17,72 @@ export const styles = `
   }
 
   .filter-button {
-    display: block;
     position: relative;
-    background-color: white;
-    color: var(--text-color-secondary, #666);
-    border: 2px solid var(--border-light, #e0e0e0);
-    padding: 10px 15px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: var(--size-body);
-    font-family: inherit;
-    font-weight: 500;
-    min-width: 36px;
-    min-height: 36px;
-    height: 36px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    gap: 8px;
+    background-color: var(--surface-1, #fff);
+    color: var(--ink-1, #1a1a1a);
+    border: 1px solid var(--hairline-strong, rgba(31, 29, 24, 0.2));
+    padding: 10px 16px;
+    border-radius: var(--r-pill, 999px);
+    cursor: pointer;
+    transition: background-color var(--dur-1, 160ms) var(--ease, ease);
+    font-size: 13px;
+    font-family: var(--font-ui, system-ui, sans-serif);
+    font-weight: 500;
+    white-space: nowrap;
+    height: 38px;
   }
 
   .filter-button:hover {
-    background-color: var(--secondary-light, #f8f9fa);
-    border-color: var(--secondary, #6c757d);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    background-color: var(--surface-2, #f2e8cf);
   }
 
   .filter-button:active {
-    transform: translateY(0);
+    background-color: var(--surface-2, #f2e8cf);
   }
 
   .filter-button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
   }
 
   .filter-button:disabled:hover {
-    background-color: white;
-    border-color: var(--border-light, #e0e0e0);
-    transform: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: var(--surface-1, #fff);
   }
 
   .filter-button .icon {
-    font-size: 1.2em;
-    color: var(--text-color-secondary, #666);
+    font-size: 1em;
+    color: inherit;
   }
 
   .filter-badge {
     display: none;
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background-color: var(--secondary);
-    color: white;
-    border-radius: 50%;
-    padding: 2px;
-    width: 10px;
-    height: 16px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 0.75rem;
-    line-height: 1;
-    min-width: 16px;
-    display: flex;
+    background-color: var(--primary-dark, #386641);
+    color: #fff;
+    border-radius: var(--r-pill, 999px);
+    padding: 2px 7px;
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
     align-items: center;
     justify-content: center;
   }
 
   .filter-badge.visible {
-    display: flex;
+    display: inline-flex;
   }
 
   .error {
-    color: var(--error-color, #d32f2f);
-    background-color: var(--error-background, #ffebee);
-    border: 1px solid var(--error-border, #ffcdd2);
-    border-radius: 4px;
+    color: var(--secondary-dark, #b03537);
+    background-color: color-mix(in oklab, var(--secondary, #bc4749) 10%, var(--surface-0, #faf6ec));
+    border: 1px solid color-mix(in oklab, var(--secondary, #bc4749) 20%, transparent);
+    border-radius: var(--r-sm, 8px);
     padding: 8px 12px;
-    font-size: var(--size-body);
+    font-size: var(--step--1, 0.875rem);
   }
 
   /* RTL support */
@@ -109,46 +90,17 @@ export const styles = `
     direction: rtl;
   }
 
-  :host([dir="rtl"]) .filter-badge {
-    right: auto;
-    left: -8px;
-  }
-
-  /* Mobile responsiveness */
-  @media (max-width: 768px) {
-    .filter-button {
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: var(--size-body);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .filter-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    }
-    
-    .filter-badge {
-      font-size: 0.7rem;
-      width: 8px;
-      height: 14px;
-      min-width: 14px;
-    }
-  }
-
 
   /* Animation for badge appearance */
   .filter-badge {
-    transition: all 0.2s ease;
+    transition: opacity var(--dur-1, 160ms) var(--ease, ease);
   }
 
   .filter-badge:not(.visible) {
-    transform: scale(0);
     opacity: 0;
   }
 
   .filter-badge.visible {
-    transform: scale(1);
     opacity: 1;
   }
 `;
