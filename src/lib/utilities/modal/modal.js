@@ -60,6 +60,7 @@ export class Modal extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.isOpen = false;
+    this._closeGuard = null; // async () => boolean — return false to prevent close
 
     // Accesibility Enhancements
     this.focusableElements = [];
@@ -216,26 +217,39 @@ export class Modal extends HTMLElement {
     }
   }
 
-  close(options = { byUser: false }) {
-    if (this.isOpen) {
-      if (options.byUser) {
-        this.dispatchEvent(
-          new CustomEvent('modal-closed-by-user', { bubbles: true, composed: true }),
-        );
-      }
-      const modalElement = this.shadowRoot.querySelector('.modal');
-      modalElement.classList.remove('open');
-      this.isOpen = false;
-      window.removeEventListener('keydown', this.handleKeyDown);
-      // Wait for the transition to finish before hiding the modal
-      setTimeout(() => {
-        if (!this.isOpen) {
-          modalElement.style.display = 'none';
-        }
-      }, 300); // This should match the transition duration
-      this.dispatchEvent(new CustomEvent('modal-closed'));
-      this.unlockScroll();
+  async close(options = { byUser: false }) {
+    if (!this.isOpen) return;
+
+    if (options.byUser && this._closeGuard) {
+      const allowed = await this._closeGuard();
+      if (!allowed || !this.isOpen) return; // guard rejected or modal already closed
     }
+
+    if (options.byUser) {
+      this.dispatchEvent(
+        new CustomEvent('modal-closed-by-user', { bubbles: true, composed: true }),
+      );
+    }
+    const modalElement = this.shadowRoot.querySelector('.modal');
+    modalElement.classList.remove('open');
+    this.isOpen = false;
+    window.removeEventListener('keydown', this.handleKeyDown);
+    // Wait for the transition to finish before hiding the modal
+    setTimeout(() => {
+      if (!this.isOpen) {
+        modalElement.style.display = 'none';
+      }
+    }, 300); // This should match the transition duration
+    this.dispatchEvent(new CustomEvent('modal-closed'));
+    this.unlockScroll();
+  }
+
+  setCloseGuard(fn) {
+    this._closeGuard = fn;
+  }
+
+  clearCloseGuard() {
+    this._closeGuard = null;
   }
 
   /**

@@ -227,7 +227,7 @@ class RecipeFormComponent extends HTMLElement {
     const importModal = this.shadowRoot.getElementById('import-modal');
     if (importModal) {
       importModal.addEventListener('recipe-extracted', (e) => {
-        this.handleRecipeExtracted(e.detail.data);
+        this.handleRecipeExtracted(e.detail.data, e.detail.sourceUrl);
       });
     }
 
@@ -471,16 +471,20 @@ class RecipeFormComponent extends HTMLElement {
    */
   handleAuthUpdate(_state) {}
 
-  handleRecipeExtracted(extractedData) {
+  handleRecipeExtracted(extractedData, sourceUrl = null) {
     console.log('Extracted data:', extractedData);
     const mappedData = mapExtractedDataToForm(extractedData);
 
-    // Merge with current data if needed, or just populate
-    // For now, we populate the form fields directly.
-    // We might want to preserve existing images if any?
-    // The import overwrites fields.
-
     this.populateFromData(mappedData);
+
+    // If extracted from a URL and the attribution field is still empty, fill it in
+    if (sourceUrl) {
+      const attributionField = this.shadowRoot.getElementById('attribution');
+      if (attributionField && !attributionField.value.trim()) {
+        attributionField.value = sourceUrl;
+      }
+    }
+
     this.collectFormData(); // Update internal state
     this.isDirty = true;
     this.updateDirtyStateIndicators(true);

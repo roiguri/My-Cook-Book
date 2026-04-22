@@ -339,7 +339,6 @@ function validateCookbookRecipe(recipeData) {
     errors.push('Invalid comments: must be array of strings');
   }
 
-  // Future fields validation (if present)
   if (recipeData.description && typeof recipeData.description !== 'string') {
     errors.push('Invalid description: must be string');
   }
@@ -354,18 +353,6 @@ function validateCookbookRecipe(recipeData) {
 // Prepare recipe for Firestore storage
 function prepareCookbookRecipe(recipeData, metadata) {
   const firestoreTimestamp = Timestamp.now();
-
-  // TODO: Remove these logs once description and sourceUrl are added to database schema
-  if (recipeData.description) {
-    console.log(
-      `TODO: Store description field once added to database: "${recipeData.description}"`,
-    );
-  }
-
-  if (recipeData.sourceUrl) {
-    console.log(`TODO: Store sourceUrl field once added to database: "${recipeData.sourceUrl}"`);
-  }
-
   // TODO: Log transfer metadata for tracking (store once added to database schema)
   console.log('TODO: Store transfer metadata once added to database schema:', {
     transferredFrom: 'recipe-reader-demo',
@@ -396,9 +383,11 @@ function prepareCookbookRecipe(recipeData, metadata) {
     tags: recipeData.tags || [],
     comments: recipeData.comments || [],
 
-    // TODO: Uncomment when added to database schema
-    // ...(recipeData.description && { description: recipeData.description }),
-    // ...(recipeData.sourceUrl && { sourceUrl: recipeData.sourceUrl }),
+    // Optional content fields
+    ...(recipeData.description && { description: recipeData.description }),
+    ...(recipeData.sourceUrl && { attribution: recipeData.sourceUrl }),
+
+    // TODO: Store transfer metadata once added to database schema
     // transferredFrom: 'recipe-reader-demo',
     // transferDate: metadata.timestamp,
     // originalUserId: metadata.userId,
