@@ -1,15 +1,4 @@
-/**
- * SignupForm Component
- * @class
- * @extends HTMLElement
- *
- * @description
- * Handles the signup form functionality including validation,
- * password strength, and Google signup
- */
-
 import './auth-content.js';
-import '../../modals/message-modal/message-modal.js';
 
 class SignupForm extends HTMLElement {
   constructor() {
@@ -25,387 +14,331 @@ class SignupForm extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        .signup-form {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          padding: 20px;
-        }
+        :host { display: block; }
 
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
+        .stack { display: flex; flex-direction: column; gap: 16px; padding: 0 40px 36px; }
 
-        .form-group label {
-          font-size: 0.9em;
-          color: var(--text-color);
-        }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-        .form-group input {
-          padding: 10px;
-          border: 1px solid var(--secondary-color);
-          border-radius: 5px;
-          font-size: 1em;
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label {
+          font-family: var(--font-ui-he, system-ui, sans-serif);
+          font-size: 12px; font-weight: 600;
+          color: var(--ink-3, #7c7562);
+          display: flex; justify-content: space-between; align-items: baseline;
         }
-
-        .form-group input:focus {
-          outline: none;
-          border-color: var(--primary-color);
-        }
-
-        /* Password strength indicator */
-        .password-strength {
-          height: 4px;
-          border-radius: 2px;
-          margin-top: 5px;
-          background-color: #ddd;
-          overflow: hidden;
-        }
-
-        .strength-meter {
-          height: 100%;
-          width: 0;
-          transition: width 0.3s ease, background-color 0.3s ease;
-        }
-
-        .strength-meter.weak { 
-          width: 33.33%;
-          background-color: #ff4d4d;
-        }
-        .strength-meter.medium { 
-          width: 66.66%;
-          background-color: #ffd700;
-        }
-        .strength-meter.strong { 
-          width: 100%;
-          background-color: #32cd32;
-        }
-
-        .submit-button {
-          background-color: var(--primary-color);
-          color: white;
-          padding: 12px;
-          border: none;
-          border-radius: 5px;
-          font-size: 1em;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-        }
-
-        .submit-button:hover {
-          background-color: var(--primary-hover);
-        }
-
-        .submit-button:disabled {
-          background-color: var(--secondary-color);
-          cursor: not-allowed;
-          opacity: 0.7;
-        }
-
-        .divider {
-          display: flex;
-          align-items: center;
-          text-align: center;
-          margin: 15px 0;
-          gap: 10px;
-          color: var(--text-color);
-          opacity: 0.8;
-        }
-
-        .divider::before,
-        .divider::after {
-          content: '';
-          flex: 1;
-          border-bottom: 1px solid var(--secondary-color);
-        }
-
-        /* Google Button Styles */
-        .gsi-material-button {
-          -moz-user-select: none;
-          -webkit-user-select: none;
-          -ms-user-select: none;
-          -webkit-appearance: none;
-          background-color: WHITE;
-          background-image: none;
-          border: 1px solid #000000;
-          -webkit-border-radius: 4px;
-          border-radius: 4px;
-          -webkit-box-sizing: border-box;
+        .field input {
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14.5px; color: var(--ink, #1f1d18);
+          background: var(--surface-0, #faf7f2);
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          border-radius: var(--r-sm, 8px);
+          padding: 12px 14px; outline: none; width: 100%;
           box-sizing: border-box;
-          color: #1f1f1f;
-          cursor: pointer;
-          font-family: 'Roboto', arial, sans-serif;
-          font-size: 14px;
-          height: 40px;
-          letter-spacing: 0.25px;
-          outline: none;
-          overflow: hidden;
-          padding: 0 12px;
-          position: relative;
-          text-align: center;
-          transition: background-color .218s, border-color .218s, box-shadow .218s;
-          vertical-align: middle;
-          white-space: nowrap;
-          width: 100%;
-          margin-top: -10px;
+          transition: border-color var(--dur-1, 160ms) var(--ease, ease),
+                      box-shadow var(--dur-1, 160ms) var(--ease, ease);
         }
-        
-        .gsi-material-button-content-wrapper {
-          align-items: center;
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-          height: 100%;
-          justify-content: space-between;
-          position: relative;
-          width: 100%;
+        .field input:focus {
+          border-color: var(--primary, #6a994e);
+          box-shadow: 0 0 0 3px rgba(106,153,78,0.12);
         }
-        
-        .gsi-material-button-icon {
-          height: 20px;
-          margin-right: 12px;
-          min-width: 20px;
-          width: 20px;
+        .field .err {
+          font-family: var(--font-mono, monospace);
+          font-size: 10.5px; color: var(--secondary-dark, #9a3a3c);
+          display: none; align-items: center; gap: 6px;
         }
-        
-        .gsi-material-button-contents {
-          flex-grow: 1;
-          font-family: 'Roboto', arial, sans-serif;
-          font-weight: 500;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          vertical-align: top;
-        }
-        
-        .gsi-material-button-state {
-          transition: opacity .218s;
-          bottom: 0;
-          left: 0;
-          opacity: 0;
-          position: absolute;
-          right: 0;
-          top: 0;
-        }
-        
-        .error-message {
-          color: red;
-          font-size: 0.9em;
-          margin-top: 5px;
-          display: none;
+        .field .err.visible { display: flex; }
+        .field .err::before {
+          content: "!"; width: 14px; height: 14px; border-radius: 50%;
+          background: var(--secondary, #bc4749); color: #fff;
+          display: inline-flex; align-items: center; justify-content: center;
+          font-size: 10px; font-weight: 700; flex-shrink: 0;
         }
 
-        .error-message.visible {
-          display: block;
+        .input-icon { position: relative; }
+        .input-icon input { padding-right: 40px; }
+        .input-icon .eye {
+          position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+          color: var(--ink-3, #7c7562); cursor: pointer; padding: 4px;
+          background: none; border: none; display: flex; align-items: center;
+        }
+        .input-icon .eye:hover { color: var(--ink, #1f1d18); }
+
+        /* 4-segment strength bar */
+        .strength { display: flex; gap: 4px; margin-top: 6px; }
+        .strength i {
+          flex: 1; height: 3px; border-radius: 2px;
+          background: var(--hairline-strong, rgba(31,29,24,0.2));
+          transition: background var(--dur-1, 160ms);
+        }
+        .strength.s1 i:nth-child(-n+1) { background: var(--secondary, #bc4749); }
+        .strength.s2 i:nth-child(-n+2) { background: #d99a3a; }
+        .strength.s3 i:nth-child(-n+3) { background: var(--primary, #6a994e); }
+        .strength.s4 i { background: var(--primary-dark, #386641); }
+        .strength-label {
+          font-family: var(--font-mono, monospace);
+          font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+          color: var(--ink-3, #7c7562); margin-top: 4px; display: block;
+        }
+        .strength-label b { color: var(--primary-dark, #386641); font-weight: 500; }
+
+        .btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14px; font-weight: 500;
+          padding: 13px 20px; border-radius: var(--r-sm, 8px);
+          border: 1px solid transparent; cursor: pointer;
+          transition: background var(--dur-1, 160ms), transform var(--dur-1, 160ms);
+          width: 100%;
+        }
+        .btn-primary { background: var(--primary, #6a994e); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark, #386641); }
+        .btn-primary:active { transform: translateY(1px); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-social {
+          background: var(--surface-1, #fff); color: var(--ink, #1f1d18);
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          padding: 12px 16px; font-weight: 500; font-size: 13.5px;
+        }
+        .btn-social:hover { background: var(--surface-2, #f2e8cf); }
+        .btn-social .logo {
+          width: 18px; height: 18px;
+          display: inline-flex; align-items: center; justify-content: center;
+        }
+
+        .or {
+          display: grid; grid-template-columns: 1fr auto 1fr;
+          align-items: center; gap: 14px; margin: 6px 0;
+          font-family: var(--font-mono, monospace);
+          font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+          color: var(--ink-3, #7c7562);
+        }
+        .or::before, .or::after { content: ""; height: 1px; background: var(--hairline, rgba(31,29,24,0.08)); }
+
+        .socials { display: grid; gap: 10px; }
+
+        .footer-note {
+          margin-top: 24px;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 12.5px; color: var(--ink-3, #7c7562);
+          text-align: center;
+        }
+        .footer-note a {
+          color: var(--primary-dark, #386641); text-decoration: none;
+          border-bottom: 1px dotted var(--primary, #6a994e); cursor: pointer;
+        }
+
+        @media (max-width: 560px) {
+          .stack { padding-left: 22px; padding-right: 22px; }
+          .grid2 { grid-template-columns: 1fr; }
         }
       </style>
 
-      <form class="signup-form">
-        <div class="form-group">
-          <label for="fullName">שם מלא</label>
-          <input type="text" id="fullName" name="fullName" required>
-        </div>
-
-        <div class="form-group">
-          <label for="signup-email">כתובת מייל</label>
-          <input type="email" id="signup-email" name="email" required>
-        </div>
-
-        <div class="form-group">
-          <label for="signup-password">סיסמה</label>
-          <input type="password" id="signup-password" name="password" required 
-                 minlength="8" autocomplete="new-password">
-          <div class="password-strength">
-            <div class="strength-meter"></div>
+      <form class="stack" id="signup-form" novalidate>
+        <div class="grid2">
+          <div class="field">
+            <label>שם פרטי</label>
+            <input type="text" id="first-name" autocomplete="given-name" />
+          </div>
+          <div class="field">
+            <label>שם משפחה</label>
+            <input type="text" id="last-name" autocomplete="family-name" />
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="signup-confirmPassword">אימות סיסמה</label>
-          <input type="password" id="signup-confirmPassword" name="confirmPassword" required>
-          <div class="error-message" id="signup-error"></div>
+        <div class="field">
+          <label>כתובת מייל</label>
+          <input type="email" id="signup-email" autocomplete="email" />
         </div>
 
-        <button type="submit" class="submit-button">הרשמה</button>
-
-        <div class="divider">או</div>
-
-        <button type="button" class="gsi-material-button">
-          <div class="gsi-material-button-state"></div>
-          <div class="gsi-material-button-content-wrapper">
-            <div class="gsi-material-button-icon">
-              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                <path fill="none" d="M0 0h48v48H0z"></path>
+        <div class="field">
+          <label>סיסמה</label>
+          <div class="input-icon">
+            <input type="password" id="signup-password" autocomplete="new-password" />
+            <button type="button" class="eye" id="toggle-pw" aria-label="הצג סיסמה">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
               </svg>
-            </div>
-            <span class="gsi-material-button-contents">הרשמה עם Google</span>
+            </button>
           </div>
+          <div class="strength" id="strength-bar"><i></i><i></i><i></i><i></i></div>
+          <span class="strength-label" id="strength-label"></span>
+        </div>
+
+        <div class="field">
+          <label>אימות סיסמה</label>
+          <input type="password" id="confirm-password" autocomplete="new-password" />
+          <span class="err" id="signup-error"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top:6px;">
+          יצירת חשבון
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
+
+        <div class="or">או</div>
+
+        <div class="socials">
+          <button type="button" class="btn btn-social" id="google-signup">
+            <span class="logo">
+              <svg width="18" height="18" viewBox="0 0 18 18">
+                <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.17-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.83.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.92v2.32A9 9 0 009 18z"/>
+                <path fill="#FBBC05" d="M3.97 10.72A5.41 5.41 0 013.68 9c0-.6.1-1.18.29-1.72V4.96H.92A9 9 0 000 9c0 1.45.35 2.83.92 4.04l3.05-2.32z"/>
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 00.92 4.96l3.05 2.32C4.68 5.16 6.66 3.58 9 3.58z"/>
+              </svg>
+            </span>
+            הרשמה עם Google
+          </button>
+        </div>
+
+        <p class="footer-note">
+          כבר חלק מהמשפחה? <a id="goto-signin">התחברות</a>
+        </p>
       </form>
     `;
   }
 
   setupEventListeners() {
-    const form = this.shadowRoot.querySelector('.signup-form');
-    const passwordInput = this.shadowRoot.getElementById('signup-password');
-    const confirmPasswordInput = this.shadowRoot.getElementById('signup-confirmPassword');
-    const googleSignup = this.shadowRoot.querySelector('.gsi-material-button');
-
-    passwordInput.addEventListener('input', () => this.checkPasswordStrength());
-    form.addEventListener('submit', (e) => this.handleSubmit(e));
-    googleSignup.addEventListener('click', () => this.handleGoogleSignup());
-    confirmPasswordInput.addEventListener('input', () => this.checkPasswordsMatch());
+    this.shadowRoot
+      .getElementById('signup-form')
+      .addEventListener('submit', (e) => this._handleSubmit(e));
+    this.shadowRoot
+      .getElementById('signup-password')
+      .addEventListener('input', () => this._checkStrength());
+    this.shadowRoot
+      .getElementById('confirm-password')
+      .addEventListener('input', () => this._checkMatch());
+    this.shadowRoot
+      .getElementById('google-signup')
+      .addEventListener('click', () => this._handleGoogleSignup());
+    this.shadowRoot
+      .getElementById('toggle-pw')
+      .addEventListener('click', () => this._togglePassword());
+    this.shadowRoot.getElementById('goto-signin').addEventListener('click', (e) => {
+      e.preventDefault();
+      const authContent = this.closest('auth-content');
+      authContent?._switchAuthTab('signin');
+    });
   }
 
-  checkPasswordStrength() {
-    const password = this.shadowRoot.getElementById('signup-password').value;
-    const strengthMeter = this.shadowRoot.querySelector('.strength-meter');
+  _togglePassword() {
+    const input = this.shadowRoot.getElementById('signup-password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
 
-    // Remove all classes first
-    strengthMeter.classList.remove('weak', 'medium', 'strong');
+  _checkStrength() {
+    const pw = this.shadowRoot.getElementById('signup-password').value;
+    const bar = this.shadowRoot.getElementById('strength-bar');
+    const label = this.shadowRoot.getElementById('strength-label');
+    bar.className = 'strength';
 
-    if (password.length >= 8) {
-      let strength = 0;
-      if (password.match(/[a-z]/)) strength++;
-      if (password.match(/[A-Z]/)) strength++;
-      if (password.match(/[0-9]/)) strength++;
-      if (password.match(/[^a-zA-Z0-9]/)) strength++;
-
-      if (strength <= 2) strengthMeter.classList.add('weak');
-      else if (strength === 3) strengthMeter.classList.add('medium');
-      else strengthMeter.classList.add('strong');
+    if (!pw) {
+      label.innerHTML = '';
+      return;
     }
+
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^a-zA-Z0-9]/.test(pw)) score++;
+
+    const levels = ['', 's1', 's2', 's3', 's4'];
+    const names = ['', 'חלשה', 'בינונית', 'חזקה', 'מצוינת'];
+    if (score > 0) bar.classList.add(levels[score]);
+    label.innerHTML = score > 0 ? `חוזק: <b>${names[score]}</b>` : '';
   }
 
-  checkPasswordsMatch() {
-    const password = this.shadowRoot.getElementById('signup-password').value;
-    const confirmPassword = this.shadowRoot.getElementById('signup-confirmPassword').value;
-
-    if (confirmPassword && password !== confirmPassword) {
-      this.showError('הסיסמאות אינן תואמות');
+  _checkMatch() {
+    const pw = this.shadowRoot.getElementById('signup-password').value;
+    const confirm = this.shadowRoot.getElementById('confirm-password').value;
+    if (confirm && pw !== confirm) {
+      this._showError('הסיסמאות אינן תואמות');
     } else {
-      this.clearError();
+      this._clearError();
     }
   }
 
-  async handleSubmit(e) {
+  async _handleSubmit(e) {
     e.preventDefault();
-
-    const fullName = this.shadowRoot.getElementById('fullName').value;
+    const firstName = this.shadowRoot.getElementById('first-name').value.trim();
+    const lastName = this.shadowRoot.getElementById('last-name').value.trim();
     const email = this.shadowRoot.getElementById('signup-email').value;
     const password = this.shadowRoot.getElementById('signup-password').value;
-    const confirmPassword = this.shadowRoot.getElementById('signup-confirmPassword').value;
-
-    if (!fullName.trim()) {
-      this.showError('נא להזין שם מלא');
+    const confirm = this.shadowRoot.getElementById('confirm-password').value;
+    if (!firstName) {
+      this._showError('יש להזין שם פרטי');
+      return;
+    }
+    if (password !== confirm) {
+      this._showError('הסיסמאות אינן תואמות');
       return;
     }
 
-    if (password !== confirmPassword) {
-      this.showError('הסיסמאות אינן תואמות');
-      return;
-    }
-
-    const submitButton = this.shadowRoot.querySelector('.submit-button');
-    const originalText = submitButton.textContent;
-
-    submitButton.disabled = true;
-    submitButton.textContent = 'נרשם...';
-    submitButton.setAttribute('aria-busy', 'true');
+    const btn = this.shadowRoot.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    const orig = btn.innerHTML;
+    btn.textContent = 'יוצר חשבון...';
 
     try {
       const authController = this.closest('auth-controller');
+      const fullName = lastName ? `${firstName} ${lastName}` : firstName;
       await authController.handleSignup(email, password, fullName);
-      // Dispatch signup success event
-      this.dispatchEvent(
-        new CustomEvent('signup-success', {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.dispatchEvent(new CustomEvent('signup-success', { bubbles: true, composed: true }));
     } catch (error) {
-      this.handleError(error);
+      this._handleError(error);
     } finally {
-      submitButton.disabled = false;
-      submitButton.textContent = originalText;
-      submitButton.removeAttribute('aria-busy');
+      btn.disabled = false;
+      btn.innerHTML = orig;
     }
   }
 
-  async handleGoogleSignup() {
-    const googleButton = this.shadowRoot.querySelector('.gsi-material-button');
-    googleButton.style.opacity = '0.7';
-    googleButton.style.pointerEvents = 'none';
-
+  async _handleGoogleSignup() {
+    const btn = this.shadowRoot.getElementById('google-signup');
+    btn.disabled = true;
     try {
       const authController = this.closest('auth-controller');
       await authController.handleGoogleSignIn();
-      this.dispatchEvent(
-        new CustomEvent('signup-success', {
-          bubbles: true,
-          composed: true,
-        }),
-      );
+      this.dispatchEvent(new CustomEvent('signup-success', { bubbles: true, composed: true }));
     } catch (error) {
-      this.handleError(error);
+      this._handleError(error);
     } finally {
-      googleButton.style.opacity = '1';
-      googleButton.style.pointerEvents = 'auto';
+      btn.disabled = false;
     }
   }
 
-  handleError(error) {
-    let message = 'אירעה שגיאה בהרשמה. אנא נסו שוב מאוחר יותר.';
-
-    if (error.code) {
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          message = 'כתובת האימייל הזו כבר נמצאת בשימוש.';
-          break;
-        case 'auth/invalid-email':
-          message = 'כתובת האימייל אינה תקינה.';
-          break;
-        case 'auth/weak-password':
-          message = 'הסיסמה חלשה מדי. אנא בחרו סיסמה חזקה יותר.';
-          break;
-        case 'auth/network-request-failed':
-          message = 'שגיאת תקשורת. אנא בדקו את החיבור לאינטרנט.';
-          break;
-      }
-    } else if (error.message) {
-      // Fallback to error message if present, but prefer localized general error if not specific
-      // Sometimes we might want to just show the technical error in dev but localized in prod
-      // checking for common text fragments if code is missing?
-      if (error.message.includes('email-already-in-use')) {
-        message = 'כתובת האימייל הזו כבר נמצאת בשימוש.';
-      }
-    }
-
-    this.showError(message);
+  _handleError(error) {
+    const ERRORS = {
+      'auth/email-already-in-use': 'כבר קיים חשבון עם כתובת מייל זו.',
+      'auth/invalid-email': 'כתובת מייל לא תקינה.',
+      'auth/weak-password': 'הסיסמה חלשה מדי. בחר סיסמה חזקה יותר.',
+      'auth/network-request-failed': 'שגיאת רשת. בדוק את החיבור שלך.',
+    };
+    const msg = ERRORS[error.code] || error.message || 'ההרשמה נכשלה. נסה שנית.';
+    this._showError(msg);
   }
 
-  showError(message) {
-    const errorElement = this.shadowRoot.getElementById('signup-error');
-    errorElement.textContent = message;
-    errorElement.classList.add('visible');
+  _showError(msg) {
+    const el = this.shadowRoot.getElementById('signup-error');
+    el.textContent = msg;
+    el.classList.add('visible');
   }
 
-  clearError() {
-    const errorElement = this.shadowRoot.getElementById('signup-error');
-    errorElement.textContent = '';
-    errorElement.classList.remove('visible');
+  _clearError() {
+    const el = this.shadowRoot.getElementById('signup-error');
+    el.textContent = '';
+    el.classList.remove('visible');
   }
 
-  // Method to clear form
   reset() {
-    this.shadowRoot.querySelector('.signup-form').reset();
-    this.clearError();
-    this.shadowRoot.querySelector('.strength-meter').classList.remove('weak', 'medium', 'strong');
+    this.shadowRoot.getElementById('signup-form').reset();
+    this._clearError();
+    this.shadowRoot.getElementById('strength-bar').className = 'strength';
+    this.shadowRoot.getElementById('strength-label').innerHTML = '';
   }
 }
 

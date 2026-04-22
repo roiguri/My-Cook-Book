@@ -1,19 +1,9 @@
-/**
- * UserProfile Component
- * @class
- * @extends HTMLElement
- *
- * @description
- * Handles user profile view with avatar selection
- */
-
 import './auth-content.js';
-import '../../modals/message-modal/message-modal.js';
+import '../../modals/confirmation_modal/confirmation_modal.js';
 import { getDownloadURL } from 'firebase/storage';
 import { StorageService } from '../../../js/services/storage-service.js';
 import authService from '../../../js/services/auth-service.js';
 
-// Cache for avatar URLs to avoid re-fetching
 let avatarCache = null;
 
 class UserProfile extends HTMLElement {
@@ -21,431 +11,640 @@ class UserProfile extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.selectedAvatarUrl = null;
+    this._activePanel = 'details';
   }
 
   connectedCallback() {
     this.render();
     this.setupEventListeners();
+    this.showPanel('details');
 
-    // Initialize with current user's avatar
-    const currentAvatarUrl = authService.getCurrentAvatarUrl();
-    if (currentAvatarUrl) {
-      this.selectedAvatarUrl = currentAvatarUrl;
-    }
+    const avatarUrl = authService.getCurrentAvatarUrl();
+    if (avatarUrl) this.selectedAvatarUrl = avatarUrl;
 
-    this.loadAvatars();
-
-    // Re-render if user data loads after component mount
     authService.addAuthObserver((state) => {
-      if (state.user) {
-        this.updateWelcomeText();
-        // Update avatar selection when auth state includes avatar URL
-        if (state.avatarUrl !== undefined) {
-          this.updateAvatarSelection(state.avatarUrl);
-        }
-      }
+      if (state.user) this._populateDetails();
     });
   }
 
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        .profile-container {
-          display: flex;
-          flex-direction: column;
-          padding: 20px;
-        }
+        :host { display: block; }
 
-        .welcome-text {
-          font-size: 1.5em;
-          color: var(--text-color);
-          text-align: center;
-          font-family: var(--heading-font-he);
-          margin-bottom: 20px;
+        /* ---- Panels ---- */
+        .profile-body {
+          padding: 28px 40px 32px;
+          max-height: 60vh;
+          overflow-y: auto;
+          -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
         }
+        .profile-body { scrollbar-width: none; }
+        .profile-body::-webkit-scrollbar { display: none; }
 
         .section-title {
-          font-size: 1.1em;
-          color: var(--text-color);
-          margin-bottom: 10px;
+          font-family: var(--font-mono, monospace);
+          font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+          color: var(--ink-3, #7c7562);
+          margin: 0 0 14px;
+          display: flex; align-items: center; gap: 10px;
+        }
+        .section-title::before {
+          content: ""; width: 14px; height: 1px;
+          background: var(--primary-dark, #386641);
+        }
+        .section + .section {
+          margin-top: 28px; padding-top: 28px;
+          border-top: 1px solid var(--hairline, rgba(31,29,24,0.08));
+        }
+        .section-title.danger { color: var(--secondary-dark, #9a3a3c); }
+        .section-title.danger::before { background: var(--secondary-dark, #9a3a3c); }
+
+        /* ---- Field styles ---- */
+        .stack { display: flex; flex-direction: column; gap: 16px; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label {
+          font-family: var(--font-ui-he, system-ui, sans-serif);
+          font-size: 12px; font-weight: 600;
+          color: var(--ink-3, #7c7562);
+          display: flex; justify-content: space-between; align-items: baseline;
+        }
+        .field input, .field textarea {
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14.5px; color: var(--ink, #1f1d18);
+          background: var(--surface-0, #faf7f2);
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          border-radius: var(--r-sm, 8px);
+          padding: 12px 14px; outline: none; width: 100%; box-sizing: border-box;
+          transition: border-color var(--dur-1, 160ms), box-shadow var(--dur-1, 160ms);
+        }
+        .field input:focus, .field textarea:focus {
+          border-color: var(--primary, #6a994e);
+          box-shadow: 0 0 0 3px rgba(106,153,78,0.12);
+        }
+        .field input:read-only {
+          opacity: 0.6; cursor: default;
+        }
+        .field input:read-only:focus { box-shadow: none; border-color: var(--hairline-strong, rgba(31,29,24,0.2)); }
+        .field textarea { min-height: 80px; resize: vertical; line-height: 1.55; }
+        .field .hint {
+          font-family: var(--font-mono, monospace);
+          font-size: 10.5px; color: var(--ink-3, #7c7562);
         }
 
+        /* ---- Avatar grid ---- */
         .avatar-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 5px;
-          padding: 10px;
-          background-color: var(--secondary-color);
-          border-radius: 10px;
-          min-height: 200px; /* Prevent collapse during loading */
-        }
-
-        .avatar-button {
-          background: none;
-          border: 3px solid transparent;
-          cursor: pointer;
-          border-radius: 10px;
-          transition: all 0.3s ease;
-          aspect-ratio: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          position: relative;
-        }
-
-        .avatar-button:hover {
-          background-color: color-mix(in srgb, var(--primary-color), white 40%);
-        }
-
-        .avatar-button.selected {
-          border-color: var(--primary-dark);
-          background-color: color-mix(in srgb, var(--primary-color), white 40%);  
-        }
-
-        .avatar-image {
-          width: 100%;
-          height: 100%;
-          border-radius: 5px;
-          object-fit: cover;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .avatar-image.loaded {
-          opacity: 1;
-        }
-
-        .buttons {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          margin-top: 10px;
-        }
-
-        .my-meal-button {
-          background-color: var(--secondary-color);
-          color: var(--text-color);
-          padding: 12px;
-          border: 1px solid var(--primary-color);
-          border-radius: 5px;
-          font-size: 1em;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          grid-template-columns: repeat(6, 1fr);
           gap: 10px;
         }
-
-        .my-meal-button:hover {
-          background-color: color-mix(in srgb, var(--primary-color), white 80%);
+        .avatar-pick {
+          aspect-ratio: 1/1; border-radius: var(--r-md, 12px);
+          border: 2px solid var(--hairline, rgba(31,29,24,0.08));
+          background: var(--surface-2, #f2e8cf);
+          cursor: pointer; position: relative; overflow: hidden;
+          display: inline-flex; align-items: center; justify-content: center;
+          transition: border-color var(--dur-1, 160ms), transform var(--dur-1, 160ms);
+          padding: 0;
         }
-
-        .save-button {
-          background-color: var(--primary-color);
-          color: white;
-          padding: 12px;
-          border: none;
-          border-radius: 5px;
-          font-size: 1em;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
+        .avatar-pick:hover { transform: translateY(-2px); border-color: var(--primary-bright, #a7c957); }
+        .avatar-pick.on { border-color: var(--primary-dark, #386641); box-shadow: 0 0 0 3px rgba(106,153,78,0.12); }
+        .avatar-pick.on::after {
+          content: "✓"; position: absolute; top: 2px; right: 4px;
+          color: var(--primary-dark, #386641); font-weight: 600; font-size: 13px;
         }
+        .avatar-pick img { width: 100%; height: 100%; object-fit: cover; }
 
-        .save-button:hover {
-          background-color: var(--primary-hover);
-        }
-
-        .signout-button {
-          background-color: color-mix(in srgb, var(--background-color), black 10%);
-          color: var(--primary-color);
-          padding: 12px;
-          border: none;
-          border-radius: 5px;
-          font-size: 1em;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .signout-button:hover {
-          background-color: color-mix(in srgb, var(--background-color), black 20%);
-        }
-
-        /* Skeleton Loading Animation */
+        /* Skeleton loading */
         @keyframes shimmer {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
         }
-
-        .avatar-button.loading {
+        .avatar-pick.loading {
           background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%);
           background-size: 200% 100%;
           animation: shimmer 1.5s infinite;
           cursor: wait;
+          border-color: var(--hairline, rgba(31,29,24,0.08));
         }
 
-        .error-message {
-          color: red;
-          font-size: 0.9em;
-          margin-top: 5px;
-          display: none;
+        /* ---- Pref rows ---- */
+        .pref {
+          display: grid; grid-template-columns: 1fr auto;
+          gap: 14px; align-items: center;
+          padding: 14px 0;
+        }
+        .pref + .pref { border-top: 1px solid var(--hairline, rgba(31,29,24,0.08)); }
+        .pref .t {
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14px; color: var(--ink, #1f1d18); margin: 0 0 2px;
+        }
+        .pref .d {
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 12.5px; color: var(--ink-3, #7c7562); margin: 0;
         }
 
-        .error-message.visible {
-          display: block;
+        /* ---- Buttons ---- */
+        .btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 13.5px; font-weight: 500;
+          padding: 10px 18px; border-radius: var(--r-sm, 8px);
+          border: 1px solid transparent; cursor: pointer;
+          transition: background var(--dur-1, 160ms), color var(--dur-1, 160ms), border-color var(--dur-1, 160ms);
+        }
+        .btn-primary { background: var(--primary, #6a994e); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark, #386641); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-ghost {
+          background: var(--surface-1, #fff); color: var(--ink, #1f1d18);
+          border-color: var(--hairline-strong, rgba(31,29,24,0.2));
+        }
+        .btn-ghost:hover { background: var(--surface-2, #f2e8cf); }
+        .btn-quiet {
+          background: transparent; color: var(--ink-3, #7c7562);
+          border-color: transparent;
+        }
+        .btn-quiet:hover {
+          color: var(--secondary-dark, #9a3a3c);
+          background: color-mix(in oklab, var(--secondary, #bc4749) 8%, transparent);
+        }
+        .btn-danger-ghost {
+          background: transparent; color: var(--secondary-dark, #9a3a3c);
+          border-color: color-mix(in oklab, var(--secondary, #bc4749) 30%, transparent);
+        }
+        .btn-danger-ghost:hover {
+          background: color-mix(in oklab, var(--secondary, #bc4749) 8%, transparent);
+        }
+
+        /* ---- Footer ---- */
+        .profile-foot {
+          padding: 14px 40px;
+          background: var(--surface-2, #f2e8cf);
+          border-radius: var(--r-lg, 16px) var(--r-lg, 16px) var(--r-xl, 20px) var(--r-xl, 20px);
+          display: flex; justify-content: center; align-items: center;
+        }
+
+        /* ---- Inline error / success ---- */
+        .feedback {
+          font-family: var(--font-mono, monospace);
+          font-size: 11px; padding: 10px 14px;
+          border-radius: var(--r-sm, 8px); display: none;
+        }
+        .feedback.err {
+          background: color-mix(in oklab, var(--secondary, #bc4749) 8%, white);
+          color: var(--secondary-dark, #9a3a3c);
+          border: 1px solid color-mix(in oklab, var(--secondary, #bc4749) 20%, white);
+        }
+        .feedback.ok {
+          background: color-mix(in oklab, var(--primary, #6a994e) 8%, white);
+          color: var(--primary-dark, #386641);
+          border: 1px solid color-mix(in oklab, var(--primary, #6a994e) 20%, white);
+        }
+        .feedback.visible { display: block; }
+
+        /* ---- Password-only / google-only notice ---- */
+        .google-notice {
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 13.5px; color: var(--ink-3, #7c7562);
+          background: var(--surface-2, #f2e8cf);
+          padding: 14px 16px; border-radius: var(--r-sm, 8px);
+          border: 1px solid var(--hairline, rgba(31,29,24,0.08));
+        }
+
+        @media (max-width: 560px) {
+          .profile-body { padding-left: 22px; padding-right: 22px; }
+          .profile-foot { padding: 14px 22px; }
+          .avatar-grid { grid-template-columns: repeat(4, 1fr); }
+          .grid2 { grid-template-columns: 1fr; }
+          .pref { grid-template-columns: 1fr; gap: 10px; }
+          .pref button { justify-self: start; }
         }
       </style>
 
-      <div class="profile-container">
-        <div class="welcome-text">ברוך הבא!</div>
-
-        <div>
-          <div class="section-title">בחר תמונת פרופיל:</div>
-          <div class="avatar-grid">
-            <!-- Avatars will be injected here -->
+      <!-- Details panel -->
+      <div class="profile-body" data-panel="details">
+        <section class="section">
+          <h4 class="section-title">עליי</h4>
+          <div class="stack">
+            <div class="grid2">
+              <div class="field">
+                <label>שם תצוגה</label>
+                <input type="text" id="display-name" />
+              </div>
+              <div class="field">
+                <label>כתובת מייל</label>
+                <input type="email" id="profile-email" readonly />
+              </div>
+            </div>
+            <div class="field">
+              <label>קצת עליי</label>
+              <textarea id="profile-bio"></textarea>
+              <span class="hint">מוצג עם הצעות המתכון שלך. עד 160 תווים.</span>
+            </div>
+            <span class="feedback" id="details-feedback"></span>
           </div>
-          <div class="error-message" id="avatar-error"></div>
-        </div>
-
-        <div class="buttons">
-          <button class="my-meal-button" id="my-meal-btn">
-            <i class="fas fa-utensils"></i> הארוחה שלי
-          </button>
-          <button class="save-button">שמור שינויים</button>
-          <button class="signout-button">התנתק</button>
-        </div>
+        </section>
       </div>
-    `;
 
-    this.updateWelcomeText();
+      <!-- Avatar panel -->
+      <div class="profile-body" data-panel="avatar" hidden>
+        <section class="section">
+          <h4 class="section-title">בחר אווטאר</h4>
+          <div class="avatar-grid" id="avatar-grid"></div>
+          <span class="feedback" id="avatar-feedback" style="margin-top:12px;display:none;"></span>
+          <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-quiet" type="button" id="use-initials-btn">השתמש בראשי תיבות</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Security panel -->
+      <div class="profile-body" data-panel="security" hidden>
+
+        <section class="section">
+          <h4 class="section-title">סיסמה</h4>
+          <div id="pw-section"></div>
+        </section>
+
+        <section class="section">
+          <h4 class="section-title">חשבונות מחוברים</h4>
+          <div id="providers-section"></div>
+        </section>
+
+        <section class="section">
+          <h4 class="section-title danger">אזור מסוכן</h4>
+          <div class="pref">
+            <div>
+              <p class="t">מחיקת חשבון</p>
+              <p class="d">המתכונים שהצעת יישארו בספר; המועדפים שסימנת לא ישמרו והחשבון יוסר.</p>
+            </div>
+            <button class="btn btn-danger-ghost" type="button" id="delete-account-btn">מחק חשבון</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Footer -->
+      <div class="profile-foot">
+        <button class="btn btn-quiet" type="button" id="signout-btn">התנתק</button>
+      </div>
+
+      <!-- Confirmation modal for delete account -->
+      <confirmation-modal id="delete-confirm"></confirmation-modal>
+    `;
   }
 
   setupEventListeners() {
-    const saveButton = this.shadowRoot.querySelector('.save-button');
-    const signoutButton = this.shadowRoot.querySelector('.signout-button');
-    const myMealButton = this.shadowRoot.querySelector('#my-meal-btn');
+    this.shadowRoot
+      .getElementById('signout-btn')
+      .addEventListener('click', () => this._handleSignout());
+    this.shadowRoot
+      .getElementById('use-initials-btn')
+      .addEventListener('click', () => this._useInitials());
+    this.shadowRoot
+      .getElementById('delete-account-btn')
+      .addEventListener('click', () => this._confirmDeleteAccount());
 
-    saveButton.addEventListener('click', () => this.handleSave());
-    signoutButton.addEventListener('click', () => this.handleSignout());
-
-    if (myMealButton) {
-      myMealButton.addEventListener('click', () => {
-        const authController = this.closest('auth-controller');
-        if (authController) authController.closeModal();
-
-        // Navigate to my-meal
-        // We need to use the router from the window.spa object
-        if (window.spa && window.spa.router) {
-          window.spa.router.navigate('/my-meal');
-        } else {
-          window.location.hash = '/my-meal'; // Fallback
-        }
-      });
-    }
+    this.shadowRoot
+      .getElementById('display-name')
+      .addEventListener('blur', () => this._autoSaveDetails());
+    this.shadowRoot
+      .getElementById('profile-bio')
+      .addEventListener('blur', () => this._autoSaveDetails());
   }
 
-  updateWelcomeText() {
-    const user = authService.getCurrentUser();
-    const displayName = user?.displayName || user?.email?.split('@')[0] || '';
-    const welcomeText = this.shadowRoot.querySelector('.welcome-text');
-    if (welcomeText) {
-      welcomeText.textContent = `ברוך הבא ${displayName}!`;
-    }
+  showPanel(panelName) {
+    this._activePanel = panelName;
+    this.shadowRoot.querySelectorAll('[data-panel]').forEach((el) => {
+      el.hidden = el.dataset.panel !== panelName;
+    });
+
+    if (panelName === 'details') this._populateDetails();
+    if (panelName === 'avatar') this._loadAvatars();
+    if (panelName === 'security') this._populateSecurity();
   }
 
   resetState() {
-    // Reset to current user's actual avatar
-    const currentAvatarUrl = authService.getCurrentAvatarUrl();
-    if (currentAvatarUrl) {
-      this.selectedAvatarUrl = currentAvatarUrl;
-      this.updateAvatarSelection(currentAvatarUrl);
+    this._populateDetails();
+    const avatarUrl = authService.getCurrentAvatarUrl();
+    if (avatarUrl) this.selectedAvatarUrl = avatarUrl;
+  }
+
+  // ---- Details panel ----
+
+  _populateDetails() {
+    const user = authService.getCurrentUser();
+    if (!user) return;
+
+    const nameEl = this.shadowRoot.getElementById('display-name');
+    const emailEl = this.shadowRoot.getElementById('profile-email');
+    const bioEl = this.shadowRoot.getElementById('profile-bio');
+
+    if (nameEl) nameEl.value = user.displayName || '';
+    if (emailEl) emailEl.value = user.email || '';
+    if (bioEl) bioEl.value = authService._userData?.bio || '';
+  }
+
+  async _autoSaveDetails() {
+    const displayName = this.shadowRoot.getElementById('display-name')?.value.trim();
+    const bio = this.shadowRoot.getElementById('profile-bio')?.value.trim();
+    const updates = {};
+    if (displayName) updates.displayName = displayName;
+    updates.bio = bio ?? '';
+    if (Object.keys(updates).length === 0) return;
+    try {
+      await authService.updateProfile(updates);
+      this._flashFeedback('details-feedback', 'ok', '✓ נשמר');
+    } catch (error) {
+      this._showFeedback('details-feedback', 'err', error.message || 'השמירה נכשלה. נסה שנית.');
     }
   }
 
-  async loadAvatars() {
-    const avatarGrid = this.shadowRoot.querySelector('.avatar-grid');
+  // ---- Avatar panel ----
+
+  async _loadAvatars() {
+    const grid = this.shadowRoot.getElementById('avatar-grid');
 
     try {
-      // Always show skeletons initially to prevent pop-in
-      avatarGrid.innerHTML = '';
+      grid.innerHTML = '';
       for (let i = 0; i < 6; i++) {
         const btn = document.createElement('button');
-        btn.className = 'avatar-button loading';
-        avatarGrid.appendChild(btn);
+        btn.type = 'button';
+        btn.className = 'avatar-pick loading';
+        grid.appendChild(btn);
       }
 
-      // 1. Fetch URLs if not cached
       if (!avatarCache) {
-        // Get avatar list from Firebase Storage
-        const avatarList = await StorageService.listFiles('Avatars');
-
-        // Fetch all URLs in parallel
-        avatarCache = await Promise.all(avatarList.items.map((ref) => getDownloadURL(ref)));
+        const list = await StorageService.listFiles('Avatars');
+        avatarCache = await Promise.all(list.items.map((ref) => getDownloadURL(ref)));
       }
 
-      // 2. Preload ALL images
-      const imagePromises = avatarCache.map((url) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.className = 'avatar-image';
-          img.alt = 'Avatar';
-          img.src = url;
-          // Resolve with result object whether success or error
-          img.onload = () => resolve({ success: true, url, img });
-          img.onerror = () => {
-            console.error(`Failed to load avatar image: ${url}`);
-            resolve({ success: false, url });
-          };
-        });
+      const results = await Promise.all(
+        avatarCache.map(
+          (url) =>
+            new Promise((resolve) => {
+              const img = new Image();
+              img.src = url;
+              img.onload = () => resolve({ ok: true, url, img });
+              img.onerror = () => resolve({ ok: false, url });
+            }),
+        ),
+      );
+
+      grid.innerHTML = '';
+      results.forEach((r) => {
+        if (!r.ok) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'avatar-pick';
+        btn.dataset.url = r.url;
+        r.img.alt = 'Avatar option';
+        btn.appendChild(r.img);
+        if (this.selectedAvatarUrl === r.url) btn.classList.add('on');
+        btn.addEventListener('click', () => this._selectAvatar(btn, r.url));
+        grid.appendChild(btn);
       });
-
-      // Wait for ALL images to load (or fail)
-      const results = await Promise.all(imagePromises);
-
-      // 3. Render ALL at once
-      avatarGrid.innerHTML = ''; // Clear skeletons
-
-      results.forEach((result) => {
-        if (result.success) {
-          const button = document.createElement('button');
-          button.className = 'avatar-button'; // Ready state
-          button.dataset.url = result.url;
-
-          result.img.classList.add('loaded');
-          button.appendChild(result.img);
-
-          // Check if this is the currently selected avatar
-          if (this.selectedAvatarUrl === result.url) {
-            button.classList.add('selected');
-          }
-
-          button.addEventListener('click', () => this.selectAvatar(button, result.url));
-          avatarGrid.appendChild(button);
-        }
-      });
-
-      // Ensure selection state is correct if selectedAvatarUrl was set before render
-      const currentAvatarUrl = authService.getCurrentAvatarUrl();
-      if (currentAvatarUrl) {
-        this.updateAvatarSelection(currentAvatarUrl);
-      }
     } catch (error) {
       console.error('Error loading avatars:', error);
-      avatarGrid.innerHTML = ''; // Clear skeletons
-      this.showError('שגיאה בטעינת תמונות הפרופיל. אנא נסה שנית.');
+      this._showFeedback('avatar-feedback', 'err', 'טעינת האווטארים נכשלה. נסה שנית.');
     }
   }
 
-  updateAvatarSelection(currentAvatarUrl) {
-    // Clear all selections first
-    this.shadowRoot.querySelectorAll('.avatar-button').forEach((btn) => {
-      btn.classList.remove('selected');
-    });
-
-    // Set the selected avatar URL
-    this.selectedAvatarUrl = currentAvatarUrl || null;
-
-    // If we have a current avatar URL, find and select the matching button
-    if (currentAvatarUrl) {
-      const avatarButtons = this.shadowRoot.querySelectorAll('.avatar-button');
-      for (const button of avatarButtons) {
-        // Check dataset URL (more robust) or image src
-        if (button.dataset.url === currentAvatarUrl) {
-          button.classList.add('selected');
-          break;
-        }
-
-        const img = button.querySelector('img');
-        if (img && img.src === currentAvatarUrl) {
-          button.classList.add('selected');
-          break;
-        }
-      }
-    }
-  }
-
-  selectAvatar(button, url) {
-    // Remove selection from all buttons
-    this.shadowRoot.querySelectorAll('.avatar-button').forEach((btn) => {
-      btn.classList.remove('selected');
-    });
-    // Add selection to clicked button
-    button.classList.add('selected');
+  async _selectAvatar(btn, url) {
+    this.shadowRoot.querySelectorAll('.avatar-pick').forEach((b) => b.classList.remove('on'));
+    btn.classList.add('on');
     this.selectedAvatarUrl = url;
+    try {
+      await authService.updateProfile({ avatarUrl: url });
+      this._flashFeedback('avatar-feedback', 'ok', '✓ נשמר');
+    } catch (error) {
+      this._showFeedback('avatar-feedback', 'err', error.message || 'השמירה נכשלה. נסה שנית.');
+    }
   }
 
-  async handleSave() {
-    if (!this.selectedAvatarUrl) {
-      this.showError('אנא בחר תמונת פרופיל');
+  async _useInitials() {
+    const btn = this.shadowRoot.getElementById('use-initials-btn');
+    btn.disabled = true;
+    try {
+      await authService.updateProfile({ avatarUrl: null });
+      this.selectedAvatarUrl = null;
+      this.shadowRoot.querySelectorAll('.avatar-pick').forEach((b) => b.classList.remove('on'));
+      this._showFeedback('avatar-feedback', 'ok', 'ראשי תיבות מוצגים כעת כאווטאר שלך.');
+    } catch (error) {
+      this._showFeedback('avatar-feedback', 'err', error.message || 'הפעולה נכשלה. נסה שנית.');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ---- Security panel ----
+
+  _populateSecurity() {
+    this._renderPasswordSection();
+    this._renderProviders();
+  }
+
+  _renderPasswordSection() {
+    const container = this.shadowRoot.getElementById('pw-section');
+    const user = authService.getCurrentUser();
+    const hasPassword = user?.providerData?.some((p) => p.providerId === 'password');
+
+    if (!hasPassword) {
+      container.innerHTML = `
+        <p class="google-notice">
+          החשבון שלך משתמש ב-Google Sign-In — אימות בסיסמה אינו מופעל.
+        </p>
+      `;
       return;
     }
 
-    const saveButton = this.shadowRoot.querySelector('.save-button');
-    const originalText = saveButton.textContent;
+    container.innerHTML = `
+      <div class="stack">
+        <div class="field">
+          <label>סיסמה נוכחית</label>
+          <input type="password" id="current-pw" placeholder="••••••••" />
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label>סיסמה חדשה</label>
+            <input type="password" id="new-pw" />
+          </div>
+          <div class="field">
+            <label>אימות</label>
+            <input type="password" id="confirm-pw" />
+          </div>
+        </div>
+        <span class="feedback" id="pw-feedback"></span>
+        <button class="btn btn-ghost" type="button" id="update-pw-btn" style="width:auto;align-self:flex-start;">
+          עדכן סיסמה
+        </button>
+      </div>
+    `;
 
-    saveButton.disabled = true;
-    saveButton.textContent = 'שומר...';
-    saveButton.setAttribute('aria-busy', 'true');
+    this.shadowRoot
+      .getElementById('update-pw-btn')
+      .addEventListener('click', () => this._handlePasswordUpdate());
+  }
+
+  async _handlePasswordUpdate() {
+    const current = this.shadowRoot.getElementById('current-pw').value;
+    const newPw = this.shadowRoot.getElementById('new-pw').value;
+    const confirm = this.shadowRoot.getElementById('confirm-pw').value;
+
+    if (!current || !newPw || !confirm) {
+      this._showFeedback('pw-feedback', 'err', 'יש למלא את כל שדות הסיסמה.');
+      return;
+    }
+    if (newPw !== confirm) {
+      this._showFeedback('pw-feedback', 'err', 'הסיסמאות החדשות אינן תואמות.');
+      return;
+    }
+
+    const btn = this.shadowRoot.getElementById('update-pw-btn');
+    btn.disabled = true;
+    btn.textContent = 'מעדכן...';
 
     try {
       const authController = this.closest('auth-controller');
-      await authController.updateUserAvatar(this.selectedAvatarUrl);
-      // Dispatch success event
-      this.dispatchEvent(
-        new CustomEvent('profile-updated', {
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      // Close modal
-      authController.closeModal();
+      await authController.updatePassword(current, newPw);
+      this._showFeedback('pw-feedback', 'ok', 'הסיסמה עודכנה בהצלחה.');
+      this.shadowRoot.getElementById('current-pw').value = '';
+      this.shadowRoot.getElementById('new-pw').value = '';
+      this.shadowRoot.getElementById('confirm-pw').value = '';
     } catch (error) {
-      console.error('Error saving avatar:', error);
-      this.showError('שגיאה בשמירת תמונת הפרופיל. אנא נסה שנית.');
+      const msg =
+        error.code === 'auth/wrong-password'
+          ? 'הסיסמה הנוכחית שגויה.'
+          : error.message || 'עדכון הסיסמה נכשל.';
+      this._showFeedback('pw-feedback', 'err', msg);
     } finally {
-      saveButton.disabled = false;
-      saveButton.textContent = originalText;
-      saveButton.removeAttribute('aria-busy');
+      btn.disabled = false;
+      btn.textContent = 'עדכן סיסמה';
     }
   }
 
-  async handleSignout() {
-    const signoutButton = this.shadowRoot.querySelector('.signout-button');
-    const originalText = signoutButton.textContent;
+  _renderProviders() {
+    const container = this.shadowRoot.getElementById('providers-section');
+    const user = authService.getCurrentUser();
+    const providers = user?.providerData || [];
 
-    signoutButton.disabled = true;
-    signoutButton.textContent = 'מתנתק...';
-    signoutButton.setAttribute('aria-busy', 'true');
+    const googleLinked = providers.some((p) => p.providerId === 'google.com');
+    const googleEmail = providers.find((p) => p.providerId === 'google.com')?.email || '';
+    const isOnlyProvider = googleLinked && providers.length === 1;
 
+    container.innerHTML = `
+      <div class="pref" id="google-pref">
+        <div>
+          <p class="t">Google${googleEmail ? ` · ${googleEmail}` : ''}</p>
+          <p class="d">${
+            googleLinked
+              ? isOnlyProvider
+                ? 'לא ניתן לנתק — אין שיטת כניסה נוספת'
+                : 'מחובר'
+              : 'לא מחובר'
+          }</p>
+        </div>
+        ${
+          isOnlyProvider
+            ? ''
+            : `<button class="btn ${googleLinked ? 'btn-quiet' : 'btn-ghost'}" type="button" id="google-link-btn" style="width:auto;">
+              ${googleLinked ? 'נתק' : 'חבר'}
+            </button>`
+        }
+      </div>
+      <span class="feedback" id="providers-feedback"></span>
+    `;
+
+    this.shadowRoot.getElementById('google-link-btn')?.addEventListener('click', async () => {
+      const btn = this.shadowRoot.getElementById('google-link-btn');
+      btn.disabled = true;
+      try {
+        const authController = this.closest('auth-controller');
+        if (googleLinked) {
+          await authController.unlinkProvider('google.com');
+        } else {
+          await authController.linkWithGoogle();
+        }
+        this._renderProviders();
+        this._showFeedback(
+          'providers-feedback',
+          'ok',
+          googleLinked ? 'חשבון Google נותק.' : 'חשבון Google חובר.',
+        );
+      } catch (error) {
+        this._showFeedback('providers-feedback', 'err', error.message || 'הפעולה נכשלה. נסה שנית.');
+        btn.disabled = false;
+      }
+    });
+  }
+
+  // ---- Delete account ----
+
+  _confirmDeleteAccount() {
+    const confirmModal = this.shadowRoot.getElementById('delete-confirm');
+    confirmModal.confirm(
+      'למחוק את החשבון שלך?',
+      'המתכונים שהצעת יישארו בספר. החשבון, המתכונים המועדפים שלך יוסרו לצמיתות.',
+      'מחק חשבון',
+      'שמור את חשבוני',
+    );
+    confirmModal.addEventListener('confirm-approved', () => this._handleDeleteAccount(), {
+      once: true,
+    });
+  }
+
+  async _handleDeleteAccount() {
+    const btn = this.shadowRoot.getElementById('delete-account-btn');
+    btn.disabled = true;
+    try {
+      const authController = this.closest('auth-controller');
+      await authController.handleDeleteAccount();
+    } catch (error) {
+      btn.disabled = false;
+      console.error('Delete account error:', error);
+    }
+  }
+
+  // ---- Sign out ----
+
+  async _handleSignout() {
+    const btn = this.shadowRoot.getElementById('signout-btn');
+    btn.disabled = true;
+    btn.textContent = 'מתנתק...';
     try {
       const authController = this.closest('auth-controller');
       await authController.handleLogout();
-      // Reset auth content state before closing
-      const authContent = this.closest('auth-content');
-      authContent?.showAuthForms();
+      this.closest('auth-content')?.showAuthForms();
       authController.closeModal();
     } catch (error) {
-      console.error('Error signing out:', error);
-      this.showError('שגיאה בהתנתקות. אנא נסה שנית.');
+      console.error('Sign out error:', error);
     } finally {
-      signoutButton.disabled = false;
-      signoutButton.textContent = originalText;
-      signoutButton.removeAttribute('aria-busy');
+      btn.disabled = false;
+      btn.textContent = 'התנתק';
     }
   }
 
-  showError(message) {
-    const errorElement = this.shadowRoot.getElementById('avatar-error');
-    errorElement.textContent = message;
-    errorElement.classList.add('visible');
+  // ---- Helpers ----
+
+  _showFeedback(id, type, msg) {
+    const el = this.shadowRoot.getElementById(id);
+    if (!el) return;
+    el.textContent = msg;
+    el.className = `feedback ${type} visible`;
   }
 
-  clearError() {
-    const errorElement = this.shadowRoot.getElementById('avatar-error');
-    errorElement.textContent = '';
-    errorElement.classList.remove('visible');
+  _flashFeedback(id, type, msg) {
+    this._showFeedback(id, type, msg);
+    clearTimeout(this._flashTimer);
+    this._flashTimer = setTimeout(() => {
+      const el = this.shadowRoot.getElementById(id);
+      if (el) el.className = 'feedback';
+    }, 2000);
   }
+
+  reset() {}
 }
 
 customElements.define('user-profile', UserProfile);
