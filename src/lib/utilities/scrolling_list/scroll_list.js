@@ -170,39 +170,88 @@ class ScrollingList extends HTMLElement {
         display: block;
         width: var(--list-width, 100%);
         height: var(--list-height, 400px);
-        --header-background-color: var(--header-background-color, #f0f0f0);
-        --header-text-color: var(--header-text-color, #000000);
-        --content-background-color: var(--content-background-color, #ffffff);
-        --content-text-color: var(--content-text-color, #000000);
+        overflow: hidden;
+        --header-background-color: var(--surface-1, #fff);
+        --header-text-color: var(--ink, #1f1d18);
+        --content-background-color: var(--surface-0, #fafaf8);
+        --content-text-color: var(--ink-3, rgba(31,29,24,0.55));
       }
-      
+
       .scrolling-list {
         height: 100%;
         overflow-y: auto;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 2px 2px 8px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--hairline-strong, rgba(31,29,24,0.15)) transparent;
       }
+
+      .scrolling-list::-webkit-scrollbar { width: 4px; }
+      .scrolling-list::-webkit-scrollbar-track { background: transparent; }
+      .scrolling-list::-webkit-scrollbar-thumb {
+        background: var(--hairline-strong, rgba(31,29,24,0.15));
+        border-radius: 2px;
+      }
+
       .list-item {
-        border-bottom: 1px solid #ccc;
-        
+        flex-shrink: 0;
+        border-radius: var(--r-sm, 8px);
+        border: 1px solid var(--hairline, rgba(31,29,24,0.08));
+        background: var(--surface-1, #fff);
+        overflow: hidden;
+        transition: border-color var(--dur-1, 160ms), box-shadow var(--dur-1, 160ms);
       }
+
+      .list-item:hover {
+        border-color: var(--hairline-strong, rgba(31,29,24,0.15));
+        box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
+      }
+
+      .list-item.expanded {
+        border-color: var(--primary, #6a994e);
+        box-shadow: 0 0 0 1px var(--primary, #6a994e),
+                    var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
+      }
+
       .list-item-header {
-        padding: 10px;
+        padding: 10px 14px;
         background-color: var(--header-background-color);
         color: var(--header-text-color);
+        font-family: var(--font-ui-he, sans-serif);
+        font-size: 14px;
+        line-height: 1.4;
       }
+
       .expandable .list-item-header {
         cursor: pointer;
+        user-select: none;
+        transition: background var(--dur-1, 160ms);
       }
+
+      .expandable .list-item-header:hover {
+        background-color: var(--surface-2, #f5f4f0);
+      }
+
       .list-item-content {
         display: none;
-        padding: 10px;
+        padding: 10px 14px;
         background-color: var(--content-background-color);
         color: var(--content-text-color);
+        font-family: var(--font-ui-he, sans-serif);
+        font-size: 13px;
+        border-top: 1px solid var(--hairline, rgba(31,29,24,0.08));
       }
+
       .list-item.expanded .list-item-content {
         display: block;
       }
+
       #sentinel {
         height: 1px;
+        flex-shrink: 0;
       }
     `;
   }
