@@ -142,6 +142,7 @@ export const recipeCardStyles = `
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    min-height: 2.5em;
 }
 
 /* Stretched Link Pattern */
@@ -348,9 +349,9 @@ export const recipeCardStyles = `
     width: 50%;
 }
 
-/* matches .recipe-title: clamp(1rem…) × line-height 1.25 */
+/* matches .recipe-title: 2-line min-height (2 × line-height 1.25) */
 .skel-title {
-    height: 20px;
+    height: 2.5em;
     width: 90%;
 }
 

@@ -41,6 +41,7 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
 /* Recipe Card Container */
 .recipe-card-container {
   width: 100%;
+  min-width: 0;
   transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
 
@@ -110,7 +111,7 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
 .pagination-container {
   display: flex;
   justify-content: center;
-  padding-top: 2rem;
+  padding-top: 1rem;
   flex-shrink: 0; /* Don't shrink */
   margin-top: auto; /* Push to bottom if there's extra space */
 }

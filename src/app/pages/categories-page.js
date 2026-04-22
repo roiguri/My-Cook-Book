@@ -432,7 +432,7 @@ export default {
 
     const authenticated = authService.getCurrentUser();
     recipePresentationGrid.setAttribute('show-favorites', authenticated ? 'true' : 'false');
-    recipePresentationGrid.setAttribute('recipes-per-page', '6');
+    recipePresentationGrid.setAttribute('recipes-per-page', '8');
     recipePresentationGrid.setAttribute('current-page', this.currentPage.toString());
 
     recipePresentationGrid.setRecipes(this.displayedRecipes, false);
