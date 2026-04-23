@@ -158,26 +158,6 @@
   position: relative;
 }
 
-.spa-content .home-page .quote-section::before,
-.spa-content .home-page .quote-section::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1px;
-  background: var(--hairline-strong);
-}
-
-.spa-content .home-page .quote-section::before {
-  top: 24px;
-  height: 28px;
-}
-
-.spa-content .home-page .quote-section::after {
-  bottom: 24px;
-  height: 28px;
-}
-
 .spa-content .home-page .quote-ornament {
   display: inline-flex;
   align-items: center;
