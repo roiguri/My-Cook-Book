@@ -74,7 +74,12 @@ class ImageApprovalMulti extends HTMLElement {
     const modal = this.shadowRoot.querySelector('custom-modal');
     if (modal) {
       const isMobile = window.innerWidth <= 768;
-      modal.setAttribute('width', isMobile ? '90vw' : '700px');
+      modal.setWidth(isMobile ? 'calc(100vw - 16px)' : '700px');
+      if (isMobile) {
+        modal.style.setProperty('--modal-outer-padding', '0px');
+      } else {
+        modal.style.removeProperty('--modal-outer-padding');
+      }
     }
   }
 
@@ -115,34 +120,36 @@ class ImageApprovalMulti extends HTMLElement {
   styles() {
     return `
       .approval-container {
-        font-family: var(--body-font);
-        padding: 1rem;
+        font-family: var(--font-ui-he, sans-serif);
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
-        overflow: hidden;
       }
 
       h2 {
-        margin: 0 0 1rem 0;
-        font-family: var(--heading-font-he);
-        color: var(--primary-color);
+        margin: 0 0 16px 0;
+        font-family: var(--font-display, serif);
+        font-size: 22px;
+        color: var(--ink, #1f1d18);
         text-align: center;
       }
 
       .metadata {
-        background: #f5f5f5;
-        padding: 1rem;
-        border-radius: 8px;
+        background: var(--surface-2, #f0ede6);
+        border: 1px solid var(--hairline, rgba(31,29,24,0.08));
+        border-radius: var(--r-sm, 8px);
+        padding: 12px 16px;
+        margin-bottom: 16px;
       }
 
       .metadata p {
-        margin: 0.5rem 0;
-        font-size: 0.95rem;
+        margin: 4px 0;
+        font-size: 13.5px;
+        color: var(--ink, #1f1d18);
       }
 
       .images-section {
-        margin-bottom: 1.5rem;
+        margin-bottom: 16px;
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
@@ -154,13 +161,11 @@ class ImageApprovalMulti extends HTMLElement {
       .loading-state {
         text-align: center;
         padding: 3rem 1rem;
-        color: #666;
-        font-size: 1.1rem;
+        color: var(--ink-3, rgba(31,29,24,0.55));
+        font-size: 14px;
       }
 
-      .loading-state.hidden {
-        display: none;
-      }
+      .loading-state.hidden { display: none; }
 
       image-handler {
         display: block;
@@ -170,9 +175,9 @@ class ImageApprovalMulti extends HTMLElement {
 
       .selection-info {
         text-align: center;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-        color: #666;
+        margin-bottom: 16px;
+        font-size: 13.5px;
+        color: var(--ink-3, rgba(31,29,24,0.55));
       }
 
       .image-item {
@@ -184,91 +189,60 @@ class ImageApprovalMulti extends HTMLElement {
       .image-item img {
         max-width: 150px;
         max-height: 150px;
-        border-radius: 8px;
-        border: 2px solid #ddd;
+        border-radius: var(--r-sm, 8px);
+        border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
       }
 
       .image-item.selected img {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 10px rgba(187, 96, 22, 0.5);
-      }
-
-      .image-item .select-checkbox {
-        position: absolute;
-        top: 5px;
-        left: 5px;
-        width: 24px;
-        height: 24px;
-        cursor: pointer;
+        border-color: var(--primary, #6a994e);
+        box-shadow: 0 0 0 2px var(--primary, #6a994e);
       }
 
       .actions {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         justify-content: center;
         flex-wrap: wrap;
       }
 
       .btn {
-        padding: 12px 20px;
-        border: none;
-        border-radius: 5px;
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-width: 100px;
+        display: inline-flex; align-items: center;
+        font-family: var(--font-ui-he, sans-serif); font-size: 13px; font-weight: 500;
+        padding: 8px 16px; border-radius: var(--r-sm, 8px); border: 1px solid transparent;
+        cursor: pointer; transition: background var(--dur-1, 160ms), border-color var(--dur-1, 160ms);
       }
 
-      .btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+      .btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
 
-      .btn-approve {
-        background-color: #4CAF50;
-        color: white;
-      }
-
-      .btn-approve:hover:not(:disabled) {
-        background-color: #45a049;
-      }
-
-      .btn-reject {
-        background-color: #f44336;
-        color: white;
-      }
-
-      .btn-reject:hover:not(:disabled) {
-        background-color: #da190b;
-      }
-
+      .btn-approve,
       .btn-approve-all {
-        background-color: #2196F3;
-        color: white;
+        background: var(--primary, #6a994e);
+        color: #fff;
       }
 
+      .btn-approve:hover:not(:disabled),
       .btn-approve-all:hover {
-        background-color: #0b7dda;
+        background: var(--primary-dark, #386641);
       }
 
+      .btn-reject,
       .btn-reject-all {
-        background-color: #FF9800;
-        color: white;
+        background: var(--secondary, #e05050);
+        color: #fff;
       }
 
+      .btn-reject:hover:not(:disabled),
       .btn-reject-all:hover {
-        background-color: #e68900;
+        background: var(--secondary-dark, #bc4749);
       }
 
       .btn-cancel {
-        background-color: #918772;
-        color: white;
+        background: transparent;
+        color: var(--ink, #1f1d18);
+        border-color: transparent;
       }
 
-      .btn-cancel:hover {
-        background-color: #5c4033;
-      }
+      .btn-cancel:hover { background: var(--surface-2, #f0ede6); }
     `;
   }
 
