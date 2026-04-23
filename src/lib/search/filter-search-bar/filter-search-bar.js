@@ -54,7 +54,7 @@ class FilterSearchBar extends HTMLElement {
         .search-input {
           width: 100%;
           height: 38px;
-          padding: 0 18px 0 44px;
+          padding: 0 44px 0 44px; /* Balanced padding for icon and clear button */
           border: 0;
           background: transparent;
           outline: none;
@@ -117,7 +117,7 @@ class FilterSearchBar extends HTMLElement {
 
         :host([dir="rtl"]) .search-input {
           padding-right: 44px;
-          padding-left: 18px;
+          padding-left: 44px;
         }
 
         :host([dir="rtl"]) .search-icon {
