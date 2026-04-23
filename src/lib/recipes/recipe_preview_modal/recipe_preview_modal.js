@@ -84,10 +84,8 @@ class RecipePreviewModal extends HTMLElement {
 
   setResponsiveWidth() {
     const modal = this.shadowRoot.querySelector('custom-modal');
-    if (modal) {
-      const isMobile = window.innerWidth <= 768;
-      modal.setAttribute('width', isMobile ? '90vw' : '60vw');
-    }
+    if (!modal) return;
+    modal.setWidth(window.innerWidth <= 768 ? '100vw' : '60vw');
   }
 
   render() {
@@ -101,93 +99,56 @@ class RecipePreviewModal extends HTMLElement {
 
   styles() {
     return `
-      .recipe-preview-modal .modal-content {
-        max-width: 600px;
-        outline: 1px solid black;
-        border-radius: 10px;
-        background-color: transparent;
-        overflow-y: auto; /* Add vertical scroll to the modal content */
-        margin-bottom: 20px;
-      }
-
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.4);
-      }
-
-      .modal-content {
-        background-color: #fefefe;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        flex-grow: 1;
-      }
-
-      .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-      }
-
-      .close:hover,
-      .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-      }
-
       .modal-buttons {
         display: flex;
-        justify-content: space-around;
-        margin-top: 10px;
-        margin-bottom: 10px;
         gap: 10px;
+        padding: 12px 16px;
+        direction: rtl;
       }
 
-      .modal-buttons button { 
-        padding: 12px;
-        width: 100%;
-        background-color: var(--primary-color, #bb6016);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: bold;
+      .modal-buttons button {
+        flex: 1;
+        padding: 10px 20px;
+        border-radius: var(--r-pill, 999px);
+        font-family: var(--font-ui-he, sans-serif);
+        font-size: 14px;
+        font-weight: 500;
         cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-
-      .modal-buttons button:hover {
-        background-color: var(--primary-hover, #5c4033);
+        transition:
+          background var(--dur-1, 160ms),
+          opacity var(--dur-1, 160ms);
       }
 
       .modal-buttons button#approve-button {
-        background-color: var(--success-color, #4CAF50); /* Green for Approve */
+        background: var(--primary, #6a994e);
+        color: #fff;
+        border: none;
       }
 
       .modal-buttons button#approve-button:hover {
-        background-color: var(--success-hover, #45a049); /* Darker green on hover */
+        background: var(--primary-dark, #4a7a32);
       }
 
       .modal-buttons button#reject-button {
-        background-color: var(--error-color, #f44336); /* Red for Reject */
+        background: transparent;
+        color: var(--secondary-dark, #bc4749);
+        border: 1.5px solid var(--secondary-dark, #bc4749);
       }
 
       .modal-buttons button#reject-button:hover {
-        background-color: var(--error-hover, #d32f2f); /* Darker red on hover */
+        background: rgba(188, 71, 73, 0.08);
+      }
+
+      .modal-buttons button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
       }
 
       .error-message {
-        color: var(--error-color, #f44336);
-        margin: 10px 0;
+        color: var(--secondary-dark, #bc4749);
+        font-family: var(--font-ui-he, sans-serif);
+        font-size: 13px;
+        margin: 8px 16px;
         text-align: center;
         display: none;
       }
@@ -200,7 +161,6 @@ class RecipePreviewModal extends HTMLElement {
         <custom-modal height="90vh" width="90vw">
           <loading-spinner overlay border-radius="10px" style="z-index:1000; display:none;" id="modal-spinner"></loading-spinner>
           <div class="error-message"></div>
-          <h3> Recipe Preview </h3>
           <div class="modal-content">
             <recipe-component recipe-id="${this.recipeId}"></recipe-component>
           </div>

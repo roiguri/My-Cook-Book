@@ -184,9 +184,10 @@ class ScrollingList extends HTMLElement {
         display: flex;
         flex-direction: column;
         gap: 4px;
-        padding: 2px 2px 8px;
+        padding: 4px 4px 8px;
         scrollbar-width: thin;
         scrollbar-color: var(--hairline-strong, rgba(31,29,24,0.15)) transparent;
+        scrollbar-gutter: stable;
       }
 
       .scrolling-list::-webkit-scrollbar { width: 4px; }

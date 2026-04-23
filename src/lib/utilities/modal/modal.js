@@ -97,6 +97,18 @@ export class Modal extends HTMLElement {
 
   styles() {
     return `
+      :host {
+        --modal-outer-padding: 20px;
+        --modal-max-width: 90vw;
+      }
+
+      @media (max-width: 768px) {
+        :host {
+          --modal-outer-padding: 4px;
+          --modal-max-width: 100vw;
+        }
+      }
+
       .modal {
         display: flex;
         position: fixed;
@@ -104,7 +116,7 @@ export class Modal extends HTMLElement {
         inset: 0;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: var(--modal-outer-padding, 20px);
         background: rgba(26, 26, 26, 0.55);
         opacity: 0;
         visibility: hidden;
@@ -117,7 +129,7 @@ export class Modal extends HTMLElement {
       }
       .modal-content {
         width: var(--modal-width, 480px);
-        max-width: min(90vw, var(--modal-width, 480px));
+        max-width: min(var(--modal-max-width, 90vw), var(--modal-width, 480px));
         max-height: 86vh;
         height: var(--modal-height, auto);
         background: var(--surface-1, #fff);

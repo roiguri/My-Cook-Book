@@ -38,7 +38,7 @@ class EditRecipeComponent extends HTMLElement {
     this.shadowRoot.innerHTML = `
           <loading-spinner overlay border-radius="10px">
             <div class="edit-recipe-container">
-                <recipe-form-component clear-button-text="איפוס" submit-button-text="שמור שינויים" recipe-id="${this.recipeId}" disable-form-protection></recipe-form-component>
+                <recipe-form-component clear-button-text="איפוס" submit-button-text="שמור שינויים" recipe-id="${this.recipeId}" disable-form-protection ${this.hasAttribute('hide-form-actions') ? 'hide-actions' : ''}></recipe-form-component>
                 <message-modal width="400px" height="auto"></message-modal>
             </div>
           </loading-spinner>
