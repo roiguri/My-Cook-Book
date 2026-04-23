@@ -203,18 +203,22 @@ class ScrollingList extends HTMLElement {
         border: 1px solid var(--hairline, rgba(31,29,24,0.08));
         background: var(--surface-1, #fff);
         overflow: hidden;
+        position: relative;
+        z-index: 0;
         transition: border-color var(--dur-1, 160ms), box-shadow var(--dur-1, 160ms);
       }
 
       .list-item:hover {
         border-color: var(--hairline-strong, rgba(31,29,24,0.15));
         box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
+        z-index: 1;
       }
 
       .list-item.expanded {
         border-color: var(--primary, #6a994e);
         box-shadow: 0 0 0 1px var(--primary, #6a994e),
                     var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
+        z-index: 2;
       }
 
       .list-item-header {
