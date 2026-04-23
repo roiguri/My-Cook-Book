@@ -1,3 +1,5 @@
+import alertStyles from '../../../styles/components/alerts.css?inline';
+
 // Constants
 const DEFAULT_TOAST_DURATION_MS = 3000;
 const TOAST_Z_INDEX = 10000;
@@ -6,23 +8,6 @@ const TOAST_Z_INDEX = 10000;
  * Toast Notification Component
  * @class
  * @extends HTMLElement
- *
- * @description
- * A lightweight toast notification component for displaying brief messages.
- * Supports auto-dismiss, RTL layout, and different types (info, success, error, warn/warning).
- *
- * @example
- * // HTML
- * <toast-notification></toast-notification>
- *
- * // JavaScript
- * const toast = document.querySelector('toast-notification');
- * toast.show('מצאנו תוצאה אחת - מעבר ישירות למתכון', 'info', 3000);
- *
- * @method show(message, type, duration)
- * @param {string} message - The message to display
- * @param {string} [type='info'] - Type: 'info', 'success', 'error'
- * @param {number} [duration=3000] - Auto-dismiss duration in milliseconds
  */
 class ToastNotification extends HTMLElement {
   constructor() {
@@ -38,6 +23,8 @@ class ToastNotification extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
+        ${alertStyles}
+
         :host {
           position: fixed;
           bottom: 24px;
@@ -47,18 +34,8 @@ class ToastNotification extends HTMLElement {
         }
 
         .toast {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          padding: 14px 18px;
-          border-radius: var(--r-md, 12px);
-          border: 1px solid transparent;
-          box-shadow: var(--shadow-2, 0 4px 16px rgba(31,29,24,0.12));
-          font-family: var(--font-ui-he, sans-serif);
-          font-size: 13.5px;
-          line-height: 1.5;
           max-width: 90vw;
-          min-width: 220px;
+          min-width: 260px;
           width: fit-content;
           direction: rtl;
           pointer-events: none;
@@ -67,47 +44,15 @@ class ToastNotification extends HTMLElement {
           transition:
             opacity var(--dur-2, 280ms) var(--ease, ease),
             transform var(--dur-2, 280ms) var(--ease, ease);
+          box-shadow: var(--shadow-2, 0 4px 16px rgba(31,29,24,0.12));
+          border-radius: var(--r-md);
+          box-sizing: border-box;
         }
 
         .toast.show {
           opacity: 1;
           transform: translateY(0);
           pointer-events: auto;
-        }
-
-        .toast.info {
-          background: #e8eef8;
-          border-color: #afc4e8;
-          color: #2a4a82;
-        }
-
-        .toast.success {
-          background: #eef4e8;
-          border-color: #b8d9a0;
-          color: var(--primary-dark, #386641);
-        }
-
-        .toast.error {
-          background: #faeaea;
-          border-color: #e8b3b3;
-          color: var(--secondary-dark, #bc4749);
-        }
-
-        .toast.warn,
-        .toast.warning {
-          background: #fdf6d8;
-          border-color: #f0d878;
-          color: #7a5a07;
-        }
-
-        .toast-icon {
-          font-size: 15px;
-          flex-shrink: 0;
-          line-height: 1.5;
-        }
-
-        .toast-message {
-          flex: 1;
         }
 
         @media (max-width: 768px) {
@@ -121,14 +66,13 @@ class ToastNotification extends HTMLElement {
           .toast {
             width: 100%;
             max-width: 100%;
-            box-sizing: border-box;
           }
         }
       </style>
 
-      <div class="toast" role="alert" aria-live="polite">
-        <span class="toast-icon" aria-hidden="true"></span>
-        <span class="toast-message"></span>
+      <div class="toast alert" role="alert" aria-live="polite">
+        <span class="alert__icon" aria-hidden="true"></span>
+        <div class="toast-message"></div>
       </div>
     `;
   }
@@ -148,13 +92,26 @@ class ToastNotification extends HTMLElement {
 
     const toast = this.shadowRoot.querySelector('.toast');
     const messageEl = this.shadowRoot.querySelector('.toast-message');
-    const iconEl = this.shadowRoot.querySelector('.toast-icon');
+    const iconEl = this.shadowRoot.querySelector('.alert__icon');
 
     // Set message
     messageEl.textContent = message;
 
-    // Set type and icon
-    toast.className = `toast ${type}`;
+    // Map types to v2 alert modifiers
+    const typeMap = {
+      success: 'ok',
+      error: 'err',
+      warn: 'warn',
+      warning: 'warn',
+      info: 'info',
+    };
+
+    const modifier = typeMap[type] || 'info';
+
+    // Reset and apply alert classes
+    toast.className = `toast alert alert--${modifier}`;
+
+    // Set icon
     iconEl.textContent = this.getIcon(type);
 
     // Show toast
@@ -173,7 +130,9 @@ class ToastNotification extends HTMLElement {
    */
   hide() {
     const toast = this.shadowRoot.querySelector('.toast');
-    toast.classList.remove('show');
+    if (toast) {
+      toast.classList.remove('show');
+    }
 
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
@@ -206,11 +165,12 @@ class ToastNotification extends HTMLElement {
 
 customElements.define('toast-notification', ToastNotification);
 
-// Export a helper function to show toasts easily
+/**
+ * Global helper to show toasts
+ */
 export function showToast(message, type = 'info', duration = DEFAULT_TOAST_DURATION_MS) {
   let toast = document.querySelector('toast-notification');
 
-  // Create toast element if it doesn't exist
   if (!toast) {
     toast = document.createElement('toast-notification');
     document.body.appendChild(toast);

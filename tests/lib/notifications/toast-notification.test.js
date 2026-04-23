@@ -28,11 +28,11 @@ describe('ToastNotification', () => {
     const shadow = el.shadowRoot;
     const toast = shadow.querySelector('.toast');
     const message = shadow.querySelector('.toast-message');
-    const icon = shadow.querySelector('.toast-icon');
+    const icon = shadow.querySelector('.alert__icon');
 
     expect(message.textContent).toBe('Success Message');
     expect(toast.classList.contains('show')).toBe(true);
-    expect(toast.classList.contains('success')).toBe(true);
+    expect(toast.classList.contains('alert--ok')).toBe(true);
     // Check for success icon (✓)
     expect(icon.textContent).toBe('✓');
   });
@@ -45,9 +45,9 @@ describe('ToastNotification', () => {
 
     const shadow = el.shadowRoot;
     const toast = shadow.querySelector('.toast');
-    const icon = shadow.querySelector('.toast-icon');
+    const icon = shadow.querySelector('.alert__icon');
 
-    expect(toast.classList.contains('info')).toBe(true);
+    expect(toast.classList.contains('alert--info')).toBe(true);
     // Check for info icon (ℹ️)
     expect(icon.textContent).toBe('ℹ️');
   });

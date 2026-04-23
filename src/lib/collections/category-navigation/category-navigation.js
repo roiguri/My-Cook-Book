@@ -28,6 +28,8 @@
 
 import { CONFIG, ATTRIBUTES } from './category-navigation-config.js';
 import { styles } from './category-navigation-styles.js';
+import badgeStyles from '../../../styles/components/badges.css?inline';
+import fieldStyles from '../../../styles/components/fields.css?inline';
 
 // Template cache to avoid repeated fetches
 let templateCache = null;
@@ -105,7 +107,11 @@ class CategoryNavigation extends HTMLElement {
 
       // Create complete HTML with styles
       this.shadowRoot.innerHTML = `
-        <style>${styles}</style>
+        <style>
+          ${badgeStyles}
+          ${fieldStyles}
+          ${styles}
+        </style>
         ${template}
       `;
 
@@ -139,7 +145,7 @@ class CategoryNavigation extends HTMLElement {
       li.className = CONFIG.CSS_CLASSES.tabsItem;
 
       const button = document.createElement('button');
-      button.className = CONFIG.CSS_CLASSES.tabsLink;
+      button.className = `${CONFIG.CSS_CLASSES.tabsLink} bdg bdg--clickable bdg--cat-${category.value}`;
       button.textContent = category.label;
       button.dataset.category = category.value;
       button.type = 'button';
@@ -150,7 +156,7 @@ class CategoryNavigation extends HTMLElement {
   }
 
   populateDropdown() {
-    const select = this.shadowRoot.querySelector('.category-dropdown-select');
+    const select = this.shadowRoot.querySelector(`.${CONFIG.CSS_CLASSES.dropdownSelect}`);
     if (!select) return;
 
     select.innerHTML = '';
@@ -165,7 +171,7 @@ class CategoryNavigation extends HTMLElement {
 
   updateActiveStates() {
     // Update tabs active state
-    const tabLinks = this.shadowRoot.querySelectorAll('.category-tabs-link');
+    const tabLinks = this.shadowRoot.querySelectorAll(`.${CONFIG.CSS_CLASSES.tabsLink}`);
     tabLinks.forEach((link) => {
       if (link.dataset.category === this.currentCategory) {
         link.classList.add(CONFIG.CSS_CLASSES.tabsLinkActive);
@@ -175,7 +181,7 @@ class CategoryNavigation extends HTMLElement {
     });
 
     // Update dropdown selected state
-    const select = this.shadowRoot.querySelector('.category-dropdown-select');
+    const select = this.shadowRoot.querySelector(`.${CONFIG.CSS_CLASSES.dropdownSelect}`);
     if (select) {
       select.value = this.currentCategory;
     }
@@ -189,7 +195,7 @@ class CategoryNavigation extends HTMLElement {
     }
 
     // Dropdown change
-    const select = this.shadowRoot.querySelector('.category-dropdown-select');
+    const select = this.shadowRoot.querySelector(`.${CONFIG.CSS_CLASSES.dropdownSelect}`);
     if (select) {
       select.addEventListener('change', this.handleDropdownChange);
     }
@@ -204,7 +210,7 @@ class CategoryNavigation extends HTMLElement {
       tabsList.removeEventListener('click', this.handleTabClick);
     }
 
-    const select = this.shadowRoot.querySelector('.category-dropdown-select');
+    const select = this.shadowRoot.querySelector(`.${CONFIG.CSS_CLASSES.dropdownSelect}`);
     if (select) {
       select.removeEventListener('change', this.handleDropdownChange);
     }
@@ -213,7 +219,7 @@ class CategoryNavigation extends HTMLElement {
   }
 
   handleTabClick(event) {
-    const button = event.target.closest('.category-tabs-link');
+    const button = event.target.closest(`.${CONFIG.CSS_CLASSES.tabsLink}`);
     if (!button) return;
 
     event.preventDefault();

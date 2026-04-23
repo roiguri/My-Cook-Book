@@ -28,9 +28,9 @@ export const CONFIG = {
     tabsList: 'category-tabs-list',
     tabsItem: 'category-tabs-item',
     tabsLink: 'category-tabs-link',
-    tabsLinkActive: 'active',
+    tabsLinkActive: 'bdg--active',
     dropdown: 'category-dropdown',
-    dropdownSelect: 'category-dropdown-select',
+    dropdownSelect: 'select-ctrl',
   },
 
   // Events

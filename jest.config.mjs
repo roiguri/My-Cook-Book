@@ -84,6 +84,7 @@ const config = {
     '^src/(.*)$': '<rootDir>/src/$1',
     '^tests/(.*)$': '<rootDir>/tests/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '\\.css(\\?inline)?$': '<rootDir>/tests/common/mocks/css-mock.js',
   },
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
