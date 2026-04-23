@@ -140,28 +140,28 @@ class ImageCarousel extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         .image-carousel__container {
-          border-radius: 20px;  
+          border-radius: 20px;
           position: relative;
           width: 100%;
-          padding-top: 100%; /* Aspect ratio */
+          padding-top: 100%;
           overflow: hidden;
           height: 0;
         }
 
         .image-carousel__wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
         }
 
         .image-carousel__list {
           position: absolute;
-          top: 0;           
-          left: 0;          
-          width: 100%;      
-          height: 100%; 
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
           display: flex;
           transition: transform 0.5s ease-in-out;
           list-style: none;
@@ -169,119 +169,113 @@ class ImageCarousel extends HTMLElement {
           margin: 0;
         }
 
-        /* RTL specific styles */
         [dir="rtl"] .image-carousel__list {
-            flex-direction: row-reverse;
+          flex-direction: row-reverse;
         }
 
         .image-carousel__item {
           flex: 0 0 100%;
           height: 100%;
-          display: flex;          
-          justify-content: center; 
-          align-items: center;  
+          display: flex;
+          justify-content: center;
+          align-items: center;
           overflow: hidden;
+          position: relative;
           -webkit-mask-image: radial-gradient(circle at center, black 50%, transparent 75%);
           mask-image: radial-gradient(circle at center, black 50%, transparent 75%);
         }
 
+        .image-carousel__item.loading::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background-color: var(--surface-2, #f0ede6);
+          animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 0.9; }
+        }
+
         .image-carousel__image {
-            width: 100%;
-            height: 100%;    
-            object-fit: contain;
-            border-radius: 20px;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          border-radius: 20px;
         }
 
         .image-carousel__dots {
           position: absolute;
-          bottom: 10px;
+          bottom: 12px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
-          gap: 5px;
+          gap: 6px;
         }
 
         .image-carousel__dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background-color: white;
+          width: 8px;
+          height: 8px;
+          border-radius: var(--r-pill, 999px);
+          background: rgba(255,255,255,0.55);
+          border: 1px solid rgba(255,255,255,0.8);
           cursor: pointer;
+          transition: background var(--dur-1, 160ms), transform var(--dur-1, 160ms);
+          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
         }
 
         .image-carousel__dot--active {
-          background-color: var(--primary-color);
+          background: var(--primary, #6a994e);
+          border-color: var(--primary, #6a994e);
+          transform: scale(1.25);
+          filter: drop-shadow(0 1px 3px rgba(106,153,78,0.5));
         }
 
         .image-carousel__button {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          background-color: var(--primary-color, #3498db);
-          color: white;
-          width: 30px;          
-          height: 30px;         
+          background: var(--surface-1, #fff);
+          color: var(--ink, #1f1d18);
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
           cursor: pointer;
           opacity: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-          border: 2px solid white;
-          font-size: 14px;      
-          transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.3s ease;
+          border: 1px solid var(--hairline, rgba(31,29,24,0.08));
+          box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
+          transition:
+            box-shadow var(--dur-1, 160ms) var(--ease, ease),
+            background var(--dur-1, 160ms) var(--ease, ease),
+            opacity var(--dur-2, 280ms) var(--ease, ease),
+            transform var(--dur-1, 160ms) var(--ease, ease);
           z-index: 10;
         }
 
         .image-carousel__button:hover {
-          background-color: var(--primary-dark, #2980b9);
-          transform: translateY(-50%) scale(1.1);
+          background: var(--surface-2, #f0ede6);
+          box-shadow: var(--shadow-2, 0 4px 12px rgba(31,29,24,0.12));
+          transform: translateY(-50%) scale(1.08);
         }
 
         .image-carousel__button:active {
           transform: translateY(-50%) scale(0.95);
         }
 
-        .image-carousel__button--prev {
-          left: 10px;
-        }
-
-        .image-carousel__button--next {
-          right: 10px;
-        }
+        .image-carousel__button--prev { left: 10px; }
+        .image-carousel__button--next { right: 10px; }
 
         .image-carousel__container:hover .image-carousel__button {
           opacity: 1;
         }
 
-
-            
-        .image-carousel__item {
-          position: relative;
-      }
-      
-      .image-carousel__item.loading::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: #f0f0f0;
-          animation: pulse 1.5s infinite;
-      }
-      
-      @keyframes pulse {
-          0% { opacity: 0.6; }
-          50% { opacity: 0.8; }
-          100% { opacity: 0.6; }
-      }
-
-        /* Responsive Styles */
         @media (max-width: 768px) {
           .image-carousel__button {
-            opacity: 1; /* Show buttons on mobile */
+            opacity: 1;
           }
         }
       </style>
