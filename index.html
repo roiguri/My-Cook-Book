@@ -40,7 +40,7 @@
   </head>
   <body class="spa-app">
     <!-- Application Header -->
-    <header class="header-container">
+    <header class="header-container app-loading">
       <div class="menu-title-container">
         <button class="nav-toggle" aria-label="Toggle navigation">
           <span class="hamburger"></span>
@@ -68,11 +68,8 @@
 
     <!-- SPA Content Container -->
     <main id="spa-content" class="spa-content">
-      <!-- Page content will be rendered here by the page manager -->
-      <div class="spa-loading">
-        <div style="text-align: center; padding: 2rem; color: #666">
-          <div>Loading application...</div>
-        </div>
+      <div class="page-loading">
+        <div class="page-loading-spinner"></div>
       </div>
     </main>
 

@@ -52,11 +52,13 @@ class AuthService {
    */
   constructor() {
     this._initialized = false;
+    this._authResolved = false; // Tracks if the initial auth state (including roles) is fully loaded
     this._currentUser = null;
     this._userData = null; // Full user document data
     this._currentAvatarUrl = null;
     this._observers = [];
     this._unsubscribeFromAuth = null;
+    this._authResolveCallbacks = []; // Callbacks waiting for initial resolution
 
     // Create singleton reference
     if (AuthService.instance) {
@@ -108,6 +110,13 @@ class AuthService {
         isApproved: this._userData?.role === 'approved' || this._userData?.role === 'manager',
         previousUser: prevUser,
       });
+
+      // Mark auth as fully resolved and notify any pending waitForAuth callers
+      if (!this._authResolved) {
+        this._authResolved = true;
+        this._authResolveCallbacks.forEach((cb) => cb(this._currentUser));
+        this._authResolveCallbacks = [];
+      }
     });
 
     // Listen for favorite changes to keep cache fresh
@@ -469,8 +478,8 @@ class AuthService {
 
     this._observers.push(observer);
 
-    // Call the observer immediately with current state if already authenticated
-    if (this._initialized) {
+    // Call the observer immediately with current state if auth is fully resolved
+    if (this._authResolved) {
       observer({
         user: this._currentUser,
         isAuthenticated: !!this._currentUser,
@@ -515,24 +524,28 @@ class AuthService {
    */
   async waitForAuth(timeout = 5000) {
     return new Promise((resolve) => {
-      // If already authenticated, return immediately
-      const currentUser = this.getCurrentUser();
-      if (currentUser) {
-        resolve(currentUser);
+      // If already fully resolved (including roles), return immediately
+      if (this._authResolved) {
+        resolve(this.getCurrentUser());
         return;
       }
 
-      // Wait for auth state to initialize
+      // Wait for auth state to fully initialize (including fetching user data)
       let timeoutId;
-      const unsubscribe = this.onAuthStateChanged((user) => {
+
+      const resolveCallback = (user) => {
         clearTimeout(timeoutId);
-        unsubscribe();
         resolve(user);
-      });
+      };
+
+      this._authResolveCallbacks.push(resolveCallback);
 
       // Timeout fallback
       timeoutId = setTimeout(() => {
-        unsubscribe();
+        const index = this._authResolveCallbacks.indexOf(resolveCallback);
+        if (index > -1) {
+          this._authResolveCallbacks.splice(index, 1);
+        }
         resolve(null);
       }, timeout);
     });

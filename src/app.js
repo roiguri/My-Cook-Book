@@ -14,6 +14,7 @@ import './js/sw-register.js';
 
 import { initFirebase } from './js/services/firebase-service.js';
 import firebaseConfig from './js/config/firebase-config.js';
+import authService from './js/services/auth-service.js';
 
 // Import SPA core
 import { AppRouter } from './app/core/router.js';
@@ -37,6 +38,21 @@ async function initializeSPA() {
       import('./lib/auth/components/auth-content.js'),
       import('./lib/search/header-search-bar/header-search-bar.js'),
     ]).catch((err) => console.warn('Failed to preload supplemental components:', err));
+
+    // Wait for critical nav components and auth state to resolve, then remove the shimmer
+    Promise.all([
+      customElements.whenDefined('header-search-bar'),
+      customElements.whenDefined('auth-avatar'),
+      customElements.whenDefined('auth-controller'),
+      authService.waitForAuth(),
+    ]).then(() => {
+      requestAnimationFrame(() => {
+        const header = document.querySelector('header.app-loading');
+        if (header) {
+          header.classList.remove('app-loading');
+        }
+      });
+    });
 
     // Await components critical for the UI shell to avoid race conditions
     // (e.g., navigation-script handles link interception which the router depends on)

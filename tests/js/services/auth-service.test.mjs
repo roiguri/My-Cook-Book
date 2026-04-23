@@ -163,6 +163,8 @@ describe('AuthService', () => {
     });
 
     test('should notify observers when auth state changes', async () => {
+      // Mark auth as resolved so addAuthObserver fires the immediate callback
+      authService._authResolved = true;
       const observer = jest.fn();
       authService.addAuthObserver(observer);
 
@@ -191,6 +193,7 @@ describe('AuthService', () => {
     test('should immediately notify new observers of current state', () => {
       authService._currentUser = mockUser;
       authService._userData = { role: 'approved' };
+      authService._authResolved = true;
 
       const observer = jest.fn();
       authService.addAuthObserver(observer);

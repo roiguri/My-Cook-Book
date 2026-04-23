@@ -37,6 +37,40 @@ header .nav-search-container {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
+  transition: opacity 0.3s ease;
+}
+
+/* ---- App Initial Loading Shimmer ---- */
+header.app-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+header.app-loading > * {
+  opacity: 0;
+  pointer-events: none;
+}
+
+header.app-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #eef3e1 25%, #dcebc1 50%, #eef3e1 75%);
+  background-size: 200% 100%;
+  animation: nav-shimmer 1.5s infinite linear;
+  z-index: 10;
+}
+
+@keyframes nav-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* ---- Pill tab nav ---- */
