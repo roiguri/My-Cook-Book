@@ -136,7 +136,7 @@ class RecipeFormComponent extends HTMLElement {
               <div>
                 <span class="recipe-sect__n">04 — תמונות ומדיה</span>
                 <h2 class="recipe-sect__h">התמונה <em>הסופית.</em></h2>
-                <p class="recipe-sect__sub">תמונת גיבור אחת חזקה, בתוספת תמונות תהליך שתרצה לצרף.</p>
+                <p class="recipe-sect__sub">תמונה ראשית בולטת, ותמונות נוספות של המתכון לפי רצונך.</p>
               </div>
               <span class="recipe-sect__meta">JPG, PNG · עד 20MB</span>
             </header>

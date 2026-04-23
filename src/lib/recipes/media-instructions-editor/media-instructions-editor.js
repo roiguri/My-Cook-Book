@@ -26,6 +26,7 @@ import {
   validateMediaFile,
   getMediaInstructionUrl,
 } from '../../../js/utils/recipes/recipe-media-utils.js';
+import { uploadZoneStyles } from '../../../styles/components/upload-zone-styles.js';
 
 class MediaInstructionsEditor extends HTMLElement {
   constructor() {
@@ -324,57 +325,24 @@ class MediaInstructionsEditor extends HTMLElement {
       <style>
         :host {
           display: block;
-          font-family: var(--body-font, Arial, sans-serif);
+          font-family: var(--font-ui-he, sans-serif);
           margin-bottom: 20px;
         }
 
-        .editor-container {
-          width: 100%;
-        }
+        .editor-container { width: 100%; }
 
-        /* Upload Zone */
-        .upload-zone {
-          border: 2px dashed var(--border-color, #ccc);
-          border-radius: 8px;
-          padding: 40px;
-          text-align: center;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          background-color: var(--background-light, #f9f9f9);
-          margin-bottom: 20px;
-        }
-
-        .upload-zone:hover {
-          border-color: var(--primary-color, #3498db);
-          background-color: var(--background-hover, #f0f8ff);
-        }
-
-        .upload-zone.drag-over {
-          border-color: var(--primary-color, #3498db);
-          background-color: var(--primary-light, #e3f2fd);
-          transform: scale(1.02);
-        }
+        ${uploadZoneStyles}
 
         .upload-zone.uploading {
-          opacity: 0.6;
+          opacity: 0.55;
           pointer-events: none;
         }
 
         .status-message {
-          margin-top: 0.5rem;
-          font-size: 0.9rem;
-          color: var(--text-muted, #999);
           direction: rtl;
         }
 
-        .file-input {
-          display: none;
-        }
-
-        /* Media List */
-        .media-list-container {
-          display: none; /* Initially hidden */
-        }
+        .media-list-container { display: none; }
 
         .media-list-container.has-items {
           display: block;
@@ -382,14 +350,8 @@ class MediaInstructionsEditor extends HTMLElement {
         }
 
         @keyframes fadeInSlideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-10px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
 
         .media-list {
@@ -400,154 +362,155 @@ class MediaInstructionsEditor extends HTMLElement {
         }
 
         .media-item {
-          border: 1px solid var(--border-color, #ddd);
-          border-radius: 8px;
+          border: 1px solid var(--hairline, rgba(31,29,24,0.08));
+          border-radius: var(--r-md, 12px);
           padding: 15px;
-          background-color: var(--background-light, #f9f9f9);
-          transition: all 0.3s ease;
+          background: var(--surface-1, #fff);
+          box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
+          transition: box-shadow var(--dur-1, 160ms), transform var(--dur-1, 160ms);
           position: relative;
         }
 
         .media-item:hover {
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--shadow-2, 0 4px 12px rgba(31,29,24,0.12));
           transform: translateY(-2px);
         }
 
-        .media-item.dragging {
-          opacity: 0.5;
-        }
+        .media-item.dragging { opacity: 0.5; }
 
         .media-item.drag-over {
-          border-color: var(--primary-color, #3498db);
-          background-color: var(--primary-light, #e3f2fd);
+          border-color: var(--primary, #6a994e);
+          background: #eef4e8;
         }
 
         .drag-handle {
           position: absolute;
           top: 10px;
           left: 10px;
-          width: 30px;
-          height: 30px;
+          width: 28px;
+          height: 28px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 20px;
-          color: #e8f4f8;
+          font-size: 18px;
+          color: var(--ink-3, rgba(31,29,24,0.55));
           cursor: move;
           z-index: 10;
-          background-color: #666;
-          border-radius: 4px;
-          transition: all 0.2s ease;
+          background: var(--surface-2, #f0ede6);
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          border-radius: var(--r-sm, 8px);
+          transition: background var(--dur-1, 160ms), color var(--dur-1, 160ms), border-color var(--dur-1, 160ms);
           user-select: none;
         }
 
         .drag-handle:hover {
-          background-color: var(--primary-color, #3498db);
-          color: var(--primary-light, #d0ebf7);
-          transform: scale(1.1);
+          background: var(--primary, #6a994e);
+          border-color: var(--primary, #6a994e);
+          color: #fff;
         }
 
         .delete-button {
           position: absolute;
           top: 10px;
           right: 10px;
-          background-color: var(--danger-color, #e74c3c);
-          color: white;
+          background: var(--secondary, #e05050);
+          color: #fff;
           border: none;
           border-radius: 50%;
-          width: 30px;
-          height: 30px;
+          width: 28px;
+          height: 28px;
           cursor: pointer;
-          font-size: 18px;
-          line-height: 30px;
+          font-size: 16px;
+          line-height: 28px;
           text-align: center;
-          transition: all 0.2s ease;
+          transition: background var(--dur-1, 160ms);
           z-index: 10;
         }
 
-        .delete-button:hover {
-          background-color: var(--danger-dark, #c0392b);
-          transform: scale(1.1);
-        }
+        .delete-button:hover { background: var(--secondary-dark, #bc4749); }
 
         .media-preview {
           width: 100%;
           height: 180px;
           object-fit: cover;
-          border-radius: 5px;
+          border-radius: var(--r-sm, 8px);
           margin-bottom: 10px;
-          background-color: var(--background-light, #f5f5f5);
+          background: var(--surface-2, #f0ede6);
         }
 
         .media-type-badge {
           position: absolute;
           top: 50px;
           left: 15px;
-          background-color: rgba(0, 0, 0, 0.7);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 4px;
+          background: rgba(31,29,24,0.65);
+          color: #fff;
+          padding: 3px 8px;
+          border-radius: var(--r-pill, 999px);
+          font-family: var(--font-ui-he, sans-serif);
           font-size: 11px;
-          font-weight: bold;
-          text-transform: uppercase;
+          font-weight: 500;
         }
 
         .media-type-badge.pending-badge {
-          background-color: rgba(255, 152, 0, 0.9);
-          color: white;
+          background: #e6a817;
+          color: #fff;
         }
 
         .caption-input {
           width: 100%;
-          padding: 8px;
-          border: 1px solid var(--border-color, #ddd);
-          border-radius: 5px;
+          padding: 10px 12px;
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          border-radius: var(--r-sm, 8px);
           font-size: 14px;
-          font-family: var(--body-font, Arial, sans-serif);
+          font-family: var(--font-ui-he, sans-serif);
+          color: var(--ink, #1f1d18);
+          background: var(--surface-1, #fff);
           direction: rtl;
           box-sizing: border-box;
         }
 
         .caption-input:focus {
           outline: none;
-          border-color: var(--primary-color, #3498db);
+          border-color: var(--primary, #6a994e);
+          box-shadow: var(--ring, 0 0 0 3px rgba(106,153,78,0.2));
         }
 
         .item-order {
           position: absolute;
           bottom: 10px;
           left: 10px;
-          background-color: var(--primary-color, #3498db);
-          color: white;
-          width: 25px;
-          height: 25px;
+          background: var(--primary, #6a994e);
+          color: #fff;
+          width: 22px;
+          height: 22px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
-          font-weight: bold;
+          font-size: 11px;
+          font-weight: 600;
         }
 
-        /* Errors */
         .errors-container {
-          background-color: var(--danger-light, #ffebee);
-          border: 1px solid var(--danger-color, #e74c3c);
-          border-radius: 5px;
-          padding: 15px;
+          background: #faeaea;
+          border: 1px solid #e8b3b3;
+          border-radius: var(--r-sm, 8px);
+          padding: 14px 16px;
           margin-top: 15px;
           direction: rtl;
           position: relative;
+          font-family: var(--font-ui-he, sans-serif);
+          font-size: 13.5px;
         }
 
         .error-dismiss-button {
           position: absolute;
           top: 10px;
           left: 10px;
-          background-color: transparent;
+          background: transparent;
           border: none;
-          color: var(--danger-color, #e74c3c);
-          font-size: 24px;
+          color: var(--secondary, #e05050);
+          font-size: 20px;
           line-height: 1;
           cursor: pointer;
           padding: 0;
@@ -557,37 +520,35 @@ class MediaInstructionsEditor extends HTMLElement {
           align-items: center;
           justify-content: center;
           border-radius: 50%;
-          transition: all 0.2s ease;
+          transition: background var(--dur-1, 160ms);
         }
 
         .error-dismiss-button:hover {
-          background-color: var(--danger-color, #e74c3c);
-          color: white;
-          transform: scale(1.1);
+          background: var(--secondary, #e05050);
+          color: #fff;
         }
 
         .error-dismiss-button:focus {
-          outline: 2px solid var(--danger-color, #e74c3c);
+          outline: 2px solid var(--secondary, #e05050);
           outline-offset: 2px;
         }
 
         .error-title {
-          font-weight: bold;
-          color: var(--danger-dark, #c0392b);
-          margin-bottom: 10px;
-          padding-right: 30px; /* Space for dismiss button */
+          font-weight: 600;
+          color: var(--secondary-dark, #bc4749);
+          margin-bottom: 8px;
+          padding-right: 30px;
         }
 
         .error-item {
-          font-size: 14px;
-          color: var(--danger-color, #e74c3c);
-          margin: 5px 0;
+          font-size: 13.5px;
+          color: var(--secondary-dark, #bc4749);
+          margin: 4px 0;
         }
 
-        /* Loading Spinner */
         .loading-spinner {
-          border: 3px solid var(--border-color, #f3f3f3);
-          border-top: 3px solid var(--primary-color, #3498db);
+          border: 3px solid var(--surface-2, #f0ede6);
+          border-top: 3px solid var(--primary, #6a994e);
           border-radius: 50%;
           width: 30px;
           height: 30px;
@@ -596,7 +557,7 @@ class MediaInstructionsEditor extends HTMLElement {
         }
 
         @keyframes spin {
-          0% { transform: rotate(0deg); }
+          0%   { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
       </style>

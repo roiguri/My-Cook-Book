@@ -1,4 +1,5 @@
 import { generateImageId } from '../../js/utils/recipes/recipe-image-utils.js';
+import { uploadZoneStyles } from '../../styles/components/upload-zone-styles.js';
 
 class ImageHandler extends HTMLElement {
   constructor() {
@@ -42,58 +43,27 @@ class ImageHandler extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         .image-handler {
-          font-family: var(--body-font);
+          font-family: var(--font-ui-he, sans-serif);
           width: 100%;
           max-width: 100%;
           box-sizing: border-box;
         }
 
-        .upload-area {
-          border: 2px dashed var(--border-color, #ccc);
-          border-radius: 8px;
-          padding: 40px;
-          text-align: center;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          background-color: var(--background-light, #f9f9f9);
-          margin-bottom: 20px;
-        }
+        ${uploadZoneStyles}
 
-        .upload-area:hover {
-          border-color: var(--primary-color, #3498db);
-          background-color: var(--background-hover, #f0f8ff);
-        }
-
-        .upload-area.drag-over {
-          border-color: var(--primary-color, #3498db);
-          background-color: var(--primary-light, #e3f2fd);
-          transform: scale(1.02);
-        }
-
-        .upload-area[data-disabled="true"] {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        :host([hide-upload]) .upload-area {
-          display: none;
-        }
+        :host([hide-upload]) .upload-zone { display: none; }
 
         .selected-files {
           margin-top: 10px;
-          font-size: 0.9em;
-          color: #666;
-        }
-
-        .file-input {
-          display: none;
+          font-size: 12px;
+          color: var(--ink-3, rgba(31,29,24,0.55));
         }
 
         .preview-container {
           position: relative;
           display: flex;
           gap: 1rem;
-          margin-top: 1rem;
+          margin-top: 4px;
           padding: 0.5rem 0;
           overflow-x: auto;
           overflow-y: hidden;
@@ -102,23 +72,22 @@ class ImageHandler extends HTMLElement {
           max-width: 100%;
         }
 
-        /* Scrollbar styling */
         .preview-container::-webkit-scrollbar {
-          height: 8px;
+          height: 6px;
         }
 
         .preview-container::-webkit-scrollbar-track {
-          background: #f5f5f5;
-          border-radius: 4px;
+          background: var(--surface-2, #f0ede6);
+          border-radius: var(--r-pill, 999px);
         }
 
         .preview-container::-webkit-scrollbar-thumb {
-          background: var(--primary-color, #bb6016);
-          border-radius: 4px;
+          background: var(--primary, #6a994e);
+          border-radius: var(--r-pill, 999px);
         }
 
         .preview-container::-webkit-scrollbar-thumb:hover {
-          background: var(--primary-hover, #a0501a);
+          background: var(--primary-dark, #386641);
         }
 
         .image-preview {
@@ -126,23 +95,23 @@ class ImageHandler extends HTMLElement {
           width: 150px;
           height: 150px;
           flex-shrink: 0;
-          border-radius: 8px;
+          border-radius: var(--r-sm, 8px);
           overflow: hidden;
-          border: 2px solid var(--primary-color, #bb6016);
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
           cursor: move;
-          transition: all 0.2s ease;
+          transition: box-shadow var(--dur-1, 160ms), transform var(--dur-1, 160ms);
           user-select: none;
         }
 
         .image-preview.dragging {
           opacity: 0.5;
           transform: scale(0.95);
-          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+          box-shadow: var(--shadow-3, 0 8px 24px rgba(31,29,24,0.16));
         }
 
         .image-preview.primary {
-          border-color: var(--secondary);
-          box-shadow: 0 0 10px rgba(var(--secondary), 0.5);
+          box-shadow: inset 0 0 0 3px var(--primary, #6a994e), var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
         }
 
         .image-preview img {
@@ -154,26 +123,21 @@ class ImageHandler extends HTMLElement {
         .image-preview.uploading::after {
           content: '';
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0, 0, 0, 0.45);
         }
 
         .image-controls {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(31,29,24,0.55);
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
+          gap: 6px;
           opacity: 0;
-          transition: opacity 0.2s ease;
+          transition: opacity var(--dur-1, 160ms);
           pointer-events: none;
         }
 
@@ -182,7 +146,6 @@ class ImageHandler extends HTMLElement {
           pointer-events: auto;
         }
 
-        /* Desktop hover support */
         @media (hover: hover) and (pointer: fine) {
           .image-preview:hover .image-controls {
             opacity: 1;
@@ -191,55 +154,67 @@ class ImageHandler extends HTMLElement {
         }
 
         .control-button {
-          background: rgba(255, 255, 255, 0.9);
-          border: none;
-          border-radius: 4px;
-          padding: 4px 8px;
-          margin: 2px;
+          font-family: var(--font-ui-he, sans-serif);
+          font-size: 12px;
+          font-weight: 500;
+          border-radius: var(--r-sm, 8px);
+          padding: 5px 12px;
           cursor: pointer;
-          font-size: 0.8em;
-          color: #333;
           width: 80%;
+          border: 1px solid transparent;
+          transition: background var(--dur-1, 160ms);
         }
 
-        .control-button:hover {
-          background: white;
+        .control-button.remove-button {
+          background: var(--secondary, #e05050);
+          color: #fff;
+        }
+
+        .control-button.remove-button:hover {
+          background: var(--secondary-dark, #bc4749);
+        }
+
+        .control-button.primary-button {
+          background: rgba(255,255,255,0.15);
+          color: #fff;
+          border-color: rgba(255,255,255,0.5);
+        }
+
+        .control-button.primary-button:hover {
+          background: rgba(255,255,255,0.25);
         }
 
         .progress-bar {
           position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
+          bottom: 0; left: 0; right: 0;
           height: 4px;
-          background: rgba(255, 255, 255, 0.3);
+          background: rgba(255,255,255,0.3);
           display: none;
         }
 
         .progress-bar__fill {
           height: 100%;
-          background: var(--primary-color, #bb6016);
+          background: var(--primary, #6a994e);
           width: 0%;
           transition: width 0.3s ease;
         }
 
         .error-message {
-          color: red;
-          margin-top: 0.5rem;
-          font-size: 0.9rem;
+          display: none;
         }
 
         .status-message {
-          margin-top: 0.5rem;
-          font-size: 0.9rem;
+          margin-top: 6px;
+          font-size: 12px;
+          color: var(--ink-3, rgba(31,29,24,0.55));
         }
 
         .drop-indicator {
           position: absolute;
-          width: calc(100% - 2rem); /* Account for container padding */
+          width: calc(100% - 2rem);
           height: 3px;
-          background-color: var(--primary-color, #bb6016);
-          box-shadow: 0 0 5px rgba(187, 96, 22, 0.5);
+          background: var(--primary, #6a994e);
+          box-shadow: 0 0 6px rgba(106,153,78,0.5);
           transition: transform 0.2s ease;
           pointer-events: none;
           display: none;
@@ -252,8 +227,8 @@ class ImageHandler extends HTMLElement {
           position: absolute;
           top: 5px;
           right: 5px;
-          background: var(--secondary);
-          color: black;
+          background: var(--primary, #6a994e);
+          color: #fff;
           width: 20px;
           height: 20px;
           border-radius: 50%;
@@ -262,36 +237,37 @@ class ImageHandler extends HTMLElement {
           justify-content: center;
           font-weight: bold;
           font-size: 12px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
         }
 
         .primary-label {
           position: absolute;
           top: 30px;
           right: 5px;
-          background: var(--secondary);
-          opacity: 0.9;
-          color: black;
-          padding: 2px 6px;
-          border-radius: 4px;
+          background: var(--primary, #6a994e);
+          color: #fff;
+          padding: 2px 7px;
+          border-radius: var(--r-pill, 999px);
           font-size: 10px;
-          font-weight: bold;
+          font-weight: 500;
         }
 
         .error-container {
-          background-color: #ffebee;
-          color: #c62828;
-          padding: 8px;
-          border-radius: 4px;
+          background: #faeaea;
+          color: var(--secondary-dark, #bc4749);
+          border: 1px solid #e8b3b3;
+          padding: 10px 14px;
+          border-radius: var(--r-sm, 8px);
           margin-bottom: 10px;
-          font-size: 0.9em;
+          font-size: 13.5px;
+          font-family: var(--font-ui-he, sans-serif);
           display: none;
         }
       </style>
 
       <div class="image-handler">
         <div class="error-container"></div>
-        <div class="upload-area" data-disabled="false">
+        <div class="upload-zone" data-disabled="false">
           גרור תמונות לכאן או לחץ להעלאה
           <div class="status-message">
             (מקסימום ${this.maxImages} תמונות, גודל מקסימלי 5MB לתמונה)
@@ -314,7 +290,7 @@ class ImageHandler extends HTMLElement {
   }
 
   setupEventListeners() {
-    const uploadArea = this.shadowRoot.querySelector('.upload-area');
+    const uploadArea = this.shadowRoot.querySelector('.upload-zone');
     const fileInput = this.shadowRoot.querySelector('.file-input');
 
     // Click to upload
@@ -656,12 +632,12 @@ class ImageHandler extends HTMLElement {
   }
 
   updateUploadAreaState() {
-    const uploadArea = this.shadowRoot.querySelector('.upload-area');
+    const uploadArea = this.shadowRoot.querySelector('.upload-zone');
     uploadArea.setAttribute('data-disabled', this.images.length >= this.maxImages);
   }
 
   updateUploadAreaVisibility() {
-    const uploadArea = this.shadowRoot?.querySelector('.upload-area');
+    const uploadArea = this.shadowRoot?.querySelector('.upload-zone');
     if (!uploadArea) return;
 
     const shouldHide = this.hasAttribute('hide-upload');
@@ -784,7 +760,7 @@ class ImageHandler extends HTMLElement {
   }
 
   setDisabled(isDisabled) {
-    const uploadArea = this.shadowRoot.querySelector('.upload-area');
+    const uploadArea = this.shadowRoot.querySelector('.upload-zone');
     uploadArea.setAttribute('data-disabled', isDisabled.toString());
 
     const controlButtons = this.shadowRoot.querySelectorAll('.image-preview .control-button');

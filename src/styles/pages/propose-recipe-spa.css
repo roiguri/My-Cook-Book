@@ -13,16 +13,6 @@
   border-bottom: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
 }
 
-.spa-content .propose-hero__eyebrow {
-  font-family: var(--font-mono, monospace);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--primary-dark, #386641);
-  display: block;
-  margin-bottom: 12px;
-}
-
 .spa-content .propose-hero__title {
   font-family: var(--font-display-he, serif);
   font-style: italic;
