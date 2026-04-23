@@ -23,13 +23,20 @@ export const styles = `
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin: 0;
+    margin: 0 auto;
     justify-content: center;
+    max-width: 950px; /* Forces wrap to roughly 6+5 for 11 items */
   }
 
   .category-tabs-item {
-    flex: 0 0 auto;
+    flex: 0 0 140px; /* Uniform width for all badges */
     display: flex;
+  }
+
+  .category-tabs-link {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .category-dropdown {

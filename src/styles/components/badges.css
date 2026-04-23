@@ -66,34 +66,37 @@
 /* Apply as: <span class="bdg bdg--cat-breads"> */
 
 .bdg--cat-all {
-  --bdg-color: #a7c957;
+  --bdg-color: var(--primary);
 }
-.bdg--cat-breads {
-  --bdg-color: #6a994e;
+.bdg--cat-appetizers {
+  --bdg-color: #f97316;
 }
-.bdg--cat-mains {
-  --bdg-color: #bc4749;
+.bdg--cat-main-courses {
+  --bdg-color: var(--secondary);
 }
-.bdg--cat-desserts {
-  --bdg-color: #eab308;
+.bdg--cat-side-dishes {
+  --bdg-color: #fbbf24;
+}
+.bdg--cat-soups-stews {
+  --bdg-color: #3b82f6;
 }
 .bdg--cat-salads {
   --bdg-color: #22c55e;
 }
-.bdg--cat-soups {
-  --bdg-color: #60a5fa;
+.bdg--cat-desserts {
+  --bdg-color: #d946ef;
 }
-.bdg--cat-appetizers {
-  --bdg-color: #d47779;
+.bdg--cat-breakfast-brunch {
+  --bdg-color: #06b6d4;
 }
-.bdg--cat-preserves {
-  --bdg-color: #836418;
+.bdg--cat-breads-pastries {
+  --bdg-color: #a34e2e;
 }
-.bdg--cat-drinks {
-  --bdg-color: #a855f7;
+.bdg--cat-snacks {
+  --bdg-color: #8b5cf6;
 }
-.bdg--cat-holiday {
-  --bdg-color: #f97316;
+.bdg--cat-beverages {
+  --bdg-color: #0ea5e9;
 }
 
 /* ---- Difficulty badges (gradient fill, no dot) ---- */

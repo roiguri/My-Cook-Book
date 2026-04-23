@@ -69,20 +69,20 @@
 }
 
 /* Gradient placeholder variants */
-.recipe-card__photo--mains {
-  background: linear-gradient(135deg, #f4d19b, #d47779 60%, #bc4749);
+.recipe-card__photo--main-courses {
+  background: linear-gradient(135deg, #fca5a5, #f87171 60%, #bc4749);
 }
 .recipe-card__photo--desserts {
-  background: linear-gradient(135deg, #f2e8cf, #c4a567 60%, #836418);
+  background: linear-gradient(135deg, #f0abfc, #e879f9 60%, #d946ef);
 }
-.recipe-card__photo--soups {
-  background: linear-gradient(135deg, #c9e4ff, #60a5fa 60%, #1d4ed8);
+.recipe-card__photo--soups-stews {
+  background: linear-gradient(135deg, #93c5fd, #60a5fa 60%, #3b82f6);
 }
 .recipe-card__photo--salads {
-  background: linear-gradient(135deg, #bbf7d0, #4ade80 60%, #15803d);
+  background: linear-gradient(135deg, #86efac, #4ade80 60%, #22c55e);
 }
 .recipe-card__photo--appetizers {
-  background: linear-gradient(135deg, #fde68a, #f59e0b 60%, #b45309);
+  background: linear-gradient(135deg, #fdba74, #fb923c 60%, #f97316);
 }
 
 /* Favorite button */
