@@ -544,4 +544,21 @@
     height: 32px;
     font-size: 1rem;
   }
+
+  .spa-content .my-meal-page .btn-ingredients .btn-label {
+    display: none;
+  }
+
+  .spa-content .my-meal-page .btn-ingredients {
+    padding: 7px 10px;
+    gap: 0;
+  }
+
+  .spa-content .my-meal-page .recipe-tab {
+    padding: 10px 4px;
+  }
+
+  .spa-content .my-meal-page .tab-name {
+    font-size: 0.85rem;
+  }
 }
