@@ -22,12 +22,13 @@ test.describe('SignupForm Component', () => {
     await expect(signupForm).toBeVisible();
 
     // Check inputs using accessibility selectors
-    await expect(signupForm.getByLabel('שם מלא')).toBeVisible();
+    await expect(signupForm.getByLabel('שם פרטי')).toBeVisible();
+    await expect(signupForm.getByLabel('שם משפחה')).toBeVisible();
     await expect(signupForm.getByLabel('כתובת מייל')).toBeVisible();
     await expect(signupForm.getByLabel(/^סיסמה$/)).toBeVisible(); // Exact match to avoid confusion with confirm password if it contained "password"
     await expect(signupForm.getByLabel('אימות סיסמה')).toBeVisible();
 
-    const submitBtn = signupForm.getByRole('button', { name: /^הרשמה$/ });
+    const submitBtn = signupForm.getByRole('button', { name: /^יצירת חשבון$/ });
     await expect(submitBtn).toBeVisible();
 
     // Visual Snapshot
@@ -41,19 +42,19 @@ test.describe('SignupForm Component', () => {
   test('should show password strength indicator', async ({ page }) => {
     const signupForm = page.locator('signup-form');
     const passwordInput = signupForm.getByLabel(/^סיסמה$/);
-    const strengthMeter = signupForm.locator('.strength-meter');
+    const strengthMeter = signupForm.locator('#strength-bar');
 
     // Weak
     await passwordInput.fill('password');
-    await expect(strengthMeter).toHaveClass(/weak/);
+    await expect(strengthMeter).toHaveClass(/s1/);
 
     // Medium
     await passwordInput.fill('Password123');
-    await expect(strengthMeter).toHaveClass(/medium/);
+    await expect(strengthMeter).toHaveClass(/s3/);
 
     // Strong
     await passwordInput.fill('Password123!');
-    await expect(strengthMeter).toHaveClass(/strong/);
+    await expect(strengthMeter).toHaveClass(/s4/);
   });
 
   test('should show error when passwords do not match', async ({ page }) => {
@@ -73,7 +74,8 @@ test.describe('SignupForm Component', () => {
   test('should attempt signup on submit', async ({ page }) => {
     const signupForm = page.locator('signup-form');
 
-    await signupForm.getByLabel('שם מלא').fill('Test User');
+    await signupForm.getByLabel('שם פרטי').fill('Test');
+    await signupForm.getByLabel('שם משפחה').fill('User');
     await signupForm.getByLabel('כתובת מייל').fill('newuser@example.com');
     await signupForm.getByLabel(/^סיסמה$/).fill('Password123!');
     await signupForm.getByLabel('אימות סיסמה').fill('Password123!');
@@ -83,7 +85,7 @@ test.describe('SignupForm Component', () => {
       msg.text().includes('Signup attempted with: newuser@example.com, Password123!, Test User'),
     );
 
-    await signupForm.getByRole('button', { name: /^הרשמה$/ }).click();
+    await signupForm.getByRole('button', { name: /^יצירת חשבון$/ }).click();
 
     // Wait for the log message to confirm the mock was called
     await consolePromise;
@@ -113,16 +115,17 @@ test.describe('SignupForm Component', () => {
 
     const signupForm = page.locator('signup-form');
 
-    await signupForm.getByLabel('שם מלא').fill('Test User');
+    await signupForm.getByLabel('שם פרטי').fill('Test');
+    await signupForm.getByLabel('שם משפחה').fill('User');
     await signupForm.getByLabel('כתובת מייל').fill('existing@example.com');
     await signupForm.getByLabel(/^סיסמה$/).fill('Password123!');
     await signupForm.getByLabel('אימות סיסמה').fill('Password123!');
 
-    await signupForm.getByRole('button', { name: /^הרשמה$/ }).click();
+    await signupForm.getByRole('button', { name: /^יצירת חשבון$/ }).click();
 
     const errorMsg = signupForm.locator('#signup-error');
     await expect(errorMsg).toBeVisible();
-    await expect(errorMsg).toHaveText('כתובת האימייל הזו כבר נמצאת בשימוש.'); // Expect localized message
+    await expect(errorMsg).toHaveText('כבר קיים חשבון עם כתובת מייל זו.'); // Expect localized message
 
     // Visual Snapshot for error state
     const container = page.locator('.test-container');

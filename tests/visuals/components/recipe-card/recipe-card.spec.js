@@ -98,6 +98,11 @@ test.describe('Recipe Card Visuals', () => {
 
       // Mock getCurrentUser to return a user
       authService.getCurrentUser = () => ({ uid: 'test-user-123', email: 'test@example.com' });
+
+      const favoritesServiceModule = await import('/src/js/services/favorites-service.js');
+      const favoritesService = favoritesServiceModule.default;
+      favoritesService.removeFavorite = async () => {};
+      favoritesService.addFavorite = async () => {};
     });
 
     // Configure and render component

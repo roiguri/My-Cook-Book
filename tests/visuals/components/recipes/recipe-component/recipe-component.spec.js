@@ -181,18 +181,18 @@ test.describe('Recipe Component Visuals', () => {
 
     const component = page.locator('recipe-component');
     const servingsInput = component.locator('#Recipe_component__servings');
-    const ingredientAmount = component.locator('.Recipe_component__ingredients-list .amount');
+    const ingredientAmount = component.locator('.Recipe_component__ingredients-list .qty');
 
     // Initial check (2 servings -> 100g)
     await expect(servingsInput).toHaveValue('2');
-    await expect(ingredientAmount).toHaveText('100');
+    await expect(ingredientAmount).toHaveText('100 גרם');
 
     // Change servings to 4
     await servingsInput.fill('4');
     await servingsInput.press('Enter');
 
     // Verify amount doubled (4 servings -> 200g)
-    await expect(ingredientAmount).toHaveText('200');
+    await expect(ingredientAmount).toHaveText('200 גרם');
   });
 
   test('handles stage/instruction selection', async ({ page }) => {

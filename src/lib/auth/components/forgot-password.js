@@ -19,6 +19,7 @@ class ForgotPassword extends HTMLElement {
         .body { padding: 32px 40px 36px; }
 
         .title {
+          text-align: center;
           font-family: var(--font-display, serif);
           font-style: italic;
           font-size: 28px;
@@ -30,6 +31,7 @@ class ForgotPassword extends HTMLElement {
         .title em { font-style: normal; color: var(--primary-dark, #386641); }
 
         .dek {
+          text-align: center;
           margin: 0 0 24px;
           color: var(--ink-3, #7c7562);
           font-family: var(--font-ui, system-ui, sans-serif);
@@ -89,7 +91,7 @@ class ForgotPassword extends HTMLElement {
         .msg.visible { display: block; }
 
         .back {
-          display: block; margin-top: 16px; text-align: center;
+          display: inline-flex; align-self: center; margin-top: 16px; text-align: center;
           font-family: var(--font-ui, system-ui, sans-serif);
           font-size: 13px; color: var(--primary-dark, #386641);
           text-decoration: none;
@@ -103,7 +105,7 @@ class ForgotPassword extends HTMLElement {
       </style>
 
       <div class="body">
-        <h2 class="title">Reset your <em>password.</em></h2>
+        <h2 class="title">Reset your <em>password</em></h2>
         <p class="dek">הזן את כתובת המייל שלך ונשלח לך קישור לאיפוס הסיסמה.</p>
 
         <form class="stack" id="reset-form" novalidate>
@@ -113,7 +115,7 @@ class ForgotPassword extends HTMLElement {
           </div>
           <span class="msg" id="reset-msg"></span>
           <button type="submit" class="btn btn-primary">שלח קישור לאיפוס</button>
-          <a class="back" id="back-link">← חזרה להתחברות</a>
+          <a class="back" id="back-link">→ חזרה להתחברות</a>
         </form>
       </div>
     `;
@@ -144,11 +146,21 @@ class ForgotPassword extends HTMLElement {
       this._showMsg('ok', 'הקישור נשלח — בדוק את תיבת הדואר שלך.');
       setTimeout(() => this._goBack(), 3000);
     } catch (error) {
-      this._showMsg('err', error.message || 'שליחת הקישור נכשלה. נסה שנית.');
+      this._handleError(error);
     } finally {
       btn.disabled = false;
       btn.textContent = orig;
     }
+  }
+
+  _handleError(error) {
+    const ERRORS = {
+      'auth/invalid-email': 'כתובת מייל לא תקינה.',
+      'auth/user-not-found': 'לא נמצא חשבון עבור כתובת מייל זו.',
+      'auth/network-request-failed': 'שגיאת רשת. בדוק את החיבור שלך.',
+    };
+    const msg = ERRORS[error.code] || 'שליחת הקישור נכשלה. נסה שנית.';
+    this._showMsg('err', msg);
   }
 
   _goBack() {

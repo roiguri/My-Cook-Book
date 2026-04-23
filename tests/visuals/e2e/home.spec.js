@@ -59,14 +59,14 @@ test.describe('Home Page Sanity', () => {
     await expect(main).toBeVisible();
 
     // Verify Recipe Feed
-    const recipeList = page.locator('recipe-scroller');
+    const recipeList = page.locator('#featured-recipes-grid');
     await expect(recipeList).toBeVisible();
   });
 
   test('visual snapshot of home page', async ({ page }) => {
     // Wait for content
     await page.waitForLoadState('domcontentloaded');
-    await expect(page.locator('recipe-scroller')).toBeVisible();
+    await expect(page.locator('#featured-recipes-grid')).toBeVisible();
 
     // Wait for at least one recipe card to ensure feed is populated
     // This confirms our mock data is working and rendering

@@ -137,22 +137,22 @@ class SignupForm extends HTMLElement {
       <form class="stack" id="signup-form" novalidate>
         <div class="grid2">
           <div class="field">
-            <label>שם פרטי</label>
+            <label for="first-name">שם פרטי</label>
             <input type="text" id="first-name" autocomplete="given-name" />
           </div>
           <div class="field">
-            <label>שם משפחה</label>
+            <label for="last-name">שם משפחה</label>
             <input type="text" id="last-name" autocomplete="family-name" />
           </div>
         </div>
 
         <div class="field">
-          <label>כתובת מייל</label>
+          <label for="signup-email">כתובת מייל</label>
           <input type="email" id="signup-email" autocomplete="email" />
         </div>
 
         <div class="field">
-          <label>סיסמה</label>
+          <label for="signup-password">סיסמה</label>
           <div class="input-icon">
             <input type="password" id="signup-password" autocomplete="new-password" />
             <button type="button" class="eye" id="toggle-pw" aria-label="הצג סיסמה">
@@ -167,7 +167,7 @@ class SignupForm extends HTMLElement {
         </div>
 
         <div class="field">
-          <label>אימות סיסמה</label>
+          <label for="confirm-password">אימות סיסמה</label>
           <input type="password" id="confirm-password" autocomplete="new-password" />
           <span class="err" id="signup-error"></span>
         </div>
