@@ -191,28 +191,53 @@ export default {
 
   createHeader(email) {
     const header = document.createElement('div');
+    header.style.cssText =
+      'font-family: var(--font-ui-he); font-size: 14px; color: var(--ink);' +
+      'overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
     header.textContent = email;
     return header;
   },
 
   createContent(user) {
     const content = document.createElement('div');
+    content.style.cssText = 'display: flex; align-items: center; gap: 10px;';
+
+    const label = document.createElement('span');
+    label.textContent = 'תפקיד:';
+    label.style.cssText =
+      'font-family: var(--font-ui-he); font-size: 11px; font-weight: 600;' +
+      'letter-spacing: 0.08em; color: var(--ink-3); flex-shrink: 0;';
+
     const select = document.createElement('select');
+    select.style.cssText =
+      'flex: 1; padding: 7px 10px;' +
+      'border: 1.5px solid var(--hairline-strong, rgba(31,29,24,0.15));' +
+      'border-radius: var(--r-sm, 10px); font-family: var(--font-ui-he);' +
+      'font-size: 13px; background: var(--surface-0); color: var(--ink); cursor: pointer; outline: none;';
     select.innerHTML = `
-        <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
-        <option value="approved" ${user.role === 'approved' ? 'selected' : ''}>approved</option>
-        <option value="manager" ${user.role === 'manager' ? 'selected' : ''}>Manager</option>
+      <option value="user"     ${user.role === 'user' ? 'selected' : ''}>משתמש</option>
+      <option value="approved" ${user.role === 'approved' ? 'selected' : ''}>מאושר</option>
+      <option value="manager"  ${user.role === 'manager' ? 'selected' : ''}>מנהל</option>
     `;
-    const saveButton = document.createElement('button');
-    saveButton.textContent = 'שמור';
-    saveButton.addEventListener('click', () => this.updateUserRole(user.id, select.value));
 
-    const space = document.createElement('div');
-    space.style.width = '20px';
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = 'שמור';
+    saveBtn.style.cssText =
+      'background: var(--primary); color: #fff; border: none;' +
+      'padding: 7px 16px; border-radius: var(--r-pill, 999px);' +
+      'font-family: var(--font-ui-he); font-size: 13px; font-weight: 500;' +
+      'cursor: pointer; flex-shrink: 0;';
+    saveBtn.addEventListener('mouseover', () => {
+      saveBtn.style.background = 'var(--primary-dark)';
+    });
+    saveBtn.addEventListener('mouseout', () => {
+      saveBtn.style.background = 'var(--primary)';
+    });
+    saveBtn.addEventListener('click', () => this.updateUserRole(user.id, select.value));
 
+    content.appendChild(label);
     content.appendChild(select);
-    content.appendChild(space);
-    content.appendChild(saveButton);
+    content.appendChild(saveBtn);
     return content;
   },
 
@@ -270,14 +295,40 @@ export default {
 
   createRecipeContent(recipe) {
     const container = document.createElement('div');
-    container.innerHTML = `
-        <p>קטגוריה: ${this.categoryMapping[recipe.category]}</p>
-        <p>זמן הכנה: ${recipe.prepTime + recipe.waitTime} דקות</p>
-        <button class="edit-recipe" data-id="${recipe.id}">ערוך</button>
-    `;
-    container
-      .querySelector('.edit-recipe')
-      .addEventListener('click', () => this.editRecipe(recipe));
+    container.style.cssText =
+      'display: flex; align-items: center; justify-content: space-between; gap: 10px;';
+
+    const meta = document.createElement('div');
+    meta.style.cssText = 'display: flex; gap: 6px;';
+    const chipStyle =
+      'background: var(--surface-2, #f0ede6);' +
+      'border-radius: var(--r-pill, 999px);' +
+      'padding: 3px 10px;' +
+      'font-family: var(--font-ui-he, sans-serif);' +
+      'font-size: 12px;' +
+      'color: var(--ink, #1f1d18);';
+    meta.innerHTML =
+      `<span style="${chipStyle}">${this.categoryMapping[recipe.category] || '—'}</span>` +
+      `<span style="${chipStyle}">${recipe.prepTime + recipe.waitTime} דק׳</span>`;
+
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'ערוך';
+    editBtn.dataset.id = recipe.id;
+    editBtn.style.cssText =
+      'background: transparent; color: var(--primary-dark);' +
+      'border: 1.5px solid var(--primary-dark); padding: 5px 14px;' +
+      'border-radius: var(--r-pill, 999px); font-family: var(--font-ui-he);' +
+      'font-size: 12px; font-weight: 500; cursor: pointer; flex-shrink: 0;';
+    editBtn.addEventListener('mouseover', () => {
+      editBtn.style.background = 'rgba(106,153,78,0.08)';
+    });
+    editBtn.addEventListener('mouseout', () => {
+      editBtn.style.background = 'transparent';
+    });
+    editBtn.addEventListener('click', () => this.editRecipe(recipe));
+
+    container.appendChild(meta);
+    container.appendChild(editBtn);
     return container;
   },
 
@@ -358,22 +409,39 @@ export default {
 
   createPendingRecipeHeader(recipe) {
     const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    header.innerHTML = `
-      <span>${recipe.name} | ${this.categoryMapping[recipe.category] || 'No category'}</span>
-      <button class="preview-recipe" data-id="${recipe.id}">הצג</button>
-    `;
-    header
-      .querySelector('.preview-recipe')
-      .addEventListener('click', () => this.previewRecipe(recipe.id));
+    header.style.cssText =
+      'display:flex; align-items:center; justify-content:space-between; gap:8px;';
+
+    const info = document.createElement('div');
+    info.style.cssText = 'display:flex; flex-direction:column; gap:2px; min-width:0;';
+
+    const name = document.createElement('span');
+    name.textContent = recipe.name;
+    name.style.cssText =
+      'font-family:var(--font-ui-he); font-size:14px; color:var(--ink);' +
+      'overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+
+    const cat = document.createElement('span');
+    cat.textContent = this.categoryMapping[recipe.category] || '—';
+    cat.style.cssText =
+      'font-family:var(--font-mono); font-size:11px; color:var(--ink-3); letter-spacing:0.04em;';
+
+    info.appendChild(name);
+    info.appendChild(cat);
+
+    const btn = this._ghostPillBtn('הצג');
+    btn.addEventListener('click', () => this.previewRecipe(recipe.id));
+
+    header.appendChild(info);
+    header.appendChild(btn);
     return header;
   },
 
-  createPendingRecipeContent(recipe) {
+  createPendingRecipeContent() {
     const content = document.createElement('div');
-    content.textContent = `Full recipe details will be shown in the preview modal.`;
+    content.style.cssText =
+      'font-family:var(--font-ui-he); font-size:13px; color:var(--ink-3); font-style:italic;';
+    content.textContent = 'לחץ על "הצג" לצפייה בפרטי המתכון המלאים';
     return content;
   },
 
@@ -455,33 +523,52 @@ export default {
 
   createPendingImagesRecipeHeader(recipe) {
     const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
+    header.style.cssText =
+      'display:flex; align-items:center; justify-content:space-between; gap:8px;';
 
-    const span = document.createElement('span');
+    const info = document.createElement('div');
+    info.style.cssText = 'display:flex; align-items:center; gap:8px; min-width:0;';
+
+    const name = document.createElement('span');
+    name.textContent = recipe.name;
+    name.style.cssText =
+      'font-family:var(--font-ui-he); font-size:14px; color:var(--ink);' +
+      'overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+
     const imageCount = recipe.pendingImages?.length || 0;
-    span.innerHTML = `${recipe.name} (${imageCount} תמונות)`;
+    const countChip = document.createElement('span');
+    countChip.textContent = `${imageCount} תמונות`;
+    countChip.style.cssText =
+      'flex-shrink:0; background:var(--surface-2,#f0ede6); border-radius:var(--r-pill,999px);' +
+      'padding:2px 8px; font-family:var(--font-ui-he); font-size:11px; color:var(--ink-3);';
 
-    const previewButton = document.createElement('button');
-    previewButton.classList.add('preview-images');
-    previewButton.textContent = 'הצג';
-    previewButton.addEventListener('click', (event) => {
-      event.preventDefault();
+    info.appendChild(name);
+    info.appendChild(countChip);
+
+    const btn = this._ghostPillBtn('הצג');
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       this.openMultiImageApprovalModal(recipe);
     });
 
-    header.appendChild(span);
-    header.appendChild(previewButton);
-
+    header.appendChild(info);
+    header.appendChild(btn);
     return header;
   },
 
   createPendingImagesRecipeContent(recipe) {
     const content = document.createElement('div');
+    content.style.cssText = 'display:flex; align-items:center; gap:8px;';
+
     const imageCount = recipe.pendingImages?.length || 0;
     const uploadedBy = recipe.pendingImages?.[0]?.uploadedBy || 'לא ידוע';
-    content.textContent = `${imageCount} תמונות הועלו על ידי ${uploadedBy}`;
+    const chipStyle =
+      'background:var(--surface-2,#f0ede6); border-radius:var(--r-pill,999px);' +
+      'padding:3px 10px; font-family:var(--font-ui-he); font-size:12px; color:var(--ink);';
+    content.innerHTML =
+      `<span style="${chipStyle}">${imageCount} תמונות</span>` +
+      `<span style="font-family:var(--font-ui-he); font-size:13px; color:var(--ink-3);">` +
+      `הועלו על ידי ${uploadedBy}</span>`;
     return content;
   },
 
@@ -543,61 +630,98 @@ export default {
 
   createFailedUrlHeader(item) {
     const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
+    header.style.cssText = 'display:flex; align-items:center; gap:8px;';
 
     const urlSpan = document.createElement('span');
     urlSpan.textContent = item.url;
     urlSpan.title = item.url;
-    urlSpan.style.overflow = 'hidden';
-    urlSpan.style.textOverflow = 'ellipsis';
-    urlSpan.style.whiteSpace = 'nowrap';
-    urlSpan.style.maxWidth = '300px';
-    urlSpan.style.direction = 'ltr';
+    urlSpan.style.cssText =
+      'flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;' +
+      'direction:ltr; font-family:var(--font-mono); font-size:12px; color:var(--ink-3); text-align:left;';
 
-    const countSpan = document.createElement('span');
-    countSpan.textContent = `נכשל ${item.count} פעמים`;
-    countSpan.style.flexShrink = '0';
-    countSpan.style.marginLeft = '10px';
+    const countChip = document.createElement('span');
+    countChip.innerHTML = `${item.count}<span style="margin-inline-start:3px; opacity:0.75;">✕</span>`;
+    countChip.style.cssText =
+      'flex-shrink:0; background:rgba(188,71,73,0.08); border-radius:var(--r-pill,999px);' +
+      'padding:2px 8px; font-family:var(--font-mono); font-size:11px; color:var(--secondary-dark,#bc4749);';
 
     header.appendChild(urlSpan);
-    header.appendChild(countSpan);
+    header.appendChild(countChip);
     return header;
   },
 
   createFailedUrlContent(item) {
     const content = document.createElement('div');
-    content.style.display = 'flex';
-    content.style.flexDirection = 'column';
-    content.style.gap = '10px';
-    content.style.padding = '10px';
+    content.style.cssText = 'display:flex; flex-direction:column; gap:10px;';
 
     const errorMsg = document.createElement('div');
-    errorMsg.textContent = `שגיאה: ${item.error?.message || 'שגיאה לא ידועה'}`;
-    errorMsg.style.color = 'red';
+    errorMsg.textContent = item.error?.message || 'שגיאה לא ידועה';
+    errorMsg.style.cssText =
+      'font-family:var(--font-mono); font-size:12px; color:var(--secondary-dark,#bc4749); word-break:break-all;';
 
     const actions = document.createElement('div');
-    actions.style.display = 'flex';
-    actions.style.gap = '10px';
+    actions.style.cssText = 'display:flex; gap:8px;';
 
-    const showFullErrorBtn = document.createElement('button');
-    showFullErrorBtn.textContent = 'הצג שגיאה מלאה';
-    showFullErrorBtn.addEventListener('click', () => this.showFullError(item));
+    const detailsBtn = this._outlinePillBtn('פרטים נוספים');
+    detailsBtn.addEventListener('click', () => this.showFullError(item));
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'מחק';
-    deleteBtn.style.backgroundColor = '#ff4444';
-    deleteBtn.style.color = 'white';
+    const deleteBtn = this._dangerPillBtn('מחק');
     deleteBtn.addEventListener('click', () => this.deleteFailedUrl(item.id));
 
-    actions.appendChild(showFullErrorBtn);
+    actions.appendChild(detailsBtn);
     actions.appendChild(deleteBtn);
-
     content.appendChild(errorMsg);
     content.appendChild(actions);
-
     return content;
+  },
+
+  /** Shared button helpers — inline styles so they work inside scrolling-list shadow DOM */
+  _ghostPillBtn(label) {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.style.cssText =
+      'background:transparent; color:var(--primary-dark); border:1.5px solid var(--primary-dark);' +
+      'padding:5px 14px; border-radius:var(--r-pill,999px); font-family:var(--font-ui-he);' +
+      'font-size:12px; font-weight:500; cursor:pointer; flex-shrink:0;';
+    btn.addEventListener('mouseover', () => {
+      btn.style.background = 'rgba(106,153,78,0.08)';
+    });
+    btn.addEventListener('mouseout', () => {
+      btn.style.background = 'transparent';
+    });
+    return btn;
+  },
+
+  _outlinePillBtn(label) {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.style.cssText =
+      'background:transparent; color:var(--ink-3); border:1.5px solid var(--hairline-strong,rgba(31,29,24,0.15));' +
+      'padding:5px 14px; border-radius:var(--r-pill,999px); font-family:var(--font-ui-he);' +
+      'font-size:12px; font-weight:500; cursor:pointer; flex-shrink:0;';
+    btn.addEventListener('mouseover', () => {
+      btn.style.background = 'var(--surface-2,#f0ede6)';
+    });
+    btn.addEventListener('mouseout', () => {
+      btn.style.background = 'transparent';
+    });
+    return btn;
+  },
+
+  _dangerPillBtn(label) {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.style.cssText =
+      'background:transparent; color:var(--secondary-dark,#bc4749); border:1.5px solid var(--secondary-dark,#bc4749);' +
+      'padding:5px 14px; border-radius:var(--r-pill,999px); font-family:var(--font-ui-he);' +
+      'font-size:12px; font-weight:500; cursor:pointer; flex-shrink:0;';
+    btn.addEventListener('mouseover', () => {
+      btn.style.background = 'rgba(188,71,73,0.08)';
+    });
+    btn.addEventListener('mouseout', () => {
+      btn.style.background = 'transparent';
+    });
+    return btn;
   },
 
   showFullError(item) {

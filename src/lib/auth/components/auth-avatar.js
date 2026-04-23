@@ -27,70 +27,58 @@ class AuthAvatar extends HTMLElement {
       <style>
         :host {
           display: block;
-          width: 44px;
-          height: 44px;
+          width: 36px;
+          height: 36px;
         }
 
         .avatar {
           width: 100%;
           height: 100%;
-          border-radius: 8px;
+          border-radius: 50%;
+          overflow: hidden;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: bold;
-          transition: transform 0.2s ease, background-color 0.3s ease, box-shadow 0.2s ease;
-          background-color: var(--primary-color);
-          color: white;
-          box-shadow:
-            0 4px 0 var(--primary-dark),
-            0 6px 4px rgba(0, 0, 0, 0.2);
-          transform: translateY(-2px);
+          background: linear-gradient(135deg, var(--primary-bright), var(--primary-dark));
+          color: #ffffff;
           box-sizing: border-box;
-        }
-
-        .avatar.signed-out {
-          background-color: var(--primary-color);
-          color: var(--button-color);
+          transition: box-shadow var(--dur-1, 160ms) var(--ease, ease),
+                      transform var(--dur-1, 160ms) var(--ease, ease);
         }
 
         .avatar:hover {
-          background-color: var(--primary-dark);
-          box-shadow:
-            inset 0 0 0 3px var(--primary-color), 
-            0 4px 0 var(--primary-dark),
-            0 6px 4px rgba(0, 0, 0, 0.2);
+          transform: scale(1.08);
+          box-shadow: 0 0 0 3px rgba(106,153,78,0.3), 0 2px 8px rgba(31,29,24,0.15);
         }
 
         .avatar:active {
-          background-color: var(--primary-dark);
-          transform: translateY(0);
-          box-shadow:
-            inset 0 0 0 3px var(--primary-color), 
-            0 6px 4px rgba(0, 0, 0, 0.2);
+          transform: scale(0.93);
+          box-shadow: 0 0 0 2px rgba(106,153,78,0.4);
+          transition-duration: 80ms;
         }
 
         .avatar img {
-          width: 70%;
-          height: 70%;
-          border-radius: 5px;
+          width: 100%;
+          height: 100%;
           object-fit: cover;
+          display: block;
+          transform: scale(1.12) translateY(4%);
         }
 
         .initial {
-          font-family: var(--body-font);
-          color: white;
-          background-color: var(--primary-color);
+          font-family: var(--font-ui, sans-serif);
+          font-weight: 600;
+          font-size: 13px;
+          color: #ffffff;
           width: 100%;
           height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 5px;
+          border-radius: 50%;
         }
 
-        /* Loading state */
         .avatar.loading {
           opacity: 0.7;
           pointer-events: none;
@@ -100,8 +88,8 @@ class AuthAvatar extends HTMLElement {
         .avatar.loading::after {
           content: '';
           position: absolute;
-          width: 20px;
-          height: 20px;
+          width: 18px;
+          height: 18px;
           border: 2px solid white;
           border-top-color: transparent;
           border-radius: 50%;

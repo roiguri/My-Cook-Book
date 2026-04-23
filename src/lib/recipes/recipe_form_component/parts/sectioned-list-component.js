@@ -337,18 +337,15 @@ export class SectionedListComponent extends DynamicListComponent {
     const firstItem = items[0];
     if (!firstItem) return;
 
+    const removeButton = firstItem.querySelector(`.${this.removeButtonClass}`);
+    if (!removeButton) return;
+
     if (items.length === 1) {
-      const removeButton = firstItem.querySelector(`.${this.removeButtonClass}`);
-      if (removeButton) removeButton.remove();
-    } else if (items.length > 1) {
-      const removeButton = firstItem.querySelector(`.${this.removeButtonClass}`);
-      if (!removeButton) {
-        const newRemoveButton = document.createElement('button');
-        newRemoveButton.type = 'button';
-        newRemoveButton.className = `recipe-form__button ${this.removeButtonClass}`;
-        newRemoveButton.textContent = '-';
-        firstItem.appendChild(newRemoveButton);
-      }
+      removeButton.style.visibility = 'hidden';
+      removeButton.style.pointerEvents = 'none';
+    } else {
+      removeButton.style.visibility = '';
+      removeButton.style.pointerEvents = '';
     }
   }
 
@@ -383,18 +380,15 @@ export class SectionedListComponent extends DynamicListComponent {
     const firstItem = items[0];
     if (!firstItem) return;
 
+    const removeButton = firstItem.querySelector(`.${this.removeButtonClass}`);
+    if (!removeButton) return;
+
     if (items.length === 1) {
-      const removeButton = firstItem.querySelector(`.${this.removeButtonClass}`);
-      if (removeButton) removeButton.remove();
-    } else if (items.length > 1) {
-      const removeButton = firstItem.querySelector(`.${this.removeButtonClass}`);
-      if (!removeButton) {
-        const newRemoveButton = document.createElement('button');
-        newRemoveButton.type = 'button';
-        newRemoveButton.className = `recipe-form__button ${this.removeButtonClass}`;
-        newRemoveButton.textContent = '-';
-        firstItem.appendChild(newRemoveButton);
-      }
+      removeButton.style.visibility = 'hidden';
+      removeButton.style.pointerEvents = 'none';
+    } else {
+      removeButton.style.visibility = '';
+      removeButton.style.pointerEvents = '';
     }
   }
 

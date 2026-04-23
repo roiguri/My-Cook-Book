@@ -1,5 +1,6 @@
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import Cropper from 'cropperjs';
+import '../../modals/confirmation_modal/confirmation_modal.js';
 import styles from './recipe_import_modal.css?inline';
 import cropperStyles from 'cropperjs/dist/cropper.css?inline';
 import memoryGameStyles from '../../games/memory_game.css?inline';
@@ -22,6 +23,9 @@ class RecipeImportModal extends HTMLElement {
     this.game = null;
     this.extractedData = null;
     this.importMode = 'image'; // 'image' or 'url'
+    this.importUrl = null; // URL used for extraction, included in recipe-extracted event
+    this.requestId = 0; // Incremented on reset to invalidate in-flight responses
+    this.abortController = null; // Aborts client-side wait when modal is reset mid-flight
   }
 
   connectedCallback() {
@@ -126,6 +130,7 @@ class RecipeImportModal extends HTMLElement {
             </div>
           </div>
       </custom-modal>
+      <confirmation-modal id="close-confirm-modal"></confirmation-modal>
     `;
   }
 
@@ -170,7 +175,7 @@ class RecipeImportModal extends HTMLElement {
       if (this.extractedData) {
         this.dispatchEvent(
           new CustomEvent('recipe-extracted', {
-            detail: { data: this.extractedData },
+            detail: { data: this.extractedData, sourceUrl: this.importUrl },
             bubbles: true,
             composed: true,
           }),
@@ -193,14 +198,14 @@ class RecipeImportModal extends HTMLElement {
     // Drag & Drop
     uploadArea.addEventListener('dragover', (e) => {
       e.preventDefault();
-      uploadArea.style.borderColor = 'var(--primary-color)';
+      uploadArea.style.borderColor = 'var(--primary, #6a994e)';
     });
     uploadArea.addEventListener('dragleave', () => {
-      uploadArea.style.borderColor = '#ccc';
+      uploadArea.style.borderColor = '';
     });
     uploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
-      uploadArea.style.borderColor = '#ccc';
+      uploadArea.style.borderColor = '';
       if (e.dataTransfer.files.length > 0) {
         this.addImages(e.dataTransfer.files);
       }
@@ -382,23 +387,26 @@ class RecipeImportModal extends HTMLElement {
       this.cropper.destroy();
       this.cropper = null;
     }
-    const editorView = this.shadowRoot.getElementById('editor-view');
-    const previewView = this.shadowRoot.getElementById('preview-view');
-
-    editorView.style.display = 'none';
-    previewView.style.display = 'block';
-
-    // Show footer again
+    this.shadowRoot.getElementById('editor-view').style.display = 'none';
     this.shadowRoot.querySelector('.modal-footer').style.display = 'flex';
+    this.updatePreviewList();
   }
 
   reset() {
     // Reset State Variables
+    this.requestId++; // Invalidate any in-flight extraction request
+    this.abortController?.abort();
+    this.abortController = null;
     this.images = [];
     this.activeImageId = null;
     this.extractedData = null;
+    this.importUrl = null;
     this.isLoading = false;
     this.importMode = 'image';
+
+    // Clear close guard in case reset is called while loading
+    const importModal = this.shadowRoot.getElementById('import-modal');
+    if (importModal) importModal.clearCloseGuard();
 
     // Cleanup Instances
     if (this.cropper) {
@@ -458,6 +466,9 @@ class RecipeImportModal extends HTMLElement {
     if (this.images.length === 0) return;
 
     this.setLoading(true);
+    const myRequestId = this.requestId;
+    this.abortController = new AbortController();
+    const { signal } = this.abortController;
 
     try {
       const imagesToSend = await Promise.all(
@@ -478,16 +489,25 @@ class RecipeImportModal extends HTMLElement {
         }),
       );
 
+      if (this.requestId !== myRequestId) return;
+
       const functions = getFunctions();
       const extractRecipeFromImage = httpsCallable(functions, 'extractRecipeFromImage');
 
-      const result = await extractRecipeFromImage({
-        images: imagesToSend,
+      const abortPromise = new Promise((_, reject) => {
+        signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
       });
 
-      // Show success state but keep modal open
+      const result = await Promise.race([
+        extractRecipeFromImage({ images: imagesToSend }),
+        abortPromise,
+      ]);
+
+      if (this.requestId !== myRequestId) return;
+
       this.showSuccessState(result.data);
     } catch (error) {
+      if (error.name === 'AbortError' || this.requestId !== myRequestId) return;
       console.error('Extraction failed:', error);
       this.isLoading = false;
       this.setError(error);
@@ -496,6 +516,7 @@ class RecipeImportModal extends HTMLElement {
 
   setLoading(isLoading) {
     this.isLoading = isLoading;
+    const importModal = this.shadowRoot.getElementById('import-modal');
     const loadingView = this.shadowRoot.getElementById('loading-view');
     const editorView = this.shadowRoot.getElementById('editor-view');
     const footer = this.shadowRoot.querySelector('.modal-footer');
@@ -503,6 +524,15 @@ class RecipeImportModal extends HTMLElement {
     const importTabs = this.shadowRoot.querySelector('.import-tabs');
 
     if (isLoading) {
+      importModal.setCloseGuard(async () => {
+        return new Promise((resolve) => {
+          const confirmModal = this.shadowRoot.getElementById('close-confirm-modal');
+          confirmModal.confirm('עיבוד המתכון בתהליך. האם לבטל ולסגור?', '', 'בטל עיבוד', 'המשך');
+          confirmModal.addEventListener('confirm-approved', () => resolve(true), { once: true });
+          confirmModal.addEventListener('confirm-rejected', () => resolve(false), { once: true });
+        });
+      });
+
       loadingView.style.display = 'flex';
       // editorView.style.display = 'none'; // Editor is already closed or irrelevant
       this.shadowRoot.getElementById('preview-view').style.display = 'none'; // Hide preview
@@ -538,6 +568,8 @@ class RecipeImportModal extends HTMLElement {
         this.gameWrapper.init();
       }
     } else {
+      importModal.clearCloseGuard();
+
       loadingView.style.display = 'none';
       if (importTabs) importTabs.style.display = 'flex'; // Show tabs
       footer.style.display = 'flex';
@@ -697,16 +729,27 @@ class RecipeImportModal extends HTMLElement {
       return;
     }
 
+    this.importUrl = url;
     this.setLoading(true);
+    const myRequestId = this.requestId;
+    this.abortController = new AbortController();
+    const { signal } = this.abortController;
 
     try {
       const functions = getFunctions();
       const extractRecipeFromUrlFn = httpsCallable(functions, 'extractRecipeFromUrl');
 
-      const result = await extractRecipeFromUrlFn({ url });
+      const abortPromise = new Promise((_, reject) => {
+        signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+      });
+
+      const result = await Promise.race([extractRecipeFromUrlFn({ url }), abortPromise]);
+
+      if (this.requestId !== myRequestId) return;
 
       this.showSuccessState(result.data);
     } catch (error) {
+      if (error.name === 'AbortError' || this.requestId !== myRequestId) return;
       console.error('URL extraction failed:', error);
       this.isLoading = false;
       this.setError(error);

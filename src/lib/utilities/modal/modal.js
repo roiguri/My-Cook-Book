@@ -60,6 +60,7 @@ export class Modal extends HTMLElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.isOpen = false;
+    this._closeGuard = null; // async () => boolean — return false to prevent close
 
     // Accesibility Enhancements
     this.focusableElements = [];
@@ -96,80 +97,92 @@ export class Modal extends HTMLElement {
 
   styles() {
     return `
-      ${this.existingStyles()}
-      .modal-content {
-        width: var(--modal-width, 480px);
-        max-width: 90vw;
-        height: var(--modal-height, auto);
-        background-color: var(--modal-background-color, var(--background-color, #f5f2e9));
+      :host {
+        --modal-outer-padding: 20px;
+        --modal-max-width: 90vw;
       }
-    `;
-  }
 
-  existingStyles() {
-    return `
+      @media (max-width: 768px) {
+        :host {
+          --modal-outer-padding: 4px;
+          --modal-max-width: 100vw;
+        }
+      }
+
       .modal {
         display: flex;
         position: fixed;
         z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        align-items: start;
-        background-color: rgba(0,0,0,0.4);
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+        padding: var(--modal-outer-padding, 20px);
+        background: rgba(26, 26, 26, 0.55);
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        transition: opacity var(--dur-2, 280ms) var(--ease, ease),
+                    visibility var(--dur-2, 280ms) var(--ease, ease);
       }
       .modal.open {
         opacity: 1;
         visibility: visible;
       }
       .modal-content {
-        background-color: var(--background-color, #f5f2e9);
-        margin: auto;
-        padding: 20px;
-        border: 1px solid #888;
-        border-radius: 10px;
+        width: var(--modal-width, 480px);
+        max-width: min(var(--modal-max-width, 90vw), var(--modal-width, 480px));
+        max-height: 86vh;
+        height: var(--modal-height, auto);
+        background: var(--surface-1, #fff);
+        border: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
+        border-radius: var(--r-xl, 20px);
+        box-shadow: var(--shadow-3, 0 8px 32px rgba(31, 29, 24, 0.18), 0 2px 8px rgba(31, 29, 24, 0.08));
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
-        align-items: center;
         position: relative;
-        transform: scale(0.7);
-        transition: transform 0.3s ease;
+        overflow: hidden;
+        transform: translateY(16px) scale(0.98);
+        transition: transform var(--dur-2, 280ms) var(--ease, ease);
       }
       .modal.open .modal-content {
-        transform: scale(1);
+        transform: none;
       }
       .close-button {
-        background-color: color-mix(in srgb, var(--background-color), black 10%);
-        border: none;
-        padding: 10px;
-        padding-left: 22px;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
+        background: var(--surface-0, #faf6ec);
         cursor: pointer;
-        flex-grow: 0;
-
-        font-size: var(--size-icon, 18px);
-        font-weight: bold;
-        
-        align-self: start;
-        position: relative;
-        top: -20px;
-        right: -20px;
-        width: 30px;
-        border-bottom-left-radius: 10px;
-        border-top-right-radius: 10px;
-        margin-bottom: -20px;
-        text-align: center;
-        transition: background-color 0.3s ease;
+        color: var(--ink-1, #1a1a1a);
+        font-size: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background var(--dur-1, 160ms) var(--ease, ease);
+        z-index: 1;
+        line-height: 1;
+        padding: 0;
+        flex-shrink: 0;
       }
       .close-button:hover {
-        color: var(--button-color, white);
-        background-color: var(--primary-color, #bb6016);
+        background: var(--surface-2, #f2e8cf);
+      }
+      .modal-slot {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        padding: 28px 32px 32px;
       }
     `;
+  }
+
+  existingStyles() {
+    return '';
   }
 
   template() {
@@ -177,7 +190,9 @@ export class Modal extends HTMLElement {
       <div dir="rtl" class="modal" role="dialog" aria-modal="true">
         <div class="modal-content">
           <button class="close-button" aria-label="סגור">&times;</button>
-          <slot></slot>
+          <div class="modal-slot">
+            <slot></slot>
+          </div>
         </div>
       </div>
     `;
@@ -214,26 +229,39 @@ export class Modal extends HTMLElement {
     }
   }
 
-  close(options = { byUser: false }) {
-    if (this.isOpen) {
-      if (options.byUser) {
-        this.dispatchEvent(
-          new CustomEvent('modal-closed-by-user', { bubbles: true, composed: true }),
-        );
-      }
-      const modalElement = this.shadowRoot.querySelector('.modal');
-      modalElement.classList.remove('open');
-      this.isOpen = false;
-      window.removeEventListener('keydown', this.handleKeyDown);
-      // Wait for the transition to finish before hiding the modal
-      setTimeout(() => {
-        if (!this.isOpen) {
-          modalElement.style.display = 'none';
-        }
-      }, 300); // This should match the transition duration
-      this.dispatchEvent(new CustomEvent('modal-closed'));
-      this.unlockScroll();
+  async close(options = { byUser: false }) {
+    if (!this.isOpen) return;
+
+    if (options.byUser && this._closeGuard) {
+      const allowed = await this._closeGuard();
+      if (!allowed || !this.isOpen) return; // guard rejected or modal already closed
     }
+
+    if (options.byUser) {
+      this.dispatchEvent(
+        new CustomEvent('modal-closed-by-user', { bubbles: true, composed: true }),
+      );
+    }
+    const modalElement = this.shadowRoot.querySelector('.modal');
+    modalElement.classList.remove('open');
+    this.isOpen = false;
+    window.removeEventListener('keydown', this.handleKeyDown);
+    // Wait for the transition to finish before hiding the modal
+    setTimeout(() => {
+      if (!this.isOpen) {
+        modalElement.style.display = 'none';
+      }
+    }, 300); // This should match the transition duration
+    this.dispatchEvent(new CustomEvent('modal-closed'));
+    this.unlockScroll();
+  }
+
+  setCloseGuard(fn) {
+    this._closeGuard = fn;
+  }
+
+  clearCloseGuard() {
+    this._closeGuard = null;
   }
 
   /**

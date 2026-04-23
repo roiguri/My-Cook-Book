@@ -43,15 +43,15 @@ test.describe('ForgotPassword Component', () => {
 
     const emailInput = forgotPassword.locator('input[type="email"]');
     await expect(emailInput).toBeVisible();
-    await expect(emailInput).toHaveAttribute('id', 'forgot-email');
+    await expect(emailInput).toHaveAttribute('id', 'reset-email');
 
     const submitBtn = forgotPassword.locator('button[type="submit"]');
     await expect(submitBtn).toBeVisible();
-    await expect(submitBtn).toHaveText('שלח קישור לאיפוס סיסמה');
+    await expect(submitBtn).toHaveText('שלח קישור לאיפוס');
 
-    const backLink = forgotPassword.locator('#back-to-login');
+    const backLink = forgotPassword.locator('#back-link');
     await expect(backLink).toBeVisible();
-    await expect(backLink).toHaveText('חזרה להתחברות');
+    await expect(backLink).toHaveText('→ חזרה להתחברות');
 
     // Visual Snapshot
     const container = page.locator('.test-container');
@@ -86,9 +86,9 @@ test.describe('ForgotPassword Component', () => {
     expect(consoleLogs).toContain('Password reset attempted for: test@example.com');
 
     // Check for success message
-    const successMsg = forgotPassword.locator('#reset-success');
+    const successMsg = forgotPassword.locator('#reset-msg');
     await expect(successMsg).toBeVisible();
-    await expect(successMsg).toHaveText('קישור לאיפוס סיסמה נשלח לכתובת המייל שלך');
+    await expect(successMsg).toHaveText('הקישור נשלח — בדוק את תיבת הדואר שלך.');
 
     // Visual Snapshot for success state
     const container = page.locator('.test-container');
@@ -104,7 +104,9 @@ test.describe('ForgotPassword Component', () => {
       const forgotPassword = document.querySelector('forgot-password');
       const mockAuthController = {
         handlePasswordReset: async () => {
-          throw new Error('User not found');
+          const error = new Error('User not found');
+          error.code = 'auth/user-not-found';
+          throw error;
         },
       };
 
@@ -123,9 +125,9 @@ test.describe('ForgotPassword Component', () => {
     await forgotPassword.locator('input[type="email"]').fill('unknown@example.com');
     await forgotPassword.locator('button[type="submit"]').click();
 
-    const errorMsg = forgotPassword.locator('#reset-error');
+    const errorMsg = forgotPassword.locator('#reset-msg');
     await expect(errorMsg).toBeVisible();
-    await expect(errorMsg).toHaveText('User not found');
+    await expect(errorMsg).toHaveText('לא נמצא חשבון עבור כתובת מייל זו.');
 
     // Visual Snapshot for error state
     const container = page.locator('.test-container');
@@ -147,7 +149,7 @@ test.describe('ForgotPassword Component', () => {
     page.on('console', (msg) => consoleLogs.push(msg.text()));
 
     const forgotPassword = page.locator('forgot-password');
-    await forgotPassword.locator('#back-to-login').click();
+    await forgotPassword.locator('#back-link').click();
 
     await page.waitForTimeout(50);
     expect(consoleLogs).toContain('back-to-login event caught');

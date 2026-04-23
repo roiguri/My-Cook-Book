@@ -1,0 +1,101 @@
+/* =========================================================================
+   OUR KITCHEN CHRONICLES — DESIGN TOKENS (v2, modern)
+   Palette preserved from v1; type, radii, shadows, motion modernized.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+Hebrew:wght@300;400;500;600;700&family=Noto+Serif+Hebrew:wght@400;600&display=swap');
+
+:root {
+  /* ---- Palette (UNCHANGED) ---- */
+  --primary-dark: #386641;
+  --primary: #6a994e;
+  --primary-bright: #a7c957;
+  --neutral: #f2e8cf;
+  --secondary: #bc4749;
+  --secondary-light: #d47779;
+  --secondary-dark: #9a3a3c;
+
+  /* ---- New surface ladder (still warm, now structured) ---- */
+  --surface-0: #faf6ec; /* page */
+  --surface-1: #ffffff; /* card */
+  --surface-2: #f6eed6; /* sunken */
+  --ink: #1f1d18; /* near-black warm */
+  --ink-2: #3a3a3a; /* body text */
+  --ink-3: #6b6a63; /* muted */
+  --ink-4: #a6a49a; /* quiet */
+  --hairline: rgba(31, 29, 24, 0.1);
+  --hairline-strong: rgba(31, 29, 24, 0.18);
+
+  /* ---- Semantic roles ---- */
+  --primary-color: var(--primary);
+  --primary-hover: var(--primary-dark);
+  --bg: var(--surface-0);
+  --card-bg: var(--surface-1);
+  --text-color: var(--ink-2);
+  --text-strong: var(--ink);
+  --text-muted: var(--ink-3);
+  --button-color: #ffffff;
+
+  /* ---- Typography — modern editorial ---- */
+  --font-display: 'Instrument Serif', 'Cormorant Garamond', serif;
+  --font-display-he: 'Noto Serif Hebrew', 'Fredoka', serif;
+  --font-ui: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-ui-he: 'Noto Sans Hebrew', var(--font-ui);
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* ---- Type scale (fluid, display-heavy) ---- */
+  --step--1: clamp(0.78rem, 0.76rem + 0.1vw, 0.82rem); /* caption */
+  --step-0: clamp(0.93rem, 0.9rem + 0.15vw, 1rem); /* body-s */
+  --step-1: clamp(1rem, 0.96rem + 0.2vw, 1.09rem); /* body */
+  --step-2: clamp(1.15rem, 1.08rem + 0.35vw, 1.32rem); /* lead */
+  --step-3: clamp(1.4rem, 1.28rem + 0.6vw, 1.75rem); /* h3 */
+  --step-4: clamp(1.9rem, 1.65rem + 1.25vw, 2.75rem); /* h2 */
+  --step-5: clamp(2.6rem, 2.1rem + 2.5vw, 4.25rem); /* h1 */
+  --step-6: clamp(3.5rem, 2.6rem + 4.5vw, 6.75rem); /* display */
+
+  /* ---- Radii — modern & restrained ---- */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-2xl: 40px;
+  --r-pill: 9999px;
+
+  /* ---- Elevation — diffuse, soft ---- */
+  --shadow-1: 0 1px 2px rgba(31, 29, 24, 0.04), 0 2px 6px rgba(31, 29, 24, 0.04);
+  --shadow-2: 0 2px 4px rgba(31, 29, 24, 0.05), 0 10px 30px -8px rgba(31, 29, 24, 0.1);
+  --shadow-3: 0 6px 18px -6px rgba(31, 29, 24, 0.12), 0 24px 60px -24px rgba(31, 29, 24, 0.2);
+  --ring: 0 0 0 3px rgba(106, 153, 78, 0.25);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.2, 0.65, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-1: 160ms;
+  --dur-2: 280ms;
+  --dur-3: 520ms;
+
+  /* ---- Layout ---- */
+  --content-max: 1200px;
+  --gutter: clamp(20px, 4vw, 48px);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--bg);
+  color: var(--text-color);
+  font-family: var(--font-ui);
+  font-weight: 400;
+  font-size: var(--step-1);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01', 'cv11';
+}

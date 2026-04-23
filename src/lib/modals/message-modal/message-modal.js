@@ -51,26 +51,45 @@ class MessageModal extends Modal {
     return `
       ${super.styles()}
       ${super.existingStyles()}
+      .message-modal-content {
+        text-align: center;
+        direction: rtl;
+        font-family: var(--font-ui, system-ui, sans-serif);
+        padding: 56px 32px 32px;
+      }
       h2 {
+        font-family: var(--font-display-he, serif);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 1.25rem;
+        color: var(--ink, #1f1d18);
+        margin: 0 0 12px;
+        letter-spacing: -0.02em;
+      }
+      p {
+        font-size: 14px;
+        color: var(--ink-3, #7c7562);
+        line-height: 1.6;
         margin: 0;
       }
-      .message-modal-content {
-        text-align: center; /* Center the content */
-      }
       .modal-actions {
-        margin-top: 15px;
+        margin-top: 20px;
         text-align: center;
       }
       .modal-actions button {
-        padding: 10px 20px;
-        background-color: var(--primary-color);
-        color: var(--button-color);
+        font-family: var(--font-ui, system-ui, sans-serif);
+        font-size: 13.5px;
+        font-weight: 500;
+        padding: 11px 28px;
+        background: var(--primary, #6a994e);
+        color: #fff;
         border: none;
-        border-radius: 5px;
+        border-radius: var(--r-sm, 8px);
         cursor: pointer;
+        transition: background var(--dur-1, 160ms) var(--ease, ease);
       }
       .modal-actions button:hover {
-        background-color: var(--primary-hover);
+        background: var(--primary-dark, #386641);
       }
     `;
   }

@@ -1,5 +1,5 @@
 /* Global variables and resets for visual tests */
-@import '/src/styles/base.css';
+@import '/src/styles/tokens.css';
 
 body {
   background-color: #f0f0f0;

@@ -15,6 +15,7 @@ import { jest } from '@jest/globals';
 jest.unstable_mockModule('firebase/auth', () => ({
   browserLocalPersistence: 'local',
   browserSessionPersistence: 'session',
+  EmailAuthProvider: { credential: jest.fn() },
   GoogleAuthProvider: jest.fn().mockImplementation(() => ({ addScope: jest.fn() })),
   setPersistence: jest.fn(),
   signInWithEmailAndPassword: jest.fn(),
@@ -22,7 +23,10 @@ jest.unstable_mockModule('firebase/auth', () => ({
   createUserWithEmailAndPassword: jest.fn(),
   signOut: jest.fn(),
   sendPasswordResetEmail: jest.fn(),
-  setPersistence: jest.fn(),
   getAuth: jest.fn(() => 'mockAuth'),
   updateProfile: jest.fn(),
+  updatePassword: jest.fn(),
+  reauthenticateWithCredential: jest.fn(),
+  linkWithPopup: jest.fn(),
+  unlink: jest.fn(),
 }));

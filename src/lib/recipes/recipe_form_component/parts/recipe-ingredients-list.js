@@ -52,9 +52,7 @@ class RecipeIngredientsList extends SectionedListComponent {
       .replace(/'/g, '&#39;');
     const escapedUnit = (ingredient.unit || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const escapedItem = (ingredient.item || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    const removeButtonHTML = includeRemove
-      ? `<button type="button" class="recipe-form__button ${this.removeButtonClass}">-</button>`
-      : '';
+    const removeButtonHTML = `<button type="button" class="recipe-form__button ${this.removeButtonClass}"${!includeRemove ? ' style="visibility:hidden;pointer-events:none"' : ''}>-</button>`;
 
     return `
       <div class="${this.itemClass}">
@@ -64,8 +62,8 @@ class RecipeIngredientsList extends SectionedListComponent {
                placeholder="יחידה" name="unit" value="${escapedUnit}">
         <input type="text" class="recipe-form__input recipe-form__input--item"
                placeholder="פריט" name="item" value="${escapedItem}">
-        <button type="button" class="recipe-form__button ${this.addButtonClass}">+</button>
         ${removeButtonHTML}
+        <button type="button" class="recipe-form__button ${this.addButtonClass}">+</button>
       </div>
     `;
   }

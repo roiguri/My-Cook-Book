@@ -63,13 +63,12 @@ class EditPreviewRecipe extends HTMLElement {
     this.path = '/img/icon/other/';
     this.render();
     this.modal = this.shadowRoot.querySelector('custom-modal');
-    this.setupModeToggle();
+    this.setupToolbar();
     this.setupSuccessEventListener();
 
-    // Initial check on page load
-    this.handleResize();
-    // Listen for window resize events
-    window.addEventListener('resize', this.handleResize);
+    this._handleResize = this.handleResize.bind(this);
+    this._handleResize();
+    window.addEventListener('resize', this._handleResize);
   }
 
   render() {
@@ -82,162 +81,220 @@ class EditPreviewRecipe extends HTMLElement {
   }
 
   styles() {
-    return `      
-      .recipe-preview-modal .modal-content {
-        outline: 1px solid black;
-        border-radius: 10px;
-        background-color: transparent;
-        overflow-y: auto; /* Add vertical scroll to the modal content */
-        margin-bottom: 20px;
-      }
-
-      .modal {
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.4);
-      }
-
-      .modal-content {
-        background-color: #fefefe;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 90%;
-        flex-grow: 1;
-      }
-
-      .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-      }
-
-      .close:hover,
-      .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-      }
-
-      .modal-buttons {
+    return `
+      .edit-modal-wrap {
         display: flex;
-        justify-content: space-around;
-        margin-top: 10px;
-        margin-bottom: 10px;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+      }
+
+      /* ---- Bottom action bar ---- */
+
+      .edit-toolbar {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        direction: rtl;
+        margin-top: 20px;
+        padding: 14px 20px;
+        background: var(--surface-0, #fafaf8);
+        border: 1px solid var(--hairline, rgba(31,29,24,0.08));
+        border-radius: var(--r-lg, 20px);
+        box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
+      }
+
+      .toolbar-btn svg {
+        display: block;
+        flex-shrink: 0;
+      }
+
+      .toolbar-actions {
+        display: flex;
         gap: 10px;
+        align-items: center;
       }
 
-      .modal-buttons button { 
-        padding: 12px;
-        width: 100%;
-        background-color: var(--primary-color, #bb6016);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: bold;
+      .toolbar-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-family: var(--font-ui-he, sans-serif);
+        font-size: 13.5px;
+        font-weight: 500;
+        padding: 10px 22px;
+        border-radius: var(--r-sm, 8px);
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition:
+          background var(--dur-1, 160ms),
+          border-color var(--dur-1, 160ms);
       }
 
-      .modal-buttons button:hover {
-        background-color: var(--primary-hover, #5c4033);
+      .toolbar-btn--toggle {
+        background: transparent;
+        color: var(--ink-3, rgba(31,29,24,0.55));
+        border: 1px solid var(--hairline, rgba(31,29,24,0.12));
+        border-radius: var(--r-pill, 999px);
+        font-size: 13px;
+        padding: 10px 18px;
       }
 
-      .modal-buttons button#approve-button {
-        background-color: var(--success-color, #4CAF50); /* Green for Approve */
+      .toolbar-btn--toggle:hover {
+        background: var(--surface-2, #f0ede6);
+        border-color: var(--primary, #6a994e);
+        color: var(--primary-dark, #386641);
       }
 
-      .modal-buttons button#approve-button:hover {
-        background-color: var(--success-hover, #45a049); /* Darker green on hover */
+      .toolbar-btn--clear {
+        background: transparent;
+        color: var(--ink, #1f1d18);
+        border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
       }
 
-      .modal-buttons button#reject-button {
-        background-color: var(--error-color, #f44336); /* Red for Reject */
+      .toolbar-btn--clear:hover {
+        background: var(--surface-2, #f0ede6);
       }
 
-      .modal-buttons button#reject-button:hover {
-        background-color: var(--error-hover, #d32f2f); /* Darker red on hover */
+      .toolbar-btn--save {
+        background: var(--primary, #6a994e);
+        color: #fff;
+        border: none;
       }
 
-      .mode-toggle {
-        position: absolute;
-        top: 10px; /* Adjust as needed */
-        left: 10px; /* Adjust as needed */
-        background: none; /* Remove button background */
-        border: none; /* Remove button border */
-        padding: 5px; /* Adjust as needed */
-        cursor: pointer; /* Show pointer cursor on hover */
+      .toolbar-btn--save:hover {
+        background: var(--primary-dark, #386641);
+      }
+
+      .toolbar-btn:disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
+        pointer-events: none;
       }
 
       .toggle-icon {
-        height: 20px;
-        width: 20px;
+        width: 15px;
+        height: 15px;
+        display: block;
+        opacity: 0.65;
+      }
+
+      @media (max-width: 768px) {
+        .btn-label { display: none; }
+
+        .toolbar-btn {
+          padding: 10px 12px;
+        }
+
+        .toolbar-btn--toggle {
+          padding: 10px 12px;
+        }
       }
     `;
   }
 
   template() {
+    const isPreview = this.mode === 'preview';
     return `
       <div class="recipe-preview-modal">
         <custom-modal height="90vh" width="60vw">
-          <button class="mode-toggle">
-            ${
-              this.mode === 'preview'
-                ? `<img src="${this.path}pencil.png" class="toggle-icon">`
-                : `<img src="${this.path}eye.png" class="toggle-icon">`
-            } 
-          </button>
-          <h3> Recipe Preview </h3>
-          <div class="modal-content">
-            ${
-              this.mode === 'preview'
-                ? `<recipe-component recipe-id="${this.recipeId}"></recipe-component>`
-                : `<edit-recipe-component recipe-id="${this.recipeId}"></edit-recipe-component>`
-            }          
+          <div class="edit-modal-wrap">
+            <div class="modal-body">
+              ${
+                isPreview
+                  ? `<recipe-component recipe-id="${this.recipeId}"></recipe-component>`
+                  : `<edit-recipe-component recipe-id="${this.recipeId}" hide-form-actions></edit-recipe-component>`
+              }
+            </div>
+            <div class="edit-toolbar">
+              <button class="toolbar-btn toolbar-btn--toggle" id="toolbar-toggle">
+                ${
+                  isPreview
+                    ? `<img src="${this.path}pencil.png" class="toggle-icon" alt="ערוך"><span class="btn-label">ערוך מתכון</span>`
+                    : `<img src="${this.path}eye.png" class="toggle-icon" alt="צפה"><span class="btn-label">תצוגה מקדימה</span>`
+                }
+              </button>
+              <div class="toolbar-actions">
+                <button class="toolbar-btn toolbar-btn--clear" id="toolbar-clear" ${isPreview ? 'disabled' : ''} aria-label="נקה">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  <span class="btn-label">נקה</span>
+                </button>
+                <button class="toolbar-btn toolbar-btn--save" id="toolbar-save" ${isPreview ? 'disabled' : ''} aria-label="שמור">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M13 2H5L2 5v9h12V2zM10 2v4H5V2M8 8v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span class="btn-label">שמור</span>
+                </button>
+              </div>
+            </div>
           </div>
         </custom-modal>
       </div>
     `;
   }
 
-  setupModeToggle() {
-    const modeToggleButton = this.shadowRoot.querySelector('.mode-toggle');
-    const modalContent = this.shadowRoot.querySelector('.modal-content'); // Get the container
-    const toggleImage = this.shadowRoot.querySelector('.toggle-icon');
-    modeToggleButton.addEventListener('click', (event) => {
+  setupToolbar() {
+    const toggleBtn = this.shadowRoot.getElementById('toolbar-toggle');
+    const saveBtn = this.shadowRoot.getElementById('toolbar-save');
+    const clearBtn = this.shadowRoot.getElementById('toolbar-clear');
+    const modalBody = this.shadowRoot.querySelector('.modal-body');
+    const toggleImg = toggleBtn.querySelector('.toggle-icon');
+    const toggleLbl = toggleBtn.querySelector('.btn-label');
+
+    toggleBtn.addEventListener('click', () => {
       if (this.mode === 'preview') {
         this.mode = 'edit';
 
-        // Remove recipe-component
-        const recipeComponent = modalContent.querySelector('recipe-component');
-        if (recipeComponent) modalContent.removeChild(recipeComponent);
+        const recipeComp = modalBody.querySelector('recipe-component');
+        if (recipeComp) modalBody.removeChild(recipeComp);
 
-        // Add edit-recipe-component
-        const editRecipeComponent = document.createElement('edit-recipe-component');
-        editRecipeComponent.setAttribute('recipe-id', this.recipeId);
-        modalContent.appendChild(editRecipeComponent);
+        const editComp = document.createElement('edit-recipe-component');
+        editComp.setAttribute('recipe-id', this.recipeId);
+        editComp.setAttribute('hide-form-actions', '');
+        modalBody.appendChild(editComp);
 
-        toggleImage.src = this.path + 'eye.png';
+        toggleImg.src = this.path + 'eye.png';
+        toggleImg.alt = 'צפה';
+        toggleLbl.textContent = 'תצוגה מקדימה';
+        saveBtn.disabled = false;
+        clearBtn.disabled = false;
       } else {
         this.mode = 'preview';
 
-        // Remove edit-recipe-component
-        const editRecipeComponent = modalContent.querySelector('edit-recipe-component');
-        if (editRecipeComponent) modalContent.removeChild(editRecipeComponent);
+        const editComp = modalBody.querySelector('edit-recipe-component');
+        if (editComp) modalBody.removeChild(editComp);
 
-        // Add recipe-component
-        const recipeComponent = document.createElement('recipe-component');
-        recipeComponent.setAttribute('recipe-id', this.recipeId);
-        modalContent.appendChild(recipeComponent);
+        const recipeComp = document.createElement('recipe-component');
+        recipeComp.setAttribute('recipe-id', this.recipeId);
+        modalBody.appendChild(recipeComp);
 
-        toggleImage.src = this.path + 'pencil.png';
+        toggleImg.src = this.path + 'pencil.png';
+        toggleImg.alt = 'ערוך';
+        toggleLbl.textContent = 'ערוך מתכון';
+        saveBtn.disabled = true;
+        clearBtn.disabled = true;
       }
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const editComp = modalBody.querySelector('edit-recipe-component');
+      const formComp = editComp?.shadowRoot?.querySelector('recipe-form-component');
+      formComp?.submitForm();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      const editComp = modalBody.querySelector('edit-recipe-component');
+      const formComp = editComp?.shadowRoot?.querySelector('recipe-form-component');
+      formComp?.requestClear();
     });
   }
 
@@ -260,11 +317,8 @@ class EditPreviewRecipe extends HTMLElement {
     });
   }
 
-  // Handle recipe preview size for different layouts
   handleResize() {
-    const element = this.shadowRoot.querySelector('custom-modal');
     if (window.innerWidth < 768) {
-      // Adjust breakpoint as needed
       this.modal.setHeight('100vh');
       this.modal.setWidth('100vw');
     } else {

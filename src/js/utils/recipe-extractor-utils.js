@@ -15,7 +15,9 @@ export function mapExtractedDataToForm(extractedData) {
     waitTime: extractedData.waitTime || 0,
     servings: extractedData.servings || 1,
     difficulty: extractedData.difficulty || 'בינונית',
-    description: extractedData.description || '', // Kept for future use
+    description: extractedData.description || '',
+    servingsUnit: extractedData.servingsUnit || 'מנות',
+    attribution: extractedData.attribution || '',
     comments: extractedData.comments || [],
     tags: extractedData.tags || [],
   };

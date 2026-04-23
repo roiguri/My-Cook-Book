@@ -16,6 +16,8 @@ Naming Convention:
   width: 100%;
   min-height: 100%;
   /* Add base page styles here */
+  background-color: var(--surface-0);
+  color: var(--ink-2);
 }
 
 /* Page sections */
@@ -28,7 +30,7 @@ Naming Convention:
 .spa-content .[page-name] .content-section {
   /* Main content section styles */
   padding: 1rem;
-  max-width: 1200px;
+  max-width: var(--content-max, 1200px);
   margin: 0 auto;
 }
 
@@ -40,55 +42,59 @@ Naming Convention:
 
 /* Typography */
 .spa-content .[page-name] h1 {
-  font-size: var(--size-header1);
-  font-family: var(--heading-font);
-  color: var(--text-color);
+  font-size: var(--step-5);
+  font-family: var(--font-display);
+  color: var(--ink);
   margin-bottom: 1rem;
+  font-weight: 400;
 }
 
 .spa-content .[page-name] h2 {
-  font-size: var(--size-header2);
-  font-family: var(--heading-font);
-  color: var(--text-color);
+  font-size: var(--step-3);
+  font-family: var(--font-display);
+  color: var(--ink);
   margin-bottom: 0.75rem;
+  font-weight: 400;
 }
 
 .spa-content .[page-name] p {
-  font-size: var(--size-body);
-  color: var(--text-color);
+  font-size: var(--step-1);
+  color: var(--ink-2);
   line-height: 1.6;
   margin-bottom: 1rem;
 }
 
 /* Links and buttons */
 .spa-content .[page-name] a {
-  color: var(--primary-color);
+  color: var(--primary);
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color var(--dur-1) var(--ease);
 }
 
 .spa-content .[page-name] a:hover {
-  color: var(--secondary-color);
+  color: var(--primary-hover);
   text-decoration: underline;
 }
 
 .spa-content .[page-name] .button {
-  background-color: var(--primary-color);
-  color: var(--button-text-color);
+  background-color: var(--primary);
+  color: var(--button-color, #fff);
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  border-radius: var(--r-sm, 10px);
   cursor: pointer;
-  font-size: var(--size-body);
-  transition: background-color 0.3s ease;
+  font-family: var(--font-ui);
+  font-size: var(--step-0);
+  font-weight: 500;
+  transition: background-color var(--dur-1) var(--ease);
 }
 
 .spa-content .[page-name] .button:hover {
-  background-color: var(--secondary-color);
+  background-color: var(--primary-hover);
 }
 
 .spa-content .[page-name] .button:disabled {
-  background-color: var(--disabled-color);
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -101,50 +107,56 @@ Naming Convention:
   display: block;
   font-weight: 600;
   margin-bottom: 0.25rem;
-  color: var(--text-color);
+  color: var(--ink);
+  font-size: var(--step-0);
 }
 
 .spa-content .[page-name] input,
 .spa-content .[page-name] textarea,
 .spa-content .[page-name] select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: var(--size-body);
-  background-color: var(--input-background);
-  color: var(--text-color);
+  padding: 0.625rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm, 10px);
+  font-size: var(--step-0);
+  background-color: var(--surface-1);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  transition:
+    border-color var(--dur-1) var(--ease),
+    box-shadow var(--dur-1) var(--ease);
 }
 
 .spa-content .[page-name] input:focus,
 .spa-content .[page-name] textarea:focus,
 .spa-content .[page-name] select:focus {
-  border-color: var(--primary-color);
+  border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 2px var(--primary-color-light);
+  box-shadow: var(--ring);
 }
 
 /* Cards and containers */
 .spa-content .[page-name] .card {
-  background-color: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  background-color: var(--surface-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md, 14px);
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-1);
   margin-bottom: 1rem;
 }
 
 .spa-content .[page-name] .card-header {
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--hairline);
   padding-bottom: 1rem;
   margin-bottom: 1rem;
 }
 
 .spa-content .[page-name] .card-title {
-  font-size: var(--size-header2);
-  font-weight: 600;
+  font-size: var(--step-3);
+  font-weight: 400;
+  font-family: var(--font-display);
   margin: 0;
-  color: var(--text-color);
+  color: var(--ink);
 }
 
 /* Grid layouts */
@@ -192,24 +204,24 @@ Naming Convention:
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  font-size: var(--size-large);
-  color: var(--text-color-secondary);
+  font-size: var(--step-2);
+  color: var(--ink-3);
 }
 
 .spa-content .[page-name] .error {
-  background-color: var(--error-background);
-  color: var(--error-color);
-  border: 1px solid var(--error-border);
-  border-radius: 4px;
+  background-color: color-mix(in oklab, var(--secondary) 8%, white);
+  color: var(--secondary-dark);
+  border: 1px solid color-mix(in oklab, var(--secondary) 20%, white);
+  border-radius: var(--r-sm, 10px);
   padding: 1rem;
   margin: 1rem 0;
 }
 
 .spa-content .[page-name] .success {
-  background-color: var(--success-background);
-  color: var(--success-color);
-  border: 1px solid var(--success-border);
-  border-radius: 4px;
+  background-color: color-mix(in oklab, var(--primary) 8%, white);
+  color: var(--primary-dark);
+  border: 1px solid color-mix(in oklab, var(--primary) 20%, white);
+  border-radius: var(--r-sm, 10px);
   padding: 1rem;
   margin: 1rem 0;
 }
@@ -254,11 +266,11 @@ Naming Convention:
   }
 
   .spa-content .[page-name] h1 {
-    font-size: var(--size-header1-mobile);
+    font-size: var(--step-4);
   }
 
   .spa-content .[page-name] h2 {
-    font-size: var(--size-header2-mobile);
+    font-size: var(--step-2);
   }
 
   /* Stack grid items on mobile */
@@ -301,7 +313,7 @@ Naming Convention:
 
   .spa-content .[page-name] .button {
     padding: 0.5rem 1rem;
-    font-size: var(--size-small);
+    font-size: var(--step--1);
   }
 }
 

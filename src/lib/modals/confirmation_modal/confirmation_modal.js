@@ -90,36 +90,56 @@ class ConfirmationModal extends Modal {
       ${super.existingStyles()}
       .confirmation-modal-content {
         text-align: center;
+        direction: rtl;
+        font-family: var(--font-ui, system-ui, sans-serif);
+        padding: 56px 32px 32px;
+      }
+      h2 {
+        font-family: var(--font-display-he, serif);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 1.25rem;
+        color: var(--ink, #1f1d18);
+        margin: 0 0 12px;
+        letter-spacing: -0.02em;
+      }
+      p {
+        font-size: 14px;
+        color: var(--ink-3, #7c7562);
+        line-height: 1.6;
+        margin: 0 0 20px;
       }
       .modal-buttons {
         display: flex;
-        gap: 8px;
+        gap: 10px;
+        justify-content: center;
       }
       .modal-button {
-        padding: 12px;
-        width: 45%;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: bold;
+        font-family: var(--font-ui, system-ui, sans-serif);
+        font-size: 13.5px;
+        font-weight: 500;
+        padding: 11px 24px;
+        border-radius: var(--r-sm, 8px);
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: background var(--dur-1, 160ms) var(--ease, ease),
+                    border-color var(--dur-1, 160ms) var(--ease, ease);
         min-width: 100px;
+        border: none;
       }
       .approve-button {
-        background-color: var(--primary-color, #bb6016);
-        color: white;
+        background: var(--primary, #6a994e);
+        color: #fff;
       }
       .approve-button:hover {
-        background-color: var(--primary-hover, #5c4033);
+        background: var(--primary-dark, #386641);
       }
       .reject-button {
-        background-color: var(--secondary-color, #e6dfd1);
-        color: var(--primary-color, #bb6016);
+        background: transparent;
+        color: var(--ink-2, #3a3a3a);
+        border: 1px solid var(--hairline-strong, rgba(31, 29, 24, 0.2));
       }
       .reject-button:hover {
-        background-color: #5c4033;
-        color: white;
+        background: var(--surface-2, #f2e8cf);
       }
     `;
   }

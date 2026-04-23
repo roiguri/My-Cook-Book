@@ -40,76 +40,70 @@ class FilterSearchBar extends HTMLElement {
           width: 100%;
           display: flex;
           align-items: center;
+          background: var(--surface-1, #fff);
+          border: 1px solid var(--hairline-strong, rgba(31, 29, 24, 0.2));
+          border-radius: var(--r-pill, 999px);
+          transition: border-color var(--dur-1, 160ms) ease, box-shadow var(--dur-1, 160ms) ease;
+        }
+
+        .search-container:focus-within {
+          border-color: var(--primary, #6a994e);
+          box-shadow: 0 0 0 3px rgba(106, 153, 78, 0.12);
         }
 
         .search-input {
           width: 100%;
-          height: 36px;
-          padding: 0 16px;
-          padding-left: 70px; /* Space for the search icon and clear button */
-          border: 2px solid var(--border-light, #e0e0e0);
-          border-radius: 12px;
-          font-size: var(--size-body);
-          font-family: var(--body-font);
-          background-color: white;
-          color: var(--text-color);
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          font-weight: 500;
+          height: 38px;
+          padding: 0 44px 0 44px; /* Balanced padding for icon and clear button */
+          border: 0;
+          background: transparent;
+          outline: none;
+          font-size: 14px;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          color: var(--ink-1, #1a1a1a);
+          font-weight: 400;
           box-sizing: border-box;
         }
 
-        .search-input:hover {
-          border-color: var(--secondary, #6c757d);
-          transform: translateY(-1px);
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-        }
-
-        .search-input:focus {
-          outline: none;
-          border-color: var(--secondary, #6c757d);
-          box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.1);
+        .search-input::placeholder {
+          color: var(--ink-3, #7c7562);
         }
 
         .search-icon {
           position: absolute;
-          left: 12px;
+          left: 16px;
           top: 50%;
           transform: translateY(-50%);
-          color: var(--text-color-secondary, #666);
+          color: var(--ink-3, #7c7562);
           pointer-events: none;
-          font-size: var(--size-icon, 1.2em);
+          display: flex;
+          align-items: center;
         }
 
         .clear-button {
           position: absolute;
-          left: 40px; /* Position next to search icon */
+          right: 14px;
           top: 50%;
           transform: translateY(-50%);
           background: none;
           border: none;
-          color: var(--text-color-secondary, #666);
+          color: var(--ink-3, #7c7562);
           cursor: pointer;
-          font-size: 18px;
-          padding: 4px;
+          font-size: 16px;
+          padding: 0;
           border-radius: 50%;
-          width: 24px;
-          height: 24px;
-          display: none; /* Hidden by default */
+          width: 20px;
+          height: 20px;
+          display: none;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s ease;
+          transition: color var(--dur-1, 160ms) ease;
           font-weight: bold;
+          line-height: 1;
         }
 
         .clear-button:hover {
-          background-color: var(--border-light, #e0e0e0);
-          color: var(--text-color, #333);
-          transform: translateY(-50%) scale(1.1);
-        }
-
-        .clear-button:active {
-          transform: translateY(-50%) scale(0.9);
+          color: var(--ink-1, #1a1a1a);
         }
 
         .clear-button.visible {
@@ -121,74 +115,35 @@ class FilterSearchBar extends HTMLElement {
           direction: rtl;
         }
 
+        :host([dir="rtl"]) .search-input {
+          padding-right: 44px;
+          padding-left: 44px;
+        }
+
         :host([dir="rtl"]) .search-icon {
           left: auto;
-          right: 12px;
+          right: 16px;
         }
 
         :host([dir="rtl"]) .clear-button {
-          left: auto;
-          right: 40px;
-        }
-
-        :host([dir="rtl"]) .search-input {
-          padding-right: 70px;
-          padding-left: 16px;
-        }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-          .search-input {
-            height: 36px;
-            padding: 0 12px;
-            padding-left: 60px;
-            border-radius: 8px;
-            font-size: var(--size-body-mobile, 0.9rem);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          }
-
-          .search-input:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-          }
-
-          .search-icon {
-            left: 10px;
-            font-size: 1.1em;
-          }
-
-          .clear-button {
-            left: 35px;
-            width: 22px;
-            height: 22px;
-            font-size: 16px;
-          }
-
-          :host([dir="rtl"]) .search-icon {
-            left: auto;
-            right: 10px;
-          }
-
-          :host([dir="rtl"]) .clear-button {
-            left: auto;
-            right: 35px;
-          }
-
-          :host([dir="rtl"]) .search-input {
-            padding-right: 60px;
-            padding-left: 12px;
-          }
+          right: auto;
+          left: 14px;
         }
 
       </style>
 
       <div class="search-container" dir="rtl">
-        <input 
-          type="text" 
-          class="search-input" 
+        <input
+          type="text"
+          class="search-input"
           placeholder="${placeholder}"
           aria-label="חיפוש מתכונים">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
         <button class="clear-button" type="button" aria-label="נקה חיפוש">×</button>
       </div>
     `;

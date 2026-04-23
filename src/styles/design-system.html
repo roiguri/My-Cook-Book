@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Design System — Our Kitchen Chronicles</title>
+    <meta name="viewport" content="width=1280" />
+    <style>
+      /* Font + token imports */
+      @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+Hebrew:wght@300;400;500;600;700&family=Noto+Serif+Hebrew:wght@400;600&display=swap');
+      @import url('./tokens.css');
+      @import url('./components/typography.css');
+      @import url('./components/spacing.css');
+      @import url('./components/cards.css');
+      @import url('./components/badges.css');
+      @import url('./components/alerts.css');
+      @import url('./components/fields.css');
+      @import url('./components/base_button.css');
+    </style>
+    <style>
+      /* ---- Page shell ---- */
+      body {
+        background:
+          radial-gradient(1200px 600px at 100% -10%, rgba(167, 201, 87, 0.1), transparent 60%),
+          radial-gradient(900px 500px at -10% 110%, rgba(188, 71, 73, 0.06), transparent 60%),
+          var(--surface-0);
+      }
+
+      .shell {
+        max-width: var(--content-max);
+        margin: 0 auto;
+        padding: clamp(32px, 6vw, 72px) var(--gutter) 120px;
+      }
+
+      /* ---- Page header ---- */
+      .ds-doc-head {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: end;
+        gap: 24px;
+        padding-bottom: 28px;
+        margin-bottom: 56px;
+        border-bottom: 1px solid var(--hairline);
+      }
+
+      .ds-doc-title {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: var(--step-5);
+        line-height: 0.95;
+        letter-spacing: -0.015em;
+        color: var(--text-strong);
+        margin: 16px 0 0;
+      }
+
+      .ds-doc-meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-muted);
+        text-align: right;
+        line-height: 1.7;
+      }
+
+      .ds-code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--surface-2);
+        padding: 2px 6px;
+        border-radius: var(--r-xs);
+        color: var(--primary-dark);
+      }
+
+      .ds-subhead {
+        font-family: var(--font-ui);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin: 0 0 14px;
+      }
+
+      /* ---- Brand lockups ---- */
+      .ds-lockups {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .ds-lock {
+        border-radius: var(--r-lg);
+        padding: 40px;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid var(--hairline);
+      }
+
+      .ds-lock--white {
+        background: var(--surface-1);
+      }
+      .ds-lock--cream {
+        background: var(--neutral);
+      }
+      .ds-lock--dark {
+        background: var(--primary-dark);
+        border-color: transparent;
+      }
+      .ds-lock--dark .mono-label {
+        color: var(--primary-bright);
+      }
+
+      .ds-wm {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 44px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        margin-top: 20px;
+        color: var(--text-strong);
+      }
+
+      .ds-wm em {
+        font-style: normal;
+        color: var(--primary-dark);
+      }
+      .ds-lock--dark .ds-wm {
+        color: var(--neutral);
+      }
+      .ds-lock--dark .ds-wm em {
+        color: var(--primary-bright);
+      }
+
+      /* ---- Color palette ---- */
+      .ds-palette {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 12px;
+      }
+
+      .ds-sw {
+        border-radius: var(--r-md);
+        overflow: hidden;
+        background: var(--surface-1);
+        border: 1px solid var(--hairline);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .ds-chip {
+        height: 120px;
+        display: flex;
+        align-items: flex-end;
+        padding: 12px;
+        color: #fff;
+      }
+
+      .ds-chip--dark {
+        color: var(--text-strong);
+      }
+
+      .ds-chip span {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .ds-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+        display: inline-block;
+      }
+
+      .ds-chip-meta {
+        padding: 12px;
+        display: grid;
+        gap: 2px;
+      }
+      .ds-chip-name {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 16px;
+        color: var(--text-strong);
+        line-height: 1;
+      }
+
+      /* ---- Surface ladder ---- */
+      .ds-surfaces {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .ds-surf {
+        border-radius: var(--r-lg);
+        padding: 28px;
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid var(--hairline);
+      }
+
+      /* ---- Type scale ---- */
+      .ds-type-scale {
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .ds-type-row {
+        display: grid;
+        grid-template-columns: 180px 1fr 140px;
+        padding: 24px 28px;
+        align-items: baseline;
+        border-top: 1px solid var(--hairline);
+        gap: 20px;
+      }
+
+      .ds-type-row:first-child {
+        border-top: 0;
+      }
+      .ds-type-tag small {
+        display: block;
+        margin-top: 4px;
+      }
+      .ds-type-size {
+        text-align: right;
+      }
+
+      /* ---- Bilingual pair ---- */
+      .ds-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      /* ---- Spacing ruler ---- */
+      .ds-two {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 16px;
+      }
+
+      .ds-ruler {
+        display: grid;
+        gap: 10px;
+      }
+      .ds-rrow {
+        display: grid;
+        grid-template-columns: 100px 1fr 80px;
+        gap: 16px;
+        align-items: center;
+      }
+      .ds-rbar {
+        height: 8px;
+        background: var(--primary);
+        border-radius: 999px;
+      }
+
+      /* ---- Radii ---- */
+      .ds-radii {
+        display: grid;
+        gap: 12px;
+      }
+      .ds-radrow {
+        display: grid;
+        grid-template-columns: 72px 1fr 160px;
+        align-items: center;
+        gap: 16px;
+      }
+      .ds-rsample {
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: 1px solid var(--hairline);
+      }
+
+      /* ---- Button row ---- */
+      .ds-btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      /* ---- Card demos ---- */
+      .ds-card-demos {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      /* ---- Recipe cards ---- */
+      .ds-recipe-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      /* ---- Badges ---- */
+      .ds-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* ---- Elevation ---- */
+      .ds-elevation {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+
+      .ds-e-card {
+        background: var(--surface-1);
+        border-radius: var(--r-lg);
+        padding: 24px;
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid var(--hairline);
+      }
+
+      .ds-e-card--1 {
+        box-shadow: var(--shadow-1);
+        border-color: transparent;
+      }
+      .ds-e-card--2 {
+        box-shadow: var(--shadow-2);
+        border-color: transparent;
+      }
+      .ds-e-card--3 {
+        box-shadow: var(--shadow-3);
+        border-color: transparent;
+      }
+
+      /* ---- Motion ---- */
+      .ds-motion {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .ds-track {
+        position: relative;
+        height: 6px;
+        background: var(--surface-2);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .ds-dot-anim {
+        position: absolute;
+        top: -7px;
+        left: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+      .ds-dot-anim--1 {
+        animation: ds-slide 2s var(--ease) infinite alternate;
+      }
+      .ds-dot-anim--2 {
+        animation: ds-slide 2.6s var(--ease) infinite alternate;
+        background: var(--primary-bright);
+      }
+      .ds-dot-anim--3 {
+        animation: ds-slide 3.2s var(--ease-out) infinite alternate;
+        background: var(--secondary);
+      }
+
+      @keyframes ds-slide {
+        to {
+          left: calc(100% - 20px);
+        }
+      }
+
+      /* ---- Responsive ---- */
+      @media (max-width: 900px) {
+        .ds-palette {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        .ds-lockups {
+          grid-template-columns: 1fr 1fr;
+        }
+        .ds-surfaces {
+          grid-template-columns: 1fr 1fr;
+        }
+        .ds-type-row {
+          grid-template-columns: 120px 1fr;
+        }
+        .ds-type-size {
+          display: none;
+        }
+        .ds-two {
+          grid-template-columns: 1fr;
+        }
+        .ds-card-demos {
+          grid-template-columns: 1fr 1fr;
+        }
+        .ds-recipe-cards {
+          grid-template-columns: 1fr 1fr;
+        }
+        .ds-elevation {
+          grid-template-columns: 1fr 1fr;
+        }
+        .ds-motion {
+          grid-template-columns: 1fr;
+        }
+        .ds-pair {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <!-- Page header -->
+      <header class="ds-doc-head">
+        <div>
+          <span class="eyebrow">Design System · v2</span>
+          <h1 class="ds-doc-title">Our Kitchen<br />Chronicles</h1>
+        </div>
+        <div class="ds-doc-meta">
+          Vanilla JS · Web Components · Vite<br />
+          v2 · modern refresh · 2026
+        </div>
+      </header>
+
+      <!-- 00 — Brand / Wordmark -->
+      <section class="section" id="ds-brand">
+        <div class="section-head">
+          <h2 class="section-title">Brand &amp; Wordmark</h2>
+          <span class="section-count">3 lockups</span>
+        </div>
+        <div class="ds-lockups">
+          <div class="ds-lock ds-lock--white">
+            <span class="mono-label">primary · light</span>
+            <div class="ds-wm">Our Kitchen<br /><em>Chronicles.</em></div>
+          </div>
+          <div class="ds-lock ds-lock--cream">
+            <span class="mono-label">warm · branded</span>
+            <div class="ds-wm">Our Kitchen<br /><em>Chronicles.</em></div>
+          </div>
+          <div class="ds-lock ds-lock--dark">
+            <span class="mono-label">dark · reversed</span>
+            <div class="ds-wm">Our Kitchen<br /><em>Chronicles.</em></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 — Colors -->
+      <section class="section" id="ds-colors">
+        <div class="section-head">
+          <h2 class="section-title">Colors</h2>
+          <span class="section-count">7 palette · 3 surfaces · semantic roles</span>
+        </div>
+
+        <p class="section-lede">
+          Core palette unchanged from v1. New surface ladder and ink hierarchy added.
+        </p>
+
+        <h3 class="ds-subhead">Core palette</h3>
+        <div class="ds-palette">
+          <div class="ds-sw">
+            <div class="ds-chip" style="background: #386641">
+              <span><i class="ds-dot"></i>on dark</span>
+            </div>
+            <div class="ds-chip-meta">
+              <span class="ds-chip-name">Primary Dark</span
+              ><span class="mono-label">--primary-dark</span
+              ><span class="mono-label text-muted">#386641</span>
+            </div>
+          </div>
+          <div class="ds-sw">
+            <div class="ds-chip" style="background: #6a994e">
+              <span><i class="ds-dot"></i>primary</span>
+            </div>
+            <div class="ds-chip-meta">
+              <span class="ds-chip-name">Primary</span><span class="mono-label">--primary</span
+              ><span class="mono-label text-muted">#6a994e</span>
+            </div>
+          </div>
+          <div class="ds-sw">
+            <div class="ds-chip ds-chip--dark" style="background: #a7c957">
+              <span><i class="ds-dot"></i>accent</span>
+            </div>
+            <div class="ds-chip-meta">
+              <span class="ds-chip-name">Bright</span
+              ><span class="mono-label">--primary-bright</span
+              ><span class="mono-label text-muted">#a7c957</span>
+            </div>
+          </div>
+          <div class="ds-sw">
+            <div class="ds-chip ds-chip--dark" style="background: #f2e8cf">
+              <span><i class="ds-dot"></i>surface</span>
+            </div>
+            <div class="ds-chip-meta">
+              <span class="ds-chip-name">Neutral</span><span class="mono-label">--neutral</span
+              ><span class="mono-label text-muted">#f2e8cf</span>
+            </div>
+          </div>
+          <div class="ds-sw">
+            <div class="ds-chip" style="background: #d47779">
+              <span><i class="ds-dot"></i>highlight</span>
+            </div>
+            <div class="ds-chip-meta">
+              <span class="ds-chip-name">Sec. Light</span
+              ><span class="mono-label">--secondary-light</span
+              ><span class="mono-label text-muted">#d47779</span>
+            </div>
+          </div>
+          <div class="ds-sw">
+            <div class="ds-chip" style="background: #bc4749">
+              <span><i class="ds-dot"></i>secondary</span>
+            </div>
+            <div class="ds-chip-meta">
+              <span class="ds-chip-name">Secondary</span><span class="mono-label">--secondary</span
+              ><span class="mono-label text-muted">#bc4749</span>
+            </div>
+          </div>
+          <div class="ds-sw">
+            <div class="ds-chip" style="background: #9a3a3c">
+              <span><i class="ds-dot"></i>pressed</span>
+            </div>
+            <div class="ds-chip-meta">
+              <span class="ds-chip-name">Sec. Dark</span
+              ><span class="mono-label">--secondary-dark</span
+              ><span class="mono-label text-muted">#9a3a3c</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="ds-subhead" style="margin-top: 2rem">Surface ladder</h3>
+        <div class="ds-surfaces">
+          <div class="ds-surf" style="background: var(--surface-0)">
+            <div>
+              <span class="mono-label">surface-0 · page</span>
+              <div class="heading-3" style="margin-top: 8px">Faint cream</div>
+            </div>
+            <p class="text-muted" style="font-size: 13px; margin: 8px 0 0">
+              Default background. Warmer than white.
+            </p>
+            <span class="mono-label">#faf6ec</span>
+          </div>
+          <div class="ds-surf" style="background: var(--surface-1)">
+            <div>
+              <span class="mono-label">surface-1 · card</span>
+              <div class="heading-3" style="margin-top: 8px">Clean white</div>
+            </div>
+            <p class="text-muted" style="font-size: 13px; margin: 8px 0 0">
+              Cards, inputs at rest, recipe tiles.
+            </p>
+            <span class="mono-label">#ffffff</span>
+          </div>
+          <div class="ds-surf" style="background: var(--surface-2)">
+            <div>
+              <span class="mono-label">surface-2 · sunken</span>
+              <div class="heading-3" style="margin-top: 8px">Pressed cream</div>
+            </div>
+            <p class="text-muted" style="font-size: 13px; margin: 8px 0 0">
+              Table headers, chips at rest, inset areas.
+            </p>
+            <span class="mono-label">#f6eed6</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 — Typography -->
+      <section class="section" id="ds-typography">
+        <div class="section-head">
+          <h2 class="section-title">Typography</h2>
+          <span class="section-count">4 families · fluid scale</span>
+        </div>
+
+        <p class="section-lede">
+          Instrument Serif for display, Geist for UI, Noto for Hebrew. Fluid
+          <code class="ds-code">clamp()</code> type scale.
+        </p>
+
+        <div class="card card-pad-lg ds-type-scale">
+          <div class="ds-type-row">
+            <div class="ds-type-tag">
+              <span class="mono-label">--step-6</span
+              ><small class="mono-label text-muted">display</small>
+            </div>
+            <div class="ds-type-sample display" style="font-size: var(--step-6)">
+              Everything you cook
+            </div>
+            <div class="ds-type-size"><span class="mono-label">3.5–6.75 rem</span></div>
+          </div>
+          <div class="ds-type-row">
+            <div class="ds-type-tag">
+              <span class="mono-label">--step-5</span
+              ><small class="mono-label text-muted">H1</small>
+            </div>
+            <div class="ds-type-sample heading-1">Recently added</div>
+            <div class="ds-type-size"><span class="mono-label">2.6–4.25 rem</span></div>
+          </div>
+          <div class="ds-type-row">
+            <div class="ds-type-tag">
+              <span class="mono-label">--step-4</span
+              ><small class="mono-label text-muted">H2</small>
+            </div>
+            <div class="ds-type-sample heading-2">Breads &amp; pastries</div>
+            <div class="ds-type-size"><span class="mono-label">1.9–2.75 rem</span></div>
+          </div>
+          <div class="ds-type-row">
+            <div class="ds-type-tag">
+              <span class="mono-label">--step-3</span
+              ><small class="mono-label text-muted">H3 / lede</small>
+            </div>
+            <div class="ds-type-sample heading-3">Sourdough challah</div>
+            <div class="ds-type-size"><span class="mono-label">1.4–1.75 rem</span></div>
+          </div>
+          <div class="ds-type-row">
+            <div class="ds-type-tag">
+              <span class="mono-label">--step-2</span
+              ><small class="mono-label text-muted">lead</small>
+            </div>
+            <div class="ds-type-sample lead">
+              Slow-braised lamb with pomegranate molasses — serves six.
+            </div>
+            <div class="ds-type-size"><span class="mono-label">1.15–1.32 rem</span></div>
+          </div>
+          <div class="ds-type-row">
+            <div class="ds-type-tag">
+              <span class="mono-label">--step-1</span
+              ><small class="mono-label text-muted">body</small>
+            </div>
+            <div class="ds-type-sample body-text">
+              Submitted Tuesday. Approved within a day or two — a manager will review it.
+            </div>
+            <div class="ds-type-size"><span class="mono-label">1–1.09 rem</span></div>
+          </div>
+          <div class="ds-type-row">
+            <div class="ds-type-tag">
+              <span class="mono-label">--step--1</span
+              ><small class="mono-label text-muted">caption</small>
+            </div>
+            <div
+              class="ds-type-sample"
+              style="
+                font-family: var(--font-mono);
+                font-size: 12px;
+                color: var(--text-muted);
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+              "
+            >
+              45 min · medium · savta ruth
+            </div>
+            <div class="ds-type-size"><span class="mono-label">0.78–0.82 rem</span></div>
+          </div>
+        </div>
+
+        <h3 class="ds-subhead" style="margin-top: 2rem">Bilingual pairing</h3>
+        <div class="ds-pair">
+          <div class="card card-pad-lg">
+            <div class="eyebrow">Breads &amp; pastries</div>
+            <h2 class="heading-2" style="margin-top: 18px; margin-bottom: 16px">
+              Sourdough challah,<br />braided by hand.
+            </h2>
+            <p class="body-text">
+              Friday's loaf — a four-strand braid, brushed with egg wash and a light dusting of
+              poppy seeds.
+            </p>
+            <div class="mono-label" style="margin-top: 16px">
+              45 min · intermediate · savta ruth
+            </div>
+          </div>
+          <div class="card card-pad-lg" dir="rtl">
+            <div class="eyebrow" style="direction: rtl">לחמים ומאפים</div>
+            <h2 class="heading-2-he" style="margin-top: 18px; margin-bottom: 16px">
+              חלה שמרים,<br />קלועה ביד.
+            </h2>
+            <p class="body-text-he">
+              הכנה פשוטה, תפיחה כפולה, קליעה בארבע רצועות. המתכון של אמא לשישי בערב.
+            </p>
+            <div class="mono-label" style="margin-top: 16px; direction: rtl">
+              45 דק׳ · בינוני · סבתא רות
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 — Spacing & Shape -->
+      <section class="section" id="ds-spacing">
+        <div class="section-head">
+          <h2 class="section-title">Spacing &amp; shape</h2>
+          <span class="section-count">8-px rhythm · 6 radii · 3 shadows</span>
+        </div>
+        <div class="ds-two">
+          <div class="card card-pad-lg">
+            <h3 class="heading-3">Scale</h3>
+            <div class="mono-label text-primary" style="margin: 6px 0 20px">
+              rem-based · multiples of 4 / 8
+            </div>
+            <div class="ds-ruler">
+              <div class="ds-rrow">
+                <span class="mono-label">2xs · 4px</span>
+                <div class="ds-rbar" style="width: 4px"></div>
+                <span class="mono-label text-muted">0.25 rem</span>
+              </div>
+              <div class="ds-rrow">
+                <span class="mono-label">xs · 8px</span>
+                <div class="ds-rbar" style="width: 8px"></div>
+                <span class="mono-label text-muted">0.5 rem</span>
+              </div>
+              <div class="ds-rrow">
+                <span class="mono-label">sm · 12px</span>
+                <div class="ds-rbar" style="width: 12px"></div>
+                <span class="mono-label text-muted">0.75 rem</span>
+              </div>
+              <div class="ds-rrow">
+                <span class="mono-label">md · 16px</span>
+                <div class="ds-rbar" style="width: 16px"></div>
+                <span class="mono-label text-muted">1 rem</span>
+              </div>
+              <div class="ds-rrow">
+                <span class="mono-label">lg · 24px</span>
+                <div class="ds-rbar" style="width: 24px"></div>
+                <span class="mono-label text-muted">1.5 rem</span>
+              </div>
+              <div class="ds-rrow">
+                <span class="mono-label">xl · 32px</span>
+                <div class="ds-rbar" style="width: 32px"></div>
+                <span class="mono-label text-muted">2 rem</span>
+              </div>
+              <div class="ds-rrow">
+                <span class="mono-label">2xl · 48px</span>
+                <div class="ds-rbar" style="width: 48px"></div>
+                <span class="mono-label text-muted">3 rem</span>
+              </div>
+              <div class="ds-rrow">
+                <span class="mono-label">3xl · 72px</span>
+                <div class="ds-rbar" style="width: 72px"></div>
+                <span class="mono-label text-muted">4.5 rem</span>
+              </div>
+            </div>
+          </div>
+          <div class="card card-pad-lg">
+            <h3 class="heading-3">Corner radii</h3>
+            <div class="mono-label text-primary" style="margin: 6px 0 20px">6 tokens</div>
+            <div class="ds-radii">
+              <div class="ds-radrow">
+                <div class="ds-rsample" style="border-radius: 6px"></div>
+                <div>
+                  <div class="body-text">xs</div>
+                  <div class="mono-label text-muted">chips, tags</div>
+                </div>
+                <span class="mono-label text-muted">--r-xs · 6px</span>
+              </div>
+              <div class="ds-radrow">
+                <div class="ds-rsample" style="border-radius: 10px"></div>
+                <div>
+                  <div class="body-text">sm</div>
+                  <div class="mono-label text-muted">buttons, inputs</div>
+                </div>
+                <span class="mono-label text-muted">--r-sm · 10px</span>
+              </div>
+              <div class="ds-radrow">
+                <div class="ds-rsample" style="border-radius: 14px"></div>
+                <div>
+                  <div class="body-text">md</div>
+                  <div class="mono-label text-muted">toasts, pills</div>
+                </div>
+                <span class="mono-label text-muted">--r-md · 14px</span>
+              </div>
+              <div class="ds-radrow">
+                <div class="ds-rsample" style="border-radius: 20px"></div>
+                <div>
+                  <div class="body-text">lg</div>
+                  <div class="mono-label text-muted">cards, modals</div>
+                </div>
+                <span class="mono-label text-muted">--r-lg · 20px</span>
+              </div>
+              <div class="ds-radrow">
+                <div class="ds-rsample" style="border-radius: 28px"></div>
+                <div>
+                  <div class="body-text">xl</div>
+                  <div class="mono-label text-muted">hero panels</div>
+                </div>
+                <span class="mono-label text-muted">--r-xl · 28px</span>
+              </div>
+              <div class="ds-radrow">
+                <div class="ds-rsample" style="border-radius: 9999px"></div>
+                <div>
+                  <div class="body-text">pill</div>
+                  <div class="mono-label text-muted">badges, nav</div>
+                </div>
+                <span class="mono-label text-muted">--r-pill · ∞</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 — Buttons -->
+      <section class="section" id="ds-buttons">
+        <div class="section-head">
+          <h2 class="section-title">Buttons</h2>
+          <span class="section-count">4 variants · 3 sizes · modifiers</span>
+        </div>
+        <div class="card card-pad-lg">
+          <div class="ds-subhead">Variants</div>
+          <div class="ds-btn-row" style="margin-bottom: 24px">
+            <button class="btn btn-primary">Save recipe</button>
+            <button class="btn btn-ghost">Suggest an edit</button>
+            <button class="btn btn-quiet">Cancel</button>
+            <button class="btn btn-danger">Delete draft</button>
+            <button class="btn btn-primary" disabled>Disabled</button>
+          </div>
+          <div class="ds-subhead">Sizes &amp; pills</div>
+          <div class="ds-btn-row" style="margin-bottom: 24px">
+            <button class="btn btn-primary btn-sm">Small</button>
+            <button class="btn btn-primary">Default</button>
+            <button class="btn btn-primary btn-lg">Large</button>
+            <button class="btn btn-ghost btn-pill">Pill · filter</button>
+            <button class="btn btn-ghost btn-icon" title="Favorite">♥</button>
+          </div>
+          <div class="ds-subhead">Hover &amp; focus preview</div>
+          <div class="ds-btn-row">
+            <button class="btn btn-primary" style="background: var(--primary-dark)">Hover</button>
+            <button class="btn btn-ghost" style="background: var(--surface-2)">Hover</button>
+            <button class="btn btn-primary" style="box-shadow: var(--ring)">Focus</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 — Cards -->
+      <section class="section" id="ds-cards">
+        <div class="section-head">
+          <h2 class="section-title">Cards</h2>
+          <span class="section-count">3 variants · 4 recipe states</span>
+        </div>
+
+        <h3 class="ds-subhead">Base card variants</h3>
+        <div class="ds-card-demos">
+          <div class="card card-pad-lg">
+            <div class="eyebrow">Base card</div>
+            <p class="heading-3" style="margin-top: 10px">With shadow-1</p>
+            <p class="body-text text-muted" style="margin-top: 6px">
+              Default card. Used for panels, modals, content blocks.
+            </p>
+          </div>
+          <div class="card--flat card-pad-lg">
+            <div class="eyebrow">Flat panel</div>
+            <p class="heading-3" style="margin-top: 10px">Hairline only</p>
+            <p class="body-text text-muted" style="margin-top: 6px">
+              For inline content areas. No shadow.
+            </p>
+          </div>
+          <div class="card--feature card-pad-lg">
+            <div class="mono-label" style="color: rgba(242, 232, 207, 0.5)">Feature card</div>
+            <p class="heading-3" style="margin-top: 10px; color: var(--neutral)">
+              Dark green hero block
+            </p>
+            <p style="margin-top: 6px; font-size: 13px; color: rgba(242, 232, 207, 0.72)">
+              For hero sections and marketing moments.
+            </p>
+          </div>
+        </div>
+
+        <h3 class="ds-subhead" style="margin-top: 2rem">Recipe cards</h3>
+        <div class="ds-recipe-cards">
+          <div class="recipe-card">
+            <div class="recipe-card__photo">
+              <button class="recipe-card__fav" aria-label="Favorite">♡</button>
+            </div>
+            <div class="recipe-card__body">
+              <span class="recipe-card__cat">Breads &amp; pastries</span>
+              <h4 class="recipe-card__title">Sourdough challah</h4>
+              <div class="recipe-card__meta">
+                <span>45 min · medium</span><span>Savta Ruth</span>
+              </div>
+            </div>
+          </div>
+          <div class="recipe-card">
+            <div class="recipe-card__photo recipe-card__photo--main-courses">
+              <button class="recipe-card__fav recipe-card__fav--active" aria-label="Unfavorite">
+                ♥
+              </button>
+            </div>
+            <div class="recipe-card__body">
+              <span class="recipe-card__cat">Main Courses</span>
+              <h4 class="recipe-card__title">Pomegranate lamb</h4>
+              <div class="recipe-card__meta">
+                <span>2 h · advanced</span><span>Abba David</span>
+              </div>
+            </div>
+          </div>
+          <div class="recipe-card">
+            <div class="recipe-card__photo recipe-card__photo--desserts">
+              <span class="recipe-card__stamp recipe-card__stamp--approved">Approved</span>
+              <button class="recipe-card__fav" aria-label="Favorite">♡</button>
+            </div>
+            <div class="recipe-card__body">
+              <span class="recipe-card__cat">Desserts</span>
+              <h4 class="recipe-card__title">Honey-walnut baklava</h4>
+              <div class="recipe-card__meta">
+                <span>1 h 10 · medium</span><span>Dod Yossi</span>
+              </div>
+            </div>
+          </div>
+          <div class="recipe-card recipe-card--pending">
+            <div class="recipe-card__photo">
+              <span class="recipe-card__stamp recipe-card__stamp--pending">Pending</span>
+            </div>
+            <div class="recipe-card__body">
+              <span class="recipe-card__cat">Salads</span>
+              <h4 class="recipe-card__title">Fattoush with sumac</h4>
+              <div class="recipe-card__meta"><span>20 min · easy</span><span>In review</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 — Badges -->
+      <section class="section" id="ds-badges">
+        <div class="section-head">
+          <h2 class="section-title">Badges</h2>
+          <span class="section-count">10 categories · difficulty · time</span>
+        </div>
+        <div class="card card-pad-lg">
+          <div class="ds-subhead">Category badges</div>
+          <div class="ds-badges" style="margin-bottom: 24px">
+            <span class="bdg bdg--active bdg--cat-all">All</span>
+            <span class="bdg bdg--cat-appetizers">Appetizers</span>
+            <span class="bdg bdg--cat-main-courses">Main Courses</span>
+            <span class="bdg bdg--cat-side-dishes">Side Dishes</span>
+            <span class="bdg bdg--cat-soups-stews">Soups &amp; Stews</span>
+            <span class="bdg bdg--cat-salads">Salads</span>
+            <span class="bdg bdg--cat-desserts">Desserts</span>
+            <span class="bdg bdg--cat-breakfast-brunch">Breakfast</span>
+            <span class="bdg bdg--cat-breads-pastries">Breads</span>
+            <span class="bdg bdg--cat-snacks">Snacks</span>
+            <span class="bdg bdg--cat-beverages">Beverages</span>
+          </div>
+          <div class="ds-subhead">Difficulty</div>
+          <div class="ds-badges" style="margin-bottom: 24px">
+            <span class="bdg bdg--easy">Easy</span>
+            <span class="bdg bdg--medium">Medium</span>
+            <span class="bdg bdg--hard">Hard</span>
+          </div>
+          <div class="ds-subhead">Time</div>
+          <div class="ds-badges">
+            <span class="bdg bdg--time-short">≤ 30 min</span>
+            <span class="bdg bdg--time-long">&gt; 60 min</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 07 — Alerts -->
+      <section class="section" id="ds-alerts">
+        <div class="section-head">
+          <h2 class="section-title">Feedback</h2>
+          <span class="section-count">success · warning · error</span>
+        </div>
+        <div class="alerts">
+          <div class="alert alert--ok">
+            <span class="alert__icon">✓</span>
+            <div>
+              <b>Saved.</b> &nbsp;Your draft of "Sourdough challah" is in review — a manager will
+              approve within a day or two.
+            </div>
+          </div>
+          <div class="alert alert--warn">
+            <span class="alert__icon">!</span>
+            <div>
+              <b>Missing attribution.</b> &nbsp;Add the person this recipe belongs to before
+              submitting.
+            </div>
+          </div>
+          <div class="alert alert--err">
+            <span class="alert__icon">×</span>
+            <div>
+              <b>Couldn't save.</b> &nbsp;Check your connection and try again — nothing has been
+              lost.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 08 — Form fields -->
+      <section class="section" id="ds-fields">
+        <div class="section-head">
+          <h2 class="section-title">Form fields</h2>
+          <span class="section-count">rest · focus · error</span>
+        </div>
+        <div class="card card-pad-lg">
+          <div class="fields-grid">
+            <div class="field">
+              <label class="field__label">Recipe title</label>
+              <input type="text" class="field__input" value="Sourdough challah, braided" />
+              <span class="field__hint">Required · shown on the card</span>
+            </div>
+            <div class="field">
+              <label class="field__label">Attribution</label>
+              <input type="text" class="field__input" value="Savta Ruth, 1974" />
+              <span class="field__hint">Who does this recipe belong to?</span>
+            </div>
+            <div class="field field--full">
+              <label class="field__label">Description</label>
+              <textarea class="field__input" rows="3">
+Friday's loaf — a four-strand braid, brushed with egg wash and a light dusting of poppy seeds.</textarea
+              >
+              <span class="field__hint">140 chars or fewer · plain language, no marketing</span>
+            </div>
+            <div class="field field--err">
+              <label class="field__label">Cook time (min)</label>
+              <input type="text" class="field__input" value="abc" />
+              <span class="field__hint">Must be a number</span>
+            </div>
+            <div class="field">
+              <label class="field__label">Category</label>
+              <select class="field__input">
+                <option>Breads &amp; pastries</option>
+                <option>Mains</option>
+                <option>Desserts</option>
+              </select>
+              <span class="field__hint">Pick one</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 — Elevation -->
+      <section class="section" id="ds-elevation">
+        <div class="section-head">
+          <h2 class="section-title">Elevation</h2>
+          <span class="section-count">4 levels · diffuse shadows</span>
+        </div>
+        <div class="ds-elevation">
+          <div class="ds-e-card">
+            <div>
+              <span class="mono-label text-primary">Level 0 · Flat</span>
+              <div class="heading-3" style="margin-top: 6px">Hairline</div>
+            </div>
+            <p class="body-text text-muted" style="font-size: 12px; margin: 0">
+              In-flow surfaces. Separated by a 1px line, not a shadow.
+            </p>
+          </div>
+          <div class="ds-e-card ds-e-card--1">
+            <div>
+              <span class="mono-label text-primary">Level 1 · Card</span>
+              <div class="heading-3" style="margin-top: 6px">Soft rest</div>
+            </div>
+            <p class="body-text text-muted" style="font-size: 12px; margin: 0">
+              Recipe cards, tiles, panels at rest.
+            </p>
+          </div>
+          <div class="ds-e-card ds-e-card--2">
+            <div>
+              <span class="mono-label text-primary">Level 2 · Lifted</span>
+              <div class="heading-3" style="margin-top: 6px">Hover, active</div>
+            </div>
+            <p class="body-text text-muted" style="font-size: 12px; margin: 0">
+              Card hover, sticky headers, popovers.
+            </p>
+          </div>
+          <div class="ds-e-card ds-e-card--3">
+            <div>
+              <span class="mono-label text-primary">Level 3 · Overlay</span>
+              <div class="heading-3" style="margin-top: 6px">Modals, menus</div>
+            </div>
+            <p class="body-text text-muted" style="font-size: 12px; margin: 0">
+              Modal dialogs, dropdowns, action menus.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 — Motion -->
+      <section class="section" id="ds-motion">
+        <div class="section-head">
+          <h2 class="section-title">Motion</h2>
+          <span class="section-count">3 tiers</span>
+        </div>
+        <div class="ds-motion">
+          <div class="card card-pad-lg">
+            <div class="heading-3">Snap</div>
+            <div class="mono-label text-primary" style="margin-top: 4px">
+              --dur-1 · 160ms · ease
+            </div>
+            <p class="body-text text-muted" style="font-size: 12px; margin: 10px 0 14px">
+              Hover color swaps, focus rings, icon taps.
+            </p>
+            <div class="ds-track"><span class="ds-dot-anim ds-dot-anim--1"></span></div>
+          </div>
+          <div class="card card-pad-lg">
+            <div class="heading-3">Glide</div>
+            <div class="mono-label text-primary" style="margin-top: 4px">
+              --dur-2 · 280ms · ease
+            </div>
+            <p class="body-text text-muted" style="font-size: 12px; margin: 10px 0 14px">
+              Card lift, favorite fill, image fade-in.
+            </p>
+            <div class="ds-track"><span class="ds-dot-anim ds-dot-anim--2"></span></div>
+          </div>
+          <div class="card card-pad-lg">
+            <div class="heading-3">Drift</div>
+            <div class="mono-label text-primary" style="margin-top: 4px">
+              --dur-3 · 520ms · ease-out
+            </div>
+            <p class="body-text text-muted" style="font-size: 12px; margin: 10px 0 14px">
+              Modal reveal, drawer slide, page transitions.
+            </p>
+            <div class="ds-track"><span class="ds-dot-anim ds-dot-anim--3"></span></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

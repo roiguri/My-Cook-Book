@@ -67,6 +67,7 @@ export default {
     const proposeRecipeForm = container.querySelector('propose-recipe-component');
     const loginPromptModal = document.querySelector('#login-prompt-modal');
     const authController = document.querySelector('auth-controller');
+    const actionBar = document.querySelector('#propose-action-bar');
 
     if (!proposeRecipeForm) {
       console.warn('propose-recipe-component not found in container');
@@ -76,13 +77,16 @@ export default {
     this.proposeRecipeForm = proposeRecipeForm;
     this.loginPromptModal = loginPromptModal;
     this.authController = authController;
+    this.actionBar = actionBar;
 
     proposeRecipeForm.style.display = 'none';
+    if (actionBar) actionBar.style.display = 'none';
 
     this.handleAuthStateChange = (isAuthenticated) => {
       if (isAuthenticated) {
         // User is authenticated
         proposeRecipeForm.style.display = 'block';
+        if (actionBar) actionBar.style.display = 'block';
         if (typeof proposeRecipeForm.setFormDisabled === 'function') {
           proposeRecipeForm.setFormDisabled(false);
         }
@@ -92,6 +96,7 @@ export default {
       } else {
         // User is NOT authenticated
         proposeRecipeForm.style.display = 'block';
+        if (actionBar) actionBar.style.display = 'none';
         if (typeof proposeRecipeForm.setFormDisabled === 'function') {
           proposeRecipeForm.setFormDisabled(true);
         } else {
@@ -129,6 +134,31 @@ export default {
 
     document.addEventListener('recipe-proposed-success', this.recipeProposedHandler);
 
+    const submitBtn = document.querySelector('#action-submit');
+    const clearBtn = document.querySelector('#action-clear');
+    const importBtn = document.querySelector('#action-import');
+
+    if (submitBtn) {
+      this.actionSubmitHandler = () => {
+        if (this.proposeRecipeForm) this.proposeRecipeForm.submitForm();
+      };
+      submitBtn.addEventListener('click', this.actionSubmitHandler);
+    }
+
+    if (clearBtn) {
+      this.actionClearHandler = () => {
+        if (this.proposeRecipeForm) this.proposeRecipeForm.requestClear();
+      };
+      clearBtn.addEventListener('click', this.actionClearHandler);
+    }
+
+    if (importBtn) {
+      this.actionImportHandler = () => {
+        if (this.proposeRecipeForm) this.proposeRecipeForm.openImportModal();
+      };
+      importBtn.addEventListener('click', this.actionImportHandler);
+    }
+
     if (this.loginPromptModal) {
       this.modalClosedHandler = () => {
         if (!authService.isAuthenticated()) {
@@ -146,6 +176,16 @@ export default {
       document.removeEventListener('recipe-proposed-success', this.recipeProposedHandler);
       this.recipeProposedHandler = null;
     }
+
+    const submitBtn = document.querySelector('#action-submit');
+    const clearBtn = document.querySelector('#action-clear');
+    const importBtn = document.querySelector('#action-import');
+    if (submitBtn && this.actionSubmitHandler)
+      submitBtn.removeEventListener('click', this.actionSubmitHandler);
+    if (clearBtn && this.actionClearHandler)
+      clearBtn.removeEventListener('click', this.actionClearHandler);
+    if (importBtn && this.actionImportHandler)
+      importBtn.removeEventListener('click', this.actionImportHandler);
 
     if (this.loginPromptModal && this.modalClosedHandler) {
       this.loginPromptModal.removeEventListener('modal-closed-by-user', this.modalClosedHandler);
@@ -169,7 +209,7 @@ export default {
         <div class="error-message">
           <h3>Error Loading Page</h3>
           <p>Sorry, we couldn't load the propose recipe page. Please try again.</p>
-          <button id="propose-error-go-home" class="btn-primary">Go Home</button>
+          <button id="propose-error-go-home" class="btn btn-primary">Go Home</button>
         </div>
       `;
 

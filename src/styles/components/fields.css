@@ -1,0 +1,176 @@
+/* ==========================================================================
+   Form field components — v2
+
+   Usage:
+     <div class="field">
+       <label class="field__label">Recipe title</label>
+       <input type="text" class="field__input" value="Sourdough challah" />
+       <span class="field__hint">Required · shown on the card</span>
+     </div>
+
+     Error state:
+     <div class="field field--err">
+       <label class="field__label">Cook time (min)</label>
+       <input type="text" class="field__input" value="abc" />
+       <span class="field__hint">Must be a number</span>
+     </div>
+   ========================================================================== */
+
+/* ---- Field wrapper ---- */
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+/* ---- Label ---- */
+
+.field__label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---- Input / textarea / select ---- */
+
+.field__input,
+.field input,
+.field textarea,
+.field select {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  color: var(--text-strong);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  width: 100%;
+  transition:
+    border-color var(--dur-1) var(--ease),
+    box-shadow var(--dur-1) var(--ease);
+  appearance: none;
+  -webkit-appearance: none;
+  line-height: 1.4;
+}
+
+.field__input:focus,
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ---- Hint text ---- */
+
+.field__hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ---- Error state ---- */
+
+.field--err .field__input,
+.field--err input,
+.field--err textarea,
+.field--err select {
+  border-color: var(--secondary);
+}
+
+.field--err .field__input:focus,
+.field--err input:focus,
+.field--err textarea:focus,
+.field--err select:focus {
+  box-shadow: 0 0 0 3px rgba(188, 71, 73, 0.2);
+}
+
+.field--err .field__hint {
+  color: var(--secondary);
+}
+
+/* ---- Disabled state ---- */
+
+.field__input:disabled,
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--surface-2);
+}
+
+/* ---- Select — standalone pill-shaped control ---- */
+/* Use when a select sits inline with buttons (e.g. filter bar), not inside a .field wrapper.
+   Example: <select class="select-ctrl">…</select> */
+
+.select-ctrl {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 14px 0 32px; /* extra left space for chevron (LTR) */
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-strong);
+  background: var(--surface-1);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-pill);
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237c7562' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: left 10px center; /* LTR: chevron on right; override for RTL below */
+  background-size: 16px;
+  transition:
+    border-color var(--dur-1) var(--ease),
+    box-shadow var(--dur-1) var(--ease);
+}
+
+/* RTL: flip padding + chevron to the left */
+[dir='rtl'] .select-ctrl,
+.select-ctrl:dir(rtl) {
+  padding: 0 32px 0 14px;
+  background-position: right 10px center;
+}
+
+.select-ctrl:hover {
+  border-color: var(--hairline-strong);
+  background-color: var(--surface-1);
+}
+
+.select-ctrl:focus {
+  border-color: var(--primary);
+  box-shadow: var(--ring);
+}
+
+.select-ctrl:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Field grid layout ---- */
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.fields-grid .field--full {
+  grid-column: span 2;
+}

@@ -20,7 +20,7 @@ test.describe('Recipe Import Modal', () => {
     await expect(page).toHaveScreenshot('modal-initial-state.png', { maxDiffPixels: 500 });
 
     // Click close button
-    await modal.locator('.close-button').click();
+    await modal.locator('.close-button').first().click();
     await expect(customModalInternal).not.toHaveClass(/open/);
   });
 

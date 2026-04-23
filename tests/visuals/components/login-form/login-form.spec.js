@@ -98,7 +98,7 @@ test.describe('LoginForm Component', () => {
 
   test('should trigger google login', async ({ page }) => {
     const loginForm = page.locator('login-form');
-    const googleBtn = loginForm.locator('.gsi-material-button');
+    const googleBtn = loginForm.locator('.btn-social');
 
     await expect(googleBtn).toBeVisible();
 
@@ -143,7 +143,7 @@ test.describe('LoginForm Component', () => {
 
     const errorMsg = loginForm.locator('#login-error');
     await expect(errorMsg).toBeVisible();
-    await expect(errorMsg).toHaveText('שם משתמש או סיסמה שגויים');
+    await expect(errorMsg).toHaveText('כתובת מייל או סיסמה שגויים');
 
     // Visual Snapshot for error state
     const container = page.locator('.test-container');

@@ -92,13 +92,13 @@ class PDFViewer extends HTMLElement {
               <style>
                 .pdf_viewer {
                     width: 100%;
-                    border-radius: 12px;
+                    border-radius: var(--r-lg, 20px);
                     overflow: hidden;
                     display: flex;
                     flex-direction: column;
-                    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
-                    border: 1px solid rgba(0, 0, 0, 0.06);
+                    background: var(--surface-1, #fff);
+                    box-shadow: var(--shadow-2, 0 4px 16px rgba(31,29,24,0.1));
+                    border: 1px solid var(--hairline, rgba(31,29,24,0.08));
                 }
 
                 .pdf_viewer.full-page {
@@ -119,9 +119,9 @@ class PDFViewer extends HTMLElement {
                     flex-grow: 1;
                     overflow: auto;
                     padding: 20px;
-                    background: #ffffff;
+                    background: var(--surface-0, #fafaf8);
                     position: relative;
-                    min-height: 400px; /* Min height to prevent jump during load */
+                    min-height: 400px;
                 }
 
                 .pdf_viewer.full-page .pdf_viewer__pdf-page {
@@ -129,34 +129,26 @@ class PDFViewer extends HTMLElement {
                     padding: 0;
                 }
 
-                .pdf_viewer__pdf-page::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 1px;
-                    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
-                }
-
                 .pdf_viewer__pdf-page img {
                     max-width: 100%;
                     max-height: 100%;
                     height: auto;
                     object-fit: contain;
-                    border-radius: 8px;
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-                    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
-                    opacity: 0; /* Hidden initially until loaded */
+                    border-radius: var(--r-md, 12px);
+                    box-shadow: var(--shadow-2, 0 4px 16px rgba(31,29,24,0.10));
+                    transition: transform var(--dur-1, 160ms) var(--ease-out, ease),
+                                box-shadow var(--dur-1, 160ms) var(--ease-out, ease),
+                                opacity var(--dur-2, 260ms);
+                    opacity: 0;
                 }
-                
+
                 .pdf_viewer__pdf-page img.loaded {
                     opacity: 1;
                 }
 
                 .pdf_viewer__pdf-page img:hover {
                     transform: scale(1.02);
-                    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16);
+                    box-shadow: var(--shadow-3, 0 8px 32px rgba(31,29,24,0.16));
                 }
 
                 .pdf_viewer.full-page .pdf_viewer__pdf-page img {
@@ -168,13 +160,13 @@ class PDFViewer extends HTMLElement {
                     position: absolute;
                     width: 40px;
                     height: 40px;
-                    border: 4px solid #f3f3f3;
-                    border-top: 4px solid var(--primary-color, #bb6016);
+                    border: 4px solid var(--hairline, rgba(31,29,24,0.08));
+                    border-top-color: var(--primary, #6a994e);
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
                     display: none;
                 }
-                
+
                 .loading-spinner.visible {
                     display: block;
                 }
@@ -189,9 +181,9 @@ class PDFViewer extends HTMLElement {
                     justify-content: space-between;
                     align-items: center;
                     padding: 8px 16px;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    background: var(--surface-2, #f5f4f0);
                     flex-shrink: 0;
-                    border-top: 1px solid rgba(0, 0, 0, 0.06);
+                    border-top: 1px solid var(--hairline, rgba(31,29,24,0.08));
                 }
 
                 .pdf_viewer.full-page .pdf_viewer__pdf-navigation {
@@ -203,10 +195,10 @@ class PDFViewer extends HTMLElement {
                     justify-content: center;
                     align-items: center;
                     padding: 12px 16px;
-                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    background: var(--surface-2, #f5f4f0);
                     gap: 12px;
                     flex-shrink: 0;
-                    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+                    border-bottom: 1px solid var(--hairline, rgba(31,29,24,0.08));
                 }
 
                 .pdf_viewer.full-page .recipe-search {
@@ -214,18 +206,18 @@ class PDFViewer extends HTMLElement {
                 }
 
                 .pdf_viewer__pdf-navigation button {
-                    background: linear-gradient(135deg, var(--primary-color, #bb6016) 0%, #a0541a 100%);
-                    color: white;
+                    background: var(--primary, #6a994e);
+                    color: #fff;
                     border: none;
-                    padding: 12px 20px;
-                    border-radius: 8px;
+                    padding: 10px 20px;
+                    border-radius: var(--r-sm, 8px);
                     cursor: pointer;
+                    font-family: var(--font-ui-he, inherit);
                     font-weight: 500;
                     font-size: 14px;
-                    transition: all 0.2s ease;
-                    box-shadow: 0 2px 8px rgba(187, 96, 22, 0.3);
-                    position: relative;
-                    overflow: hidden;
+                    transition: background var(--dur-1, 160ms), transform var(--dur-1, 160ms),
+                                box-shadow var(--dur-1, 160ms);
+                    box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
                 }
 
                 /* Full Page Controls */
@@ -237,7 +229,7 @@ class PDFViewer extends HTMLElement {
                     border: none;
                     cursor: pointer;
                     z-index: 10001;
-                    transition: background 0.2s ease;
+                    transition: background var(--dur-1, 160ms);
                 }
 
                 .pdf_viewer.full-page .fp-control {
@@ -266,7 +258,7 @@ class PDFViewer extends HTMLElement {
                     width: 50px;
                     height: 80px;
                     font-size: 30px;
-                    border-radius: 8px;
+                    border-radius: var(--r-sm, 8px);
                 }
 
                 .fp-prev {
@@ -287,14 +279,14 @@ class PDFViewer extends HTMLElement {
                     right: 10px;
                     width: 32px;
                     height: 32px;
-                    border-radius: 6px;
+                    border-radius: var(--r-xs, 6px);
                     background: rgba(0, 0, 0, 0.35);
                     color: white;
                     border: none;
                     cursor: pointer;
                     z-index: 5;
                     font-size: 14px;
-                    transition: background 0.2s ease, opacity 0.2s ease;
+                    transition: background var(--dur-1, 160ms), opacity var(--dur-1, 160ms);
                     opacity: 0.6;
                 }
 
@@ -307,24 +299,10 @@ class PDFViewer extends HTMLElement {
                     display: none;
                 }
 
-                .pdf_viewer__pdf-navigation button::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: -100%;
-                    width: 100%;
-                    height: 100%;
-                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-                    transition: left 0.5s ease;
-                }
-
                 .pdf_viewer__pdf-navigation button:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 16px rgba(187, 96, 22, 0.4);
-                }
-
-                .pdf_viewer__pdf-navigation button:hover::before {
-                    left: 100%;
+                    background: var(--primary-dark, #4a7c31);
+                    transform: translateY(-1px);
+                    box-shadow: var(--shadow-2, 0 4px 16px rgba(31,29,24,0.10));
                 }
 
                 .pdf_viewer__pdf-navigation button:active {
@@ -332,70 +310,64 @@ class PDFViewer extends HTMLElement {
                 }
 
                 .pdf_viewer__pdf-navigation button:disabled {
-                    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-                    color: #6c757d;
+                    background: var(--hairline-strong, rgba(31,29,24,0.15));
+                    color: var(--ink-4, rgba(31,29,24,0.35));
                     cursor: not-allowed;
                     transform: none;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    box-shadow: none;
                 }
 
                 .pdf_viewer__pdf-navigation span {
-                    background: rgba(255, 255, 255, 0.9);
-                    padding: 8px 16px;
-                    border-radius: 20px;
+                    background: var(--surface-1, #fff);
+                    padding: 6px 16px;
+                    border-radius: var(--r-pill, 999px);
                     font-weight: 500;
-                    color: var(--text-color, #333);
-                    border: 1px solid rgba(0, 0, 0, 0.08);
-                    backdrop-filter: blur(10px);
-                }
-
-                .pdf-viewer .recipe-search {
-                  padding: 12px 16px;
-                  background: linear-gradient(135deg, var(--background-color, #f8f9fa) 0%, #e9ecef 100%);
-                  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+                    font-family: var(--font-mono, monospace);
+                    font-size: 12px;
+                    color: var(--ink-3, rgba(31,29,24,0.55));
+                    border: 1px solid var(--hairline-strong, rgba(31,29,24,0.15));
                 }
 
                 .pdf_viewer #category-select,
                 .pdf_viewer #search-input {
-                  padding: 12px 16px;
-                  border: 2px solid rgba(187, 96, 22, 0.2);
-                  border-radius: 8px;
+                  padding: 10px 14px;
+                  border: 1.5px solid var(--hairline-strong, rgba(31,29,24,0.15));
+                  border-radius: var(--r-sm, 8px);
                   font-size: 14px;
-                  background: rgba(255, 255, 255, 0.95);
-                  transition: all 0.2s ease;
-                  backdrop-filter: blur(10px);
-                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                  font-family: var(--font-ui-he, inherit);
+                  background: var(--surface-0, #fafaf8);
+                  color: var(--ink, #1f1d18);
+                  transition: border-color var(--dur-1, 160ms), box-shadow var(--dur-1, 160ms);
                 }
 
                 .pdf_viewer #category-select:focus,
                 .pdf_viewer #search-input:focus {
                   outline: none;
-                  border-color: var(--primary-color, #bb6016);
-                  box-shadow: 0 0 0 3px rgba(187, 96, 22, 0.1);
-                  background: #ffffff;
+                  border-color: var(--primary, #6a994e);
+                  box-shadow: 0 0 0 3px rgba(106, 153, 78, 0.12);
+                  background: var(--surface-1, #fff);
                 }
 
                 .pdf_viewer #category-select:hover,
                 .pdf_viewer #search-input:hover {
-                  border-color: rgba(187, 96, 22, 0.4);
-                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                  border-color: var(--primary, #6a994e);
                 }
 
                 @media (max-width: 768px) {
                   .pdf_viewer__pdf-page {
                     padding: 12px;
                   }
-                  
+
                   .pdf_viewer__pdf-navigation {
                     padding: 6px 12px;
                   }
-                  
+
                   .recipe-search {
                     padding: 10px 12px;
                     gap: 8px;
                     flex-wrap: wrap;
                   }
-                  
+
                   .pdf_viewer #category-select,
                   .pdf_viewer #search-input {
                     padding: 10px 12px;
@@ -403,9 +375,9 @@ class PDFViewer extends HTMLElement {
                     min-width: 0;
                     flex: 1;
                   }
-                  
+
                   .pdf_viewer__pdf-navigation button {
-                    padding: 10px 16px;
+                    padding: 8px 14px;
                     font-size: 13px;
                   }
                 }

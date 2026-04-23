@@ -1,55 +1,63 @@
-/* SPA Recipe Detail Page Styles - Scoped for SPA Content Container */
+/* SPA Recipe Detail Page Styles */
 
-.spa-content .recipe-detail .recipe-container {
-  position: relative; /* For absolute positioning of menu */
-  width: 600px;
-  padding: 100px;
-  font-family: var(--body-font);
-  background-color: var(--background-color);
-  direction: rtl;
-  flex-grow: 1;
-  height: 100%;
+.spa-content .recipe-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-/* Recipe Menu Styles */
+.spa-content .recipe-detail .recipe-container {
+  position: relative;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px var(--gutter);
+  direction: rtl;
+}
+
+/* ---- Recipe Action Menu ---- */
 .spa-content .recipe-detail .recipe-menu {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 14px;
+  left: 14px;
   z-index: 100;
 }
 
 .spa-content .recipe-detail .recipe-menu-button {
-  background: none;
+  background: var(--surface-2);
   border: none;
   cursor: pointer;
-  padding: 8px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary-color);
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  color: var(--ink-3);
+  border-radius: var(--r-sm);
+  transition:
+    background var(--dur-1) var(--ease),
+    color var(--dur-1) var(--ease);
 }
 
 .spa-content .recipe-detail .recipe-menu-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background: var(--hairline);
+  color: var(--ink);
 }
 
 .spa-content .recipe-detail .recipe-menu-button svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
 }
 
 .spa-content .recipe-detail .recipe-menu-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 6px);
   left: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 180px;
+  background: var(--surface-1);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  min-width: 200px;
   overflow: hidden;
   display: none;
   z-index: 1000;
@@ -61,77 +69,85 @@
 
 .spa-content .recipe-detail .menu-item {
   width: 100%;
-  padding: 12px 16px;
+  padding: 11px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
   background: none;
   border: none;
+  border-bottom: 1px solid var(--hairline);
   cursor: pointer;
-  font-size: 14px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
   text-align: right;
-  transition: background-color 0.2s;
-  color: #333;
+  transition: background var(--dur-1) var(--ease);
+  color: var(--ink-2);
+  direction: rtl;
+}
+
+.spa-content .recipe-detail .menu-item:last-child {
+  border-bottom: none;
 }
 
 .spa-content .recipe-detail .menu-item:hover {
-  background-color: #f5f5f5;
+  background: var(--surface-2);
 }
 
 .spa-content .recipe-detail .menu-item svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
+  color: var(--ink-3);
 }
 
 .spa-content .recipe-detail .menu-item span {
   flex: 1;
 }
 
-/* Error state styling */
+/* ---- Error state ---- */
 .spa-content .recipe-detail .recipe-detail-error {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 50vh;
   padding: 2rem;
+  text-align: center;
 }
 
 .spa-content .recipe-detail .recipe-detail-error h2 {
-  color: #d32f2f;
-  margin-bottom: 1rem;
+  font-family: var(--font-display-he);
+  font-size: var(--step-3);
+  color: var(--secondary-dark);
+  margin: 0 0 12px;
 }
 
 .spa-content .recipe-detail .recipe-detail-error p {
-  color: #666;
-  margin-bottom: 1.5rem;
+  color: var(--text-muted);
+  margin: 0 0 24px;
 }
 
 .spa-content .recipe-detail .recipe-detail-error button {
-  background: var(--primary-color);
+  background: var(--primary-dark);
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 0.75rem 1.5rem;
+  border-radius: var(--r-sm);
+  padding: 10px 24px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s ease;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background var(--dur-1) var(--ease);
 }
 
 .spa-content .recipe-detail .recipe-detail-error button:hover {
-  background: var(--primary-color-dark, #d32f2f);
+  background: var(--primary);
 }
 
-/* Mobile responsive */
+/* ---- Mobile ---- */
 @media (max-width: 768px) {
   .spa-content .recipe-detail .recipe-container {
-    padding: 30px;
-    width: auto;
-    min-width: 200px;
-  }
-
-  .spa-content .recipe-detail .recipe-detail-error {
-    padding: 1rem;
-    min-height: 40vh;
+    padding: 24px var(--gutter);
   }
 }

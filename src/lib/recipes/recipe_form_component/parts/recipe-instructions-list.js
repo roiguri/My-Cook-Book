@@ -60,15 +60,13 @@ class RecipeInstructionsList extends SectionedListComponent {
     const escapedInstruction = (instruction.text || '')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
-    const removeButtonHTML = includeRemove
-      ? `<button type="button" class="recipe-form__button ${this.removeButtonClass}">-</button>`
-      : '';
+    const removeButtonHTML = `<button type="button" class="recipe-form__button ${this.removeButtonClass}"${!includeRemove ? ' style="visibility:hidden;pointer-events:none"' : ''}>-</button>`;
 
     return `
       <fieldset class="${this.itemClass}">
         <input type="text" name="steps" class="recipe-form__input" value="${escapedInstruction}">
-        <button type="button" class="recipe-form__button ${this.addButtonClass}">+</button>
         ${removeButtonHTML}
+        <button type="button" class="recipe-form__button ${this.addButtonClass}">+</button>
       </fieldset>
     `;
   }

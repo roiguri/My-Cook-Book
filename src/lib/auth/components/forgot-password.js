@@ -1,14 +1,4 @@
 import './auth-content.js';
-import '../../modals/message-modal/message-modal.js';
-
-/**
- * ForgotPassword Component
- * @class
- * @extends HTMLElement
- *
- * @description
- * Handles password reset functionality
- */
 
 class ForgotPassword extends HTMLElement {
   constructor() {
@@ -24,199 +14,174 @@ class ForgotPassword extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        .forgot-password-form {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          padding: 20px;
-        }
+        :host { display: block; }
+
+        .body { padding: 32px 40px 36px; }
 
         .title {
-          color: var(--text-color);
-          font-size: 1.1em;
-          margin-bottom: 10px;
+          text-align: center;
+          font-family: var(--font-display, serif);
+          font-style: italic;
+          font-size: 28px;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+          color: var(--ink, #1f1d18);
+          margin: 0 0 8px;
+        }
+        .title em { font-style: normal; color: var(--primary-dark, #386641); }
+
+        .dek {
+          text-align: center;
+          margin: 0 0 24px;
+          color: var(--ink-3, #7c7562);
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14px;
+          line-height: 1.55;
         }
 
-        .description {
-          color: var(--text-color);
-          font-size: 0.9em;
-          margin-bottom: 15px;
-          opacity: 0.8;
+        .stack { display: flex; flex-direction: column; gap: 16px; }
+
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label {
+          font-family: var(--font-ui-he, system-ui, sans-serif);
+          font-size: 12px; font-weight: 600;
+          color: var(--ink-3, #7c7562);
+        }
+        .field input {
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14.5px; color: var(--ink, #1f1d18);
+          background: var(--surface-0, #faf7f2);
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          border-radius: var(--r-sm, 8px);
+          padding: 12px 14px; outline: none; width: 100%; box-sizing: border-box;
+          transition: border-color var(--dur-1, 160ms), box-shadow var(--dur-1, 160ms);
+        }
+        .field input:focus {
+          border-color: var(--primary, #6a994e);
+          box-shadow: 0 0 0 3px rgba(106,153,78,0.12);
         }
 
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
+        .btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14px; font-weight: 500;
+          padding: 13px 20px; border-radius: var(--r-sm, 8px);
+          border: 1px solid transparent; cursor: pointer; width: 100%;
+          transition: background var(--dur-1, 160ms);
         }
+        .btn-primary { background: var(--primary, #6a994e); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark, #386641); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .form-group label {
-          font-size: 0.9em;
-          color: var(--text-color);
+        .msg {
+          font-family: var(--font-mono, monospace);
+          font-size: 11px; padding: 10px 14px; border-radius: var(--r-sm, 8px);
+          display: none;
         }
-
-        .form-group input {
-          padding: 10px;
-          border: 1px solid var(--secondary-color);
-          border-radius: 5px;
-          font-size: 1em;
+        .msg.err {
+          background: color-mix(in oklab, var(--secondary, #bc4749) 8%, white);
+          color: var(--secondary-dark, #9a3a3c);
+          border: 1px solid color-mix(in oklab, var(--secondary, #bc4749) 20%, white);
         }
-
-        .form-group input:focus {
-          outline: none;
-          border-color: var(--primary-color);
+        .msg.ok {
+          background: color-mix(in oklab, var(--primary, #6a994e) 8%, white);
+          color: var(--primary-dark, #386641);
+          border: 1px solid color-mix(in oklab, var(--primary, #6a994e) 20%, white);
         }
+        .msg.visible { display: block; }
 
-        .submit-button {
-          background-color: var(--primary-color);
-          color: white;
-          padding: 12px;
-          border: none;
-          border-radius: 5px;
-          font-size: 1em;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-        }
-
-        .submit-button:hover {
-          background-color: var(--primary-hover);
-        }
-
-        .back-to-login {
-          color: var(--primary-color);
+        .back {
+          display: inline-flex; align-self: center; margin-top: 16px; text-align: center;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 13px; color: var(--primary-dark, #386641);
           text-decoration: none;
-          cursor: pointer;
-          font-size: 0.9em;
-          text-align: center;
+          border-bottom: 1px solid transparent; cursor: pointer;
         }
+        .back:hover { border-color: var(--primary, #6a994e); }
 
-        .back-to-login:hover {
-          text-decoration: underline;
-        }
-
-        .error-message {
-          color: red;
-          font-size: 0.9em;
-          margin-top: 5px;
-          display: none;
-        }
-
-        .error-message.visible {
-          display: block;
-        }
-
-        .success-message {
-          color: green;
-          font-size: 0.9em;
-          margin-top: 5px;
-          display: none;
-          background-color: #f0fff0;
-          padding: 10px;
-          border-radius: 5px;
-          text-align: center;
-        }
-
-        .success-message.visible {
-          display: block;
+        @media (max-width: 560px) {
+          .body { padding-left: 22px; padding-right: 22px; }
         }
       </style>
 
-      <form class="forgot-password-form">
-        <div class="title">שחזור סיסמה</div>
-        <div class="description">
-          הזן את כתובת המייל שלך ואנו נשלח לך קישור לאיפוס הסיסמה
-        </div>
+      <div class="body">
+        <h2 class="title">Reset your <em>password</em></h2>
+        <p class="dek">הזן את כתובת המייל שלך ונשלח לך קישור לאיפוס הסיסמה.</p>
 
-        <div class="form-group">
-          <label for="forgot-email">כתובת מייל</label>
-          <input type="email" id="forgot-email" name="email" required>
-          <div class="error-message" id="reset-error"></div>
-          <div class="success-message" id="reset-success"></div>
-        </div>
-
-        <button type="submit" class="submit-button">שלח קישור לאיפוס סיסמה</button>
-        
-        <a class="back-to-login" id="back-to-login">חזרה להתחברות</a>
-      </form>
+        <form class="stack" id="reset-form" novalidate>
+          <div class="field">
+            <label>כתובת מייל</label>
+            <input type="email" id="reset-email" autocomplete="email" />
+          </div>
+          <span class="msg" id="reset-msg"></span>
+          <button type="submit" class="btn btn-primary">שלח קישור לאיפוס</button>
+          <a class="back" id="back-link">→ חזרה להתחברות</a>
+        </form>
+      </div>
     `;
   }
 
   setupEventListeners() {
-    const form = this.shadowRoot.querySelector('.forgot-password-form');
-    const backToLogin = this.shadowRoot.getElementById('back-to-login');
-
-    form.addEventListener('submit', (e) => this.handleSubmit(e));
-    backToLogin.addEventListener('click', (e) => this.handleBackToLogin(e));
+    this.shadowRoot
+      .getElementById('reset-form')
+      .addEventListener('submit', (e) => this._handleSubmit(e));
+    this.shadowRoot.getElementById('back-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      this._goBack();
+    });
   }
 
-  async handleSubmit(e) {
+  async _handleSubmit(e) {
     e.preventDefault();
-    const email = this.shadowRoot.getElementById('forgot-email').value;
-    const submitButton = this.shadowRoot.querySelector('.submit-button');
-    const originalText = submitButton.textContent;
-
-    submitButton.disabled = true;
-    submitButton.textContent = 'שולח...';
-    submitButton.setAttribute('aria-busy', 'true');
+    const email = this.shadowRoot.getElementById('reset-email').value;
+    const btn = this.shadowRoot.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    const orig = btn.textContent;
+    btn.textContent = 'שולח...';
+    this._clearMsg();
 
     try {
       const authController = this.closest('auth-controller');
       await authController.handlePasswordReset(email);
-      this.showSuccess('קישור לאיפוס סיסמה נשלח לכתובת המייל שלך');
-
-      // Automatically return to login after 3 seconds
-      setTimeout(() => {
-        this.handleBackToLogin();
-      }, 3000);
+      this._showMsg('ok', 'הקישור נשלח — בדוק את תיבת הדואר שלך.');
+      setTimeout(() => this._goBack(), 3000);
     } catch (error) {
-      this.showError(error.message);
+      this._handleError(error);
     } finally {
-      submitButton.disabled = false;
-      submitButton.textContent = originalText;
-      submitButton.removeAttribute('aria-busy');
+      btn.disabled = false;
+      btn.textContent = orig;
     }
   }
 
-  handleBackToLogin(e) {
-    e?.preventDefault();
-    this.dispatchEvent(
-      new CustomEvent('back-to-login', {
-        bubbles: true,
-        composed: true,
-      }),
-    );
+  _handleError(error) {
+    const ERRORS = {
+      'auth/invalid-email': 'כתובת מייל לא תקינה.',
+      'auth/user-not-found': 'לא נמצא חשבון עבור כתובת מייל זו.',
+      'auth/network-request-failed': 'שגיאת רשת. בדוק את החיבור שלך.',
+    };
+    const msg = ERRORS[error.code] || 'שליחת הקישור נכשלה. נסה שנית.';
+    this._showMsg('err', msg);
   }
 
-  showError(message) {
-    const errorElement = this.shadowRoot.getElementById('reset-error');
-    const successElement = this.shadowRoot.getElementById('reset-success');
-
-    errorElement.textContent = message;
-    errorElement.classList.add('visible');
-    successElement.classList.remove('visible');
+  _goBack() {
+    this.dispatchEvent(new CustomEvent('back-to-login', { bubbles: true, composed: true }));
   }
 
-  showSuccess(message) {
-    const errorElement = this.shadowRoot.getElementById('reset-error');
-    const successElement = this.shadowRoot.getElementById('reset-success');
-
-    successElement.textContent = message;
-    successElement.classList.add('visible');
-    errorElement.classList.remove('visible');
+  _showMsg(type, text) {
+    const el = this.shadowRoot.getElementById('reset-msg');
+    el.textContent = text;
+    el.className = `msg ${type} visible`;
   }
 
-  clearMessages() {
-    const errorElement = this.shadowRoot.getElementById('reset-error');
-    const successElement = this.shadowRoot.getElementById('reset-success');
-
-    errorElement.classList.remove('visible');
-    successElement.classList.remove('visible');
+  _clearMsg() {
+    const el = this.shadowRoot.getElementById('reset-msg');
+    el.className = 'msg';
+    el.textContent = '';
   }
 
-  // Method to clear form
   reset() {
-    this.shadowRoot.querySelector('.forgot-password-form').reset();
-    this.clearMessages();
+    this.shadowRoot.getElementById('reset-form').reset();
+    this._clearMsg();
   }
 }
 

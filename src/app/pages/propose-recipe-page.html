@@ -1,22 +1,66 @@
 <div class="propose-recipe">
-  <section class="propose-recipe-hero">
-    <h1>Propose a Recipe</h1>
-    <p>Share your culinary creations with our community</p>
+  <section class="propose-hero">
+    <h1 class="propose-hero__title">הצע <em>מתכון</em> לספר.</h1>
+    <p class="propose-hero__dek">כתוב אותו כפי שהיית מספר אותו לחבר.</p>
   </section>
 
-  <section class="propose-recipe-form">
+  <section class="propose-form">
     <propose-recipe-component></propose-recipe-component>
   </section>
-
-  <div class="error-container" style="display: none"></div>
 </div>
 
-<div class="quote-section">
-  <blockquote>
-    "Cooking is like painting or writing a song. Just as there are only so many notes or colors,
-    there are only so many flavors - it's how you combine them that sets you apart."
-  </blockquote>
-  <p>-- Wolfgang Puck</p>
+<div class="propose-action-bar" id="propose-action-bar" style="display: none">
+  <div class="propose-action-bar__inner">
+    <button
+      class="propose-action-bar__btn propose-action-bar__btn--import"
+      id="action-import"
+      aria-label="ייבא מתכון"
+    >
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path
+          d="M8 2v7M5 6l3 3 3-3M3 13h10"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span class="propose-action-bar__label">ייבא מתכון</span>
+    </button>
+    <div class="propose-action-bar__actions">
+      <button
+        class="propose-action-bar__btn propose-action-bar__btn--clear"
+        id="action-clear"
+        aria-label="נקה"
+      >
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M3 3l10 10M13 3L3 13"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+        <span class="propose-action-bar__label">נקה</span>
+      </button>
+      <button
+        class="propose-action-bar__btn propose-action-bar__btn--submit"
+        id="action-submit"
+        aria-label="שלח מתכון"
+      >
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path
+            d="M14 2L2 7.5l4.5 2L9 14l1.5-4L14 2z"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        <span class="propose-action-bar__label">שלח מתכון</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <message-modal id="login-prompt-modal"></message-modal>

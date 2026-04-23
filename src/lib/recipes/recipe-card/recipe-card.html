@@ -20,23 +20,19 @@
         <path d="M12 5v14M5 12h14" />
       </svg>
     </button>
-    <img class="recipe-image" data-src="" alt="" data-fallback="/img/placeholder.jpg" />
+    <div class="photo">
+      <img class="recipe-image" data-src="" alt="" data-fallback="/img/placeholder.jpg" />
+    </div>
     <div class="recipe-content">
+      <span class="badge category"></span>
       <h3 class="recipe-title">
         <a class="recipe-link" href=""></a>
       </h3>
-      <div class="recipe-details">
-        <div class="recipe-meta">
-          <div class="category-container">
-            <span class="badge category"></span>
-          </div>
-          <div class="stats-container">
-            <span dir="rtl" class="badge time"></span>
-            <span class="badge difficulty">
-              <span class="icon"></span>
-            </span>
-          </div>
-        </div>
+      <div class="recipe-meta">
+        <span dir="rtl" class="badge time"></span>
+        <span class="badge difficulty">
+          <span class="icon"></span>
+        </span>
       </div>
     </div>
   </div>
@@ -44,7 +40,15 @@
 
 <!-- Loading State Template -->
 <template id="loading-template">
-  <div class="recipe-card loading"></div>
+  <div class="recipe-card loading">
+    <div class="photo"></div>
+    <div class="recipe-content">
+      <div class="skel skel-cat"></div>
+      <div class="skel skel-title"></div>
+      <div class="skel-divider"></div>
+      <div class="skel skel-meta"></div>
+    </div>
+  </div>
 </template>
 
 <!-- Error State Template -->
@@ -52,7 +56,7 @@
   <div class="error-state"></div>
 </template>
 
-<!-- No Image Card Template - Same structure as main, but with placeholder instead of img -->
+<!-- No Image Card Template -->
 <template id="no-image-card-template">
   <div class="recipe-card" role="article">
     <button class="favorite-btn" aria-label="Add to favorites">
@@ -74,7 +78,7 @@
         <path d="M12 5v14M5 12h14" />
       </svg>
     </button>
-    <div class="no-image-placeholder recipe-image">
+    <div class="photo no-image-placeholder">
       <svg class="no-image-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"
@@ -83,21 +87,15 @@
       </svg>
     </div>
     <div class="recipe-content">
+      <span class="badge category"></span>
       <h3 class="recipe-title">
         <a class="recipe-link" href=""></a>
       </h3>
-      <div class="recipe-details">
-        <div class="recipe-meta">
-          <div class="category-container">
-            <span class="badge category"></span>
-          </div>
-          <div class="stats-container">
-            <span dir="rtl" class="badge time"></span>
-            <span class="badge difficulty">
-              <span class="icon"></span>
-            </span>
-          </div>
-        </div>
+      <div class="recipe-meta">
+        <span dir="rtl" class="badge time"></span>
+        <span class="badge difficulty">
+          <span class="icon"></span>
+        </span>
       </div>
     </div>
   </div>

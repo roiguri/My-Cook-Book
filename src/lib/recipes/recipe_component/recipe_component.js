@@ -84,40 +84,55 @@ class RecipeComponent extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>${this.styles()}</style>
       <div dir="rtl" class="Recipe_component">
+
         <header class="recipe_component__header">
+          <span id="Recipe_component__category" class="Recipe_component__eyebrow"></span>
           <h1 id="Recipe_component__name" class="Recipe_component__title"></h1>
-          <div class="Recipe_component__meta">
-            <span id="Recipe_component__prepTime" class="Recipe_component__prepTime"></span>
-            <span id="Recipe_component__waitTime" class="Recipe_component__waitTime"></span>
-            <span id="Recipe_component__difficulty" class="Recipe_component__difficulty"></span>
-            <span id="Recipe_component__category" class="Recipe_component__category"></span>
+          <div class="Recipe_component__meta-strip">
+            <div class="Recipe_component__meta-cell">
+              <div class="Recipe_component__meta-k">זמן הכנה</div>
+              <div id="Recipe_component__prepTime" class="Recipe_component__meta-v"></div>
+            </div>
+            <div class="Recipe_component__meta-cell">
+              <div class="Recipe_component__meta-k">זמן המתנה</div>
+              <div id="Recipe_component__waitTime" class="Recipe_component__meta-v"></div>
+            </div>
+            <div class="Recipe_component__meta-cell">
+              <div class="Recipe_component__meta-k">רמת קושי</div>
+              <div id="Recipe_component__difficulty" class="Recipe_component__meta-v"></div>
+            </div>
           </div>
         </header>
-        <cook-mode-container></cook-mode-container>
-        <div class="Recipe_component__content">
-          <div class="Recipe_component__details">
-            <div class="Recipe_component__serving-adjuster">
-              <!-- disable password manager -->
-              <input name="disable-pwd-mgr-1" type="password" id="disable-pwd-mgr-1" style="display: none;" value="disable-pwd-mgr-1" />
-              <input name="disable-pwd-mgr-2" type="password" id="disable-pwd-mgr-2" style="display: none;" value="disable-pwd-mgr-2" />
-              <input name="disable-pwd-mgr-3" type="password" id="disable-pwd-mgr-3" style="display: none;" value="disable-pwd-mgr-3" />
 
-              <label for="Recipe_component__servings">מספר מנות</label>
-              <input type="number" id="Recipe_component__servings" name="servings" value="4" min="1">
-            </div>
-            <div class="Recipe_component__ingredients">
-              <h2>מצרכים:</h2>
-              <ul id="Recipe_component__ingredients-list" class="Recipe_component__ingredients-list"></ul>
-            </div>
+        <div class="Recipe_component__image-container"></div>
+
+        <cook-mode-container></cook-mode-container>
+
+        <div class="Recipe_component__content">
+
+          <div class="Recipe_component__instructions">
+            <div id="Recipe_component__instructions-list"></div>
           </div>
-          <div class="Recipe_component__image-container">
-            <img id="Recipe_component__image" src="" alt="" class="Recipe_component__image">
-          </div>
+
+          <aside class="Recipe_component__details">
+            <input name="disable-pwd-mgr-1" type="password" id="disable-pwd-mgr-1" style="display: none;" value="disable-pwd-mgr-1" />
+            <input name="disable-pwd-mgr-2" type="password" id="disable-pwd-mgr-2" style="display: none;" value="disable-pwd-mgr-2" />
+            <input name="disable-pwd-mgr-3" type="password" id="disable-pwd-mgr-3" style="display: none;" value="disable-pwd-mgr-3" />
+            <div class="Recipe_component__ing-header">
+              <h3 class="Recipe_component__ing-title">מצרכים</h3>
+              <div class="Recipe_component__serving-adjuster">
+                <div class="Recipe_component__yield-num">
+                  <button class="Recipe_component__yield-btn" id="Recipe_component__servings-dec" aria-label="פחות" type="button">−</button>
+                  <input type="number" id="Recipe_component__servings" name="servings" value="4" min="1" aria-label="מספר מנות" />
+                  <button class="Recipe_component__yield-btn" id="Recipe_component__servings-inc" aria-label="יותר" type="button">+</button>
+                </div>
+              </div>
+            </div>
+            <ul id="Recipe_component__ingredients-list" class="Recipe_component__ingredients-list"></ul>
+          </aside>
+
         </div>
-        <div class="Recipe_component__instructions">
-          <h2>הוראות הכנה:</h2>
-          <ol id="Recipe_component__instructions-list"></ol>
-        </div>
+
         <div class="Recipe_component__media-instructions" id="Recipe_component__media-section" style="display: none;">
           <h2>טיפים מצולמים:</h2>
           <media-scroller
@@ -131,6 +146,7 @@ class RecipeComponent extends HTMLElement {
           <h2>הערות:</h2>
           <ol id="Recipe_component__comments-list"></ol>
         </div>
+
       </div>
     `;
   }
@@ -141,194 +157,497 @@ class RecipeComponent extends HTMLElement {
       display: flex;
       flex-direction: column;
       width: 100%;
-      font-family: var(--body-font);
+      font-family: var(--font-ui-he, 'Noto Sans Hebrew', sans-serif);
       direction: rtl;
+      color: var(--ink-2, #3a3a3a);
     }
 
-    .Recipe_component__content {
-      display: flex;
-      gap: 2rem;
-      margin-bottom: 40px;
+    /* =========================================================
+       HEADER
+       ========================================================= */
+    .Recipe_component__eyebrow {
+      font-family: var(--font-mono, monospace);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary-dark, #386641);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
+    .Recipe_component__eyebrow::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--primary-dark, #386641);
+    }
+
+    .Recipe_component__title {
+      font-family: var(--font-display-he, 'Noto Serif Hebrew', serif);
+      font-size: var(--step-5, clamp(2.6rem, 2.1rem + 2.5vw, 4.25rem));
+      font-weight: 600;
+      color: var(--ink, #1f1d18);
+      text-align: right;
+      margin: 0 0 24px;
+      line-height: 1.1;
+      text-wrap: balance;
+    }
+
+    /* Meta strip */
+    .Recipe_component__meta-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: var(--surface-1, #fff);
+      border: 1px solid var(--hairline, rgba(31,29,24,0.1));
+      border-radius: var(--r-lg, 20px);
+      padding: 4px;
+    }
+
+    .Recipe_component__meta-cell {
+      padding: 16px 20px;
+      border-left: 1px solid var(--hairline, rgba(31,29,24,0.1));
+    }
+
+    .Recipe_component__meta-cell:last-child { border-left: 0; }
+
+    .Recipe_component__meta-k {
+      font-family: var(--font-mono, monospace);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted, #6b6a63);
+      margin-bottom: 6px;
+    }
+
+    .Recipe_component__meta-v {
+      font-family: var(--font-display-he, serif);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--text-strong, #1f1d18);
+      line-height: 1;
+    }
+
+    /* =========================================================
+       HERO IMAGE
+       ========================================================= */
     .Recipe_component__image-container {
-      flex: 1;
-      min-width: 300px;
+      margin: 16px 0 0;
+      border-radius: var(--r-xl, 28px);
+      overflow: hidden;
+      border: 1px solid var(--hairline, rgba(31,29,24,0.1));
+      background: var(--surface-2, #f6eed6);
     }
 
     .Recipe_component__image {
       width: 100%;
-      height: auto;
+      display: block;
       object-fit: cover;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
+    /* =========================================================
+       TWO-COLUMN CONTENT
+       ========================================================= */
+    .Recipe_component__content {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 48px;
+      align-items: start;
+      margin-top: 32px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid var(--hairline, rgba(31,29,24,0.1));
+    }
+
+    /* =========================================================
+       INGREDIENTS PANEL (sticky sidebar)
+       ========================================================= */
     .Recipe_component__details {
-      flex: 1;
+      position: sticky;
+      top: 80px;
+      background: var(--surface-1, #fff);
+      border: 1px solid var(--hairline, rgba(31,29,24,0.1));
+      border-radius: var(--r-lg, 20px);
+      padding: 22px 20px 18px;
+      align-self: start;
     }
 
-    .Recipe_component__title {
-      font-family: var(--heading-font-he);
-      font-size: 3rem;
-      color: var(--primary-color);
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .Recipe_component__meta {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 30px;
-      font-size: 1rem;
-      color: var(--text-color);
-    }
-
-    .Recipe_component__serving-adjuster {
-      margin-top: 10px;  
-      margin-bottom: 20px;
+    .Recipe_component__ing-header {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--hairline, rgba(31,29,24,0.1));
     }
 
-    .Recipe_component__serving-adjuster label {
-      margin-left: 10px;
+    .Recipe_component__ing-title {
+      font-family: var(--font-display-he, serif);
+      font-weight: 400;
+      font-size: 22px;
+      color: var(--text-strong, #1f1d18);
+      margin: 0;
     }
 
-    .Recipe_component__serving-adjuster input {
-      width: 60px;
-      padding: 5px;
-      font-size: 1rem;
+    /* Yield controller */
+    .Recipe_component__serving-adjuster {
+      flex-shrink: 0;
     }
 
-    .Recipe_component__ingredients h2,
-    .Recipe_component__instructions h2,
-    .Recipe_component__media-instructions h2,
-    .Recipe_component__comments h2 {
-      font-family: var(--heading-font-he);
-      font-size: 2rem;
-      color: var(--primary-color);
-      margin-bottom: 20px;
+    .Recipe_component__yield-num {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      background: var(--surface-2, #f6eed6);
+      border: 1px solid var(--hairline-strong, rgba(31,29,24,0.18));
+      border-radius: var(--r-pill, 9999px);
+      padding: 2px;
     }
 
-    .Recipe_component__ingredients-list {
-      list-style-type: none;
+    .Recipe_component__yield-btn {
+      width: 22px;
+      height: 22px;
+      border: 0;
+      background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--text-strong, #1f1d18);
+      font-size: 14px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--dur-1, 160ms) var(--ease, ease);
+      line-height: 1;
+    }
+
+    .Recipe_component__yield-btn:hover { background: var(--surface-1, #fff); }
+    .Recipe_component__yield-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .Recipe_component__yield-num input {
+      width: 32px;
+      text-align: center;
+      font-family: var(--font-mono, monospace);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-strong, #1f1d18);
+      background: transparent;
+      border: 0;
       padding: 0;
+      -moz-appearance: textfield;
+    }
+
+    .Recipe_component__yield-num input::-webkit-inner-spin-button,
+    .Recipe_component__yield-num input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    /* Ingredient list */
+    .Recipe_component__ingredients-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
 
     .Recipe_component__ingredients-list li {
-      margin-bottom: 10px;
+      display: grid;
+      grid-template-columns: auto 1fr 20px;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px dashed var(--hairline, rgba(31,29,24,0.1));
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: color var(--dur-1, 160ms);
     }
 
-    .Recipe_component__section-title,
-    .Recipe_component__stage-title {
-      font-family: var(--heading-font-he);
-      font-size: 1.2rem;
+    .Recipe_component__ingredients-list li:last-child { border-bottom: 0; }
+
+    .qty {
+      font-family: var(--font-mono, monospace);
+      font-size: 12px;
+      color: var(--text-muted, #6b6a63);
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+
+    .name { color: var(--text-strong, #1f1d18); }
+
+    .check {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1.5px solid var(--hairline-strong, rgba(31,29,24,0.18));
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: background var(--dur-1, 160ms), border-color var(--dur-1, 160ms);
+    }
+
+    .Recipe_component__ingredients-list li.checked .check {
+      background: var(--primary, #6a994e);
+      border-color: var(--primary, #6a994e);
+    }
+
+    .Recipe_component__ingredients-list li.checked .check::after { content: '✓'; }
+
+    .Recipe_component__ingredients-list li.checked .name,
+    .Recipe_component__ingredients-list li.checked .qty {
+      color: var(--text-muted, #6b6a63);
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+
+    /* Ingredient section titles */
+    .Recipe_component__section-title {
+      font-family: var(--font-ui, sans-serif);
+      font-size: 11px;
       font-weight: 600;
-      color: var(--text-color);
-      margin: 16px 0 8px 0;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary-dark, #386641);
+      margin: 18px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .Recipe_component__section-title::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary-bright, #a7c957);
+      flex-shrink: 0;
     }
 
     .Recipe_component__section-ingredients {
-      list-style-type: none;
+      list-style: none;
       padding: 0;
-      margin-bottom: 20px;
+      margin: 0 0 4px;
     }
 
     .Recipe_component__section-ingredients li {
-      margin-bottom: 8px;
-      padding-right: 15px;
+      display: grid;
+      grid-template-columns: auto 1fr 20px;
+      gap: 10px;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px dashed var(--hairline, rgba(31,29,24,0.1));
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: color var(--dur-1, 160ms);
     }
 
-    .Recipe_component__instructions ol {
+    .Recipe_component__section-ingredients li:last-child { border-bottom: 0; }
+
+    /* =========================================================
+       INSTRUCTIONS
+       ========================================================= */
+    .Recipe_component__instructions {
+      min-width: 0;
+    }
+
+    .Recipe_component__instructions-heading {
+      font-family: var(--font-display-he, serif);
+      font-size: var(--step-4, clamp(1.9rem, 1.65rem + 1.25vw, 2.75rem));
+      font-weight: 400;
+      color: var(--ink, #1f1d18);
+      margin: 0 0 28px;
+      line-height: 1;
+    }
+
+    /* Stage wrapper */
+    .Recipe_component__stage {
+      margin-bottom: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid var(--hairline, rgba(31,29,24,0.1));
+    }
+
+    .Recipe_component__stage:last-child {
+      border-bottom: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    /* Stage header */
+    .Recipe_component__stage-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+      gap: 16px;
       margin-bottom: 20px;
     }
 
-    .Recipe_component__instruction-list {
-      padding-right: 0;
-    }
-
-    .Recipe_component__instructions > ol {
-      padding-right: 0;
-    }
-
-    .Recipe_component__instructions li {
-      margin-bottom: 10px;
-      line-height: 1.6;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-      list-style-position: inside;
-    }
-
-    .Recipe_component__instructions li:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
-
-    .Recipe_component__instructions li.active-step {
-      background-color: var(--primary-color-light, #e0f2f1);
-      border-right: 4px solid var(--primary-color, #009688);
-      font-weight: bold;
-      padding-right: 12px;
+    .Recipe_component__stage-num {
+      font-family: var(--font-mono, monospace);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--primary-dark, #386641);
+      white-space: nowrap;
+      padding-top: 6px;
     }
 
     .Recipe_component__stage-title {
+      font-family: var(--font-display-he, serif);
+      font-weight: 400;
+      font-size: var(--step-3, clamp(1.4rem, 1.28rem + 0.6vw, 1.75rem));
+      color: var(--text-strong, #1f1d18);
+      margin: 0;
+      line-height: 1.1;
       cursor: pointer;
-      border-radius: 4px;
-      transition: background-color 0.2s;
+      border-radius: var(--r-sm, 10px);
+      padding: 4px 10px;
+      border-right: 3px solid transparent;
+      transition: background var(--dur-1, 160ms) var(--ease, ease);
     }
 
-    .Recipe_component__stage-title:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
+    .Recipe_component__stage-title:hover { background: var(--surface-2, #f6eed6); }
 
     .Recipe_component__stage-title.active-step {
-      background-color: var(--primary-color-light, #e0f2f1);
-      border-right: 4px solid var(--primary-color, #009688);
-      padding-right: 12px;
+      background: color-mix(in oklab, var(--primary, #6a994e) 12%, var(--surface-0, #faf6ec));
     }
 
-    .Recipe_component__comments ol {
-      padding-right: 15px;
-      margin-bottom: 20px;
+    /* Step list */
+    .Recipe_component__instruction-list {
+      list-style: none;
+      counter-reset: step;
+      margin: 0;
+      padding: 0;
     }
+
+    .Recipe_component__instruction-list > li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 20px;
+      padding: 18px 0;
+      align-items: start;
+      border-top: 1px solid var(--hairline, rgba(31,29,24,0.1));
+      cursor: pointer;
+      border-radius: var(--r-sm, 10px);
+      transition: background var(--dur-1, 160ms) var(--ease, ease);
+      line-height: 1.65;
+      font-size: 15px;
+      color: var(--text-color, #3a3a3a);
+    }
+
+    .Recipe_component__instruction-list > li:first-child {
+      border-top: 0;
+    }
+
+    .Recipe_component__instruction-list > li::before {
+      content: counter(step, decimal-leading-zero);
+      font-family: var(--font-display, serif);
+      font-style: italic;
+      font-size: 28px;
+      color: var(--primary, #6a994e);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      text-align: center;
+      padding-top: 3px;
+    }
+
+    .Recipe_component__instruction-list > li:hover { background: var(--surface-2, #f6eed6); }
+
+    .Recipe_component__instruction-list > li.active-step {
+      background: color-mix(in oklab, var(--primary, #6a994e) 12%, var(--surface-0, #faf6ec));
+    }
+
+    .Recipe_component__instruction-list > li.active-step::before {
+      color: var(--primary-dark, #386641);
+    }
+
+    /* =========================================================
+       MEDIA INSTRUCTIONS
+       ========================================================= */
+    .Recipe_component__media-instructions {
+      padding: 40px 0;
+      border-top: 1px solid var(--hairline, rgba(31,29,24,0.1));
+    }
+
+    .Recipe_component__media-instructions h2 {
+      font-family: var(--font-display-he, serif);
+      font-size: var(--step-3, clamp(1.4rem, 1.28rem + 0.6vw, 1.75rem));
+      font-weight: 400;
+      color: var(--ink, #1f1d18);
+      margin: 0 0 20px;
+    }
+
+    /* =========================================================
+       COMMENTS
+       ========================================================= */
+    .Recipe_component__comments {
+      padding: 48px 0 16px;
+    }
+
+    .Recipe_component__comments h2 {
+      font-family: var(--font-display-he, serif);
+      font-size: var(--step-3, clamp(1.4rem, 1.28rem + 0.6vw, 1.75rem));
+      font-weight: 400;
+      color: var(--ink, #1f1d18);
+      margin: 0 0 20px;
+    }
+
+    .Recipe_component__comments ol { padding: 0 20px 0 0; margin: 0; }
 
     .Recipe_component__comments li {
-      margin-bottom: 10px;
+      margin-bottom: 0;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--hairline, rgba(31,29,24,0.1));
       line-height: 1.6;
+      color: var(--ink-2, #3a3a3a);
     }
 
-    /* Responsive Styles */
+    .Recipe_component__comments li:last-child { border-bottom: 0; }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
     @media (max-width: 768px) {
-      .Recipe_component{
-        padding: 30px;
-        width: auto;  
+      .Recipe_component__title {
+        font-size: var(--step-4, clamp(1.9rem, 1.65rem + 1.25vw, 2.75rem));
       }
+
+      .Recipe_component__meta-strip {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .Recipe_component__meta-cell {
+        padding: 12px 10px;
+      }
+
+      .Recipe_component__meta-v {
+        font-size: 17px;
+      }
+
+      cook-mode-container {
+        margin-top: 16px;
+      }
+
       .Recipe_component__content {
-        flex-direction: column;
-        gap: 0.5rem;
-        margin-bottom: 10px;
+        grid-template-columns: 1fr;
+        gap: 28px;
+        margin-top: 0;
       }
 
-      .Recipe_component__details,
-      .Recipe_component__image-container {
-        width: 100%;
+      .Recipe_component__details {
+        position: static;
+        order: -1;
       }
 
-      .Recipe_component__meta {
-        flex-direction: column;
-        align-items: center;
+      .Recipe_component__instruction-list > li {
+        grid-template-columns: 36px 1fr;
+        gap: 14px;
       }
 
-      .Recipe_component__section-title,
-      .Recipe_component__stage-title {
-        font-size: 1.1rem;
-        margin: 12px 0 6px 0;
-      }
-
-      .Recipe_component__section-ingredients li {
-        padding-right: 10px;
+      .Recipe_component__instruction-list > li::before {
+        font-size: 22px;
       }
     }
     `;
@@ -365,14 +684,15 @@ class RecipeComponent extends HTMLElement {
 
   populateRecipeDetails(recipe) {
     this.shadowRoot.getElementById('Recipe_component__name').textContent = recipe.name;
-    this.shadowRoot.getElementById('Recipe_component__prepTime').textContent =
-      `זמן הכנה: ${formatCookingTime(recipe.prepTime)}`;
-    this.shadowRoot.getElementById('Recipe_component__waitTime').textContent =
-      `זמן המתנה: ${formatCookingTime(recipe.waitTime)}`;
-    this.shadowRoot.getElementById('Recipe_component__difficulty').textContent =
-      `רמת קושי: ${recipe.difficulty}`;
+    this.shadowRoot.getElementById('Recipe_component__prepTime').textContent = formatCookingTime(
+      recipe.prepTime,
+    );
+    this.shadowRoot.getElementById('Recipe_component__waitTime').textContent = formatCookingTime(
+      recipe.waitTime,
+    );
+    this.shadowRoot.getElementById('Recipe_component__difficulty').textContent = recipe.difficulty;
     this.shadowRoot.getElementById('Recipe_component__category').textContent =
-      `קטגוריה: ${getLocalizedCategoryName(recipe.category)}`;
+      getLocalizedCategoryName(recipe.category);
   }
 
   async setRecipeImage(recipe) {
@@ -501,24 +821,23 @@ class RecipeComponent extends HTMLElement {
 
   _createIngredientListItem(ingredient) {
     const li = document.createElement('li');
+    li.addEventListener('click', () => li.classList.toggle('checked'));
 
-    const amountSpan = document.createElement('span');
-    amountSpan.className = 'amount';
-    amountSpan.textContent = formatIngredientAmount(ingredient.amount);
+    const qtySpan = document.createElement('span');
+    qtySpan.className = 'qty';
+    const amount = formatIngredientAmount(ingredient.amount);
+    qtySpan.textContent = ingredient.unit ? `${amount} ${ingredient.unit}` : amount;
 
-    const unitSpan = document.createElement('span');
-    unitSpan.className = 'unit';
-    unitSpan.textContent = ingredient.unit;
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'name';
+    nameSpan.textContent = ingredient.item;
 
-    const itemSpan = document.createElement('span');
-    itemSpan.className = 'item';
-    itemSpan.textContent = ingredient.item;
+    const checkSpan = document.createElement('span');
+    checkSpan.className = 'check';
 
-    li.appendChild(amountSpan);
-    li.appendChild(document.createTextNode(' '));
-    li.appendChild(unitSpan);
-    li.appendChild(document.createTextNode(' '));
-    li.appendChild(itemSpan);
+    li.appendChild(qtySpan);
+    li.appendChild(nameSpan);
+    li.appendChild(checkSpan);
 
     return li;
   }
@@ -528,30 +847,28 @@ class RecipeComponent extends HTMLElement {
     instructionsList.innerHTML = '';
     let globalStepIndex = 0;
 
+    const dispatchStepChange = (stepIndex) => {
+      this.dispatchEvent(
+        new CustomEvent('active-step-changed', {
+          detail: { stepIndex },
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    };
+
     const createInstructionItem = (instruction) => {
       const li = document.createElement('li');
       li.textContent = instruction;
       li.dataset.stepIndex = globalStepIndex;
       li.addEventListener('click', () => {
-        const stepIndex = parseInt(li.dataset.stepIndex);
+        const idx = parseInt(li.dataset.stepIndex);
         if (li.classList.contains('active-step')) {
           this.setActiveStep(null);
-          this.dispatchEvent(
-            new CustomEvent('active-step-changed', {
-              detail: { stepIndex: null },
-              bubbles: true,
-              composed: true,
-            }),
-          );
+          dispatchStepChange(null);
         } else {
-          this.setActiveStep(stepIndex);
-          this.dispatchEvent(
-            new CustomEvent('active-step-changed', {
-              detail: { stepIndex: stepIndex },
-              bubbles: true,
-              composed: true,
-            }),
-          );
+          this.setActiveStep(idx);
+          dispatchStepChange(idx);
         }
       });
       globalStepIndex++;
@@ -560,49 +877,53 @@ class RecipeComponent extends HTMLElement {
 
     if (recipe.stages && recipe.stages.length > 0) {
       recipe.stages.forEach((stage, index) => {
-        const stageTitle = document.createElement('h3');
-        stageTitle.textContent = `שלב ${index + 1}: ${stage.title}`;
-        stageTitle.classList.add('Recipe_component__stage-title');
+        const section = document.createElement('section');
+        section.className = 'Recipe_component__stage';
 
-        // Make stage title clickable
+        // Stage header
+        const stageHead = document.createElement('header');
+        stageHead.className = 'Recipe_component__stage-head';
+
+        const stageNum = document.createElement('span');
+        stageNum.className = 'Recipe_component__stage-num';
+        stageNum.textContent = `שלב ${String(index + 1).padStart(2, '0')}`;
+
+        const stageTitle = document.createElement('h2');
+        stageTitle.textContent = stage.title;
+        stageTitle.className = 'Recipe_component__stage-title';
         stageTitle.dataset.stepIndex = globalStepIndex;
         stageTitle.addEventListener('click', () => {
-          const stepIndex = parseInt(stageTitle.dataset.stepIndex);
+          const idx = parseInt(stageTitle.dataset.stepIndex);
           if (stageTitle.classList.contains('active-step')) {
             this.setActiveStep(null);
-            this.dispatchEvent(
-              new CustomEvent('active-step-changed', {
-                detail: { stepIndex: null },
-                bubbles: true,
-                composed: true,
-              }),
-            );
+            dispatchStepChange(null);
           } else {
-            this.setActiveStep(stepIndex);
-            this.dispatchEvent(
-              new CustomEvent('active-step-changed', {
-                detail: { stepIndex: stepIndex },
-                bubbles: true,
-                composed: true,
-              }),
-            );
+            this.setActiveStep(idx);
+            dispatchStepChange(idx);
           }
         });
-        globalStepIndex++; // Increment for the title itself
+        globalStepIndex++;
 
-        instructionsList.appendChild(stageTitle);
+        stageHead.appendChild(stageNum);
+        stageHead.appendChild(stageTitle);
+        section.appendChild(stageHead);
 
         const stageList = document.createElement('ol');
-        stageList.classList.add('Recipe_component__instruction-list');
+        stageList.className = 'Recipe_component__instruction-list';
         stage.instructions.forEach((instruction) => {
           stageList.appendChild(createInstructionItem(instruction));
         });
-        instructionsList.appendChild(stageList);
+        section.appendChild(stageList);
+        instructionsList.appendChild(section);
       });
     } else {
-      // Fallback to the original instructions array
+      const heading = document.createElement('h2');
+      heading.className = 'Recipe_component__instructions-heading';
+      heading.textContent = 'הוראות הכנה';
+      instructionsList.appendChild(heading);
+
       const singleStageList = document.createElement('ol');
-      singleStageList.classList.add('Recipe_component__instruction-list');
+      singleStageList.className = 'Recipe_component__instruction-list';
       recipe.instructions.forEach((instruction) => {
         singleStageList.appendChild(createInstructionItem(instruction));
       });
@@ -618,7 +939,7 @@ class RecipeComponent extends HTMLElement {
 
   setActiveStep(index) {
     const allSteps = this.shadowRoot.querySelectorAll(
-      '.Recipe_component__instruction-list li, .Recipe_component__stage-title',
+      '.Recipe_component__instruction-list > li, .Recipe_component__stage-title',
     );
     allSteps.forEach((step) => step.classList.remove('active-step'));
 
@@ -717,48 +1038,34 @@ class RecipeComponent extends HTMLElement {
 
   setupServingsAdjuster(recipe) {
     const servingsInput = this.shadowRoot.getElementById('Recipe_component__servings');
+    const decBtn = this.shadowRoot.getElementById('Recipe_component__servings-dec');
+    const incBtn = this.shadowRoot.getElementById('Recipe_component__servings-inc');
+
     const initialServings = this.getAttribute('initial-servings');
     const currentServings = initialServings ? parseInt(initialServings) : recipe.servings;
 
     servingsInput.setAttribute('value', currentServings);
-    servingsInput.value = currentServings; // Ensure property is updated too
+    servingsInput.value = currentServings;
 
-    // Store original data in closure scope to avoid instance state issues
     const originalIngredients = recipe.ingredientSections || recipe.ingredients;
     const originalRecipeFormat = recipe.ingredientSections ? 'sectioned' : 'flat';
     const originalServings = recipe.servings;
 
-    // Perform initial scaling if needed
-    if (currentServings !== originalServings) {
-      const scaledIngredients = scaleIngredients(
-        originalIngredients,
-        originalServings,
-        currentServings,
-      );
-      const scaledRecipe =
-        originalRecipeFormat === 'sectioned'
-          ? { ingredientSections: scaledIngredients }
-          : { ingredients: scaledIngredients };
-      this.populateIngredientsList(scaledRecipe);
-    }
+    const updateButtons = () => {
+      if (decBtn) decBtn.disabled = parseInt(servingsInput.value) <= 1;
+    };
 
-    servingsInput.addEventListener('change', () => {
-      const newServings = parseInt(servingsInput.value);
-
+    const applyServings = (newServings) => {
       const scaledIngredients = scaleIngredients(
         originalIngredients,
         originalServings,
         newServings,
       );
-
-      // Pass scaled ingredients in the same format as the original data
       const scaledRecipe =
         originalRecipeFormat === 'sectioned'
           ? { ingredientSections: scaledIngredients }
           : { ingredients: scaledIngredients };
-
       this.populateIngredientsList(scaledRecipe);
-
       this.dispatchEvent(
         new CustomEvent('servings-changed', {
           detail: { servings: newServings },
@@ -766,7 +1073,34 @@ class RecipeComponent extends HTMLElement {
           composed: true,
         }),
       );
-    });
+      updateButtons();
+    };
+
+    // Perform initial scaling if needed
+    if (currentServings !== originalServings) {
+      applyServings(currentServings);
+    }
+    updateButtons();
+
+    servingsInput.addEventListener('change', () => applyServings(parseInt(servingsInput.value)));
+
+    if (decBtn) {
+      decBtn.addEventListener('click', () => {
+        const val = parseInt(servingsInput.value);
+        if (val > 1) {
+          servingsInput.value = val - 1;
+          applyServings(val - 1);
+        }
+      });
+    }
+
+    if (incBtn) {
+      incBtn.addEventListener('click', () => {
+        const val = parseInt(servingsInput.value);
+        servingsInput.value = val + 1;
+        applyServings(val + 1);
+      });
+    }
   }
 
   /**

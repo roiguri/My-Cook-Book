@@ -1,0 +1,98 @@
+/* ==========================================================================
+   Alert / feedback components — v2
+
+   Usage:
+     <div class="alert alert--ok">
+       <span class="alert__icon">✓</span>
+       <div><b>Saved.</b> Your draft is in review.</div>
+     </div>
+   ========================================================================== */
+
+/* ---- Base alert ---- */
+
+.alert {
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  line-height: 1.5;
+  border: 1px solid;
+  box-sizing: border-box;
+}
+
+.alert__icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: -1px;
+  line-height: 1.5;
+}
+
+.alert b {
+  font-weight: 600;
+}
+
+/* ---- Success ---- */
+
+.alert--ok {
+  background: color-mix(in oklab, var(--primary) 8%, white);
+  border-color: color-mix(in oklab, var(--primary) 20%, transparent);
+  color: var(--primary-dark);
+}
+
+.alert--ok {
+  background: color-mix(in oklab, var(--primary) 8%, white);
+  border-color: color-mix(in oklab, var(--primary) 20%, transparent);
+  color: var(--primary-dark);
+}
+
+/* ---- Warning ---- */
+
+.alert--warn {
+  background: color-mix(in oklab, #eab308 10%, white);
+  border-color: color-mix(in oklab, #eab308 25%, transparent);
+  color: #7a5a07;
+}
+
+.alert--warn {
+  background: color-mix(in oklab, #eab308 10%, white);
+  border-color: color-mix(in oklab, #eab308 25%, transparent);
+  color: #7a5a07;
+}
+
+/* ---- Error ---- */
+
+.alert--err {
+  background: color-mix(in oklab, var(--secondary) 8%, white);
+  border-color: color-mix(in oklab, var(--secondary) 20%, transparent);
+  color: var(--secondary-dark);
+}
+
+.alert--err {
+  background: color-mix(in oklab, var(--secondary) 8%, white);
+  border-color: color-mix(in oklab, var(--secondary) 20%, transparent);
+  color: var(--secondary-dark);
+}
+
+/* ---- Info ---- */
+
+.alert--info {
+  background: color-mix(in oklab, var(--text-muted) 8%, white);
+  border-color: color-mix(in oklab, var(--text-muted) 20%, transparent);
+  color: var(--text-muted);
+}
+
+.alert--info {
+  background: color-mix(in oklab, var(--text-muted) 8%, white);
+  border-color: color-mix(in oklab, var(--text-muted) 20%, transparent);
+  color: var(--text-muted);
+}
+
+/* ---- Stack of alerts ---- */
+
+.alerts {
+  display: grid;
+  gap: 10px;
+}

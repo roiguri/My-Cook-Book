@@ -50,7 +50,7 @@ class AuthController extends HTMLElement {
           display: contents;
         }
       </style>
-      <custom-modal height="auto">
+      <custom-modal height="auto" width="520px">
         <slot></slot>
       </custom-modal>
     `;
@@ -112,7 +112,6 @@ class AuthController extends HTMLElement {
       // Use clean URLs for History API routing
       link.href = href;
       link.textContent = text;
-      link.classList.add('btn-3d');
       item.appendChild(link);
       return item;
     };
@@ -209,6 +208,34 @@ class AuthController extends HTMLElement {
     } catch (error) {
       throw error;
     }
+  }
+
+  async updatePassword(currentPassword, newPassword) {
+    return await authService.updatePassword(currentPassword, newPassword);
+  }
+
+  async linkWithGoogle() {
+    return await authService.linkWithGoogle();
+  }
+
+  async unlinkProvider(providerId) {
+    return await authService.unlinkProvider(providerId);
+  }
+
+  async handleDeleteAccount() {
+    await authService.deleteAccount();
+    this.closeModal();
+  }
+
+  // Modal Width Control
+  setProfileWidth() {
+    const modal = this.shadowRoot.querySelector('custom-modal');
+    modal?.setWidth('640px');
+  }
+
+  setAuthWidth() {
+    const modal = this.shadowRoot.querySelector('custom-modal');
+    modal?.setWidth('520px');
   }
 
   // Modal Control Methods

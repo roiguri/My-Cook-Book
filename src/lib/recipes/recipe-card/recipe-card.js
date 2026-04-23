@@ -198,10 +198,18 @@ class RecipeCard extends HTMLElement {
   }
 
   _showImmediateLoadingState() {
-    // Show a simple loading state immediately, even before templates load
-    const simpleLoading = document.createElement('div');
-    simpleLoading.className = 'recipe-card loading';
-    this.shadowRoot.appendChild(simpleLoading);
+    const card = document.createElement('div');
+    card.className = 'recipe-card loading';
+    card.innerHTML = `
+      <div class="photo"></div>
+      <div class="recipe-content">
+        <div class="skel skel-cat"></div>
+        <div class="skel skel-title"></div>
+        <div class="skel-divider"></div>
+        <div class="skel skel-meta"></div>
+      </div>
+    `;
+    this.shadowRoot.appendChild(card);
   }
 
   _loadStyles() {
@@ -301,12 +309,16 @@ class RecipeCard extends HTMLElement {
             <path d="M12 5v14M5 12h14"/>
           </svg>
         </button>
-        <img class="recipe-image" data-src="" alt="" data-fallback="/img/placeholder.jpg">
+        <div class="photo">
+          <img class="recipe-image" data-src="" alt="" data-fallback="/img/placeholder.jpg">
+        </div>
         <div class="recipe-content">
-          <h3 class="recipe-title">
-            <a class="recipe-link" href=""></a>
-          </h3>
-          <div class="recipe-details"></div>
+          <span class="badge category"></span>
+          <h3 class="recipe-title"><a class="recipe-link" href=""></a></h3>
+          <div class="recipe-meta">
+            <span dir="rtl" class="badge time"></span>
+            <span class="badge difficulty"><span class="icon"></span></span>
+          </div>
         </div>
       </div>
     `;
@@ -339,16 +351,18 @@ class RecipeCard extends HTMLElement {
             <path d="M12 5v14M5 12h14"/>
           </svg>
         </button>
-        <div class="no-image-placeholder recipe-image">
+        <div class="photo no-image-placeholder">
           <svg class="no-image-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/>
           </svg>
         </div>
         <div class="recipe-content">
-          <h3 class="recipe-title">
-             <a class="recipe-link" href=""></a>
-          </h3>
-          <div class="recipe-details"></div>
+          <span class="badge category"></span>
+          <h3 class="recipe-title"><a class="recipe-link" href=""></a></h3>
+          <div class="recipe-meta">
+            <span dir="rtl" class="badge time"></span>
+            <span class="badge difficulty"><span class="icon"></span></span>
+          </div>
         </div>
       </div>
     `;

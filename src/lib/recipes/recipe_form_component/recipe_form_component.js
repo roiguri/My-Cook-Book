@@ -85,56 +85,115 @@ class RecipeFormComponent extends HTMLElement {
   template() {
     return `
       <div dir="rtl" class="recipe-form">
-        <div class="recipe-form__header">
-          <h2 class="recipe-form__title">פרטי המתכון</h2>
-          <button id="import-btn" class="recipe-form__button recipe-form__button--import" style="display: none;">
-             ייבא מתכון
-             <i class="fas fa-magic"></i>
-          </button>
-        </div>
-        
+
         <recipe-import-modal id="import-modal"></recipe-import-modal>
-        
+
         <div class="recipe-form__error-message" style="display: none;">
           נא למלא את כל שדות החובה
         </div>
-  
-        <form id="recipe-form" class="recipe-form__form">
-          <recipe-metadata-fields id="metadata-fields"></recipe-metadata-fields>
-  
-          <div class="recipe-form__group">
+
+        <form id="recipe-form">
+
+          <!-- 01 — פרטי המתכון -->
+          <section class="recipe-sect" id="s-details">
+            <header class="recipe-sect__header">
+              <div>
+                <span class="recipe-sect__n">01 — פרטי המתכון</span>
+                <h2 class="recipe-sect__h">הכותרת <em>הראשית.</em></h2>
+                <p class="recipe-sect__sub">שם, תיאור קצר, וקטגוריה.</p>
+              </div>
+            </header>
+            <recipe-metadata-fields id="metadata-fields"></recipe-metadata-fields>
+          </section>
+
+          <!-- 02 — מצרכים -->
+          <section class="recipe-sect" id="s-ingredients">
+            <header class="recipe-sect__header">
+              <div>
+                <span class="recipe-sect__n">02 — מצרכים</span>
+                <h2 class="recipe-sect__h">כמויות <em>ויחידות.</em></h2>
+                <p class="recipe-sect__sub">קבץ מצרכים לקטגוריות אם זה עוזר — "לבצק", "לציפוי" וכדומה.</p>
+              </div>
+            </header>
             <recipe-ingredients-list id="ingredients-list"></recipe-ingredients-list>
-          </div>
-  
-          <div class="recipe-form__group">
+          </section>
+
+          <!-- 03 — הוראות הכנה -->
+          <section class="recipe-sect" id="s-instructions">
+            <header class="recipe-sect__header">
+              <div>
+                <span class="recipe-sect__n">03 — הוראות הכנה</span>
+                <h2 class="recipe-sect__h">שלבים <em>ושלבי עבודה.</em></h2>
+                <p class="recipe-sect__sub">חלק את השיטה לשלבים. הוסף תמונה לכל שלב אם זה עוזר.</p>
+              </div>
+            </header>
             <recipe-instructions-list id="instructions-list" mode="flat"></recipe-instructions-list>
-          </div>
-  
-          <div class="recipe-form__group">
-            <label class="recipe-form__label">תמונות המתכון:</label>
-            <image-handler id="recipe-images"></image-handler>
-          </div>
+          </section>
 
-          <div class="recipe-form__group">
-            <label class="recipe-form__label">טיפים מצולמים:</label>
-            <p class="recipe-form__help-text">הוסף תמונות או סרטונים המדגימים את שלבי ההכנה</p>
-            <media-instructions-editor
-              id="media-instructions-editor"
-              media-data='[]'
-              recipe-id="">
-            </media-instructions-editor>
-          </div>
+          <!-- 04 — תמונות ומדיה -->
+          <section class="recipe-sect" id="s-cover">
+            <header class="recipe-sect__header">
+              <div>
+                <span class="recipe-sect__n">04 — תמונות ומדיה</span>
+                <h2 class="recipe-sect__h">התמונה <em>הסופית.</em></h2>
+                <p class="recipe-sect__sub">תמונה ראשית בולטת, ותמונות נוספות של המתכון לפי רצונך.</p>
+              </div>
+              <span class="recipe-sect__meta">JPG, PNG · עד 20MB</span>
+            </header>
+            <div class="recipe-form__group">
+              <image-handler id="recipe-images"></image-handler>
+            </div>
+            <div class="recipe-form__group" style="margin-top: 20px;">
+              <label class="recipe-form__label">הוראות מצולמות</label>
+              <p class="recipe-form__help-text">הוסף תמונות או סרטונים המדגימים שלבי הכנה</p>
+              <media-instructions-editor
+                id="media-instructions-editor"
+                media-data='[]'
+                recipe-id="">
+              </media-instructions-editor>
+            </div>
+          </section>
 
-          <div class="recipe-form__group">
-            <label for="comments" class="recipe-form__label">הערות:</label>
-            <textarea id="comments" name="comments" class="recipe-form__textarea"></textarea>
-          </div>
-  
-          <form-button-group 
-            id="form-buttons" 
-            clear-text="${this.clearButtonText}" 
-            submit-text="${this.submitButtonText}">
+          <!-- 05 — הערות משפחה -->
+          <section class="recipe-sect" id="s-notes">
+            <header class="recipe-sect__header">
+              <div>
+                <span class="recipe-sect__n">05 — הערות משפחה</span>
+                <h2 class="recipe-sect__h">טיפים <em>ווריאציות.</em></h2>
+                <p class="recipe-sect__sub">דברים שהיית אומר למישהו שמבשל את זה בפעם הראשונה.</p>
+              </div>
+              <span class="recipe-sect__meta">אופציונלי</span>
+            </header>
+            <div class="recipe-form__group">
+              <textarea id="comments" name="comments" class="recipe-form__textarea" placeholder="טיפ, תחליף, זיכרון..."></textarea>
+            </div>
+          </section>
+
+          <!-- 06 — קרדיט -->
+          <section class="recipe-sect" id="s-attr">
+            <header class="recipe-sect__header">
+              <div>
+                <span class="recipe-sect__n">06 — קרדיט</span>
+                <h2 class="recipe-sect__h">של מי <em>המתכון הזה?</em></h2>
+                <p class="recipe-sect__sub">קרדיט לטבח המקורי — שם, קישור, או שניהם.</p>
+              </div>
+              <span class="recipe-sect__meta">אופציונלי</span>
+            </header>
+            <div class="recipe-form__group">
+              <label for="attribution" class="recipe-form__label">קרדיט</label>
+              <input type="text" id="attribution" name="attribution" class="recipe-form__input"
+                placeholder='סבתא רות · או https://...' />
+              <span class="recipe-form__hint">שם, קישור, או שניהם. יוצג בדף המתכון.</span>
+            </div>
+          </section>
+
+          <form-button-group
+            id="form-buttons"
+            clear-text="${this.clearButtonText}"
+            submit-text="${this.submitButtonText}"
+            ${this.hasAttribute('hide-actions') ? 'style="display:none"' : ''}>
           </form-button-group>
+
         </form>
       </div>
       <message-modal></message-modal>
@@ -164,18 +223,11 @@ class RecipeFormComponent extends HTMLElement {
       });
     }
 
-    // Import button
-    const importBtn = this.shadowRoot.getElementById('import-btn');
+    // Import modal
     const importModal = this.shadowRoot.getElementById('import-modal');
-
-    if (importBtn && importModal) {
-      importBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        importModal.open();
-      });
-
+    if (importModal) {
       importModal.addEventListener('recipe-extracted', (e) => {
-        this.handleRecipeExtracted(e.detail.data);
+        this.handleRecipeExtracted(e.detail.data, e.detail.sourceUrl);
       });
     }
 
@@ -301,7 +353,7 @@ class RecipeFormComponent extends HTMLElement {
         'יש לך שינויים שלא נשמרו שיאבדו. האם אתה בטוח שברצונך לנקות את הטופס?',
         'נקה טופס',
         'נקה טופס',
-        'שמור שינויים',
+        'ביטול',
       );
     });
   }
@@ -313,6 +365,19 @@ class RecipeFormComponent extends HTMLElement {
       this.collectFormData();
       formProtectionManager.initialize(this.shadowRoot, this.recipeData);
     }
+  }
+
+  submitForm() {
+    this.handleFormSubmit();
+  }
+
+  requestClear() {
+    this.handleClearForm();
+  }
+
+  openImportModal() {
+    const importModal = this.shadowRoot.getElementById('import-modal');
+    if (importModal) importModal.open();
   }
 
   async setRecipeData(recipeId) {
@@ -360,6 +425,11 @@ class RecipeFormComponent extends HTMLElement {
       commentsField.value = data.comments ? data.comments.join('\n') : '';
     }
 
+    const attributionField = this.shadowRoot.getElementById('attribution');
+    if (attributionField && data.attribution) {
+      attributionField.value = data.attribution;
+    }
+
     const ingredientsList = this.shadowRoot.getElementById('ingredients-list');
     if (ingredientsList) {
       if (data.ingredientSections && data.ingredientSections.length > 0) {
@@ -399,29 +469,22 @@ class RecipeFormComponent extends HTMLElement {
    * Updates UI based on authentication state
    * @param {Object} state - Auth state object
    */
-  handleAuthUpdate(state) {
-    const btn = this.shadowRoot.getElementById('import-btn');
-    if (btn) {
-      // Only show for approved users (mimics navigation logic)
-      if (state.isApproved) {
-        // Use flex to maintain layout defined in CSS
-        btn.style.display = 'flex';
-      } else {
-        btn.style.display = 'none';
-      }
-    }
-  }
+  handleAuthUpdate(_state) {}
 
-  handleRecipeExtracted(extractedData) {
+  handleRecipeExtracted(extractedData, sourceUrl = null) {
     console.log('Extracted data:', extractedData);
     const mappedData = mapExtractedDataToForm(extractedData);
 
-    // Merge with current data if needed, or just populate
-    // For now, we populate the form fields directly.
-    // We might want to preserve existing images if any?
-    // The import overwrites fields.
-
     this.populateFromData(mappedData);
+
+    // If extracted from a URL and the attribution field is still empty, fill it in
+    if (sourceUrl) {
+      const attributionField = this.shadowRoot.getElementById('attribution');
+      if (attributionField && !attributionField.value.trim()) {
+        attributionField.value = sourceUrl;
+      }
+    }
+
     this.collectFormData(); // Update internal state
     this.isDirty = true;
     this.updateDirtyStateIndicators(true);

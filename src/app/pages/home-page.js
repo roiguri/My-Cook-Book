@@ -34,36 +34,16 @@ export default {
 
   async importComponents() {
     try {
-      await Promise.all([
-        import('../../lib/recipes/recipe-card/recipe-card.js'),
-        import('../../lib/utilities/recipe-scroller/recipe-scroller.js'),
-      ]);
+      await import('../../lib/recipes/recipe-card/recipe-card.js');
     } catch (error) {
       console.error('Error importing home page components:', error);
     }
   },
 
   async loadFeaturedRecipes() {
-    const featuredRecipesGrid = document.getElementById('featured-recipes-grid');
-    if (!featuredRecipesGrid) {
+    const recipesGrid = document.getElementById('featured-recipes-grid');
+    if (!recipesGrid) {
       console.warn('Featured recipes grid not found');
-      return;
-    }
-
-    const sectionContainer = document.querySelector('.featured-recipes');
-    const messageContainer = document.createElement('p');
-    messageContainer.dir = 'rtl';
-    messageContainer.style.fontSize = 'var(--size-header2)';
-    sectionContainer.insertBefore(messageContainer, featuredRecipesGrid);
-
-    messageContainer.innerHTML = 'טוען את המתכונים הכי חדשים...';
-
-    const recipeScroller = document.querySelector('recipe-scroller');
-    const recipesContainer = recipeScroller?.querySelector('[slot="items"]');
-
-    if (!recipesContainer) {
-      console.warn('Recipes container not found');
-      messageContainer.innerHTML = 'Error loading featured recipes.';
       return;
     }
 
@@ -71,30 +51,19 @@ export default {
       const queryParams = {
         where: [['approved', '==', true]],
         orderBy: ['creationTime', 'desc'],
-        limit: 3,
+        limit: 4,
       };
       const recipes = await FirestoreService.queryDocuments('recipes', queryParams);
 
-      if (!recipes.length) {
-        messageContainer.innerHTML = 'לא נמצאו מתכונים מומלצים.';
-        return;
-      }
-
-      messageContainer.remove();
+      if (!recipes.length) return;
 
       recipes.forEach((doc) => {
         const recipeCard = document.createElement('recipe-card');
         recipeCard.setAttribute('recipe-id', doc.id);
-        recipeCard.setAttribute('layout', 'vertical');
-        recipesContainer.appendChild(recipeCard);
+        recipesGrid.appendChild(recipeCard);
       });
 
-      // Apply styles after all cards are added
-      if (recipeScroller && typeof recipeScroller.applyItemStyles === 'function') {
-        recipeScroller.applyItemStyles();
-      }
-
-      featuredRecipesGrid.addEventListener('recipe-card-open', (event) => {
+      recipesGrid.addEventListener('recipe-card-open', (event) => {
         const recipeId = event.detail.recipeId;
         if (window.spa?.router) {
           window.spa.router.navigate(`/recipe/${recipeId}`);
@@ -109,7 +78,6 @@ export default {
       });
     } catch (error) {
       console.error('Error fetching featured recipes:', error);
-      messageContainer.innerHTML = 'Error loading featured recipes. Please try again later.';
     }
   },
 };

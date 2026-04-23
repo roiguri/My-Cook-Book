@@ -1,5 +1,4 @@
 import './auth-content.js';
-import '../../modals/message-modal/message-modal.js';
 
 class LoginForm extends HTMLElement {
   constructor() {
@@ -15,353 +14,313 @@ class LoginForm extends HTMLElement {
   render() {
     this.shadowRoot.innerHTML = `
       <style>
-        .login-form {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          padding: 20px;
-        }
+        :host { display: block; }
 
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
+        .stack { display: flex; flex-direction: column; gap: 16px; padding: 0 40px 36px; }
 
-        .form-group label {
-          font-size: 0.9em;
-          color: var(--text-color);
+        .field { display: flex; flex-direction: column; gap: 6px; }
+        .field label {
+          font-family: var(--font-ui-he, system-ui, sans-serif);
+          font-size: 12px; font-weight: 600;
+          color: var(--ink-3, #7c7562);
+          display: flex; justify-content: space-between; align-items: baseline;
         }
-
-        .form-group input {
-          padding: 10px;
-          border: 1px solid var(--secondary-color);
-          border-radius: 5px;
-          font-size: 1em;
-        }
-
-        .form-group input:focus {
-          outline: none;
-          border-color: var(--primary-color);
-        }
-
-        .remember-forgot {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 0.9em;
-          margin-top: -5px; /* Tighten up spacing */
-        }
-
-        .remember-me {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-        }
-
-        .forgot-password {
-          color: var(--primary-color);
-          cursor: pointer;
-          text-decoration: none;
-        }
-
-        .forgot-password:hover {
-          text-decoration: underline;
-        }
-
-        .submit-button {
-          background-color: var(--primary-color);
-          color: white;
-          padding: 12px;
-          border: none;
-          border-radius: 5px;
-          font-size: 1em;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-        }
-
-        .submit-button:hover {
-          background-color: var(--primary-hover);
-        }
-
-        .submit-button:disabled {
-          background-color: var(--secondary-color);
-          cursor: not-allowed;
-          opacity: 0.7;
-        }
-
-        .divider {
-          display: flex;
-          align-items: center;
-          text-align: center;
-          margin: 15px 0;
-          gap: 10px;
-          color: var(--text-color);
-          opacity: 0.8;
-        }
-
-        .divider::before,
-        .divider::after {
-          content: '';
-          flex: 1;
-          border-bottom: 1px solid var(--secondary-color);
-        }
-
-        /* Google Button Styles */
-        .gsi-material-button {
-          -moz-user-select: none;
-          -webkit-user-select: none;
-          -ms-user-select: none;
-          -webkit-appearance: none;
-          background-color: WHITE;
-          background-image: none;
-          border: 1px solid #000000;
-          -webkit-border-radius: 4px;
-          border-radius: 4px;
-          -webkit-box-sizing: border-box;
+        .field input {
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14.5px; color: var(--ink, #1f1d18);
+          background: var(--surface-0, #faf7f2);
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          border-radius: var(--r-sm, 8px);
+          padding: 12px 14px; outline: none; width: 100%;
           box-sizing: border-box;
-          color: #1f1f1f;
+          transition: border-color var(--dur-1, 160ms) var(--ease, ease),
+                      box-shadow var(--dur-1, 160ms) var(--ease, ease);
+        }
+        .field input:focus {
+          border-color: var(--primary, #6a994e);
+          box-shadow: 0 0 0 3px rgba(106,153,78,0.12);
+        }
+        .field .err {
+          font-family: var(--font-mono, monospace);
+          font-size: 10.5px; color: var(--secondary-dark, #9a3a3c);
+          display: none; align-items: center; gap: 6px;
+        }
+        .field .err.visible { display: flex; }
+        .field .err::before {
+          content: "!"; width: 14px; height: 14px; border-radius: 50%;
+          background: var(--secondary, #bc4749); color: #fff;
+          display: inline-flex; align-items: center; justify-content: center;
+          font-size: 10px; font-weight: 700; flex-shrink: 0;
+        }
+
+        .input-icon { position: relative; }
+        .input-icon input { padding-right: 40px; }
+        .input-icon .eye {
+          position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+          color: var(--ink-3, #7c7562); cursor: pointer; padding: 4px;
+          background: none; border: none; display: flex; align-items: center;
+        }
+        .input-icon .eye:hover { color: var(--ink, #1f1d18); }
+
+        .row-between {
+          display: flex; align-items: center; justify-content: space-between;
+          gap: 12px; margin-top: 4px;
+        }
+        .check {
+          display: inline-flex; align-items: center; gap: 8px;
           cursor: pointer;
-          font-family: 'Roboto', arial, sans-serif;
-          font-size: 14px;
-          height: 40px;
-          letter-spacing: 0.25px;
-          outline: none;
-          overflow: hidden;
-          padding: 0 12px;
-          position: relative;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 13px; color: var(--ink, #1f1d18);
+          user-select: none;
+        }
+        .check input[type="checkbox"] { display: none; }
+        .check .box {
+          width: 18px; height: 18px;
+          border-radius: var(--r-xs, 4px);
+          border: 1.5px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          background: var(--surface-0, #faf7f2);
+          display: inline-flex; align-items: center; justify-content: center;
+          transition: background var(--dur-1, 160ms), border-color var(--dur-1, 160ms);
+          flex-shrink: 0;
+        }
+        .check input:checked + .box {
+          background: var(--primary, #6a994e);
+          border-color: var(--primary, #6a994e);
+        }
+        .check input:checked + .box::after {
+          content: "";
+          width: 10px; height: 6px;
+          border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+          transform: rotate(-45deg) translate(1px, -1px);
+        }
+
+        .link {
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 13px; color: var(--primary-dark, #386641);
+          text-decoration: none;
+          border-bottom: 1px solid transparent;
+          cursor: pointer;
+        }
+        .link:hover { border-color: var(--primary, #6a994e); }
+
+        .btn {
+          display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 14px; font-weight: 500;
+          padding: 13px 20px; border-radius: var(--r-sm, 8px);
+          border: 1px solid transparent; cursor: pointer;
+          transition: background var(--dur-1, 160ms), transform var(--dur-1, 160ms);
+          width: 100%;
+        }
+        .btn-primary { background: var(--primary, #6a994e); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark, #386641); }
+        .btn-primary:active { transform: translateY(1px); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-social {
+          background: var(--surface-1, #fff); color: var(--ink, #1f1d18);
+          border: 1px solid var(--hairline-strong, rgba(31,29,24,0.2));
+          padding: 12px 16px; font-weight: 500; font-size: 13.5px;
+        }
+        .btn-social:hover { background: var(--surface-2, #f2e8cf); }
+        .btn-social .logo {
+          width: 18px; height: 18px;
+          display: inline-flex; align-items: center; justify-content: center;
+        }
+
+        .or {
+          display: grid; grid-template-columns: 1fr auto 1fr;
+          align-items: center; gap: 14px; margin: 6px 0;
+          font-family: var(--font-mono, monospace);
+          font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+          color: var(--ink-3, #7c7562);
+        }
+        .or::before, .or::after { content: ""; height: 1px; background: var(--hairline, rgba(31,29,24,0.08)); }
+
+        .socials { display: grid; gap: 10px; }
+
+        .footer-note {
+          margin-top: 24px;
+          font-family: var(--font-ui, system-ui, sans-serif);
+          font-size: 12.5px; color: var(--ink-3, #7c7562);
           text-align: center;
-          transition: background-color .218s, border-color .218s, box-shadow .218s;
-          vertical-align: middle;
-          white-space: nowrap;
-          width: 100%;
-          margin-top: -10px;
         }
-        
-        .gsi-material-button-content-wrapper {
-          align-items: center;
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
-          height: 100%;
-          justify-content: space-between;
-          position: relative;
-          width: 100%;
-        }
-        
-        .gsi-material-button-icon {
-          height: 20px;
-          margin-right: 12px;
-          min-width: 20px;
-          width: 20px;
-        }
-        
-        .gsi-material-button-contents {
-          flex-grow: 1;
-          font-family: 'Roboto', arial, sans-serif;
-          font-weight: 500;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          vertical-align: top;
-        }
-        
-        .gsi-material-button-state {
-          transition: opacity .218s;
-          bottom: 0;
-          left: 0;
-          opacity: 0;
-          position: absolute;
-          right: 0;
-          top: 0;
+        .footer-note a {
+          color: var(--primary-dark, #386641); text-decoration: none;
+          border-bottom: 1px dotted var(--primary, #6a994e); cursor: pointer;
         }
 
-        .error-message {
-          color: red;
-          font-size: 0.9em;
-          margin-top: 5px;
-          display: none;
-        }
-
-        .error-message.visible {
-          display: block;
+        @media (max-width: 560px) {
+          .stack { padding-left: 22px; padding-right: 22px; }
         }
       </style>
 
-      <form class="login-form">
-        <div class="form-group">
-          <label for="login-email">כתובת מייל</label>
-          <input type="email" id="login-email" name="email" required>
+      <form class="stack" id="login-form" novalidate>
+        <div class="field">
+          <label>כתובת מייל</label>
+          <input type="email" id="login-email" autocomplete="email" />
         </div>
 
-        <div class="form-group">
-          <label for="login-password">סיסמה</label>
-          <input type="password" id="login-password" name="password" required>
-          <div class="error-message" id="login-error"></div>
-        </div>
-
-        <div class="remember-forgot">
-          <label class="remember-me">
-            <input type="checkbox" id="remember" name="remember">
-            <span>זכור אותי</span>
-          </label>
-          <a class="forgot-password" id="forgot-password">שכחת סיסמה?</a>
-        </div>
-
-        <button type="submit" class="submit-button">התחבר</button>
-
-        <div class="divider">או</div>
-
-        <button type="button" class="gsi-material-button">
-          <div class="gsi-material-button-state"></div>
-          <div class="gsi-material-button-content-wrapper">
-            <div class="gsi-material-button-icon">
-              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                <path fill="none" d="M0 0h48v48H0z"></path>
+        <div class="field">
+          <label>סיסמה</label>
+          <div class="input-icon">
+            <input type="password" id="login-password" autocomplete="current-password" />
+            <button type="button" class="eye" id="toggle-pw" aria-label="הצג סיסמה">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
               </svg>
-            </div>
-            <span class="gsi-material-button-contents">התחבר עם Google</span>
+            </button>
           </div>
+          <span class="err" id="login-error"></span>
+        </div>
+
+        <div class="row-between">
+          <label class="check">
+            <input type="checkbox" id="remember" />
+            <span class="box"></span>
+            זכור אותי
+          </label>
+          <a class="link" id="forgot-password-link">שכחת סיסמה?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top:8px;">
+          התחבר
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </button>
+
+        <div class="or">או</div>
+
+        <div class="socials">
+          <button type="button" class="btn btn-social" id="google-signin">
+            <span class="logo">
+              <svg width="18" height="18" viewBox="0 0 18 18">
+                <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.17-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.83.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.92v2.32A9 9 0 009 18z"/>
+                <path fill="#FBBC05" d="M3.97 10.72A5.41 5.41 0 013.68 9c0-.6.1-1.18.29-1.72V4.96H.92A9 9 0 000 9c0 1.45.35 2.83.92 4.04l3.05-2.32z"/>
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 00.92 4.96l3.05 2.32C4.68 5.16 6.66 3.58 9 3.58z"/>
+              </svg>
+            </span>
+            המשך עם Google
+          </button>
+        </div>
+
+        <p class="footer-note">
+          חדש כאן? <a id="goto-signup">יצירת חשבון</a>
+        </p>
       </form>
     `;
   }
 
   setupEventListeners() {
-    const form = this.shadowRoot.querySelector('.login-form');
-    const forgotPassword = this.shadowRoot.getElementById('forgot-password');
-    const googleSignIn = this.shadowRoot.querySelector('.gsi-material-button');
-
-    form.addEventListener('submit', (e) => this.handleSubmit(e));
-    forgotPassword.addEventListener('click', (e) => this.handleForgotPassword(e));
-    googleSignIn.addEventListener('click', () => this.handleGoogleSignIn());
+    this.shadowRoot
+      .getElementById('login-form')
+      .addEventListener('submit', (e) => this._handleSubmit(e));
+    this.shadowRoot
+      .getElementById('forgot-password-link')
+      .addEventListener('click', () => this._handleForgotPassword());
+    this.shadowRoot
+      .getElementById('google-signin')
+      .addEventListener('click', () => this._handleGoogleSignIn());
+    this.shadowRoot
+      .getElementById('toggle-pw')
+      .addEventListener('click', () => this._togglePassword());
+    this.shadowRoot.getElementById('goto-signup').addEventListener('click', (e) => {
+      e.preventDefault();
+      const authContent = this.closest('auth-content');
+      authContent?._switchAuthTab('signup');
+    });
   }
 
-  async handleSubmit(e) {
-    e.preventDefault();
+  _togglePassword() {
+    const input = this.shadowRoot.getElementById('login-password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  }
 
+  async _handleSubmit(e) {
+    e.preventDefault();
     const email = this.shadowRoot.getElementById('login-email').value;
     const password = this.shadowRoot.getElementById('login-password').value;
     const remember = this.shadowRoot.getElementById('remember').checked;
 
-    const submitButton = this.shadowRoot.querySelector('.submit-button');
-    const originalText = submitButton.textContent;
-
-    submitButton.disabled = true;
-    submitButton.textContent = 'מתחבר...';
-    submitButton.setAttribute('aria-busy', 'true');
+    const btn = this.shadowRoot.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    const orig = btn.innerHTML;
+    btn.textContent = 'מתחבר...';
 
     try {
       const authController = this.closest('auth-controller');
       await authController.handleLogin(email, password, remember);
-      // Close modal after successful login
       authController.closeModal();
     } catch (error) {
-      console.error('Login Error Details:', {
-        code: error.code,
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-      });
-      this.showError(error);
+      this._showError(error);
     } finally {
-      submitButton.disabled = false;
-      submitButton.textContent = originalText;
-      submitButton.removeAttribute('aria-busy');
+      btn.disabled = false;
+      btn.innerHTML = orig;
     }
   }
 
-  handleForgotPassword(e) {
-    e.preventDefault();
-
-    // Dispatch event to show forgot password form
+  _handleForgotPassword() {
     this.dispatchEvent(
       new CustomEvent('switch-to-forgot-password', {
         bubbles: true,
         composed: true,
-        detail: {
-          email: this.shadowRoot.getElementById('login-email').value, // Pass current email if entered
-        },
+        detail: { email: this.shadowRoot.getElementById('login-email').value },
       }),
     );
   }
 
-  async handleGoogleSignIn() {
-    const googleButton = this.shadowRoot.querySelector('.gsi-material-button');
-    googleButton.style.opacity = '0.7';
-    googleButton.style.pointerEvents = 'none';
-
+  async _handleGoogleSignIn() {
+    const btn = this.shadowRoot.getElementById('google-signin');
+    btn.disabled = true;
     try {
       const authController = this.closest('auth-controller');
       await authController.handleGoogleSignIn();
-
       authController.closeModal();
     } catch (error) {
-      this.showError(error);
+      this._showError(error);
     } finally {
-      googleButton.style.opacity = '1';
-      googleButton.style.pointerEvents = 'auto';
+      btn.disabled = false;
     }
   }
 
-  showError(error) {
-    const AUTH_ERROR_MESSAGES = {
-      // Email/Password Sign In Errors
-      INVALID_LOGIN_CREDENTIALS: 'שם משתמש או סיסמה שגויים',
-      'auth/invalid-email': 'כתובת המייל אינה תקינה',
-      'auth/user-disabled': 'המשתמש חסום. אנא פנה לתמיכה',
-      'auth/user-not-found': 'משתמש לא קיים במערכת',
+  _showError(error) {
+    const AUTH_ERRORS = {
+      'auth/invalid-credential': 'כתובת מייל או סיסמה שגויים',
+      INVALID_LOGIN_CREDENTIALS: 'כתובת מייל או סיסמה שגויים',
+      'auth/invalid-email': 'כתובת מייל לא תקינה',
+      'auth/user-disabled': 'חשבון זה מושבת',
+      'auth/user-not-found': 'לא נמצא חשבון עבור כתובת מייל זו',
       'auth/wrong-password': 'סיסמה שגויה',
-      'auth/too-many-requests': 'נסיונות כניסה רבים מדי. אנא נסה שוב מאוחר יותר',
-      'auth/network-request-failed': 'בעיית תקשורת. אנא בדוק את חיבור האינטרנט',
-
-      // Google Sign In Errors
-      'auth/popup-closed-by-user': 'החלון נסגר לפני השלמת ההתחברות',
-      'auth/popup-blocked': 'החלון נחסם על ידי הדפדפן. אנא אפשר חלונות קופצים ונסה שנית',
-      'auth/cancelled-popup-request': 'בקשת ההתחברות בוטלה',
+      'auth/too-many-requests': 'יותר מדי ניסיונות. נסה שנית מאוחר יותר',
+      'auth/network-request-failed': 'שגיאת רשת. בדוק את החיבור שלך',
+      'auth/popup-closed-by-user': 'חלון ההתחברות נסגר לפני סיום',
+      'auth/popup-blocked': 'חלון קופץ נחסם. אנא אפשר חלונות קופצים ונסה שנית',
       'auth/account-exists-with-different-credential':
-        'קיים משתמש עם אותה כתובת מייל. אנא נסה להתחבר בדרך אחרת',
-
-      'auth/wrong-password': 'סיסמה שגויה',
-      'auth/user-not-found': 'משתמש לא קיים במערכת',
-      'auth/invalid-email': 'כתובת המייל אינה תקינה',
-      'auth/internal-error': 'שגיאת מערכת. אנא נסה שנית',
-      // Default error
-      default: 'שגיאה בהתחברות. אנא נסה שנית',
+        'קיים חשבון עם כתובת מייל זו עם שיטת התחברות שונה',
     };
-
-    const errorElement = this.shadowRoot.getElementById('login-error');
-    let errorCode = error.code;
-
-    // Try to parse the internal error message if it exists
-    if (error.code === 'auth/internal-error' && error.message) {
+    let code = error.code;
+    if (code === 'auth/internal-error' && error.message) {
       try {
-        const parsedError = JSON.parse(error.message);
-        errorCode = parsedError.error.message;
-      } catch (e) {
-        // If parsing fails, use the original error code
-        console.log('Error parsing message:', e);
-      }
+        code = JSON.parse(error.message).error.message;
+      } catch (_) {}
     }
-
-    const errorMessage = AUTH_ERROR_MESSAGES[errorCode] || AUTH_ERROR_MESSAGES.default;
-    errorElement.textContent = errorMessage;
-    errorElement.classList.add('visible');
+    const msg = AUTH_ERRORS[code] || 'ההתחברות נכשלה. נסה שנית.';
+    const el = this.shadowRoot.getElementById('login-error');
+    el.textContent = msg;
+    el.classList.add('visible');
   }
 
-  clearError() {
-    const errorElement = this.shadowRoot.getElementById('login-error');
-    errorElement.textContent = '';
-    errorElement.classList.remove('visible');
+  _clearError() {
+    const el = this.shadowRoot.getElementById('login-error');
+    el.textContent = '';
+    el.classList.remove('visible');
   }
 
-  // Method to clear form
   reset() {
-    this.shadowRoot.querySelector('.login-form').reset();
-    this.clearError();
+    this.shadowRoot.getElementById('login-form').reset();
+    this._clearError();
   }
 }
 

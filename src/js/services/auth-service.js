@@ -31,6 +31,7 @@ import { serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'fire
 import {
   browserLocalPersistence,
   browserSessionPersistence,
+  EmailAuthProvider,
   GoogleAuthProvider,
   setPersistence,
   signInWithEmailAndPassword,
@@ -39,6 +40,10 @@ import {
   signOut,
   sendPasswordResetEmail,
   updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  linkWithPopup,
+  unlink,
 } from 'firebase/auth';
 
 class AuthService {
@@ -394,6 +399,26 @@ class AuthService {
       this._handleAuthError('delete-account', error);
       throw error;
     }
+  }
+
+  async updatePassword(currentPassword, newPassword) {
+    const user = this.getCurrentUser();
+    if (!user) throw new Error('No user is signed in');
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    await updatePassword(user, newPassword);
+  }
+
+  async linkWithGoogle() {
+    const user = this.getCurrentUser();
+    if (!user) throw new Error('No user is signed in');
+    return await linkWithPopup(user, new GoogleAuthProvider());
+  }
+
+  async unlinkProvider(providerId) {
+    const user = this.getCurrentUser();
+    if (!user) throw new Error('No user is signed in');
+    return await unlink(user, providerId);
   }
 
   /**

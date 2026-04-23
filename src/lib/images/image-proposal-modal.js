@@ -53,7 +53,12 @@ class ImageProposalModal extends HTMLElement {
     const modal = this.shadowRoot.querySelector('custom-modal');
     if (modal) {
       const isMobile = window.innerWidth <= 768;
-      modal.setAttribute('width', isMobile ? '90vw' : '300px');
+      modal.setWidth(isMobile ? 'calc(100vw - 8px)' : '480px');
+      if (isMobile) {
+        modal.style.setProperty('--modal-outer-padding', '0px');
+      } else {
+        modal.style.removeProperty('--modal-outer-padding');
+      }
     }
   }
 
@@ -62,16 +67,8 @@ class ImageProposalModal extends HTMLElement {
       <style>
         .proposal-modal {
           position: relative;
-          font-family: var(--body-font);
+          font-family: var(--font-ui-he, sans-serif);
           width: 100%;
-          max-width: 100%;
-          overflow: hidden;
-          box-sizing: border-box;
-        }
-
-        .proposal-content {
-          width: 100%;
-          max-width: 100%;
           box-sizing: border-box;
         }
 
@@ -81,8 +78,9 @@ class ImageProposalModal extends HTMLElement {
         }
 
         .proposal-header h2 {
-          font-family: var(--heading-font-he);
-          color: var(--primary-color);
+          font-family: var(--font-display, serif);
+          font-size: 22px;
+          color: var(--ink, #1f1d18);
           margin: 0;
         }
 
@@ -102,44 +100,27 @@ class ImageProposalModal extends HTMLElement {
           display: flex;
           justify-content: center;
           gap: 10px;
-          margin-top: 20px;
+          margin-top: 4px;
         }
 
-        .submit-button,
-        .cancel-button {
-          padding: 10px 20px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          font-weight: bold;
-          min-width: 120px;
+        .btn {
+          display: inline-flex; align-items: center; gap: 7px;
+          font-family: var(--font-ui-he, sans-serif); font-size: 14px; font-weight: 500;
+          padding: 10px 22px; border-radius: var(--r-sm, 8px); border: 1px solid transparent;
+          cursor: pointer; transition: background var(--dur-1, 160ms), border-color var(--dur-1, 160ms);
         }
 
-        .submit-button {
-          background-color: var(--primary-color);
-          color: white;
+        .btn-primary {
+          background: var(--primary, #6a994e); color: #fff; border-color: transparent;
         }
 
-        .submit-button:hover {
-          background-color: var(--primary-hover);
+        .btn-primary:hover { background: var(--primary-dark, #386641); }
+
+        .btn-quiet {
+          background: transparent; color: var(--ink, #1f1d18); border-color: transparent;
         }
 
-        .cancel-button {
-          background-color: #918772;
-          color: white;
-        }
-
-        .cancel-button:hover {
-          background-color: #5c4033;
-        }
-
-        /* Mobile responsive adjustments */
-        @media (max-width: 768px) {
-          .proposal-modal,
-          .proposal-content {
-            max-width: 95vw;
-          }
-        }
+        .btn-quiet:hover { background: var(--surface-2, #f0ede6); }
       </style>
 
       <loading-spinner overlay border-radius="10px" size="60px" color="#ffffff">
@@ -152,8 +133,8 @@ class ImageProposalModal extends HTMLElement {
               <form class="proposal-form">
                 <image-handler></image-handler>
                 <div class="button-container">
-                  <button type="button" class="cancel-button">ביטול</button>
-                  <button type="submit" class="submit-button">שלח תמונות</button>
+                  <button type="button" class="btn btn-quiet">ביטול</button>
+                  <button type="submit" class="btn btn-primary">שלח תמונות</button>
                 </div>
               </form>
             </div>
@@ -166,7 +147,7 @@ class ImageProposalModal extends HTMLElement {
   setupEventListeners() {
     const modal = this.shadowRoot.querySelector('custom-modal');
     const form = this.shadowRoot.querySelector('.proposal-form');
-    const cancelButton = this.shadowRoot.querySelector('.cancel-button');
+    const cancelButton = this.shadowRoot.querySelector('.btn-quiet');
 
     form.addEventListener('submit', (e) => this.handleSubmit(e));
     cancelButton.addEventListener('click', () => this.close());

@@ -1,0 +1,83 @@
+/* ==========================================================================
+   Spacing system — v2
+   8-px base rhythm. Use --sp-* vars for consistent spacing throughout.
+   ========================================================================== */
+
+:root {
+  --sp-2xs: 0.25rem; /* 4px */
+  --sp-xs: 0.5rem; /* 8px */
+  --sp-sm: 0.75rem; /* 12px */
+  --sp-md: 1rem; /* 16px */
+  --sp-lg: 1.5rem; /* 24px */
+  --sp-xl: 2rem; /* 32px */
+  --sp-2xl: 3rem; /* 48px */
+  --sp-3xl: 4.5rem; /* 72px */
+}
+
+/* ---- Layout containers ---- */
+
+.content-wrap {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ---- Section rhythm ---- */
+
+.section {
+  margin-top: var(--sp-3xl);
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-lg);
+  margin-bottom: var(--sp-lg);
+  padding-bottom: var(--sp-md);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.section-head h2,
+.section-head .section-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--step-4);
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--text-strong);
+}
+
+.section-head .section-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.section-lede {
+  max-width: 60ch;
+  color: var(--text-muted);
+  font-size: var(--step-1);
+  margin: 0 0 var(--sp-lg);
+}
+
+/* ---- Card interior padding ---- */
+
+.card-pad {
+  padding: 24px;
+}
+.card-pad-lg {
+  padding: 28px;
+}
+
+/* ---- Grid gap utility ---- */
+
+.grid-gap {
+  gap: var(--sp-md);
+}
+.grid-gap-sm {
+  gap: var(--sp-sm);
+}
