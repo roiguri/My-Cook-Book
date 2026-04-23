@@ -288,8 +288,8 @@ class UserProfile extends HTMLElement {
 
       <!-- Footer -->
       <div class="profile-foot">
-        <button class="btn btn-primary" type="button" id="my-meal-btn">הארוחה שלי</button>
         <button class="btn btn-quiet" type="button" id="signout-btn">התנתק</button>
+        <button class="btn btn-primary" type="button" id="my-meal-btn">הארוחה שלי</button>
       </div>
 
       <!-- Confirmation modal for delete account -->
