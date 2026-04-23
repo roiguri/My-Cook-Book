@@ -85,6 +85,7 @@ export class PageManager {
       const html = await this.callPageMethod('render', params);
       if (typeof html === 'string') {
         this.renderPageContent(html);
+        this.showLoadingState();
       }
 
       await this.updatePageMetadata(params);
@@ -192,18 +193,10 @@ export class PageManager {
   }
 
   showLoadingState() {
-    this.contentContainer.innerHTML = `
-      <div class="page-loading" style="
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 200px;
-        font-size: 1.1em;
-        color: #666;
-      ">
-        <div>Loading...</div>
-      </div>
-    `;
+    const overlay = document.createElement('div');
+    overlay.className = 'page-loading';
+    overlay.innerHTML = '<div class="page-loading-spinner"></div>';
+    this.contentContainer.appendChild(overlay);
   }
 
   hideLoadingState() {
