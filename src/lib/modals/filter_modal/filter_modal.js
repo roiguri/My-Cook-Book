@@ -325,12 +325,12 @@ class RecipeFilterComponent extends HTMLElement {
       /* Footer */
       .filter-footer {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         align-items: center;
         gap: 12px;
-        padding: 16px 28px 20px;
-        border-top: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
-        background: var(--surface-0, #faf6ec);
+        padding: 14px 28px;
+        background: var(--surface-2, #f2e8cf);
+        border-radius: var(--r-xl, 20px);
         flex-shrink: 0;
       }
 
@@ -438,7 +438,7 @@ class RecipeFilterComponent extends HTMLElement {
         }
 
         .filter-footer {
-          padding: 16px 20px 20px;
+          padding: 14px 20px;
         }
       }
     `;
