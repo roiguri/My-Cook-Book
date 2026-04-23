@@ -72,6 +72,11 @@ footer {
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: page-spin 0.8s linear infinite;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -20px;
+  margin-left: -20px;
 }
 
 .spa-content .page-error {
