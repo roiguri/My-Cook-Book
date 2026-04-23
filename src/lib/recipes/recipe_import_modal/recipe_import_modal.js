@@ -198,14 +198,14 @@ class RecipeImportModal extends HTMLElement {
     // Drag & Drop
     uploadArea.addEventListener('dragover', (e) => {
       e.preventDefault();
-      uploadArea.style.borderColor = 'var(--primary-color)';
+      uploadArea.style.borderColor = 'var(--primary, #6a994e)';
     });
     uploadArea.addEventListener('dragleave', () => {
-      uploadArea.style.borderColor = '#ccc';
+      uploadArea.style.borderColor = '';
     });
     uploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
-      uploadArea.style.borderColor = '#ccc';
+      uploadArea.style.borderColor = '';
       if (e.dataTransfer.files.length > 0) {
         this.addImages(e.dataTransfer.files);
       }
