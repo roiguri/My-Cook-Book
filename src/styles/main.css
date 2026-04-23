@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+Hebrew:wght@300;400;500;600;700&family=Noto+Serif+Hebrew:wght@400;600&display=swap');
 
+/* ---- All @imports must be at the top (CSS spec) ---- */
 @import 'tokens.css';
-@import 'base.css';
 
 /* design system components */
 @import 'components/typography.css';
@@ -16,6 +16,40 @@
 @import 'components/header.css';
 @import 'components/footer.css';
 @import 'components/search_bar.css';
-@import 'components/quote.css';
 @import 'components/spa.css';
 @import 'components/lazy-loading.css';
+
+/* ---- Global resets ---- */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+main {
+  flex-grow: 1;
+  margin: 0 auto;
+}
+
+/* Prevent FOUC for Custom Elements */
+auth-controller:not(:defined),
+custom-modal:not(:defined) {
+  display: none;
+  visibility: hidden;
+}

@@ -209,7 +209,7 @@ export default {
         <div class="error-message">
           <h3>Error Loading Page</h3>
           <p>Sorry, we couldn't load the propose recipe page. Please try again.</p>
-          <button id="propose-error-go-home" class="btn-primary">Go Home</button>
+          <button id="propose-error-go-home" class="btn btn-primary">Go Home</button>
         </div>
       `;
 
