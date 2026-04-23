@@ -9,7 +9,7 @@ const TOAST_Z_INDEX = 10000;
  *
  * @description
  * A lightweight toast notification component for displaying brief messages.
- * Supports auto-dismiss, RTL layout, and different types (info, success, error).
+ * Supports auto-dismiss, RTL layout, and different types (info, success, error, warn/warning).
  *
  * @example
  * // HTML
@@ -40,55 +40,70 @@ class ToastNotification extends HTMLElement {
       <style>
         :host {
           position: fixed;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%);
+          bottom: 24px;
+          right: 24px;
           z-index: ${TOAST_Z_INDEX};
           pointer-events: none;
-          --toast-success-color: #4caf50;
-          --toast-error-color: #f44336;
         }
 
         .toast {
-          background-color: var(--primary-color);
-          color: var(--button-color);
-          padding: 12px 24px;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-          display: none;
-          align-items: center;
+          display: flex;
+          align-items: flex-start;
           gap: 10px;
-          font-family: var(--body-font);
-          font-size: var(--size-body);
+          padding: 14px 18px;
+          border-radius: var(--r-md, 12px);
+          border: 1px solid transparent;
+          box-shadow: var(--shadow-2, 0 4px 16px rgba(31,29,24,0.12));
+          font-family: var(--font-ui-he, sans-serif);
+          font-size: 13.5px;
+          line-height: 1.5;
           max-width: 90vw;
+          min-width: 220px;
           width: fit-content;
-          min-width: 200px;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-          pointer-events: auto;
           direction: rtl;
-          text-align: center;
+          pointer-events: none;
+          opacity: 0;
+          transform: translateY(10px);
+          transition:
+            opacity var(--dur-2, 280ms) var(--ease, ease),
+            transform var(--dur-2, 280ms) var(--ease, ease);
         }
 
         .toast.show {
-          display: flex;
           opacity: 1;
+          transform: translateY(0);
+          pointer-events: auto;
         }
 
         .toast.info {
-          background-color: var(--primary-color);
+          background: #e8eef8;
+          border-color: #afc4e8;
+          color: #2a4a82;
         }
 
         .toast.success {
-          background-color: var(--toast-success-color);
+          background: #eef4e8;
+          border-color: #b8d9a0;
+          color: var(--primary-dark, #386641);
         }
 
         .toast.error {
-          background-color: var(--toast-error-color);
+          background: #faeaea;
+          border-color: #e8b3b3;
+          color: var(--secondary-dark, #bc4749);
+        }
+
+        .toast.warn,
+        .toast.warning {
+          background: #fdf6d8;
+          border-color: #f0d878;
+          color: #7a5a07;
         }
 
         .toast-icon {
-          font-size: 1.2em;
+          font-size: 15px;
+          flex-shrink: 0;
+          line-height: 1.5;
         }
 
         .toast-message {
@@ -98,14 +113,15 @@ class ToastNotification extends HTMLElement {
         @media (max-width: 768px) {
           :host {
             bottom: 20px;
-            left: 20px;
-            right: 20px;
+            right: 16px;
+            left: 16px;
             transform: none;
           }
 
           .toast {
-            width: auto;
+            width: 100%;
             max-width: 100%;
+            box-sizing: border-box;
           }
         }
       </style>
@@ -120,7 +136,7 @@ class ToastNotification extends HTMLElement {
   /**
    * Show a toast notification
    * @param {string} message - The message to display
-   * @param {string} [type='info'] - Type: 'info', 'success', 'error'
+   * @param {string} [type='info'] - Type: 'info', 'success', 'error', 'warn'
    * @param {number} [duration=DEFAULT_TOAST_DURATION_MS] - Auto-dismiss duration in milliseconds (0 = no auto-dismiss)
    */
   show(message, type = 'info', duration = DEFAULT_TOAST_DURATION_MS) {
@@ -168,13 +184,15 @@ class ToastNotification extends HTMLElement {
   /**
    * Get icon for toast type
    * @param {string} type - Toast type
-   * @returns {string} Icon emoji
+   * @returns {string} Icon character
    */
   getIcon(type) {
     const icons = {
       info: 'ℹ️',
       success: '✓',
       error: '✕',
+      warn: '⚠',
+      warning: '⚠',
     };
     return icons[type] || icons.info;
   }
