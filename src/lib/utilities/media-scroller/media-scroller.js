@@ -156,13 +156,45 @@ class MediaScroller extends HTMLElement {
           transform: translateY(-2px);
         }
 
-        .media-scroller__media {
+        .media-scroller__media-container {
+          position: relative;
           width: 100%;
           height: 180px;
-          object-fit: cover;
-          border-radius: 5px;
           margin-bottom: 10px;
-          background-color: var(--background-light, #f5f5f5);
+          background-color: var(--surface-2, #f6eed6);
+          border-radius: 5px;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .media-scroller__media {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .media-scroller__media.loaded {
+          opacity: 1;
+        }
+
+        .media-scroller__spinner {
+          width: 24px;
+          height: 24px;
+          border: 3px solid rgba(0, 0, 0, 0.1);
+          border-top-color: var(--primary, #6a994e);
+          border-radius: 50%;
+          animation: ms-spin 0.8s linear infinite;
+        }
+
+        @keyframes ms-spin {
+          to { transform: rotate(360deg); }
         }
 
         .media-type-badge {
@@ -215,24 +247,47 @@ class MediaScroller extends HTMLElement {
       badge.textContent = mediaType;
       itemElement.appendChild(badge);
 
+      const mediaContainer = document.createElement('div');
+      mediaContainer.className = 'media-scroller__media-container';
+
+      const spinner = document.createElement('div');
+      spinner.className = 'media-scroller__spinner';
+      mediaContainer.appendChild(spinner);
+
+      const handleLoad = (element) => {
+        element.classList.add('loaded');
+        if (spinner.parentNode) {
+          spinner.parentNode.removeChild(spinner);
+        }
+      };
+
       if (isVideo) {
         const video = document.createElement('video');
         video.className = 'media-scroller__media';
         video.controls = true;
+
+        video.addEventListener('loadeddata', () => handleLoad(video));
+        video.addEventListener('error', () => handleLoad(video));
 
         const source = document.createElement('source');
         source.src = item.path;
         source.type = 'video/mp4';
 
         video.appendChild(source);
-        itemElement.appendChild(video);
+        mediaContainer.appendChild(video);
       } else {
         const img = document.createElement('img');
         img.className = 'media-scroller__media';
+
+        img.addEventListener('load', () => handleLoad(img));
+        img.addEventListener('error', () => handleLoad(img));
+
         img.src = item.path;
         img.alt = item.caption || '';
-        itemElement.appendChild(img);
+        mediaContainer.appendChild(img);
       }
+
+      itemElement.appendChild(mediaContainer);
 
       if (item.caption) {
         const caption = document.createElement('div');

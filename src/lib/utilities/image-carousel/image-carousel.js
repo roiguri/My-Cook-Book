@@ -65,7 +65,12 @@ class ImageCarousel extends HTMLElement {
       this.images.map(async (image, index) => {
         const listItem = document.createElement('li');
         listItem.classList.add('image-carousel__item');
+        listItem.classList.add('loading');
         const img = document.createElement('img');
+
+        const handleLoad = () => listItem.classList.remove('loading');
+        img.addEventListener('load', handleLoad);
+        img.addEventListener('error', handleLoad);
 
         // Check if the image is a Firebase path
         if (typeof image === 'string' && image.startsWith('img/recipes/')) {
@@ -183,19 +188,30 @@ class ImageCarousel extends HTMLElement {
           position: relative;
           -webkit-mask-image: radial-gradient(circle at center, black 50%, transparent 75%);
           mask-image: radial-gradient(circle at center, black 50%, transparent 75%);
+          background-color: var(--surface-2, #f6eed6);
         }
 
         .image-carousel__item.loading::before {
           content: '';
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
-          background-color: var(--surface-2, #f0ede6);
-          animation: pulse 1.5s infinite;
+          background: linear-gradient(
+            90deg,
+            var(--surface-2, #f6eed6) 25%,
+            #e5dfcb 50%,
+            var(--surface-2, #f6eed6) 75%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite linear;
         }
 
-        @keyframes pulse {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 0.9; }
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+
+        .image-carousel__item.loading .image-carousel__image {
+          opacity: 0;
         }
 
         .image-carousel__image {
@@ -203,6 +219,8 @@ class ImageCarousel extends HTMLElement {
           height: 100%;
           object-fit: contain;
           border-radius: 20px;
+          opacity: 1;
+          transition: opacity 0.3s ease;
         }
 
         .image-carousel__dots {

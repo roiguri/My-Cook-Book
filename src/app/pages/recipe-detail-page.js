@@ -45,6 +45,12 @@ export default {
       }
 
       const recipeComponent = document.createElement('recipe-component');
+
+      // Set up the listener before attaching to DOM and triggering fetch
+      this._readyPromise = new Promise((resolve) => {
+        recipeComponent.addEventListener('recipe-data-loaded', resolve, { once: true });
+      });
+
       recipeComponent.setAttribute('recipe-id', recipeId);
       recipeContainer.appendChild(recipeComponent);
     } else {
@@ -190,6 +196,12 @@ export default {
     if (this._menuCleanup) {
       this._menuCleanup();
       this._menuCleanup = null;
+    }
+  },
+
+  async waitForReady(container) {
+    if (this._readyPromise) {
+      await this._readyPromise;
     }
   },
 

@@ -92,6 +92,14 @@ export class PageManager {
 
       await this.callPageMethod('mount', this.contentContainer, params);
 
+      if (typeof this.currentPageModule?.waitForReady === 'function') {
+        const READY_TIMEOUT = 10_000;
+        await Promise.race([
+          this.callPageMethod('waitForReady', this.contentContainer, params),
+          new Promise((resolve) => setTimeout(resolve, READY_TIMEOUT)),
+        ]);
+      }
+
       this.hideLoadingState();
     } catch (error) {
       this.hideLoadingState();

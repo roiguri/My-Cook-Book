@@ -238,12 +238,39 @@ class RecipeComponent extends HTMLElement {
       overflow: hidden;
       border: 1px solid var(--hairline, rgba(31,29,24,0.1));
       background: var(--surface-2, #f6eed6);
+      position: relative;
+      min-height: 200px;
+    }
+
+    .Recipe_component__image-container.loading::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(
+        90deg,
+        var(--surface-2, #f6eed6) 25%,
+        #e5dfcb 50%,
+        var(--surface-2, #f6eed6) 75%
+      );
+      background-size: 200% 100%;
+      animation: rc-shimmer 1.5s infinite linear;
+    }
+
+    @keyframes rc-shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .Recipe_component__image-container.loading .Recipe_component__image {
+      opacity: 0;
     }
 
     .Recipe_component__image {
       width: 100%;
       display: block;
       object-fit: cover;
+      opacity: 1;
+      transition: opacity 0.3s ease;
     }
 
     /* =========================================================
@@ -665,12 +692,14 @@ class RecipeComponent extends HTMLElement {
       if (recipe) {
         this.updatePageTitle(recipe.name);
         this.populateRecipeDetails(recipe);
-        this.setRecipeImage(recipe);
+        await this.setRecipeImage(recipe);
         this.populateIngredientsList(recipe);
         this.populateInstructions(recipe);
         this.populateCommentList(recipe);
         this.setupServingsAdjuster(recipe);
-        await this.displayMediaInstructions(recipe);
+        this.displayMediaInstructions(recipe).catch((err) => {
+          console.error('Error loading media instructions:', err);
+        });
         this._originalIngredients = recipe.ingredients;
       } else {
         console.warn('No such document!');
@@ -679,6 +708,8 @@ class RecipeComponent extends HTMLElement {
     } catch (error) {
       console.error('Error getting recipe: ', error);
       // TODO: Handle potential errors during data fetching
+    } finally {
+      this.dispatchEvent(new CustomEvent('recipe-data-loaded', { bubbles: false, composed: true }));
     }
   }
 
@@ -707,6 +738,7 @@ class RecipeComponent extends HTMLElement {
       const accessibleImages = getRecipeImages(recipe, userRole);
 
       imageContainer.innerHTML = '';
+      imageContainer.classList.remove('loading');
       if (accessibleImages.length === 0) {
         imageContainer.style.display = 'none';
       } else {
@@ -743,6 +775,12 @@ class RecipeComponent extends HTMLElement {
 
   async showSingleImage(container, image, requestId) {
     const img = document.createElement('img');
+    container.classList.add('loading');
+
+    const handleLoad = () => container.classList.remove('loading');
+    img.addEventListener('load', handleLoad);
+    img.addEventListener('error', handleLoad);
+
     try {
       // Get download URL from util
       const url = await getImageUrl(image.full);
@@ -758,6 +796,7 @@ class RecipeComponent extends HTMLElement {
       container.appendChild(img);
     } catch (error) {
       if (this._imageRequestId !== requestId) return;
+      container.classList.remove('loading');
       console.error('Error loading image:', error);
       await this.showPlaceholder(container, requestId);
     }
