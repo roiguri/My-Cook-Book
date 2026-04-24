@@ -305,9 +305,56 @@ header .hamburger::after {
     display: flex;
     z-index: 1002;
     position: relative;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    border: 0;
+    background: var(--primary-dark);
+    color: #fff;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-1);
     transition:
       opacity var(--dur-2) var(--ease),
-      visibility var(--dur-2) var(--ease);
+      visibility var(--dur-2) var(--ease),
+      background var(--dur-1) var(--ease);
+  }
+
+  header .nav-toggle:hover {
+    background: var(--primary);
+  }
+
+  header .hamburger {
+    display: block;
+    width: 16px;
+    height: 2px;
+    background-color: #fff; /* Contrast with green bg */
+    border-radius: 1px;
+    position: relative;
+    transition: background-color var(--dur-1) var(--ease);
+    will-change: background-color;
+  }
+
+  header .hamburger::before,
+  header .hamburger::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 16px;
+    height: 2px;
+    background-color: #fff;
+    border-radius: 1px;
+    transition: transform var(--dur-2) var(--ease);
+    will-change: transform;
+  }
+
+  header .hamburger::before {
+    top: -6px;
+  }
+
+  header .hamburger::after {
+    top: 6px;
   }
 
   header .nav-toggle.drawer-open {
@@ -350,33 +397,124 @@ header .hamburger::after {
     display: none;
   }
 
-  /* ---- Mobile drawer ---- */
+  /* ---- Mobile drawer (Ledger style) ---- */
   .mobile-nav-drawer {
     position: fixed;
     top: 0;
     right: 0;
     height: 100vh;
-    width: min(220px, 75vw);
-    background: var(--surface-1);
+    width: min(320px, 85vw);
+    background-color: #fbf4e0;
     border-left: 1px solid var(--hairline);
-    border-top-left-radius: var(--r-xl);
-    border-bottom-left-radius: var(--r-xl);
     transform: translate3d(100%, 0, 0);
     transition: transform var(--dur-3) var(--ease-out);
     z-index: 1001;
-    padding: 2rem 1.5rem;
-    box-shadow: var(--shadow-3);
-    overflow-y: auto;
+    box-shadow: 24px 0 64px -24px rgba(31, 29, 24, 0.35);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Rule margin line */
+  .mobile-nav-drawer::before {
+    content: '';
+    position: absolute;
+    left: 44px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(188, 71, 73, 0.25);
+    z-index: 0;
   }
 
   .mobile-nav-drawer.active {
     transform: translate3d(0, 0, 0);
   }
 
+  /* Drawer head */
+  .mobile-nav-drawer .drawer-head {
+    padding: 20px 22px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .mobile-nav-drawer .drawer-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .mobile-nav-drawer .drawer-brand .words {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--text-strong);
+  }
+
+  .mobile-nav-drawer .drawer-brand .words em {
+    font-style: normal;
+    color: var(--primary-dark);
+  }
+
+  .mobile-nav-drawer .drawer-close {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--hairline-strong);
+    background: rgba(255, 255, 255, 0.6);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-strong);
+    cursor: pointer;
+  }
+
+  .mobile-nav-drawer .drawer-close::before {
+    content: '×';
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  /* Navigation index label */
+  .mobile-nav-drawer .drawer-idx {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--secondary-dark);
+    padding: 22px 22px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .mobile-nav-drawer .drawer-idx::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: color-mix(in oklab, var(--secondary-dark) 35%, transparent);
+  }
+
+  /* Drawer navigation */
   .mobile-nav-drawer nav {
-    margin-top: 5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--hairline);
+    margin-top: 0;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    overflow-y: auto;
   }
 
   .mobile-nav-drawer nav ul {
@@ -385,9 +523,8 @@ header .hamburger::after {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 2px;
     background: transparent;
-    border-radius: 0;
   }
 
   .mobile-nav-drawer nav ul li {
@@ -424,32 +561,74 @@ header .hamburger::after {
   }
 
   .mobile-nav-drawer nav ul li a {
-    display: block;
-    color: var(--ink-2);
-    font-family: var(--font-ui);
-    font-weight: 500;
-    font-size: var(--step-0);
-    background: var(--surface-2);
-    padding: 0.75rem 1rem;
-    border-radius: var(--r-sm);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 14px;
+    border-radius: var(--r-md);
     text-decoration: none;
-    border: 1px solid var(--hairline);
+    color: var(--text-strong);
+    font-family: var(--font-ui);
+    font-size: 17px;
+    font-weight: 500;
+    position: relative;
     transition:
       background var(--dur-1) var(--ease),
-      color var(--dur-1) var(--ease),
-      box-shadow var(--dur-1) var(--ease);
+      color var(--dur-1) var(--ease);
+  }
+
+  .mobile-nav-drawer nav ul li a .ico {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    font-size: 16px;
   }
 
   .mobile-nav-drawer nav ul li a:hover {
-    background: var(--surface-1);
-    box-shadow: var(--shadow-1);
+    background: rgba(255, 255, 255, 0.6);
   }
 
   .mobile-nav-drawer nav ul li a.active {
-    background: var(--primary-dark);
-    color: var(--surface-1);
-    border-color: var(--primary-dark);
-    box-shadow: var(--shadow-2);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 1px 2px rgba(31, 29, 24, 0.06);
+    border: 1px solid rgba(31, 29, 24, 0.08);
+  }
+
+  .mobile-nav-drawer nav ul li a.active .ico {
+    color: var(--secondary-dark);
+  }
+
+  .mobile-nav-drawer nav ul li a.active::before {
+    content: '';
+    position: absolute;
+    right: -10px; /* Hebrew layout */
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    background: var(--secondary);
+    border-radius: 3px 0 0 3px;
+  }
+
+  /* Drawer foot */
+  .mobile-nav-drawer .drawer-foot {
+    margin-top: auto;
+    border-top: 1px dashed color-mix(in oklab, var(--secondary) 40%, transparent);
+    padding: 14px 22px 26px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    gap: 10px;
   }
 
   /* Backdrop */
@@ -471,56 +650,6 @@ header .hamburger::after {
   .mobile-nav-backdrop.active {
     opacity: 1;
     visibility: visible;
-  }
-
-  /* Drawer header */
-  .mobile-nav-drawer .drawer-header {
-    position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
-    right: 1.5rem;
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 1rem;
-  }
-
-  .mobile-nav-drawer .drawer-logo {
-    font-family: var(--font-display);
-    font-style: italic;
-    color: var(--ink);
-    font-size: 1.25rem;
-    white-space: nowrap;
-  }
-
-  .mobile-nav-drawer .drawer-close {
-    background: var(--surface-2);
-    border: 1px solid var(--hairline);
-    color: var(--ink-3);
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 0.4rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    transition:
-      background var(--dur-1) var(--ease),
-      color var(--dur-1) var(--ease);
-  }
-
-  .mobile-nav-drawer .drawer-close:hover {
-    background: var(--hairline-strong);
-    color: var(--ink);
-  }
-
-  .mobile-nav-drawer .drawer-close::before {
-    content: '×';
-    font-weight: 400;
-    line-height: 1;
   }
 }
 

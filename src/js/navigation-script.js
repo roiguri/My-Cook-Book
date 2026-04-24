@@ -30,22 +30,47 @@ function createMobileDrawer() {
   mobileDrawer = document.createElement('div');
   mobileDrawer.className = 'mobile-nav-drawer';
 
+  // 1. Drawer Head
   const drawerHeader = document.createElement('div');
-  drawerHeader.className = 'drawer-header';
+  drawerHeader.className = 'drawer-head';
 
-  const drawerLogo = document.createElement('div');
-  drawerLogo.className = 'drawer-logo';
-  drawerLogo.textContent = 'תפריט';
+  const brand = document.createElement('a');
+  brand.className = 'drawer-brand';
+  brand.href = '/home';
+  brand.innerHTML = `
+    <div class="words">Our Kitchen <em>Chronicles</em></div>
+  `;
+  brand.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (window.spa && window.spa.router) {
+      window.spa.router.navigate('/home');
+      closeMobileDrawer();
+    }
+  });
 
   const drawerClose = document.createElement('button');
   drawerClose.className = 'drawer-close';
   drawerClose.setAttribute('aria-label', 'Close menu');
   drawerClose.addEventListener('click', closeMobileDrawer);
 
-  drawerHeader.appendChild(drawerLogo);
+  drawerHeader.appendChild(brand);
   drawerHeader.appendChild(drawerClose);
-
   mobileDrawer.appendChild(drawerHeader);
+
+  // 2. Index Label
+  const drawerIdx = document.createElement('div');
+  drawerIdx.className = 'drawer-idx';
+  drawerIdx.textContent = 'תפריט';
+  mobileDrawer.appendChild(drawerIdx);
+
+  // Navigation will be inserted here by syncMobileDrawerNavigation
+
+  // 3. Drawer Foot
+  const drawerFoot = document.createElement('div');
+  drawerFoot.className = 'drawer-foot';
+  drawerFoot.innerHTML = ``;
+  mobileDrawer.appendChild(drawerFoot);
+
   syncMobileDrawerNavigation();
 
   document.body.appendChild(mobileBackdrop);
@@ -77,7 +102,49 @@ function syncMobileDrawerNavigation() {
   }
 
   const drawerNav = headerNav.cloneNode(true);
-  mobileDrawer.appendChild(drawerNav);
+
+  // Map icons to links
+  const iconMap = [
+    { key: 'favorites=true', icon: 'fa-heart' },
+    { key: '/grandmas-cooking', icon: 'fa-archive' },
+    { key: '/dashboard', icon: 'fa-user-shield' },
+    { key: '/home', icon: 'fa-home' },
+    { key: '/categories', icon: 'fa-book-open' },
+    { key: '/propose-recipe', icon: 'fa-plus-circle' },
+    { key: '/my-meal', icon: 'fa-utensils' },
+  ];
+
+  const navLinks = drawerNav.querySelectorAll('a');
+  navLinks.forEach((link) => {
+    try {
+      const url = new URL(link.href);
+      const path = url.pathname;
+      const search = url.search;
+
+      let iconClass = 'fa-link'; // Default icon
+
+      for (const item of iconMap) {
+        if (item.key.includes('=') && search.includes(item.key)) {
+          iconClass = item.icon;
+          break;
+        } else if (path === item.key) {
+          iconClass = item.icon;
+          break;
+        }
+      }
+
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'ico';
+      iconSpan.innerHTML = `<i class="fas ${iconClass}"></i>`;
+      link.prepend(iconSpan);
+    } catch (e) {
+      console.warn('Invalid link in drawer:', link.href);
+    }
+  });
+
+  // Insert before the footer
+  const drawerFoot = mobileDrawer.querySelector('.drawer-foot');
+  mobileDrawer.insertBefore(drawerNav, drawerFoot);
 }
 
 function toggleMobileDrawer() {
