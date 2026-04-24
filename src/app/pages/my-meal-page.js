@@ -42,6 +42,7 @@ export default {
       unselectedIngredients: new Set(),
     };
 
+    this._pageReady = false;
     this.setupAuthObserver();
     await this.initializeRecipeComponent();
     this.setupIngredientsDrawer();
@@ -72,6 +73,11 @@ export default {
     const db = getFirestoreInstance();
     const docRef = doc(db, 'active_meals', this.currentUser.uid);
 
+    let resolveFirstSnapshot;
+    this._firstDataPromise = new Promise((resolve) => {
+      resolveFirstSnapshot = resolve;
+    });
+
     this.unsubscribe = onSnapshot(docRef, async (docSnap) => {
       if (docSnap.exists()) {
         const mealData = docSnap.data();
@@ -80,6 +86,8 @@ export default {
         // No active meal, create one or show empty state
         this.renderEmptyState();
       }
+      resolveFirstSnapshot?.();
+      resolveFirstSnapshot = null;
     });
   },
 
@@ -250,6 +258,13 @@ export default {
     const container = this.container.querySelector('#recipe-container');
     container.innerHTML = '';
 
+    let loader = null;
+    if (this._pageReady) {
+      loader = document.createElement('div');
+      loader.className = 'recipe-container-loader';
+      container.appendChild(loader);
+    }
+
     const recipeState = this.state.meal.recipeStates?.[recipeId] || {};
 
     const component = document.createElement('recipe-component');
@@ -261,6 +276,10 @@ export default {
 
     if (recipeState.currentStepIndex !== undefined) {
       component.setAttribute('active-step', recipeState.currentStepIndex);
+    }
+
+    if (loader) {
+      component.addEventListener('recipe-data-loaded', () => loader.remove(), { once: true });
     }
 
     // Listen for state changes
@@ -785,6 +804,11 @@ export default {
       if (window.spa?.router) window.spa.router.navigate('/categories');
       else window.location.hash = '#/categories';
     });
+  },
+
+  async waitForReady() {
+    if (this._firstDataPromise) await this._firstDataPromise;
+    this._pageReady = true;
   },
 
   unmount() {
