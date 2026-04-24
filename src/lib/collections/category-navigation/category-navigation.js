@@ -55,13 +55,20 @@ class CategoryNavigation extends HTMLElement {
   }
 
   async connectedCallback() {
+    let resolveReady;
+    this._readyPromise = new Promise((resolve) => (resolveReady = resolve));
     await this.render();
     this.setupEventListeners();
     this.updateActiveStates();
+    resolveReady();
   }
 
   disconnectedCallback() {
     this.removeEventListeners();
+  }
+
+  waitForReady() {
+    return this._readyPromise ?? Promise.resolve();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {

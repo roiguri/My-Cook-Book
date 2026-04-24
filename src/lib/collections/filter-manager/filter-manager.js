@@ -71,14 +71,21 @@ class FilterManager extends HTMLElement {
   }
 
   async connectedCallback() {
+    let resolveReady;
+    this._readyPromise = new Promise((resolve) => (resolveReady = resolve));
     await this.importModalComponent();
     await this.render();
     this.setupEventListeners();
     this.updateUI();
+    resolveReady();
   }
 
   disconnectedCallback() {
     this.removeEventListeners();
+  }
+
+  waitForReady() {
+    return this._readyPromise ?? Promise.resolve();
   }
 
   attributeChangedCallback(name, oldValue, newValue) {

@@ -72,6 +72,10 @@ class RecipeCard extends HTMLElement {
     this._handleLinkClick = this._handleLinkClick.bind(this);
 
     this._userFavorites = new Set();
+
+    // Load styles in constructor so :host { display: block; width: 100% } is
+    // applied before the element is connected, preventing a display:inline flash.
+    this._loadStyles();
   }
 
   get recipeId() {

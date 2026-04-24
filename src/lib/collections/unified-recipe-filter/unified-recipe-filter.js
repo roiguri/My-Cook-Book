@@ -82,14 +82,25 @@ class UnifiedRecipeFilter extends HTMLElement {
   }
 
   async connectedCallback() {
+    let resolveReady;
+    this._readyPromise = new Promise((resolve) => (resolveReady = resolve));
     await this.importDependencies();
     await this.render();
     this.setupEventListeners();
     this.updateLayout();
+    resolveReady();
   }
 
   disconnectedCallback() {
     this.removeEventListeners();
+  }
+
+  async waitForReady() {
+    await (this._readyPromise ?? Promise.resolve());
+    await Promise.all([
+      this.categoryNav?.waitForReady?.() ?? Promise.resolve(),
+      this.filterManager?.waitForReady?.() ?? Promise.resolve(),
+    ]);
   }
 
   attributeChangedCallback(name, oldValue, newValue) {

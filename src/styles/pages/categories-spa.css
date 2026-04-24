@@ -37,7 +37,7 @@
   background: var(--surface-0, #faf6ec);
   border-top: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
   border-bottom: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
-  margin-bottom: var(--sp-xl, 2rem);
+  margin-bottom: 0.75rem;
 }
 
 .spa-content .categories-page .categories-content {

@@ -422,13 +422,19 @@ class RecipePresentationGrid extends HTMLElement {
   showLoading() {
     this.isLoading = true;
     const gridContainer = this.shadowRoot.querySelector('.recipe-grid');
-    if (gridContainer) {
-      gridContainer.innerHTML = `
-        <div class="loading-state">
-          <p>${RECIPE_PRESENTATION_GRID_CONFIG.LOADING_MESSAGE}</p>
-        </div>
-      `;
+    if (!gridContainer) return;
+    const count = this.recipesPerPage || 8;
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'recipe-card-container';
+      const card = document.createElement('recipe-card');
+      card.setAttribute('layout', 'vertical');
+      wrapper.appendChild(card);
+      fragment.appendChild(wrapper);
     }
+    gridContainer.innerHTML = '';
+    gridContainer.appendChild(fragment);
   }
 
   /**

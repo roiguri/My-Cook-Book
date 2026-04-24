@@ -9,6 +9,8 @@ export const recipeCardStyles = `
 :host {
     display: block;
     width: var(--card-width, 100%);
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .recipe-card {

@@ -28,14 +28,29 @@ export default {
       await this.importComponents();
       this.initializeState(params);
       this.setupAuthObserver();
-      await this.loadInitialRecipes();
       this.setupEventListeners();
       this.updateUI();
-      await this.displayCurrentPageRecipes();
+      this._loadAndDisplay().catch((err) => this.handleError(err, 'loadAndDisplay'));
     } catch (error) {
       console.error('Error mounting categories page:', error);
       this.handleError(error, 'mount');
     }
+  },
+
+  async _loadAndDisplay() {
+    const grid = document.getElementById('recipe-presentation-grid');
+    if (grid) {
+      await grid.waitForReady(5000);
+      grid.setAttribute('recipes-per-page', '8');
+      grid.showLoading();
+    }
+    await this.loadInitialRecipes();
+    await this.displayCurrentPageRecipes();
+  },
+
+  async waitForReady(container) {
+    const filter = container.querySelector('#unified-filter');
+    if (filter?.waitForReady) await filter.waitForReady();
   },
 
   async unmount() {

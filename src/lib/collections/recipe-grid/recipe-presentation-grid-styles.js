@@ -29,13 +29,12 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
   grid-template-columns: repeat(4, 1fr);
   gap: var(--sp-lg, 1.5rem);
   width: 100%;
-  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+  transition: opacity 0.25s ease-out;
   align-content: start;
 }
 
 .recipe-grid.transitioning {
   opacity: 0;
-  transform: translateY(10px);
 }
 
 /* Recipe Card Container */
@@ -51,7 +50,9 @@ export const RECIPE_PRESENTATION_GRID_STYLES = `
 }
 
 .recipe-card-container recipe-card {
+  display: block;
   width: 100%;
+  min-width: 0;
 }
 
 /* No Results State - Matching Original Categories Page */
