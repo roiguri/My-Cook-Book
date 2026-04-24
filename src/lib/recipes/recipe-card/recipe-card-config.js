@@ -6,8 +6,8 @@
 export const RECIPE_CARD_CONFIG = {
   // Default dimensions
   DEFAULT_DIMENSIONS: {
-    width: '200px',
-    height: '300px',
+    width: '100%',
+    height: 'auto',
   },
 
   // Observed attributes
