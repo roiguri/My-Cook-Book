@@ -167,7 +167,9 @@ class RecipeRelatedField extends HTMLElement {
     });
 
     // Reposition on scroll/resize so the fixed dropdown tracks the input
-    this._reposition = () => { if (!dropdown.hidden) this._positionDropdown(); };
+    this._reposition = () => {
+      if (!dropdown.hidden) this._positionDropdown();
+    };
     window.addEventListener('scroll', this._reposition, { passive: true, capture: true });
     window.addEventListener('resize', this._reposition, { passive: true });
   }
@@ -290,7 +292,9 @@ class RecipeRelatedField extends HTMLElement {
     const input = this.shadowRoot.getElementById('related-search-input');
     input.disabled = this._selected.length >= MAX_RELATED;
     input.placeholder =
-      this._selected.length >= MAX_RELATED ? `הגעת למקסימום (${MAX_RELATED})` : 'הקלד שם מתכון לחיפוש...';
+      this._selected.length >= MAX_RELATED
+        ? `הגעת למקסימום (${MAX_RELATED})`
+        : 'הקלד שם מתכון לחיפוש...';
   }
 
   /**

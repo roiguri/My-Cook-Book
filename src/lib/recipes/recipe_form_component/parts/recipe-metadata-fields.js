@@ -79,7 +79,7 @@ class RecipeMetadataFields extends HTMLElement {
             <input type="number" id="prep-time" name="prep-time" class="recipe-form__input" min="0" placeholder="45" />
           </div>
           <div class="recipe-form__group">
-            <label for="wait-time" class="recipe-form__label">זמן כולל (דקות) <span class="recipe-form__req">*</span></label>
+            <label for="wait-time" class="recipe-form__label">זמן המתנה (דקות) <span class="recipe-form__req">*</span></label>
             <input type="number" id="wait-time" name="wait-time" class="recipe-form__input" min="0" placeholder="360" />
           </div>
         </div>
