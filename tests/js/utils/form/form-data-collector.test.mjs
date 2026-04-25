@@ -290,12 +290,11 @@ describe('form-data-collector', () => {
         source: 'new',
       });
 
-      // Existing image
+      // Existing image (compressed field is intentionally not collected — WebP migration)
       expect(result.images[1]).toEqual({
         id: 'existing-1',
         isPrimary: false,
         full: 'path/to/full.jpg',
-        compressed: 'path/to/compressed.jpg',
         access: 'public',
         uploadedBy: 'user123',
         fileName: 'existing.jpg',

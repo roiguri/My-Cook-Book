@@ -550,10 +550,10 @@ class RecipeCard extends HTMLElement {
 
   async _fetchRecipeImage() {
     try {
-      this._imageUrl = await getPrimaryImageUrl(this._recipeData);
+      this._imageUrl = await getPrimaryImageUrl(this._recipeData, '400x400');
     } catch (error) {
       console.error('Error fetching recipe image:', error);
-      this._imageUrl = await getPlaceholderImageUrl();
+      this._imageUrl = getPlaceholderImageUrl();
     }
   }
 
@@ -609,7 +609,8 @@ class RecipeCard extends HTMLElement {
     const difficultyClass = getDifficultyClass(difficulty);
 
     this._clearShadowRoot();
-    const template = this._hasImages() ? this._templates.main : this._templates.noImage;
+    const template =
+      this._hasImages() && this._imageUrl ? this._templates.main : this._templates.noImage;
     const clone = template.content.cloneNode(true);
 
     // Populate template with data

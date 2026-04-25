@@ -1,4 +1,5 @@
 import { StorageService } from '../../../js/services/storage-service.js';
+import { getOptimizedImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 
 class ImageCarousel extends HTMLElement {
   constructor() {
@@ -60,7 +61,7 @@ class ImageCarousel extends HTMLElement {
     this.carouselList.innerHTML = '';
     this.dotsContainer.innerHTML = '';
 
-    // Process all images (could be URLs or Firebase paths)
+    // Process all images (could be RecipeImage objects, URLs or Firebase paths)
     await Promise.all(
       this.images.map(async (image, index) => {
         const listItem = document.createElement('li');
@@ -70,32 +71,39 @@ class ImageCarousel extends HTMLElement {
 
         const handleLoad = () => listItem.classList.remove('loading');
         img.addEventListener('load', handleLoad);
-        img.addEventListener('error', handleLoad);
+        img.addEventListener('error', () => {
+          listItem.classList.remove('loading');
+          this.showItemPlaceholder(listItem);
+        });
 
-        // Check if the image is a Firebase path
-        if (typeof image === 'string' && image.startsWith('img/recipes/')) {
+        let src = null;
+        // Check if the image is a RecipeImage object or a Firebase path string
+        if (typeof image === 'object' && image !== null && image.full) {
           try {
-            img.src = await StorageService.getFileUrl(image);
+            src = await getOptimizedImageUrl(image, '1080x1080');
           } catch (error) {
-            console.error('Error loading Firebase image:', error);
-            // Fallback to placeholder if Firebase image fails
-            try {
-              img.src = await StorageService.getFileUrl(
-                'img/recipes/compressed/place-holder-add-new.png',
-              );
-            } catch (placeholderError) {
-              console.error('Error loading placeholder image:', placeholderError);
-              img.src = '';
-            }
+            console.error('Error loading optimized image:', error);
           }
-        } else {
-          // Handle as direct URL or local path
-          img.src = image;
+        } else if (typeof image === 'string' && image.startsWith('img/recipes/')) {
+          try {
+            src = await StorageService.getFileUrl(image);
+          } catch (error) {
+            console.error('Error loading Firebase image path:', error);
+          }
+        } else if (typeof image === 'string') {
+          src = image;
         }
 
-        img.alt = `Image ${index + 1}`;
-        img.classList.add('image-carousel__image');
-        listItem.appendChild(img);
+        if (src) {
+          img.src = src;
+          img.alt = `Image ${index + 1}`;
+          img.classList.add('image-carousel__image');
+          listItem.appendChild(img);
+        } else {
+          listItem.classList.remove('loading');
+          this.showItemPlaceholder(listItem);
+        }
+
         this.carouselList.appendChild(listItem);
 
         const dot = document.createElement('div');
@@ -112,6 +120,16 @@ class ImageCarousel extends HTMLElement {
     }
 
     this.goToSlide(this.currentIndex);
+  }
+
+  showItemPlaceholder(listItem) {
+    listItem.innerHTML = `
+      <div class="image-carousel__placeholder">
+        <svg class="no-image-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/>
+        </svg>
+      </div>
+    `;
   }
 
   goToSlide(index) {
@@ -221,6 +239,21 @@ class ImageCarousel extends HTMLElement {
           border-radius: 20px;
           opacity: 1;
           transition: opacity 0.3s ease;
+        }
+
+        .image-carousel__placeholder {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+          background: color-mix(in oklab, var(--surface-2, #f6eed6) 70%, var(--neutral, #f2e8cf));
+        }
+
+        .no-image-icon {
+          width: 60px;
+          height: 60px;
+          color: var(--ink-4, #a6a49a);
         }
 
         .image-carousel__dots {

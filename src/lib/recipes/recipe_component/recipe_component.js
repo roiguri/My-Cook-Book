@@ -7,8 +7,7 @@ import {
 } from '../../../js/utils/recipes/recipe-data-utils.js';
 import {
   getRecipeImages,
-  getImageUrl,
-  getPlaceholderImageUrl,
+  getOptimizedImageUrl,
 } from '../../../js/utils/recipes/recipe-image-utils.js';
 import {
   formatIngredientAmount,
@@ -271,6 +270,20 @@ class RecipeComponent extends HTMLElement {
       object-fit: cover;
       opacity: 1;
       transition: opacity 0.3s ease;
+    }
+
+    .Recipe_component__image-container.no-image-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      background: color-mix(in oklab, var(--surface-2, #f6eed6) 70%, var(--neutral, #f2e8cf));
+    }
+
+    .no-image-icon {
+      width: 60px;
+      height: 60px;
+      color: var(--ink-4, #a6a49a);
     }
 
     /* =========================================================
@@ -760,17 +773,15 @@ class RecipeComponent extends HTMLElement {
     }
   }
 
-  async showPlaceholder(container, requestId) {
-    const img = document.createElement('img');
-    img.className = 'Recipe_component__image';
-    img.alt = 'תמונת מתכון לא זמינה';
-    try {
-      img.src = await getPlaceholderImageUrl();
-    } catch (error) {
-      console.error('Could not load placeholder image', error);
-    }
-    if (this._imageRequestId !== requestId) return;
-    container.appendChild(img);
+  showPlaceholder(container, requestId) {
+    if (requestId && this._imageRequestId !== requestId) return;
+
+    container.classList.add('no-image-placeholder');
+    container.innerHTML = `
+      <svg class="no-image-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/>
+      </svg>
+    `;
   }
 
   async showSingleImage(container, image, requestId) {
@@ -782,8 +793,8 @@ class RecipeComponent extends HTMLElement {
     img.addEventListener('error', handleLoad);
 
     try {
-      // Get download URL from util
-      const url = await getImageUrl(image.full);
+      // Get optimized download URL from util
+      const url = await getOptimizedImageUrl(image, '1080x1080');
 
       if (this._imageRequestId !== requestId) return;
 
@@ -798,11 +809,11 @@ class RecipeComponent extends HTMLElement {
       if (this._imageRequestId !== requestId) return;
       container.classList.remove('loading');
       console.error('Error loading image:', error);
-      await this.showPlaceholder(container, requestId);
+      this.showPlaceholder(container, requestId);
     }
   }
 
-  async showCarousel(container, images) {
+  showCarousel(container, images) {
     try {
       // Sort images to ensure primary image is first
       const sortedImages = [...images].sort((a, b) => {
@@ -811,15 +822,12 @@ class RecipeComponent extends HTMLElement {
         return 0;
       });
 
-      // Just pass the full paths directly
-      const imagePaths = sortedImages.map((img) => img.full);
-
       const carousel = document.createElement('image-carousel');
-      carousel.setAttribute('images', JSON.stringify(imagePaths));
+      carousel.setAttribute('images', JSON.stringify(sortedImages));
       container.appendChild(carousel);
     } catch (error) {
       console.error('Error setting up carousel:', error);
-      await this.showPlaceholder(container);
+      this.showPlaceholder(container);
     }
   }
 

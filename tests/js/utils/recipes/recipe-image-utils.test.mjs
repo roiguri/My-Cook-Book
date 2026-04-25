@@ -6,13 +6,13 @@ import '../../../common/mocks/firebase-storage.mock.js';
 import '../../../common/mocks/firebase-service.mock.js';
 
 let validateImageFile,
-  compressImage,
   getImageStoragePath,
-  removeApprovedImage,
+  deleteImageFiles,
   setPrimaryImage,
   getRecipeImages,
   getImageUrl,
   getPlaceholderImageUrl,
+  getOptimizedImageUrl,
   getPrimaryImage,
   getPrimaryImageUrl,
   removeAllRecipeImages,
@@ -64,13 +64,13 @@ describe('recipe-image-utils', () => {
     updateDocumentMock.mockReset();
     const utils = await import('src/js/utils/recipes/recipe-image-utils.js');
     validateImageFile = utils.validateImageFile;
-    compressImage = utils.compressImage;
     getImageStoragePath = utils.getImageStoragePath;
-    removeApprovedImage = utils.removeApprovedImage;
+    deleteImageFiles = utils.deleteImageFiles;
     setPrimaryImage = utils.setPrimaryImage;
     getRecipeImages = utils.getRecipeImages;
     getImageUrl = utils.getImageUrl;
     getPlaceholderImageUrl = utils.getPlaceholderImageUrl;
+    getOptimizedImageUrl = utils.getOptimizedImageUrl;
     getPrimaryImage = utils.getPrimaryImage;
     getPrimaryImageUrl = utils.getPrimaryImageUrl;
     removeAllRecipeImages = utils.removeAllRecipeImages;
@@ -112,22 +112,34 @@ describe('recipe-image-utils', () => {
     });
   });
 
-  describe('removeApprovedImage', () => {
-    it('removes image from images array and deletes files', async () => {
-      getDocumentMock.mockResolvedValue({ images: [{ id: 'img1', full: 'f', compressed: 'c' }] });
-      updateDocumentMock.mockResolvedValue();
-      await removeApprovedImage('rid', 'img1');
-      expect(deleteFileMock).toHaveBeenCalledWith('f');
-      expect(deleteFileMock).toHaveBeenCalledWith('c');
-      expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', { images: [] });
+  describe('deleteImageFiles', () => {
+    it('deletes full and WebP variants', async () => {
+      await deleteImageFiles({ full: 'img/recipes/full/cat/rid/image.jpg' });
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image.jpg');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image_400x400.webp');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image_1080x1080.webp');
     });
-    it('throws if image not found', async () => {
-      getDocumentMock.mockResolvedValue({ images: [{ id: 'img2' }] });
-      await expect(removeApprovedImage('rid', 'img1')).rejects.toThrow();
+    it('deletes legacy compressed when provided', async () => {
+      await deleteImageFiles({
+        full: 'img/recipes/full/cat/rid/image.jpg',
+        compressed: 'img/recipes/compressed/cat/rid/image.jpg',
+      });
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/compressed/cat/rid/image.jpg');
     });
-    it('throws if no images', async () => {
-      getDocumentMock.mockResolvedValue({});
-      await expect(removeApprovedImage('rid', 'img1')).rejects.toThrow();
+    it('silently ignores errors on variant deletion', async () => {
+      deleteFileMock
+        .mockResolvedValueOnce(undefined) // full OK
+        .mockRejectedValueOnce(new Error('not found')) // 400 variant missing
+        .mockRejectedValueOnce(new Error('not found')); // 1080 variant missing
+      await expect(
+        deleteImageFiles({ full: 'img/recipes/full/cat/rid/image.jpg' }),
+      ).resolves.not.toThrow();
+    });
+    it('propagates errors from full file deletion', async () => {
+      deleteFileMock.mockRejectedValueOnce(new Error('permission denied'));
+      await expect(
+        deleteImageFiles({ full: 'img/recipes/full/cat/rid/image.jpg' }),
+      ).rejects.toThrow('permission denied');
     });
   });
 
@@ -180,12 +192,58 @@ describe('recipe-image-utils', () => {
   });
 
   describe('getPlaceholderImageUrl', () => {
-    it('calls StorageService.getFileUrl with placeholder path', async () => {
-      getFileUrlMock.mockResolvedValue('placeholder-url');
-      expect(await getPlaceholderImageUrl()).toBe('placeholder-url');
-      expect(getFileUrlMock).toHaveBeenCalledWith(
-        'img/recipes/compressed/place-holder-add-new.png',
-      );
+    it('returns null', () => {
+      expect(getPlaceholderImageUrl()).toBeNull();
+    });
+  });
+
+  describe('getOptimizedImageUrl', () => {
+    it('returns WebP URL when optimized variant is available', async () => {
+      getFileUrlMock.mockResolvedValue('webp-url');
+      const image = { id: '1', full: 'img/recipes/full/cat/rid/image.jpg' };
+      const result = await getOptimizedImageUrl(image, '400x400');
+      expect(getFileUrlMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image_400x400.webp');
+      expect(result).toBe('webp-url');
+    });
+    it('falls back to compressed when WebP is missing', async () => {
+      getFileUrlMock
+        .mockRejectedValueOnce(new Error('not found')) // WebP fails
+        .mockResolvedValueOnce('compressed-url'); // compressed works
+      const image = {
+        id: '1',
+        full: 'img/recipes/full/cat/rid/image.jpg',
+        compressed: 'img/recipes/compressed/cat/rid/image.jpg',
+      };
+      const result = await getOptimizedImageUrl(image, '400x400');
+      expect(result).toBe('compressed-url');
+    });
+    it('falls back to full when WebP and compressed are missing', async () => {
+      getFileUrlMock
+        .mockRejectedValueOnce(new Error('not found')) // WebP fails
+        .mockResolvedValueOnce('full-url'); // full works
+      const image = { id: '1', full: 'img/recipes/full/cat/rid/image.jpg' };
+      const result = await getOptimizedImageUrl(image, '400x400');
+      expect(result).toBe('full-url');
+    });
+    it('returns null when all storage lookups fail', async () => {
+      getFileUrlMock.mockRejectedValue(new Error('not found'));
+      const image = { id: '1', full: 'img/recipes/full/cat/rid/image.jpg' };
+      const result = await getOptimizedImageUrl(image, '400x400');
+      expect(result).toBeNull();
+    });
+    it('returns null for null image', async () => {
+      expect(await getOptimizedImageUrl(null, '400x400')).toBeNull();
+      expect(getFileUrlMock).not.toHaveBeenCalled();
+    });
+    it('returns null for image without full path', async () => {
+      expect(await getOptimizedImageUrl({ id: '1', compressed: 'c' }, '400x400')).toBeNull();
+      expect(getFileUrlMock).not.toHaveBeenCalled();
+    });
+    it('uses provided size suffix', async () => {
+      getFileUrlMock.mockResolvedValue('webp-1080-url');
+      const image = { id: '1', full: 'img/recipes/full/cat/rid/image.jpg' };
+      await getOptimizedImageUrl(image, '1080x1080');
+      expect(getFileUrlMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image_1080x1080.webp');
     });
   });
 
@@ -208,23 +266,26 @@ describe('recipe-image-utils', () => {
   });
 
   describe('getPrimaryImageUrl', () => {
-    it('returns the download URL for the primary image', async () => {
-      getFileUrlMock.mockResolvedValue('img-url');
-      const recipe = { images: [{ id: '1', isPrimary: true, compressed: 'img-path' }] };
-      await expect(getPrimaryImageUrl(recipe)).resolves.toBe('img-url');
-      expect(getFileUrlMock).toHaveBeenCalledWith('img-path');
+    it('returns the optimized WebP URL for the primary image', async () => {
+      getFileUrlMock.mockResolvedValue('webp-url');
+      const recipe = {
+        images: [{ id: '1', isPrimary: true, full: 'img/recipes/full/cat/rid/img.jpg' }],
+      };
+      await expect(getPrimaryImageUrl(recipe)).resolves.toBe('webp-url');
+      expect(getFileUrlMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/img_400x400.webp');
     });
-    it('returns the download URL for the first image if no primary', async () => {
-      getFileUrlMock.mockResolvedValue('img-url2');
-      const recipe = { images: [{ id: '1', compressed: 'img-path2' }] };
-      await expect(getPrimaryImageUrl(recipe)).resolves.toBe('img-url2');
-      expect(getFileUrlMock).toHaveBeenCalledWith('img-path2');
+    it('returns the optimized URL for the first image if no primary', async () => {
+      getFileUrlMock.mockResolvedValue('webp-url2');
+      const recipe = {
+        images: [{ id: '1', full: 'img/recipes/full/cat/rid/img2.jpg' }],
+      };
+      await expect(getPrimaryImageUrl(recipe)).resolves.toBe('webp-url2');
+      expect(getFileUrlMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/img2_400x400.webp');
     });
-    it('returns the placeholder URL if no images', async () => {
-      getFileUrlMock.mockResolvedValue('placeholder-url');
-      await expect(getPrimaryImageUrl({ images: [] })).resolves.toBe('placeholder-url');
-      await expect(getPrimaryImageUrl({})).resolves.toBe('placeholder-url');
-      await expect(getPrimaryImageUrl(null)).resolves.toBe('placeholder-url');
+    it('returns null if no images', async () => {
+      await expect(getPrimaryImageUrl({ images: [] })).resolves.toBeNull();
+      await expect(getPrimaryImageUrl({})).resolves.toBeNull();
+      await expect(getPrimaryImageUrl(null)).resolves.toBeNull();
     });
   });
 
@@ -232,28 +293,21 @@ describe('recipe-image-utils', () => {
     it('removes all approved and pending images and updates Firestore', async () => {
       getDocumentMock.mockResolvedValue({
         images: [
-          { id: 'a', full: 'f1', compressed: 'c1' },
-          { id: 'b', full: 'f2', compressed: 'c2' },
+          { id: 'a', full: 'img/recipes/full/cat/rid/a.jpg', compressed: 'c1' },
+          { id: 'b', full: 'img/recipes/full/cat/rid/b.jpg' },
         ],
         pendingImages: [
-          {
-            images: [
-              { id: 'p1', full: 'pf1', compressed: 'pc1' },
-              { id: 'p2', full: 'pf2', compressed: 'pc2' },
-            ],
-          },
+          { id: 'p1', full: 'img/recipes/full/cat/rid/p1.jpg', compressed: 'pc1' },
+          { id: 'p2', full: 'img/recipes/full/cat/rid/p2.jpg' },
         ],
       });
       updateDocumentMock.mockResolvedValue();
       await removeAllRecipeImages('rid');
-      expect(deleteFileMock).toHaveBeenCalledWith('f1');
-      expect(deleteFileMock).toHaveBeenCalledWith('c1');
-      expect(deleteFileMock).toHaveBeenCalledWith('f2');
-      expect(deleteFileMock).toHaveBeenCalledWith('c2');
-      expect(deleteFileMock).toHaveBeenCalledWith('pf1');
-      expect(deleteFileMock).toHaveBeenCalledWith('pc1');
-      expect(deleteFileMock).toHaveBeenCalledWith('pf2');
-      expect(deleteFileMock).toHaveBeenCalledWith('pc2');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/a.jpg');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/a_400x400.webp');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/b.jpg');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/p1.jpg');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/p2.jpg');
       expect(updateDocumentMock).toHaveBeenCalledWith('recipes', 'rid', {
         images: [],
         pendingImages: [],
@@ -281,10 +335,8 @@ describe('recipe-image-utils', () => {
   });
 
   describe('uploadAndBuildImageMetadata', () => {
-    it('uploads full and compressed images and returns correct metadata', async () => {
+    it('uploads full image and returns correct metadata', async () => {
       uploadFileMock.mockResolvedValue('url');
-      // Mock compressImage to return a different blob
-      compressImage = jest.fn(async (file) => new Blob(['compressed'], { type: file.type }));
       const file = createFakeFile('test.jpg', 'image/jpeg', 1234);
       const meta = await uploadAndBuildImageMetadata({
         recipeId: 'rid',
@@ -293,12 +345,10 @@ describe('recipe-image-utils', () => {
         isPrimary: true,
         uploadedBy: 'user1',
       });
-      // Should upload full and compressed
-      expect(uploadFileMock).toHaveBeenCalledTimes(2);
-      // Should return correct metadata
+      expect(uploadFileMock).toHaveBeenCalledTimes(1);
       expect(meta).toHaveProperty('id');
       expect(meta.full).toContain('img/recipes/full/cat/rid/');
-      expect(meta.compressed).toContain('img/recipes/compressed/cat/rid/');
+      expect(meta).not.toHaveProperty('compressed');
       expect(meta.fileName).toBe('primary.jpg');
       expect(meta.isPrimary).toBe(true);
       expect(meta.uploadedBy).toBe('user1');
@@ -307,7 +357,6 @@ describe('recipe-image-utils', () => {
     });
     it('uses a timestamped fileName for non-primary', async () => {
       uploadFileMock.mockResolvedValue('url');
-      compressImage = jest.fn(async (file) => new Blob(['compressed'], { type: file.type }));
       const file = createFakeFile('test2.jpg', 'image/jpeg', 1234);
       const meta = await uploadAndBuildImageMetadata({
         recipeId: 'rid',
@@ -329,7 +378,7 @@ describe('recipe-image-utils', () => {
       getDocumentMock.mockResolvedValue({ pendingImages: [] });
       const files = [createFakeFile('a.jpg'), createFakeFile('b.jpg')];
       const result = await addPendingImages('rid', files, 'cat', 'user1');
-      expect(uploadFileMock).toHaveBeenCalledTimes(4); // 2 files x (full+compressed)
+      expect(uploadFileMock).toHaveBeenCalledTimes(2);
       expect(updateDocumentMock).toHaveBeenCalledWith(
         'recipes',
         'rid',
@@ -338,6 +387,7 @@ describe('recipe-image-utils', () => {
       expect(result.length).toBe(2);
       expect(result[0]).toHaveProperty('id');
       expect(result[1]).toHaveProperty('id');
+      expect(result[0]).not.toHaveProperty('compressed');
     });
     it('returns [] if no files', async () => {
       getDocumentMock.mockResolvedValue({ pendingImages: [] });
@@ -351,8 +401,7 @@ describe('recipe-image-utils', () => {
     it('moves the correct pending image to images array', async () => {
       const pending = {
         id: 'pid',
-        full: 'f',
-        compressed: 'c',
+        full: 'img/recipes/full/cat/rid/img.jpg',
         fileExtension: 'jpg',
         uploadedBy: 'u',
       };
@@ -376,12 +425,14 @@ describe('recipe-image-utils', () => {
   });
 
   describe('rejectPendingImageById', () => {
-    it('deletes the correct pending image and removes from array', async () => {
-      const pending = { id: 'pid', full: 'f', compressed: 'c' };
+    it('deletes all files and removes the pending image from the array', async () => {
+      const pending = { id: 'pid', full: 'img/recipes/full/cat/rid/image.jpg', compressed: 'c' };
       getDocumentMock.mockResolvedValue({ pendingImages: [pending, { id: 'other' }] });
       updateDocumentMock.mockResolvedValue();
       await rejectPendingImageById('rid', 'pid');
-      expect(deleteFileMock).toHaveBeenCalledWith('f');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image.jpg');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image_400x400.webp');
+      expect(deleteFileMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image_1080x1080.webp');
       expect(deleteFileMock).toHaveBeenCalledWith('c');
       expect(updateDocumentMock).toHaveBeenCalledWith(
         'recipes',

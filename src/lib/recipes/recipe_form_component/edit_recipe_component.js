@@ -3,10 +3,10 @@ import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { StorageService } from '../../../js/services/storage-service.js';
 import authService from '../../../js/services/auth-service.js';
 import {
-  compressImage,
   getImageStoragePath,
   uploadAndBuildImageMetadata,
   migrateImageToCategory,
+  deleteImageFiles,
 } from '../../../js/utils/recipes/recipe-image-utils.js';
 
 import '../../modals/message-modal/message-modal.js';
@@ -56,8 +56,7 @@ class EditRecipeComponent extends HTMLElement {
 
       if (Array.isArray(recipeData.toDelete)) {
         for (const img of recipeData.toDelete) {
-          if (img.full) await StorageService.deleteFile(img.full).catch(() => {});
-          if (img.compressed) await StorageService.deleteFile(img.compressed).catch(() => {});
+          if (img.full) await deleteImageFiles(img).catch(() => {});
         }
       }
 
@@ -76,7 +75,6 @@ class EditRecipeComponent extends HTMLElement {
           let existingImage = {
             id: img.id,
             full: img.full,
-            compressed: img.compressed,
             isPrimary: img.isPrimary,
             access: img.access,
             uploadedBy: img.uploadedBy,
@@ -214,20 +212,18 @@ class EditRecipeComponent extends HTMLElement {
           'compressed',
         );
         await StorageService.deleteFile(oldFullPath);
-        await StorageService.deleteFile(oldCompressedPath);
+        // Catch deletion of compressed path in case it doesn't exist (legacy)
+        await StorageService.deleteFile(oldCompressedPath).catch(() => {});
       } catch (error) {
         console.error('Error removing old images:', error);
       }
     }
-    // Upload new image (both full and compressed)
+    // Upload new image (full only)
     try {
       const fullPath = getImageStoragePath(this.recipeId, category, imageName, 'full');
-      const compressedPath = getImageStoragePath(this.recipeId, category, imageName, 'compressed');
-      const compressedImageBlob = await compressImage(imageFile);
-      await StorageService.uploadFile(compressedImageBlob, compressedPath);
       await StorageService.uploadFile(imageFile, fullPath);
     } catch (error) {
-      console.error('Error uploading new images:', error);
+      console.error('Error uploading new image:', error);
     }
   }
 
