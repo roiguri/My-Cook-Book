@@ -87,7 +87,9 @@ class RecipeComponent extends HTMLElement {
         <header class="recipe_component__header">
           <span id="Recipe_component__category" class="Recipe_component__eyebrow"></span>
           <h1 id="Recipe_component__name" class="Recipe_component__title"></h1>
-          <div class="Recipe_component__meta-strip">
+          <p id="Recipe_component__description" class="Recipe_component__description"></p>
+          <button id="Recipe_component__show-more" class="Recipe_component__show-more">הצג עוד</button>
+          <div id="Recipe_component__meta-strip" class="Recipe_component__meta-strip">
             <div class="Recipe_component__meta-cell">
               <div class="Recipe_component__meta-k">זמן הכנה</div>
               <div id="Recipe_component__prepTime" class="Recipe_component__meta-v"></div>
@@ -99,6 +101,10 @@ class RecipeComponent extends HTMLElement {
             <div class="Recipe_component__meta-cell">
               <div class="Recipe_component__meta-k">רמת קושי</div>
               <div id="Recipe_component__difficulty" class="Recipe_component__meta-v"></div>
+            </div>
+            <div id="Recipe_component__attribution-row" class="Recipe_component__attribution-row" style="display: none;">
+              <span class="Recipe_component__attribution-label">מקור:</span>
+              <span id="Recipe_component__attribution" class="Recipe_component__attribution-value"></span>
             </div>
           </div>
         </header>
@@ -189,9 +195,49 @@ class RecipeComponent extends HTMLElement {
       font-weight: 600;
       color: var(--ink, #1f1d18);
       text-align: right;
-      margin: 0 0 24px;
+      margin: 0 0 16px;
       line-height: 1.1;
       text-wrap: balance;
+    }
+
+    .Recipe_component__description {
+      font-family: var(--font-ui-he, sans-serif);
+      font-size: var(--step-1, clamp(1rem, 0.96rem + 0.2vw, 1.09rem));
+      color: var(--text-muted, #6b6a63);
+      line-height: 1.6;
+      margin: 0 0 4px;
+      max-width: 80ch;
+      text-wrap: pretty;
+      display: none;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      transition: -webkit-line-clamp 0.3s ease;
+    }
+
+    .Recipe_component__description.expanded {
+      -webkit-line-clamp: unset;
+      margin-bottom: 24px;
+    }
+
+    .Recipe_component__show-more {
+      background: none;
+      border: none;
+      color: var(--primary, #6a994e);
+      font-family: var(--font-ui-he, sans-serif);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 24px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .Recipe_component__show-more:hover {
+      text-decoration: underline;
     }
 
     /* Meta strip */
@@ -209,7 +255,8 @@ class RecipeComponent extends HTMLElement {
       border-left: 1px solid var(--hairline, rgba(31,29,24,0.1));
     }
 
-    .Recipe_component__meta-cell:last-child { border-left: 0; }
+    /* The 3rd cell is the last in the top row, so we remove its left border */
+    .Recipe_component__meta-cell:nth-child(3) { border-left: 0; }
 
     .Recipe_component__meta-k {
       font-family: var(--font-mono, monospace);
@@ -226,6 +273,54 @@ class RecipeComponent extends HTMLElement {
       font-weight: 400;
       color: var(--text-strong, #1f1d18);
       line-height: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .Recipe_component__attribution-row {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border-top: 1px solid var(--hairline, rgba(31,29,24,0.1));
+      font-size: 12px;
+      color: var(--ink-3, #6b6a63);
+      min-width: 0; /* Allow truncation */
+    }
+
+    .Recipe_component__attribution-label {
+      font-family: var(--font-mono, monospace);
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-4, #a6a49a);
+      flex-shrink: 0;
+    }
+
+    .Recipe_component__attribution-value {
+      font-family: var(--font-ui-he, sans-serif);
+      font-style: italic;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+      unicode-bidi: plaintext;
+      text-align: right;
+    }
+
+    .Recipe_component__attribution-link {
+      color: inherit;
+      text-decoration: underline;
+      text-decoration-color: var(--primary, #6a994e);
+      text-underline-offset: 3px;
+      transition: color var(--dur-1, 160ms);
+    }
+
+    .Recipe_component__attribution-link:hover {
+      color: var(--primary, #6a994e);
     }
 
     /* =========================================================
@@ -681,6 +776,17 @@ class RecipeComponent extends HTMLElement {
 
       .Recipe_component__meta-cell {
         padding: 12px 10px;
+        border-left: 1px solid var(--hairline, rgba(31,29,24,0.1));
+      }
+
+      .Recipe_component__meta-cell:last-child {
+        border-left: 0;
+      }
+
+      .Recipe_component__attribution-row {
+        grid-column: 1 / -1;
+        padding: 8px 12px;
+        justify-content: center;
       }
 
       .Recipe_component__meta-v {
@@ -758,6 +864,59 @@ class RecipeComponent extends HTMLElement {
     this.shadowRoot.getElementById('Recipe_component__difficulty').textContent = recipe.difficulty;
     this.shadowRoot.getElementById('Recipe_component__category').textContent =
       getLocalizedCategoryName(recipe.category);
+
+    // Populate Description
+    const descEl = this.shadowRoot.getElementById('Recipe_component__description');
+    const showMoreBtn = this.shadowRoot.getElementById('Recipe_component__show-more');
+
+    if (recipe.description && recipe.description.trim()) {
+      descEl.textContent = recipe.description;
+      descEl.style.display = '-webkit-box';
+      descEl.classList.remove('expanded');
+
+      // Check for truncation after render
+      setTimeout(() => {
+        const isTruncated = descEl.scrollHeight > descEl.offsetHeight;
+        if (isTruncated) {
+          showMoreBtn.style.display = 'flex';
+        } else {
+          showMoreBtn.style.display = 'none';
+          descEl.classList.add('expanded'); // Show full text and apply margin
+        }
+      }, 0);
+
+      showMoreBtn.onclick = () => {
+        const isExpanded = descEl.classList.toggle('expanded');
+        showMoreBtn.textContent = isExpanded ? 'הצג פחות' : 'הצג עוד';
+      };
+    } else {
+      descEl.style.display = 'none';
+      showMoreBtn.style.display = 'none';
+    }
+
+    // Populate Attribution
+    const attrRow = this.shadowRoot.getElementById('Recipe_component__attribution-row');
+    const attrEl = this.shadowRoot.getElementById('Recipe_component__attribution');
+
+    if (recipe.attribution && recipe.attribution.trim()) {
+      attrEl.innerHTML = this._formatAttribution(recipe.attribution);
+      attrRow.style.display = 'flex';
+    } else {
+      attrRow.style.display = 'none';
+    }
+  }
+
+  _formatAttribution(attribution) {
+    if (!attribution) return '';
+    // Escape HTML first to prevent XSS
+    const div = document.createElement('div');
+    div.textContent = attribution;
+    const escaped = div.innerHTML;
+
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return escaped.replace(urlRegex, (url) => {
+      return `<a href="${url}" class="Recipe_component__attribution-link" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
   }
 
   async setRecipeImage(recipe) {

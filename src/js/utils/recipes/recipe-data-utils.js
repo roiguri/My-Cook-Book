@@ -225,6 +225,8 @@ export function formatRecipeData(rawData) {
     waitTime: typeof rawData.waitTime === 'number' ? rawData.waitTime : 0,
     difficulty: rawData.difficulty || '',
     mainIngredient: rawData.mainIngredient || '',
+    description: rawData.description || '',
+    attribution: rawData.attribution || '',
     tags: Array.isArray(rawData.tags) ? rawData.tags : [],
     servings: typeof rawData.servings === 'number' ? rawData.servings : 1,
 
