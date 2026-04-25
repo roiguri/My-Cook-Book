@@ -30,7 +30,6 @@
 
 // --- Imports ---
 import { StorageService } from '../../services/storage-service.js';
-import { Timestamp } from 'firebase/firestore';
 
 // --- Constants ---
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -199,7 +198,7 @@ export async function uploadMediaInstructionFile(file, recipeId, userId, onProgr
       type: mediaType,
       order: 0, // Default order - to be updated when added to array
       uploadedBy: userId,
-      uploadedAt: Timestamp.now(),
+      uploadedAt: new Date(),
     };
 
     return metadata;

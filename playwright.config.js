@@ -19,6 +19,9 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Block service workers so Playwright route intercepts always take priority over cached modules */
+    serviceWorkers: 'block',
   },
 
   /* Configure projects for major browsers */

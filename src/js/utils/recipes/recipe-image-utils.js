@@ -57,7 +57,6 @@
 // --- Imports ---
 import { StorageService } from '../../services/storage-service.js';
 import { FirestoreService } from '../../services/firestore-service.js';
-import { Timestamp } from 'firebase/firestore';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
@@ -368,7 +367,7 @@ export async function uploadAndBuildImageMetadata({
     isPrimary,
     uploadedBy,
     access: 'public',
-    uploadTimestamp: Timestamp.now(),
+    uploadTimestamp: new Date(),
   };
 }
 
@@ -398,7 +397,7 @@ export async function addPendingImages(recipeId, files, category, uploader) {
       id,
       full: fullPath,
       fileExtension,
-      timestamp: Timestamp.now(),
+      timestamp: new Date(),
       uploadedBy: uploader,
     };
   });
@@ -430,7 +429,7 @@ export async function approvePendingImageById(recipeId, pendingImageId) {
     access: 'public',
     uploadedBy: pendingImage.uploadedBy,
     fileName: `${pendingImageId}.${pendingImage.fileExtension}`,
-    uploadTimestamp: Timestamp.now(),
+    uploadTimestamp: new Date(),
   };
   const images = Array.isArray(recipe.images) ? [...recipe.images, newImage] : [newImage];
   const pendingImages = recipe.pendingImages.filter((img) => img.id !== pendingImageId);

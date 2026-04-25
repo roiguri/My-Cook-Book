@@ -1,5 +1,9 @@
 import { jest } from '@jest/globals';
 
+// Mock Firebase SDK modules that storage-service.js and firestore-service.js depend on
+import '../../../common/mocks/firebase-storage.mock.js';
+import '../../../common/mocks/firebase-service.mock.js';
+
 // Inline FirestoreService mock for this test file
 export const mockQueryDocuments = jest.fn();
 export const mockGetDocument = jest.fn();
@@ -134,6 +138,8 @@ describe('recipe-data-utils', () => {
       const raw = {
         id: 'abc',
         name: 'Cake',
+        description: 'A tasty cake',
+        attribution: 'Grandma',
         category: 'desserts',
         prepTime: 10,
         waitTime: 20,
@@ -147,6 +153,7 @@ describe('recipe-data-utils', () => {
         instructions: ['Step 1'],
         images: [{ file: 'cake.jpg', isPrimary: true, access: 'public', uploadedBy: 'user1' }],
         mediaInstructions: [],
+        relatedRecipes: ['recipe-1'],
         comments: ['Yum!'],
         approved: true,
         creationTime: 1234567890,
@@ -162,6 +169,8 @@ describe('recipe-data-utils', () => {
       expect(formatted).toEqual({
         id: '',
         name: 'Bread',
+        description: '',
+        attribution: '',
         category: '',
         prepTime: 0,
         waitTime: 0,
@@ -176,6 +185,7 @@ describe('recipe-data-utils', () => {
         images: [],
         mediaInstructions: [],
         comments: [],
+        relatedRecipes: [],
         approved: false,
         creationTime: null,
         updatedAt: null,
