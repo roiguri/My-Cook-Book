@@ -164,7 +164,7 @@ describe('form-data-collector', () => {
       expect(result.difficulty).toBe('קלה');
       expect(result.mainIngredient).toBe('Chicken');
       expect(result.servings).toBe(4);
-      expect(result.approved).toBe(false);
+      expect(result.approved).toBeUndefined();
     });
 
     it('should parse tags correctly', () => {

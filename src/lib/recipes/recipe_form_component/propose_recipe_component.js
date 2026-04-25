@@ -67,6 +67,7 @@ class ProposeRecipeComponent extends HTMLElement {
       delete recipeDataForFirestore.toDelete;
       recipeDataForFirestore.creationTime = Timestamp.now();
       recipeDataForFirestore.userId = user?.uid || 'anonymous';
+      recipeDataForFirestore.approved = false;
 
       Object.keys(recipeDataForFirestore).forEach((key) => {
         const value = recipeDataForFirestore[key];

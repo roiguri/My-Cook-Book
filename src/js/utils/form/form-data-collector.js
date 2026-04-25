@@ -19,7 +19,6 @@ export function collectRecipeFormData(shadowRoot) {
 
   const recipeData = {
     ...metadataData,
-    approved: false,
   };
 
   // Collect ingredients/ingredientSections from component

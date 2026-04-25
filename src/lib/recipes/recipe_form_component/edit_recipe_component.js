@@ -163,8 +163,13 @@ class EditRecipeComponent extends HTMLElement {
       }
 
       const { images, toDelete, mediaInstructions: _, ...rest } = recipeData;
+
+      // Manager edits are trusted and should not require re-approval.
+      // - If saving an already approved recipe, it stays approved.
+      // - If saving a pending recipe, it is auto-approved.
       await FirestoreService.updateDocument('recipes', this.recipeId, {
         ...rest,
+        approved: true,
         images: newImages,
         mediaInstructions: mediaInstructions,
       });
