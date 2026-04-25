@@ -1,6 +1,6 @@
 import { getFirestoreInstance } from '../../../js/services/firebase-service.js';
 import { doc, getDoc } from 'firebase/firestore';
-import { getImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
+import { getOptimizedImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
 import { validateRecipeForm } from '../../../js/utils/form/form-validation-utils.js';
 import { collectRecipeFormData } from '../../../js/utils/form/form-data-collector.js';
@@ -496,12 +496,7 @@ class RecipeFormComponent extends HTMLElement {
 
     for (const image of images) {
       try {
-        // Use getImageUrl from recipe-image-utils for preview
-        const previewUrl = image.compressed
-          ? await getImageUrl(image.compressed)
-          : image.full
-            ? await getImageUrl(image.full)
-            : null;
+        const previewUrl = await getOptimizedImageUrl(image, '400x400');
         if (previewUrl) {
           imageHandler.addImage({
             file: null, // No file object, just preview
@@ -509,7 +504,6 @@ class RecipeFormComponent extends HTMLElement {
             id: image.id,
             isPrimary: image.isPrimary,
             full: image.full,
-            compressed: image.compressed,
             access: image.access,
             uploadedBy: image.uploadedBy,
             fileName: image.fileName,

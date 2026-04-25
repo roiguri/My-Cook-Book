@@ -519,12 +519,11 @@ class ImageHandler extends HTMLElement {
     const removedImage = this.images.find((img) => img.id === imageId);
     const wasPrimary = removedImage?.isPrimary;
 
-    // Track removed images if they have id/full/compressed (i.e., are existing images)
-    if (removedImage && (removedImage.id || removedImage.full || removedImage.compressed)) {
+    // Track removed images if they have id/full (i.e., are existing images)
+    if (removedImage && (removedImage.id || removedImage.full)) {
       this.removedImages.push({
         id: removedImage.id,
         full: removedImage.full,
-        compressed: removedImage.compressed,
       });
     }
 

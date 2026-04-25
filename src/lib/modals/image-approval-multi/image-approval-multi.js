@@ -38,7 +38,7 @@
 import {
   approvePendingImageById,
   rejectPendingImageById,
-  getImageUrl,
+  getOptimizedImageUrl,
   setPrimaryImage,
 } from '../../../js/utils/recipes/recipe-image-utils.js';
 
@@ -314,7 +314,7 @@ class ImageApprovalMulti extends HTMLElement {
     // Load and add images
     for (const pendingImg of pendingImages) {
       try {
-        const previewUrl = await getImageUrl(pendingImg.compressed || pendingImg.full);
+        const previewUrl = await getOptimizedImageUrl(pendingImg, '400x400');
 
         // Add image to handler (observer will add selection controls automatically)
         imageHandler.addImage({
@@ -323,7 +323,6 @@ class ImageApprovalMulti extends HTMLElement {
           id: pendingImg.id,
           isPrimary: false, // Admin will decide when approving
           full: pendingImg.full,
-          compressed: pendingImg.compressed,
           uploadedBy: pendingImg.uploadedBy,
           timestamp: pendingImg.timestamp,
         });

@@ -149,7 +149,6 @@ function collectImages(shadowRoot) {
       // Only add properties that exist (prevent undefined values in Firestore)
       if (img.id !== undefined) existingImage.id = img.id;
       if (img.full !== undefined) existingImage.full = img.full;
-      if (img.compressed !== undefined) existingImage.compressed = img.compressed;
       if (img.access !== undefined) existingImage.access = img.access;
       if (img.uploadedBy !== undefined) existingImage.uploadedBy = img.uploadedBy;
       if (img.fileName !== undefined) existingImage.fileName = img.fileName;

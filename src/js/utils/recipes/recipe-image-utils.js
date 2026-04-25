@@ -5,13 +5,15 @@
  *
  * Exported Methods:
  *
- * Validation & Compression:
+ * Validation:
  *   - validateImageFile(file): Validate file type and size.
- *   - compressImage(imageFile, quality): (Stub) Compress image file.
  *
  * Storage Path Helpers:
  *   - getImageStoragePath(recipeId, category, fileName, type): Get storage path for image.
  *   - generateImageId(): Generate a unique image ID.
+ *
+ * Image File Deletion:
+ *   - deleteImageFiles(image): Delete all storage files for an image (full + WebP variants + legacy compressed).
  *
  * Multi Pending Images:
  *   - addPendingImages(recipeId, files, category, uploader): Upload multiple pending images.
@@ -20,12 +22,12 @@
  *   - getPendingImages(recipeId): Get all pending images for a recipe.
  *
  * Approved Images:
- *   - removeApprovedImage(recipeId, imageId): Remove an approved image.
  *   - setPrimaryImage(recipeId, imageId): Set the primary image for a recipe.
  *   - getRecipeImages(recipe, userRole): Get accessible images for a user role.
  *   - getPrimaryImage(recipe): Get the primary image object.
- *   - getPrimaryImageUrl(recipe): Get the download URL for the primary image or placeholder.
+ *   - getPrimaryImageUrl(recipe, size): Get the download URL for the primary image (optimized) or placeholder.
  *   - getImageUrl(storagePath): Get the download URL for a storage path.
+ *   - getOptimizedImageUrl(image, size): Get the download URL for an optimized version of an image with fallback.
  *   - getPlaceholderImageUrl(): Get the placeholder image URL.
  *   - removeAllRecipeImages(recipeId): Remove all images (approved and pending) for a recipe.
  *   - migrateImageToCategory(image, recipeId, oldCategory, newCategory): Migrate image to new category path.
@@ -36,7 +38,6 @@
  * @typedef {Object} RecipeImage
  * @property {string} id
  * @property {string} full
- * @property {string} compressed
  * @property {boolean} isPrimary
  * @property {string} access
  * @property {string} uploadedBy
@@ -46,8 +47,8 @@
 
 /**
  * @typedef {Object} PendingRecipeImage
+ * @property {string} id
  * @property {string} full
- * @property {string} compressed
  * @property {string} fileExtension
  * @property {Timestamp} timestamp
  * @property {string} uploadedBy
@@ -61,7 +62,7 @@ import { Timestamp } from 'firebase/firestore';
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
-// --- Validation & Compression ---
+// --- Validation ---
 export function validateImageFile(file) {
   const errors = [];
   if (!file) {
@@ -75,11 +76,6 @@ export function validateImageFile(file) {
     }
   }
   return { isValid: errors.length === 0, errors };
-}
-
-// TODO: Implement compression
-export async function compressImage(imageFile, quality = 0.7) {
-  return imageFile;
 }
 
 // --- Storage Path Helpers ---
@@ -106,22 +102,22 @@ export function generateImageId() {
   return 'img-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
 }
 
-// --- Image CRUD ---
+// --- Image File Deletion ---
 /**
- * Removes an approved image from a recipe (deletes from storage and Firestore)
- * @param {string} recipeId
- * @param {string} imageId
+ * Deletes all storage files for an image: full original, WebP variants, and optional legacy compressed.
+ * The full-size deletion propagates errors; variant deletions are best-effort.
+ * @param {Object} image - Image object with `full` path and optional `compressed` path
  * @returns {Promise<void>}
  */
-export async function removeApprovedImage(recipeId, imageId) {
-  const recipe = await getRecipeDoc(recipeId);
-  if (!recipe || !Array.isArray(recipe.images)) throw new Error('No images to remove');
-  const image = recipe.images.find((img) => img.id === imageId);
-  if (!image) throw new Error('Image not found');
-  await StorageService.deleteFile(image.full);
-  await StorageService.deleteFile(image.compressed);
-  const images = recipe.images.filter((img) => img.id !== imageId);
-  await updateRecipeDoc(recipeId, { images });
+export async function deleteImageFiles({ full, compressed }) {
+  const optimized400 = full.replace(/\.[^.]+$/, '_400x400.webp');
+  const optimized1080 = full.replace(/\.[^.]+$/, '_1080x1080.webp');
+  await StorageService.deleteFile(full);
+  await Promise.all([
+    StorageService.deleteFile(optimized400).catch(() => {}),
+    StorageService.deleteFile(optimized1080).catch(() => {}),
+    ...(compressed ? [StorageService.deleteFile(compressed).catch(() => {})] : []),
+  ]);
 }
 
 /**
@@ -167,10 +163,46 @@ export async function getImageUrl(storagePath) {
 
 /**
  * Gets placeholder image URL for recipes without images
- * @returns {Promise<string>} Placeholder image URL
+ * @returns {null} Returns null to indicate no image is available
  */
-export async function getPlaceholderImageUrl() {
-  return await StorageService.getFileUrl('img/recipes/compressed/place-holder-add-new.png');
+export function getPlaceholderImageUrl() {
+  return null;
+}
+
+/**
+ * Gets the download URL for an optimized version of an image with fallback
+ * @param {RecipeImage|PendingRecipeImage} image - The image object
+ * @param {string} size - Target size (e.g., '400x400', '1080x1080')
+ * @returns {Promise<string>} Download URL
+ */
+export async function getOptimizedImageUrl(image, size = '400x400') {
+  if (!image || !image.full) return getPlaceholderImageUrl();
+
+  // 1. Try Optimized version (New)
+  // Extension appends suffix like _400x400.webp
+  const optimizedPath = image.full.replace(/\.[^.]+$/, `_${size}.webp`);
+
+  try {
+    return await StorageService.getFileUrl(optimizedPath);
+  } catch (error) {
+    // 2. Fallback to Legacy Compressed (if it exists in old docs)
+    // TODO: Remove after migration period — https://github.com/roiguri/My-Cook-Book/issues/142
+    if (image.compressed) {
+      try {
+        return await StorageService.getFileUrl(image.compressed);
+      } catch (innerError) {
+        // Fall through
+      }
+    }
+
+    // 3. Fallback to Full Original (Latency or Legacy)
+    try {
+      return await StorageService.getFileUrl(image.full);
+    } catch (finalError) {
+      // 4. Ultimate Fallback
+      return getPlaceholderImageUrl();
+    }
+  }
 }
 
 /**
@@ -185,16 +217,17 @@ export function getPrimaryImage(recipe) {
 }
 
 /**
- * Returns the download URL for the primary image's compressed version, or the placeholder if none
+ * Returns the download URL for the primary image's optimized version, or the placeholder if none
  * @param {Object} recipe - Recipe object with images array
+ * @param {string} size - Target size (e.g., '400x400', '1080x1080')
  * @returns {Promise<string>} Download URL for the primary image or placeholder
  */
-export async function getPrimaryImageUrl(recipe) {
+export async function getPrimaryImageUrl(recipe, size = '400x400') {
   const primary = getPrimaryImage(recipe);
-  if (primary && primary.compressed) {
-    return await StorageService.getFileUrl(primary.compressed);
+  if (primary) {
+    return await getOptimizedImageUrl(primary, size);
   }
-  return await getPlaceholderImageUrl();
+  return getPlaceholderImageUrl();
 }
 
 /**
@@ -209,46 +242,14 @@ export async function removeAllRecipeImages(recipeId) {
     return;
   }
   const deletePromises = [];
-  // Delete approved images
   if (recipe.images && Array.isArray(recipe.images)) {
     recipe.images.forEach((image) => {
-      if (image.full) {
-        deletePromises.push(
-          StorageService.deleteFile(image.full).catch((err) =>
-            console.warn(`Error deleting full image ${image.id}:`, err),
-          ),
-        );
-      }
-      if (image.compressed) {
-        deletePromises.push(
-          StorageService.deleteFile(image.compressed).catch((err) =>
-            console.warn(`Error deleting compressed image ${image.id}:`, err),
-          ),
-        );
-      }
+      if (image.full) deletePromises.push(deleteImageFiles(image).catch(() => {}));
     });
   }
-  // Delete pending images (batches) // TODO: check if necessary when implementing image suggestions
   if (recipe.pendingImages && Array.isArray(recipe.pendingImages)) {
-    recipe.pendingImages.forEach((pendingBatch) => {
-      if (pendingBatch.images && Array.isArray(pendingBatch.images)) {
-        pendingBatch.images.forEach((image) => {
-          if (image.full) {
-            deletePromises.push(
-              StorageService.deleteFile(image.full).catch((err) =>
-                console.warn(`Error deleting pending full image ${image.id}:`, err),
-              ),
-            );
-          }
-          if (image.compressed) {
-            deletePromises.push(
-              StorageService.deleteFile(image.compressed).catch((err) =>
-                console.warn(`Error deleting pending compressed image ${image.id}:`, err),
-              ),
-            );
-          }
-        });
-      }
+    recipe.pendingImages.forEach((image) => {
+      if (image.full) deletePromises.push(deleteImageFiles(image).catch(() => {}));
     });
   }
   await Promise.all(deletePromises);
@@ -266,41 +267,59 @@ export async function removeAllRecipeImages(recipeId) {
  * @returns {Promise<RecipeImage>} Updated image object with new paths
  */
 export async function migrateImageToCategory(image, recipeId, oldCategory, newCategory) {
-  if (!image || !image.full || !image.compressed) {
+  if (!image || !image.full) {
     throw new Error('Invalid image object for migration');
   }
 
   try {
     const fileName = image.full.split('/').pop();
     const newFullPath = getImageStoragePath(recipeId, newCategory, fileName, 'full');
-    const newCompressedPath = getImageStoragePath(recipeId, newCategory, fileName, 'compressed');
 
     const fullUrl = await StorageService.getFileUrl(image.full);
-    const compressedUrl = await StorageService.getFileUrl(image.compressed);
-
     const fullResponse = await fetch(fullUrl);
-    const compressedResponse = await fetch(compressedUrl);
 
-    if (!fullResponse.ok || !compressedResponse.ok) {
-      throw new Error(
-        `Failed to fetch images: full=${fullResponse.status}, compressed=${compressedResponse.status}`,
-      );
+    if (!fullResponse.ok) {
+      throw new Error(`Failed to fetch images: full=${fullResponse.status}`);
     }
 
     const fullBlob = await fullResponse.blob();
-    const compressedBlob = await compressedResponse.blob();
-
     await StorageService.uploadFile(fullBlob, newFullPath);
-    await StorageService.uploadFile(compressedBlob, newCompressedPath);
-
     await StorageService.deleteFile(image.full);
-    await StorageService.deleteFile(image.compressed);
 
-    return {
+    // Migrate WebP variants to new path (best effort — may not exist yet if extension hasn't run)
+    const oldOpt400 = image.full.replace(/\.[^.]+$/, '_400x400.webp');
+    const oldOpt1080 = image.full.replace(/\.[^.]+$/, '_1080x1080.webp');
+    const newOpt400 = newFullPath.replace(/\.[^.]+$/, '_400x400.webp');
+    const newOpt1080 = newFullPath.replace(/\.[^.]+$/, '_1080x1080.webp');
+    for (const [oldPath, newPath] of [
+      [oldOpt400, newOpt400],
+      [oldOpt1080, newOpt1080],
+    ]) {
+      try {
+        const url = await StorageService.getFileUrl(oldPath);
+        const response = await fetch(url);
+        if (response.ok) {
+          const blob = await response.blob();
+          await StorageService.uploadFile(blob, newPath);
+          await StorageService.deleteFile(oldPath).catch(() => {});
+        }
+      } catch {
+        // variant doesn't exist yet — extension will create it at the new path
+      }
+    }
+
+    // If there was a legacy compressed version, delete it too
+    if (image.compressed) {
+      await StorageService.deleteFile(image.compressed).catch(() => {});
+    }
+
+    const updatedImage = {
       ...image,
       full: newFullPath,
-      compressed: newCompressedPath,
     };
+    delete updatedImage.compressed;
+
+    return updatedImage;
   } catch (error) {
     console.error(
       `Failed to migrate image ${image.id} from ${oldCategory} to ${newCategory}:`,
@@ -311,7 +330,7 @@ export async function migrateImageToCategory(image, recipeId, oldCategory, newCa
 }
 
 /**
- * Uploads a recipe image (full and compressed) and returns metadata
+ * Uploads a recipe image (full only) and returns metadata
  * @param {Object} params
  * @param {string} recipeId
  * @param {string} category
@@ -330,14 +349,11 @@ export async function uploadAndBuildImageMetadata({
   const fileExtension = file.name.split('.').pop();
   const fileName = isPrimary ? 'primary.jpg' : `${Date.now()}.${fileExtension}`;
   const fullPath = getImageStoragePath(recipeId, category, fileName, 'full');
-  const compressedPath = getImageStoragePath(recipeId, category, fileName, 'compressed');
   await StorageService.uploadFile(file, fullPath);
-  const compressedFile = await compressImage(file);
-  await StorageService.uploadFile(compressedFile, compressedPath);
+
   return {
     id: generateImageId(),
     full: fullPath,
-    compressed: compressedPath,
     fileName,
     isPrimary,
     uploadedBy,
@@ -367,15 +383,10 @@ export async function addPendingImages(recipeId, files, category, uploader) {
     // Upload full-size
     const fullPath = getImageStoragePath(recipeId, category, fileName, 'full');
     await StorageService.uploadFile(file, fullPath);
-    // Compress and upload
-    const compressedFile = await compressImage(file);
-    const compressedPath = getImageStoragePath(recipeId, category, fileName, 'compressed');
-    await StorageService.uploadFile(compressedFile, compressedPath);
 
     return {
       id,
       full: fullPath,
-      compressed: compressedPath,
       fileExtension,
       timestamp: Timestamp.now(),
       uploadedBy: uploader,
@@ -405,7 +416,6 @@ export async function approvePendingImageById(recipeId, pendingImageId) {
   const newImage = {
     id: newImageId,
     full: pendingImage.full,
-    compressed: pendingImage.compressed,
     isPrimary: !recipe.images || recipe.images.length === 0,
     access: 'public',
     uploadedBy: pendingImage.uploadedBy,
@@ -431,8 +441,7 @@ export async function rejectPendingImageById(recipeId, pendingImageId) {
   const idx = recipe.pendingImages.findIndex((img) => img.id === pendingImageId);
   if (idx === -1) throw new Error('Pending image not found');
   const pendingImage = recipe.pendingImages[idx];
-  await StorageService.deleteFile(pendingImage.full);
-  await StorageService.deleteFile(pendingImage.compressed);
+  await deleteImageFiles(pendingImage);
   const pendingImages = recipe.pendingImages.filter((img) => img.id !== pendingImageId);
   await updateRecipeDoc(recipeId, { pendingImages });
 }
