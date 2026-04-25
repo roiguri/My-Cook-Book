@@ -11,6 +11,7 @@ import {
 import { onSnapshot, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getFirestoreInstance } from '../../js/services/firebase-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
+import { icons } from '../../js/icons.js';
 import '../../styles/pages/my-meal-page.css';
 
 export default {
@@ -179,7 +180,7 @@ export default {
       // Remove button
       const removeBtn = document.createElement('span');
       removeBtn.className = 'remove-recipe-btn';
-      removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+      removeBtn.innerHTML = icons.times;
       removeBtn.title = 'הסר מתכון';
       removeBtn.onclick = (e) => this.handleRemoveRecipe(e, id, ActiveMealUtils);
 
@@ -201,7 +202,7 @@ export default {
       const clearBtn = document.createElement('button');
       clearBtn.className = 'recipe-tab clear-all-btn';
       clearBtn.title = 'נקה הכל';
-      clearBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+      clearBtn.innerHTML = icons.trashAlt;
       clearBtn.onclick = () => this.handleClearMeal(ActiveMealUtils);
       tabList.appendChild(clearBtn);
     } else {
@@ -431,7 +432,7 @@ export default {
         await navigator.clipboard.writeText(text);
         // Simple visual feedback could be improved with a toast
         const originalIcon = copyBtn.innerHTML;
-        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+        copyBtn.innerHTML = icons.check;
         setTimeout(() => {
           copyBtn.innerHTML = originalIcon;
         }, 2000);

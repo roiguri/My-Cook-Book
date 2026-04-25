@@ -1,3 +1,5 @@
+import { icons } from './icons.js';
+
 // Module-scope DOM element references
 let navToggle = null;
 let mobileDrawer = null;
@@ -105,13 +107,13 @@ function syncMobileDrawerNavigation() {
 
   // Map icons to links
   const iconMap = [
-    { key: 'favorites=true', icon: 'fa-heart' },
-    { key: '/grandmas-cooking', icon: 'fa-archive' },
-    { key: '/dashboard', icon: 'fa-user-shield' },
-    { key: '/home', icon: 'fa-home' },
-    { key: '/categories', icon: 'fa-book-open' },
-    { key: '/propose-recipe', icon: 'fa-plus-circle' },
-    { key: '/my-meal', icon: 'fa-utensils' },
+    { key: 'favorites=true', icon: 'heart' },
+    { key: '/grandmas-cooking', icon: 'archive' },
+    { key: '/dashboard', icon: 'userShield' },
+    { key: '/home', icon: 'home' },
+    { key: '/categories', icon: 'bookOpen' },
+    { key: '/propose-recipe', icon: 'plusCircle' },
+    { key: '/my-meal', icon: 'utensils' },
   ];
 
   const navLinks = drawerNav.querySelectorAll('a');
@@ -121,21 +123,21 @@ function syncMobileDrawerNavigation() {
       const path = url.pathname;
       const search = url.search;
 
-      let iconClass = 'fa-link'; // Default icon
+      let iconKey = 'link';
 
       for (const item of iconMap) {
         if (item.key.includes('=') && search.includes(item.key)) {
-          iconClass = item.icon;
+          iconKey = item.icon;
           break;
         } else if (path === item.key) {
-          iconClass = item.icon;
+          iconKey = item.icon;
           break;
         }
       }
 
       const iconSpan = document.createElement('span');
       iconSpan.className = 'ico';
-      iconSpan.innerHTML = `<i class="fas ${iconClass}"></i>`;
+      iconSpan.innerHTML = icons[iconKey] ?? icons.link;
       link.prepend(iconSpan);
     } catch (e) {
       console.warn('Invalid link in drawer:', link.href);

@@ -96,6 +96,19 @@ Tokens are in `src/styles/tokens.css` (v2, modern). Key variables to use in all 
 
 Never use raw hex colors or hardcoded px values for things covered by tokens. The app has Hebrew RTL content — use `dir="rtl"` on Hebrew containers.
 
+### Icons
+
+Icons are inline SVGs managed via a central registry at `src/js/icons.js`. Font Awesome is **not** loaded — do not add a CDN link for it.
+
+```js
+import { icons } from '../../js/icons.js'; // adjust path as needed
+element.innerHTML = icons.heart; // renders the SVG inline
+```
+
+Available keys: `heart`, `archive`, `userShield`, `home`, `bookOpen`, `plusCircle`, `utensils`, `link`, `times`, `trashAlt`, `check`.
+
+To add a new icon: find the SVG at `github.com/FortAwesome/Font-Awesome/tree/5.15.4/svgs/solid/<name>.svg`, copy the `viewBox` and `<path d="...">`, add an entry in `icons.js` using the `svg()` helper. Use camelCase for hyphenated names.
+
 ---
 
 ## Git Workflow
