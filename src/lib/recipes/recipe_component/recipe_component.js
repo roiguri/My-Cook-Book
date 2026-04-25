@@ -143,7 +143,7 @@ class RecipeComponent extends HTMLElement {
         <fullscreen-media-viewer id="Recipe_component__media-viewer"></fullscreen-media-viewer>
         <div class="Recipe_component__comments" style="display: none;">
           <h2>הערות:</h2>
-          <ol id="Recipe_component__comments-list"></ol>
+          <ul id="Recipe_component__comments-list" class="Recipe_component__comments-list"></ul>
         </div>
 
       </div>
@@ -624,6 +624,7 @@ class RecipeComponent extends HTMLElement {
        ========================================================= */
     .Recipe_component__comments {
       padding: 48px 0 16px;
+      border-top: 1px solid var(--hairline, rgba(31,29,24,0.1));
     }
 
     .Recipe_component__comments h2 {
@@ -634,17 +635,37 @@ class RecipeComponent extends HTMLElement {
       margin: 0 0 20px;
     }
 
-    .Recipe_component__comments ol { padding: 0 20px 0 0; margin: 0; }
-
-    .Recipe_component__comments li {
-      margin-bottom: 0;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--hairline, rgba(31,29,24,0.1));
-      line-height: 1.6;
-      color: var(--ink-2, #3a3a3a);
+    .Recipe_component__comments-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
 
-    .Recipe_component__comments li:last-child { border-bottom: 0; }
+    .Recipe_component__comments-list li {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 14px 0;
+      border-bottom: 1px dashed var(--hairline, rgba(31,29,24,0.1));
+      line-height: 1.6;
+      color: var(--ink-2, #3a3a3a);
+      font-size: 14.5px;
+    }
+
+    .Recipe_component__comments-list li::before {
+      content: '';
+      justify-self: center;
+      margin-top: 0.7em;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--primary, #6a994e);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, #6a994e) 15%, transparent);
+      display: inline-block;
+    }
+
+    .Recipe_component__comments-list li:last-child { border-bottom: 0; }
 
     /* =========================================================
        RESPONSIVE
@@ -1016,6 +1037,8 @@ class RecipeComponent extends HTMLElement {
         commentsList.appendChild(li);
       });
       commentsSection.style.display = '';
+    } else {
+      commentsSection.style.display = 'none';
     }
   }
 

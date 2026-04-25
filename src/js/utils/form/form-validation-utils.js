@@ -19,7 +19,7 @@ const FIELD_MAP = {
   difficulty: 'difficulty',
   mainIngredient: 'main-ingredient',
   tags: 'tags',
-  comments: 'comments',
+  comments: 'comments-list',
 };
 
 /**
@@ -103,10 +103,10 @@ export function clearValidationErrors(shadowRoot) {
     ingredientsComponent.setValidationState({});
   }
 
-  // Clear validation errors from main component fields only (comments textarea and instruction inputs)
-  const commentsField = shadowRoot.getElementById('comments');
-  if (commentsField) {
-    commentsField.classList.remove('recipe-form__input--invalid');
+  // Clear validation errors from comments component
+  const commentsComponent = shadowRoot.getElementById('comments-list');
+  if (commentsComponent && typeof commentsComponent.setValidationState === 'function') {
+    commentsComponent.setValidationState({});
   }
 
   // Clear instruction/stage field errors
@@ -126,6 +126,7 @@ function highlightFieldErrors(errors, shadowRoot) {
   // Collect errors by component for single API calls
   const metadataErrors = {};
   const ingredientErrors = {};
+  const commentErrors = {};
 
   Object.keys(errors).forEach((key) => {
     // Explicitly handle metadata fields
@@ -141,11 +142,15 @@ function highlightFieldErrors(errors, shadowRoot) {
     ) {
       metadataErrors[key] = true;
     }
+    // Handle comments field
+    else if (key === 'comments') {
+      commentErrors[key] = true;
+    }
     // Legacy ingredient error support (for backward compatibility)
     else if (key === 'ingredients' || key.startsWith('ingredients[')) {
       ingredientErrors[key] = true;
     }
-    // Handle main component fields directly (like comments)
+    // Handle main component fields directly
     else {
       const fieldId = FIELD_MAP[key];
       if (fieldId) {
@@ -160,6 +165,14 @@ function highlightFieldErrors(errors, shadowRoot) {
     const metadataComponent = shadowRoot.getElementById('metadata-fields');
     if (metadataComponent && typeof metadataComponent.setValidationState === 'function') {
       metadataComponent.setValidationState(metadataErrors);
+    }
+  }
+
+  // Apply comment errors
+  if (Object.keys(commentErrors).length > 0) {
+    const commentsComponent = shadowRoot.getElementById('comments-list');
+    if (commentsComponent && typeof commentsComponent.setValidationState === 'function') {
+      commentsComponent.setValidationState(commentErrors);
     }
   }
 

@@ -195,14 +195,19 @@ function collectMediaInstructions(shadowRoot) {
 }
 
 /**
- * Collects comments from the comments field
+ * Collects comments from the comments list component
  * @param {ShadowRoot} shadowRoot - The component's shadow root
  * @returns {string[]|null} - Array with comments or null if empty
  */
 function collectComments(shadowRoot) {
-  const commentsElement = shadowRoot.getElementById('comments');
-  const comments = commentsElement ? commentsElement.value.trim() : '';
-  return comments.length > 0 ? [comments] : null;
+  const commentsList = shadowRoot.getElementById('comments-list');
+  if (commentsList && typeof commentsList.getData === 'function') {
+    const comments = commentsList.getData();
+    return comments.length > 0 ? comments : null;
+  }
+
+  console.warn('Comments list component not found or missing getData method');
+  return null;
 }
 
 /**

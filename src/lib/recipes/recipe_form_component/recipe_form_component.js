@@ -14,6 +14,7 @@ import './parts/recipe-metadata-fields.js';
 import './parts/form-button-group.js';
 import './parts/recipe-ingredients-list.js';
 import './parts/recipe-instructions-list.js';
+import './parts/recipe-comments-list.js';
 import '../media-instructions-editor/media-instructions-editor.js';
 import '../recipe_import_modal/recipe_import_modal.js';
 import { mapExtractedDataToForm } from '../../../js/utils/recipe-extractor-utils.js';
@@ -165,7 +166,7 @@ class RecipeFormComponent extends HTMLElement {
               <span class="recipe-sect__meta">אופציונלי</span>
             </header>
             <div class="recipe-form__group">
-              <textarea id="comments" name="comments" class="recipe-form__textarea" placeholder="טיפ, תחליף, זיכרון..."></textarea>
+              <recipe-comments-list id="comments-list"></recipe-comments-list>
             </div>
           </section>
 
@@ -240,11 +241,11 @@ class RecipeFormComponent extends HTMLElement {
       this.handleFormSubmit();
     });
 
-    // Add input listener for comments textarea to clear errors on change
-    const commentsTextarea = this.shadowRoot.getElementById('comments');
-    if (commentsTextarea) {
-      commentsTextarea.addEventListener('input', () => {
-        commentsTextarea.classList.remove('recipe-form__input--invalid');
+    // Add event listener for comments list
+    const commentsList = this.shadowRoot.getElementById('comments-list');
+    if (commentsList) {
+      commentsList.addEventListener('list-changed', () => {
+        // No validation on every change
       });
     }
   }
@@ -420,9 +421,9 @@ class RecipeFormComponent extends HTMLElement {
       metadataFields.populateFields(data);
     }
 
-    const commentsField = this.shadowRoot.getElementById('comments');
-    if (commentsField) {
-      commentsField.value = data.comments ? data.comments.join('\n') : '';
+    const commentsList = this.shadowRoot.getElementById('comments-list');
+    if (commentsList) {
+      commentsList.populateData(data.comments);
     }
 
     const attributionField = this.shadowRoot.getElementById('attribution');

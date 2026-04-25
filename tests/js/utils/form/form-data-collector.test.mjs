@@ -115,12 +115,24 @@ describe('form-data-collector', () => {
       })),
     };
 
+    const mockCommentsComponent = {
+      getData: jest.fn(() => {
+        if (data.comments === '') return [];
+        return data.comments
+          ? Array.isArray(data.comments)
+            ? data.comments
+            : [data.comments]
+          : ['Test comments'];
+      }),
+    };
+
     return {
       getElementById: jest.fn((id) => {
         if (id === 'recipe-images') return mockImageHandler;
         if (id === 'ingredients-list') return mockIngredientsComponent;
         if (id === 'instructions-list') return mockInstructionsComponent;
         if (id === 'metadata-fields') return mockMetadataComponent;
+        if (id === 'comments-list') return mockCommentsComponent;
         return mockElements[id] || null;
       }),
       querySelector: jest.fn((selector) => {

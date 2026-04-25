@@ -112,6 +112,11 @@ describe('form-state-manager', () => {
         setDisabled: jest.fn(),
         clear: jest.fn(),
       },
+      'comments-list': {
+        setDisabled: jest.fn(),
+        clearList: jest.fn(),
+        populateData: jest.fn(),
+      },
       'form-buttons': {
         setDisabled: jest.fn(),
         setLoadingState: jest.fn(),
@@ -229,9 +234,11 @@ describe('form-state-manager', () => {
       // Verify component methods are called
       const metadataComponent = mockShadowRoot.getElementById('metadata-fields');
       const ingredientsComponent = mockShadowRoot.getElementById('ingredients-list');
+      const commentsList = mockShadowRoot.getElementById('comments-list');
 
       expect(metadataComponent.clearFields).toHaveBeenCalled();
       expect(ingredientsComponent.clear).toHaveBeenCalled();
+      expect(commentsList.clearList).toHaveBeenCalled();
 
       // Verify main component fields are cleared (using complex selector)
       const mainElements = mockShadowRoot.querySelectorAll(
@@ -289,6 +296,16 @@ describe('form-state-manager', () => {
       expect(ingredientsComponent.clear).toHaveBeenCalled();
     });
 
+    it('should reset comments to initial state', () => {
+      const mockShadowRoot = createMockShadowRoot();
+
+      clearForm(mockShadowRoot);
+
+      // Verify comments component clearList method is called
+      const commentsList = mockShadowRoot.getElementById('comments-list');
+      expect(commentsList.clearList).toHaveBeenCalled();
+    });
+
     it('should clear images through image handler', () => {
       const mockShadowRoot = createMockShadowRoot();
 
@@ -343,7 +360,8 @@ describe('form-state-manager', () => {
       expect(mockShadowRoot.getElementById('dish-type').value).toBe('main-courses');
       expect(mockShadowRoot.getElementById('prep-time').value).toBe(30);
       expect(mockShadowRoot.getElementById('tags').value).toBe('healthy, quick');
-      expect(mockShadowRoot.getElementById('comments').value).toBe('Great recipe\nEasy to make');
+      const commentsList = mockShadowRoot.getElementById('comments-list');
+      expect(commentsList.populateData).toHaveBeenCalledWith(['Great recipe', 'Easy to make']);
     });
 
     it('should handle missing optional fields', () => {
@@ -383,17 +401,18 @@ describe('form-state-manager', () => {
       expect(mockShadowRoot.getElementById('tags').value).toBe('single-tag');
     });
 
-    it('should handle non-array comments', () => {
+    it('should handle comments', () => {
       const mockShadowRoot = createMockShadowRoot();
       const recipeData = {
         name: 'Test Recipe',
-        comments: 'Single comment',
+        comments: ['Single comment'],
         ingredients: [],
       };
 
       populateFormWithData(mockShadowRoot, recipeData);
 
-      expect(mockShadowRoot.getElementById('comments').value).toBe('Single comment');
+      const commentsList = mockShadowRoot.getElementById('comments-list');
+      expect(commentsList.populateData).toHaveBeenCalledWith(['Single comment']);
     });
   });
 

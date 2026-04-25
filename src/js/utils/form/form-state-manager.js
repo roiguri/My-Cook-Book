@@ -25,6 +25,12 @@ export function setFormDisabledState(shadowRoot, isDisabled) {
     ingredientsList.setDisabled(isDisabled);
   }
 
+  // Handle comments list component
+  const commentsList = shadowRoot.getElementById('comments-list');
+  if (commentsList && typeof commentsList.setDisabled === 'function') {
+    commentsList.setDisabled(isDisabled);
+  }
+
   // Handle form button group component
   const buttonGroup = shadowRoot.getElementById('form-buttons');
   if (buttonGroup && typeof buttonGroup.setDisabled === 'function') {
@@ -58,6 +64,9 @@ export function clearForm(shadowRoot) {
 
   // Clear ingredients through component API
   clearIngredientsFields(shadowRoot);
+
+  // Clear comments through component API
+  clearCommentsFields(shadowRoot);
 
   // Clear main component fields (inputs, selects, textareas not in sub-components)
   clearMainComponentFields(shadowRoot);
@@ -94,6 +103,17 @@ function clearIngredientsFields(shadowRoot) {
   const ingredientsList = shadowRoot.getElementById('ingredients-list');
   if (ingredientsList && typeof ingredientsList.clear === 'function') {
     ingredientsList.clear();
+  }
+}
+
+/**
+ * Clears comments fields through component API
+ * @param {ShadowRoot} shadowRoot - The component's shadow root
+ */
+function clearCommentsFields(shadowRoot) {
+  const commentsList = shadowRoot.getElementById('comments-list');
+  if (commentsList && typeof commentsList.clearList === 'function') {
+    commentsList.clearList();
   }
 }
 
@@ -183,6 +203,9 @@ export function populateFormWithData(shadowRoot, recipeData) {
   // Populate ingredients
   populateIngredients(shadowRoot, recipeData.ingredients || []);
 
+  // Populate comments
+  populateComments(shadowRoot, recipeData.comments || []);
+
   // Populate instructions/stages
   populateInstructions(shadowRoot, recipeData);
 
@@ -211,11 +234,6 @@ function populateBasicFields(shadowRoot, recipeData) {
       id: 'tags',
       transform: (tags) => (Array.isArray(tags) ? tags.join(', ') : tags),
     },
-    {
-      field: 'comments',
-      id: 'comments',
-      transform: (comments) => (Array.isArray(comments) ? comments.join('\n') : comments),
-    },
   ];
 
   fieldMappings.forEach(({ field, id, transform }) => {
@@ -235,6 +253,18 @@ function populateIngredients(shadowRoot, ingredients) {
   const ingredientsList = shadowRoot.getElementById('ingredients-list');
   if (ingredientsList && typeof ingredientsList.populateIngredients === 'function') {
     ingredientsList.populateIngredients(ingredients);
+  }
+}
+
+/**
+ * Populates comments section using component API
+ * @param {ShadowRoot} shadowRoot - The component's shadow root
+ * @param {Array} comments - Array of comment strings
+ */
+function populateComments(shadowRoot, comments) {
+  const commentsList = shadowRoot.getElementById('comments-list');
+  if (commentsList && typeof commentsList.populateData === 'function') {
+    commentsList.populateData(comments);
   }
 }
 

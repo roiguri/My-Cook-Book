@@ -278,12 +278,14 @@ fieldset {
 }
 
 .recipe-form__ingredients,
-.recipe-form__stages {
+.recipe-form__stages,
+.recipe-form__comments-list {
   width: 100%;
 }
 
 .recipe-form__ingredient-entry,
-.recipe-form__step {
+.recipe-form__step,
+.recipe-form__comment-entry {
   display: flex;
   gap: 8px;
   align-items: center;
@@ -292,7 +294,8 @@ fieldset {
 }
 
 .recipe-form__ingredient-entry:first-child,
-.recipe-form__step:first-child {
+.recipe-form__step:first-child,
+.recipe-form__comment-entry:first-child {
   border-top: 0;
 }
 
@@ -306,7 +309,8 @@ fieldset {
   flex-shrink: 0;
 }
 
-.recipe-form__input--item {
+.recipe-form__input--item,
+.recipe-form__input--comment {
   flex: 1;
 }
 
@@ -314,7 +318,8 @@ fieldset {
 
 /* Inline + buttons inside item rows — match the circle remove button */
 .recipe-form__ingredient-entry .recipe-form__button--add-ingredient,
-.recipe-form__step .recipe-form__button--add-step {
+.recipe-form__step .recipe-form__button--add-step,
+.recipe-form__comment-entry .recipe-form__button--add-comment {
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -337,7 +342,8 @@ fieldset {
 }
 
 .recipe-form__ingredient-entry .recipe-form__button--add-ingredient:hover,
-.recipe-form__step .recipe-form__button--add-step:hover {
+.recipe-form__step .recipe-form__button--add-step:hover,
+.recipe-form__comment-entry .recipe-form__button--add-comment:hover {
   background: color-mix(in oklab, var(--primary, #6a994e) 12%, transparent);
   border-color: var(--primary, #6a994e);
 }
@@ -345,6 +351,7 @@ fieldset {
 /* Below-list add buttons (section headers) keep the pill style */
 .recipe-form__button--add-ingredient,
 .recipe-form__button--add-step,
+.recipe-form__button--add-comment,
 .recipe-form__button--add-section,
 .recipe-form__button--add-stage {
   display: inline-flex;
@@ -367,6 +374,7 @@ fieldset {
 
 .recipe-form__button--add-ingredient:hover,
 .recipe-form__button--add-step:hover,
+.recipe-form__button--add-comment:hover,
 .recipe-form__button--add-section:hover,
 .recipe-form__button--add-stage:hover {
   background: var(--surface-2, #f2e8cf);
@@ -376,6 +384,7 @@ fieldset {
 
 .recipe-form__button--remove-ingredient,
 .recipe-form__button--remove-step,
+.recipe-form__button--remove-comment,
 .recipe-form__button--remove-section,
 .recipe-form__button--remove-stage {
   width: 30px;
@@ -402,6 +411,7 @@ fieldset {
 
 .recipe-form__button--remove-ingredient:hover,
 .recipe-form__button--remove-step:hover,
+.recipe-form__button--remove-comment:hover,
 .recipe-form__button--remove-section:hover,
 .recipe-form__button--remove-stage:hover {
   background: color-mix(in oklab, var(--secondary, #bc4749) 10%, transparent);
