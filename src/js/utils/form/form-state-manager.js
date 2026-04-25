@@ -80,6 +80,9 @@ export function clearForm(shadowRoot) {
   // Clear media instructions
   clearMediaInstructions(shadowRoot);
 
+  // Clear related recipes field
+  clearRelatedField(shadowRoot);
+
   // Reset form and hide error messages
   resetFormState(shadowRoot);
 }
@@ -172,6 +175,13 @@ function clearMediaInstructions(shadowRoot) {
   const mediaEditor = shadowRoot.getElementById('media-instructions-editor');
   if (mediaEditor && typeof mediaEditor.clear === 'function') {
     mediaEditor.clear();
+  }
+}
+
+function clearRelatedField(shadowRoot) {
+  const relatedField = shadowRoot.getElementById('related-field');
+  if (relatedField && typeof relatedField.clear === 'function') {
+    relatedField.clear();
   }
 }
 

@@ -69,6 +69,7 @@ import { removeAllMediaInstructions } from './recipe-media-utils.js';
  * @property {boolean} [approved]
  * @property {Date|string|number} [creationTime]
  * @property {Date|string|number} [updatedAt]
+ * @property {string[]} [relatedRecipes] - IDs of complementary recipes
  */
 
 // Category mapping and icons - Single source of truth for all category data
@@ -244,6 +245,7 @@ export function formatRecipeData(rawData) {
     approved: typeof rawData.approved === 'boolean' ? rawData.approved : false,
     creationTime: rawData.creationTime || null,
     updatedAt: rawData.updatedAt || null,
+    relatedRecipes: Array.isArray(rawData.relatedRecipes) ? rawData.relatedRecipes : [],
   };
 }
 

@@ -77,6 +77,13 @@ export function collectRecipeFormData(shadowRoot) {
     if (attribution) recipeData.attribution = attribution;
   }
 
+  // Collect related recipes (array of IDs)
+  const relatedField = shadowRoot.getElementById('related-field');
+  if (relatedField && typeof relatedField.getData === 'function') {
+    const relatedRecipes = relatedField.getData();
+    recipeData.relatedRecipes = relatedRecipes;
+  }
+
   return recipeData;
 }
 

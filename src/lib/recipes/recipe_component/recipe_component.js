@@ -1,5 +1,6 @@
 import authService from '../../../js/services/auth-service.js';
 import { AppConfig } from '../../../js/config/app-config.js';
+import { FirestoreService } from '../../../js/services/firestore-service.js';
 import {
   getRecipeById,
   getLocalizedCategoryName,
@@ -19,6 +20,7 @@ import '../../utilities/image-carousel/image-carousel.js';
 import '../../utilities/media-scroller/media-scroller.js';
 import '../../utilities/fullscreen-media-viewer/fullscreen-media-viewer.js';
 import './parts/cook-mode-container.js';
+import '../recipe_strip/recipe_strip.js';
 
 /**
  * Recipe Component
@@ -150,6 +152,11 @@ class RecipeComponent extends HTMLElement {
         <div class="Recipe_component__comments" style="display: none;">
           <h2>הערות:</h2>
           <ul id="Recipe_component__comments-list" class="Recipe_component__comments-list"></ul>
+        </div>
+
+        <div class="Recipe_component__related" id="Recipe_component__related" style="display: none;">
+          <h2 class="Recipe_component__related-title">מתכונים קשורים</h2>
+          <recipe-strip id="Recipe_component__related-strip"></recipe-strip>
         </div>
 
       </div>
@@ -763,6 +770,14 @@ class RecipeComponent extends HTMLElement {
     .Recipe_component__comments-list li:last-child { border-bottom: 0; }
 
     /* =========================================================
+       RELATED RECIPES
+       ========================================================= */
+    .Recipe_component__related {
+      padding: 48px 0 16px;
+      border-top: 1px solid var(--hairline, rgba(31,29,24,0.1));
+    }
+
+    /* =========================================================
        RESPONSIVE
        ========================================================= */
     @media (max-width: 768px) {
@@ -836,6 +851,9 @@ class RecipeComponent extends HTMLElement {
         this.populateIngredientsList(recipe);
         this.populateInstructions(recipe);
         this.populateCommentList(recipe);
+        this.populateRelatedRecipes(recipe).catch((err) => {
+          console.error('Error loading related recipes:', err);
+        });
         this.setupServingsAdjuster(recipe);
         this.displayMediaInstructions(recipe).catch((err) => {
           console.error('Error loading media instructions:', err);
@@ -1199,6 +1217,37 @@ class RecipeComponent extends HTMLElement {
     } else {
       commentsSection.style.display = 'none';
     }
+  }
+
+  async populateRelatedRecipes(recipe) {
+    const section = this.shadowRoot.getElementById('Recipe_component__related');
+    const strip = this.shadowRoot.getElementById('Recipe_component__related-strip');
+    if (!section || !strip) return;
+
+    const ids = Array.isArray(recipe.relatedRecipes) ? recipe.relatedRecipes : [];
+    if (!ids.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    const fetched = await Promise.all(ids.map((id) => getRecipeById(id)));
+    const valid = fetched.filter((r) => r && r.approved);
+
+    // Self-heal: remove stale IDs from Firestore (fire-and-forget)
+    const validIds = valid.map((r) => r.id);
+    if (validIds.length !== ids.length && this.recipeId) {
+      FirestoreService.updateDocument('recipes', this.recipeId, {
+        relatedRecipes: validIds,
+      }).catch(() => {});
+    }
+
+    if (!valid.length) {
+      section.style.display = 'none';
+      return;
+    }
+
+    strip.setRecipes(valid);
+    section.style.display = '';
   }
 
   async displayMediaInstructions(recipe) {

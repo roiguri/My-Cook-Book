@@ -15,6 +15,7 @@ import './parts/form-button-group.js';
 import './parts/recipe-ingredients-list.js';
 import './parts/recipe-instructions-list.js';
 import './parts/recipe-comments-list.js';
+import './parts/recipe-related-field.js';
 import '../media-instructions-editor/media-instructions-editor.js';
 import '../recipe_import_modal/recipe_import_modal.js';
 import { mapExtractedDataToForm } from '../../../js/utils/recipe-extractor-utils.js';
@@ -186,6 +187,19 @@ class RecipeFormComponent extends HTMLElement {
                 placeholder='סבתא רות · או https://...' />
               <span class="recipe-form__hint">שם, קישור, או שניהם. יוצג בדף המתכון.</span>
             </div>
+          </section>
+
+          <!-- 07 — מתכונים קשורים -->
+          <section class="recipe-sect" id="s-related">
+            <header class="recipe-sect__header">
+              <div>
+                <span class="recipe-sect__n">07 — מתכונים קשורים</span>
+                <h2 class="recipe-sect__h">מתכונים <em>משלימים.</em></h2>
+                <p class="recipe-sect__sub">מתכונים שמשתלבים יחד — רוטב לסלט, ציפוי לעוגה, ותוספת לעיקרית.</p>
+              </div>
+              <span class="recipe-sect__meta">אופציונלי</span>
+            </header>
+            <recipe-related-field id="related-field"></recipe-related-field>
           </section>
 
           <form-button-group
@@ -464,6 +478,15 @@ class RecipeFormComponent extends HTMLElement {
         mediaEditor.setAttribute('recipe-id', recipeId);
       }
     }
+
+    // Populate related recipes (edit mode)
+    const relatedField = this.shadowRoot.getElementById('related-field');
+    if (relatedField) {
+      if (recipeId) relatedField.setExcludeId(recipeId);
+      if (Array.isArray(data.relatedRecipes) && data.relatedRecipes.length) {
+        await relatedField.populateData(data.relatedRecipes);
+      }
+    }
   }
 
   /**
@@ -556,6 +579,7 @@ class RecipeFormComponent extends HTMLElement {
     this.addEventListener('instructions-changed', debouncedDirtyCheck);
     this.addEventListener('images-changed', debouncedDirtyCheck);
     this.addEventListener('media-changed', debouncedDirtyCheck);
+    this.addEventListener('related-changed', debouncedDirtyCheck);
 
     // Also listen for cut events (when users delete content with Ctrl+X)
     this.shadowRoot.addEventListener('cut', debouncedDirtyCheck);

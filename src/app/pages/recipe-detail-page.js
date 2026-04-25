@@ -53,6 +53,16 @@ export default {
 
       recipeComponent.setAttribute('recipe-id', recipeId);
       recipeContainer.appendChild(recipeComponent);
+
+      // Handle navigation from related recipe cards inside the component
+      recipeContainer.addEventListener('recipe-card-open', (event) => {
+        const targetId = event.detail.recipeId;
+        if (window.spa?.router) {
+          window.spa.router.navigate(`/recipe/${targetId}`);
+        } else {
+          window.location.href = `${import.meta.env.BASE_URL}recipe/${targetId}`;
+        }
+      });
     } else {
       throw new Error('Recipe container not found in template');
     }
