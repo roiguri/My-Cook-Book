@@ -120,16 +120,16 @@ export const recipeCardStyles = `
 }
 
 /* Category color accents */
-.badge.category.appetizers       { color: #f97316; }
+.badge.category.appetizers       { color: #c2410c; }
 .badge.category.main-courses     { color: var(--secondary, #bc4749); }
-.badge.category.side-dishes      { color: #fbbf24; }
-.badge.category.soups-stews      { color: #3b82f6; }
-.badge.category.salads           { color: #22c55e; }
-.badge.category.desserts         { color: #d946ef; }
-.badge.category.breakfast-brunch { color: #06b6d4; }
+.badge.category.side-dishes      { color: #a16207; }
+.badge.category.soups-stews      { color: #1d4ed8; }
+.badge.category.salads           { color: #15803d; }
+.badge.category.desserts         { color: #a21caf; }
+.badge.category.breakfast-brunch { color: #0e7490; }
 .badge.category.breads-pastries  { color: #a34e2e; }
-.badge.category.snacks           { color: #8b5cf6; }
-.badge.category.beverages        { color: #0ea5e9; }
+.badge.category.snacks           { color: #6d28d9; }
+.badge.category.beverages        { color: #0369a1; }
 
 /* Title */
 .recipe-title {
