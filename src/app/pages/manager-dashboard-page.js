@@ -1,7 +1,7 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
 import authService from '../../js/services/auth-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
-import { CATEGORY_MAP } from '../../js/utils/recipes/recipe-data-utils.js';
+import { CATEGORY_MAP, deleteRecipe } from '../../js/utils/recipes/recipe-data-utils.js';
 import {
   DashboardRefreshManager,
   DASHBOARD_SECTIONS,
@@ -65,6 +65,8 @@ export default {
       import('../../lib/recipes/recipe_preview_modal/edit_preview_recipe.js'),
       import('../../lib/recipes/recipe_preview_modal/recipe_preview_modal.js'),
       import('../../lib/modals/image-approval-multi/image-approval-multi.js'),
+      import('../../lib/modals/confirmation_modal/confirmation_modal.js'),
+      import('../../lib/modals/message-modal/message-modal.js'),
       import('../../lib/utilities/image-carousel/image-carousel.js'),
       import('../../lib/utilities/modal/modal.js'),
       import('../../lib/utilities/loading-spinner/loading-spinner.js'),
@@ -311,6 +313,9 @@ export default {
       `<span style="${chipStyle}">${this.categoryMapping[recipe.category] || '—'}</span>` +
       `<span style="${chipStyle}">${recipe.prepTime + recipe.waitTime} דק׳</span>`;
 
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display: flex; gap: 8px;';
+
     const editBtn = document.createElement('button');
     editBtn.textContent = 'ערוך';
     editBtn.dataset.id = recipe.id;
@@ -327,8 +332,14 @@ export default {
     });
     editBtn.addEventListener('click', () => this.editRecipe(recipe));
 
+    const deleteBtn = this._dangerPillBtn('מחק');
+    deleteBtn.addEventListener('click', () => this.confirmDeleteRecipe(recipe));
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
     container.appendChild(meta);
-    container.appendChild(editBtn);
+    container.appendChild(actions);
     return container;
   },
 
@@ -346,6 +357,34 @@ export default {
     setTimeout(() => {
       editPreviewRecipe.openModal();
     }, 100);
+  },
+
+  confirmDeleteRecipe(recipe) {
+    const modal = document.getElementById('delete-recipe-confirmation');
+    const message = `האם אתה בטוח שברצונך למחוק את המתכון "${recipe.name}"? פעולה זו תמחק גם את כל המדיה המשויכת ואינה ניתנת לביטול.`;
+
+    modal.confirm(message, 'מחיקת מתכון', 'מחק', 'ביטול');
+
+    modal.addEventListener(
+      'confirm-approved',
+      () => {
+        this.deleteRecipe(recipe.id);
+      },
+      { once: true },
+    );
+  },
+
+  async deleteRecipe(recipeId) {
+    try {
+      this.toggleLoading(true);
+      await deleteRecipe(recipeId);
+      this.showSuccessMessage('המתכון נמחק בהצלחה');
+      this.refreshManager.refreshRecipes();
+    } catch (error) {
+      this.handleError(error);
+    } finally {
+      this.toggleLoading(false);
+    }
   },
 
   filterRecipes() {
@@ -726,30 +765,57 @@ export default {
 
   showFullError(item) {
     const errorText = JSON.stringify(item.error, null, 2);
-    // Simple modal for now
-    alert(errorText);
+    const modal = document.getElementById('success-message-modal');
+    modal.show(errorText, 'פרטי שגיאה מלאים');
   },
 
   async deleteFailedUrl(id) {
-    if (confirm('האם אתה בטוח שברצונך למחוק רשומה זו?')) {
-      try {
-        await FirestoreService.deleteDocument('failed_url_extractions', id);
-        this.loadFailedUrls(); // Reload list
-      } catch (error) {
-        this.handleError(error);
-      }
-    }
+    const modal = document.getElementById('delete-recipe-confirmation');
+
+    modal.confirm('האם אתה בטוח שברצונך למחוק רשומה זו?', 'מחיקת רשומה');
+
+    modal.addEventListener(
+      'confirm-approved',
+      async () => {
+        try {
+          this.toggleLoading(true);
+          await FirestoreService.deleteDocument('failed_url_extractions', id);
+          this.loadFailedUrls();
+          this.showSuccess('הרשומה נמחקה בהצלחה');
+        } catch (error) {
+          this.handleError(error);
+        } finally {
+          this.toggleLoading(false);
+        }
+      },
+      { once: true },
+    );
   },
 
   /**
    * Helper functions
    */
+  toggleLoading(loading) {
+    const spinner = document.getElementById('dashboard-spinner');
+    if (loading) {
+      spinner.setAttribute('active', '');
+    } else {
+      spinner.removeAttribute('active');
+    }
+  },
+
   showSuccessMessage(message) {
-    alert(message); // Replace with a more user-friendly notification system
+    this.showSuccess(message, 'המתכון נמחק');
+  },
+
+  showSuccess(message, title = 'הצלחה') {
+    const modal = document.getElementById('success-message-modal');
+    modal.show(message, title);
   },
 
   handleError(error) {
     console.error('Error:', error);
-    alert('אירעה שגיאה. אנא נסה שנית.'); // Replace with a more user-friendly error handling system
+    const modal = document.getElementById('success-message-modal');
+    modal.show(error.message || 'אירעה שגיאה. אנא נסה שנית.', 'שגיאה');
   },
 };
