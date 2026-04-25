@@ -34,16 +34,16 @@ export default {
 
   async importComponents() {
     try {
-      await import('../../lib/recipes/recipe-card/recipe-card.js');
+      await import('../../lib/recipes/recipe_strip/recipe_strip.js');
     } catch (error) {
       console.error('Error importing home page components:', error);
     }
   },
 
   async loadFeaturedRecipes() {
-    const recipesGrid = document.getElementById('featured-recipes-grid');
-    if (!recipesGrid) {
-      console.warn('Featured recipes grid not found');
+    const strip = document.getElementById('featured-recipes-strip');
+    if (!strip) {
+      console.warn('Featured recipes strip not found');
       return;
     }
 
@@ -57,13 +57,9 @@ export default {
 
       if (!recipes.length) return;
 
-      recipes.forEach((doc) => {
-        const recipeCard = document.createElement('recipe-card');
-        recipeCard.setAttribute('recipe-id', doc.id);
-        recipesGrid.appendChild(recipeCard);
-      });
+      strip.setRecipes(recipes.map((doc) => doc.id));
 
-      recipesGrid.addEventListener('recipe-card-open', (event) => {
+      strip.addEventListener('recipe-card-open', (event) => {
         const recipeId = event.detail.recipeId;
         if (window.spa?.router) {
           window.spa.router.navigate(`/recipe/${recipeId}`);
