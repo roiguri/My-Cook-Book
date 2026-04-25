@@ -1,4 +1,5 @@
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { icons } from '../../../js/icons.js';
 import Cropper from 'cropperjs';
 import '../../modals/confirmation_modal/confirmation_modal.js';
 import styles from './recipe_import_modal.css?inline';
@@ -60,7 +61,7 @@ class RecipeImportModal extends HTMLElement {
 
             <!-- Initial State: Upload -->
             <div id="upload-view" class="upload-area">
-              <div class="upload-icon">📷</div>
+              <div class="upload-icon">${icons.camera}</div>
               <p class="upload-text">לחץ להעלאת תמונות או גרור לכאן</p>
               <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
             </div>
@@ -86,10 +87,10 @@ class RecipeImportModal extends HTMLElement {
                  <img id="image-preview" style="max-width: 100%; display: block;">
               </div>
               <div class="toolbar">
-                <button class="tool-btn" id="rotate-left" title="סובב שמאלה">↶</button>
-                <button class="tool-btn" id="rotate-right" title="סובב ימינה">↷</button>
-                <button class="tool-btn" id="cancel-crop" title="ביטול">✕</button>
-                <button class="tool-btn" id="save-crop" title="שמור חיתוך">✓</button>
+                <button class="tool-btn" id="rotate-left" title="סובב שמאלה">${icons.undoAlt}</button>
+                <button class="tool-btn" id="rotate-right" title="סובב ימינה">${icons.redoAlt}</button>
+                <button class="tool-btn" id="cancel-crop" title="ביטול">${icons.times}</button>
+                <button class="tool-btn" id="save-crop" title="שמור חיתוך">${icons.check}</button>
               </div>
             </div>
 
@@ -292,10 +293,10 @@ class RecipeImportModal extends HTMLElement {
           <img src="${img.imageUrl}" class="image-thumb">
         </div>
         <div class="image-controls">
-          <button class="control-btn move-down" ${index === this.images.length - 1 ? 'disabled' : ''}>↓</button>
-          <button class="control-btn move-up" ${index === 0 ? 'disabled' : ''}>↑</button>
-          <button class="control-btn edit-btn">✏️</button>
-          <button class="control-btn delete-btn">🗑️</button>
+          <button class="control-btn move-down" ${index === this.images.length - 1 ? 'disabled' : ''}>${icons.arrowDown}</button>
+          <button class="control-btn move-up" ${index === 0 ? 'disabled' : ''}>${icons.arrowUp}</button>
+          <button class="control-btn edit-btn">${icons.pencilAlt}</button>
+          <button class="control-btn delete-btn">${icons.trashAlt}</button>
         </div>
         <div class="image-number">${index + 1}</div>
       `;
