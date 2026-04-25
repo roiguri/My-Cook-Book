@@ -244,12 +244,22 @@ export async function removeAllRecipeImages(recipeId) {
   const deletePromises = [];
   if (recipe.images && Array.isArray(recipe.images)) {
     recipe.images.forEach((image) => {
-      if (image.full) deletePromises.push(deleteImageFiles(image).catch(() => {}));
+      if (image.full)
+        deletePromises.push(
+          deleteImageFiles(image).catch((err) =>
+            console.warn(`Failed to delete files for image ${image.id}:`, err),
+          ),
+        );
     });
   }
   if (recipe.pendingImages && Array.isArray(recipe.pendingImages)) {
     recipe.pendingImages.forEach((image) => {
-      if (image.full) deletePromises.push(deleteImageFiles(image).catch(() => {}));
+      if (image.full)
+        deletePromises.push(
+          deleteImageFiles(image).catch((err) =>
+            console.warn(`Failed to delete files for pending image ${image.id}:`, err),
+          ),
+        );
     });
   }
   await Promise.all(deletePromises);

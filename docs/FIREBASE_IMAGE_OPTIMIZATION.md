@@ -22,7 +22,7 @@ Install the [Resize Images](https://extensions.dev/extensions/firebase/storage-r
 
 The extension only triggers on **New Uploads** or **Overwrites**. Updating metadata (touching) is often insufficient for this specific extension. To process an entire existing library, use the following methods.
 
-### Option A: The Cloud Shell Method (Fastest & Most Reliable)
+### Cloud Shell Method
 
 This method forces a refresh by synchronizing your images through a temporary folder.
 
@@ -39,18 +39,6 @@ gsutil -m rsync -r gs://BUCKET_NAME/img/recipes/backup/full/ gs://BUCKET_NAME/im
 
 # 3. Cleanup after verifying .webp files appear in Storage
 gsutil -m rm -r gs://BUCKET_NAME/img/recipes/backup
-```
-
-### Option B: Administrative Script (Advanced)
-
-If you have a local service account configured, you can run the provided utility script:
-
-```bash
-# Install admin dependencies
-npm install firebase-admin --save-dev
-
-# Run the script (ensure service-account.json is in root)
-node scripts/optimize-images.cjs
 ```
 
 ## 3. Architecture & Fallbacks
