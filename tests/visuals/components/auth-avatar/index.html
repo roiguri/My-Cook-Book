@@ -11,6 +11,11 @@
     <script type="module" src="/src/lib/auth/auth-controller.js"></script>
     <script type="module" src="/src/lib/auth/components/auth-avatar.js"></script>
     <script type="module" src="/src/lib/auth/components/auth-content.js"></script>
+    <!-- Expose singletons for test access via the same Vite-transformed module instance -->
+    <script type="module">
+      import authService from '/src/js/services/auth-service.js';
+      window.__authService = authService;
+    </script>
   </head>
   <body>
     <!--

@@ -358,7 +358,7 @@ describe('AuthService', () => {
       const result = await authService.loginWithGoogle();
 
       expect(GoogleAuthProvider).toHaveBeenCalled();
-      expect(signInWithPopup).toHaveBeenCalledWith(mockAuth, expect.any(Object));
+      expect(signInWithPopup).toHaveBeenCalledWith(mockAuth, expect.any(Object), 'mockResolver');
       expect(setDoc).toHaveBeenCalledWith(
         mockDocRef,
         expect.objectContaining({

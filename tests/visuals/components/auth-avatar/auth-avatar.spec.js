@@ -54,8 +54,7 @@ test.describe('Auth Avatar Visuals', () => {
 
   test('renders signed-in state with image', async ({ page }) => {
     await page.evaluate(async () => {
-      const authServiceModule = await import('/src/js/services/auth-service.js');
-      const authService = authServiceModule.default;
+      const authService = window.__authService;
 
       const mockUser = {
         uid: 'user123',
@@ -118,8 +117,7 @@ test.describe('Auth Avatar Visuals', () => {
 
   test('opens profile when clicked (signed in)', async ({ page }) => {
     await page.evaluate(async () => {
-      const authServiceModule = await import('/src/js/services/auth-service.js');
-      const authService = authServiceModule.default;
+      const authService = window.__authService;
       const mockUser = { uid: 'u1', email: 'e@e.com' };
       authService.getCurrentUser = () => mockUser;
 

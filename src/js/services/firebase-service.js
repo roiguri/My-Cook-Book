@@ -2,7 +2,7 @@
 
 // Import Firebase SDK modules (v9+ modular)
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { initializeAuth, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -23,7 +23,7 @@ export function initFirebase(config) {
     } else {
       firebaseApp = getApps()[0];
     }
-    firebaseAuth = getAuth(firebaseApp);
+    firebaseAuth = initializeAuth(firebaseApp, { persistence: browserLocalPersistence });
     firebaseFirestore = getFirestore(firebaseApp);
     firebaseStorage = getStorage(firebaseApp);
   }

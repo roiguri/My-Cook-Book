@@ -4,10 +4,10 @@ import { jest } from '@jest/globals';
  * Mock for 'firebase/auth'.
  *
  * Purpose: Prevents real authentication/network calls during tests by mocking:
- *   - Auth persistence constants
+ *   - Auth persistence constants and resolvers
  *   - Auth methods (signIn, signOut, etc.)
  *   - GoogleAuthProvider
- *   - getAuth: returns a dummy auth object
+ *   - initializeAuth: returns a dummy auth object
  *
  * Use this mock when your code or tests import from 'firebase/auth'.
  */
@@ -15,6 +15,7 @@ import { jest } from '@jest/globals';
 jest.unstable_mockModule('firebase/auth', () => ({
   browserLocalPersistence: 'local',
   browserSessionPersistence: 'session',
+  browserPopupRedirectResolver: 'mockResolver',
   EmailAuthProvider: { credential: jest.fn() },
   GoogleAuthProvider: jest.fn().mockImplementation(() => ({ addScope: jest.fn() })),
   setPersistence: jest.fn(),
@@ -23,7 +24,7 @@ jest.unstable_mockModule('firebase/auth', () => ({
   createUserWithEmailAndPassword: jest.fn(),
   signOut: jest.fn(),
   sendPasswordResetEmail: jest.fn(),
-  getAuth: jest.fn(() => 'mockAuth'),
+  initializeAuth: jest.fn(() => 'mockAuth'),
   updateProfile: jest.fn(),
   updatePassword: jest.fn(),
   reauthenticateWithCredential: jest.fn(),

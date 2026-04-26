@@ -23,5 +23,12 @@
   <body>
     <recipe-card id="test-card" card-width="300px"></recipe-card>
     <script type="module" src="/src/lib/recipes/recipe-card/recipe-card.js"></script>
+    <!-- Expose singletons for test access via the same Vite-transformed module instance -->
+    <script type="module">
+      import authService from '/src/js/services/auth-service.js';
+      import favoritesService from '/src/js/services/favorites-service.js';
+      window.__authService = authService;
+      window.__favoritesService = favoritesService;
+    </script>
   </body>
 </html>

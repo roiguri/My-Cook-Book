@@ -31,6 +31,7 @@ import { serverTimestamp, doc, getDoc, setDoc, updateDoc, deleteDoc } from 'fire
 import {
   browserLocalPersistence,
   browserSessionPersistence,
+  browserPopupRedirectResolver,
   EmailAuthProvider,
   GoogleAuthProvider,
   setPersistence,
@@ -247,7 +248,7 @@ class AuthService {
     try {
       const auth = getAuthInstance();
       const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
       const user = userCredential.user;
 
       // Check if user document exists in Firestore
@@ -421,7 +422,7 @@ class AuthService {
   async linkWithGoogle() {
     const user = this.getCurrentUser();
     if (!user) throw new Error('No user is signed in');
-    return await linkWithPopup(user, new GoogleAuthProvider());
+    return await linkWithPopup(user, new GoogleAuthProvider(), browserPopupRedirectResolver);
   }
 
   async unlinkProvider(providerId) {

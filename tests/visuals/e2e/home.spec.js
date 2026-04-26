@@ -21,8 +21,8 @@ test.describe('Home Page Sanity', () => {
     );
     const mockStorageContent = fs.readFileSync(mockStoragePath, 'utf8');
 
-    // Mock FirestoreService
-    await page.route('**/src/js/services/firestore-service.js', async (route) => {
+    // Mock FirestoreService — use RegExp to match Vite's timestamped URLs (e.g. ?t=123)
+    await page.route(/\/src\/js\/services\/firestore-service\.js/, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/javascript',
@@ -30,8 +30,8 @@ test.describe('Home Page Sanity', () => {
       });
     });
 
-    // Mock StorageService
-    await page.route('**/src/js/services/storage-service.js', async (route) => {
+    // Mock StorageService — use RegExp to match Vite's timestamped URLs (e.g. ?t=123)
+    await page.route(/\/src\/js\/services\/storage-service\.js/, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/javascript',

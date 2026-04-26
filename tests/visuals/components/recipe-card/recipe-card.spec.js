@@ -92,15 +92,10 @@ test.describe('Recipe Card Visuals', () => {
 
     // Mock Authentication
     await page.evaluate(async () => {
-      // Import authService from the source to mock the singleton
-      const authServiceModule = await import('/src/js/services/auth-service.js');
-      const authService = authServiceModule.default;
-
-      // Mock getCurrentUser to return a user
+      const authService = window.__authService;
       authService.getCurrentUser = () => ({ uid: 'test-user-123', email: 'test@example.com' });
 
-      const favoritesServiceModule = await import('/src/js/services/favorites-service.js');
-      const favoritesService = favoritesServiceModule.default;
+      const favoritesService = window.__favoritesService;
       favoritesService.removeFavorite = async () => {};
       favoritesService.addFavorite = async () => {};
     });
