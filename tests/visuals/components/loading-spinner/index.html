@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading Spinner Visual Test</title>
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <style>
+      body {
+        background-color: #f4f4f5;
+        padding: 20px;
+        margin: 0;
+        font-family: sans-serif;
+      }
+      .test-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .test-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .test-case {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="test-container">
+      <h2>Standard Spinner</h2>
+      <div class="test-row">
+        <div class="test-case" id="default-spinner">
+          <label>Default</label>
+          <loading-spinner active></loading-spinner>
+        </div>
+        <div class="test-case" id="custom-color">
+          <label>Custom Color & Size</label>
+          <loading-spinner active color="#e63946" size="60px" line-width="6px"></loading-spinner>
+        </div>
+        <div class="test-case" id="half-length">
+          <label>Half Length</label>
+          <loading-spinner active length="half" color="#2a9d8f"></loading-spinner>
+        </div>
+      </div>
+
+      <h2>Overlay Spinner</h2>
+      <div class="test-row">
+        <!-- Testing overlay spinner here -->
+        <button id="toggle-overlay" style="padding: 10px; cursor: pointer">
+          Toggle Overlay Spinner
+        </button>
+      </div>
+    </div>
+
+    <!-- Overlay Spinner Instance -->
+    <loading-spinner
+      id="overlay-spinner"
+      overlay
+      size="80px"
+      color="#1d3557"
+      border-radius="10px"
+    ></loading-spinner>
+
+    <script type="module" src="/src/lib/utilities/loading-spinner/loading-spinner.js"></script>
+    <script>
+      document.getElementById('toggle-overlay').addEventListener('click', () => {
+        const spinner = document.getElementById('overlay-spinner');
+        if (spinner.hasAttribute('active')) {
+          spinner.removeAttribute('active');
+        } else {
+          spinner.setAttribute('active', '');
+        }
+      });
+    </script>
+  </body>
+</html>
