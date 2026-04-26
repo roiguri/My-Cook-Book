@@ -211,7 +211,8 @@ export class PageManager {
   hideLoadingState() {
     const loadingElement = this.contentContainer.querySelector('.page-loading');
     if (loadingElement) {
-      loadingElement.remove();
+      loadingElement.style.opacity = '0';
+      setTimeout(() => loadingElement.remove(), 150);
     }
   }
 

@@ -57,6 +57,7 @@ footer {
   justify-content: center;
   background: rgba(250, 246, 236, 0.9);
   z-index: 2000;
+  transition: opacity 0.15s ease;
 }
 
 @keyframes page-spin {
