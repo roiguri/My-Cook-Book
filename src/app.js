@@ -31,8 +31,9 @@ async function initializeSPA() {
   try {
     initFirebase(firebaseConfig);
 
-    // Start loading supplemental components in parallel (non-blocking for faster TTI)
+    // Start loading supplemental components and the most common first route in parallel
     Promise.all([
+      import('./app/pages/home-page.js'),
       import('./lib/auth/auth-controller.js'),
       import('./lib/auth/components/auth-avatar.js'),
       import('./lib/auth/components/auth-content.js'),
