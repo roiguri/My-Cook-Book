@@ -5,6 +5,34 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+Hebrew:wght@300;400;500;600;700&family=Noto+Serif+Hebrew:wght@400;600&display=swap');
 
+/* Metric-adjusted fallbacks to prevent layout shift during font swap */
+@font-face {
+  font-family: 'Geist Fallback';
+  src: local('Arial');
+  size-adjust: 90%;
+  ascent-override: 92%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Instrument Serif Fallback';
+  src: local('Georgia');
+  size-adjust: 100%;
+  ascent-override: 87%;
+  descent-override: 19%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Geist Mono Fallback';
+  src: local('Menlo'), local('Courier New');
+  size-adjust: 115%;
+  ascent-override: 90%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
 :root {
   /* ---- Palette (UNCHANGED) ---- */
   --primary-dark: #386641;
@@ -37,11 +65,12 @@
   --button-color: #ffffff;
 
   /* ---- Typography — modern editorial ---- */
-  --font-display: 'Instrument Serif', 'Cormorant Garamond', serif;
+  --font-display: 'Instrument Serif', 'Instrument Serif Fallback', 'Cormorant Garamond', serif;
   --font-display-he: 'Noto Serif Hebrew', 'Fredoka', serif;
-  --font-ui: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-ui:
+    'Geist', 'Geist Fallback', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-ui-he: 'Noto Sans Hebrew', var(--font-ui);
-  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* ---- Type scale (fluid, display-heavy) ---- */
   --step--1: clamp(0.78rem, 0.76rem + 0.1vw, 0.82rem); /* caption */
