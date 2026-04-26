@@ -13,7 +13,7 @@ export default {
 
   async mount() {
     await this.importComponents();
-    await this.loadFeaturedRecipes();
+    this.loadFeaturedRecipes();
   },
 
   async unmount() {
