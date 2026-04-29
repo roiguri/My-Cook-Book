@@ -1,3 +1,4 @@
+import { icons } from '../../../js/icons.js';
 import './auth-content.js';
 
 class SignupForm extends HTMLElement {
@@ -156,10 +157,7 @@ class SignupForm extends HTMLElement {
           <div class="input-icon">
             <input type="password" id="signup-password" autocomplete="new-password" />
             <button type="button" class="eye" id="toggle-pw" aria-label="הצג סיסמה">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.5"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
-              </svg>
+              ${icons.eye}
             </button>
           </div>
           <div class="strength" id="strength-bar"><i></i><i></i><i></i><i></i></div>
@@ -174,23 +172,14 @@ class SignupForm extends HTMLElement {
 
         <button type="submit" class="btn btn-primary" style="margin-top:6px;">
           יצירת חשבון
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          ${icons.arrowLeft}
         </button>
 
         <div class="or">או</div>
 
         <div class="socials">
           <button type="button" class="btn btn-social" id="google-signup">
-            <span class="logo">
-              <svg width="18" height="18" viewBox="0 0 18 18">
-                <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.17-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
-                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.83.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.92v2.32A9 9 0 009 18z"/>
-                <path fill="#FBBC05" d="M3.97 10.72A5.41 5.41 0 013.68 9c0-.6.1-1.18.29-1.72V4.96H.92A9 9 0 000 9c0 1.45.35 2.83.92 4.04l3.05-2.32z"/>
-                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 00.92 4.96l3.05 2.32C4.68 5.16 6.66 3.58 9 3.58z"/>
-              </svg>
-            </span>
+            <span class="logo">${icons.googleLogo}</span>
             הרשמה עם Google
           </button>
         </div>

@@ -7,6 +7,7 @@
  * Header avatar component that serves as the main entry point for authentication
  */
 
+import { icons } from '../../../js/icons.js';
 import authService from '../../../js/services/auth-service.js';
 import './auth-content.js';
 
@@ -102,9 +103,7 @@ class AuthAvatar extends HTMLElement {
       </style>
       
       <div class="avatar signed-out" id="auth-trigger">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-        </svg>
+        ${icons.user}
       </div>
     `;
   }
@@ -152,11 +151,7 @@ class AuthAvatar extends HTMLElement {
       }
     } else {
       avatar.classList.add('signed-out');
-      avatar.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-        </svg>
-      `;
+      avatar.innerHTML = icons.user;
     }
   }
 

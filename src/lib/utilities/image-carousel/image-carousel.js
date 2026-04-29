@@ -1,3 +1,4 @@
+import { icons } from '../../../js/icons.js';
 import { StorageService } from '../../../js/services/storage-service.js';
 import { getOptimizedImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 
@@ -125,9 +126,7 @@ class ImageCarousel extends HTMLElement {
   showItemPlaceholder(listItem) {
     listItem.innerHTML = `
       <div class="image-carousel__placeholder">
-        <svg class="no-image-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/>
-        </svg>
+        <span class="no-image-icon">${icons.imagePlaceholder}</span>
       </div>
     `;
   }
@@ -335,16 +334,10 @@ class ImageCarousel extends HTMLElement {
           <ul class="image-carousel__list"></ul>
           <div class="image-carousel__dots"></div>
           <button class="image-carousel__button image-carousel__button--prev">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
+            ${icons.chevronLeft}
           </button>
           <button class="image-carousel__button image-carousel__button--next">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
+            ${icons.chevronRight}
           </button>
         </div>
       </div>
