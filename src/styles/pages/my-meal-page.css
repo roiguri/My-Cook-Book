@@ -457,9 +457,7 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 24px;
-}
-
-.spa-content .my-meal-page .empty-icon-wrapper svg {
+  font-size: 48px;
   color: var(--primary);
 }
 

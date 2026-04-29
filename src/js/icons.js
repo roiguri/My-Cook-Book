@@ -178,8 +178,8 @@ export const icons = {
     '<path d="M3 3l10 10M13 3L3 13"/>',
   ),
 
-  // Blender / food icon used in my-meal empty state (stroke-based, multi-path)
-  blender: svgStroke(
+  // Kitchen utensils icon used in my-meal empty state (stroke-based, multi-path)
+  kitchenUtensils: svgStroke(
     '0 0 24 24',
     '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
   ),

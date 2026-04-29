@@ -788,7 +788,7 @@ export default {
         <div class="empty-state">
           <div class="empty-state-card">
             <div class="empty-icon-wrapper">
-              ${icons.blender}
+              ${icons.kitchenUtensils}
             </div>
             <h2 class="heading-2-he">אין ארוחה פעילה</h2>
             <p class="empty-subtitle">התחל להוסיף מתכונים לארוחה שלך<br>כדי לראות אותם כאן</p>
