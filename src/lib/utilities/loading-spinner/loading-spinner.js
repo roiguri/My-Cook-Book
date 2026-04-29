@@ -100,7 +100,7 @@ class LoadingSpinner extends HTMLElement {
         position: fixed;
         inset: 0;
         background: rgba(255,255,255,0.7);
-        z-index: 10000;
+        z-index: var(--z-spinner);
         pointer-events: all;
         border-radius: ${this.borderRadius};
       }

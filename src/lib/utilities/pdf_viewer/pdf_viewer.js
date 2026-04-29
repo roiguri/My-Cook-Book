@@ -107,7 +107,7 @@ class PDFViewer extends HTMLElement {
                     left: 0;
                     width: 100vw;
                     height: 100vh;
-                    z-index: 10000;
+                    z-index: var(--z-fullscreen);
                     border-radius: 0;
                     margin: 0;
                 }
@@ -228,7 +228,7 @@ class PDFViewer extends HTMLElement {
                     color: white;
                     border: none;
                     cursor: pointer;
-                    z-index: 10001;
+                    z-index: calc(var(--z-fullscreen) + 1);
                     transition: background var(--dur-1, 160ms);
                 }
 

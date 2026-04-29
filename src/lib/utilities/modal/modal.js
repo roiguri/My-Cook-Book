@@ -112,7 +112,7 @@ export class Modal extends HTMLElement {
       .modal {
         display: flex;
         position: fixed;
-        z-index: 2000;
+        z-index: var(--z-modal);
         inset: 0;
         align-items: center;
         justify-content: center;

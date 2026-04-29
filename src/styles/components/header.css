@@ -61,7 +61,7 @@ header.app-loading::before {
   background: linear-gradient(90deg, #eef3e1 25%, #dcebc1 50%, #eef3e1 75%);
   background-size: 200% 100%;
   animation: nav-shimmer 1.5s infinite linear;
-  z-index: 10;
+  z-index: var(--z-elevated);
 }
 
 @keyframes nav-shimmer {
@@ -303,7 +303,7 @@ header .hamburger::after {
 
   header .nav-toggle {
     display: flex;
-    z-index: 1002;
+    z-index: var(--z-nav);
     position: relative;
     width: 30px;
     height: 30px;
@@ -408,7 +408,7 @@ header .hamburger::after {
     border-left: 1px solid var(--hairline);
     transform: translate3d(100%, 0, 0);
     transition: transform var(--dur-3) var(--ease-out);
-    z-index: 1001;
+    z-index: var(--z-drawer);
     box-shadow: 24px 0 64px -24px rgba(31, 29, 24, 0.35);
     overflow: hidden;
     display: flex;
@@ -424,7 +424,7 @@ header .hamburger::after {
     bottom: 0;
     width: 1px;
     background: rgba(188, 71, 73, 0.25);
-    z-index: 0;
+    z-index: var(--z-base);
   }
 
   .mobile-nav-drawer.active {
@@ -644,7 +644,7 @@ header .hamburger::after {
     opacity: 0;
     visibility: hidden;
     transition: all var(--dur-3) var(--ease-out);
-    z-index: 1000;
+    z-index: var(--z-backdrop);
   }
 
   .mobile-nav-backdrop.active {
