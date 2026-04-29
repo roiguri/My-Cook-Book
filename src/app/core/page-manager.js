@@ -80,7 +80,6 @@ export class PageManager {
       this.currentPageModule = module;
       this.currentPage = params.route || 'unknown';
 
-      this.showLoadingState();
       window.scrollTo(0, 0);
 
       const html = await this.callPageMethod('render', params);
