@@ -80,6 +80,11 @@ class AuthAvatar extends HTMLElement {
           border-radius: 50%;
         }
 
+        .avatar.signed-out svg {
+          width: 24px;
+          height: 24px;
+        }
+
         .avatar.loading {
           opacity: 0.7;
           pointer-events: none;

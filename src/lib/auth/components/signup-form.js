@@ -62,6 +62,7 @@ class SignupForm extends HTMLElement {
           position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
           color: var(--ink-3, #7c7562); cursor: pointer; padding: 4px;
           background: none; border: none; display: flex; align-items: center;
+          font-size: 18px;
         }
         .input-icon .eye:hover { color: var(--ink, #1f1d18); }
 
