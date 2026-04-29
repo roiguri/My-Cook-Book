@@ -27,3 +27,5 @@
 
 **Learning:** `await`ing every component import in the application initialization path (e.g., in `initializeSPA`) delays the Time to Interactive (TTI) because the router waits for all components to load before rendering.
 **Action:** Separate truly critical shell components (like `navigation-script`) from supplemental ones (like Auth and Search). `await` only critical shell dependencies to avoid race conditions, but let supplemental ones load in parallel via non-blocking `Promise.all().catch()`.
+
+## 2025-10-25 - [Debounce Search Inputs]\n**Learning:** Search inputs triggering filtering operations directly on every keystroke can cause performance bottlenecks. Debouncing is a simple, effective optimization.\n**Action:** Always wrap search input handlers with a debounce function (e.g., 300ms) to reduce the frequency of filtering operations and improve application responsiveness.
