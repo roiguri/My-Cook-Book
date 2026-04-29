@@ -119,9 +119,17 @@
   background-position: center;
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-1);
+  overflow: hidden; /* Ensure image respects border radius */
   transition:
     transform var(--dur-2) var(--ease),
     box-shadow var(--dur-2) var(--ease);
+}
+
+.spa-content .home-page .tile-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .spa-content .home-page .category-tile:hover .tile-img {

@@ -1,24 +1,14 @@
-const CACHE_NAME = 'our-kitchen-chronicles-spa-2024.12.18';
+const VERSION = '2026.04.30.2';
+const CACHE_NAME = `our-kitchen-chronicles-shell-${VERSION}`;
+
 const urlsToCache = [
   '/',
   '/index.html',
+  '/src/app.js',
   '/src/styles/main.css',
-  '/src/styles/components/spa.css',
-  '/src/styles/components/header.css',
-  '/src/styles/components/footer.css',
-  '/img/background/stone-counter-top.jpg',
-  '/img/background/wood-texture.jpg',
-  '/img/category-jars/optimized/appetizers.webp',
-  '/img/category-jars/optimized/main-course.webp',
-  '/img/category-jars/optimized/side-dishes.webp',
-  '/img/category-jars/optimized/soups-stews.webp',
-  '/img/category-jars/optimized/salad.webp',
-  '/img/category-jars/optimized/breads-pastries.webp',
-  '/img/category-jars/optimized/dessert.webp',
-  '/img/category-jars/optimized/breakfast.webp',
-  '/img/category-jars/optimized/snacks.webp',
-  '/img/category-jars/optimized/beverages.webp',
-  // Add other critical assets here
+  '/site.webmanifest.json',
+  '/img/icon/prod/wooden-spoon-32.png',
+  '/img/icon/prod/wooden-spoon-192.png',
 ];
 
 self.addEventListener('install', function (event) {
