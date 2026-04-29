@@ -22,6 +22,12 @@
     radial-gradient(900px 500px at -10% 110%, rgba(188, 71, 73, 0.06), transparent 60%), var(--bg);
 }
 
+/* Reserve near-full viewport height while loading to prevent footer CLS */
+.spa-content:has(> .page-loading) {
+  min-height: calc(100vh - 60px);
+  min-height: calc(100svh - 60px);
+}
+
 /* Footer should not grow and stick to bottom */
 footer {
   flex-shrink: 0;
@@ -168,10 +174,6 @@ footer {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .spa-content {
-    min-height: 300px;
-  }
-
   .spa-home-placeholder,
   .spa-categories-placeholder,
   .spa-propose-placeholder {
