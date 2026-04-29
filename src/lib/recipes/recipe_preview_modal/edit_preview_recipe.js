@@ -45,6 +45,7 @@
  * logic in your parent component.
  */
 
+import { icons } from '../../../js/icons.js';
 import '../recipe_component/recipe_component.js';
 import '../recipe_form_component/edit_recipe_component.js';
 import '../../utilities/modal/modal.js';
@@ -223,15 +224,11 @@ class EditPreviewRecipe extends HTMLElement {
               </button>
               <div class="toolbar-actions">
                 <button class="toolbar-btn toolbar-btn--clear" id="toolbar-clear" ${isPreview ? 'disabled' : ''} aria-label="נקה">
-                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                  </svg>
+                  ${icons.closeX}
                   <span class="btn-label">נקה</span>
                 </button>
                 <button class="toolbar-btn toolbar-btn--save" id="toolbar-save" ${isPreview ? 'disabled' : ''} aria-label="שמור">
-                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                    <path d="M13 2H5L2 5v9h12V2zM10 2v4H5V2M8 8v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
+                  ${icons.floppyDisk}
                   <span class="btn-label">שמור</span>
                 </button>
               </div>

@@ -18,6 +18,10 @@
 const svg = (viewBox, path) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false"><path d="${path}"/></svg>`;
 
+// For stroke-based icons. `content` is the inner SVG markup (path, polyline, circle, etc.).
+const svgStroke = (viewBox, content, sw = '1.5') =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${content}</svg>`;
+
 export const icons = {
   heart: svg(
     '0 0 512 512',
@@ -103,4 +107,83 @@ export const icons = {
     '0 0 448 512',
     'M413.1 222.5l22.2 22.2c9.4 9.4 9.4 24.6 0 33.9L241 473c-9.4 9.4-24.6 9.4-33.9 0L12.7 278.6c-9.4-9.4-9.4-24.6 0-33.9l22.2-22.2c9.5-9.5 25-9.3 34.3.4L184 343.4V56c0-13.3 10.7-24 24-24h32c13.3 0 24 10.7 24 24v287.4l114.8-120.5c9.3-9.8 24.8-10 34.3-.4z',
   ),
+
+  // Image / photo placeholder (Material Design "image" icon, fill-based)
+  imagePlaceholder: svg(
+    '0 0 24 24',
+    'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z',
+  ),
+
+  // Generic user / avatar icon (Material Design "person", fill-based)
+  user: svg(
+    '0 0 24 24',
+    'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
+  ),
+
+  // Outline heart for favorites (stroke-based; stroke-width 2 matches recipe-card usage)
+  heartOutline: svgStroke(
+    '0 0 24 24',
+    '<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>',
+    '2',
+  ),
+
+  // Thin cross / add-to-meal (stroke-based)
+  plus: svgStroke(
+    '0 0 24 24',
+    '<path d="M12 5v14M5 12h14"/>',
+    '2',
+  ),
+
+  // Eye icon for password-visibility toggle (stroke-based, path + circle)
+  eye: svgStroke(
+    '0 0 24 24',
+    '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+  ),
+
+  // Left-pointing arrow used on RTL auth-form submit buttons
+  arrowLeft: svgStroke(
+    '0 0 16 16',
+    '<path d="M13 8H3M7 4l-4 4 4 4"/>',
+  ),
+
+  // Carousel chevrons (stroke-based, polyline)
+  chevronLeft: svgStroke(
+    '0 0 24 24',
+    '<polyline points="15 18 9 12 15 6"/>',
+    '2',
+  ),
+
+  chevronRight: svgStroke(
+    '0 0 24 24',
+    '<polyline points="9 18 15 12 9 6"/>',
+    '2',
+  ),
+
+  // Magnifying-glass search icon (stroke-based, circle + line)
+  search: svgStroke(
+    '0 0 16 16',
+    '<circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>',
+  ),
+
+  // Floppy-disk save icon (stroke-based; original uses stroke-width 1.4)
+  floppyDisk: svgStroke(
+    '0 0 16 16',
+    '<path d="M13 2H5L2 5v9h12V2zM10 2v4H5V2M8 8v5"/>',
+    '1.4',
+  ),
+
+  // Small × close/clear icon (stroke-based, two diagonal lines)
+  closeX: svgStroke(
+    '0 0 16 16',
+    '<path d="M3 3l10 10M13 3L3 13"/>',
+  ),
+
+  // Kitchen utensils icon used in my-meal empty state (stroke-based, multi-path)
+  kitchenUtensils: svgStroke(
+    '0 0 24 24',
+    '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
+  ),
+
+  // Google brand logo (multi-colour; cannot use svg() / svgStroke() helpers)
+  googleLogo: `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 18 18" aria-hidden="true" focusable="false"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.17-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.83.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.92v2.32A9 9 0 009 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.41 5.41 0 013.68 9c0-.6.1-1.18.29-1.72V4.96H.92A9 9 0 000 9c0 1.45.35 2.83.92 4.04l3.05-2.32z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 00.92 4.96l3.05 2.32C4.68 5.16 6.66 3.58 9 3.58z"/></svg>`,
 };

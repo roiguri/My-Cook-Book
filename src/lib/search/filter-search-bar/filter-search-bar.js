@@ -1,3 +1,4 @@
+import { icons } from '../../../js/icons.js';
 import { debounce } from '../../../js/utils/common-utils.js';
 
 /**
@@ -139,10 +140,7 @@ class FilterSearchBar extends HTMLElement {
           placeholder="${placeholder}"
           aria-label="חיפוש מתכונים">
         <span class="search-icon" aria-hidden="true">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
+          ${icons.search}
         </span>
         <button class="clear-button" type="button" aria-label="נקה חיפוש">×</button>
       </div>

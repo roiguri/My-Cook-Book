@@ -33,6 +33,7 @@
  * - Lazy loading for images
  * - Consistent dimensions to prevent layout shifts
  */
+import { icons } from '../../../js/icons.js';
 import authService from '../../../js/services/auth-service.js';
 import favoritesService from '../../../js/services/favorites-service.js';
 import {
@@ -304,14 +305,10 @@ class RecipeCard extends HTMLElement {
     template.innerHTML = `
       <div class="recipe-card" role="article">
         <button class="favorite-btn" aria-label="Add to favorites">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke-width="2"/>
-          </svg>
+          ${icons.heartOutline}
         </button>
         <button class="add-to-meal-btn" aria-label="Add to meal" style="display: none">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
+          ${icons.plus}
         </button>
         <div class="photo">
           <img class="recipe-image" data-src="" alt="" data-fallback="/img/placeholder.jpg">
@@ -346,19 +343,13 @@ class RecipeCard extends HTMLElement {
     template.innerHTML = `
       <div class="recipe-card" role="article">
         <button class="favorite-btn" aria-label="Add to favorites">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke-width="2"/>
-          </svg>
+          ${icons.heartOutline}
         </button>
         <button class="add-to-meal-btn" aria-label="Add to meal" style="display: none">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
+          ${icons.plus}
         </button>
         <div class="photo no-image-placeholder">
-          <svg class="no-image-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="currentColor"/>
-          </svg>
+          <span class="no-image-icon">${icons.imagePlaceholder}</span>
         </div>
         <div class="recipe-content">
           <span class="badge category"></span>

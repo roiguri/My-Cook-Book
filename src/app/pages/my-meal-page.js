@@ -788,11 +788,7 @@ export default {
         <div class="empty-state">
           <div class="empty-state-card">
             <div class="empty-icon-wrapper">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2"/>
-                <path d="M7 2v20"/>
-                <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
-              </svg>
+              ${icons.kitchenUtensils}
             </div>
             <h2 class="heading-2-he">אין ארוחה פעילה</h2>
             <p class="empty-subtitle">התחל להוסיף מתכונים לארוחה שלך<br>כדי לראות אותם כאן</p>
