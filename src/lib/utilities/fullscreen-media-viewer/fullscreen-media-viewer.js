@@ -240,7 +240,7 @@ class FullscreenMediaViewer extends HTMLElement {
           width: 100%;
           height: 100%;
           background-color: rgba(0, 0, 0, 0.95);
-          z-index: 10000;
+          z-index: var(--z-fullscreen);
           opacity: 0;
           transition: opacity 0.3s ease;
           flex-direction: column;
@@ -270,7 +270,7 @@ class FullscreenMediaViewer extends HTMLElement {
           align-items: center;
           justify-content: center;
           transition: background-color 0.2s ease, transform 0.2s ease;
-          z-index: 10002;
+          z-index: calc(var(--z-fullscreen) + 2);
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
@@ -290,7 +290,7 @@ class FullscreenMediaViewer extends HTMLElement {
           background: rgba(0, 0, 0, 0.5);
           padding: 8px 16px;
           border-radius: 20px;
-          z-index: 10002;
+          z-index: calc(var(--z-fullscreen) + 2);
         }
 
         .viewer-content {
@@ -347,7 +347,7 @@ class FullscreenMediaViewer extends HTMLElement {
           align-items: center;
           justify-content: center;
           transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-          z-index: 10001;
+          z-index: calc(var(--z-fullscreen) + 1);
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 

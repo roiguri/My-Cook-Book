@@ -2,7 +2,6 @@ import alertStyles from '../../../styles/components/alerts.css?inline';
 
 // Constants
 const DEFAULT_TOAST_DURATION_MS = 3000;
-const TOAST_Z_INDEX = 10000;
 
 /**
  * Toast Notification Component
@@ -29,7 +28,7 @@ class ToastNotification extends HTMLElement {
           position: fixed;
           bottom: 24px;
           right: 24px;
-          z-index: ${TOAST_Z_INDEX};
+          z-index: var(--z-toast);
           pointer-events: none;
         }
 

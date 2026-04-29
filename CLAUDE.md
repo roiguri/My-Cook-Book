@@ -93,6 +93,13 @@ Tokens are in `src/styles/tokens.css` (v2, modern). Key variables to use in all 
 - **Shadows**: `--shadow-1/2/3`, `--ring` (focus ring)
 - **Motion**: `--ease`, `--ease-out`, `--dur-1` (160ms), `--dur-2` (280ms), `--dur-3` (520ms)
 - **Layout**: `--content-max` (1200px), `--gutter` (fluid)
+- **Z-Index**: token hierarchy (lowest → highest): `--z-elevated` (10) → `--z-sticky` (100) → `--z-page-overlay` (200) → `--z-nav` (1000) → `--z-backdrop` (1010) → `--z-drawer` (1020) → `--z-modal` (2000) → `--z-toast` (3000) → `--z-fullscreen` (10000) → `--z-spinner` (10010)
+
+**Z-index rules:**
+
+- Always use a token when placing an element in the application stacking context (nav, drawers, modals, backdrops, toasts, overlays).
+- Raw numeric `z-index` values are acceptable for _internal_ component layout — e.g. `z-index: 1` to lift a pseudo-element or child above a sibling within the same component. These are local, not application-level, so tokens would be semantically wrong.
+- Never use a raw number for anything that competes with application-level layers (header, drawers, modals, etc.).
 
 Never use raw hex colors or hardcoded px values for things covered by tokens. The app has Hebrew RTL content — use `dir="rtl"` on Hebrew containers.
 

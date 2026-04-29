@@ -105,6 +105,28 @@
   /* ---- Layout ---- */
   --content-max: 1200px;
   --gutter: clamp(20px, 4vw, 48px);
+
+  /* ---- Z-Index Architecture ---- */
+  --z-hide: -1;
+  --z-base: 0;
+
+  /* Page & Component Level */
+  --z-elevated: 10; /* Hover states, local card stacking */
+  --z-sticky: 100; /* Sticky headers within pages, FABs */
+  --z-page-overlay: 200; /* In-page dropdowns, tooltips */
+
+  /* Application Layout Level */
+  --z-nav: 1000; /* Top navigation bar — above page content, below overlays */
+  --z-backdrop: 1010; /* Dimming backdrops — covers nav when drawers/modals open */
+  --z-drawer: 1020; /* Drawers and side panels */
+
+  /* Global Overlays Level */
+  --z-modal: 2000; /* Modals, Dialogs (Must be > nav) */
+  --z-toast: 3000; /* Toast notifications */
+
+  /* System Level */
+  --z-fullscreen: 10000; /* Fullscreen media viewers, PDF viewers */
+  --z-spinner: 10010; /* Global loading spinners */
 }
 
 * {

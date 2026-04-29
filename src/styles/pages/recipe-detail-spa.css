@@ -20,7 +20,7 @@
   position: absolute;
   top: 14px;
   left: 14px;
-  z-index: 100;
+  z-index: var(--z-sticky);
 }
 
 .spa-content .recipe-detail .recipe-menu-button {
@@ -60,7 +60,7 @@
   min-width: 200px;
   overflow: hidden;
   display: none;
-  z-index: 1000;
+  z-index: var(--z-page-overlay);
 }
 
 .spa-content .recipe-detail .recipe-menu-dropdown.open {
