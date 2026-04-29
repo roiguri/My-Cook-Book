@@ -128,11 +128,7 @@ export const icons = {
   ),
 
   // Thin cross / add-to-meal (stroke-based)
-  plus: svgStroke(
-    '0 0 24 24',
-    '<path d="M12 5v14M5 12h14"/>',
-    '2',
-  ),
+  plus: svgStroke('0 0 24 24', '<path d="M12 5v14M5 12h14"/>', '2'),
 
   // Eye icon for password-visibility toggle (stroke-based, path + circle)
   eye: svgStroke(
@@ -141,42 +137,21 @@ export const icons = {
   ),
 
   // Left-pointing arrow used on RTL auth-form submit buttons
-  arrowLeft: svgStroke(
-    '0 0 16 16',
-    '<path d="M13 8H3M7 4l-4 4 4 4"/>',
-  ),
+  arrowLeft: svgStroke('0 0 16 16', '<path d="M13 8H3M7 4l-4 4 4 4"/>'),
 
   // Carousel chevrons (stroke-based, polyline)
-  chevronLeft: svgStroke(
-    '0 0 24 24',
-    '<polyline points="15 18 9 12 15 6"/>',
-    '2',
-  ),
+  chevronLeft: svgStroke('0 0 24 24', '<polyline points="15 18 9 12 15 6"/>', '2'),
 
-  chevronRight: svgStroke(
-    '0 0 24 24',
-    '<polyline points="9 18 15 12 9 6"/>',
-    '2',
-  ),
+  chevronRight: svgStroke('0 0 24 24', '<polyline points="9 18 15 12 9 6"/>', '2'),
 
   // Magnifying-glass search icon (stroke-based, circle + line)
-  search: svgStroke(
-    '0 0 16 16',
-    '<circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>',
-  ),
+  search: svgStroke('0 0 16 16', '<circle cx="7" cy="7" r="5"/><path d="M11 11l3 3"/>'),
 
   // Floppy-disk save icon (stroke-based; original uses stroke-width 1.4)
-  floppyDisk: svgStroke(
-    '0 0 16 16',
-    '<path d="M13 2H5L2 5v9h12V2zM10 2v4H5V2M8 8v5"/>',
-    '1.4',
-  ),
+  floppyDisk: svgStroke('0 0 16 16', '<path d="M13 2H5L2 5v9h12V2zM10 2v4H5V2M8 8v5"/>', '1.4'),
 
   // Small × close/clear icon (stroke-based, two diagonal lines)
-  closeX: svgStroke(
-    '0 0 16 16',
-    '<path d="M3 3l10 10M13 3L3 13"/>',
-  ),
+  closeX: svgStroke('0 0 16 16', '<path d="M3 3l10 10M13 3L3 13"/>'),
 
   // Kitchen utensils icon used in my-meal empty state (stroke-based, multi-path)
   kitchenUtensils: svgStroke(
