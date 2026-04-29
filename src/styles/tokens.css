@@ -116,9 +116,9 @@
   --z-page-overlay: 200; /* In-page dropdowns, tooltips */
 
   /* Application Layout Level */
-  --z-backdrop: 1000; /* Dimming backdrops for drawers/modals */
-  --z-drawer: 1010; /* Mobile navigation drawer */
-  --z-nav: 1020; /* Top navigation bar, hamburger menu */
+  --z-nav: 1000; /* Top navigation bar — above page content, below overlays */
+  --z-backdrop: 1010; /* Dimming backdrops — covers nav when drawers/modals open */
+  --z-drawer: 1020; /* Drawers and side panels */
 
   /* Global Overlays Level */
   --z-modal: 2000; /* Modals, Dialogs (Must be > nav) */

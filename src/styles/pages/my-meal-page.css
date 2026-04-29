@@ -10,7 +10,7 @@
 .spa-content .my-meal-page .meal-header {
   position: sticky;
   top: 0;
-  z-index: var(--z-elevated);
+  z-index: var(--z-sticky);
   background: var(--surface-1);
   border-bottom: 1px solid var(--hairline-strong);
   display: flex;
