@@ -174,3 +174,13 @@
 .fields-grid .field--full {
   grid-column: span 2;
 }
+
+/* ---- Mobile optimizations to prevent auto-zoom ---- */
+@media (max-width: 768px) {
+  .field__input,
+  .field input,
+  .field textarea,
+  .field select {
+    font-size: 16px;
+  }
+}

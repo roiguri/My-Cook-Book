@@ -131,6 +131,7 @@ class SignupForm extends HTMLElement {
         }
 
         @media (max-width: 560px) {
+          .field input { font-size: 16px; }
           .stack { padding-left: 22px; padding-right: 22px; }
           .grid2 { grid-template-columns: 1fr; }
         }

@@ -215,6 +215,7 @@ class UserProfile extends HTMLElement {
         }
 
         @media (max-width: 560px) {
+          .field input { font-size: 16px; }
           .profile-body { padding-left: 22px; padding-right: 22px; }
           .profile-foot { padding: 14px 22px; }
           .avatar-grid { grid-template-columns: repeat(4, 1fr); }

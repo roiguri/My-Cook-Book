@@ -100,6 +100,7 @@ class ForgotPassword extends HTMLElement {
         .back:hover { border-color: var(--primary, #6a994e); }
 
         @media (max-width: 560px) {
+          .field input { font-size: 16px; }
           .body { padding-left: 22px; padding-right: 22px; }
         }
       </style>
