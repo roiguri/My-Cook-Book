@@ -225,6 +225,8 @@ export default {
     const submitBtn = document.querySelector('#action-submit');
     const clearBtn = document.querySelector('#action-clear');
     const importBtn = document.querySelector('#action-import');
+    const heroTitle = document.querySelector('.propose-hero__title');
+    const heroDek = document.querySelector('.propose-hero__dek');
 
     if (this.isPreviewMode) {
       // Switching to Preview mode
@@ -243,6 +245,9 @@ export default {
       if (clearBtn) clearBtn.disabled = true;
       if (importBtn) importBtn.disabled = true;
 
+      if (heroTitle) heroTitle.innerHTML = 'כך ייראה <em>המתכון שלך</em>';
+      if (heroDek) heroDek.textContent = 'כפי שיופיע לאחר הפרסום';
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       // Switching back to Edit mode
@@ -252,6 +257,9 @@ export default {
       if (submitBtn) submitBtn.disabled = false;
       if (clearBtn) clearBtn.disabled = false;
       if (importBtn) importBtn.disabled = false;
+
+      if (heroTitle) heroTitle.innerHTML = 'הצע <em>מתכון</em> לספר.';
+      if (heroDek) heroDek.textContent = 'כתוב אותו כפי שהיית מספר אותו לחבר.';
     }
 
     this.updatePreviewButton();

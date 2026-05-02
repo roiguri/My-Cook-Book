@@ -168,6 +168,11 @@ class RecipeComponent extends HTMLElement {
 
   styles() {
     return `
+    :host {
+      display: block;
+      width: 100%;
+    }
+
     .Recipe_component {
       display: flex;
       flex-direction: column;
