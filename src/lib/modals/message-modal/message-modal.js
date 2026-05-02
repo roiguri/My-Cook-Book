@@ -71,6 +71,18 @@ class MessageModal extends Modal {
         color: var(--ink-3, #7c7562);
         line-height: 1.6;
         margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      p.monospace {
+        font-family: var(--font-mono, monospace);
+        text-align: left;
+        direction: ltr;
+        font-size: 12px;
+        background: var(--surface-2, #f2e8cf);
+        padding: 12px;
+        border-radius: var(--r-sm, 8px);
+        margin-top: 10px;
       }
       .modal-actions {
         margin-top: 20px;
@@ -94,8 +106,15 @@ class MessageModal extends Modal {
     `;
   }
 
-  show(message, title = '', buttonText = null, buttonAction = null) {
-    this.shadowRoot.getElementById('modal-message').textContent = message;
+  show(message, title = '', buttonText = null, buttonAction = null, options = {}) {
+    const messageEl = this.shadowRoot.getElementById('modal-message');
+    messageEl.textContent = message;
+
+    if (options.monospace) {
+      messageEl.classList.add('monospace');
+    } else {
+      messageEl.classList.remove('monospace');
+    }
 
     const titleDiv = this.shadowRoot.getElementById('modal-title');
     if (title) {

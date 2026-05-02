@@ -79,7 +79,7 @@ class ImageCarousel extends HTMLElement {
 
         let src = null;
         // Check if the image is a RecipeImage object or a Firebase path string
-        if (typeof image === 'object' && image !== null && image.full) {
+        if (typeof image === 'object' && image !== null && (image.full || image.preview)) {
           try {
             src = await getOptimizedImageUrl(image, '1080x1080');
           } catch (error) {

@@ -1,5 +1,8 @@
 import { generateImageId } from '../../js/utils/recipes/recipe-image-utils.js';
 import { uploadZoneStyles } from '../../styles/components/upload-zone-styles.js';
+import authService from '../../js/services/auth-service.js';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import './image-editor.js';
 
 class ImageHandler extends HTMLElement {
   constructor() {
@@ -11,15 +14,22 @@ class ImageHandler extends HTMLElement {
     this.maxImages = 5;
     this.draggedImage = null;
     this.removedImages = [];
+    this.canEnhance = false;
   }
 
   static get observedAttributes() {
     return ['hide-upload'];
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     this.render();
     this.setupEventListeners();
+
+    // Check if user can use AI enhancement
+    this.canEnhance = await authService.isApproved();
+    if (this.canEnhance) {
+      this.updatePreviewContainer(); // Re-render to show enhance buttons
+    }
 
     this.boundDocumentClickHandler = this.handleDocumentClick.bind(this);
     document.addEventListener('click', this.boundDocumentClickHandler);
@@ -184,6 +194,29 @@ class ImageHandler extends HTMLElement {
           background: rgba(255,255,255,0.25);
         }
 
+        .control-button.edit-button, .control-button.enhance-button {
+          background: rgba(255,255,255,0.15);
+          color: #fff;
+          border-color: rgba(255,255,255,0.5);
+        }
+
+        .control-button.edit-button:hover, .control-button.enhance-button:hover {
+          background: rgba(255,255,255,0.25);
+        }
+
+        .image-preview.enhancing::after {
+          content: '...משפר';
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          z-index: 5;
+        }
+
         .progress-bar {
           position: absolute;
           bottom: 0; left: 0; right: 0;
@@ -277,6 +310,7 @@ class ImageHandler extends HTMLElement {
         <input type="file" class="file-input" accept="image/jpeg,image/png,image/webp" multiple>
         <div class="error-message"></div>
         <div class="preview-container"></div>
+        <image-editor id="image-editor"></image-editor>
       </div>
     `;
   }
@@ -403,6 +437,13 @@ class ImageHandler extends HTMLElement {
 
       // Perform the reorder
       this.reorderImages(fromIndex, toIndex);
+    });
+
+    // Image editor events
+    const imageEditor = this.shadowRoot.getElementById('image-editor');
+    imageEditor.addEventListener('image-saved', (e) => {
+      const { imageId, file, preview } = e.detail;
+      this.updateImageData(imageId, { file, preview });
     });
   }
 
@@ -569,11 +610,12 @@ class ImageHandler extends HTMLElement {
 
   updatePreviewContainer() {
     const container = this.shadowRoot.querySelector('.preview-container');
+    if (!container) return;
     container.innerHTML = '';
 
     this.images.forEach((image, index) => {
       const preview = document.createElement('div');
-      preview.className = `image-preview${image.isPrimary ? ' primary' : ''}`;
+      preview.className = `image-preview${image.isPrimary ? ' primary' : ''}${image.isEnhancing ? ' enhancing' : ''}`;
       preview.draggable = true;
       preview.setAttribute('data-id', image.id);
 
@@ -584,6 +626,8 @@ class ImageHandler extends HTMLElement {
           <div class="progress-bar__fill"></div>
         </div>
         <div class="image-controls">
+          <button class="control-button edit-button">ערוך</button>
+          ${this.canEnhance ? '<button class="control-button enhance-button">שפר (AI)</button>' : ''}
           <button class="control-button remove-button">הסר</button>
           ${!image.isPrimary ? `<button class="control-button primary-button">הגדר כראשית</button>` : ''}
         </div>
@@ -592,6 +636,8 @@ class ImageHandler extends HTMLElement {
       const controls = preview.querySelector('.image-controls');
       const removeButton = preview.querySelector('.remove-button');
       const primaryButton = preview.querySelector('.primary-button');
+      const editButton = preview.querySelector('.edit-button');
+      const enhanceButton = preview.querySelector('.enhance-button');
 
       // Toggle overlay visibility on click (for mobile)
       preview.addEventListener('click', (e) => {
@@ -625,9 +671,102 @@ class ImageHandler extends HTMLElement {
         });
       }
 
+      if (editButton) {
+        editButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.handleEditImage(image.id);
+        });
+      }
+
+      if (enhanceButton) {
+        enhanceButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.handleEnhanceImage(image.id);
+        });
+      }
+
       container.appendChild(preview);
     });
     this.updateSelectedFiles();
+  }
+
+  handleEditImage(imageId) {
+    const image = this.images.find((img) => img.id === imageId);
+    if (image) {
+      const editor = this.shadowRoot.getElementById('image-editor');
+      editor.open(image);
+    }
+  }
+
+  async handleEnhanceImage(imageId) {
+    const image = this.images.find((img) => img.id === imageId);
+    if (!image || image.isEnhancing) return;
+
+    try {
+      this.updateImageData(imageId, { isEnhancing: true });
+
+      const functions = getFunctions();
+      const enhanceRecipeImage = httpsCallable(functions, 'enhanceRecipeImage');
+
+      // Convert preview (data URL) to base64 if needed, or use the file
+      let base64;
+      let mimeType = 'image/jpeg';
+
+      if (image.file) {
+        const reader = new FileReader();
+        base64 = await new Promise((resolve) => {
+          reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+          reader.readAsDataURL(image.file);
+        });
+        mimeType = image.file.type;
+      } else {
+        base64 = image.preview.split(',')[1];
+      }
+
+      const result = await enhanceRecipeImage({ image: base64, mimeType });
+      const enhancedBase64 = result.data.enhancedImage;
+
+      // Create new blob from enhanced base64
+      const byteCharacters = atob(enhancedBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+      const enhancedPreview = URL.createObjectURL(blob);
+      const originalFile = image.file;
+      const fileName = originalFile ? `enhanced-${originalFile.name}` : `enhanced-${imageId}.jpg`;
+      const enhancedFile = new File([blob], fileName, { type: 'image/jpeg' });
+
+      this.updateImageData(imageId, {
+        file: enhancedFile,
+        preview: enhancedPreview,
+        isEnhancing: false
+      });
+    } catch (error) {
+      console.error('Enhancement failed:', error);
+      this.updateImageData(imageId, { isEnhancing: false });
+      this.showError('שגיאה בשיפור התמונה: ' + (error.message || 'שגיאה לא ידועה'));
+    }
+  }
+
+  updateImageData(imageId, newData) {
+    const index = this.images.findIndex((img) => img.id === imageId);
+    if (index !== -1) {
+      this.images[index] = { ...this.images[index], ...newData };
+      this.updatePreviewContainer();
+      this.updateSelectedFiles();
+
+      this.dispatchEvent(
+        new CustomEvent('images-changed', {
+          detail: { images: this.images },
+          bubbles: true,
+          composed: true,
+        }),
+      );
+    }
   }
 
   updateUploadAreaState() {

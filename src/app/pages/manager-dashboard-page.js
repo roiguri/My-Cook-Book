@@ -708,10 +708,21 @@ export default {
     const detailsBtn = this._outlinePillBtn('פרטים נוספים');
     detailsBtn.addEventListener('click', () => this.showFullError(item));
 
+    const copyBtn = this._outlinePillBtn('העתק');
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(item.error, null, 2));
+        this.showSuccess('השגיאה הועתקה ללוח');
+      } catch (err) {
+        this.handleError(new Error('כשל בהעתקה ללוח'));
+      }
+    });
+
     const deleteBtn = this._dangerPillBtn('מחק');
     deleteBtn.addEventListener('click', () => this.deleteFailedUrl(item.id));
 
     actions.appendChild(detailsBtn);
+    actions.appendChild(copyBtn);
     actions.appendChild(deleteBtn);
     content.appendChild(errorMsg);
     content.appendChild(actions);
@@ -770,7 +781,20 @@ export default {
   showFullError(item) {
     const errorText = JSON.stringify(item.error, null, 2);
     const modal = document.getElementById('success-message-modal');
-    modal.show(errorText, 'פרטי שגיאה מלאים');
+    modal.show(
+      errorText,
+      'פרטי שגיאה מלאים',
+      'העתק שגיאה',
+      async () => {
+        try {
+          await navigator.clipboard.writeText(errorText);
+          this.showSuccess('השגיאה הועתקה ללוח');
+        } catch (err) {
+          this.handleError(new Error('כשל בהעתקה ללוח'));
+        }
+      },
+      { monospace: true },
+    );
   },
 
   async deleteFailedUrl(id) {

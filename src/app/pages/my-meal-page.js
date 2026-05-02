@@ -338,9 +338,8 @@ export default {
     const closeBtn = this.container.querySelector('#close-drawer-btn');
     const viewAllBtn = this.container.querySelector('#view-all-ingredients');
     const viewRecipeBtn = this.container.querySelector('#view-recipe-ingredients');
-
-    const selectAllBtn = this.container.querySelector('#select-all-btn');
-    const deselectAllBtn = this.container.querySelector('#deselect-all-btn');
+    const selectAllBtn = this.container.querySelector('#select-all-ingredients-btn');
+    const deselectAllBtn = this.container.querySelector('#deselect-all-ingredients-btn');
 
     const copyBtn = this.container.querySelector('#copy-ingredients-btn');
     const shareBtn = this.container.querySelector('#share-ingredients-btn');
@@ -473,12 +472,61 @@ export default {
       this.renderIngredientsList();
     });
 
-    selectAllBtn.addEventListener('click', () => this.handleBulkIngredientSelection(true));
-    deselectAllBtn.addEventListener('click', () => this.handleBulkIngredientSelection(false));
+    selectAllBtn.addEventListener('click', () => this.handleGlobalIngredientSelection(true));
+    deselectAllBtn.addEventListener('click', () => this.handleGlobalIngredientSelection(false));
   },
 
-  async handleBulkIngredientSelection(shouldSelect) {
-    const keys = this.getCurrentViewIngredientKeys();
+  async handleGlobalIngredientSelection(shouldSelect) {
+    const allRecipeIds = this.state.meal?.recipeIds || [];
+    const keys = [];
+    allRecipeIds.forEach((id) => {
+      const recipe = this.state.recipes[id];
+      if (!recipe) return;
+      if (recipe.ingredientSections) {
+        recipe.ingredientSections.forEach((section, sIndex) => {
+          section.items.forEach((_, iIndex) => {
+            keys.push({ recipeId: id, key: `${id}-${sIndex}-${iIndex}` });
+          });
+        });
+      } else if (recipe.ingredients) {
+        recipe.ingredients.forEach((_, iIndex) => {
+          keys.push({ recipeId: id, key: `${id}-0-${iIndex}` });
+        });
+      }
+    });
+
+    const recipesToUpdate = new Set();
+    let hasChanges = false;
+    keys.forEach(({ recipeId, key }) => {
+      const isUnselected = this.state.unselectedIngredients.has(key);
+      if (shouldSelect && isUnselected) {
+        this.state.unselectedIngredients.delete(key);
+        hasChanges = true;
+        recipesToUpdate.add(recipeId);
+      } else if (!shouldSelect && !isUnselected) {
+        this.state.unselectedIngredients.add(key);
+        hasChanges = true;
+        recipesToUpdate.add(recipeId);
+      }
+    });
+
+    if (hasChanges) {
+      const { ActiveMealUtils } = await import('../../js/utils/active-meal-utils.js');
+      const promises = Array.from(recipesToUpdate).map((recipeId) => {
+        const unselectedArr = Array.from(this.state.unselectedIngredients).filter((k) =>
+          k.startsWith(`${recipeId}-`),
+        );
+        return ActiveMealUtils.updateRecipeState(this.currentUser.uid, recipeId, {
+          unselectedIngredients: unselectedArr,
+        });
+      });
+      await Promise.all(promises);
+      this.renderIngredientsList();
+    }
+  },
+
+  async handleBulkIngredientSelection(shouldSelect, recipeId) {
+    const keys = this.getCurrentViewIngredientKeys(recipeId);
     const recipesToUpdate = new Set();
     let hasChanges = false;
 
@@ -526,10 +574,22 @@ export default {
     return false;
   },
 
-  getCurrentViewIngredientKeys() {
+  _areAllItemsSelected(recipeId) {
+    const keys = this.getCurrentViewIngredientKeys(recipeId);
+    if (keys.length === 0) return false;
+    return keys.every(({ key }) => !this.state.unselectedIngredients.has(key));
+  },
+
+  _areSomeItemsSelected(recipeId) {
+    const keys = this.getCurrentViewIngredientKeys(recipeId);
+    return keys.some(({ key }) => !this.state.unselectedIngredients.has(key));
+  },
+
+  getCurrentViewIngredientKeys(targetRecipeId) {
     const keys = [];
-    const recipeIds =
-      this.state.ingredientsView === 'current'
+    const recipeIds = targetRecipeId
+      ? [targetRecipeId]
+      : this.state.ingredientsView === 'current'
         ? this.state.activeTabId
           ? [this.state.activeTabId]
           : []
@@ -620,9 +680,36 @@ export default {
         const recipe = this.state.recipes[id];
         if (!recipe) return;
 
+        const headerContainer = document.createElement('div');
+        headerContainer.className = 'recipe-section-header';
+
+        const allSelected = this._areAllItemsSelected(id);
+        const someSelected = this._areSomeItemsSelected(id);
+
+        const label = document.createElement('label');
+        label.className = 'recipe-checkbox-label';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'ingredient-checkbox';
+        checkbox.checked = allSelected;
+        checkbox.indeterminate = someSelected && !allSelected;
+        checkbox.addEventListener('change', () =>
+          this.handleBulkIngredientSelection(!allSelected, id),
+        );
+
+        const box = document.createElement('span');
+        box.className = 'check-box';
+
         const recipeHeader = document.createElement('h3');
         recipeHeader.textContent = recipe.name;
-        listContainer.appendChild(recipeHeader);
+
+        label.appendChild(checkbox);
+        label.appendChild(box);
+        label.appendChild(recipeHeader);
+
+        headerContainer.appendChild(label);
+        listContainer.appendChild(headerContainer);
 
         const ul = document.createElement('ul');
         const state = this.state.meal.recipeStates?.[id];

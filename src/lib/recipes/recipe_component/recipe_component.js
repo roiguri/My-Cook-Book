@@ -68,7 +68,9 @@ class RecipeComponent extends HTMLElement {
   connectedCallback() {
     this.render();
     this.recipeId = this.getAttribute('recipe-id');
-    this.fetchAndPopulateRecipeData();
+    if (this.recipeId) {
+      this.fetchAndPopulateRecipeData();
+    }
   }
 
   disconnectedCallback() {
@@ -166,6 +168,11 @@ class RecipeComponent extends HTMLElement {
 
   styles() {
     return `
+    :host {
+      display: block;
+      width: 100%;
+    }
+
     .Recipe_component {
       display: flex;
       flex-direction: column;
@@ -842,24 +849,42 @@ class RecipeComponent extends HTMLElement {
     }
   }
 
+  /**
+   * Public API: Directly set recipe data to display (e.g., for preview mode)
+   * @param {Object} recipe - Formatted recipe data object
+   */
+  async setData(recipe) {
+    if (!recipe) return;
+
+    try {
+      this.populateRecipeDetails(recipe);
+      await this.setRecipeImage(recipe);
+      this.populateIngredientsList(recipe);
+      this.populateInstructions(recipe);
+      this.populateCommentList(recipe);
+      this.populateRelatedRecipes(recipe).catch((err) => {
+        console.error('Error loading related recipes:', err);
+      });
+      this.setupServingsAdjuster(recipe);
+      this.displayMediaInstructions(recipe).catch((err) => {
+        console.error('Error loading media instructions:', err);
+      });
+      this._originalIngredients = recipe.ingredientSections || recipe.ingredients;
+    } catch (error) {
+      console.error('Error setting recipe data:', error);
+    } finally {
+      this.dispatchEvent(new CustomEvent('recipe-data-loaded', { bubbles: false, composed: true }));
+    }
+  }
+
   async fetchAndPopulateRecipeData() {
+    if (!this.recipeId) return;
+
     try {
       const recipe = await getRecipeById(this.recipeId);
       if (recipe) {
         this.updatePageTitle(recipe.name);
-        this.populateRecipeDetails(recipe);
-        await this.setRecipeImage(recipe);
-        this.populateIngredientsList(recipe);
-        this.populateInstructions(recipe);
-        this.populateCommentList(recipe);
-        this.populateRelatedRecipes(recipe).catch((err) => {
-          console.error('Error loading related recipes:', err);
-        });
-        this.setupServingsAdjuster(recipe);
-        this.displayMediaInstructions(recipe).catch((err) => {
-          console.error('Error loading media instructions:', err);
-        });
-        this._originalIngredients = recipe.ingredients;
+        await this.setData(recipe);
       } else {
         console.warn('No such document!');
         // TODO: Handle the case where the recipe doesn't exist

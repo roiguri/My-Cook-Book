@@ -509,6 +509,36 @@ fieldset {
     width: 100%;
     justify-content: center;
   }
+
+  /* ---- Ingredient row: two-line layout ---- */
+  .recipe-form__ingredient-entry {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .recipe-form__input--quantity {
+    width: 55px;
+    order: 1;
+  }
+
+  .recipe-form__input--unit {
+    width: 80px;
+    order: 2;
+  }
+
+  .recipe-form__ingredient-entry .recipe-form__button--remove-ingredient {
+    order: 3;
+    margin-inline-start: auto;
+  }
+
+  .recipe-form__ingredient-entry .recipe-form__button--add-ingredient {
+    order: 4;
+  }
+
+  .recipe-form__input--item {
+    order: 5;
+    flex: 0 0 100%;
+  }
 }
 
 /* ============ ACCESSIBILITY ============ */
