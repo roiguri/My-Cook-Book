@@ -77,8 +77,17 @@ class ProposeRecipeComponent extends HTMLElement {
         }
       });
 
-      // Add recipe to Firestore
-      const recipeId = await FirestoreService.addDocument('recipes', recipeDataForFirestore);
+      // Add recipe to Firestore — race against a timeout because Firestore buffers writes
+      // when offline instead of rejecting, which would leave the spinner frozen forever
+      const recipeId = await Promise.race([
+        FirestoreService.addDocument('recipes', recipeDataForFirestore),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error('אין חיבור לאינטרנט. אנא בדוק את החיבור ונסה שוב.')),
+            15000,
+          ),
+        ),
+      ]);
 
       // Upload images if provided
       if (imagesToUpload.length > 0) {
