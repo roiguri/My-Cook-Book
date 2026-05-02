@@ -312,17 +312,29 @@
 }
 
 /* Recipe name header — eyebrow style */
+.spa-content .my-meal-page .recipe-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0 8px;
+  direction: rtl;
+}
+
 .spa-content .my-meal-page .ingredients-list-container h3 {
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--primary-dark);
-  margin: 16px 0 8px;
+  margin: 0;
   padding-bottom: 0;
   border: none;
   text-align: right;
   font-weight: 400;
+}
+
+.spa-content .my-meal-page .recipe-section-header .selection-controls {
+  margin-top: 0;
 }
 
 .spa-content .my-meal-page .ingredients-list-container li {

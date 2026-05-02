@@ -477,8 +477,8 @@ export default {
     deselectAllBtn.addEventListener('click', () => this.handleBulkIngredientSelection(false));
   },
 
-  async handleBulkIngredientSelection(shouldSelect) {
-    const keys = this.getCurrentViewIngredientKeys();
+  async handleBulkIngredientSelection(shouldSelect, recipeId) {
+    const keys = this.getCurrentViewIngredientKeys(recipeId);
     const recipesToUpdate = new Set();
     let hasChanges = false;
 
@@ -526,10 +526,11 @@ export default {
     return false;
   },
 
-  getCurrentViewIngredientKeys() {
+  getCurrentViewIngredientKeys(targetRecipeId) {
     const keys = [];
-    const recipeIds =
-      this.state.ingredientsView === 'current'
+    const recipeIds = targetRecipeId
+      ? [targetRecipeId]
+      : this.state.ingredientsView === 'current'
         ? this.state.activeTabId
           ? [this.state.activeTabId]
           : []
@@ -620,9 +621,36 @@ export default {
         const recipe = this.state.recipes[id];
         if (!recipe) return;
 
+        const headerContainer = document.createElement('div');
+        headerContainer.className = 'recipe-section-header';
+
         const recipeHeader = document.createElement('h3');
         recipeHeader.textContent = recipe.name;
-        listContainer.appendChild(recipeHeader);
+        headerContainer.appendChild(recipeHeader);
+
+        const controls = document.createElement('div');
+        controls.className = 'selection-controls';
+
+        const selectBtn = document.createElement('button');
+        selectBtn.className = 'text-btn';
+        selectBtn.textContent = 'בחר הכל';
+        selectBtn.onclick = () => this.handleBulkIngredientSelection(true, id);
+
+        const separator = document.createElement('span');
+        separator.className = 'separator';
+        separator.textContent = '·';
+
+        const deselectBtn = document.createElement('button');
+        deselectBtn.className = 'text-btn';
+        deselectBtn.textContent = 'בטל בחירה';
+        deselectBtn.onclick = () => this.handleBulkIngredientSelection(false, id);
+
+        controls.appendChild(selectBtn);
+        controls.appendChild(separator);
+        controls.appendChild(deselectBtn);
+
+        headerContainer.appendChild(controls);
+        listContainer.appendChild(headerContainer);
 
         const ul = document.createElement('ul');
         const state = this.state.meal.recipeStates?.[id];
