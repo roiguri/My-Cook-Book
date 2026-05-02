@@ -18,10 +18,10 @@ import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { Timestamp } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
-import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
+import { logError } from '../../../js/utils/error-handler.js';
+import { showToast } from '../../notifications/toast-notification/toast-notification.js';
 
 import './recipe_form_component.js';
-import '../../modals/message-modal/message-modal.js';
 import '../../utilities/loading-spinner/loading-spinner.js';
 
 class ProposeRecipeComponent extends HTMLElement {
@@ -48,7 +48,6 @@ class ProposeRecipeComponent extends HTMLElement {
       <loading-spinner overlay>
         <div class="propose-recipe-container">
           <recipe-form-component hide-actions></recipe-form-component>
-          <message-modal></message-modal>
         </div>
       </loading-spinner>
       `;
@@ -128,14 +127,16 @@ class ProposeRecipeComponent extends HTMLElement {
       this.clearForm();
 
       if (hasPartialFailure) {
-        this.showWarningMessage(
-          `Recipe proposed successfully!\n\n` +
-            `${successCount} media file(s) were uploaded successfully.\n` +
-            `${failedCount} media file(s) failed to upload.\n\n` +
-            `You can view your recipe in the Manager Dashboard and edit it to retry uploading the failed media files.`,
+        showToast(
+          `המתכון נשלח בהצלחה!\n\n` +
+            `${successCount} קבצי מדיה הועלו בהצלחה.\n` +
+            `${failedCount} קבצי מדיה נכשלו.\n\n` +
+            `ניתן לראות את המתכון בלוח הבקרה ולערוך אותו כדי לנסות שוב.`,
+          'warn',
+          0,
         );
       } else {
-        this.showSuccessMessage('Recipe proposed successfully!');
+        this.showSuccessMessage();
       }
       spinner.removeAttribute('active');
       this.dispatchEvent(
@@ -167,14 +168,12 @@ class ProposeRecipeComponent extends HTMLElement {
   }
 
   showSuccessMessage() {
-    const proposeRecipeModal = this.shadowRoot.querySelector('message-modal');
-    proposeRecipeModal.show('המתכון נשלח בהצלחה!', '', 'Close');
+    showToast('המתכון נשלח בהצלחה!', 'success');
   }
 
   showErrorMessage(error) {
-    const proposeRecipeModal = this.shadowRoot.querySelector('message-modal');
     logError(error, 'Recipe proposal');
-    showErrorModal(proposeRecipeModal, error);
+    showToast(error.message || 'אירעה שגיאה. אנא נסה שוב.', 'error', 5000);
   }
 
   clearForm() {
