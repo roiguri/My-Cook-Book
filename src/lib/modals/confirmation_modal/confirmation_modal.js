@@ -144,6 +144,36 @@ class ConfirmationModal extends Modal {
     `;
   }
 
+  setupEventListeners() {
+    super.setupEventListeners();
+
+    const approveButton = this.shadowRoot.getElementById('modal-approve-button');
+    const rejectButton = this.shadowRoot.getElementById('modal-reject-button');
+
+    approveButton.addEventListener('click', () => {
+      const resolve = this._resolveConfirm;
+      this._resolveConfirm = null;
+      this.close();
+      this.dispatchEvent(new CustomEvent('confirm-approved'));
+      if (resolve) resolve(true);
+    });
+
+    rejectButton.addEventListener('click', () => {
+      const resolve = this._resolveConfirm;
+      this._resolveConfirm = null;
+      this.close();
+      this.dispatchEvent(new CustomEvent('confirm-rejected'));
+      if (resolve) resolve(false);
+    });
+
+    this.addEventListener('modal-closed', () => {
+      if (this._resolveConfirm) {
+        this._resolveConfirm(false);
+        this._resolveConfirm = null;
+      }
+    });
+  }
+
   confirm(
     message = 'האם אתה בטוח?',
     title = '',
@@ -163,20 +193,11 @@ class ConfirmationModal extends Modal {
     this.shadowRoot.getElementById('modal-approve-button').textContent = approveButtonText;
     this.shadowRoot.getElementById('modal-reject-button').textContent = rejectButtonText;
 
-    const approveButton = this.shadowRoot.getElementById('modal-approve-button');
-    const rejectButton = this.shadowRoot.getElementById('modal-reject-button');
-
-    approveButton.addEventListener('click', () => {
-      this.close();
-      this.dispatchEvent(new CustomEvent('confirm-approved'));
-    });
-
-    rejectButton.addEventListener('click', () => {
-      this.close();
-      this.dispatchEvent(new CustomEvent('confirm-rejected'));
-    });
-
     this.open();
+
+    return new Promise((resolve) => {
+      this._resolveConfirm = resolve;
+    });
   }
 }
 

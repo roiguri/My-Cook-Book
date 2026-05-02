@@ -12,6 +12,7 @@ import { onSnapshot, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getFirestoreInstance } from '../../js/services/firebase-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
 import { icons } from '../../js/icons.js';
+import '../../lib/modals/confirmation_modal/confirmation_modal.js';
 import '../../styles/pages/my-meal-page.css';
 
 export default {
@@ -212,7 +213,10 @@ export default {
 
   async handleRemoveRecipe(e, recipeId, ActiveMealUtils) {
     e.stopPropagation();
-    if (!confirm('האם להסיר את המתכון מהארוחה?')) return;
+    const confirmed = await this.container
+      .querySelector('#confirmation-modal')
+      .confirm('האם להסיר את המתכון מהארוחה?');
+    if (!confirmed) return;
 
     // Detect if we need to switch tabs
     if (this.state.activeTabId === recipeId) {
@@ -238,7 +242,10 @@ export default {
   },
 
   async handleClearMeal(ActiveMealUtils) {
-    if (!confirm('האם לנקות את כל הארוחה? פעולה זו תסיר את כל המתכונים.')) return;
+    const confirmed = await this.container
+      .querySelector('#confirmation-modal')
+      .confirm('האם לנקות את כל הארוחה? פעולה זו תסיר את כל המתכונים.');
+    if (!confirmed) return;
 
     await ActiveMealUtils.clearMeal(this.currentUser.uid);
     // UI update will happen automatically via onSnapshot
