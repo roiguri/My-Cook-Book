@@ -118,7 +118,7 @@
   display: inline-flex;
   align-items: center;
   height: 38px;
-  padding: 0 14px 0 32px; /* extra left space for chevron (LTR) */
+  padding: 0 32px 0 14px; /* extra space for chevron (right in LTR, left in RTL) */
   font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 500;
@@ -134,7 +134,7 @@
   box-sizing: border-box;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%237c7562' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: left 10px center; /* LTR: chevron on right; override for RTL below */
+  background-position: right 10px center;
   background-size: 16px;
   transition:
     border-color var(--dur-1) var(--ease),
@@ -143,9 +143,10 @@
 
 /* RTL: flip padding + chevron to the left */
 [dir='rtl'] .select-ctrl,
+.select-ctrl[dir='rtl'],
 .select-ctrl:dir(rtl) {
-  padding: 0 32px 0 14px;
-  background-position: right 10px center;
+  padding: 0 14px 0 32px;
+  background-position: left 10px center;
 }
 
 .select-ctrl:hover {

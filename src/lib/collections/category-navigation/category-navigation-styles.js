@@ -57,11 +57,15 @@ export const styles = `
   }
 
   /* RTL support */
+  :host([dir="rtl"]) {
+    direction: rtl;
+  }
+
   :host([dir="rtl"]) .category-tabs {
     direction: rtl;
   }
 
-  :host([dir="rtl"]) .select-ctrl {
+  :host([dir="rtl"]) .category-dropdown {
     direction: rtl;
   }
 `;
