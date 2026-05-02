@@ -1,5 +1,7 @@
 import authService from '../../js/services/auth-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
+import { icons } from '../../js/icons.js';
+import { collectRecipeFormData } from '../../js/utils/form/form-data-collector.js';
 import '../../styles/pages/propose-recipe-spa.css';
 
 export default {
@@ -18,11 +20,13 @@ export default {
 
   async mount(container, params) {
     try {
+      this.isPreviewMode = false;
       await this.importComponents();
 
       await this.setupAuthentication(container);
 
       this.setupEventListeners();
+      this.updatePreviewButton();
     } catch (error) {
       console.error('Error mounting propose recipe page:', error);
       this.handleError(error, 'mount');
@@ -55,6 +59,7 @@ export default {
     try {
       await Promise.all([
         import('../../lib/recipes/recipe_form_component/propose_recipe_component.js'),
+        import('../../lib/recipes/recipe_component/recipe_component.js'),
         import('../../lib/modals/message-modal/message-modal.js'),
       ]);
     } catch (error) {
@@ -137,6 +142,7 @@ export default {
     const submitBtn = document.querySelector('#action-submit');
     const clearBtn = document.querySelector('#action-clear');
     const importBtn = document.querySelector('#action-import');
+    const previewBtn = document.querySelector('#action-preview');
 
     if (submitBtn) {
       this.actionSubmitHandler = () => {
@@ -157,6 +163,13 @@ export default {
         if (this.proposeRecipeForm) this.proposeRecipeForm.openImportModal();
       };
       importBtn.addEventListener('click', this.actionImportHandler);
+    }
+
+    if (previewBtn) {
+      this.actionPreviewHandler = () => {
+        this.togglePreviewMode();
+      };
+      previewBtn.addEventListener('click', this.actionPreviewHandler);
     }
 
     if (this.loginPromptModal) {
@@ -180,12 +193,15 @@ export default {
     const submitBtn = document.querySelector('#action-submit');
     const clearBtn = document.querySelector('#action-clear');
     const importBtn = document.querySelector('#action-import');
+    const previewBtn = document.querySelector('#action-preview');
     if (submitBtn && this.actionSubmitHandler)
       submitBtn.removeEventListener('click', this.actionSubmitHandler);
     if (clearBtn && this.actionClearHandler)
       clearBtn.removeEventListener('click', this.actionClearHandler);
     if (importBtn && this.actionImportHandler)
       importBtn.removeEventListener('click', this.actionImportHandler);
+    if (previewBtn && this.actionPreviewHandler)
+      previewBtn.removeEventListener('click', this.actionPreviewHandler);
 
     if (this.loginPromptModal && this.modalClosedHandler) {
       this.loginPromptModal.removeEventListener('modal-closed-by-user', this.modalClosedHandler);
@@ -197,6 +213,70 @@ export default {
     if (this.authStateUnsubscribe) {
       this.authStateUnsubscribe();
       this.authStateUnsubscribe = null;
+    }
+  },
+
+  togglePreviewMode() {
+    this.isPreviewMode = !this.isPreviewMode;
+
+    const formSection = document.querySelector('#propose-form-section');
+    const previewSection = document.querySelector('#propose-preview-section');
+    const previewComponent = document.querySelector('#recipe-preview');
+    const submitBtn = document.querySelector('#action-submit');
+    const clearBtn = document.querySelector('#action-clear');
+    const importBtn = document.querySelector('#action-import');
+    const heroTitle = document.querySelector('.propose-hero__title');
+    const heroDek = document.querySelector('.propose-hero__dek');
+
+    if (this.isPreviewMode) {
+      // Switching to Preview mode
+      const formComponent =
+        this.proposeRecipeForm.shadowRoot.querySelector('recipe-form-component');
+      const recipeData = collectRecipeFormData(formComponent.shadowRoot);
+
+      if (previewComponent) {
+        previewComponent.setData(recipeData);
+      }
+
+      formSection.style.display = 'none';
+      previewSection.style.display = 'block';
+
+      if (submitBtn) submitBtn.disabled = true;
+      if (clearBtn) clearBtn.disabled = true;
+      if (importBtn) importBtn.disabled = true;
+
+      if (heroTitle) heroTitle.innerHTML = 'כך ייראה <em>המתכון שלך</em>';
+      if (heroDek) heroDek.textContent = 'כפי שיופיע לאחר הפרסום';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // Switching back to Edit mode
+      formSection.style.display = 'block';
+      previewSection.style.display = 'none';
+
+      if (submitBtn) submitBtn.disabled = false;
+      if (clearBtn) clearBtn.disabled = false;
+      if (importBtn) importBtn.disabled = false;
+
+      if (heroTitle) heroTitle.innerHTML = 'הצע <em>מתכון</em> לספר.';
+      if (heroDek) heroDek.textContent = 'כתוב אותו כפי שהיית מספר אותו לחבר.';
+    }
+
+    this.updatePreviewButton();
+  },
+
+  updatePreviewButton() {
+    const iconContainer = document.querySelector('#preview-icon');
+    const labelContainer = document.querySelector('#preview-label');
+
+    if (iconContainer && labelContainer) {
+      if (this.isPreviewMode) {
+        iconContainer.innerHTML = icons.pencilAlt;
+        labelContainer.textContent = 'חזור לעריכה';
+      } else {
+        iconContainer.innerHTML = icons.eye;
+        labelContainer.textContent = 'תצוגה מקדימה';
+      }
     }
   },
 
