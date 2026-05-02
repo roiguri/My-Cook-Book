@@ -270,13 +270,6 @@ export async function deleteMediaInstructionFiles(filePaths) {
  * @returns {Promise<string>} The download URL
  */
 export async function getMediaInstructionUrl(storagePath) {
-  if (!storagePath) return '';
-
-  // If it's already a URL (blob or data), return it directly
-  if (storagePath.startsWith('blob:') || storagePath.startsWith('data:')) {
-    return storagePath;
-  }
-
   try {
     return await StorageService.getFileUrl(storagePath);
   } catch (error) {

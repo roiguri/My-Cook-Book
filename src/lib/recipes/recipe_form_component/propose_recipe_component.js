@@ -23,6 +23,7 @@ import { showErrorModal, logError } from '../../../js/utils/error-handler.js';
 import './recipe_form_component.js';
 import '../../modals/message-modal/message-modal.js';
 import '../../utilities/loading-spinner/loading-spinner.js';
+import { showToast } from '../../notifications/toast-notification/toast-notification.js';
 
 class ProposeRecipeComponent extends HTMLElement {
   constructor() {
@@ -167,8 +168,7 @@ class ProposeRecipeComponent extends HTMLElement {
   }
 
   showSuccessMessage() {
-    const proposeRecipeModal = this.shadowRoot.querySelector('message-modal');
-    proposeRecipeModal.show('המתכון נשלח בהצלחה!', '', 'Close');
+    showToast('המתכון נשלח בהצלחה!', 'success');
   }
 
   showErrorMessage(error) {
