@@ -79,7 +79,6 @@ export function validateImageFile(file) {
 
 // --- Storage Path Helpers ---
 export function getImageStoragePath(recipeId, category, fileName, type = 'full') {
-  // type: 'full' | 'compressed'
   const base = `img/recipes/${type}/${category}/${recipeId}`;
   return `${base}/${fileName}`;
 }
@@ -184,21 +183,11 @@ export async function getOptimizedImageUrl(image, size = '400x400') {
   try {
     return await StorageService.getFileUrl(optimizedPath);
   } catch (error) {
-    // 2. Fallback to Legacy Compressed (if it exists in old docs)
-    // TODO: Remove after migration period — https://github.com/roiguri/My-Cook-Book/issues/142
-    if (image.compressed) {
-      try {
-        return await StorageService.getFileUrl(image.compressed);
-      } catch (innerError) {
-        // Fall through
-      }
-    }
-
-    // 3. Fallback to Full Original (Latency or Legacy)
+    // 2. Fallback to Full Original (Latency or Legacy)
     try {
       return await StorageService.getFileUrl(image.full);
     } catch (finalError) {
-      // 4. Ultimate Fallback
+      // 3. Ultimate Fallback
       return getPlaceholderImageUrl();
     }
   }

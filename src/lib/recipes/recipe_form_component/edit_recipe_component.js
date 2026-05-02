@@ -205,32 +205,6 @@ class EditRecipeComponent extends HTMLElement {
     await FirestoreService.updateDocument('recipes', recipeId, recipeDataWithoutImage);
   }
 
-  async uploadImage(imageFile, category, imageName, oldImageName = null) {
-    // Remove old image if it exists and has changed
-    if (oldImageName && oldImageName !== imageName) {
-      try {
-        const oldFullPath = getImageStoragePath(this.recipeId, category, oldImageName, 'full');
-        const oldCompressedPath = getImageStoragePath(
-          this.recipeId,
-          category,
-          oldImageName,
-          'compressed',
-        );
-        await StorageService.deleteFile(oldFullPath);
-        // Catch deletion of compressed path in case it doesn't exist (legacy)
-        await StorageService.deleteFile(oldCompressedPath).catch(() => {});
-      } catch (error) {
-        console.error('Error removing old images:', error);
-      }
-    }
-    // Upload new image (full only)
-    try {
-      const fullPath = getImageStoragePath(this.recipeId, category, imageName, 'full');
-      await StorageService.uploadFile(imageFile, fullPath);
-    } catch (error) {
-      console.error('Error uploading new image:', error);
-    }
-  }
 
   showSuccessMessage(message) {
     const editRecipeModal = this.shadowRoot.querySelector('message-modal');
