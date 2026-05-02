@@ -5,6 +5,7 @@
   margin: 0 auto;
   padding: 0 var(--gutter, 2rem) var(--sp-2xl, 4rem);
   direction: rtl;
+  flex: 1;
 }
 
 /* ---- Hero / title block ---- */
@@ -57,6 +58,7 @@
   border-top: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
   box-shadow: 0 -4px 24px rgba(31, 29, 24, 0.08);
   padding: 12px var(--gutter, 2rem);
+  margin-top: auto;
 }
 
 .spa-content .propose-action-bar__inner {
