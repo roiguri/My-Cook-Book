@@ -105,11 +105,6 @@ describe('recipe-image-utils', () => {
         'img/recipes/full/cat/id1/file.jpg',
       );
     });
-    it('generates correct path for compressed', () => {
-      expect(getImageStoragePath('id2', 'cat2', 'file2.jpg', 'compressed')).toBe(
-        'img/recipes/compressed/cat2/id2/file2.jpg',
-      );
-    });
   });
 
   describe('deleteImageFiles', () => {
@@ -205,19 +200,7 @@ describe('recipe-image-utils', () => {
       expect(getFileUrlMock).toHaveBeenCalledWith('img/recipes/full/cat/rid/image_400x400.webp');
       expect(result).toBe('webp-url');
     });
-    it('falls back to compressed when WebP is missing', async () => {
-      getFileUrlMock
-        .mockRejectedValueOnce(new Error('not found')) // WebP fails
-        .mockResolvedValueOnce('compressed-url'); // compressed works
-      const image = {
-        id: '1',
-        full: 'img/recipes/full/cat/rid/image.jpg',
-        compressed: 'img/recipes/compressed/cat/rid/image.jpg',
-      };
-      const result = await getOptimizedImageUrl(image, '400x400');
-      expect(result).toBe('compressed-url');
-    });
-    it('falls back to full when WebP and compressed are missing', async () => {
+    it('falls back to full when WebP variant is missing', async () => {
       getFileUrlMock
         .mockRejectedValueOnce(new Error('not found')) // WebP fails
         .mockResolvedValueOnce('full-url'); // full works
