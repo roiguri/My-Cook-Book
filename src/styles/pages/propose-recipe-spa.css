@@ -87,7 +87,14 @@
   cursor: pointer;
   transition:
     background var(--dur-1, 160ms) var(--ease, ease),
-    border-color var(--dur-1, 160ms) var(--ease, ease);
+    border-color var(--dur-1, 160ms) var(--ease, ease),
+    opacity var(--dur-1, 160ms) var(--ease, ease);
+}
+
+.spa-content .propose-action-bar__btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .spa-content .propose-action-bar__btn--submit {
@@ -110,7 +117,14 @@
   background: var(--surface-2, #f2e8cf);
 }
 
-.spa-content .propose-action-bar__btn--import {
+.spa-content .propose-action-bar__toggles {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.spa-content .propose-action-bar__btn--import,
+.spa-content .propose-action-bar__btn--preview {
   background: transparent;
   color: var(--ink-3, #7c7562);
   border: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
@@ -119,10 +133,33 @@
   padding: 10px 18px;
 }
 
-.spa-content .propose-action-bar__btn--import:hover {
+.spa-content .propose-action-bar__btn--import:hover,
+.spa-content .propose-action-bar__btn--preview:hover {
   background: var(--surface-2, #f2e8cf);
   border-color: var(--primary, #6a994e);
   color: var(--primary-dark, #386641);
+}
+
+.spa-content .propose-action-bar__icon svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+}
+
+.spa-content .propose-preview {
+  padding: 24px 0;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ---- Mobile ---- */
