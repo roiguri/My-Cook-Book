@@ -869,18 +869,6 @@ class MediaInstructionsEditor extends HTMLElement {
   }
 
   /**
-   * Gets media instructions data for form collection
-   * Provides consistent method-based API for accessing media state
-   * @returns {Object} { mediaInstructions: Array, pendingFiles: Array }
-   */
-  getMediaInstructionsData() {
-    return {
-      mediaInstructions: this.mediaInstructions,
-      pendingFiles: this.pendingFiles,
-    };
-  }
-
-  /**
    * Clears all media instructions and pending files
    * Used when resetting the form
    */

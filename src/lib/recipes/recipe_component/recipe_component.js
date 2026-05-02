@@ -852,7 +852,6 @@ class RecipeComponent extends HTMLElement {
     if (!recipe) return;
 
     try {
-      this.updatePageTitle(recipe.name);
       this.populateRecipeDetails(recipe);
       await this.setRecipeImage(recipe);
       this.populateIngredientsList(recipe);
@@ -879,6 +878,7 @@ class RecipeComponent extends HTMLElement {
     try {
       const recipe = await getRecipeById(this.recipeId);
       if (recipe) {
+        this.updatePageTitle(recipe.name);
         await this.setData(recipe);
       } else {
         console.warn('No such document!');

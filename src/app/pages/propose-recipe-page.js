@@ -134,9 +134,6 @@ export default {
 
   setupEventListeners() {
     this.recipeProposedHandler = () => {
-      if (this.isPreviewMode) {
-        this.togglePreviewMode();
-      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -231,7 +228,8 @@ export default {
 
     if (this.isPreviewMode) {
       // Switching to Preview mode
-      const formComponent = this.proposeRecipeForm.shadowRoot.querySelector('recipe-form-component');
+      const formComponent =
+        this.proposeRecipeForm.shadowRoot.querySelector('recipe-form-component');
       const recipeData = collectRecipeFormData(formComponent.shadowRoot);
 
       if (previewComponent) {
