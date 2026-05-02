@@ -296,7 +296,6 @@ class RecipeFormComponent extends HTMLElement {
       this.dispatchRecipeData();
 
       if (this.isProtectionEnabled) {
-        formProtectionManager.markAsSaved();
         formProtectionManager.enable();
       }
     } else {
