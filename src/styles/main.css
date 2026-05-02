@@ -18,6 +18,10 @@
 @import 'components/lazy-loading.css';
 
 /* ---- Global resets ---- */
+* {
+  touch-action: manipulation;
+}
+
 html {
   scrollbar-gutter: stable;
 }
