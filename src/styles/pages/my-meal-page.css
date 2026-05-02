@@ -276,7 +276,6 @@
   font-size: 12px;
   cursor: pointer;
   padding: 0;
-  text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color var(--dur-1, 160ms);
 }
@@ -311,30 +310,84 @@
   margin: 0 0 20px;
 }
 
-/* Recipe name header — eyebrow style */
+/* Recipe name header — card block */
 .spa-content .my-meal-page .recipe-section-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin: 16px 0 8px;
+  margin: 12px 0 6px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-radius: var(--r-xs);
   direction: rtl;
 }
 
-.spa-content .my-meal-page .ingredients-list-container h3 {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--primary-dark);
-  margin: 0;
-  padding-bottom: 0;
-  border: none;
-  text-align: right;
-  font-weight: 400;
+.spa-content .my-meal-page .recipe-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
 }
 
-.spa-content .my-meal-page .recipe-section-header .selection-controls {
-  margin-top: 0;
+.spa-content .my-meal-page .recipe-checkbox-label .ingredient-checkbox {
+  display: none;
+}
+
+.spa-content .my-meal-page .recipe-checkbox-label .check-box {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-xs, 6px);
+  border: 2px solid var(--ink-3);
+  background: var(--surface-0);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    background var(--dur-1, 160ms),
+    border-color var(--dur-1, 160ms);
+}
+
+.spa-content .my-meal-page .recipe-checkbox-label .ingredient-checkbox:checked + .check-box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.spa-content .my-meal-page .recipe-checkbox-label .ingredient-checkbox:checked + .check-box::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border-left: 1.5px solid #fff;
+  border-bottom: 1.5px solid #fff;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+/* Indeterminate state */
+.spa-content .my-meal-page .recipe-checkbox-label .ingredient-checkbox:indeterminate + .check-box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.spa-content
+  .my-meal-page
+  .recipe-checkbox-label
+  .ingredient-checkbox:indeterminate
+  + .check-box::after {
+  content: '';
+  width: 9px;
+  height: 2px;
+  background: #fff;
+}
+
+.spa-content .my-meal-page .ingredients-list-container h3 {
+  font-family: var(--font-ui-he);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+  padding: 0;
+  border: none;
+  text-align: right;
 }
 
 .spa-content .my-meal-page .ingredients-list-container li {
