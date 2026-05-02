@@ -175,12 +175,7 @@ export function getPlaceholderImageUrl() {
  * @returns {Promise<string>} Download URL
  */
 export async function getOptimizedImageUrl(image, size = '400x400') {
-  if (!image) return getPlaceholderImageUrl();
-
-  // 0. Use local preview if available (for form preview mode)
-  if (image.preview) return image.preview;
-
-  if (!image.full) return getPlaceholderImageUrl();
+  if (!image || !image.full) return getPlaceholderImageUrl();
 
   // 1. Try Optimized version (New)
   // Extension appends suffix like _400x400.webp

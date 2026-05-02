@@ -140,7 +140,6 @@ function collectImages(shadowRoot) {
       // New image to upload
       return {
         file: img.file,
-        preview: img.preview,
         isPrimary: img.isPrimary ?? false, // Default to false if undefined
         access: 'public',
         uploadedBy: authService.getCurrentUser()?.uid || 'anonymous',
@@ -180,25 +179,25 @@ function collectMediaInstructions(shadowRoot) {
     return null;
   }
 
-  if (typeof mediaEditor.getAllMediaInOrder !== 'function') {
-    console.warn('Media instructions editor missing getAllMediaInOrder method');
+  if (typeof mediaEditor.getMediaInstructionsData !== 'function') {
+    console.warn('Media instructions editor missing getMediaInstructionsData method');
     return null;
   }
 
-  const allMedia = mediaEditor.getAllMediaInOrder();
+  const data = mediaEditor.getMediaInstructionsData();
+  const mediaInstructions = data.mediaInstructions || [];
+  const hasPendingFiles = data.pendingFiles && data.pendingFiles.length > 0;
 
-  if (allMedia.length === 0) {
-    return null;
+  // Return combined state - important for dirty checking
+  // If there are pending files, include them in the structure
+  if (hasPendingFiles) {
+    return [
+      ...mediaInstructions,
+      ...data.pendingFiles.map((p) => ({ pending: true, caption: p.caption })),
+    ];
   }
 
-  return allMedia.map((item) => ({
-    id: item.id,
-    path: item.path || item.preview, // Use preview for local unsaved items
-    caption: item.caption,
-    type: item.type,
-    order: item.position,
-    pending: !!item.file,
-  }));
+  return mediaInstructions.length > 0 ? mediaInstructions : null;
 }
 
 /**

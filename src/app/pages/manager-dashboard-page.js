@@ -8,6 +8,7 @@ import {
   DASHBOARD_SECTIONS,
 } from '../../lib/utilities/dashboard-refresh-manager.js';
 import '../../styles/pages/manager-dashboard-spa.css';
+import { showToast } from '../../lib/notifications/toast-notification/toast-notification.js';
 
 export default {
   async render(params) {
@@ -247,7 +248,7 @@ export default {
   async updateUserRole(userId, newRole) {
     try {
       await FirestoreService.updateDocument('users', userId, { role: newRole });
-      this.showSuccessMessage('תפקיד המשתמש עודכן בהצלחה');
+      showToast('תפקיד המשתמש עודכן בהצלחה', 'success');
     } catch (error) {
       this.handleError(error);
     }
@@ -382,7 +383,7 @@ export default {
     try {
       this.toggleLoading(true);
       await deleteRecipe(recipeId);
-      this.showSuccessMessage('המתכון נמחק בהצלחה');
+      showToast('המתכון נמחק בהצלחה', 'success');
       this.refreshManager.refreshRecipes();
     } catch (error) {
       this.handleError(error);
@@ -626,6 +627,7 @@ export default {
   handleImagesApproved(event) {
     console.log('Images approved for recipe:', event.detail.recipeId);
     console.log('Approved image IDs:', event.detail.imageIds);
+    showToast('התמונות אושרו בהצלחה', 'success');
     // Refresh both pending images and all recipes lists
     this.refreshManager.refreshImages();
   },
@@ -633,6 +635,7 @@ export default {
   handleImagesRejected(event) {
     console.log('Images rejected for recipe:', event.detail.recipeId);
     console.log('Rejected image IDs:', event.detail.imageIds);
+    showToast('התמונות נדחו בהצלחה', 'success');
     // Only refresh the pending images list
     this.refreshManager.refreshPendingImages();
   },
@@ -712,7 +715,7 @@ export default {
     copyBtn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(JSON.stringify(item.error, null, 2));
-        this.showSuccess('השגיאה הועתקה ללוח');
+        showToast('השגיאה הועתקה ללוח', 'success');
       } catch (err) {
         this.handleError(new Error('כשל בהעתקה ללוח'));
       }
@@ -788,7 +791,7 @@ export default {
       async () => {
         try {
           await navigator.clipboard.writeText(errorText);
-          this.showSuccess('השגיאה הועתקה ללוח');
+          showToast('השגיאה הועתקה ללוח', 'success');
         } catch (err) {
           this.handleError(new Error('כשל בהעתקה ללוח'));
         }
@@ -809,7 +812,7 @@ export default {
           this.toggleLoading(true);
           await FirestoreService.deleteDocument('failed_url_extractions', id);
           this.loadFailedUrls();
-          this.showSuccess('הרשומה נמחקה בהצלחה');
+          showToast('הרשומה נמחקה בהצלחה', 'success');
         } catch (error) {
           this.handleError(error);
         } finally {
@@ -830,15 +833,6 @@ export default {
     } else {
       spinner.removeAttribute('active');
     }
-  },
-
-  showSuccessMessage(message) {
-    this.showSuccess(message, 'המתכון נמחק');
-  },
-
-  showSuccess(message, title = 'הצלחה') {
-    const modal = document.getElementById('success-message-modal');
-    modal.show(message, title);
   },
 
   handleError(error) {

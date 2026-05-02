@@ -17,8 +17,6 @@
   width: 100%;
   min-height: 0;
   position: relative;
-  display: flex;
-  flex-direction: column;
   background:
     radial-gradient(1200px 600px at 100% -10%, rgba(167, 201, 87, 0.1), transparent 60%),
     radial-gradient(900px 500px at -10% 110%, rgba(188, 71, 73, 0.06), transparent 60%), var(--bg);

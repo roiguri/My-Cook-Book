@@ -12,6 +12,7 @@ import {
 import '../../modals/message-modal/message-modal.js';
 import '../../utilities/loading-spinner/loading-spinner.js';
 import './recipe_form_component.js';
+import { showToast } from '../../notifications/toast-notification/toast-notification.js';
 
 class EditRecipeComponent extends HTMLElement {
   constructor() {
@@ -233,21 +234,12 @@ class EditRecipeComponent extends HTMLElement {
   }
 
   showSuccessMessage(message) {
-    const editRecipeModal = this.shadowRoot.querySelector('message-modal');
-
-    editRecipeModal.addEventListener(
-      'modal-closed',
-      () => {
-        const event = new CustomEvent('edit-success-modal-closed', {
-          bubbles: true,
-          composed: true,
-        });
-        this.dispatchEvent(event);
-      },
-      { once: true },
-    );
-
-    editRecipeModal.show(message);
+    showToast(message, 'success');
+    const event = new CustomEvent('edit-success-modal-closed', {
+      bubbles: true,
+      composed: true,
+    });
+    this.dispatchEvent(event);
   }
 
   showWarningMessage(message) {

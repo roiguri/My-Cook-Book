@@ -23,6 +23,7 @@ import { showToast } from '../../notifications/toast-notification/toast-notifica
 
 import './recipe_form_component.js';
 import '../../utilities/loading-spinner/loading-spinner.js';
+import { showToast } from '../../notifications/toast-notification/toast-notification.js';
 
 class ProposeRecipeComponent extends HTMLElement {
   constructor() {
