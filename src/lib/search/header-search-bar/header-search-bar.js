@@ -158,6 +158,12 @@ class HeaderSearchBar extends HTMLElement {
   async navigateToSearch(searchText) {
     if (!searchText.trim()) return;
 
+    // If on categories page and on mobile, don't perform full search navigation
+    // as it will be handled by real-time filtering in categories-page.js
+    if (window.innerWidth <= 768 && window.spa?.router?.getCurrentRoute() === '/categories') {
+      return;
+    }
+
     try {
       // Load all approved recipes from Firestore
       const recipes = await FirestoreService.queryDocuments('recipes', {

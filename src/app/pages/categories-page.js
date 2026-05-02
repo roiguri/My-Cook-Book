@@ -311,6 +311,9 @@ export default {
 
     document.addEventListener('recipe-favorite-changed', this._boundFavoriteChanged);
 
+    this._boundHeaderSearch = this.handleHeaderSearchInput.bind(this);
+    window.addEventListener('search-input', this._boundHeaderSearch);
+
     this.setupNavigationInterception();
   },
 
@@ -319,11 +322,22 @@ export default {
     if (this._boundFavoriteChanged) {
       document.removeEventListener('recipe-favorite-changed', this._boundFavoriteChanged);
     }
+    if (this._boundHeaderSearch) {
+      window.removeEventListener('search-input', this._boundHeaderSearch);
+    }
   },
 
   updateUI() {
     this.updateUnifiedFilter();
     this.updatePageTitle();
+    this.updateHeaderSearch();
+  },
+
+  updateHeaderSearch() {
+    const headerSearch = document.querySelector('header-search-bar');
+    if (headerSearch && headerSearch.getSearchText() !== this.currentSearchQuery) {
+      headerSearch.setSearchText(this.currentSearchQuery);
+    }
   },
 
   updateUnifiedFilter() {
@@ -453,6 +467,15 @@ export default {
     recipePresentationGrid.setRecipes(this.displayedRecipes, false);
   },
 
+  handleHeaderSearchInput(event) {
+    if (event.target.tagName === 'HEADER-SEARCH-BAR' && window.innerWidth <= 768) {
+      const unifiedFilter = document.getElementById('unified-filter');
+      if (unifiedFilter) {
+        unifiedFilter.setSearchQuery(event.detail.searchText);
+      }
+    }
+  },
+
   handleRecipeSelected(event) {
     const { recipeId } = event.detail;
     if (window.spa?.router) {
@@ -478,6 +501,9 @@ export default {
       this.currentPage = 1;
       this.updateUI();
       await this.displayCurrentPageRecipes();
+
+      // Ensure header search bar is in sync (useful on desktop)
+      this.updateHeaderSearch();
 
       this.updateURL(true);
     }
