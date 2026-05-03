@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Profile Visual Test</title>
+    <!-- Import base styles to ensure CSS variables are available -->
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background-color: #f4f4f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      /* Container simulating the modal content dimensions */
+      .test-container {
+        width: 480px;
+        max-width: 90vw;
+        background-color: var(--background-color, #fff);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="test-container">
+      <user-profile></user-profile>
+    </div>
+
+    <!-- We inject a shim for the services to read from the window mock -->
+    <script type="importmap">
+      {
+        "imports": {
+          "firebase/storage": "/tests/common/mocks/firebase-storage.mock.js",
+          "../../../js/services/storage-service.js": "/tests/common/mocks/storage-service.browser.js",
+          "../../../js/services/auth-service.js": "/tests/common/mocks/auth-service.browser.js"
+        }
+      }
+    </script>
+    <script type="module" src="/src/lib/auth/components/user-profile.js"></script>
+  </body>
+</html>
