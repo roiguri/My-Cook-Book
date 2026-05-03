@@ -54,7 +54,7 @@ _Visual and interaction tests for UI blocks._
 | `login-form`      | ✅  | ✅  | [ ] | **Stable** |
 | `signup-form`     | ✅  | ✅  | [ ] | **Stable** |
 | `forgot-password` | ✅  | ✅  | [ ] | **Stable** |
-| `user-profile`    | [ ] | [ ] | [ ] | Untested   |
+| `user-profile`    | ✅  | ✅  | [ ] | Partial    |
 
 ### Collections (Feeds & Grids)
 
