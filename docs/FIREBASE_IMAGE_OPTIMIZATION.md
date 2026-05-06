@@ -50,10 +50,9 @@ The application is built to handle the asynchronous nature of server-side resizi
 When a component requests an image, the `getOptimizedImageUrl` utility follows this sequence:
 
 1.  **Optimized Attempt:** Tries to fetch the WebP variant (`_400x400.webp` or `_1080x1080.webp`).
-2.  **Legacy Fallback:** If the WebP is missing, it tries the legacy `compressed` path (for very old documents).
-3.  **Latency Fallback:** If still missing, it fetches the original `full` image (ensuring the user sees something immediately after upload).
-4.  **UI Placeholder:** If all Storage paths fail, it returns `null`, and the component renders a CSS-based SVG placeholder.
+2.  **Latency Fallback:** If missing, it fetches the original `full` image (ensuring the user sees something immediately after upload).
+3.  **UI Placeholder:** If Storage paths fail, it returns `null`, and the component renders a CSS-based SVG placeholder.
 
 ### Clean Deletion
 
-When a recipe or image is deleted via the app, the logic in `recipe-image-utils.js` automatically cleans up all associated files: the original, the 400px WebP, the 1080px WebP, and any legacy compressed files.
+When a recipe or image is deleted via the app, the logic in `recipe-image-utils.js` automatically cleans up all associated files: the original, the 400px WebP, and the 1080px WebP.

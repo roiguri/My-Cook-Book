@@ -205,7 +205,6 @@ class EditRecipeComponent extends HTMLElement {
     await FirestoreService.updateDocument('recipes', recipeId, recipeDataWithoutImage);
   }
 
-
   showSuccessMessage(message) {
     const editRecipeModal = this.shadowRoot.querySelector('message-modal');
 

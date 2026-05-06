@@ -3,7 +3,6 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
-const sharp = require('sharp');
 const { extractRecipeFromImage, extractRecipeFromUrl } = require('./utils/gemini-service');
 
 // Initialize Firebase Admin
@@ -54,45 +53,9 @@ async function processRecipeImages(recipeId, images, category, originalUserId) {
 
       console.log(`Uploaded full image to: ${fullPath}`);
 
-      // Create compressed version
-      let compressedBuffer;
-      try {
-        compressedBuffer = await sharp(buffer)
-          .resize(800, 600, {
-            fit: 'inside',
-            withoutEnlargement: true,
-          })
-          .jpeg({ quality: 80 })
-          .toBuffer();
-      } catch (compressionError) {
-        console.warn(
-          `Compression failed for ${fileName}, using original:`,
-          compressionError.message,
-        );
-        compressedBuffer = buffer;
-      }
-
-      // Upload compressed image
-      const compressedPath = `img/recipes/compressed/${category}/${recipeId}/${fileName}`;
-      const compressedFile = bucket.file(compressedPath);
-
-      await compressedFile.save(compressedBuffer, {
-        metadata: {
-          contentType: 'image/jpeg',
-          metadata: {
-            originalSource: 'recipe-reader-transfer',
-            transferredAt: new Date().toISOString(),
-            compressed: true,
-          },
-        },
-      });
-
-      console.log(`Uploaded compressed image to: ${compressedPath}`);
-
       // Create Firestore image object
       const firestoreImage = {
         access: 'public',
-        compressed: compressedPath,
         fileName: fileName,
         full: fullPath,
         id: imageId,
