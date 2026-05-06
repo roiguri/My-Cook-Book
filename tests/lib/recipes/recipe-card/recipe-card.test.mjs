@@ -37,7 +37,7 @@ const mockRecipeData = {
   prepTime: 10,
   waitTime: 20,
   difficulty: 'קלה',
-  images: [{ id: 'img1', isPrimary: true, compressed: 'path/to/img.jpg' }],
+  images: [{ id: 'img1', isPrimary: true }],
 };
 
 const mockUser = {

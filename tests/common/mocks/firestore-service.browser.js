@@ -15,9 +15,7 @@ export const MOCK_RECIPES = [
     prepTime: 10,
     waitTime: 5,
     difficulty: 'Easy',
-    images: [
-      { id: 'img-1', full: IMG_RED, compressed: IMG_RED, isPrimary: true, access: 'public' },
-    ],
+    images: [{ id: 'img-1', full: IMG_RED, isPrimary: true, access: 'public' }],
     approved: true,
     creationTime: { seconds: 1700000003 },
   },
@@ -29,9 +27,7 @@ export const MOCK_RECIPES = [
     prepTime: 15,
     waitTime: 0,
     difficulty: 'Medium',
-    images: [
-      { id: 'img-2', full: IMG_GREEN, compressed: IMG_GREEN, isPrimary: true, access: 'public' },
-    ],
+    images: [{ id: 'img-2', full: IMG_GREEN, isPrimary: true, access: 'public' }],
     approved: true,
     creationTime: { seconds: 1700000002 },
   },
@@ -43,9 +39,7 @@ export const MOCK_RECIPES = [
     prepTime: 15,
     waitTime: 0,
     difficulty: 'Easy',
-    images: [
-      { id: 'img-3', full: IMG_BLUE, compressed: IMG_BLUE, isPrimary: true, access: 'public' },
-    ],
+    images: [{ id: 'img-3', full: IMG_BLUE, isPrimary: true, access: 'public' }],
     approved: true,
     creationTime: { seconds: 1700000001 },
   },
@@ -57,9 +51,7 @@ export const MOCK_RECIPES = [
     prepTime: 10,
     waitTime: 0,
     difficulty: 'Easy',
-    images: [
-      { id: 'img-4', full: IMG_RED, compressed: IMG_RED, isPrimary: true, access: 'public' },
-    ],
+    images: [{ id: 'img-4', full: IMG_RED, isPrimary: true, access: 'public' }],
     approved: true,
     creationTime: { seconds: 1700000000 },
   },

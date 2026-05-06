@@ -13,7 +13,7 @@
  *   - generateImageId(): Generate a unique image ID.
  *
  * Image File Deletion:
- *   - deleteImageFiles(image): Delete all storage files for an image (full + WebP variants + legacy compressed).
+ *   - deleteImageFiles(image): Delete all storage files for an image (full + WebP variants).
  *
  * Multi Pending Images:
  *   - addPendingImages(recipeId, files, category, uploader): Upload multiple pending images.
@@ -79,7 +79,6 @@ export function validateImageFile(file) {
 
 // --- Storage Path Helpers ---
 export function getImageStoragePath(recipeId, category, fileName, type = 'full') {
-  // type: 'full' | 'compressed'
   const base = `img/recipes/${type}/${category}/${recipeId}`;
   return `${base}/${fileName}`;
 }
@@ -103,19 +102,18 @@ export function generateImageId() {
 
 // --- Image File Deletion ---
 /**
- * Deletes all storage files for an image: full original, WebP variants, and optional legacy compressed.
+ * Deletes all storage files for an image: full original and WebP variants.
  * The full-size deletion propagates errors; variant deletions are best-effort.
- * @param {Object} image - Image object with `full` path and optional `compressed` path
+ * @param {Object} image - Image object with `full` path
  * @returns {Promise<void>}
  */
-export async function deleteImageFiles({ full, compressed }) {
+export async function deleteImageFiles({ full }) {
   const optimized400 = full.replace(/\.[^.]+$/, '_400x400.webp');
   const optimized1080 = full.replace(/\.[^.]+$/, '_1080x1080.webp');
   await StorageService.deleteFile(full);
   await Promise.all([
     StorageService.deleteFile(optimized400).catch(() => {}),
     StorageService.deleteFile(optimized1080).catch(() => {}),
-    ...(compressed ? [StorageService.deleteFile(compressed).catch(() => {})] : []),
   ]);
 }
 
@@ -189,21 +187,11 @@ export async function getOptimizedImageUrl(image, size = '400x400') {
   try {
     return await StorageService.getFileUrl(optimizedPath);
   } catch (error) {
-    // 2. Fallback to Legacy Compressed (if it exists in old docs)
-    // TODO: Remove after migration period — https://github.com/roiguri/My-Cook-Book/issues/142
-    if (image.compressed) {
-      try {
-        return await StorageService.getFileUrl(image.compressed);
-      } catch (innerError) {
-        // Fall through
-      }
-    }
-
-    // 3. Fallback to Full Original (Latency or Legacy)
+    // 2. Fallback to Full Original (Latency or Legacy)
     try {
       return await StorageService.getFileUrl(image.full);
     } catch (finalError) {
-      // 4. Ultimate Fallback
+      // 3. Ultimate Fallback
       return getPlaceholderImageUrl();
     }
   }
@@ -322,18 +310,10 @@ export async function migrateImageToCategory(image, recipeId, oldCategory, newCa
       }
     }
 
-    // If there was a legacy compressed version, delete it too
-    if (image.compressed) {
-      await StorageService.deleteFile(image.compressed).catch(() => {});
-    }
-
-    const updatedImage = {
+    return {
       ...image,
       full: newFullPath,
     };
-    delete updatedImage.compressed;
-
-    return updatedImage;
   } catch (error) {
     console.error(
       `Failed to migrate image ${image.id} from ${oldCategory} to ${newCategory}:`,
