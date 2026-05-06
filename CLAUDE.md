@@ -81,7 +81,7 @@ Unit tests use Jest with jsdom in `tests/`. Firebase is mocked via `tests/common
 
 ### Cloud Functions
 
-`functions/index.js` handles image compression via Sharp, Gemini AI recipe extraction from images/URLs, and batch recipe imports. Triggered by Pub/Sub and Firestore events.
+`functions/index.js` handles Gemini AI recipe extraction from images/URLs, and batch recipe imports. Triggered by Pub/Sub and Firestore events. (Legacy image compression via Sharp was removed in favor of automated Storage-triggered WebP resizing).
 
 ### Design System
 
