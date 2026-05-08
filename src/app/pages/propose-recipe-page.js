@@ -87,11 +87,17 @@ export default {
     proposeRecipeForm.style.display = 'none';
     if (actionBar) actionBar.style.display = 'none';
 
-    this.handleAuthStateChange = (isAuthenticated) => {
+    this.handleAuthStateChange = (isAuthenticated, isApproved) => {
       if (isAuthenticated) {
         // User is authenticated
         proposeRecipeForm.style.display = 'block';
         if (actionBar) actionBar.style.display = 'block';
+
+        const importBtn = document.querySelector('#action-import');
+        if (importBtn) {
+          importBtn.style.display = isApproved ? '' : 'none';
+        }
+
         if (typeof proposeRecipeForm.setFormDisabled === 'function') {
           proposeRecipeForm.setFormDisabled(false);
         }
@@ -113,9 +119,10 @@ export default {
     };
 
     authService.initialize();
-    this.authStateUnsubscribe = authService.onAuthStateChanged((user) => {
-      this.handleAuthStateChange(!!user);
-    });
+    this.authObserver = (authState) => {
+      this.handleAuthStateChange(authState.isAuthenticated, authState.isApproved);
+    };
+    authService.addAuthObserver(this.authObserver);
   },
 
   showLoginPrompt() {
@@ -210,9 +217,9 @@ export default {
   },
 
   cleanupAuthListeners() {
-    if (this.authStateUnsubscribe) {
-      this.authStateUnsubscribe();
-      this.authStateUnsubscribe = null;
+    if (this.authObserver) {
+      authService.removeAuthObserver(this.authObserver);
+      this.authObserver = null;
     }
   },
 
