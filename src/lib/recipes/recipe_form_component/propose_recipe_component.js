@@ -15,10 +15,13 @@
  */
 
 import { FirestoreService } from '../../../js/services/firestore-service.js';
-import { uploadAndBuildImageMetadata } from '../../../js/utils/recipes/recipe-image-utils.js';
+import {
+  uploadAndBuildImageMetadata,
+  deleteImageFiles,
+} from '../../../js/utils/recipes/recipe-image-utils.js';
 import { Timestamp } from 'firebase/firestore';
 import authService from '../../../js/services/auth-service.js';
-import { logError } from '../../../js/utils/error-handler.js';
+import { logError, getErrorMessage } from '../../../js/utils/error-handler.js';
 import { showToast } from '../../notifications/toast-notification/toast-notification.js';
 
 import './recipe_form_component.js';
@@ -56,6 +59,7 @@ class ProposeRecipeComponent extends HTMLElement {
   async handleRecipeData(event) {
     const recipeData = event.detail.recipeData;
     const spinner = this.shadowRoot.querySelector('loading-spinner');
+    let uploadedFilesToCleanup = [];
     try {
       spinner.setAttribute('active', '');
       const user = authService.getCurrentUser();
@@ -77,17 +81,8 @@ class ProposeRecipeComponent extends HTMLElement {
         }
       });
 
-      // Add recipe to Firestore — race against a timeout because Firestore buffers writes
-      // when offline instead of rejecting, which would leave the spinner frozen forever
-      const recipeId = await Promise.race([
-        FirestoreService.addDocument('recipes', recipeDataForFirestore),
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error('אין חיבור לאינטרנט. אנא בדוק את החיבור ונסה שוב.')),
-            15000,
-          ),
-        ),
-      ]);
+      // Generate ID before uploading so we can use it for storage paths
+      const recipeId = FirestoreService.generateId('recipes');
 
       // Upload images if provided
       if (imagesToUpload.length > 0) {
@@ -97,10 +92,9 @@ class ProposeRecipeComponent extends HTMLElement {
           recipeDataForFirestore.category,
           user?.uid || 'anonymous',
         );
-        await FirestoreService.updateDocument('recipes', recipeId, {
-          images: imageUploadResults,
-          allowImageSuggestions: true,
-        });
+        recipeDataForFirestore.images = imageUploadResults;
+        recipeDataForFirestore.allowImageSuggestions = true;
+        uploadedFilesToCleanup.push(...imageUploadResults);
       }
 
       // Upload pending media instructions if any
@@ -113,25 +107,43 @@ class ProposeRecipeComponent extends HTMLElement {
         const allMedia = formComponent.getAllMediaInOrder();
         const pendingCount = allMedia.filter((item) => item.file).length;
 
-        const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
-          recipeId,
-          user?.uid || 'anonymous',
-        );
+        if (pendingCount > 0) {
+          const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
+            recipeId,
+            user?.uid || 'anonymous',
+          );
 
-        if (uploadedMedia && uploadedMedia.length > 0) {
-          successCount = uploadedMedia.length;
-          await FirestoreService.updateDocument('recipes', recipeId, {
-            mediaInstructions: uploadedMedia,
-          });
+          if (uploadedMedia && uploadedMedia.length > 0) {
+            successCount = uploadedMedia.length;
+            recipeDataForFirestore.mediaInstructions = uploadedMedia;
+            uploadedFilesToCleanup.push(...uploadedMedia);
 
-          // Detect partial failure
-          if (pendingCount > 0 && uploadedMedia.length < pendingCount) {
+            // Detect partial failure
+            if (uploadedMedia.length < pendingCount) {
+              hasPartialFailure = true;
+              failedCount = pendingCount - uploadedMedia.length;
+              console.warn(`${failedCount} of ${pendingCount} media file(s) failed to upload`);
+            }
+          } else {
+            // If there were pending files but none uploaded, count as failure
             hasPartialFailure = true;
-            failedCount = pendingCount - uploadedMedia.length;
-            console.warn(`${failedCount} of ${pendingCount} media file(s) failed to upload`);
+            failedCount = pendingCount;
+            console.warn(`All ${pendingCount} media file(s) failed to upload`);
           }
         }
       }
+
+      // Add recipe to Firestore — race against a timeout because Firestore buffers writes
+      // when offline instead of rejecting, which would leave the spinner frozen forever
+      await Promise.race([
+        FirestoreService.setDocument('recipes', recipeId, recipeDataForFirestore),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error('אין חיבור לאינטרנט. אנא בדוק את החיבור ונסה שוב.')),
+            15000,
+          ),
+        ),
+      ]);
 
       this.clearForm();
 
@@ -152,6 +164,12 @@ class ProposeRecipeComponent extends HTMLElement {
         new CustomEvent('recipe-proposed-success', { bubbles: true, composed: true }),
       );
     } catch (error) {
+      // Cleanup any successfully uploaded files to avoid orphans
+      if (uploadedFilesToCleanup.length > 0) {
+        uploadedFilesToCleanup.forEach((img) => {
+          deleteImageFiles(img).catch((e) => console.warn('Failed to cleanup file on error:', e));
+        });
+      }
       spinner.removeAttribute('active');
       this.showErrorMessage(error);
     }
@@ -182,7 +200,7 @@ class ProposeRecipeComponent extends HTMLElement {
 
   showErrorMessage(error) {
     logError(error, 'Recipe proposal');
-    showToast(error.message || 'אירעה שגיאה. אנא נסה שוב.', 'error', 5000);
+    showToast(getErrorMessage(error), 'error', 5000);
   }
 
   clearForm() {

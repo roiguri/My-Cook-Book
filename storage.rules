@@ -30,19 +30,6 @@ service firebase.storage {
     }
 
     // ========================================
-    // PENDING IMAGE SUGGESTIONS
-    // ========================================
-    match /pendingImages/{allPaths=**} {
-      allow read: if true;
-      allow create: if isAuthenticated()
-                     && request.resource.size < 5 * 1024 * 1024
-                     && request.resource.contentType.matches('image/.*');
-      // Restrict delete/update to Manager (Specific UID for now as fallback, or open to Manager context if Custom Claims were used)
-      // Keeping the existing hardcoded UID for backward compatibility if needed, but 'isAuthenticated' is safer than open.
-      allow delete, update: if request.auth.uid == "VVEha9tUvnO3oTQTaBtbeusIGnx2";
-    }
-
-    // ========================================
     // Grandmother's Cookbook
     // ========================================
     match /grandmas_cookbook/{allPaths=**} {

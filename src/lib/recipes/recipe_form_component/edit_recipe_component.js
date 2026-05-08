@@ -76,16 +76,12 @@ class EditRecipeComponent extends HTMLElement {
             id: img.id,
             full: img.full,
             isPrimary: img.isPrimary,
-            access: img.access,
-            uploadedBy: img.uploadedBy,
           };
-
-          if (img.fileName !== undefined) {
-            existingImage.fileName = img.fileName;
-          }
-          if (img.uploadTimestamp !== undefined) {
+          if (img.access !== undefined) existingImage.access = img.access;
+          if (img.uploadedBy !== undefined) existingImage.uploadedBy = img.uploadedBy;
+          if (img.fileName !== undefined) existingImage.fileName = img.fileName;
+          if (img.uploadTimestamp !== undefined)
             existingImage.uploadTimestamp = img.uploadTimestamp;
-          }
 
           if (categoryChanged) {
             try {

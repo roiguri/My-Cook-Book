@@ -89,6 +89,34 @@ export class FirestoreService {
   }
 
   /**
+   * Generate a new document ID without saving it.
+   * @param {string} collectionName - The collection name
+   * @returns {string} The new document ID
+   */
+  static generateId(collectionName) {
+    const db = getFirestoreInstance();
+    return doc(collection(db, collectionName)).id;
+  }
+
+  /**
+   * Set a document with a specific ID.
+   * @param {string} collectionName - The collection name
+   * @param {string} id - The document ID
+   * @param {Object} data - The document data
+   * @returns {Promise<void>}
+   */
+  static async setDocument(collectionName, id, data) {
+    try {
+      const db = getFirestoreInstance();
+      const docRef = doc(db, collectionName, id);
+      await setDoc(docRef, data);
+    } catch (error) {
+      console.error('Error setting document:', error);
+      throw new Error('Failed to set document');
+    }
+  }
+
+  /**
    * Add a new document to a collection.
    * @param {string} collectionName - The collection name
    * @param {Object} data - The document data
