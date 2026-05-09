@@ -406,6 +406,7 @@ export default {
 
   populateFilterOptions(recipes) {
     const filterSelect = document.getElementById('recipe-filter');
+    filterSelect.innerHTML = '<option value="">סינון לפי קטגוריה</option>';
     const categories = [...new Set(recipes.map((recipe) => this.categoryMapping[recipe.category]))];
 
     categories.forEach((category) => {
