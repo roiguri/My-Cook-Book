@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading Spinner Visual Test</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: #f4f4f5;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      The component only works correctly with the overlay attribute currently.
+      Let's test it as it is used in the app.
+    -->
+    <loading-spinner active overlay id="spinner-overlay-active"></loading-spinner>
+    <loading-spinner overlay id="spinner-overlay-inactive"></loading-spinner>
+
+    <!-- Test different configurations but still with overlay to ensure styling works -->
+    <!-- Note: the overlay is fixed inset 0, so multiple overlays will stack.
+         We need a way to capture the screenshot or test them individually without overlap.
+         We will use JavaScript in the test to toggle them.
+    -->
+    <loading-spinner overlay id="spinner-custom-color" color="#ff0000"></loading-spinner>
+    <loading-spinner overlay id="spinner-large" size="80px" line-width="8px"></loading-spinner>
+
+    <script type="module" src="/src/lib/utilities/loading-spinner/loading-spinner.js"></script>
+  </body>
+</html>
