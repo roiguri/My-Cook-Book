@@ -4,6 +4,47 @@ const { defineSecret } = require('firebase-functions/params');
 // Define secret for API key
 const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
+// Image generation/editing model (Gemini's "Nano Banana"). Update if a newer
+// image-capable model supersedes this.
+const IMAGE_ENHANCEMENT_MODEL = 'gemini-2.5-flash-image';
+
+const FOOD_STYLIST_PROMPT = `You are a professional food photographer and AI vision expert. Your task is to perform a 'Studio Elevation' on the provided input image. Follow this three-step execution protocol:
+
+1. Inference & Extraction: Analyze the input image to identify the core dish. Maintain 100% fidelity to the ingredients, colors, and textures of the food itself.
+
+2. Environment Transformation: Replace the original background, lighting, and plating with a professional studio setup based on the parameters provided below.
+
+3. Composition & Breathing Room: Ensure the dish is centered with padding (negative space) around the bowl/plate to allow for professional framing.
+
+Configurable Parameters — choose the option from each group that best fits the dish you identified, to produce the most appetizing and editorial-quality result:
+
+[DIRECTIONAL LIGHTING]
+- Option A (Natural): Soft, directional window light with subtle, organic shadows.
+- Option B (Commercial): Bright, even studio softbox lighting for maximum clarity and 'pop'.
+- Option C (Moody): High-contrast, dramatic side-lighting for a fine-dining aesthetic.
+
+[CAMERA ANGLE]
+- Option A (Flat Lay): 90-degree directly overhead (best for bowls and spreads).
+- Option B (Hero Shot): 45-degree angle to show depth and texture.
+- Option C (Portrait): Low-angle, eye-level to emphasize height and layers.
+
+[SURFACE & TEXTURE]
+- Option A (Classic Luxury): Polished white marble with subtle gray veining.
+- Option B (Rustic): Dark, weathered oak wood with visible grain.
+- Option C (Minimalist): Neutral, matte-finish light gray concrete.
+
+[STYLING LEVEL]
+- Option A (Clean): No props; focus entirely on the dish and the surface.
+- Option B (Editorial): Add a neatly folded linen napkin and one high-end utensil.
+- Option C (Ingredient-Led): Scatter a few raw ingredients (e.g., a sprig of herb or a slice of fruit) near the dish.
+
+Technical Output Specification:
+- Resolution: Ultra-high definition, 8k photographic detail.
+- Focus: Sharp focus on the center of the dish with a professional shallow depth of field (bokeh) toward the edges of the frame.
+- Authenticity: The food must look freshly prepared, vibrant, and appetizing, avoiding 'plastic' or overly-perfect AI artifacts.
+
+Return ONLY the enhanced image. Do not include any text in the response.`;
+
 const RECIPE_SCHEMA = {
   description: 'Recipe data extraction schema',
   type: 'object',
@@ -397,7 +438,56 @@ ${responseText}`,
   }
 }
 
+/**
+ * Enhances a food image using Gemini's image generation model with the
+ * "Professional Food Stylist" system prompt. The model auto-selects the best
+ * lighting/angle/surface/styling parameters for the input dish.
+ *
+ * @param {{base64: string, mimeType?: string}} image
+ * @returns {Promise<{base64: string, mimeType: string}>} The enhanced image.
+ */
+async function enhanceFoodImage(image) {
+  if (!image || !image.base64) {
+    throw new Error('Input image is required');
+  }
+
+  const client = createClient();
+  const inputMimeType = image.mimeType || 'image/jpeg';
+
+  const response = await client.models.generateContent({
+    model: IMAGE_ENHANCEMENT_MODEL,
+    contents: [
+      {
+        parts: [
+          { text: FOOD_STYLIST_PROMPT },
+          {
+            inlineData: {
+              data: image.base64,
+              mimeType: inputMimeType,
+            },
+          },
+        ],
+      },
+    ],
+  });
+
+  const parts = response?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find((p) => p.inlineData && p.inlineData.data);
+
+  if (!imagePart) {
+    const textPart = parts.find((p) => typeof p.text === 'string' && p.text.length > 0);
+    const detail = textPart ? `: ${textPart.text.slice(0, 200)}` : '';
+    throw new Error(`Gemini did not return an enhanced image${detail}`);
+  }
+
+  return {
+    base64: imagePart.inlineData.data,
+    mimeType: imagePart.inlineData.mimeType || 'image/png',
+  };
+}
+
 module.exports = {
   extractRecipeFromImage,
   extractRecipeFromUrl,
+  enhanceFoodImage,
 };

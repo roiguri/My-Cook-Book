@@ -74,6 +74,7 @@ export default {
       import('../../lib/utilities/modal/modal.js'),
       import('../../lib/utilities/loading-spinner/loading-spinner.js'),
       import('../../lib/images/image-handler.js'),
+      import('../../lib/images/ai-image-enhancer/ai-image-enhancer.js'),
     ]);
   },
 

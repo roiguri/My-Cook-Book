@@ -4,7 +4,11 @@ const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
-const { extractRecipeFromImage, extractRecipeFromUrl } = require('./utils/gemini-service');
+const {
+  extractRecipeFromImage,
+  extractRecipeFromUrl,
+  enhanceFoodImage,
+} = require('./utils/gemini-service');
 const { sendNotificationToRole } = require('./notifications');
 
 // Initialize Firebase Admin
@@ -525,6 +529,47 @@ exports.extractRecipeFromImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (
       throw error;
     }
     throw new HttpsError('internal', 'Recipe extraction failed', error.message);
+  }
+});
+
+exports.enhanceFoodImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (request) => {
+  // Check if user is authenticated
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { uid } = request.auth;
+  const { image } = request.data || {};
+
+  if (!image || typeof image !== 'object' || typeof image.base64 !== 'string' || !image.base64) {
+    throw new HttpsError(
+      'invalid-argument',
+      'The function must be called with an image { base64, mimeType } payload.',
+    );
+  }
+
+  try {
+    // Role gate — match recipe extraction (approved/manager).
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      throw new HttpsError('permission-denied', 'User not found.');
+    }
+
+    const role = userDoc.data().role;
+    if (role !== 'approved' && role !== 'manager') {
+      throw new HttpsError(
+        'permission-denied',
+        'User must be approved or a manager to use this feature.',
+      );
+    }
+
+    return await enhanceFoodImage(image);
+  } catch (error) {
+    console.error('Error enhancing image:', error);
+    if (error.code && error.details) {
+      throw error;
+    }
+    throw new HttpsError('internal', 'Image enhancement failed', error.message);
   }
 });
 
