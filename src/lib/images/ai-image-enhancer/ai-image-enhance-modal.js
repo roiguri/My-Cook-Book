@@ -26,6 +26,8 @@ class AiImageEnhanceModal extends HTMLElement {
     this._image = null;
     this._enhancedResult = null;
     this._isLoading = false;
+    this._beforeUrl = null;
+    this._viewer = null;
     this._handleKeyDown = this._handleKeyDown.bind(this);
   }
 
@@ -37,6 +39,10 @@ class AiImageEnhanceModal extends HTMLElement {
   disconnectedCallback() {
     window.removeEventListener('keydown', this._handleKeyDown);
     this._unlockScroll();
+    if (this._viewer) {
+      this._viewer.remove();
+      this._viewer = null;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -48,6 +54,7 @@ class AiImageEnhanceModal extends HTMLElement {
     this._image = image;
     this._enhancedResult = null;
     this._isLoading = false;
+    this._beforeUrl = null;
 
     this._updateTitle();
     this._setStatus('');
@@ -62,6 +69,37 @@ class AiImageEnhanceModal extends HTMLElement {
 
     window.addEventListener('keydown', this._handleKeyDown);
     this._lockScroll();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fullscreen viewer (lazy, singleton per modal instance)
+  // ---------------------------------------------------------------------------
+
+  async _getViewer() {
+    if (!this._viewer) {
+      await import('../../utilities/fullscreen-media-viewer/fullscreen-media-viewer.js');
+      this._viewer = document.createElement('fullscreen-media-viewer');
+      this._viewer.setAttribute('dir', 'rtl');
+      document.body.appendChild(this._viewer);
+    }
+    return this._viewer;
+  }
+
+  async _openViewer(startPane) {
+    const items = [];
+    if (this._beforeUrl) items.push({ path: this._beforeUrl, caption: 'לפני', type: 'image' });
+    if (this._enhancedResult)
+      items.push({ path: this._enhancedResult.dataUrl, caption: 'אחרי', type: 'image' });
+    if (items.length === 0) return;
+
+    const index =
+      startPane === 'after' && this._enhancedResult
+        ? items.findIndex((i) => i.caption === 'אחרי')
+        : 0;
+
+    const viewer = await this._getViewer();
+    viewer.setAttribute('media-data', JSON.stringify(items));
+    viewer.open(Math.max(0, index));
   }
 
   // ---------------------------------------------------------------------------
@@ -114,6 +152,8 @@ class AiImageEnhanceModal extends HTMLElement {
         img.onload = () => {
           img.style.display = 'block';
           if (spinner) spinner.style.display = 'none';
+          this._beforeUrl = url;
+          this._updatePaneHints();
         };
         img.onerror = () => {
           if (spinner) spinner.style.display = 'none';
@@ -132,6 +172,13 @@ class AiImageEnhanceModal extends HTMLElement {
     const placeholder = this.shadowRoot.getElementById('after-placeholder');
     if (img) img.style.display = 'none';
     if (placeholder) placeholder.style.display = 'flex';
+  }
+
+  _updatePaneHints() {
+    const beforePane = this.shadowRoot.getElementById('before-pane');
+    const afterPane = this.shadowRoot.getElementById('after-pane');
+    if (beforePane) beforePane.classList.toggle('pane-clickable', !!this._beforeUrl);
+    if (afterPane) afterPane.classList.toggle('pane-clickable', !!this._enhancedResult);
   }
 
   _setStatus(message) {
@@ -189,6 +236,7 @@ class AiImageEnhanceModal extends HTMLElement {
         afterImg.style.display = 'block';
       }
       if (afterPlaceholder) afterPlaceholder.style.display = 'none';
+      this._updatePaneHints();
       this._setStatus('התמונה שופרה. ניתן לשמור או לבטל.');
     } catch (error) {
       console.error('Image enhancement failed:', error);
@@ -267,6 +315,7 @@ class AiImageEnhanceModal extends HTMLElement {
   _discard() {
     this._enhancedResult = null;
     this._clearAfterImage();
+    this._updatePaneHints();
     this._setStatus('');
     this._updateActions();
   }
@@ -342,6 +391,12 @@ class AiImageEnhanceModal extends HTMLElement {
     sr.getElementById('enhance-btn').addEventListener('click', () => this._enhance());
     sr.getElementById('save-btn').addEventListener('click', () => this._save());
     sr.getElementById('discard-btn').addEventListener('click', () => this._discard());
+    sr.getElementById('before-pane').addEventListener('click', () => {
+      if (this._beforeUrl) this._openViewer('before');
+    });
+    sr.getElementById('after-pane').addEventListener('click', () => {
+      if (this._enhancedResult) this._openViewer('after');
+    });
   }
 
   _render() {
@@ -513,6 +568,14 @@ class AiImageEnhanceModal extends HTMLElement {
           pointer-events: none;
         }
 
+        .compare-pane.pane-clickable {
+          cursor: zoom-in;
+        }
+
+        .compare-pane.pane-clickable:hover img {
+          filter: brightness(1.06);
+        }
+
         .actions {
           display: flex;
           flex-wrap: wrap;
@@ -581,12 +644,12 @@ class AiImageEnhanceModal extends HTMLElement {
             <h2 id="modal-title" class="title"></h2>
 
             <div class="compare">
-              <div class="compare-pane">
+              <div id="before-pane" class="compare-pane">
                 <span class="compare-label">לפני</span>
                 <img id="before-img" alt="לפני" style="display: none;" />
                 <div id="before-loading" class="pane-shimmer"></div>
               </div>
-              <div class="compare-pane">
+              <div id="after-pane" class="compare-pane">
                 <span class="compare-label">אחרי</span>
                 <img id="after-img" alt="אחרי" style="display: none;" />
                 <div id="after-placeholder" class="after-placeholder">
