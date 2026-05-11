@@ -44,9 +44,17 @@ async function sendNotificationToUsers(uids, payload) {
 
   if (tokenIndex.length === 0) return { sent: 0, pruned: 0 };
 
+  // Data-only payload: when `notification` is present on a Web push, FCM auto-
+  // displays a banner using the site favicon AND the SW's onBackgroundMessage
+  // also fires our own — yielding two notifications. Sending only `data` makes
+  // the SW (and the page's onMessage) the single source of truth for display.
   const message = {
-    notification: { title: payload.title, body: payload.body },
-    data: stringifyData({ ...(payload.data || {}), url: payload.url || '/dashboard' }),
+    data: stringifyData({
+      ...(payload.data || {}),
+      title: payload.title,
+      body: payload.body,
+      url: payload.url || '/dashboard',
+    }),
     tokens: tokenIndex.map((t) => t.entry.token),
     webpush: {
       headers: payload.collapseKey ? { Topic: payload.collapseKey } : undefined,
