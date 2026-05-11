@@ -44,7 +44,7 @@ service cloud.firestore {
                     && request.resource.data.role == 'user';
       
       // UPDATE:
-      // - Users can update their own profile (avatar, favorites, name)
+      // - Users can update their own profile (avatar, favorites, name, fcmTokens)
       // - CRITICAL: Users CANNOT change their role
       // - Managers can update anything (including roles)
       allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role)
