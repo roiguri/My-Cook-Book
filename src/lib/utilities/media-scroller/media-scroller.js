@@ -197,20 +197,6 @@ class MediaScroller extends HTMLElement {
           to { transform: rotate(360deg); }
         }
 
-        .media-type-badge {
-          position: absolute;
-          top: 25px;
-          left: 25px;
-          background-color: rgba(0, 0, 0, 0.7);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 11px;
-          font-weight: bold;
-          text-transform: uppercase;
-          z-index: 5;
-        }
-
         .media-scroller__caption {
           margin-top: 5px;
           text-align: center;
@@ -236,16 +222,9 @@ class MediaScroller extends HTMLElement {
         console.warn(`[MediaScroller] Item at index ${index} is missing 'type' field`);
       }
 
-      const mediaType = isVideo ? 'וידאו' : 'תמונה';
-
       const itemElement = document.createElement('div');
       itemElement.className = 'media-scroller__item';
       itemElement.setAttribute('data-index', index.toString());
-
-      const badge = document.createElement('span');
-      badge.className = 'media-type-badge';
-      badge.textContent = mediaType;
-      itemElement.appendChild(badge);
 
       const mediaContainer = document.createElement('div');
       mediaContainer.className = 'media-scroller__media-container';
