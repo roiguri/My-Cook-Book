@@ -7,6 +7,7 @@
 import { arrayUnion, arrayRemove } from 'firebase/firestore';
 import authService from './auth-service.js';
 import { FirestoreService } from './firestore-service.js';
+import { captureError } from './logger.js';
 
 class FavoritesService {
   constructor() {
@@ -51,6 +52,11 @@ class FavoritesService {
         return favoriteRecipeIds;
       } catch (error) {
         console.error('Error fetching user favorites:', error);
+        captureError(error, {
+          service: 'favorites',
+          op: 'getUserFavorites',
+          uid: user.uid,
+        });
         return [];
       } finally {
         this._fetchPromise = null;
@@ -78,6 +84,12 @@ class FavoritesService {
       });
     } catch (error) {
       console.error('Error adding favorite:', error);
+      captureError(error, {
+        service: 'favorites',
+        op: 'addFavorite',
+        uid: user.uid,
+        recipeId,
+      });
       // Revert cache on error
       this.updateCache(recipeId, false);
       throw error;
@@ -102,6 +114,12 @@ class FavoritesService {
       });
     } catch (error) {
       console.error('Error removing favorite:', error);
+      captureError(error, {
+        service: 'favorites',
+        op: 'removeFavorite',
+        uid: user.uid,
+        recipeId,
+      });
       // Revert cache on error
       this.updateCache(recipeId, true);
       throw error;
