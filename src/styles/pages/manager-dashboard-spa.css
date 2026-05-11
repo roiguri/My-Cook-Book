@@ -247,6 +247,10 @@
   font-family: var(--font-ui-he);
 }
 
+.spa-content .manager-dashboard .notifications-banner[hidden] {
+  display: none;
+}
+
 .spa-content .manager-dashboard .notifications-banner__text {
   flex: 1;
   font-size: 14px;
