@@ -1,4 +1,26 @@
 <main class="manager-dashboard">
+  <div
+    id="notifications-banner"
+    class="notifications-banner"
+    hidden
+    role="region"
+    aria-label="הפעלת התראות"
+  >
+    <span class="notifications-banner__text"> קבל התראה מיידית כשמתכון חדש ממתין לאישור </span>
+    <button type="button" id="enable-notifications-btn" class="notifications-banner__btn">
+      הפעל התראות במכשיר זה
+    </button>
+    <button
+      type="button"
+      id="dismiss-notifications-btn"
+      class="notifications-banner__dismiss"
+      aria-label="סגור"
+      title="סגור"
+    >
+      ×
+    </button>
+  </div>
+
   <div class="dashboard-header">
     <button class="refresh-icon master-refresh" id="master-refresh" title="רענן הכל">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">

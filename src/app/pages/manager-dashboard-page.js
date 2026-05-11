@@ -1,5 +1,6 @@
 import { FirestoreService } from '../../js/services/firestore-service.js';
 import authService from '../../js/services/auth-service.js';
+import notificationService from '../../js/services/notification-service.js';
 import { AppConfig } from '../../js/config/app-config.js';
 import { CATEGORY_MAP, deleteRecipe } from '../../js/utils/recipes/recipe-data-utils.js';
 import { debounce } from '../../js/utils/common-utils.js';
@@ -41,6 +42,7 @@ export default {
     this.setupImageApprovalListeners();
     this.setupRefreshIconListeners();
     this.setupEditRecipeListener();
+    this.setupNotificationsBanner(currentUser);
   },
 
   async unmount() {
@@ -163,6 +165,50 @@ export default {
       console.log('Recipe updated:', event.detail.recipeId);
       // Refresh both all recipes and pending recipes (edits require re-approval)
       this.refreshManager.refreshRecipes(600);
+    });
+  },
+
+  async setupNotificationsBanner(user) {
+    const banner = document.getElementById('notifications-banner');
+    const enableBtn = document.getElementById('enable-notifications-btn');
+    const dismissBtn = document.getElementById('dismiss-notifications-btn');
+    if (!banner || !enableBtn || !dismissBtn || !user) return;
+
+    await notificationService.init();
+    const status = await notificationService.getStatus();
+
+    // Show only when the manager can still opt in. 'denied' (user blocked the
+    // browser prompt) and 'unsupported' both leave the banner hidden — there's
+    // nothing actionable to show.
+    if (status !== 'default' && status !== 'granted-unregistered') return;
+
+    banner.hidden = false;
+
+    enableBtn.addEventListener('click', async () => {
+      enableBtn.disabled = true;
+      const prevText = enableBtn.textContent;
+      enableBtn.textContent = 'מפעיל...';
+
+      const result = await notificationService.requestPermissionAndRegister(user.uid);
+      if (result.ok) {
+        banner.hidden = true;
+        this.showSuccess('התראות הופעלו במכשיר זה');
+      } else {
+        enableBtn.disabled = false;
+        enableBtn.textContent = prevText;
+        if (result.reason === 'denied') {
+          this.handleError(
+            new Error('הדפדפן חסם את ההתראות. כדי להפעיל, יש לאפשר התראות בהגדרות הדפדפן.'),
+          );
+          banner.hidden = true;
+        } else {
+          this.handleError(new Error('הפעלת ההתראות נכשלה. נסה שוב.'));
+        }
+      }
+    });
+
+    dismissBtn.addEventListener('click', () => {
+      banner.hidden = true;
     });
   },
 

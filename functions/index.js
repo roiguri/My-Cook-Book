@@ -1,9 +1,11 @@
 const { onMessagePublished } = require('firebase-functions/v2/pubsub');
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const { extractRecipeFromImage, extractRecipeFromUrl } = require('./utils/gemini-service');
+const { sendNotificationToRole } = require('./notifications');
 
 // Initialize Firebase Admin
 initializeApp();
@@ -580,5 +582,42 @@ exports.extractRecipeFromUrl = onCall({ secrets: ['GEMINI_API_KEY'] }, async (re
       throw error;
     }
     throw new HttpsError('internal', 'Recipe extraction from URL failed', error.message);
+  }
+});
+
+/**
+ * Notify managers when a new recipe is submitted for approval.
+ *
+ * Fires on every recipe create; only sends when `approved === false` so it
+ * skips manager-authored recipes that are created already-approved and the
+ * processRecipeTransfer pipeline (which also lands recipes with approved=false
+ * — that's intentional, those should be reviewed too).
+ *
+ * One push per event for v1. Batching tracked separately.
+ */
+exports.onRecipeCreated = onDocumentCreated('recipes/{recipeId}', async (event) => {
+  const snap = event.data;
+  if (!snap) return;
+  const recipe = snap.data() || {};
+  if (recipe.approved === true) return;
+
+  const recipeId = event.params.recipeId;
+  const recipeName = recipe.name || 'מתכון חדש';
+
+  try {
+    const result = await sendNotificationToRole('manager', {
+      title: 'מתכון חדש ממתין לאישור',
+      body: recipeName,
+      collapseKey: 'recipe-approval',
+      url: '/dashboard',
+      data: {
+        type: 'recipe-approval',
+        recipeId,
+      },
+    });
+    console.log(`[onRecipeCreated] notified managers for ${recipeId}:`, result);
+  } catch (error) {
+    console.error(`[onRecipeCreated] notification failed for ${recipeId}:`, error);
+    // Don't rethrow — notification failure must not block the recipe creation.
   }
 });

@@ -313,6 +313,17 @@ class AuthService {
    */
   async logout() {
     try {
+      // Best-effort: remove this device's push token before signing out, while
+      // we still hold auth (Firestore rules require it). Dynamic import keeps
+      // this an optional dependency — non-notification code paths never load it.
+      if (this._currentUser) {
+        try {
+          const { default: notificationService } = await import('./notification-service.js');
+          await notificationService.unregisterCurrentDevice(this._currentUser.uid);
+        } catch (error) {
+          console.warn('Failed to unregister push token on logout:', error);
+        }
+      }
       const auth = getAuthInstance();
       await signOut(auth);
     } catch (error) {
