@@ -299,9 +299,11 @@
 @media (max-width: 600px) {
   .spa-content .manager-dashboard .notifications-banner {
     flex-wrap: wrap;
+    justify-content: center;
   }
 
   .spa-content .manager-dashboard .notifications-banner__text {
     flex-basis: 100%;
+    text-align: center;
   }
 }
