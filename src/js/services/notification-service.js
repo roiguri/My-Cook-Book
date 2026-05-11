@@ -87,12 +87,33 @@ class NotificationService {
           { scope: '/firebase-cloud-messaging-push-scope' },
         );
 
-        const { getMessaging, isSupported: fcmIsSupported } = await import('firebase/messaging');
+        const {
+          getMessaging,
+          isSupported: fcmIsSupported,
+          onMessage,
+        } = await import('firebase/messaging');
         if (!(await fcmIsSupported())) {
           console.warn('[notifications] FCM not supported on this browser.');
           return false;
         }
         this._messaging = getMessaging(getFirebaseApp());
+
+        // Foreground message handler. FCM does not auto-display notifications
+        // when the tab is focused — it calls onMessage instead. We route the
+        // display through the same SW registration as the background path so
+        // the SW's notificationclick handler manages navigation uniformly.
+        onMessage(this._messaging, (payload) => {
+          if (!this._swRegistration) return;
+          const data = payload.data || {};
+          const title = data.title || 'Our Kitchen Chronicles';
+          this._swRegistration.showNotification(title, {
+            body: data.body || '',
+            icon: '/img/icon/prod/wooden-spoon-192.png',
+            badge: '/img/icon/prod/wooden-spoon-32.png',
+            data,
+            tag: data.tag || data.type || 'default',
+          });
+        });
 
         // Cache last-known token so we can unregister on sign-out even if
         // getToken() can't be called in time (e.g. permission revoked).
