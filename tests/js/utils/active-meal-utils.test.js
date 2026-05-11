@@ -27,9 +27,8 @@ describe('ActiveMealUtils', () => {
     jest.clearAllMocks();
     ({ FirestoreService } = await import('src/js/services/firestore-service.js'));
     ({ ActiveMealUtils } = await import('src/js/utils/active-meal-utils.js'));
-    ({ arrayUnion, arrayRemove, serverTimestamp, deleteField } = await import(
-      'firebase/firestore'
-    ));
+    ({ arrayUnion, arrayRemove, serverTimestamp, deleteField } =
+      await import('firebase/firestore'));
   });
 
   describe('addToMeal', () => {
