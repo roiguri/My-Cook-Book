@@ -74,6 +74,7 @@ class NotificationService {
         // Register the messaging SW separately from the existing caching SW.
         // Pass Firebase config via URL query params so the SW can initialize
         // without us shipping config in a static file.
+        const iconEnv = import.meta.env.VITE_ICON_PATH || 'prod';
         const params = new URLSearchParams({
           apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
           authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
@@ -81,6 +82,7 @@ class NotificationService {
           storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
           messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
           appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+          badgePath: `/img/icon/${iconEnv}/wooden-spoon-32.png`,
         });
         this._swRegistration = await navigator.serviceWorker.register(
           `${SW_PATH}?${params.toString()}`,
@@ -108,8 +110,8 @@ class NotificationService {
           const title = data.title || 'Our Kitchen Chronicles';
           this._swRegistration.showNotification(title, {
             body: data.body || '',
-            icon: '/img/icon/prod/wooden-spoon-192.png',
-            badge: '/img/icon/prod/wooden-spoon-32.png',
+            icon: '/img/notification-recipe.png',
+            badge: `/img/icon/${iconEnv}/wooden-spoon-32.png`,
             data,
             tag: data.tag || data.type || 'default',
           });

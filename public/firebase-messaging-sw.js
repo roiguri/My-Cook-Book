@@ -26,6 +26,8 @@ firebase.initializeApp({
   appId: params.get('appId'),
 });
 
+const badgePath = params.get('badgePath') || '/img/icon/prod/wooden-spoon-32.png';
+
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
@@ -34,8 +36,8 @@ messaging.onBackgroundMessage((payload) => {
   const title = notification.title || data.title || 'Our Kitchen Chronicles';
   const options = {
     body: notification.body || data.body || '',
-    icon: '/img/icon/prod/wooden-spoon-192.png',
-    badge: '/img/icon/prod/wooden-spoon-32.png',
+    icon: '/img/notification-recipe.png',
+    badge: badgePath,
     data,
     tag: data.tag || data.type || 'default',
   };
