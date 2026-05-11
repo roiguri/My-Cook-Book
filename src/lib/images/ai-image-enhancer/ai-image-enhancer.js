@@ -36,6 +36,14 @@ class AiImageEnhancer extends HTMLElement {
     }
   }
 
+  /**
+   * Public refresh API — reloads the recipe list from Firestore and preserves
+   * the current selection if the recipe still exists.
+   */
+  async refresh() {
+    await this._loadRecipes();
+  }
+
   // ---------------------------------------------------------------------------
   // Modal (lazy, singleton per enhancer instance)
   // ---------------------------------------------------------------------------
@@ -57,7 +65,6 @@ class AiImageEnhancer extends HTMLElement {
   // ---------------------------------------------------------------------------
 
   async _loadRecipes() {
-    this._setStatus('טוען מתכונים...');
     try {
       const all = await FirestoreService.queryDocuments('recipes', {
         where: [['approved', '==', true]],
@@ -65,9 +72,17 @@ class AiImageEnhancer extends HTMLElement {
       this._recipes = all
         .filter((r) => Array.isArray(r.images) && r.images.length > 0)
         .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'he'));
-      this._filteredRecipes = this._recipes;
-      this._setStatus('');
-      this._renderRecipeList();
+
+      // Re-sync the selected recipe to its fresh document (or clear it if gone).
+      if (this._selectedRecipe) {
+        const fresh = this._recipes.find((r) => r.id === this._selectedRecipe.id);
+        this._selectedRecipe = fresh || null;
+        this._renderImageStrip();
+      }
+
+      // Preserve any active search filter; falls back to full list when empty.
+      const term = this.shadowRoot.getElementById('search-input')?.value || '';
+      this._filterRecipes(term);
     } catch (err) {
       console.error('Failed to load recipes:', err);
       this._setStatus('שגיאה בטעינת מתכונים');
