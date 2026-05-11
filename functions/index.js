@@ -549,18 +549,15 @@ exports.enhanceFoodImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (reques
   }
 
   try {
-    // Role gate — match recipe extraction (approved/manager).
+    // Role gate — managers only.
     const userDoc = await db.collection('users').doc(uid).get();
     if (!userDoc.exists) {
       throw new HttpsError('permission-denied', 'User not found.');
     }
 
     const role = userDoc.data().role;
-    if (role !== 'approved' && role !== 'manager') {
-      throw new HttpsError(
-        'permission-denied',
-        'User must be approved or a manager to use this feature.',
-      );
+    if (role !== 'manager') {
+      throw new HttpsError('permission-denied', 'User must be a manager to use this feature.');
     }
 
     return await enhanceFoodImage(image);

@@ -110,10 +110,12 @@ export function generateImageId() {
 export async function deleteImageFiles({ full }) {
   const optimized400 = full.replace(/\.[^.]+$/, '_400x400.webp');
   const optimized1080 = full.replace(/\.[^.]+$/, '_1080x1080.webp');
+  const originalBackup = full.replace(/(\.[^.]+)$/, '_original$1');
   await StorageService.deleteFile(full);
   await Promise.all([
     StorageService.deleteFile(optimized400).catch(() => {}),
     StorageService.deleteFile(optimized1080).catch(() => {}),
+    StorageService.deleteFile(originalBackup).catch(() => {}),
   ]);
 }
 
@@ -288,14 +290,17 @@ export async function migrateImageToCategory(image, recipeId, oldCategory, newCa
     await StorageService.uploadFile(fullBlob, newFullPath);
     await StorageService.deleteFile(image.full);
 
-    // Migrate WebP variants to new path (best effort — may not exist yet if extension hasn't run)
+    // Migrate WebP variants and AI-enhancement backup to new path (best effort)
     const oldOpt400 = image.full.replace(/\.[^.]+$/, '_400x400.webp');
     const oldOpt1080 = image.full.replace(/\.[^.]+$/, '_1080x1080.webp');
+    const oldOriginal = image.full.replace(/(\.[^.]+)$/, '_original$1');
     const newOpt400 = newFullPath.replace(/\.[^.]+$/, '_400x400.webp');
     const newOpt1080 = newFullPath.replace(/\.[^.]+$/, '_1080x1080.webp');
+    const newOriginal = newFullPath.replace(/(\.[^.]+)$/, '_original$1');
     for (const [oldPath, newPath] of [
       [oldOpt400, newOpt400],
       [oldOpt1080, newOpt1080],
+      [oldOriginal, newOriginal],
     ]) {
       try {
         const url = await StorageService.getFileUrl(oldPath);

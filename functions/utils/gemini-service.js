@@ -6,7 +6,7 @@ const geminiApiKey = defineSecret('GEMINI_API_KEY');
 
 // Image generation/editing model (Gemini's "Nano Banana"). Update if a newer
 // image-capable model supersedes this.
-const IMAGE_ENHANCEMENT_MODEL = 'gemini-2.5-flash-image';
+const IMAGE_ENHANCEMENT_MODEL = 'gemini-3.1-flash-image-preview';
 
 const FOOD_STYLIST_PROMPT = `You are a professional food photographer and AI vision expert. Your task is to perform a 'Studio Elevation' on the provided input image. Follow this three-step execution protocol:
 

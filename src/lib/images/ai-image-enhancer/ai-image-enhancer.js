@@ -1,80 +1,113 @@
 /**
  * <ai-image-enhancer>
  *
- * Self-contained component for AI-enhancing a recipe image. The user picks a
- * recipe, picks one of its images, runs the enhancement, then either keeps the
- * result (replacing the recipe image; the previous file is preserved with an
- * `_original` suffix) or discards it.
+ * Manages recipe selection and image picking for AI enhancement.
+ * Shows a scrollable recipe list and, once a recipe is selected, a horizontal
+ * image strip. Clicking an image opens <ai-image-enhance-modal> (lazily
+ * imported and appended to document.body so it is fully decoupled from any
+ * page).
  *
- * Backend access is gated by the `enhanceFoodImage` callable (auth + role).
- * The component itself performs no role check — mount it only where allowed.
+ * Listens for `image-enhanced-saved` from the modal to refresh the affected
+ * recipe's image list without a full reload.
  */
 
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { FirestoreService } from '../../../js/services/firestore-service.js';
-import { StorageService } from '../../../js/services/storage-service.js';
 import { getOptimizedImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
-
-const MAX_INPUT_DIMENSION = 1536; // px, downscale before send to keep payload small
-const JPEG_QUALITY = 0.92;
 
 class AiImageEnhancer extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-
-    this.recipes = [];
-    this.filteredRecipes = [];
-    this.selectedRecipe = null;
-    this.selectedImage = null;
-    this.enhancedResult = null; // { blob, dataUrl, mimeType }
-    this.isLoading = false;
-    this.statusMessage = '';
+    this._recipes = [];
+    this._filteredRecipes = [];
+    this._selectedRecipe = null;
+    this._modal = null;
   }
 
   connectedCallback() {
-    this.render();
-    this.loadRecipes();
+    this._render();
+    this._loadRecipes();
   }
 
-  async loadRecipes() {
-    try {
-      this.setStatus('טוען מתכונים...');
-      const recipes = await FirestoreService.queryDocuments('recipes', {
-        where: [['approved', '==', true]],
-      });
-      this.recipes = recipes
-        .filter((r) => Array.isArray(r.images) && r.images.length > 0)
-        .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'he'));
-      this.filteredRecipes = this.recipes;
-      this.setStatus('');
-      this.renderRecipeList();
-    } catch (error) {
-      console.error('Failed to load recipes:', error);
-      this.setStatus('שגיאה בטעינת מתכונים');
+  disconnectedCallback() {
+    if (this._modal) {
+      this._modal.remove();
+      this._modal = null;
     }
   }
 
-  setStatus(message) {
-    this.statusMessage = message;
-    const el = this.shadowRoot.getElementById('status');
-    if (el) el.textContent = message;
+  // ---------------------------------------------------------------------------
+  // Modal (lazy, singleton per enhancer instance)
+  // ---------------------------------------------------------------------------
+
+  async _getModal() {
+    if (!this._modal) {
+      await import('./ai-image-enhance-modal.js');
+      this._modal = document.createElement('ai-image-enhance-modal');
+      document.body.appendChild(this._modal);
+      this._modal.addEventListener('image-enhanced-saved', (e) => {
+        this._refreshRecipe(e.detail.recipeId);
+      });
+    }
+    return this._modal;
   }
 
-  filterRecipes(term) {
+  // ---------------------------------------------------------------------------
+  // Data
+  // ---------------------------------------------------------------------------
+
+  async _loadRecipes() {
+    this._setStatus('טוען מתכונים...');
+    try {
+      const all = await FirestoreService.queryDocuments('recipes', {
+        where: [['approved', '==', true]],
+      });
+      this._recipes = all
+        .filter((r) => Array.isArray(r.images) && r.images.length > 0)
+        .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'he'));
+      this._filteredRecipes = this._recipes;
+      this._setStatus('');
+      this._renderRecipeList();
+    } catch (err) {
+      console.error('Failed to load recipes:', err);
+      this._setStatus('שגיאה בטעינת מתכונים');
+    }
+  }
+
+  async _refreshRecipe(recipeId) {
+    try {
+      const fresh = await FirestoreService.getDocument('recipes', recipeId);
+      if (!fresh) return;
+      const idx = this._recipes.findIndex((r) => r.id === recipeId);
+      if (idx !== -1) this._recipes[idx] = fresh;
+      if (this._selectedRecipe?.id === recipeId) {
+        this._selectedRecipe = fresh;
+        this._renderImageStrip();
+      }
+      this._filterRecipes(this.shadowRoot.getElementById('search-input')?.value || '');
+    } catch (err) {
+      console.warn('Failed to refresh recipe:', err);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Recipe list
+  // ---------------------------------------------------------------------------
+
+  _filterRecipes(term) {
     const t = (term || '').trim().toLowerCase();
-    this.filteredRecipes = t
-      ? this.recipes.filter((r) => (r.name || '').toLowerCase().includes(t))
-      : this.recipes;
-    this.renderRecipeList();
+    this._filteredRecipes = t
+      ? this._recipes.filter((r) => (r.name || '').toLowerCase().includes(t))
+      : this._recipes;
+    this._renderRecipeList();
   }
 
-  renderRecipeList() {
+  _renderRecipeList() {
     const list = this.shadowRoot.getElementById('recipe-list');
     if (!list) return;
     list.innerHTML = '';
 
-    if (this.filteredRecipes.length === 0) {
+    if (this._filteredRecipes.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'empty';
       empty.textContent = 'אין מתכונים להצגה';
@@ -82,13 +115,11 @@ class AiImageEnhancer extends HTMLElement {
       return;
     }
 
-    for (const recipe of this.filteredRecipes) {
+    for (const recipe of this._filteredRecipes) {
       const item = document.createElement('button');
       item.type = 'button';
       item.className = 'recipe-item';
-      if (this.selectedRecipe && this.selectedRecipe.id === recipe.id) {
-        item.classList.add('selected');
-      }
+      if (this._selectedRecipe?.id === recipe.id) item.classList.add('selected');
 
       const name = document.createElement('span');
       name.className = 'recipe-name';
@@ -100,47 +131,49 @@ class AiImageEnhancer extends HTMLElement {
 
       item.appendChild(name);
       item.appendChild(count);
-      item.addEventListener('click', () => this.handleSelectRecipe(recipe));
+      item.addEventListener('click', () => this._selectRecipe(recipe));
       list.appendChild(item);
     }
   }
 
-  async handleSelectRecipe(recipe) {
-    this.selectedRecipe = recipe;
-    this.selectedImage = null;
-    this.enhancedResult = null;
-    this.renderRecipeList();
-    this.renderEnhancedPreview();
-    await this.renderImageGrid();
-    this.updateActionState();
+  _selectRecipe(recipe) {
+    this._selectedRecipe = recipe;
+    this._renderRecipeList();
+    this._renderImageStrip();
   }
 
-  async renderImageGrid() {
-    const grid = this.shadowRoot.getElementById('image-grid');
-    const wrap = this.shadowRoot.getElementById('image-picker');
-    if (!grid || !wrap) return;
-    grid.innerHTML = '';
+  // ---------------------------------------------------------------------------
+  // Image strip
+  // ---------------------------------------------------------------------------
 
-    if (!this.selectedRecipe) {
-      wrap.style.display = 'none';
+  _renderImageStrip() {
+    const strip = this.shadowRoot.getElementById('image-strip');
+    const wrap = this.shadowRoot.getElementById('strip-wrap');
+    const title = this.shadowRoot.getElementById('strip-title');
+    if (!strip || !wrap) return;
+
+    strip.innerHTML = '';
+
+    if (!this._selectedRecipe) {
+      wrap.hidden = true;
       return;
     }
 
-    wrap.style.display = 'block';
-    const heading = this.shadowRoot.getElementById('image-picker-title');
-    if (heading) heading.textContent = `בחר תמונה — ${this.selectedRecipe.name}`;
+    wrap.hidden = false;
+    if (title) title.textContent = this._selectedRecipe.name;
 
-    for (const image of this.selectedRecipe.images) {
+    for (const image of this._selectedRecipe.images) {
       const tile = document.createElement('button');
       tile.type = 'button';
       tile.className = 'image-tile';
-      if (this.selectedImage && this.selectedImage.id === image.id) {
-        tile.classList.add('selected');
-      }
+
+      const shimmer = document.createElement('div');
+      shimmer.className = 'tile-shimmer';
+      tile.appendChild(shimmer);
 
       const img = document.createElement('img');
       img.alt = image.fileName || image.id;
-      img.loading = 'lazy';
+      img.style.display = 'none';
       tile.appendChild(img);
 
       if (image.isPrimary) {
@@ -150,304 +183,59 @@ class AiImageEnhancer extends HTMLElement {
         tile.appendChild(badge);
       }
 
-      tile.addEventListener('click', () => this.handleSelectImage(image));
-      grid.appendChild(tile);
+      tile.addEventListener('click', () => this._openModal(image));
+      strip.appendChild(tile);
 
       getOptimizedImageUrl(image, '400x400')
         .then((url) => {
-          if (url) img.src = url;
+          if (!url) {
+            shimmer.style.display = 'none';
+            return;
+          }
+          img.onload = () => {
+            img.style.display = 'block';
+            shimmer.style.display = 'none';
+          };
+          img.onerror = () => {
+            shimmer.style.display = 'none';
+          };
+          img.src = url;
         })
-        .catch(() => {});
+        .catch(() => {
+          shimmer.style.display = 'none';
+        });
     }
   }
 
-  handleSelectImage(image) {
-    this.selectedImage = image;
-    this.enhancedResult = null;
-    this.renderImageGrid();
-    this.renderEnhancedPreview();
-    this.updateActionState();
+  async _openModal(image) {
+    const modal = await this._getModal();
+    modal.open(this._selectedRecipe, image);
   }
 
-  updateActionState() {
-    const enhanceBtn = this.shadowRoot.getElementById('enhance-btn');
-    const saveBtn = this.shadowRoot.getElementById('save-btn');
-    const discardBtn = this.shadowRoot.getElementById('discard-btn');
-    if (!enhanceBtn) return;
+  // ---------------------------------------------------------------------------
+  // Status line
+  // ---------------------------------------------------------------------------
 
-    enhanceBtn.disabled = !this.selectedImage || this.isLoading;
-    enhanceBtn.textContent = this.isLoading ? 'מעבד...' : 'שפר תמונה';
-
-    const hasResult = !!this.enhancedResult;
-    saveBtn.style.display = hasResult ? '' : 'none';
-    discardBtn.style.display = hasResult ? '' : 'none';
-    saveBtn.disabled = this.isLoading;
-    discardBtn.disabled = this.isLoading;
+  _setStatus(msg) {
+    const el = this.shadowRoot.getElementById('status');
+    if (el) el.textContent = msg;
   }
 
-  async renderEnhancedPreview() {
-    const beforeImg = this.shadowRoot.getElementById('before-img');
-    const afterImg = this.shadowRoot.getElementById('after-img');
-    const compareWrap = this.shadowRoot.getElementById('compare');
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
 
-    if (!this.selectedImage) {
-      compareWrap.style.display = 'none';
-      return;
-    }
-
-    compareWrap.style.display = 'grid';
-    try {
-      const url = await getOptimizedImageUrl(this.selectedImage, '1080x1080');
-      beforeImg.src = url || '';
-    } catch {
-      beforeImg.src = '';
-    }
-
-    if (this.enhancedResult) {
-      afterImg.src = this.enhancedResult.dataUrl;
-      afterImg.style.opacity = '1';
-    } else {
-      afterImg.removeAttribute('src');
-      afterImg.style.opacity = '0.25';
-    }
-  }
-
-  async enhanceSelectedImage() {
-    if (!this.selectedImage || this.isLoading) return;
-
-    this.isLoading = true;
-    this.enhancedResult = null;
-    this.updateActionState();
-    this.setStatus('שולח לשיפור בעזרת AI...');
-
-    try {
-      const downloadUrl = await StorageService.getFileUrl(this.selectedImage.full);
-      const response = await fetch(downloadUrl);
-      if (!response.ok) throw new Error(`Failed to fetch image (${response.status})`);
-      const sourceBlob = await response.blob();
-
-      const { base64, mimeType } = await this.prepareImagePayload(sourceBlob);
-
-      const functions = getFunctions();
-      const enhanceFn = httpsCallable(functions, 'enhanceFoodImage');
-      const result = await enhanceFn({ image: { base64, mimeType } });
-
-      const data = result?.data;
-      if (!data || !data.base64) {
-        throw new Error('Empty response from enhancement service');
-      }
-
-      const outMime = data.mimeType || 'image/png';
-      const enhancedBlob = await this.base64ToBlob(data.base64, outMime);
-      const dataUrl = `data:${outMime};base64,${data.base64}`;
-
-      this.enhancedResult = { blob: enhancedBlob, dataUrl, mimeType: outMime };
-      this.setStatus('התמונה שופרה. ניתן לשמור או לבטל.');
-    } catch (error) {
-      console.error('Image enhancement failed:', error);
-      this.setStatus(this.formatError(error));
-    } finally {
-      this.isLoading = false;
-      this.updateActionState();
-      this.renderEnhancedPreview();
-    }
-  }
-
-  formatError(error) {
-    const code = error?.code || '';
-    if (code === 'functions/unauthenticated') return 'יש להתחבר כדי להשתמש בתכונה זו.';
-    if (code === 'functions/permission-denied') return 'אין הרשאה — נדרש תפקיד "מאושר" או "מנהל".';
-    return error?.message ? `שגיאה: ${error.message}` : 'שגיאה בשיפור התמונה';
-  }
-
-  async saveEnhancedImage() {
-    if (!this.enhancedResult || !this.selectedRecipe || !this.selectedImage) return;
-
-    this.isLoading = true;
-    this.updateActionState();
-    this.setStatus('שומר את התמונה החדשה...');
-
-    try {
-      const originalPath = this.selectedImage.full;
-      const backupPath = this.makeBackupPath(originalPath);
-
-      // Step 1: Back up the original if no backup exists yet.
-      let backupExists = false;
-      try {
-        await StorageService.getMetadata(backupPath);
-        backupExists = true;
-      } catch {
-        backupExists = false;
-      }
-
-      if (!backupExists) {
-        const originalUrl = await StorageService.getFileUrl(originalPath);
-        const originalResponse = await fetch(originalUrl);
-        if (!originalResponse.ok) {
-          throw new Error(`Failed to fetch original (${originalResponse.status})`);
-        }
-        const originalBlob = await originalResponse.blob();
-        await StorageService.uploadFile(originalBlob, backupPath);
-      }
-
-      // Step 2: Overwrite the original path with the enhanced image. Storage
-      // triggers will regenerate WebP variants automatically.
-      await StorageService.uploadFile(this.enhancedResult.blob, originalPath);
-
-      // Step 3: Best-effort cleanup of stale WebP variants so the carousel
-      // reloads from the new full-size file until the trigger republishes them.
-      await Promise.all([
-        StorageService.deleteFile(originalPath.replace(/\.[^.]+$/, '_400x400.webp')).catch(
-          () => {},
-        ),
-        StorageService.deleteFile(originalPath.replace(/\.[^.]+$/, '_1080x1080.webp')).catch(
-          () => {},
-        ),
-      ]);
-
-      this.setStatus('התמונה הוחלפה. התמונה המקורית נשמרה כגיבוי.');
-      this.enhancedResult = null;
-      this.dispatchEvent(
-        new CustomEvent('image-enhanced-saved', {
-          bubbles: true,
-          composed: true,
-          detail: {
-            recipeId: this.selectedRecipe.id,
-            imageId: this.selectedImage.id,
-            backupPath,
-            backupCreated: !backupExists,
-          },
-        }),
-      );
-
-      // Reload the recipe so subsequent enhancements use fresh data.
-      await this.refreshSelectedRecipe();
-    } catch (error) {
-      console.error('Save failed:', error);
-      this.setStatus(this.formatError(error));
-    } finally {
-      this.isLoading = false;
-      this.updateActionState();
-      this.renderEnhancedPreview();
-    }
-  }
-
-  async refreshSelectedRecipe() {
-    if (!this.selectedRecipe) return;
-    try {
-      const fresh = await FirestoreService.getDocument('recipes', this.selectedRecipe.id);
-      if (fresh) {
-        const idx = this.recipes.findIndex((r) => r.id === this.selectedRecipe.id);
-        if (idx !== -1) this.recipes[idx] = fresh;
-        this.selectedRecipe = fresh;
-        this.selectedImage = null;
-        this.filterRecipes(this.shadowRoot.getElementById('search-input')?.value || '');
-        await this.renderImageGrid();
-        this.renderEnhancedPreview();
-      }
-    } catch (error) {
-      console.warn('Failed to refresh recipe:', error);
-    }
-  }
-
-  discardEnhancedImage() {
-    this.enhancedResult = null;
-    this.setStatus('');
-    this.updateActionState();
-    this.renderEnhancedPreview();
-  }
-
-  makeBackupPath(fullPath) {
-    return fullPath.replace(/(\.[^.]+)$/, '_original$1');
-  }
-
-  async prepareImagePayload(blob) {
-    // Downscale large images so the callable payload stays well under 10MB.
-    const bitmap = await this.blobToBitmap(blob);
-    const { width, height } = this.fitWithin(
-      bitmap.width,
-      bitmap.height,
-      MAX_INPUT_DIMENSION,
-      MAX_INPUT_DIMENSION,
-    );
-
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(bitmap, 0, 0, width, height);
-    bitmap.close && bitmap.close();
-
-    const outMime = 'image/jpeg';
-    const dataUrl = canvas.toDataURL(outMime, JPEG_QUALITY);
-    const base64 = dataUrl.split(',')[1];
-    return { base64, mimeType: outMime };
-  }
-
-  fitWithin(srcW, srcH, maxW, maxH) {
-    const ratio = Math.min(1, maxW / srcW, maxH / srcH);
-    return { width: Math.round(srcW * ratio), height: Math.round(srcH * ratio) };
-  }
-
-  async blobToBitmap(blob) {
-    if (typeof createImageBitmap === 'function') {
-      return await createImageBitmap(blob);
-    }
-    return await new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(blob);
-      const img = new Image();
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        resolve(img);
-      };
-      img.onerror = (err) => {
-        URL.revokeObjectURL(url);
-        reject(err);
-      };
-      img.src = url;
-    });
-  }
-
-  async base64ToBlob(base64, mimeType) {
-    const res = await fetch(`data:${mimeType};base64,${base64}`);
-    return await res.blob();
-  }
-
-  render() {
+  _render() {
     this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
           font-family: var(--font-ui-he, sans-serif);
           color: var(--ink, #1f1d18);
+          direction: rtl;
         }
 
-        .layout {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-          gap: 16px;
-        }
-
-        @media (max-width: 720px) {
-          .layout { grid-template-columns: 1fr; }
-        }
-
-        .panel {
-          background: var(--surface-0, #fff);
-          border: 1.5px solid var(--hairline, rgba(31, 29, 24, 0.08));
-          border-radius: var(--r-md, 14px);
-          padding: 12px;
-        }
-
-        .panel h3 {
-          margin: 0 0 8px;
-          font-family: var(--font-ui-he, sans-serif);
-          font-size: 14px;
-          font-weight: 600;
-          color: var(--ink-3, rgba(31, 29, 24, 0.55));
-          letter-spacing: 0.04em;
-        }
-
+        /* ── Search ── */
         .search-input {
           width: 100%;
           padding: 8px 12px;
@@ -462,41 +250,65 @@ class AiImageEnhancer extends HTMLElement {
           margin-bottom: 8px;
         }
 
+        .search-input:focus {
+          border-color: var(--primary, #6a994e);
+          box-shadow: var(--ring, 0 0 0 3px rgba(106,153,78,0.18));
+        }
+
+        /* ── Recipe list — mirrors scrolling-list card style ── */
         .recipe-list {
-          max-height: 360px;
+          height: 200px;
           overflow-y: auto;
           display: flex;
           flex-direction: column;
           gap: 4px;
+          padding: 2px 2px 6px;
+          scrollbar-width: thin;
+          scrollbar-color: var(--hairline-strong, rgba(31,29,24,0.15)) transparent;
+        }
+
+        .recipe-list::-webkit-scrollbar { width: 4px; }
+        .recipe-list::-webkit-scrollbar-track { background: transparent; }
+        .recipe-list::-webkit-scrollbar-thumb {
+          background: var(--hairline-strong, rgba(31,29,24,0.15));
+          border-radius: 2px;
         }
 
         .recipe-item {
+          flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 8px;
-          padding: 8px 10px;
-          background: transparent;
-          border: 1.5px solid transparent;
-          border-radius: var(--r-sm, 10px);
+          width: 100%;
+          padding: 10px 14px;
+          background: var(--surface-1, #fff);
+          border: 1px solid var(--hairline, rgba(31, 29, 24, 0.08));
+          border-radius: var(--r-sm, 8px);
           cursor: pointer;
           text-align: start;
           font-family: var(--font-ui-he, sans-serif);
+          font-size: 14px;
           color: var(--ink, #1f1d18);
-          transition: background-color var(--dur-1, 160ms) var(--ease, ease);
+          line-height: 1.4;
+          box-sizing: border-box;
+          transition: border-color var(--dur-1, 160ms), box-shadow var(--dur-1, 160ms);
         }
 
         .recipe-item:hover {
-          background: var(--surface-2, #f0ede6);
+          border-color: var(--hairline-strong, rgba(31,29,24,0.15));
+          box-shadow: var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
         }
 
         .recipe-item.selected {
-          background: rgba(106, 153, 78, 0.08);
           border-color: var(--primary, #6a994e);
+          box-shadow: 0 0 0 1px var(--primary, #6a994e),
+                      var(--shadow-1, 0 1px 4px rgba(31,29,24,0.08));
+          background: rgba(106, 153, 78, 0.04);
         }
 
         .recipe-name {
-          font-size: 13px;
+          flex: 1;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -518,29 +330,56 @@ class AiImageEnhancer extends HTMLElement {
           font-size: 13px;
         }
 
-        .image-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        /* ── Image strip ── */
+        .strip-wrap {
+          margin-top: 14px;
+        }
+
+        .strip-label {
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--ink-3, rgba(31, 29, 24, 0.55));
+          margin-bottom: 8px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .image-strip {
+          display: flex;
           gap: 8px;
+          overflow-x: auto;
+          scroll-snap-type: x mandatory;
+          padding-bottom: 6px;
+          scrollbar-width: thin;
+          scrollbar-color: var(--hairline-strong, rgba(31,29,24,0.15)) transparent;
+        }
+
+        .image-strip::-webkit-scrollbar { height: 4px; }
+        .image-strip::-webkit-scrollbar-track { background: transparent; }
+        .image-strip::-webkit-scrollbar-thumb {
+          background: var(--hairline-strong, rgba(31,29,24,0.15));
+          border-radius: 2px;
         }
 
         .image-tile {
+          flex-shrink: 0;
+          scroll-snap-align: start;
           position: relative;
-          aspect-ratio: 1 / 1;
-          border: 2px solid transparent;
+          width: 88px;
+          height: 88px;
+          border: 2px solid var(--hairline, rgba(31,29,24,0.08));
           border-radius: var(--r-sm, 10px);
           padding: 0;
           background: var(--surface-2, #f0ede6);
           cursor: pointer;
           overflow: hidden;
-          transition: border-color var(--dur-1, 160ms) var(--ease, ease);
+          transition: border-color var(--dur-1, 160ms), box-shadow var(--dur-1, 160ms);
         }
 
         .image-tile:hover {
-          border-color: var(--hairline-strong, rgba(31, 29, 24, 0.15));
-        }
-
-        .image-tile.selected {
           border-color: var(--primary, #6a994e);
           box-shadow: 0 0 0 2px rgba(106, 153, 78, 0.2);
         }
@@ -552,6 +391,24 @@ class AiImageEnhancer extends HTMLElement {
           display: block;
         }
 
+        .tile-shimmer {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            90deg,
+            var(--surface-2, #f0ede6) 0%,
+            rgba(255, 255, 255, 0.65) 50%,
+            var(--surface-2, #f0ede6) 100%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.4s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
         .primary-badge {
           position: absolute;
           top: 4px;
@@ -561,155 +418,38 @@ class AiImageEnhancer extends HTMLElement {
           font-size: 10px;
           padding: 2px 6px;
           border-radius: var(--r-pill, 999px);
+          pointer-events: none;
         }
 
-        .compare {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-          margin-top: 12px;
-        }
-
-        @media (max-width: 540px) {
-          .compare { grid-template-columns: 1fr; }
-        }
-
-        .compare-pane {
-          background: var(--surface-2, #f0ede6);
-          border-radius: var(--r-md, 14px);
-          overflow: hidden;
-          aspect-ratio: 1 / 1;
-          position: relative;
-        }
-
-        .compare-pane img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          background: var(--surface-2, #f0ede6);
-          transition: opacity var(--dur-2, 280ms) var(--ease, ease);
-        }
-
-        .compare-label {
-          position: absolute;
-          top: 6px;
-          inset-inline-start: 6px;
-          background: rgba(31, 29, 24, 0.7);
-          color: #fff;
-          font-size: 11px;
-          padding: 2px 8px;
-          border-radius: var(--r-pill, 999px);
-        }
-
-        .actions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-          margin-top: 12px;
-        }
-
-        button.action {
-          font-family: var(--font-ui-he, sans-serif);
-          font-size: 13px;
-          font-weight: 500;
-          padding: 8px 18px;
-          border-radius: var(--r-pill, 999px);
-          cursor: pointer;
-          border: 1.5px solid transparent;
-          transition:
-            background-color var(--dur-1, 160ms) var(--ease, ease),
-            color var(--dur-1, 160ms) var(--ease, ease);
-        }
-
-        button.action:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        button.primary {
-          background: var(--primary, #6a994e);
-          color: #fff;
-        }
-
-        button.primary:hover:not(:disabled) {
-          background: var(--primary-dark, #557a3e);
-        }
-
-        button.ghost {
-          background: transparent;
-          color: var(--primary-dark, #557a3e);
-          border-color: var(--primary-dark, #557a3e);
-        }
-
-        button.ghost:hover:not(:disabled) {
-          background: rgba(106, 153, 78, 0.08);
-        }
-
-        button.danger {
-          background: transparent;
-          color: var(--secondary-dark, #bc4749);
-          border-color: var(--secondary-dark, #bc4749);
-        }
-
-        button.danger:hover:not(:disabled) {
-          background: rgba(188, 71, 73, 0.08);
-        }
-
+        /* ── Status ── */
         .status {
-          margin-top: 10px;
+          margin-top: 8px;
           font-size: 12px;
           color: var(--ink-3, rgba(31, 29, 24, 0.55));
           min-height: 16px;
         }
       </style>
 
-      <div class="layout">
-        <div class="panel">
-          <h3>בחר מתכון</h3>
-          <input id="search-input" class="search-input" type="text" placeholder="חיפוש מתכון..." />
-          <div id="recipe-list" class="recipe-list"></div>
-        </div>
+      <input
+        id="search-input"
+        class="search-input"
+        type="text"
+        placeholder="חיפוש מתכון..."
+        dir="rtl"
+      />
+      <div id="recipe-list" class="recipe-list"></div>
 
-        <div class="panel">
-          <div id="image-picker" style="display: none;">
-            <h3 id="image-picker-title">בחר תמונה</h3>
-            <div id="image-grid" class="image-grid"></div>
-          </div>
-
-          <div id="compare" class="compare" style="display: none;">
-            <div class="compare-pane">
-              <span class="compare-label">לפני</span>
-              <img id="before-img" alt="לפני" />
-            </div>
-            <div class="compare-pane">
-              <span class="compare-label">אחרי</span>
-              <img id="after-img" alt="אחרי" style="opacity: 0.25;" />
-            </div>
-          </div>
-
-          <div class="actions">
-            <button id="enhance-btn" class="action primary" disabled>שפר תמונה</button>
-            <button id="save-btn" class="action ghost" style="display: none;">שמור והחלף</button>
-            <button id="discard-btn" class="action danger" style="display: none;">בטל</button>
-          </div>
-
-          <div id="status" class="status"></div>
-        </div>
+      <div id="strip-wrap" class="strip-wrap" hidden>
+        <div id="strip-title" class="strip-label"></div>
+        <div id="image-strip" class="image-strip"></div>
       </div>
+
+      <div id="status" class="status"></div>
     `;
 
     this.shadowRoot.getElementById('search-input').addEventListener('input', (e) => {
-      this.filterRecipes(e.target.value);
+      this._filterRecipes(e.target.value);
     });
-    this.shadowRoot
-      .getElementById('enhance-btn')
-      .addEventListener('click', () => this.enhanceSelectedImage());
-    this.shadowRoot
-      .getElementById('save-btn')
-      .addEventListener('click', () => this.saveEnhancedImage());
-    this.shadowRoot
-      .getElementById('discard-btn')
-      .addEventListener('click', () => this.discardEnhancedImage());
   }
 }
 
