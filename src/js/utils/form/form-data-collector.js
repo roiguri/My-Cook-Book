@@ -209,8 +209,7 @@ function collectMediaInstructions(shadowRoot) {
 function collectComments(shadowRoot) {
   const commentsList = shadowRoot.getElementById('comments-list');
   if (commentsList && typeof commentsList.getData === 'function') {
-    const comments = commentsList.getData();
-    return comments.length > 0 ? comments : null;
+    return commentsList.getData();
   }
 
   console.warn('Comments list component not found or missing getData method');

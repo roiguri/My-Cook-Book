@@ -338,7 +338,7 @@ describe('form-data-collector', () => {
 
       const result = collectRecipeFormData(mockShadowRoot);
 
-      expect(result.comments).toBeUndefined();
+      expect(result.comments).toEqual([]);
     });
   });
 
