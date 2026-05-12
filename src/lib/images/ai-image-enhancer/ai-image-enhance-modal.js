@@ -192,10 +192,11 @@ class AiImageEnhanceModal extends HTMLElement {
     const discardBtn = this.shadowRoot.getElementById('discard-btn');
     if (!enhanceBtn) return;
 
+    const hasResult = !!this._enhancedResult;
+    enhanceBtn.style.display = hasResult ? 'none' : '';
     enhanceBtn.disabled = this._isLoading;
     enhanceBtn.textContent = this._isLoading ? 'מעבד...' : 'שפר תמונה';
 
-    const hasResult = !!this._enhancedResult;
     saveBtn.style.display = hasResult ? '' : 'none';
     discardBtn.style.display = hasResult ? '' : 'none';
     saveBtn.disabled = this._isLoading;
