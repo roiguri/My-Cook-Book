@@ -673,6 +673,29 @@ class RecipeFormComponent extends HTMLElement {
   }
 
   /**
+   * Public API: Show an error in the top-of-form error banner. Used by hosts
+   * (propose/edit components) to surface async failures (image/media upload,
+   * Firestore write, etc.) in the same spot as field-validation errors.
+   * @param {string} message
+   */
+  showFormError(message) {
+    const el = this.shadowRoot.querySelector('.recipe-form__error-message');
+    if (!el) return;
+    el.textContent = message;
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /**
+   * Public API: Hide the top-of-form error banner.
+   */
+  hideFormError() {
+    const el = this.shadowRoot.querySelector('.recipe-form__error-message');
+    if (!el) return;
+    el.style.display = 'none';
+  }
+
+  /**
    * Public API: Upload pending media instructions
    * Delegates to the media-instructions-editor component without exposing internal structure
    * @param {string} recipeId - Recipe ID for storage path

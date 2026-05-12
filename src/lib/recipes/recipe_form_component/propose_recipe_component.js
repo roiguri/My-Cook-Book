@@ -96,9 +96,8 @@ class ProposeRecipeComponent extends HTMLElement {
             user?.uid || 'anonymous',
           );
         } catch (uploadError) {
-          // Surface the real Firebase error code in the image-handler so the user sees
-          // a meaningful message right next to the upload area (not just a fleeting toast).
-          this.showImageUploadError(uploadError);
+          // Let the outer catch route the real Firebase error to the form's
+          // top-of-form error banner via showErrorMessage().
           throw uploadError;
         }
         recipeDataForFirestore.images = imageUploadResults;
@@ -214,17 +213,14 @@ class ProposeRecipeComponent extends HTMLElement {
 
   showErrorMessage(error) {
     logError(error, 'Recipe proposal');
-    showToast(getErrorMessage(error), 'error', 5000);
-  }
-
-  showImageUploadError(error) {
-    // Surface the real Firebase error inline on the image-handler so the user sees
-    // the failure right next to the upload area rather than a brief toast.
+    const message = getErrorMessage(error);
+    // Use the form's top-of-form error banner so async failures appear in the
+    // same spot users already look for validation errors.
     const formComponent = this.shadowRoot.querySelector('recipe-form-component');
-    const imageHandler = formComponent?.shadowRoot?.getElementById('recipe-images');
-    if (imageHandler && typeof imageHandler.showError === 'function') {
-      // 0 = sticky; the user needs to see the failure long enough to act on it.
-      imageHandler.showError(getErrorMessage(error), 0);
+    if (formComponent && typeof formComponent.showFormError === 'function') {
+      formComponent.showFormError(message);
+    } else {
+      showToast(message, 'error', 5000);
     }
   }
 
