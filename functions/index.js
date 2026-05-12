@@ -4,7 +4,7 @@ const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, FieldValue, Timestamp } = require('firebase-admin/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const sharp = require('sharp');
-const { extractRecipeFromImage, extractRecipeFromUrl } = require('./utils/gemini-service');
+const { extractRecipeFromImage, extractRecipeFromUrl, enhanceImage } = require('./utils/gemini-service');
 
 // Initialize Firebase Admin
 initializeApp();
@@ -617,5 +617,41 @@ exports.extractRecipeFromUrl = onCall({ secrets: ['GEMINI_API_KEY'] }, async (re
       throw error;
     }
     throw new HttpsError('internal', 'Recipe extraction from URL failed', error.message);
+  }
+});
+
+exports.enhanceRecipeImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { uid } = request.auth;
+  const { image, mimeType } = request.data;
+
+  if (!image || typeof image !== 'string') {
+    throw new HttpsError('invalid-argument', 'The function must be called with a base64 image string.');
+  }
+
+  try {
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      throw new HttpsError('permission-denied', 'User not found.');
+    }
+
+    const userData = userDoc.data();
+    const role = userData.role;
+
+    if (role !== 'approved' && role !== 'manager') {
+      throw new HttpsError('permission-denied', 'User must be approved or a manager to use this feature.');
+    }
+
+    const enhancedImageBase64 = await enhanceImage(image, mimeType);
+    return { enhancedImage: enhancedImageBase64 };
+  } catch (error) {
+    console.error('Error enhancing image:', error);
+    if (error.code && error.details) {
+      throw error;
+    }
+    throw new HttpsError('internal', 'Image enhancement failed', error.message);
   }
 });

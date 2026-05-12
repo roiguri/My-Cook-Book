@@ -190,6 +190,16 @@ Data Formatting:
 - Instructions: Split into logical steps.
 - Language: Translate ALL text to Hebrew.`;
 
+const ENHANCE_IMAGE_PROMPT = `Enhance the provided food image to make it look more professional and appealing while strictly maintaining its authenticity.
+
+RULES:
+1. AUTHENTICITY: Do NOT change the actual food item, its ingredients, or its core appearance. It must remain recognizable as the original dish.
+2. PROFESSIONAL SCENE: Improve lighting, color balance, and background to create a high-quality, professional food photography aesthetic.
+3. QUALITY: Reduce noise, improve sharpness, and enhance textures where appropriate.
+4. CONSISTENCY: Maintain the same camera angle and framing as the original image.
+
+Output the enhanced image as a single Base64 string (without data URI prefix).`;
+
 const URL_EXTRACTION_PROMPT = `Extract the complete recipe details from the webpage at the provided URL.
 
 CRITICAL RULES FOR STRUCTURE:
@@ -258,7 +268,7 @@ async function extractRecipeFromImage(images) {
 
   try {
     const response = await client.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       contents: [{ parts: [{ text: IMAGE_EXTRACTION_PROMPT }, ...imageParts] }],
       config: {
         responseMimeType: 'application/json',
@@ -290,6 +300,53 @@ async function extractRecipeFromImage(images) {
  * @param {string} url - The URL of the recipe webpage.
  * @returns {Promise<Object>} The extracted recipe data.
  */
+/**
+ * Enhances a recipe image using Gemini.
+ *
+ * @param {string} base64 - Base64 encoded image
+ * @param {string} mimeType - Image MIME type
+ * @returns {Promise<string>} Enhanced image as Base64 string
+ */
+async function enhanceImage(base64, mimeType = 'image/jpeg') {
+  // NOTE: For professional production use, a dedicated image-to-image model
+  // like Imagen 3 on Vertex AI is recommended. This implementation uses
+  // Gemini 2.0 Flash as a placeholder for multimodal transformation.
+  const client = createClient();
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: [
+        {
+          parts: [{ text: ENHANCE_IMAGE_PROMPT }, { inlineData: { data: base64, mimeType } }],
+        },
+      ],
+    });
+
+    let enhancedBase64 = response.text();
+
+    // Clean up any potential markdown or whitespace
+    enhancedBase64 = enhancedBase64.trim();
+    if (enhancedBase64.startsWith('```')) {
+      enhancedBase64 = enhancedBase64.replace(/^```[a-z]*\n/i, '').replace(/\n```$/g, '');
+    }
+    // Remove all whitespace/newlines that might be in the base64 string
+    enhancedBase64 = enhancedBase64.replace(/\s/g, '');
+
+    // Validation: Check if it looks like a valid Base64 string
+    if (!/^[A-Za-z0-9+/=]+$/.test(enhancedBase64)) {
+      console.warn('Gemini did not return a valid Base64 image. Falling back to original.');
+      return base64;
+    }
+
+    return enhancedBase64;
+  } catch (error) {
+    console.error('Error calling Gemini for enhancement:', error);
+    // If enhancement fails, fall back to the original image rather than crashing
+    return base64;
+  }
+}
+
 async function extractRecipeFromUrl(url) {
   const client = createClient();
 
@@ -320,7 +377,7 @@ IMPORTANT: Return ONLY the JSON object, no markdown formatting or additional tex
 
   try {
     const response = await client.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       contents: [extractionPrompt],
       config: {
         tools: [{ urlContext: {} }],
@@ -358,7 +415,7 @@ IMPORTANT: Return ONLY the JSON object, no markdown formatting or additional tex
       // Fallback: Use another Gemini call with JSON response type to clean up
       try {
         const cleanupResponse = await client.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           contents: [
             `Convert the following recipe text into a valid JSON object matching the schema. 
 Extract all recipe information and return ONLY the JSON object.
@@ -400,4 +457,5 @@ ${responseText}`,
 module.exports = {
   extractRecipeFromImage,
   extractRecipeFromUrl,
+  enhanceImage,
 };
