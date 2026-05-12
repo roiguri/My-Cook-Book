@@ -582,7 +582,11 @@ class AiImageEnhanceModal extends HTMLElement {
         }
 
         @media (max-width: 540px) {
-          .title { font-size: 15px; padding-inline-end: 36px; }
+          .title {
+            font-size: 15px;
+            padding-inline-end: 36px;
+            margin-bottom: 10px;
+          }
         }
 
         .compare {
@@ -591,8 +595,8 @@ class AiImageEnhanceModal extends HTMLElement {
           gap: 12px;
         }
 
-        @media (max-width: 480px) {
-          .compare { grid-template-columns: 1fr; }
+        @media (max-width: 540px) {
+          .compare { gap: 8px; }
         }
 
         .compare-pane {
@@ -698,10 +702,10 @@ class AiImageEnhanceModal extends HTMLElement {
 
         @media (max-width: 540px) {
           .advanced-body {
-            grid-template-columns: 1fr;
             padding: 0 12px 12px;
+            gap: 8px 10px;
           }
-          .advanced-title { padding: 10px 12px 6px; }
+          .advanced-title { padding: 8px 12px 4px; }
         }
 
         .param-field {
