@@ -42,6 +42,7 @@ export default {
     this.setupImageApprovalListeners();
     this.setupRefreshIconListeners();
     this.setupEditRecipeListener();
+    this.setupImageEnhancementListener();
     this.setupNotificationsBanner(currentUser);
   },
 
@@ -74,6 +75,7 @@ export default {
       import('../../lib/utilities/modal/modal.js'),
       import('../../lib/utilities/loading-spinner/loading-spinner.js'),
       import('../../lib/images/image-handler.js'),
+      import('../../lib/images/ai-image-enhancer/ai-image-enhancer.js'),
     ]);
   },
 
@@ -165,6 +167,15 @@ export default {
       console.log('Recipe updated:', event.detail.recipeId);
       // Refresh both all recipes and pending recipes (edits require re-approval)
       this.refreshManager.refreshRecipes(600);
+    });
+  },
+
+  setupImageEnhancementListener() {
+    // Bubbles up from <ai-image-enhance-modal> on successful save. The enhancer
+    // refreshes itself for the affected recipe; here we refresh peer sections
+    // that might surface the same recipe's images (currently all-recipes).
+    document.addEventListener('image-enhanced-saved', () => {
+      this.refreshManager.refreshDashboards([DASHBOARD_SECTIONS.ALL_RECIPES]);
     });
   },
 
@@ -675,6 +686,17 @@ export default {
     console.log('Approved image IDs:', event.detail.imageIds);
     // Refresh both pending images and all recipes lists
     this.refreshManager.refreshImages();
+  },
+
+  /**
+   * Image Enhancement section refresh — delegates to the <ai-image-enhancer>
+   * component's public refresh() method.
+   */
+  async loadImageEnhancement() {
+    const enhancer = document.getElementById('ai-image-enhancer');
+    if (enhancer && typeof enhancer.refresh === 'function') {
+      await enhancer.refresh();
+    }
   },
 
   handleImagesRejected(event) {

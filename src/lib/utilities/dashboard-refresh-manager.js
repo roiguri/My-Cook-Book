@@ -8,6 +8,7 @@ export const DASHBOARD_SECTIONS = {
   ALL_RECIPES: 'all-recipes',
   PENDING_RECIPES: 'pending-recipes',
   PENDING_IMAGES: 'pending-images',
+  IMAGE_ENHANCEMENT: 'image-enhancement',
   FAILED_URLS: 'failed-urls',
 };
 
@@ -123,6 +124,9 @@ export class DashboardRefreshManager {
       case DASHBOARD_SECTIONS.PENDING_IMAGES:
         await this.controller.loadPendingImages();
         break;
+      case DASHBOARD_SECTIONS.IMAGE_ENHANCEMENT:
+        await this.controller.loadImageEnhancement();
+        break;
       case DASHBOARD_SECTIONS.FAILED_URLS:
         await this.controller.loadFailedUrls();
         break;
@@ -138,7 +142,11 @@ export class DashboardRefreshManager {
    */
   async refreshRecipes(delay = 0) {
     await this.refreshDashboards(
-      [DASHBOARD_SECTIONS.ALL_RECIPES, DASHBOARD_SECTIONS.PENDING_RECIPES],
+      [
+        DASHBOARD_SECTIONS.ALL_RECIPES,
+        DASHBOARD_SECTIONS.PENDING_RECIPES,
+        DASHBOARD_SECTIONS.IMAGE_ENHANCEMENT,
+      ],
       delay,
     );
   }
@@ -150,7 +158,11 @@ export class DashboardRefreshManager {
    */
   async refreshImages(delay = 0) {
     await this.refreshDashboards(
-      [DASHBOARD_SECTIONS.ALL_RECIPES, DASHBOARD_SECTIONS.PENDING_IMAGES],
+      [
+        DASHBOARD_SECTIONS.ALL_RECIPES,
+        DASHBOARD_SECTIONS.PENDING_IMAGES,
+        DASHBOARD_SECTIONS.IMAGE_ENHANCEMENT,
+      ],
       delay,
     );
   }
