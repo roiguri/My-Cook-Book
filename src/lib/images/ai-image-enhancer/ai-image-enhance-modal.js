@@ -294,9 +294,10 @@ class AiImageEnhanceModal extends HTMLElement {
   }
 
   _updateActions() {
-    const enhanceBtn = this.shadowRoot.getElementById('enhance-btn');
-    const saveBtn = this.shadowRoot.getElementById('save-btn');
-    const discardBtn = this.shadowRoot.getElementById('discard-btn');
+    const sr = this.shadowRoot;
+    const enhanceBtn = sr.getElementById('enhance-btn');
+    const saveBtn = sr.getElementById('save-btn');
+    const discardBtn = sr.getElementById('discard-btn');
     if (!enhanceBtn) return;
 
     const hasResult = !!this._enhancedResult;
@@ -308,6 +309,17 @@ class AiImageEnhanceModal extends HTMLElement {
     discardBtn.style.display = hasResult ? '' : 'none';
     saveBtn.disabled = this._isLoading;
     discardBtn.disabled = this._isLoading;
+
+    // Lock the parameter dropdowns + free-text once a result is showing — they
+    // belong to the next enhance call, not the current one. Discard frees them
+    // again (it clears _enhancedResult and triggers _updateActions).
+    const formDisabled = this._isLoading || hasResult;
+    for (const axis of PARAMETER_AXES) {
+      const sel = sr.getElementById(`param-${axis}`);
+      if (sel) sel.disabled = formDisabled;
+    }
+    const ta = sr.getElementById('free-text');
+    if (ta) ta.disabled = formDisabled;
   }
 
   // ---------------------------------------------------------------------------
@@ -705,6 +717,13 @@ class AiImageEnhanceModal extends HTMLElement {
         .free-text-field textarea:focus {
           border-color: var(--primary, #6a994e);
           box-shadow: var(--ring, 0 0 0 3px rgba(106, 153, 78, 0.18));
+        }
+
+        .param-field select:disabled,
+        .free-text-field textarea:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+          background: var(--surface-2, #f0ede6);
         }
 
         .free-text-field {
