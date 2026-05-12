@@ -1,16 +1,20 @@
 import { generateImageId } from '../../../js/utils/recipes/recipe-image-utils.js';
-import { uploadZoneStyles } from '../../../styles/components/upload-zone-styles.js';
+import '../upload-zone/upload-zone.js';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 class ImageHandler extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.maxFileSize = 5 * 1024 * 1024; // 5MB
-    this.allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     this.images = [];
     this.maxImages = 5;
     this.draggedImage = null;
     this.removedImages = [];
+
+    this.handleAccepted = this.handleAccepted.bind(this);
+    this.handleRejected = this.handleRejected.bind(this);
   }
 
   static get observedAttributes() {
@@ -39,6 +43,10 @@ class ImageHandler extends HTMLElement {
     }
   }
 
+  get uploadZoneHint() {
+    return `(מקסימום ${this.maxImages} תמונות, גודל מקסימלי 5MB לתמונה)`;
+  }
+
   render() {
     this.shadowRoot.innerHTML = `
       <style>
@@ -49,15 +57,7 @@ class ImageHandler extends HTMLElement {
           box-sizing: border-box;
         }
 
-        ${uploadZoneStyles}
-
-        :host([hide-upload]) .upload-zone { display: none; }
-
-        .selected-files {
-          margin-top: 10px;
-          font-size: 12px;
-          color: var(--ink-3, rgba(31,29,24,0.55));
-        }
+        :host([hide-upload]) upload-zone { display: none; }
 
         .preview-container {
           position: relative;
@@ -199,16 +199,6 @@ class ImageHandler extends HTMLElement {
           transition: width 0.3s ease;
         }
 
-        .error-message {
-          display: none;
-        }
-
-        .status-message {
-          margin-top: 6px;
-          font-size: 12px;
-          color: var(--ink-3, rgba(31,29,24,0.55));
-        }
-
         .drop-indicator {
           position: absolute;
           width: calc(100% - 2rem);
@@ -263,19 +253,24 @@ class ImageHandler extends HTMLElement {
           font-family: var(--font-ui-he, sans-serif);
           display: none;
         }
+
+        .selected-files {
+          margin-top: 10px;
+          font-size: 12px;
+          color: var(--ink-3, rgba(31,29,24,0.55));
+        }
       </style>
 
       <div class="image-handler">
         <div class="error-container"></div>
-        <div class="upload-zone" data-disabled="false">
-          גרור תמונות לכאן או לחץ להעלאה
-          <div class="status-message">
-            (מקסימום ${this.maxImages} תמונות, גודל מקסימלי 5MB לתמונה)
-          </div>
-          <div class="selected-files"></div>
-        </div>
-        <input type="file" class="file-input" accept="image/jpeg,image/png,image/webp" multiple>
-        <div class="error-message"></div>
+        <upload-zone
+          accept="${ALLOWED_TYPES.join(',')}"
+          multiple
+          max-size="${MAX_FILE_SIZE}"
+          label="גרור תמונות לכאן או לחץ להעלאה"
+          hint="${this.uploadZoneHint}">
+        </upload-zone>
+        <div class="selected-files"></div>
         <div class="preview-container"></div>
       </div>
     `;
@@ -290,47 +285,11 @@ class ImageHandler extends HTMLElement {
   }
 
   setupEventListeners() {
-    const uploadArea = this.shadowRoot.querySelector('.upload-zone');
-    const fileInput = this.shadowRoot.querySelector('.file-input');
+    const uploadZone = this.shadowRoot.querySelector('upload-zone');
+    uploadZone.addEventListener('upload-files-accepted', this.handleAccepted);
+    uploadZone.addEventListener('upload-files-rejected', this.handleRejected);
 
-    // Click to upload
-    uploadArea.addEventListener('click', () => {
-      if (uploadArea.getAttribute('data-disabled') !== 'true') {
-        fileInput.click();
-      }
-    });
-
-    // File input change
-    fileInput.addEventListener('change', (e) => {
-      this.handleFiles(Array.from(e.target.files));
-      fileInput.value = ''; // Reset input
-    });
-
-    // Drag and drop
-    uploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      if (uploadArea.getAttribute('data-disabled') !== 'true') {
-        uploadArea.classList.add('drag-over');
-      }
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('drag-over');
-    });
-
-    uploadArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove('drag-over');
-
-      if (uploadArea.getAttribute('data-disabled') !== 'true') {
-        const files = Array.from(e.dataTransfer.files).filter((file) =>
-          this.allowedTypes.includes(file.type),
-        );
-        this.handleFiles(files);
-      }
-    });
-
-    // Drag and drop reordering
+    // Drag and drop reordering on preview container
     const previewContainer = this.shadowRoot.querySelector('.preview-container');
     const dropIndicator = document.createElement('div');
     dropIndicator.className = 'drop-indicator';
@@ -341,7 +300,6 @@ class ImageHandler extends HTMLElement {
       if (preview) {
         this.draggedImage = preview;
         preview.classList.add('dragging');
-        // Set dragged element data
         e.dataTransfer.setData('text/plain', preview.getAttribute('data-id'));
         e.dataTransfer.effectAllowed = 'move';
       }
@@ -371,7 +329,6 @@ class ImageHandler extends HTMLElement {
         const targetRect = target.getBoundingClientRect();
         const containerRect = previewContainer.getBoundingClientRect();
 
-        // Calculate position for drop indicator
         if (targetIndex > draggedIndex) {
           dropIndicator.style.transform = `translateY(${targetRect.bottom - containerRect.top}px)`;
         } else {
@@ -401,12 +358,12 @@ class ImageHandler extends HTMLElement {
       const fromIndex = allPreviews.indexOf(this.draggedImage);
       const toIndex = allPreviews.indexOf(target);
 
-      // Perform the reorder
       this.reorderImages(fromIndex, toIndex);
     });
   }
 
-  async handleFiles(files) {
+  async handleAccepted(event) {
+    const files = event.detail.files;
     const remainingSlots = this.maxImages - this.images.length;
 
     if (remainingSlots <= 0) {
@@ -415,15 +372,11 @@ class ImageHandler extends HTMLElement {
     }
 
     const filesToProcess = files.slice(0, remainingSlots);
+    if (files.length > remainingSlots) {
+      this.showError(`לא ניתן להעלות יותר מ-${this.maxImages} תמונות`);
+    }
 
     for (const file of filesToProcess) {
-      const validation = this.validateFile(file);
-
-      if (!validation.valid) {
-        this.showError(validation.error);
-        continue;
-      }
-
       try {
         const preview = await this.createImagePreview(file);
         const imageData = {
@@ -434,7 +387,6 @@ class ImageHandler extends HTMLElement {
 
         this.addImage(imageData);
 
-        // Dispatch event for new file
         this.dispatchEvent(
           new CustomEvent('file-added', {
             detail: { imageData },
@@ -450,22 +402,15 @@ class ImageHandler extends HTMLElement {
     this.updateUploadAreaState();
   }
 
-  validateFile(file) {
-    if (!this.allowedTypes.includes(file.type)) {
-      return {
-        valid: false,
-        error: 'סוג הקובץ לא נתמך. נא להעלות תמונות מסוג JPEG, PNG או WebP בלבד',
-      };
-    }
+  handleRejected(event) {
+    const rejected = event.detail.rejected;
+    const reasons = new Set(rejected.flatMap((item) => item.reasons));
 
-    if (file.size > this.maxFileSize) {
-      return {
-        valid: false,
-        error: 'התמונה גדולה מדי. הגודל המקסימלי המותר הוא 5MB',
-      };
+    if (reasons.has('type')) {
+      this.showError('סוג הקובץ לא נתמך. נא להעלות תמונות מסוג JPEG, PNG או WebP בלבד');
+    } else if (reasons.has('size')) {
+      this.showError('התמונה גדולה מדי. הגודל המקסימלי המותר הוא 5MB');
     }
-
-    return { valid: true };
   }
 
   updateSelectedFiles() {
@@ -519,7 +464,6 @@ class ImageHandler extends HTMLElement {
     const removedImage = this.images.find((img) => img.id === imageId);
     const wasPrimary = removedImage?.isPrimary;
 
-    // Track removed images if they have id/full (i.e., are existing images)
     if (removedImage && (removedImage.id || removedImage.full)) {
       this.removedImages.push({
         id: removedImage.id,
@@ -529,7 +473,6 @@ class ImageHandler extends HTMLElement {
 
     this.images = this.images.filter((img) => img.id !== imageId);
 
-    // If we removed the primary image and there are other images, make the first one primary
     if (wasPrimary && this.images.length > 0) {
       this.images[0].isPrimary = true;
     }
@@ -537,7 +480,6 @@ class ImageHandler extends HTMLElement {
     this.updatePreviewContainer();
     this.updateUploadAreaState();
 
-    // Clear the selected files if no images remain
     if (wasOnlyImage) {
       this.updateSelectedFiles();
     }
@@ -571,7 +513,7 @@ class ImageHandler extends HTMLElement {
     const container = this.shadowRoot.querySelector('.preview-container');
     container.innerHTML = '';
 
-    this.images.forEach((image, index) => {
+    this.images.forEach((image) => {
       const preview = document.createElement('div');
       preview.className = `image-preview${image.isPrimary ? ' primary' : ''}`;
       preview.draggable = true;
@@ -593,26 +535,18 @@ class ImageHandler extends HTMLElement {
       const removeButton = preview.querySelector('.remove-button');
       const primaryButton = preview.querySelector('.primary-button');
 
-      // Toggle overlay visibility on click (for mobile)
       preview.addEventListener('click', (e) => {
-        if (e.target.closest('.control-button')) {
-          return;
-        }
+        if (e.target.closest('.control-button')) return;
 
         e.stopPropagation();
 
-        // Close all other overlays
         container.querySelectorAll('.image-controls.visible').forEach((ctrl) => {
-          if (ctrl !== controls) {
-            ctrl.classList.remove('visible');
-          }
+          if (ctrl !== controls) ctrl.classList.remove('visible');
         });
 
-        // Toggle this overlay
         controls.classList.toggle('visible');
       });
 
-      // Button event handlers (prevent event bubbling to avoid toggle)
       removeButton.addEventListener('click', (e) => {
         e.stopPropagation();
         this.removeImage(image.id);
@@ -631,22 +565,22 @@ class ImageHandler extends HTMLElement {
   }
 
   updateUploadAreaState() {
-    const uploadArea = this.shadowRoot.querySelector('.upload-zone');
-    uploadArea.setAttribute('data-disabled', this.images.length >= this.maxImages);
+    const uploadZone = this.shadowRoot.querySelector('upload-zone');
+    if (!uploadZone) return;
+    const atMax = this.images.length >= this.maxImages;
+    if (!this.hasAttribute('hide-upload')) {
+      uploadZone.toggleAttribute('disabled', atMax);
+    }
   }
 
   updateUploadAreaVisibility() {
-    const uploadArea = this.shadowRoot?.querySelector('.upload-zone');
-    if (!uploadArea) return;
+    const uploadZone = this.shadowRoot?.querySelector('upload-zone');
+    if (!uploadZone) return;
 
-    const shouldHide = this.hasAttribute('hide-upload');
-
-    if (shouldHide) {
-      uploadArea.style.display = 'none';
-      uploadArea.setAttribute('data-disabled', 'true');
+    if (this.hasAttribute('hide-upload')) {
+      uploadZone.setAttribute('disabled', '');
     } else {
-      uploadArea.style.display = '';
-      uploadArea.setAttribute('data-disabled', this.images.length >= this.maxImages);
+      uploadZone.toggleAttribute('disabled', this.images.length >= this.maxImages);
     }
   }
 
@@ -664,8 +598,6 @@ class ImageHandler extends HTMLElement {
 
   /**
    * Set upload progress for a specific image
-   * @param {string} imageId - The ID of the image
-   * @param {number} progress - Progress percentage (0-100)
    */
   setImageProgress(imageId, progress) {
     const imageEl = this.shadowRoot.querySelector(`.image-preview[data-id="${imageId}"]`);
@@ -679,8 +611,6 @@ class ImageHandler extends HTMLElement {
 
   /**
    * Mark an image as uploading
-   * @param {string} imageId - The ID of the image
-   * @param {boolean} isUploading - Whether the image is currently uploading
    */
   setImageUploading(imageId, isUploading) {
     const imageEl = this.shadowRoot.querySelector(`.image-preview[data-id="${imageId}"]`);
@@ -695,8 +625,6 @@ class ImageHandler extends HTMLElement {
 
   /**
    * Mark an image as uploaded successfully
-   * @param {string} imageId - The ID of the image
-   * @param {string} uploadedUrl - The URL of the uploaded image
    */
   setImageUploaded(imageId, uploadedUrl) {
     const imageData = this.images.find((img) => img.id === imageId);
@@ -708,8 +636,6 @@ class ImageHandler extends HTMLElement {
 
   /**
    * Show error for a specific image
-   * @param {string} imageId - The ID of the image
-   * @param {string} error - Error message
    */
   setImageError(imageId, error) {
     const imageEl = this.shadowRoot.querySelector(`.image-preview[data-id="${imageId}"]`);
@@ -722,7 +648,6 @@ class ImageHandler extends HTMLElement {
 
   /**
    * Get all selected images
-   * @returns {Array} Array of image data objects
    */
   getImages() {
     return [...this.images];
@@ -730,7 +655,6 @@ class ImageHandler extends HTMLElement {
 
   /**
    * Get all removed images (for deletion)
-   * @returns {Array} Array of removed image data objects
    */
   getRemovedImages() {
     return [...this.removedImages];
@@ -749,37 +673,31 @@ class ImageHandler extends HTMLElement {
 
   /**
    * Set maximum number of images allowed
-   * @param {number} count - Maximum number of images
    */
   setMaxImages(count) {
     this.maxImages = count;
-    this.shadowRoot.querySelector('.status-message').textContent =
-      `(מקסימום ${this.maxImages} תמונות, גודל מקסימלי 5MB לתמונה)`;
+    const uploadZone = this.shadowRoot.querySelector('upload-zone');
+    if (uploadZone) {
+      uploadZone.setAttribute('hint', this.uploadZoneHint);
+    }
     this.updateUploadAreaState();
   }
 
   setDisabled(isDisabled) {
-    const uploadArea = this.shadowRoot.querySelector('.upload-zone');
-    uploadArea.setAttribute('data-disabled', isDisabled.toString());
+    const uploadZone = this.shadowRoot.querySelector('upload-zone');
+    if (uploadZone) {
+      uploadZone.toggleAttribute('disabled', isDisabled);
+    }
 
     const controlButtons = this.shadowRoot.querySelectorAll('.image-preview .control-button');
     controlButtons.forEach((button) => {
       button.disabled = isDisabled;
     });
 
-    // Additionally, disable the file input itself to prevent programmatic clicking if any
-    const fileInput = this.shadowRoot.querySelector('.file-input');
-    if (fileInput) {
-      fileInput.disabled = isDisabled;
-    }
-
-    // Prevent drag-and-drop on previews when disabled
     const previews = this.shadowRoot.querySelectorAll('.image-preview');
     previews.forEach((preview) => {
       preview.draggable = !isDisabled;
     });
-    // The main upload area click is already handled by checking data-disabled.
-    // Drag-over on upload area also checks data-disabled.
   }
 }
 
