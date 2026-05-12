@@ -57,24 +57,11 @@
 // --- Imports ---
 import { StorageService } from '../../services/storage-service.js';
 import { FirestoreService } from '../../services/firestore-service.js';
-
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+import { validateRecipeImageFile } from '../../config/media-types.js';
 
 // --- Validation ---
 export function validateImageFile(file) {
-  const errors = [];
-  if (!file) {
-    errors.push('No file provided');
-  } else {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      errors.push('Invalid file type');
-    }
-    if (file.size > MAX_SIZE) {
-      errors.push('File is too large (max 5MB)');
-    }
-  }
-  return { isValid: errors.length === 0, errors };
+  return validateRecipeImageFile(file);
 }
 
 // --- Storage Path Helpers ---
@@ -361,13 +348,24 @@ export async function uploadAndBuildImageMetadata({
   isPrimary,
   uploadedBy,
 }) {
-  const fileExtension = file.name.split('.').pop();
-  const fileName = isPrimary ? 'primary.jpg' : `${Date.now()}.${fileExtension}`;
+  const validation = validateImageFile(file);
+  if (!validation.isValid) {
+    const err = new Error(`בדיקת הקובץ נכשלה: ${validation.errors.join(', ')}`);
+    err.code = 'validation/invalid-image';
+    throw err;
+  }
+
+  const id = generateImageId();
+  // Use the unique id (not Date.now()) to prevent filename collisions when multiple
+  // images are uploaded in parallel within the same millisecond.
+  const rawExtension = (file.name.split('.').pop() || '').toLowerCase();
+  const safeExtension = rawExtension.replace(/[^a-z0-9]/g, '') || 'bin';
+  const fileName = isPrimary ? `primary.${safeExtension}` : `${id}.${safeExtension}`;
   const fullPath = getImageStoragePath(recipeId, category, fileName, 'full');
   await StorageService.uploadFile(file, fullPath);
 
   return {
-    id: generateImageId(),
+    id,
     full: fullPath,
     fileName,
     isPrimary,
@@ -392,7 +390,14 @@ export async function addPendingImages(recipeId, files, category, uploader) {
 
   // Upload all images in parallel for better performance
   const uploadPromises = files.map(async (file) => {
-    const fileExtension = file.name.split('.').pop();
+    const validation = validateImageFile(file);
+    if (!validation.isValid) {
+      const err = new Error(`בדיקת הקובץ נכשלה: ${validation.errors.join(', ')}`);
+      err.code = 'validation/invalid-image';
+      throw err;
+    }
+    const rawExtension = (file.name.split('.').pop() || '').toLowerCase();
+    const fileExtension = rawExtension.replace(/[^a-z0-9]/g, '') || 'bin';
     const id = generateImageId();
     const fileName = `${id}.${fileExtension}`;
     // Upload full-size

@@ -37,12 +37,49 @@ describe('StorageService', () => {
       expect(url).toBe(mockUrl);
     });
 
-    it('throws an error if upload fails', async () => {
-      uploadBytes.mockRejectedValue(new Error('fail'));
+    it('throws an error if upload fails and preserves the Firebase error code', async () => {
+      const firebaseError = new Error('User does not have permission');
+      firebaseError.code = 'storage/unauthorized';
+      uploadBytes.mockRejectedValue(firebaseError);
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      await expect(StorageService.uploadFile(mockFile, mockPath)).rejects.toThrow(
-        'Failed to upload file',
-      );
+
+      let thrown;
+      try {
+        await StorageService.uploadFile(mockFile, mockPath);
+      } catch (e) {
+        thrown = e;
+      }
+
+      expect(thrown).toBeDefined();
+      expect(thrown.code).toBe('storage/unauthorized');
+      expect(thrown.message).toBe('User does not have permission');
+      errorSpy.mockRestore();
+    });
+
+    it('retries transient errors once then succeeds', async () => {
+      const transientError = new Error('canceled');
+      transientError.code = 'storage/canceled';
+      uploadBytes.mockRejectedValueOnce(transientError).mockResolvedValueOnce({});
+      getDownloadURL.mockResolvedValue(mockUrl);
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const url = await StorageService.uploadFile(mockFile, mockPath);
+
+      expect(uploadBytes).toHaveBeenCalledTimes(2);
+      expect(url).toBe(mockUrl);
+      errorSpy.mockRestore();
+    });
+
+    it('does not retry non-transient errors (e.g. unauthorized)', async () => {
+      const permissionError = new Error('Permission denied');
+      permissionError.code = 'storage/unauthorized';
+      uploadBytes.mockRejectedValue(permissionError);
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await expect(StorageService.uploadFile(mockFile, mockPath)).rejects.toMatchObject({
+        code: 'storage/unauthorized',
+      });
+      expect(uploadBytes).toHaveBeenCalledTimes(1);
       errorSpy.mockRestore();
     });
   });
@@ -67,10 +104,15 @@ describe('StorageService', () => {
       expect(url2).toBe(mockUrl);
     });
 
-    it('throws an error if getDownloadURL fails', async () => {
-      getDownloadURL.mockRejectedValue(new Error('fail'));
+    it('throws an error if getDownloadURL fails and preserves the code', async () => {
+      const err = new Error('not found');
+      err.code = 'storage/object-not-found';
+      getDownloadURL.mockRejectedValue(err);
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      await expect(StorageService.getFileUrl(mockPath)).rejects.toThrow('Failed to get file URL');
+      await expect(StorageService.getFileUrl(mockPath)).rejects.toMatchObject({
+        code: 'storage/object-not-found',
+        message: 'not found',
+      });
       errorSpy.mockRestore();
     });
   });
@@ -84,10 +126,14 @@ describe('StorageService', () => {
       expect(deleteObject).toHaveBeenCalledWith({ storage: mockStorage, path: mockPath });
     });
 
-    it('throws an error if deleteObject fails', async () => {
-      deleteObject.mockRejectedValue(new Error('fail'));
+    it('throws an error if deleteObject fails and preserves the code', async () => {
+      const err = new Error('not found');
+      err.code = 'storage/object-not-found';
+      deleteObject.mockRejectedValue(err);
       const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      await expect(StorageService.deleteFile(mockPath)).rejects.toThrow('Failed to delete file');
+      await expect(StorageService.deleteFile(mockPath)).rejects.toMatchObject({
+        code: 'storage/object-not-found',
+      });
       errorSpy.mockRestore();
     });
   });

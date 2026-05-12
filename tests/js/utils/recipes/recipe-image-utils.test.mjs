@@ -94,7 +94,7 @@ describe('recipe-image-utils', () => {
       expect(validateImageFile(file).isValid).toBe(false);
     });
     it('rejects too large', () => {
-      const file = createFakeFile('big.jpg', 'image/jpeg', 6 * 1024 * 1024);
+      const file = createFakeFile('big.jpg', 'image/jpeg', 11 * 1024 * 1024);
       expect(validateImageFile(file).isValid).toBe(false);
     });
   });
@@ -324,13 +324,13 @@ describe('recipe-image-utils', () => {
       expect(uploadFileMock).toHaveBeenCalledTimes(1);
       expect(meta).toHaveProperty('id');
       expect(meta.full).toContain('img/recipes/full/cat/rid/');
-      expect(meta.fileName).toBe('primary.jpg');
+      expect(meta.fileName).toMatch(/^primary\.jpg$/);
       expect(meta.isPrimary).toBe(true);
       expect(meta.uploadedBy).toBe('user1');
       expect(meta.access).toBe('public');
       expect(meta.uploadTimestamp).toBeDefined();
     });
-    it('uses a timestamped fileName for non-primary', async () => {
+    it('uses a unique image id for the fileName when non-primary (avoids parallel-upload collisions)', async () => {
       uploadFileMock.mockResolvedValue('url');
       const file = createFakeFile('test2.jpg', 'image/jpeg', 1234);
       const meta = await uploadAndBuildImageMetadata({
@@ -340,7 +340,8 @@ describe('recipe-image-utils', () => {
         isPrimary: false,
         uploadedBy: 'user2',
       });
-      expect(meta.fileName).toMatch(/\.jpg$/);
+      expect(meta.fileName).toMatch(/^img-.+\.jpg$/);
+      expect(meta.fileName).toContain(meta.id);
       expect(meta.isPrimary).toBe(false);
       expect(meta.uploadedBy).toBe('user2');
     });

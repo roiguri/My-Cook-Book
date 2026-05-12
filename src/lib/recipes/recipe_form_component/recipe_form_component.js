@@ -140,7 +140,7 @@ class RecipeFormComponent extends HTMLElement {
                 <h2 class="recipe-sect__h">התמונה <em>הסופית.</em></h2>
                 <p class="recipe-sect__sub">תמונה ראשית בולטת, ותמונות נוספות של המתכון לפי רצונך.</p>
               </div>
-              <span class="recipe-sect__meta">JPG, PNG · עד 20MB</span>
+              <span class="recipe-sect__meta">JPG, PNG, WebP, HEIC, AVIF · עד 10MB</span>
             </header>
             <div class="recipe-form__group">
               <image-handler id="recipe-images"></image-handler>
@@ -670,6 +670,29 @@ class RecipeFormComponent extends HTMLElement {
 
   setDisabled(isDisabled) {
     setFormDisabledState(this.shadowRoot, isDisabled);
+  }
+
+  /**
+   * Public API: Show an error in the top-of-form error banner. Used by hosts
+   * (propose/edit components) to surface async failures (image/media upload,
+   * Firestore write, etc.) in the same spot as field-validation errors.
+   * @param {string} message
+   */
+  showFormError(message) {
+    const el = this.shadowRoot.querySelector('.recipe-form__error-message');
+    if (!el) return;
+    el.textContent = message;
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /**
+   * Public API: Hide the top-of-form error banner.
+   */
+  hideFormError() {
+    const el = this.shadowRoot.querySelector('.recipe-form__error-message');
+    if (!el) return;
+    el.style.display = 'none';
   }
 
   /**

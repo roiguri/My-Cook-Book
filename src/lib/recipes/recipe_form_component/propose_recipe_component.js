@@ -84,14 +84,22 @@ class ProposeRecipeComponent extends HTMLElement {
       // Generate ID before uploading so we can use it for storage paths
       const recipeId = FirestoreService.generateId('recipes');
 
-      // Upload images if provided
+      // Upload images if provided. If any image fails, abort the whole submission —
+      // a recipe without its primary image is not useful.
       if (imagesToUpload.length > 0) {
-        const imageUploadResults = await this.uploadRecipeImages(
-          recipeId,
-          imagesToUpload,
-          recipeDataForFirestore.category,
-          user?.uid || 'anonymous',
-        );
+        let imageUploadResults;
+        try {
+          imageUploadResults = await this.uploadRecipeImages(
+            recipeId,
+            imagesToUpload,
+            recipeDataForFirestore.category,
+            user?.uid || 'anonymous',
+          );
+        } catch (uploadError) {
+          // Let the outer catch route the real Firebase error to the form's
+          // top-of-form error banner via showErrorMessage().
+          throw uploadError;
+        }
         recipeDataForFirestore.images = imageUploadResults;
         recipeDataForFirestore.allowImageSuggestions = true;
         uploadedFilesToCleanup.push(...imageUploadResults);
@@ -102,10 +110,11 @@ class ProposeRecipeComponent extends HTMLElement {
       let hasPartialFailure = false;
       let successCount = 0;
       let failedCount = 0;
+      let pendingCount = 0;
 
       if (formComponent && typeof formComponent.uploadPendingMediaInstructions === 'function') {
         const allMedia = formComponent.getAllMediaInOrder();
-        const pendingCount = allMedia.filter((item) => item.file).length;
+        pendingCount = allMedia.filter((item) => item.file).length;
 
         if (pendingCount > 0) {
           const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
@@ -125,10 +134,14 @@ class ProposeRecipeComponent extends HTMLElement {
               console.warn(`${failedCount} of ${pendingCount} media file(s) failed to upload`);
             }
           } else {
-            // If there were pending files but none uploaded, count as failure
-            hasPartialFailure = true;
-            failedCount = pendingCount;
-            console.warn(`All ${pendingCount} media file(s) failed to upload`);
+            // All media failed — the inline editor already shows per-file errors.
+            // Abort submission so the user can retry instead of getting a recipe
+            // missing all its step media silently.
+            const err = new Error(
+              `כל ${pendingCount} קבצי המדיה נכשלו בהעלאה. אנא בדוק את החיבור ונסה שוב.`,
+            );
+            err.code = 'upload/media-all-failed';
+            throw err;
           }
         }
       }
@@ -200,7 +213,15 @@ class ProposeRecipeComponent extends HTMLElement {
 
   showErrorMessage(error) {
     logError(error, 'Recipe proposal');
-    showToast(getErrorMessage(error), 'error', 5000);
+    const message = getErrorMessage(error);
+    // Use the form's top-of-form error banner so async failures appear in the
+    // same spot users already look for validation errors.
+    const formComponent = this.shadowRoot.querySelector('recipe-form-component');
+    if (formComponent && typeof formComponent.showFormError === 'function') {
+      formComponent.showFormError(message);
+    } else {
+      showToast(message, 'error', 5000);
+    }
   }
 
   clearForm() {

@@ -1,12 +1,19 @@
 import { generateImageId } from '../../js/utils/recipes/recipe-image-utils.js';
 import { uploadZoneStyles } from '../../styles/components/upload-zone-styles.js';
+import {
+  ALLOWED_RECIPE_IMAGE_TYPES,
+  MAX_RECIPE_IMAGE_SIZE,
+  RECIPE_IMAGE_ACCEPT_ATTR,
+  validateRecipeImageFile,
+} from '../../js/config/media-types.js';
 
 class ImageHandler extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.maxFileSize = 5 * 1024 * 1024; // 5MB
-    this.allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    this.maxFileSize = MAX_RECIPE_IMAGE_SIZE;
+    this.allowedTypes = ALLOWED_RECIPE_IMAGE_TYPES;
+    this.acceptAttr = RECIPE_IMAGE_ACCEPT_ATTR;
     this.images = [];
     this.maxImages = 5;
     this.draggedImage = null;
@@ -274,7 +281,7 @@ class ImageHandler extends HTMLElement {
           </div>
           <div class="selected-files"></div>
         </div>
-        <input type="file" class="file-input" accept="image/jpeg,image/png,image/webp" multiple>
+        <input type="file" class="file-input" accept="${this.acceptAttr}" multiple>
         <div class="error-message"></div>
         <div class="preview-container"></div>
       </div>
@@ -451,20 +458,10 @@ class ImageHandler extends HTMLElement {
   }
 
   validateFile(file) {
-    if (!this.allowedTypes.includes(file.type)) {
-      return {
-        valid: false,
-        error: 'סוג הקובץ לא נתמך. נא להעלות תמונות מסוג JPEG, PNG או WebP בלבד',
-      };
+    const result = validateRecipeImageFile(file);
+    if (!result.isValid) {
+      return { valid: false, error: result.errors.join(' • ') };
     }
-
-    if (file.size > this.maxFileSize) {
-      return {
-        valid: false,
-        error: 'התמונה גדולה מדי. הגודל המקסימלי המותר הוא 5MB',
-      };
-    }
-
     return { valid: true };
   }
 
@@ -650,14 +647,22 @@ class ImageHandler extends HTMLElement {
     }
   }
 
-  showError(message) {
+  showError(message, durationMs = 5000) {
     const errorContainer = this.shadowRoot.querySelector('.error-container');
     errorContainer.textContent = message;
     errorContainer.style.display = 'block';
 
-    setTimeout(() => {
-      errorContainer.style.display = 'none';
-    }, 5000);
+    if (this._errorTimeoutId) {
+      clearTimeout(this._errorTimeoutId);
+      this._errorTimeoutId = null;
+    }
+
+    if (durationMs > 0) {
+      this._errorTimeoutId = setTimeout(() => {
+        errorContainer.style.display = 'none';
+        this._errorTimeoutId = null;
+      }, durationMs);
+    }
   }
 
   // Public API Methods

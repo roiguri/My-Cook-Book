@@ -26,6 +26,7 @@ import {
   validateMediaFile,
   getMediaInstructionUrl,
 } from '../../../js/utils/recipes/recipe-media-utils.js';
+import { INSTRUCTION_MEDIA_ACCEPT_ATTR } from '../../../js/config/media-types.js';
 import { uploadZoneStyles } from '../../../styles/components/upload-zone-styles.js';
 
 class MediaInstructionsEditor extends HTMLElement {
@@ -567,9 +568,9 @@ class MediaInstructionsEditor extends HTMLElement {
         <div class="upload-zone" role="button" tabindex="0" aria-label="העלאת קבצי מדיה - גרור קבצים או לחץ לבחירה">
           גרור תמונות או סרטונים לכאן או לחץ להעלאה
           <div class="status-message">
-            (תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)
+            (תמונות: JPEG, PNG, WebP, GIF, HEIC, AVIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)
           </div>
-          <input type="file" class="file-input" multiple accept="image/*,video/*" aria-label="בחר קבצי מדיה">
+          <input type="file" class="file-input" multiple accept="${INSTRUCTION_MEDIA_ACCEPT_ATTR}" aria-label="בחר קבצי מדיה">
         </div>
 
         <!-- Media List -->
@@ -597,9 +598,9 @@ class MediaInstructionsEditor extends HTMLElement {
       uploadZone.innerHTML = `
           גרור תמונות או סרטונים לכאן או לחץ להעלאה
           <div class="status-message">
-            (תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)
+            (תמונות: JPEG, PNG, WebP, GIF, HEIC, AVIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)
           </div>
-          <input type="file" class="file-input" multiple accept="image/*,video/*" aria-label="בחר קבצי מדיה">
+          <input type="file" class="file-input" multiple accept="${INSTRUCTION_MEDIA_ACCEPT_ATTR}" aria-label="בחר קבצי מדיה">
       `;
 
       // Re-attach file input change listener (new element created by innerHTML)
