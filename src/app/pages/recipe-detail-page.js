@@ -72,8 +72,8 @@ export default {
     // Import modal dependencies
     await import('../../lib/utilities/modal/modal.js');
     await import('../../lib/utilities/loading-spinner/loading-spinner.js');
-    await import('../../lib/images/image-handler.js');
-    await import('../../lib/images/image-proposal-modal.js');
+    await import('../../lib/media/image-handler/image-handler.js');
+    await import('../../lib/media/image-proposal-modal/image-proposal-modal.js');
     await import('../../lib/modals/message-modal/message-modal.js');
   },
 
