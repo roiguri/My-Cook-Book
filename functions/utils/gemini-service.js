@@ -14,7 +14,7 @@ const FOOD_STYLIST_PROMPT = `You are a professional food photographer and AI vis
 
 2. Environment Transformation: Replace the original background, lighting, and plating with a professional studio setup based on the parameters provided below.
 
-3. Composition & Breathing Room: Ensure the dish is centered with padding (negative space) around the bowl/plate to allow for professional framing.
+3. Composition & Breathing Room: Frame the dish in a SQUARE 1:1 aspect ratio. Center the bowl/plate within the square frame and leave even padding (negative space) on all four sides so the dish reads cleanly when cropped to a square card thumbnail.
 
 Configurable Parameters — choose the option from each group that best fits the dish you identified, to produce the most appetizing and editorial-quality result:
 
@@ -39,6 +39,7 @@ Configurable Parameters — choose the option from each group that best fits the
 - Option C (Ingredient-Led): Scatter a few raw ingredients (e.g., a sprig of herb or a slice of fruit) near the dish.
 
 Technical Output Specification:
+- Aspect Ratio: MUST be exactly 1:1 (square). Both image dimensions must be equal. Do not output landscape or portrait crops.
 - Resolution: Ultra-high definition, 8k photographic detail.
 - Focus: Sharp focus on the center of the dish with a professional shallow depth of field (bokeh) toward the edges of the frame.
 - Authenticity: The food must look freshly prepared, vibrant, and appetizing, avoiding 'plastic' or overly-perfect AI artifacts.
