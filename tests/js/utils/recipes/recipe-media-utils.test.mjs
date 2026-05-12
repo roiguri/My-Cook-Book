@@ -111,14 +111,14 @@ describe('recipe-media-utils', () => {
       const result = validateMediaFile(file);
       expect(result.isValid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors[0]).toContain('סוג קובץ לא תקין');
+      expect(result.errors[0]).toContain('אינו נתמך');
     });
 
     it('rejects wrong type (text)', () => {
       const file = createFakeFile('test.txt', 'text/plain', 1000);
       const result = validateMediaFile(file);
       expect(result.isValid).toBe(false);
-      expect(result.errors[0]).toContain('סוג קובץ לא תקין');
+      expect(result.errors[0]).toContain('אינו נתמך');
     });
 
     it('rejects file too large (>50MB)', () => {

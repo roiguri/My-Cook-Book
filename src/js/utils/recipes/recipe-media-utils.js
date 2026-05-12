@@ -30,12 +30,7 @@
 
 // --- Imports ---
 import { StorageService } from '../../services/storage-service.js';
-
-// --- Constants ---
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
-const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
-const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+import { validateInstructionMediaFile, getInstructionMediaType } from '../../config/media-types.js';
 
 // --- Validation ---
 /**
@@ -44,25 +39,7 @@ const MAX_SIZE = 50 * 1024 * 1024; // 50MB
  * @returns {{ isValid: boolean, errors: string[] }}
  */
 export function validateMediaFile(file) {
-  const errors = [];
-
-  if (!file) {
-    errors.push('לא סופק קובץ');
-    return { isValid: false, errors };
-  }
-
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    errors.push(
-      `סוג קובץ לא תקין: ${file.type}. סוגי קבצים מותרים: תמונות (JPEG, PNG, WebP, GIF) וסרטונים (MP4, WebM, MOV)`,
-    );
-  }
-
-  if (file.size > MAX_SIZE) {
-    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-    errors.push(`הקובץ גדול מדי (${sizeMB}MB). גודל מקסימלי: 50MB`);
-  }
-
-  return { isValid: errors.length === 0, errors };
+  return validateInstructionMediaFile(file);
 }
 
 /**
@@ -131,13 +108,7 @@ export function generateMediaInstructionId() {
  * @returns {'image'|'video'|null}
  */
 function getMediaType(file) {
-  if (ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    return 'image';
-  }
-  if (ALLOWED_VIDEO_TYPES.includes(file.type)) {
-    return 'video';
-  }
-  return null;
+  return getInstructionMediaType(file);
 }
 
 // --- Upload & Delete ---
@@ -204,7 +175,10 @@ export async function uploadMediaInstructionFile(file, recipeId, userId, onProgr
     return metadata;
   } catch (error) {
     console.error('Error uploading media instruction file:', error);
-    throw new Error(`העלאת הקובץ נכשלה: ${error.message}`);
+    const wrapped = new Error(`העלאת הקובץ נכשלה: ${error.message}`);
+    if (error?.code) wrapped.code = error.code;
+    wrapped.cause = error;
+    throw wrapped;
   }
 }
 

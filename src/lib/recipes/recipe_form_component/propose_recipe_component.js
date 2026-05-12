@@ -84,14 +84,23 @@ class ProposeRecipeComponent extends HTMLElement {
       // Generate ID before uploading so we can use it for storage paths
       const recipeId = FirestoreService.generateId('recipes');
 
-      // Upload images if provided
+      // Upload images if provided. If any image fails, abort the whole submission —
+      // a recipe without its primary image is not useful.
       if (imagesToUpload.length > 0) {
-        const imageUploadResults = await this.uploadRecipeImages(
-          recipeId,
-          imagesToUpload,
-          recipeDataForFirestore.category,
-          user?.uid || 'anonymous',
-        );
+        let imageUploadResults;
+        try {
+          imageUploadResults = await this.uploadRecipeImages(
+            recipeId,
+            imagesToUpload,
+            recipeDataForFirestore.category,
+            user?.uid || 'anonymous',
+          );
+        } catch (uploadError) {
+          // Surface the real Firebase error code in the image-handler so the user sees
+          // a meaningful message right next to the upload area (not just a fleeting toast).
+          this.showImageUploadError(uploadError);
+          throw uploadError;
+        }
         recipeDataForFirestore.images = imageUploadResults;
         recipeDataForFirestore.allowImageSuggestions = true;
         uploadedFilesToCleanup.push(...imageUploadResults);
@@ -102,10 +111,11 @@ class ProposeRecipeComponent extends HTMLElement {
       let hasPartialFailure = false;
       let successCount = 0;
       let failedCount = 0;
+      let pendingCount = 0;
 
       if (formComponent && typeof formComponent.uploadPendingMediaInstructions === 'function') {
         const allMedia = formComponent.getAllMediaInOrder();
-        const pendingCount = allMedia.filter((item) => item.file).length;
+        pendingCount = allMedia.filter((item) => item.file).length;
 
         if (pendingCount > 0) {
           const uploadedMedia = await formComponent.uploadPendingMediaInstructions(
@@ -125,10 +135,14 @@ class ProposeRecipeComponent extends HTMLElement {
               console.warn(`${failedCount} of ${pendingCount} media file(s) failed to upload`);
             }
           } else {
-            // If there were pending files but none uploaded, count as failure
-            hasPartialFailure = true;
-            failedCount = pendingCount;
-            console.warn(`All ${pendingCount} media file(s) failed to upload`);
+            // All media failed — the inline editor already shows per-file errors.
+            // Abort submission so the user can retry instead of getting a recipe
+            // missing all its step media silently.
+            const err = new Error(
+              `כל ${pendingCount} קבצי המדיה נכשלו בהעלאה. אנא בדוק את החיבור ונסה שוב.`,
+            );
+            err.code = 'upload/media-all-failed';
+            throw err;
           }
         }
       }
@@ -201,6 +215,17 @@ class ProposeRecipeComponent extends HTMLElement {
   showErrorMessage(error) {
     logError(error, 'Recipe proposal');
     showToast(getErrorMessage(error), 'error', 5000);
+  }
+
+  showImageUploadError(error) {
+    // Surface the real Firebase error inline on the image-handler so the user sees
+    // the failure right next to the upload area rather than a brief toast.
+    const formComponent = this.shadowRoot.querySelector('recipe-form-component');
+    const imageHandler = formComponent?.shadowRoot?.getElementById('recipe-images');
+    if (imageHandler && typeof imageHandler.showError === 'function') {
+      // 0 = sticky; the user needs to see the failure long enough to act on it.
+      imageHandler.showError(getErrorMessage(error), 0);
+    }
   }
 
   clearForm() {
