@@ -11,6 +11,7 @@
  */
 
 import { enhanceFoodImage } from '../../../js/services/ai-enhancement-service.js';
+import { FirestoreService } from '../../../js/services/firestore-service.js';
 import { StorageService } from '../../../js/services/storage-service.js';
 import { getOptimizedImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { icons } from '../../../js/icons.js';
@@ -152,8 +153,8 @@ class AiImageEnhanceModal extends HTMLElement {
   // ---------------------------------------------------------------------------
 
   _close() {
+    this._setSavingOverlay(false);
     const modal = this.shadowRoot.getElementById('custom-modal');
-    modal?.clearCloseGuard();
     modal?.close();
   }
 
@@ -430,6 +431,22 @@ class AiImageEnhanceModal extends HTMLElement {
           () => {},
         ),
       ]);
+
+      // Mark this image as AI-enhanced in Firestore. Best-effort: the user-
+      // visible enhancement already succeeded above, so a write failure here
+      // shouldn't surface as a save error — it just means the badge signal
+      // is missing on this image until a future backfill.
+      try {
+        const fresh = await FirestoreService.getDocument('recipes', this._recipe.id);
+        if (fresh && Array.isArray(fresh.images)) {
+          const images = fresh.images.map((img) =>
+            img.id === this._image.id ? { ...img, aiEnhanced: true } : img,
+          );
+          await FirestoreService.updateDocument('recipes', this._recipe.id, { images });
+        }
+      } catch (err) {
+        console.error('Failed to mark image as AI-enhanced:', err);
+      }
 
       this._setStatus('התמונה הוחלפה. התמונה המקורית נשמרה כגיבוי.');
 
