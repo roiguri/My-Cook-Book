@@ -26,7 +26,13 @@ import {
   validateMediaFile,
   getMediaInstructionUrl,
 } from '../../../js/utils/recipes/recipe-media-utils.js';
-import { uploadZoneStyles } from '../../../styles/components/upload-zone-styles.js';
+import '../upload-zone/upload-zone.js';
+
+const ACCEPT_MIME =
+  'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime';
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const UPLOAD_LABEL = 'גרור תמונות או סרטונים לכאן או לחץ להעלאה';
+const UPLOAD_HINT = '(תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)';
 
 class MediaInstructionsEditor extends HTMLElement {
   constructor() {
@@ -40,12 +46,8 @@ class MediaInstructionsEditor extends HTMLElement {
     this.errors = [];
     this.draggedIndex = null;
 
-    this.handleDragOver = this.handleDragOver.bind(this);
-    this.handleDragLeave = this.handleDragLeave.bind(this);
-    this.handleDrop = this.handleDrop.bind(this);
-    this.handleFileSelect = this.handleFileSelect.bind(this);
-    this.handleUploadZoneClick = this.handleUploadZoneClick.bind(this);
-    this.handleUploadZoneKeyDown = this.handleUploadZoneKeyDown.bind(this);
+    this.handleAccepted = this.handleAccepted.bind(this);
+    this.handleRejected = this.handleRejected.bind(this);
   }
 
   static get observedAttributes() {
@@ -58,8 +60,6 @@ class MediaInstructionsEditor extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.removeEventListeners();
-
     // Clean up any pending blob URLs to prevent memory leaks
     this.mediaItems.forEach((item) => {
       if (item.preview && item.file) {
@@ -97,84 +97,27 @@ class MediaInstructionsEditor extends HTMLElement {
   }
 
   setupEventListeners() {
-    const uploadZone = this.shadowRoot.querySelector('.upload-zone');
-    const fileInput = this.shadowRoot.querySelector('.file-input');
-
-    // Drag & Drop events
-    uploadZone.addEventListener('dragover', this.handleDragOver);
-    uploadZone.addEventListener('dragleave', this.handleDragLeave);
-    uploadZone.addEventListener('drop', this.handleDrop);
-
-    // Click to browse
-    uploadZone.addEventListener('click', this.handleUploadZoneClick);
-
-    // Keyboard accessibility for upload zone
-    uploadZone.addEventListener('keydown', this.handleUploadZoneKeyDown);
-
-    fileInput.addEventListener('change', this.handleFileSelect);
-  }
-
-  removeEventListeners() {
-    const uploadZone = this.shadowRoot.querySelector('.upload-zone');
-    const fileInput = this.shadowRoot.querySelector('.file-input');
-
-    if (uploadZone) {
-      uploadZone.removeEventListener('dragover', this.handleDragOver);
-      uploadZone.removeEventListener('dragleave', this.handleDragLeave);
-      uploadZone.removeEventListener('drop', this.handleDrop);
-      uploadZone.removeEventListener('click', this.handleUploadZoneClick);
-      uploadZone.removeEventListener('keydown', this.handleUploadZoneKeyDown);
-    }
-
-    if (fileInput) {
-      fileInput.removeEventListener('change', this.handleFileSelect);
-    }
+    const uploadZone = this.shadowRoot.querySelector('upload-zone');
+    uploadZone.addEventListener('upload-files-accepted', this.handleAccepted);
+    uploadZone.addEventListener('upload-files-rejected', this.handleRejected);
   }
 
   // --- File Upload Handlers ---
 
-  handleDragOver(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const uploadZone = this.shadowRoot.querySelector('.upload-zone');
-    uploadZone.classList.add('drag-over');
+  async handleAccepted(event) {
+    await this.uploadFiles(event.detail.files);
   }
 
-  handleDragLeave(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const uploadZone = this.shadowRoot.querySelector('.upload-zone');
-    uploadZone.classList.remove('drag-over');
-  }
-
-  async handleDrop(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    const uploadZone = this.shadowRoot.querySelector('.upload-zone');
-    uploadZone.classList.remove('drag-over');
-
-    const files = Array.from(e.dataTransfer.files);
-    await this.uploadFiles(files);
-  }
-
-  async handleFileSelect(e) {
-    const files = Array.from(e.target.files);
-    await this.uploadFiles(files);
-    // Reset input so same file can be selected again
-    e.target.value = '';
-  }
-
-  handleUploadZoneClick() {
-    const currentFileInput = this.shadowRoot.querySelector('.file-input');
-    if (currentFileInput) currentFileInput.click();
-  }
-
-  handleUploadZoneKeyDown(e) {
-    // Trigger file input on Enter or Space (standard button behavior)
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      this.handleUploadZoneClick();
+  handleRejected(event) {
+    const rejected = event.detail.rejected;
+    // Run domain validator to get localized error messages.
+    for (const { file } of rejected) {
+      const validation = validateMediaFile(file);
+      if (!validation.isValid) {
+        this.errors.push(`${file.name}: ${validation.errors.join(', ')}`);
+      }
     }
+    this.renderErrors();
   }
 
   async uploadFiles(files) {
@@ -331,15 +274,9 @@ class MediaInstructionsEditor extends HTMLElement {
 
         .editor-container { width: 100%; }
 
-        ${uploadZoneStyles}
-
-        .upload-zone.uploading {
-          opacity: 0.55;
-          pointer-events: none;
-        }
-
-        .status-message {
-          direction: rtl;
+        upload-zone {
+          display: block;
+          margin-bottom: 10px;
         }
 
         .media-list-container { display: none; }
@@ -545,32 +482,16 @@ class MediaInstructionsEditor extends HTMLElement {
           color: var(--secondary-dark, #bc4749);
           margin: 4px 0;
         }
-
-        .loading-spinner {
-          border: 3px solid var(--surface-2, #f0ede6);
-          border-top: 3px solid var(--primary, #6a994e);
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-          animation: spin 1s linear infinite;
-          margin: 20px auto;
-        }
-
-        @keyframes spin {
-          0%   { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
       </style>
 
       <div class="editor-container">
-        <!-- Upload Zone -->
-        <div class="upload-zone" role="button" tabindex="0" aria-label="העלאת קבצי מדיה - גרור קבצים או לחץ לבחירה">
-          גרור תמונות או סרטונים לכאן או לחץ להעלאה
-          <div class="status-message">
-            (תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)
-          </div>
-          <input type="file" class="file-input" multiple accept="image/*,video/*" aria-label="בחר קבצי מדיה">
-        </div>
+        <upload-zone
+          accept="${ACCEPT_MIME}"
+          multiple
+          max-size="${MAX_FILE_SIZE}"
+          label="${UPLOAD_LABEL}"
+          hint="${UPLOAD_HINT}">
+        </upload-zone>
 
         <!-- Media List -->
         <div class="media-list-container"></div>
@@ -583,31 +504,11 @@ class MediaInstructionsEditor extends HTMLElement {
     this.renderMediaList();
   }
 
-  renderUploadingState() {
-    const uploadZone = this.shadowRoot.querySelector('.upload-zone');
-    if (this.uploading) {
-      uploadZone.classList.add('uploading');
-      uploadZone.innerHTML = `
-        <div class="loading-spinner"></div>
-        <div class="upload-text">מעלה קבצים...</div>
-      `;
-    } else {
-      uploadZone.classList.remove('uploading');
-      // Restore original content
-      uploadZone.innerHTML = `
-          גרור תמונות או סרטונים לכאן או לחץ להעלאה
-          <div class="status-message">
-            (תמונות: JPEG, PNG, WebP, GIF | סרטונים: MP4, WebM, MOV | מקסימום: 50MB)
-          </div>
-          <input type="file" class="file-input" multiple accept="image/*,video/*" aria-label="בחר קבצי מדיה">
-      `;
-
-      // Re-attach file input change listener (new element created by innerHTML)
-      const fileInput = this.shadowRoot.querySelector('.file-input');
-      fileInput.addEventListener('change', this.handleFileSelect);
-
-      // Note: uploadZone listeners (drag/drop/click/keydown) remain intact because
-      // uploadZone element itself is not replaced, only its innerHTML children are replaced
+  setUploading(isUploading) {
+    this.uploading = isUploading;
+    const uploadZone = this.shadowRoot.querySelector('upload-zone');
+    if (uploadZone) {
+      uploadZone.toggleAttribute('loading', isUploading);
     }
   }
 
@@ -780,8 +681,7 @@ class MediaInstructionsEditor extends HTMLElement {
       return [];
     }
 
-    this.uploading = true;
-    this.renderUploadingState();
+    this.setUploading(true);
 
     const uploadedMedia = [];
 
@@ -815,8 +715,7 @@ class MediaInstructionsEditor extends HTMLElement {
       item.order = index;
     });
 
-    this.uploading = false;
-    this.renderUploadingState();
+    this.setUploading(false);
     this.emitChange();
     this.renderMediaList();
     this.renderErrors();
