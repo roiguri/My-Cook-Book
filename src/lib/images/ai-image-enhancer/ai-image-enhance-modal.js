@@ -59,6 +59,7 @@ class AiImageEnhanceModal extends HTMLElement {
     this._updateTitle();
     this._setStatus('');
     this._clearAfterImage();
+    this._setSavingOverlay(false);
     this._updateActions();
     this._loadBeforeImage();
 
@@ -170,8 +171,28 @@ class AiImageEnhanceModal extends HTMLElement {
   _clearAfterImage() {
     const img = this.shadowRoot.getElementById('after-img');
     const placeholder = this.shadowRoot.getElementById('after-placeholder');
+    const loading = this.shadowRoot.getElementById('after-loading');
     if (img) img.style.display = 'none';
+    if (loading) loading.style.display = 'none';
     if (placeholder) placeholder.style.display = 'flex';
+  }
+
+  _setAfterPaneLoading(isLoading) {
+    const img = this.shadowRoot.getElementById('after-img');
+    const placeholder = this.shadowRoot.getElementById('after-placeholder');
+    const loading = this.shadowRoot.getElementById('after-loading');
+    if (isLoading) {
+      if (img) img.style.display = 'none';
+      if (placeholder) placeholder.style.display = 'none';
+      if (loading) loading.style.display = 'block';
+    } else if (loading) {
+      loading.style.display = 'none';
+    }
+  }
+
+  _setSavingOverlay(isSaving) {
+    const overlay = this.shadowRoot.getElementById('saving-overlay');
+    if (overlay) overlay.hidden = !isSaving;
   }
 
   _updatePaneHints() {
@@ -213,6 +234,7 @@ class AiImageEnhanceModal extends HTMLElement {
     this._isLoading = true;
     this._enhancedResult = null;
     this._updateActions();
+    this._setAfterPaneLoading(true);
     this._setStatus('שולח לשיפור בעזרת AI...');
 
     try {
@@ -232,6 +254,7 @@ class AiImageEnhanceModal extends HTMLElement {
 
       const afterImg = this.shadowRoot.getElementById('after-img');
       const afterPlaceholder = this.shadowRoot.getElementById('after-placeholder');
+      this._setAfterPaneLoading(false);
       if (afterImg) {
         afterImg.src = dataUrl;
         afterImg.style.display = 'block';
@@ -241,6 +264,8 @@ class AiImageEnhanceModal extends HTMLElement {
       this._setStatus('התמונה שופרה. ניתן לשמור או לבטל.');
     } catch (error) {
       console.error('Image enhancement failed:', error);
+      // Restore the placeholder so the after pane stops looking like it's loading.
+      this._clearAfterImage();
       this._setStatus(this._formatError(error));
     } finally {
       this._isLoading = false;
@@ -253,6 +278,7 @@ class AiImageEnhanceModal extends HTMLElement {
 
     this._isLoading = true;
     this._updateActions();
+    this._setSavingOverlay(true);
     this._setStatus('שומר את התמונה החדשה...');
 
     try {
@@ -306,6 +332,7 @@ class AiImageEnhanceModal extends HTMLElement {
       setTimeout(() => this._close(), 1200);
     } catch (error) {
       console.error('Save failed:', error);
+      this._setSavingOverlay(false);
       this._setStatus(this._formatError(error));
     } finally {
       this._isLoading = false;
@@ -636,6 +663,43 @@ class AiImageEnhanceModal extends HTMLElement {
           color: var(--ink-3, rgba(31, 29, 24, 0.55));
           min-height: 16px;
         }
+
+        .saving-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(255, 255, 255, 0.88);
+          border-radius: inherit;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+          z-index: 3;
+        }
+
+        .saving-overlay[hidden] {
+          display: none;
+        }
+
+        .spinner {
+          width: 38px;
+          height: 38px;
+          border: 3px solid var(--hairline, rgba(31, 29, 24, 0.12));
+          border-top-color: var(--primary, #6a994e);
+          border-radius: 50%;
+          animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .saving-text {
+          font-family: var(--font-ui-he, sans-serif);
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--ink, #1f1d18);
+        }
       </style>
 
       <div id="backdrop" class="backdrop" style="display: none;">
@@ -653,6 +717,7 @@ class AiImageEnhanceModal extends HTMLElement {
               <div id="after-pane" class="compare-pane">
                 <span class="compare-label">אחרי</span>
                 <img id="after-img" alt="אחרי" style="display: none;" />
+                <div id="after-loading" class="pane-shimmer" style="display: none;"></div>
                 <div id="after-placeholder" class="after-placeholder">
                   <span class="placeholder-icon">${icons.magic}</span>
                   <span>התמונה המשופרת<br/>תופיע כאן</span>
@@ -667,6 +732,11 @@ class AiImageEnhanceModal extends HTMLElement {
             </div>
 
             <div id="status" class="status"></div>
+          </div>
+
+          <div id="saving-overlay" class="saving-overlay" hidden>
+            <div class="spinner" role="status" aria-label="שומר"></div>
+            <div class="saving-text">שומר את התמונה...</div>
           </div>
         </div>
       </div>
