@@ -14,6 +14,7 @@ import { enhanceFoodImage } from '../../../js/services/ai-enhancement-service.js
 import { StorageService } from '../../../js/services/storage-service.js';
 import { getOptimizedImageUrl } from '../../../js/utils/recipes/recipe-image-utils.js';
 import { icons } from '../../../js/icons.js';
+import '../../utilities/modal/modal.js';
 
 const MAX_INPUT_DIMENSION = 1536;
 const JPEG_QUALITY = 0.92;
@@ -77,7 +78,6 @@ class AiImageEnhanceModal extends HTMLElement {
     this._isLoading = false;
     this._beforeUrl = null;
     this._viewer = null;
-    this._handleKeyDown = this._handleKeyDown.bind(this);
   }
 
   connectedCallback() {
@@ -86,8 +86,6 @@ class AiImageEnhanceModal extends HTMLElement {
   }
 
   disconnectedCallback() {
-    window.removeEventListener('keydown', this._handleKeyDown);
-    this._unlockScroll();
     if (this._viewer) {
       this._viewer.remove();
       this._viewer = null;
@@ -113,13 +111,9 @@ class AiImageEnhanceModal extends HTMLElement {
     this._updateActions();
     this._loadBeforeImage();
 
-    const backdrop = this.shadowRoot.getElementById('backdrop');
-    backdrop.style.display = 'flex';
-    backdrop.offsetWidth; // force reflow for transition
-    backdrop.classList.add('open');
-
-    window.addEventListener('keydown', this._handleKeyDown);
-    this._lockScroll();
+    const modal = this.shadowRoot.getElementById('custom-modal');
+    modal?.clearCloseGuard();
+    modal?.open();
   }
 
   // ---------------------------------------------------------------------------
@@ -158,25 +152,9 @@ class AiImageEnhanceModal extends HTMLElement {
   // ---------------------------------------------------------------------------
 
   _close() {
-    const backdrop = this.shadowRoot.getElementById('backdrop');
-    backdrop.classList.remove('open');
-    window.removeEventListener('keydown', this._handleKeyDown);
-    this._unlockScroll();
-    setTimeout(() => {
-      if (!backdrop.classList.contains('open')) backdrop.style.display = 'none';
-    }, 280);
-  }
-
-  _handleKeyDown(e) {
-    if (e.key === 'Escape') this._close();
-  }
-
-  _lockScroll() {
-    document.body.style.overflow = 'hidden';
-  }
-
-  _unlockScroll() {
-    document.body.style.overflow = '';
+    const modal = this.shadowRoot.getElementById('custom-modal');
+    modal?.clearCloseGuard();
+    modal?.close();
   }
 
   // ---------------------------------------------------------------------------
@@ -243,6 +221,16 @@ class AiImageEnhanceModal extends HTMLElement {
   _setSavingOverlay(isSaving) {
     const overlay = this.shadowRoot.getElementById('saving-overlay');
     if (overlay) overlay.hidden = !isSaving;
+    // Also block the modal's user-initiated close paths (ESC, click-outside,
+    // close button) while saving. The visual overlay covers the close button
+    // pointer-events; the guard handles the keyboard / backdrop click paths.
+    const modal = this.shadowRoot.getElementById('custom-modal');
+    if (!modal) return;
+    if (isSaving) {
+      modal.setCloseGuard(() => false);
+    } else {
+      modal.clearCloseGuard();
+    }
   }
 
   _updatePaneHints() {
@@ -530,10 +518,6 @@ class AiImageEnhanceModal extends HTMLElement {
 
   _bindEvents() {
     const sr = this.shadowRoot;
-    sr.getElementById('backdrop').addEventListener('click', (e) => {
-      if (e.target === sr.getElementById('backdrop')) this._close();
-    });
-    sr.getElementById('close-btn').addEventListener('click', () => this._close());
     sr.getElementById('enhance-btn').addEventListener('click', () => this._enhance());
     sr.getElementById('save-btn').addEventListener('click', () => this._save());
     sr.getElementById('discard-btn').addEventListener('click', () => this._discard());
@@ -552,81 +536,10 @@ class AiImageEnhanceModal extends HTMLElement {
           font-family: var(--font-ui-he, sans-serif);
         }
 
-        .backdrop {
-          position: fixed;
-          inset: 0;
-          z-index: var(--z-modal, 2000);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
-          background: rgba(26, 26, 26, 0.55);
-          opacity: 0;
-          visibility: hidden;
-          transition: opacity var(--dur-2, 280ms) var(--ease, ease),
-                      visibility var(--dur-2, 280ms) var(--ease, ease);
-        }
-
-        .backdrop.open {
-          opacity: 1;
-          visibility: visible;
-        }
-
-        @media (max-width: 540px) {
-          .backdrop { padding: 4px; }
-          .dialog { width: 96vw; max-height: 92vh; }
-          .dialog-body { padding: 22px 16px 20px; }
-          .title { font-size: 15px; padding-inline-end: 36px; }
-        }
-
-        .dialog {
-          position: relative;
-          width: min(640px, 90vw);
-          max-height: 86vh;
-          display: flex;
-          flex-direction: column;
-          background: var(--surface-1, #fff);
-          border: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
-          border-radius: var(--r-xl, 20px);
-          box-shadow: var(--shadow-3, 0 8px 32px rgba(31,29,24,0.18), 0 2px 8px rgba(31,29,24,0.08));
-          box-sizing: border-box;
-          direction: rtl;
-          transform: translateY(16px) scale(0.98);
-          transition: transform var(--dur-2, 280ms) var(--ease, ease);
-        }
-
-        .dialog-body {
-          flex: 1 1 auto;
-          overflow-y: auto;
-          padding: 28px 32px 32px;
-        }
-
-        .backdrop.open .dialog {
-          transform: none;
-        }
-
-        .close-btn {
-          position: absolute;
-          top: 16px;
-          left: 16px;
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          border: 1px solid var(--hairline, rgba(31,29,24,0.12));
-          background: var(--surface-0, #fafaf8);
-          cursor: pointer;
-          color: var(--ink, #1f1d18);
-          font-size: 18px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          transition: background var(--dur-1, 160ms);
-          line-height: 1;
-          padding: 0;
-        }
-
-        .close-btn:hover {
-          background: var(--surface-2, #f0ede6);
+        /* Width-sized for the AI-enhance content. The shared <custom-modal>
+           handles backdrop, scrollbar compensation, ESC, focus trap, etc. */
+        custom-modal {
+          --modal-width: 640px;
         }
 
         .title {
@@ -635,7 +548,12 @@ class AiImageEnhanceModal extends HTMLElement {
           font-size: 16px;
           font-weight: 600;
           color: var(--ink, #1f1d18);
+          /* Clear the close button (top-left in RTL) on the title's row. */
           padding-inline-end: 40px;
+        }
+
+        @media (max-width: 540px) {
+          .title { font-size: 15px; padding-inline-end: 36px; }
         }
 
         .compare {
@@ -865,16 +783,15 @@ class AiImageEnhanceModal extends HTMLElement {
         }
 
         .saving-overlay {
-          position: absolute;
+          position: fixed;
           inset: 0;
           background: rgba(255, 255, 255, 0.88);
-          border-radius: inherit;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           gap: 14px;
-          z-index: 3;
+          z-index: calc(var(--z-modal, 2000) + 1);
         }
 
         .saving-overlay[hidden] {
@@ -902,70 +819,65 @@ class AiImageEnhanceModal extends HTMLElement {
         }
       </style>
 
-      <div id="backdrop" class="backdrop" style="display: none;">
-        <div class="dialog" role="dialog" aria-modal="true">
-          <button id="close-btn" class="close-btn" aria-label="סגור">&times;</button>
-          <div class="dialog-body">
-            <h2 id="modal-title" class="title"></h2>
+      <custom-modal id="custom-modal" width="640px">
+        <h2 id="modal-title" class="title"></h2>
 
-            <div class="compare">
-              <div id="before-pane" class="compare-pane">
-                <span class="compare-label">לפני</span>
-                <img id="before-img" alt="לפני" style="display: none;" />
-                <div id="before-loading" class="pane-shimmer"></div>
-              </div>
-              <div id="after-pane" class="compare-pane">
-                <span class="compare-label">אחרי</span>
-                <img id="after-img" alt="אחרי" style="display: none;" />
-                <div id="after-loading" class="pane-shimmer" style="display: none;"></div>
-                <div id="after-placeholder" class="after-placeholder">
-                  <span class="placeholder-icon">${icons.magic}</span>
-                  <span>התמונה המשופרת<br/>תופיע כאן</span>
-                </div>
-              </div>
-            </div>
-
-            <section class="advanced" aria-labelledby="advanced-title">
-              <div id="advanced-title" class="advanced-title">אפשרויות מתקדמות</div>
-              <div class="advanced-body">
-                ${PARAMETER_AXES.map(
-                  (axis) => `
-                <div class="param-field">
-                  <label for="param-${axis}">${PARAMETER_UI[axis].label}</label>
-                  <select id="param-${axis}">
-                    <option value="">אוטומטי</option>
-                    ${Object.entries(PARAMETER_UI[axis].options)
-                      .map(([value, label]) => `<option value="${value}">${label}</option>`)
-                      .join('')}
-                  </select>
-                </div>`,
-                ).join('')}
-                <div class="free-text-field">
-                  <label for="free-text">הוראות נוספות (אופציונלי)</label>
-                  <textarea
-                    id="free-text"
-                    maxlength="${FREE_TEXT_MAX_LENGTH}"
-                    rows="2"
-                    placeholder="לדוגמה: סגנון איטלקי כפרי, פחות גרניש..."
-                  ></textarea>
-                </div>
-              </div>
-            </section>
-
-            <div class="actions">
-              <button id="enhance-btn" class="action primary">שפר תמונה</button>
-              <button id="save-btn" class="action ghost" style="display: none;">שמור והחלף</button>
-              <button id="discard-btn" class="action danger" style="display: none;">בטל</button>
-            </div>
-
-            <div id="status" class="status"></div>
+        <div class="compare">
+          <div id="before-pane" class="compare-pane">
+            <span class="compare-label">לפני</span>
+            <img id="before-img" alt="לפני" style="display: none;" />
+            <div id="before-loading" class="pane-shimmer"></div>
           </div>
-
-          <div id="saving-overlay" class="saving-overlay" hidden>
-            <div class="spinner" role="status" aria-label="שומר"></div>
-            <div class="saving-text">שומר את התמונה...</div>
+          <div id="after-pane" class="compare-pane">
+            <span class="compare-label">אחרי</span>
+            <img id="after-img" alt="אחרי" style="display: none;" />
+            <div id="after-loading" class="pane-shimmer" style="display: none;"></div>
+            <div id="after-placeholder" class="after-placeholder">
+              <span class="placeholder-icon">${icons.magic}</span>
+              <span>התמונה המשופרת<br/>תופיע כאן</span>
+            </div>
           </div>
         </div>
+
+        <section class="advanced" aria-labelledby="advanced-title">
+          <div id="advanced-title" class="advanced-title">אפשרויות מתקדמות</div>
+          <div class="advanced-body">
+            ${PARAMETER_AXES.map(
+              (axis) => `
+            <div class="param-field">
+              <label for="param-${axis}">${PARAMETER_UI[axis].label}</label>
+              <select id="param-${axis}">
+                <option value="">אוטומטי</option>
+                ${Object.entries(PARAMETER_UI[axis].options)
+                  .map(([value, label]) => `<option value="${value}">${label}</option>`)
+                  .join('')}
+              </select>
+            </div>`,
+            ).join('')}
+            <div class="free-text-field">
+              <label for="free-text">הוראות נוספות (אופציונלי)</label>
+              <textarea
+                id="free-text"
+                maxlength="${FREE_TEXT_MAX_LENGTH}"
+                rows="2"
+                placeholder="לדוגמה: סגנון איטלקי כפרי, פחות גרניש..."
+              ></textarea>
+            </div>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button id="enhance-btn" class="action primary">שפר תמונה</button>
+          <button id="save-btn" class="action ghost" style="display: none;">שמור והחלף</button>
+          <button id="discard-btn" class="action danger" style="display: none;">בטל</button>
+        </div>
+
+        <div id="status" class="status"></div>
+      </custom-modal>
+
+      <div id="saving-overlay" class="saving-overlay" hidden>
+        <div class="spinner" role="status" aria-label="שומר"></div>
+        <div class="saving-text">שומר את התמונה...</div>
       </div>
     `;
   }
