@@ -597,10 +597,8 @@ exports.enhanceFoodImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (reques
     return await enhanceFoodImage({ image, parameters, instruction });
   } catch (error) {
     console.error('Error enhancing image:', error);
-    if (error.code && error.details !== undefined) {
-      throw error;
-    }
-    throw new HttpsError('internal', 'Image enhancement failed', error.message);
+    if (error instanceof HttpsError) throw error;
+    throw new HttpsError('internal', 'Image enhancement failed');
   }
 });
 

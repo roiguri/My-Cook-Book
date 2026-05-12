@@ -174,8 +174,7 @@ export default {
     // Bubbles up from <ai-image-enhance-modal> on successful save. The enhancer
     // refreshes itself for the affected recipe; here we refresh peer sections
     // that might surface the same recipe's images (currently all-recipes).
-    document.addEventListener('image-enhanced-saved', (event) => {
-      console.log('Image enhanced for recipe:', event.detail?.recipeId);
+    document.addEventListener('image-enhanced-saved', () => {
       this.refreshManager.refreshDashboards([DASHBOARD_SECTIONS.ALL_RECIPES]);
     });
   },
