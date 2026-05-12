@@ -17,9 +17,9 @@ import {
 } from '../../../js/utils/recipes/recipe-ingredients-utils.js';
 import { getMediaInstructionUrl } from '../../../js/utils/recipes/recipe-media-utils.js';
 
-import '../../utilities/image-carousel/image-carousel.js';
-import '../../utilities/media-scroller/media-scroller.js';
-import '../../utilities/fullscreen-media-viewer/fullscreen-media-viewer.js';
+import '../../media/image-carousel/image-carousel.js';
+import '../../media/media-scroller/media-scroller.js';
+import '../../media/fullscreen-media-viewer/fullscreen-media-viewer.js';
 import './parts/cook-mode-container.js';
 import '../recipe_strip/recipe_strip.js';
 

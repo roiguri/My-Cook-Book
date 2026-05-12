@@ -123,7 +123,7 @@ class AiImageEnhanceModal extends HTMLElement {
 
   async _getViewer() {
     if (!this._viewer) {
-      await import('../../utilities/fullscreen-media-viewer/fullscreen-media-viewer.js');
+      await import('../fullscreen-media-viewer/fullscreen-media-viewer.js');
       this._viewer = document.createElement('fullscreen-media-viewer');
       this._viewer.setAttribute('dir', 'rtl');
       document.body.appendChild(this._viewer);

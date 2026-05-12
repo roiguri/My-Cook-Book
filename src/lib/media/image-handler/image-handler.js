@@ -1,5 +1,5 @@
-import { generateImageId } from '../../js/utils/recipes/recipe-image-utils.js';
-import { uploadZoneStyles } from '../../styles/components/upload-zone-styles.js';
+import { generateImageId } from '../../../js/utils/recipes/recipe-image-utils.js';
+import { uploadZoneStyles } from '../../../styles/components/upload-zone-styles.js';
 
 class ImageHandler extends HTMLElement {
   constructor() {
