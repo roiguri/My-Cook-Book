@@ -8,6 +8,7 @@ const {
   extractRecipeFromImage,
   extractRecipeFromUrl,
   enhanceFoodImage,
+  PARAMETER_TAXONOMY,
 } = require('./utils/gemini-service');
 const { sendNotificationToRole } = require('./notifications');
 
@@ -532,6 +533,37 @@ exports.extractRecipeFromImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (
   }
 });
 
+const MAX_INSTRUCTION_LENGTH = 500;
+
+function validateEnhancementParameters(parameters) {
+  if (parameters === undefined || parameters === null) return;
+  if (typeof parameters !== 'object' || Array.isArray(parameters)) {
+    throw new HttpsError('invalid-argument', 'parameters must be an object.');
+  }
+  for (const [axis, value] of Object.entries(parameters)) {
+    if (!(axis in PARAMETER_TAXONOMY)) {
+      throw new HttpsError('invalid-argument', `Unknown parameter axis: ${axis}.`);
+    }
+    if (value === null || value === undefined || value === '') continue;
+    if (typeof value !== 'string' || !PARAMETER_TAXONOMY[axis][value]) {
+      throw new HttpsError('invalid-argument', `Invalid value '${value}' for parameter '${axis}'.`);
+    }
+  }
+}
+
+function validateInstruction(instruction) {
+  if (instruction === undefined || instruction === null || instruction === '') return;
+  if (typeof instruction !== 'string') {
+    throw new HttpsError('invalid-argument', 'instruction must be a string.');
+  }
+  if (instruction.length > MAX_INSTRUCTION_LENGTH) {
+    throw new HttpsError(
+      'invalid-argument',
+      `instruction exceeds ${MAX_INSTRUCTION_LENGTH} characters.`,
+    );
+  }
+}
+
 exports.enhanceFoodImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (request) => {
   // Check if user is authenticated
   if (!request.auth) {
@@ -539,14 +571,16 @@ exports.enhanceFoodImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (reques
   }
 
   const { uid } = request.auth;
-  const { image } = request.data || {};
+  const { image, parameters, instruction } = request.data || {};
 
   if (!image || typeof image !== 'object' || typeof image.base64 !== 'string' || !image.base64) {
     throw new HttpsError(
       'invalid-argument',
-      'The function must be called with an image { base64, mimeType } payload.',
+      'image must be an object of shape { base64, mimeType? }.',
     );
   }
+  validateEnhancementParameters(parameters);
+  validateInstruction(instruction);
 
   try {
     // Role gate — managers only.
@@ -560,10 +594,10 @@ exports.enhanceFoodImage = onCall({ secrets: ['GEMINI_API_KEY'] }, async (reques
       throw new HttpsError('permission-denied', 'User must be a manager to use this feature.');
     }
 
-    return await enhanceFoodImage(image);
+    return await enhanceFoodImage({ image, parameters, instruction });
   } catch (error) {
     console.error('Error enhancing image:', error);
-    if (error.code && error.details) {
+    if (error.code && error.details !== undefined) {
       throw error;
     }
     throw new HttpsError('internal', 'Image enhancement failed', error.message);

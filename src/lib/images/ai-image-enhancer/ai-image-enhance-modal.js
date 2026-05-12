@@ -17,6 +17,55 @@ import { icons } from '../../../js/icons.js';
 
 const MAX_INPUT_DIMENSION = 1536;
 const JPEG_QUALITY = 0.92;
+const FREE_TEXT_MAX_LENGTH = 500;
+
+// Parameter UI mapping. The KEY values (moody, flat-lay, etc.) must match the
+// server-side PARAMETER_TAXONOMY exactly — they cross the wire as-is. The
+// labels are Hebrew strings rendered in the <select> options.
+const PARAMETER_UI = {
+  lighting: {
+    label: 'תאורה',
+    options: {
+      natural: 'טבעית',
+      commercial: 'סטודיו',
+      moody: 'דרמטית',
+      'golden-hour': 'אור זהוב',
+      backlit: 'אור מאחור',
+    },
+  },
+  angle: {
+    label: 'זווית צילום',
+    options: {
+      'flat-lay': 'מבט עליון',
+      hero: 'זווית 45°',
+      portrait: 'זווית נמוכה',
+      macro: 'תקריב',
+      'side-profile': 'מבט מהצד',
+    },
+  },
+  surface: {
+    label: 'משטח',
+    options: {
+      marble: 'שיש',
+      wood: 'עץ כפרי',
+      concrete: 'בטון',
+      linen: 'בד פשתן',
+      slate: 'אבן כהה',
+    },
+  },
+  styling: {
+    label: 'סגנון עיצוב',
+    options: {
+      clean: 'נקי',
+      editorial: 'עריכותי',
+      'ingredient-led': 'מבוסס מרכיבים',
+      'rustic-spread': 'מטבח כפרי',
+      'gourmet-plated': 'גורמה',
+    },
+  },
+};
+
+const PARAMETER_AXES = Object.keys(PARAMETER_UI);
 
 class AiImageEnhanceModal extends HTMLElement {
   constructor() {
@@ -60,6 +109,7 @@ class AiImageEnhanceModal extends HTMLElement {
     this._setStatus('');
     this._clearAfterImage();
     this._setSavingOverlay(false);
+    this._resetParameterControls();
     this._updateActions();
     this._loadBeforeImage();
 
@@ -202,6 +252,54 @@ class AiImageEnhanceModal extends HTMLElement {
     if (afterPane) afterPane.classList.toggle('pane-clickable', !!this._enhancedResult);
   }
 
+  /**
+   * Reads the current parameter dropdowns. Empty-string selections (the
+   * "אוטומטי" option's value) collapse to `undefined` so the server treats
+   * them as unset and lets the model choose.
+   * @returns {Object} Object with one key per axis; only set keys included.
+   */
+  _readParameters() {
+    const sr = this.shadowRoot;
+    const out = {};
+    for (const axis of PARAMETER_AXES) {
+      const sel = sr.getElementById(`param-${axis}`);
+      const value = sel?.value || '';
+      if (value) out[axis] = value;
+    }
+    return out;
+  }
+
+  _readFreeText() {
+    const ta = this.shadowRoot.getElementById('free-text');
+    return (ta?.value || '').trim();
+  }
+
+  /**
+   * Writes a parameters object back into the dropdowns. `null` values leave
+   * the dropdown on "אוטומטי". Used after a successful enhance to surface
+   * the model's picks.
+   */
+  _writeParameters(parameters) {
+    if (!parameters) return;
+    const sr = this.shadowRoot;
+    for (const axis of PARAMETER_AXES) {
+      const sel = sr.getElementById(`param-${axis}`);
+      if (!sel) continue;
+      const value = parameters[axis];
+      sel.value = value && PARAMETER_UI[axis].options[value] ? value : '';
+    }
+  }
+
+  _resetParameterControls() {
+    const sr = this.shadowRoot;
+    for (const axis of PARAMETER_AXES) {
+      const sel = sr.getElementById(`param-${axis}`);
+      if (sel) sel.value = '';
+    }
+    const ta = sr.getElementById('free-text');
+    if (ta) ta.value = '';
+  }
+
   _setStatus(message) {
     const el = this.shadowRoot.getElementById('status');
     if (el) el.textContent = message;
@@ -244,13 +342,32 @@ class AiImageEnhanceModal extends HTMLElement {
       const sourceBlob = await response.blob();
 
       const { base64, mimeType } = await this._preparePayload(sourceBlob);
-      const data = await enhanceFoodImage({ base64, mimeType });
+
+      const parameters = this._readParameters();
+      const instruction = this._readFreeText();
+
+      const data = await enhanceFoodImage({
+        image: { base64, mimeType },
+        parameters: Object.keys(parameters).length ? parameters : undefined,
+        instruction: instruction || undefined,
+      });
 
       const outMime = data.mimeType || 'image/png';
       const enhancedBlob = await this._base64ToBlob(data.base64, outMime);
       const dataUrl = `data:${outMime};base64,${data.base64}`;
 
       this._enhancedResult = { blob: enhancedBlob, dataUrl, mimeType: outMime };
+
+      // Surface the model's picks in the dropdowns so the user sees what was
+      // applied. User overrides win when set (the server echoes them back, but
+      // we fall back to the user value if the PARAMS line was malformed for
+      // an axis).
+      const selected = data.selectedParameters || {};
+      const surfaced = {};
+      for (const axis of PARAMETER_AXES) {
+        surfaced[axis] = parameters[axis] || selected[axis] || null;
+      }
+      this._writeParameters(surfaced);
 
       const afterImg = this.shadowRoot.getElementById('after-img');
       const afterPlaceholder = this.shadowRoot.getElementById('after-placeholder');
@@ -344,6 +461,7 @@ class AiImageEnhanceModal extends HTMLElement {
     this._enhancedResult = null;
     this._clearAfterImage();
     this._updatePaneHints();
+    this._resetParameterControls();
     this._setStatus('');
     this._updateActions();
   }
@@ -456,6 +574,9 @@ class AiImageEnhanceModal extends HTMLElement {
 
         @media (max-width: 540px) {
           .backdrop { padding: 4px; }
+          .dialog { width: 96vw; max-height: 92vh; }
+          .dialog-body { padding: 22px 16px 20px; }
+          .title { font-size: 15px; padding-inline-end: 36px; }
         }
 
         .dialog {
@@ -604,6 +725,85 @@ class AiImageEnhanceModal extends HTMLElement {
           filter: brightness(1.06);
         }
 
+        .advanced {
+          margin-top: 14px;
+          border: 1px solid var(--hairline, rgba(31, 29, 24, 0.12));
+          border-radius: var(--r-md, 12px);
+          background: var(--surface-0, #fafaf8);
+        }
+
+        .advanced-title {
+          padding: 10px 14px 6px;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--ink-3, rgba(31, 29, 24, 0.55));
+          user-select: none;
+        }
+
+        .advanced-body {
+          padding: 0 14px 14px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px 14px;
+        }
+
+        @media (max-width: 540px) {
+          .advanced-body {
+            grid-template-columns: 1fr;
+            padding: 0 12px 12px;
+          }
+          .advanced-title { padding: 10px 12px 6px; }
+        }
+
+        .param-field {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .param-field label {
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          color: var(--ink-3, rgba(31, 29, 24, 0.55));
+        }
+
+        .param-field select,
+        .free-text-field textarea {
+          padding: 7px 10px;
+          border: 1.5px solid var(--hairline-strong, rgba(31, 29, 24, 0.15));
+          border-radius: var(--r-sm, 8px);
+          font-family: var(--font-ui-he, sans-serif);
+          font-size: 13px;
+          background: var(--surface-0, #fff);
+          color: var(--ink, #1f1d18);
+          outline: none;
+          box-sizing: border-box;
+        }
+
+        .param-field select:focus,
+        .free-text-field textarea:focus {
+          border-color: var(--primary, #6a994e);
+          box-shadow: var(--ring, 0 0 0 3px rgba(106, 153, 78, 0.18));
+        }
+
+        .free-text-field {
+          grid-column: 1 / -1;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .free-text-field textarea {
+          resize: vertical;
+          min-height: 44px;
+          max-height: 120px;
+          font-family: var(--font-ui-he, sans-serif);
+          line-height: 1.4;
+        }
+
         .actions {
           display: flex;
           flex-wrap: wrap;
@@ -724,6 +924,33 @@ class AiImageEnhanceModal extends HTMLElement {
                 </div>
               </div>
             </div>
+
+            <section class="advanced" aria-labelledby="advanced-title">
+              <div id="advanced-title" class="advanced-title">אפשרויות מתקדמות</div>
+              <div class="advanced-body">
+                ${PARAMETER_AXES.map(
+                  (axis) => `
+                <div class="param-field">
+                  <label for="param-${axis}">${PARAMETER_UI[axis].label}</label>
+                  <select id="param-${axis}">
+                    <option value="">אוטומטי</option>
+                    ${Object.entries(PARAMETER_UI[axis].options)
+                      .map(([value, label]) => `<option value="${value}">${label}</option>`)
+                      .join('')}
+                  </select>
+                </div>`,
+                ).join('')}
+                <div class="free-text-field">
+                  <label for="free-text">הוראות נוספות (אופציונלי)</label>
+                  <textarea
+                    id="free-text"
+                    maxlength="${FREE_TEXT_MAX_LENGTH}"
+                    rows="2"
+                    placeholder="לדוגמה: סגנון איטלקי כפרי, פחות גרניש..."
+                  ></textarea>
+                </div>
+              </div>
+            </section>
 
             <div class="actions">
               <button id="enhance-btn" class="action primary">שפר תמונה</button>
