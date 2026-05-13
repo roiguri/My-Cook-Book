@@ -438,6 +438,19 @@ class MediaInstructionsEditor extends HTMLElement {
           background: var(--surface-2, #f0ede6);
         }
 
+        .pending-badge {
+          position: absolute;
+          top: 50px;
+          left: 15px;
+          background: #e6a817;
+          color: #fff;
+          padding: 3px 8px;
+          border-radius: var(--r-pill, 999px);
+          font-family: var(--font-ui-he, sans-serif);
+          font-size: 11px;
+          font-weight: 500;
+        }
+
         .caption-input {
           width: 100%;
           padding: 10px 12px;
@@ -652,6 +665,7 @@ class MediaInstructionsEditor extends HTMLElement {
                 <button
                   class="delete-button"
                   aria-label="מחק פריט ${index + 1}">×</button>
+                ${isPending ? '<span class="pending-badge">ממתין</span>' : ''}
                 <span class="item-order" aria-hidden="true">${index + 1}</span>
                 ${mediaTag}
                 <input
