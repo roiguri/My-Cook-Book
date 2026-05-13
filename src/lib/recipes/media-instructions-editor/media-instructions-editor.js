@@ -438,22 +438,17 @@ class MediaInstructionsEditor extends HTMLElement {
           background: var(--surface-2, #f0ede6);
         }
 
-        .media-type-badge {
+        .pending-badge {
           position: absolute;
           top: 50px;
           left: 15px;
-          background: rgba(31,29,24,0.65);
+          background: #e6a817;
           color: #fff;
           padding: 3px 8px;
           border-radius: var(--r-pill, 999px);
           font-family: var(--font-ui-he, sans-serif);
           font-size: 11px;
           font-weight: 500;
-        }
-
-        .media-type-badge.pending-badge {
-          background: #e6a817;
-          color: #fff;
         }
 
         .caption-input {
@@ -651,19 +646,16 @@ class MediaInstructionsEditor extends HTMLElement {
               }
 
               const isVideo = item.type === 'video';
-              const mediaTypeText = isVideo ? 'וידאו' : 'תמונה';
               const mediaTag = isVideo
                 ? `<video class="media-preview" src="${previewURL}" controls aria-label="${item.caption || 'וידאו ללא כיתוב'}"></video>`
                 : `<img class="media-preview" src="${previewURL}" alt="${item.caption || 'תמונה ללא תיאור'}">`;
-
-              const badgeText = isPending ? `${mediaTypeText} (ממתין)` : mediaTypeText;
 
               return `
               <div
                 class="media-item ${isPending ? 'pending' : ''}"
                 data-index="${index}"
                 role="article"
-                aria-label="פריט מדיה ${index + 1} מתוך ${this.mediaItems.length}: ${mediaTypeText}">
+                aria-label="פריט מדיה ${index + 1} מתוך ${this.mediaItems.length}">
                 <span
                   class="drag-handle"
                   draggable="true"
@@ -672,8 +664,8 @@ class MediaInstructionsEditor extends HTMLElement {
                   aria-label="גרור לשינוי סדר פריט ${index + 1}">⠿</span>
                 <button
                   class="delete-button"
-                  aria-label="מחק ${mediaTypeText} ${index + 1}">×</button>
-                <span class="media-type-badge ${isPending ? 'pending-badge' : ''}">${badgeText}</span>
+                  aria-label="מחק פריט ${index + 1}">×</button>
+                ${isPending ? '<span class="pending-badge">ממתין</span>' : ''}
                 <span class="item-order" aria-hidden="true">${index + 1}</span>
                 ${mediaTag}
                 <input
@@ -681,7 +673,7 @@ class MediaInstructionsEditor extends HTMLElement {
                   class="caption-input"
                   placeholder="הוסף הסבר לשלב..."
                   value="${item.caption || ''}"
-                  aria-label="כיתוב עבור ${mediaTypeText} ${index + 1}"
+                  aria-label="כיתוב עבור פריט ${index + 1}"
                   dir="rtl"
                 >
               </div>
