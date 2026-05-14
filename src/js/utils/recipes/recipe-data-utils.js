@@ -32,6 +32,7 @@
  */
 
 import { FirestoreService } from '../../services/firestore-service.js';
+import { getRecipeStore } from '../../state/recipe-store.js';
 import { formatIngredientAmount } from './recipe-ingredients-utils.js';
 import { removeAllRecipeImages } from './recipe-image-utils.js';
 import { removeAllMediaInstructions } from './recipe-media-utils.js';
@@ -446,10 +447,11 @@ export function getCategoryIcon(category) {
 }
 
 /**
- * Fetch recipes for display in recipe cards (lightweight version)
+ * Fetch recipes for display in recipe cards (lightweight version).
+ * Populates the per-id recipe cache so a subsequent getRecipeById() for any
+ * of these recipes hits memory instead of Firestore.
  * @param {Object} options - Query options (category, limit, approved only, etc.)
  * @returns {Promise<Array>} Array of recipe card data objects
- * @property {Date|string|number} [creationTime]
  */
 export async function getRecipesForCards(options = {}) {
   const queryParams = { where: [], orderBy: ['creationTime', 'desc'] };
@@ -463,17 +465,24 @@ export async function getRecipesForCards(options = {}) {
     queryParams.limit = options.limit;
   }
   const docs = await FirestoreService.queryDocuments('recipes', queryParams);
+  const store = getRecipeStore();
+  for (const doc of docs) {
+    if (doc?.id) store.set(doc.id, doc);
+  }
   return docs.map(formatRecipeData);
 }
 
 /**
- * Fetch a single complete recipe by ID
+ * Fetch a single complete recipe by ID.
+ * Routes through the shared recipe cache: within the cache TTL, repeat reads
+ * of the same id across pages avoid Firestore entirely. The cache is
+ * invalidated for an id whenever a `recipe-updated` event fires for it.
  * @param {string} recipeId - Recipe ID
  * @returns {Promise<Object>} Complete recipe object
  */
 export async function getRecipeById(recipeId) {
-  const doc = await FirestoreService.getDocument('recipes', recipeId);
-  return doc ? formatRecipeData(doc) : null;
+  const raw = await getRecipeStore().get(recipeId);
+  return raw ? formatRecipeData(raw) : null;
 }
 
 /**
@@ -500,6 +509,9 @@ export async function deleteRecipe(recipeId) {
 
     // 4. Delete the recipe document from Firestore
     await FirestoreService.deleteDocument('recipes', recipeId);
+
+    // 5. Drop the cached entry so subsequent reads don't return stale data
+    getRecipeStore().invalidate(recipeId);
   } catch (error) {
     console.error('Error deleting recipe:', error);
     throw new Error(`Failed to delete recipe: ${error.message}`);
