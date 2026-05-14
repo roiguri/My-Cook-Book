@@ -46,17 +46,25 @@ import {
   linkWithPopup,
   unlink,
 } from 'firebase/auth';
+import {
+  authStore,
+  _setUser as _storeSetUser,
+  _resetForUserSwitch as _storeResetForUserSwitch,
+  _patchUserData as _storePatchUserData,
+} from '../state/auth-store.js';
 
 class AuthService {
   /**
-   * Constructor initializes the service
+   * Constructor initializes the service.
+   *
+   * Authentication state (user, userData, isAuthResolved, avatarUrl) lives in
+   * authStore — this class is a thin facade over it. The legacy private fields
+   * `_currentUser`, `_userData`, `_authResolved`, `_currentAvatarUrl` are
+   * implemented as getter/setter properties below that proxy to the store, so
+   * existing call sites and tests that read or assign them continue to work.
    */
   constructor() {
     this._initialized = false;
-    this._authResolved = false; // Tracks if the initial auth state (including roles) is fully loaded
-    this._currentUser = null;
-    this._userData = null; // Full user document data
-    this._currentAvatarUrl = null;
     this._observers = [];
     this._unsubscribeFromAuth = null;
     this._authResolveCallbacks = []; // Callbacks waiting for initial resolution
@@ -67,6 +75,50 @@ class AuthService {
     }
 
     AuthService.instance = this;
+  }
+
+  // ---- authStore proxy properties (single source of truth) ----
+
+  get _currentUser() {
+    return authStore.get().user;
+  }
+  set _currentUser(user) {
+    const s = authStore.get();
+    _storeSetUser(user, s.userData, { resolved: s.isAuthResolved });
+  }
+
+  get _userData() {
+    return authStore.get().userData;
+  }
+  set _userData(userData) {
+    const s = authStore.get();
+    _storeSetUser(s.user, userData, { resolved: s.isAuthResolved });
+  }
+
+  get _authResolved() {
+    return authStore.get().isAuthResolved;
+  }
+  set _authResolved(resolved) {
+    const s = authStore.get();
+    _storeSetUser(s.user, s.userData, { resolved });
+  }
+
+  get _currentAvatarUrl() {
+    return authStore.get().avatarUrl;
+  }
+  set _currentAvatarUrl(url) {
+    // avatarUrl is normally derived from userData.avatarUrl ?? user.photoURL.
+    // The few legacy call sites that assign it directly are persisting an
+    // explicit override; mirror that into userData so the derivation produces
+    // the requested value.
+    const s = authStore.get();
+    if (url === null) {
+      if (s.userData && 'avatarUrl' in s.userData) {
+        _storePatchUserData({ avatarUrl: null });
+      }
+      return;
+    }
+    _storePatchUserData({ avatarUrl: url });
   }
 
   /**
@@ -80,14 +132,24 @@ class AuthService {
     const auth = getAuthInstance();
     this._unsubscribeFromAuth = auth.onAuthStateChanged(async (user) => {
       const prevUser = this._currentUser;
-      this._currentUser = user;
+
+      // When the Firebase user changes (logout, login, or account switch),
+      // synchronously drop the previous user's Firestore data BEFORE awaiting
+      // the new user's fetch. This prevents any UI subscribed to authStore
+      // from seeing the previous user's data paired with the new user — the
+      // root cause of the "modal shows previous user's profile" bug.
+      const userChanged = (prevUser?.uid ?? null) !== (user?.uid ?? null);
+      if (userChanged) {
+        _storeResetForUserSwitch(user);
+      } else {
+        this._currentUser = user;
+      }
 
       if (user) {
         // Fetch full user data once
         await this.getUserData({ forceRefresh: true });
       } else {
         this._userData = null;
-        this._currentAvatarUrl = null;
       }
 
       // Notify observers of the auth state change
@@ -138,21 +200,17 @@ class AuthService {
     if (!this._currentUser || this._currentUser.uid !== userId) return;
     if (!this._userData) return;
 
-    // Initialize favorites array if missing
-    if (!this._userData.favorites) {
-      this._userData.favorites = [];
-    }
-
-    const favorites = new Set(this._userData.favorites);
-
+    const favorites = new Set(this._userData.favorites || []);
     if (isFavorite) {
       favorites.add(recipeId);
     } else {
       favorites.delete(recipeId);
     }
 
-    // Update local cache
-    this._userData.favorites = Array.from(favorites);
+    // Replace the whole userData object so authStore subscribers are notified
+    // (mutating in place would not change the reference and would skip the
+    // store's equality check).
+    this._userData = { ...this._userData, favorites: Array.from(favorites) };
   }
 
   /**
@@ -181,8 +239,8 @@ class AuthService {
         this._userData = { role: 'user', favorites: [] };
       }
 
-      // Update derived properties
-      this._currentAvatarUrl = this._userData.avatarUrl || this._currentUser.photoURL || null;
+      // avatarUrl is derived from userData.avatarUrl ?? user.photoURL by
+      // authStore — no explicit assignment needed.
 
       return this._userData;
     } catch (error) {
@@ -371,18 +429,12 @@ class AuthService {
         updatedAt: serverTimestamp(),
       });
 
-      // Update local cache manually since we just updated the doc
+      // Merge profileData into userData. authStore re-derives avatarUrl from
+      // userData.avatarUrl, so no separate avatar field needs updating.
       if (this._userData) {
         this._userData = { ...this._userData, ...profileData };
-        // Don't overwrite existing fields that aren't in profileData
       } else {
         await this.getUserData({ forceRefresh: true });
-      }
-
-      // Update cached avatar URL if it was changed
-      if (profileData.avatarUrl !== undefined) {
-        this._currentAvatarUrl = profileData.avatarUrl;
-        if (this._userData) this._userData.avatarUrl = profileData.avatarUrl;
       }
 
       // Dispatch profile updated event

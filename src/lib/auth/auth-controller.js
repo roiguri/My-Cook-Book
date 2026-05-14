@@ -1,4 +1,3 @@
-// FIXME: when user logging in with different account, when opening modal for the first time, it shows the previous user's profile
 /**
  * AuthController Component
  * @class
@@ -7,6 +6,11 @@
  * @description
  * A custom web component that manages authentication state and provides
  * core authentication functionality for the application.
+ *
+ * Reads auth state from authStore (the single source of truth). When the
+ * Firebase user changes, authStore atomically clears the previous user's
+ * Firestore data before the new user's data is fetched — so this component
+ * never renders user A's profile against user B's session.
  *
  * @example
  * // HTML
@@ -27,6 +31,7 @@
  */
 
 import authService from '../../js/services/auth-service.js';
+import { authStore } from '../../js/state/auth-store.js';
 import '../utilities/modal/modal.js';
 
 class AuthController extends HTMLElement {
@@ -35,12 +40,20 @@ class AuthController extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.isAuthenticated = false;
     this.currentUser = null;
+    this._unsubscribeAuthStore = null;
   }
 
   connectedCallback() {
     this.render();
     this.setupAuthStateObserver();
     authService.initialize();
+  }
+
+  disconnectedCallback() {
+    if (this._unsubscribeAuthStore) {
+      this._unsubscribeAuthStore();
+      this._unsubscribeAuthStore = null;
+    }
   }
 
   render() {
@@ -65,8 +78,12 @@ class AuthController extends HTMLElement {
   }
 
   setupAuthStateObserver() {
-    authService.addAuthObserver((state) => {
-      this.isAuthenticated = !!state.user;
+    // Subscribe to authStore so every transition — including the synchronous
+    // "user switch in progress, userData not yet loaded" frame — is reflected
+    // here. The first call from subscribe() runs synchronously with the
+    // current state.
+    this._unsubscribeAuthStore = authStore.subscribe((state) => {
+      this.isAuthenticated = state.isAuthenticated;
       this.currentUser = state.user;
 
       if (state.user) {
