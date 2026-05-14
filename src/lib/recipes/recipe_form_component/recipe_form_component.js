@@ -45,9 +45,7 @@ class RecipeFormComponent extends HTMLElement {
     this.render();
     this.setupEventListeners();
 
-    if (!this.formProtectionDisabled) {
-      this.setupFormProtection();
-    }
+    this.setupFormProtection();
 
     // Auth observer for dynamic button visibility
     this.handleAuthUpdate = this.handleAuthUpdate.bind(this);
@@ -57,13 +55,10 @@ class RecipeFormComponent extends HTMLElement {
     if (recipeId) {
       await this.setRecipeData(recipeId);
     } else {
-      // Enable protection for new forms after initial render (only if not disabled)
-      if (!this.formProtectionDisabled) {
-        setTimeout(() => {
-          this.collectFormData();
-          this.enableFormProtection(this.recipeData);
-        }, 500);
-      }
+      setTimeout(() => {
+        this.collectFormData();
+        this.enableFormProtection(this.recipeData);
+      }, 500);
     }
   }
 
@@ -404,27 +399,27 @@ class RecipeFormComponent extends HTMLElement {
         this.recipeData = data;
         await this.populateFromData(data, recipeId);
 
-        // Enable protection only if not disabled
-        if (!this.formProtectionDisabled) {
-          setTimeout(() => this.enableFormProtection(this.recipeData), 500);
-        }
+        // Re-collect from the form so the dirty-state baseline matches
+        // the shape produced by subsequent captures (Firestore-raw and
+        // form-collected shapes diverge — e.g. source:'existing' on
+        // images, instruction string normalization).
+        setTimeout(() => {
+          this.collectFormData();
+          this.enableFormProtection(this.recipeData);
+        }, 500);
       } else {
         console.warn('No such document!');
-        if (!this.formProtectionDisabled) {
-          setTimeout(() => {
-            this.collectFormData();
-            this.enableFormProtection(this.recipeData);
-          }, 500);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching recipe:', error);
-      if (!this.formProtectionDisabled) {
         setTimeout(() => {
           this.collectFormData();
           this.enableFormProtection(this.recipeData);
         }, 500);
       }
+    } catch (error) {
+      console.error('Error fetching recipe:', error);
+      setTimeout(() => {
+        this.collectFormData();
+        this.enableFormProtection(this.recipeData);
+      }, 500);
     }
   }
 
@@ -557,9 +552,7 @@ class RecipeFormComponent extends HTMLElement {
     const debouncedDirtyCheck = () => {
       clearTimeout(checkDirtyStateTimeout);
       checkDirtyStateTimeout = setTimeout(() => {
-        if (this.isProtectionEnabled) {
-          formProtectionManager.checkDirtyState();
-        }
+        formProtectionManager.checkDirtyState();
       }, 300);
     };
 
@@ -585,11 +578,17 @@ class RecipeFormComponent extends HTMLElement {
    * @param {Object} initialData - Initial form data (optional)
    */
   enableFormProtection(initialData = null) {
-    if (this.formProtectionDisabled || this.isProtectionEnabled) return;
+    if (this.isProtectionEnabled) return;
 
     const dataToUse = initialData || this.recipeData;
     formProtectionManager.initialize(this.shadowRoot, dataToUse);
     this.isProtectionEnabled = true;
+
+    // disable-form-protection silences nav-away prompts but keeps
+    // dirty-state events flowing for save-button gating.
+    if (this.formProtectionDisabled) {
+      formProtectionManager.temporaryDisable();
+    }
   }
 
   /**

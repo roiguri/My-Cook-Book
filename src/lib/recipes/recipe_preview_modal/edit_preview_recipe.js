@@ -227,7 +227,7 @@ class EditPreviewRecipe extends HTMLElement {
                   ${icons.closeX}
                   <span class="btn-label">נקה</span>
                 </button>
-                <button class="toolbar-btn toolbar-btn--save" id="toolbar-save" ${isPreview ? 'disabled' : ''} aria-label="שמור">
+                <button class="toolbar-btn toolbar-btn--save" id="toolbar-save" disabled aria-label="שמור">
                   ${icons.floppyDisk}
                   <span class="btn-label">שמור</span>
                 </button>
@@ -262,7 +262,7 @@ class EditPreviewRecipe extends HTMLElement {
         toggleImg.src = this.path + 'eye.png';
         toggleImg.alt = 'צפה';
         toggleLbl.textContent = 'תצוגה מקדימה';
-        saveBtn.disabled = false;
+        saveBtn.disabled = true;
         clearBtn.disabled = false;
       } else {
         this.mode = 'preview';
@@ -292,6 +292,11 @@ class EditPreviewRecipe extends HTMLElement {
       const editComp = modalBody.querySelector('edit-recipe-component');
       const formComp = editComp?.shadowRoot?.querySelector('recipe-form-component');
       formComp?.requestClear();
+    });
+
+    modalBody.addEventListener('form-dirty-changed', (event) => {
+      if (this.mode !== 'edit') return;
+      saveBtn.disabled = !event.detail.isDirty;
     });
   }
 
