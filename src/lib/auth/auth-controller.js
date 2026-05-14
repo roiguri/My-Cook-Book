@@ -27,6 +27,7 @@
  */
 
 import authService from '../../js/services/auth-service.js';
+import i18nService from '../../js/i18n/i18n.js';
 import '../utilities/modal/modal.js';
 
 class AuthController extends HTMLElement {
@@ -35,12 +36,26 @@ class AuthController extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.isAuthenticated = false;
     this.currentUser = null;
+    this._lastRoles = { isManager: false, isApproved: false };
+    this._onLocaleChanged = this._onLocaleChanged.bind(this);
   }
 
   connectedCallback() {
     this.render();
     this.setupAuthStateObserver();
     authService.initialize();
+    i18nService.addEventListener('locale-changed', this._onLocaleChanged);
+  }
+
+  disconnectedCallback() {
+    i18nService.removeEventListener('locale-changed', this._onLocaleChanged);
+  }
+
+  _onLocaleChanged() {
+    // Rebuild dynamic nav items so their text reflects the new locale.
+    if (this.currentUser) {
+      this.updateNavigation(this.currentUser, this._lastRoles);
+    }
   }
 
   render() {
@@ -96,6 +111,8 @@ class AuthController extends HTMLElement {
     const navMenu = document.querySelector('nav ul');
     if (!navMenu) return;
 
+    this._lastRoles = roles;
+
     // Remove dynamic tabs first
     ['profile-tab', 'documents-tab', 'dashboard-tab'].forEach((id) => {
       const tab = document.querySelector(`#${id}`);
@@ -117,16 +134,22 @@ class AuthController extends HTMLElement {
     };
 
     // Add Favorites tab for all logged in users - redirect to categories page with favorites filter
-    navMenu.appendChild(createNavItem('profile-tab', 'מועדפים', '/categories?favorites=true'));
+    navMenu.appendChild(
+      createNavItem('profile-tab', i18nService.t('nav.favorites'), '/categories?favorites=true'),
+    );
 
     // Add Grandmother's Recipes for approved users and managers
     if (roles.isApproved || roles.isManager) {
-      navMenu.appendChild(createNavItem('documents-tab', 'המטעמים של סבתא', '/grandmas-cooking'));
+      navMenu.appendChild(
+        createNavItem('documents-tab', i18nService.t('nav.grandmasCooking'), '/grandmas-cooking'),
+      );
     }
 
     // Add Management Interface for managers
     if (roles.isManager) {
-      navMenu.appendChild(createNavItem('dashboard-tab', 'ממשק ניהול', '/dashboard'));
+      navMenu.appendChild(
+        createNavItem('dashboard-tab', i18nService.t('nav.dashboard'), '/dashboard'),
+      );
     }
 
     // Sync mobile drawer navigation if it exists

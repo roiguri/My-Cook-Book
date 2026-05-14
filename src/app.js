@@ -15,6 +15,7 @@ import './js/sw-register.js';
 import { initFirebase } from './js/services/firebase-service.js';
 import firebaseConfig from './js/config/firebase-config.js';
 import authService from './js/services/auth-service.js';
+import i18nService from './js/i18n/i18n.js';
 
 // Import SPA core
 import { AppRouter } from './app/core/router.js';
@@ -31,6 +32,10 @@ async function initializeSPA() {
   try {
     initFirebase(firebaseConfig);
 
+    // Resolve locale and set <html lang>/<html dir> before any component
+    // connectedCallback runs, so RTL-aware styles are correct on first paint.
+    await i18nService.init();
+
     // Start loading supplemental components and the most common first route in parallel
     Promise.all([
       import('./app/pages/home-page.js'),
@@ -38,6 +43,7 @@ async function initializeSPA() {
       import('./lib/auth/components/auth-avatar.js'),
       import('./lib/auth/components/auth-content.js'),
       import('./lib/search/header-search-bar/header-search-bar.js'),
+      import('./lib/i18n/language-switcher.js'),
     ]).catch((err) => console.warn('Failed to preload supplemental components:', err));
 
     // Wait for critical nav components and auth state to resolve, then remove the shimmer
@@ -58,6 +64,9 @@ async function initializeSPA() {
     // Await components critical for the UI shell to avoid race conditions
     // (e.g., navigation-script handles link interception which the router depends on)
     await import('./js/navigation-script.js');
+
+    applyStaticTranslations();
+    i18nService.addEventListener('locale-changed', applyStaticTranslations);
 
     const contentContainer = document.getElementById('spa-content');
     if (!contentContainer) {
@@ -140,6 +149,31 @@ function registerRoutes(router, pageManager) {
       ...params,
       route: '/my-meal',
     });
+  });
+}
+
+/**
+ * Walks the document for elements marked with `data-i18n` and replaces their
+ * text with the translated string. Optional `data-i18n-params` may carry a
+ * JSON object for interpolation placeholders (e.g. `{year}`). The Hebrew
+ * fallback text shipped in index.html stays in place if i18n init fails.
+ */
+function applyStaticTranslations() {
+  const nodes = document.querySelectorAll('[data-i18n]');
+  nodes.forEach((el) => {
+    const key = el.dataset.i18n;
+    let params;
+    if (el.dataset.i18nParams) {
+      try {
+        params = JSON.parse(el.dataset.i18nParams);
+      } catch (_) {
+        params = undefined;
+      }
+    }
+    const translated = i18nService.t(key, params);
+    if (translated && translated !== key) {
+      el.textContent = translated;
+    }
   });
 }
 

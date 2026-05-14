@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -68,9 +68,9 @@
       <div class="nav-search-container">
         <nav dir="rtl">
           <ul>
-            <li><a href="/home">דף הבית</a></li>
-            <li><a href="/categories">מתכונים</a></li>
-            <li><a href="/propose-recipe">הצעת מתכון</a></li>
+            <li><a href="/home" data-i18n="nav.home">דף הבית</a></li>
+            <li><a href="/categories" data-i18n="nav.recipes">מתכונים</a></li>
+            <li><a href="/propose-recipe" data-i18n="nav.proposeRecipe">הצעת מתכון</a></li>
           </ul>
         </nav>
         <div class="search-auth-container">
@@ -91,7 +91,10 @@
 
     <!-- Application Footer -->
     <footer>
-      <p>&copy; 2024 Our Kitchen Chronicles. All rights reserved.</p>
+      <p data-i18n="footer.copyright" data-i18n-params='{"year":2024}'>
+        &copy; 2024 Our Kitchen Chronicles. All rights reserved.
+      </p>
+      <language-switcher></language-switcher>
       <a id="icon-attribute" href="https://www.flaticon.com/free-icons/spoon" title="spoon icons"
         >Spoon icons created by Freepik - Flaticon</a
       >

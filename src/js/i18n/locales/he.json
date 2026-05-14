@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "home": "דף הבית",
+    "recipes": "מתכונים",
+    "proposeRecipe": "הצעת מתכון",
+    "favorites": "מועדפים",
+    "grandmasCooking": "המטעמים של סבתא",
+    "dashboard": "ממשק ניהול"
+  },
+  "footer": {
+    "copyright": "© {year} Our Kitchen Chronicles. כל הזכויות שמורות."
+  },
+  "common": {}
+}
