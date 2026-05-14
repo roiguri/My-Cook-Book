@@ -72,16 +72,13 @@ class EditRecipeComponent extends HTMLElement {
           });
           newImages.push(meta);
         } else if (img.source === 'existing') {
-          let existingImage = {
-            id: img.id,
-            full: img.full,
-            isPrimary: img.isPrimary,
-          };
-          if (img.access !== undefined) existingImage.access = img.access;
-          if (img.uploadedBy !== undefined) existingImage.uploadedBy = img.uploadedBy;
-          if (img.fileName !== undefined) existingImage.fileName = img.fileName;
-          if (img.uploadTimestamp !== undefined)
-            existingImage.uploadTimestamp = img.uploadTimestamp;
+          // Spread all persistent fields (e.g. aiEnhanced) and drop transient
+          // form-internal ones. Filter undefined values since Firestore is not
+          // configured with ignoreUndefinedProperties.
+          const { source: _s, file: _f, preview: _p, ...rest } = img;
+          let existingImage = Object.fromEntries(
+            Object.entries(rest).filter(([, v]) => v !== undefined),
+          );
 
           if (categoryChanged) {
             try {

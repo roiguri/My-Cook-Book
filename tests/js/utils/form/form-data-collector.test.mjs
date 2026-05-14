@@ -316,6 +316,24 @@ describe('form-data-collector', () => {
       expect(result.toDelete).toEqual([{ id: 'removed-1', full: 'path/to/removed.jpg' }]);
     });
 
+    it('preserves arbitrary persistent fields on existing images (e.g. aiEnhanced)', () => {
+      const mockShadowRoot = createMockShadowRoot();
+      const imageHandler = mockShadowRoot.getElementById('recipe-images');
+      const [newImg, existingImg] = imageHandler.getImages();
+      imageHandler.getImages = jest.fn(() => [
+        newImg,
+        { ...existingImg, aiEnhanced: true, unknownFutureField: 'preserved' },
+      ]);
+
+      const result = collectRecipeFormData(mockShadowRoot);
+
+      expect(result.images[1]).toMatchObject({
+        aiEnhanced: true,
+        unknownFutureField: 'preserved',
+        source: 'existing',
+      });
+    });
+
     it('should handle anonymous user for new images', () => {
       mockGetCurrentUser.mockReturnValue(null);
       const mockShadowRoot = createMockShadowRoot();

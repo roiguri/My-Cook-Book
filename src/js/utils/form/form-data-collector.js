@@ -147,20 +147,15 @@ function collectImages(shadowRoot) {
         source: 'new',
       };
     } else {
-      // Existing image to keep - only include defined properties
-      const existingImage = {
-        isPrimary: img.isPrimary ?? false, // Default to false if undefined
-        source: 'existing',
-      };
-
-      // Only add properties that exist (prevent undefined values in Firestore)
-      if (img.id !== undefined) existingImage.id = img.id;
-      if (img.full !== undefined) existingImage.full = img.full;
-      if (img.access !== undefined) existingImage.access = img.access;
-      if (img.uploadedBy !== undefined) existingImage.uploadedBy = img.uploadedBy;
-      if (img.fileName !== undefined) existingImage.fileName = img.fileName;
-      if (img.uploadTimestamp !== undefined) existingImage.uploadTimestamp = img.uploadTimestamp;
-
+      // Spread all persistent fields (e.g. aiEnhanced) and drop transient
+      // form-internal ones. Filter undefined values since Firestore is not
+      // configured with ignoreUndefinedProperties.
+      const { file: _f, preview: _p, source: _s, ...rest } = img;
+      const existingImage = Object.fromEntries(
+        Object.entries(rest).filter(([, v]) => v !== undefined),
+      );
+      existingImage.isPrimary = img.isPrimary ?? false;
+      existingImage.source = 'existing';
       return existingImage;
     }
   });
