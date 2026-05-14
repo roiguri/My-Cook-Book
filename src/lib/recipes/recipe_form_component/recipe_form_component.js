@@ -7,7 +7,7 @@ import { collectRecipeFormData } from '../../../js/utils/form/form-data-collecto
 import { clearForm, setFormDisabledState } from '../../../js/utils/form/form-state-manager.js';
 import { formProtectionManager } from '../../../js/utils/form/form-protection-manager.js';
 
-import '../../images/image-handler.js';
+import '../../media/image-handler/image-handler.js';
 import '../../modals/message-modal/message-modal.js';
 import '../../modals/confirmation_modal/confirmation_modal.js';
 import './parts/recipe-metadata-fields.js';
@@ -16,7 +16,7 @@ import './parts/recipe-ingredients-list.js';
 import './parts/recipe-instructions-list.js';
 import './parts/recipe-comments-list.js';
 import './parts/recipe-related-field.js';
-import '../media-instructions-editor/media-instructions-editor.js';
+import '../../media/media-instructions-editor/media-instructions-editor.js';
 import '../recipe_import_modal/recipe_import_modal.js';
 import { mapExtractedDataToForm } from '../../../js/utils/recipe-extractor-utils.js';
 import authService from '../../../js/services/auth-service.js';

@@ -71,11 +71,11 @@ export default {
       import('../../lib/modals/image-approval-multi/image-approval-multi.js'),
       import('../../lib/modals/confirmation_modal/confirmation_modal.js'),
       import('../../lib/modals/message-modal/message-modal.js'),
-      import('../../lib/utilities/image-carousel/image-carousel.js'),
+      import('../../lib/media/image-carousel/image-carousel.js'),
       import('../../lib/utilities/modal/modal.js'),
       import('../../lib/utilities/loading-spinner/loading-spinner.js'),
-      import('../../lib/images/image-handler.js'),
-      import('../../lib/images/ai-image-enhancer/ai-image-enhancer.js'),
+      import('../../lib/media/image-handler/image-handler.js'),
+      import('../../lib/media/ai-image-enhancer/ai-image-enhancer.js'),
     ]);
   },
 
