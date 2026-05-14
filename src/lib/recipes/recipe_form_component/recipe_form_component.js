@@ -521,16 +521,12 @@ class RecipeFormComponent extends HTMLElement {
       try {
         const previewUrl = await getOptimizedImageUrl(image, '400x400');
         if (previewUrl) {
+          // Spread the full image object so persistent fields (e.g. aiEnhanced)
+          // survive the edit round-trip. Transient form fields are layered on top.
           imageHandler.addImage({
-            file: null, // No file object, just preview
+            ...image,
+            file: null,
             preview: previewUrl,
-            id: image.id,
-            isPrimary: image.isPrimary,
-            full: image.full,
-            access: image.access,
-            uploadedBy: image.uploadedBy,
-            fileName: image.fileName,
-            uploadTimestamp: image.uploadTimestamp,
             source: 'existing',
           });
         }
