@@ -67,6 +67,3 @@ dev-debug.log
 *.sw?
 playwright-report/
 test-results/
-
-# generated migration reports
-scripts/migrate/reports/
