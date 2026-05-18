@@ -600,8 +600,8 @@ describe('recipe-data-utils', () => {
         },
       ];
       const scaled = scaleIngredientSections(sections, 2, 4);
-      expect(scaled[0].items[0].amount).toBe('4');
-      expect(scaled[0].items[1].amount).toBe('2');
+      expect(scaled[0].items[0].amount).toBe(4);
+      expect(scaled[0].items[1].amount).toBe(2);
       expect(scaled[0].title).toBe('Dry Ingredients');
     });
 

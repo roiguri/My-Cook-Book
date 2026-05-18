@@ -514,10 +514,14 @@ class RecipeComponent extends HTMLElement {
 
     .qty {
       font-family: var(--font-mono, monospace);
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted, #6b6a63);
       white-space: nowrap;
       letter-spacing: 0.02em;
+    }
+    .qty-amount {
+      unicode-bidi: isolate;
+      direction: ltr;
     }
 
     .name { color: var(--text-strong, #1f1d18); }
@@ -1093,7 +1097,16 @@ class RecipeComponent extends HTMLElement {
     const qtySpan = document.createElement('span');
     qtySpan.className = 'qty';
     const amount = formatIngredientAmount(ingredient.amount);
-    qtySpan.textContent = ingredient.unit ? `${amount} ${ingredient.unit}` : amount;
+    // Amount is LTR (e.g. "1 1/2"); isolate it so it does not bidi-reorder
+    // inside the RTL Hebrew list.
+    const amountEl = document.createElement('span');
+    amountEl.className = 'qty-amount';
+    amountEl.setAttribute('dir', 'ltr');
+    amountEl.textContent = amount;
+    qtySpan.appendChild(amountEl);
+    if (ingredient.unit) {
+      qtySpan.appendChild(document.createTextNode(` ${ingredient.unit}`));
+    }
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'name';

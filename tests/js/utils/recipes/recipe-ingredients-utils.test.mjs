@@ -74,18 +74,18 @@ describe('recipe-ingredients-utils', () => {
   });
 
   describe('formatAmount', () => {
-    it('renders common fractions as unicode glyphs', () => {
-      expect(formatAmount(0.5)).toBe('½');
-      expect(formatAmount(0.25)).toBe('¼');
-      expect(formatAmount(0.75)).toBe('¾');
-      expect(formatAmount(1 / 3)).toBe('⅓');
-      expect(formatAmount(2 / 3)).toBe('⅔');
-      expect(formatAmount(0.125)).toBe('⅛');
+    it('renders common fractions as ASCII', () => {
+      expect(formatAmount(0.5)).toBe('1/2');
+      expect(formatAmount(0.25)).toBe('1/4');
+      expect(formatAmount(0.75)).toBe('3/4');
+      expect(formatAmount(1 / 3)).toBe('1/3');
+      expect(formatAmount(2 / 3)).toBe('2/3');
+      expect(formatAmount(0.125)).toBe('1/8');
     });
-    it('prefixes the whole part', () => {
-      expect(formatAmount(1.5)).toBe('1½');
-      expect(formatAmount(2.75)).toBe('2¾');
-      expect(formatAmount(2.5)).toBe('2½');
+    it('prefixes the whole part with a space (ASCII mixed number)', () => {
+      expect(formatAmount(1.5)).toBe('1 1/2');
+      expect(formatAmount(2.75)).toBe('2 3/4');
+      expect(formatAmount(2.5)).toBe('2 1/2');
     });
     it('renders integers without a fraction', () => {
       expect(formatAmount(2)).toBe('2');
@@ -103,6 +103,20 @@ describe('recipe-ingredients-utils', () => {
       expect(formatAmount(2.55)).toBe('2.55');
       expect(formatAmount(0.5667)).toBe('0.567');
     });
+    it('prefers the decimal over an inexact fraction (accuracy)', () => {
+      // Only essentially-exact values become a fraction...
+      expect(formatAmount(0.26)).toBe('0.26'); // not 1/4
+      expect(formatAmount(0.24)).toBe('0.24'); // not 1/4
+      expect(formatAmount(0.13)).toBe('0.13'); // not 1/8
+      expect(formatAmount(0.3)).toBe('0.3'); // not 1/3
+      expect(formatAmount(0.65)).toBe('0.65'); // not 2/3
+      // ...but the repeating 1/3 and 2/3 get a looser tolerance.
+      expect(formatAmount(0.33)).toBe('1/3');
+      expect(formatAmount(0.34)).toBe('1/3');
+      expect(formatAmount(0.66)).toBe('2/3');
+      expect(formatAmount(0.667)).toBe('2/3');
+      expect(formatAmount(2.33)).toBe('2 1/3');
+    });
     it('returns empty string for nullish / non-numeric', () => {
       expect(formatAmount(null)).toBe('');
       expect(formatAmount(undefined)).toBe('');
@@ -110,7 +124,7 @@ describe('recipe-ingredients-utils', () => {
       expect(formatAmount('abc')).toBe('');
     });
     it('accepts numeric strings', () => {
-      expect(formatAmount('0.5')).toBe('½');
+      expect(formatAmount('0.5')).toBe('1/2');
       expect(formatAmount('2')).toBe('2');
     });
   });
@@ -146,24 +160,30 @@ describe('recipe-ingredients-utils', () => {
   });
 
   describe('scaleIngredients', () => {
-    it('scales ingredient amounts correctly', () => {
-      // Arrange
+    it('scales amounts to numbers (legacy string input tolerated)', () => {
       const ingredients = [
         { amount: '2', unit: 'cup', item: 'flour' },
         { amount: '1.5', unit: 'tbsp', item: 'sugar' },
       ];
-      // Act
       const scaled = scaleIngredients(ingredients, 2, 4);
-      // Assert
-      expect(scaled[0].amount).toBe('4');
-      expect(scaled[1].amount).toBe('3');
+      expect(scaled[0].amount).toBe(4);
+      expect(scaled[1].amount).toBe(3);
+    });
+    it('scales numeric and fractional source amounts', () => {
+      const ingredients = [
+        { amount: 0.5, unit: 'cup', item: 'a' },
+        { amount: '1/2', unit: 'cup', item: 'b' },
+      ];
+      const scaled = scaleIngredients(ingredients, 2, 6); // ×3
+      expect(scaled[0].amount).toBe(1.5);
+      expect(scaled[1].amount).toBe(1.5);
     });
     it('returns original if originalServings is 0 or invalid', () => {
-      const ingredients = [{ amount: '2', unit: 'cup', item: 'flour' }];
+      const ingredients = [{ amount: 2, unit: 'cup', item: 'flour' }];
       expect(scaleIngredients(ingredients, 0, 4)).toBe(ingredients);
       expect(scaleIngredients(ingredients, null, 4)).toBe(ingredients);
     });
-    it('handles non-numeric amounts gracefully', () => {
+    it('leaves non-numeric amounts untouched', () => {
       const ingredients = [{ amount: 'to taste', unit: '', item: 'salt' }];
       const scaled = scaleIngredients(ingredients, 2, 4);
       expect(scaled[0].amount).toBe('to taste');
@@ -171,16 +191,17 @@ describe('recipe-ingredients-utils', () => {
   });
 
   describe('formatIngredientAmount', () => {
-    it('formats integer and float values', () => {
+    it('formats numeric and legacy-string amounts as ASCII fractions', () => {
       expect(formatIngredientAmount(2)).toBe('2');
-      expect(formatIngredientAmount(2.5)).toBe('2.5');
+      expect(formatIngredientAmount(2.5)).toBe('2 1/2');
+      expect(formatIngredientAmount(0.5)).toBe('1/2');
       expect(formatIngredientAmount('2.00')).toBe('2');
-      expect(formatIngredientAmount('2.50')).toBe('2.5');
+      expect(formatIngredientAmount('1/2')).toBe('1/2');
       expect(formatIngredientAmount('2.55')).toBe('2.55');
-      expect(formatIngredientAmount('2.555')).toBe('2.56');
     });
-    it('returns original string for non-numeric', () => {
-      expect(formatIngredientAmount('to taste')).toBe('to taste');
+    it('returns empty string for null/unparseable', () => {
+      expect(formatIngredientAmount('to taste')).toBe('');
+      expect(formatIngredientAmount(null)).toBe('');
       expect(formatIngredientAmount(undefined)).toBe('');
     });
   });
@@ -207,23 +228,25 @@ describe('recipe-ingredients-utils', () => {
   });
 
   describe('validateIngredient', () => {
-    it('returns true for valid ingredient', () => {
-      const ing = { amount: '1', unit: 'cup', item: 'flour' };
-      expect(validateIngredient(ing)).toBe(true);
+    it('returns true for numeric or legacy-string amounts', () => {
+      expect(validateIngredient({ amount: 1, unit: 'cup', item: 'flour' })).toBe(true);
+      expect(validateIngredient({ amount: 0.5, unit: 'cup', item: 'flour' })).toBe(true);
+      expect(validateIngredient({ amount: '1/2', unit: 'cup', item: 'flour' })).toBe(true);
     });
-    it('returns false for missing or empty fields', () => {
+    it('returns false for missing/empty/zero/non-numeric amount or fields', () => {
       expect(validateIngredient({ amount: '', unit: 'cup', item: 'flour' })).toBe(false);
-      expect(validateIngredient({ amount: '1', unit: '', item: 'flour' })).toBe(false);
-      expect(validateIngredient({ amount: '1', unit: 'cup', item: '' })).toBe(false);
+      expect(validateIngredient({ amount: 0, unit: 'cup', item: 'flour' })).toBe(false);
+      expect(validateIngredient({ amount: 'to taste', unit: 'cup', item: 'x' })).toBe(false);
+      expect(validateIngredient({ amount: 1, unit: '', item: 'flour' })).toBe(false);
+      expect(validateIngredient({ amount: 1, unit: 'cup', item: '' })).toBe(false);
       expect(validateIngredient({})).toBe(false);
       expect(validateIngredient(null)).toBe(false);
     });
   });
 
   describe('createEmptyIngredient', () => {
-    it('returns an ingredient with empty fields', () => {
-      const ing = createEmptyIngredient();
-      expect(ing).toEqual({ amount: '', unit: '', item: '' });
+    it('returns an ingredient with a null amount and empty unit/item', () => {
+      expect(createEmptyIngredient()).toEqual({ amount: null, unit: '', item: '' });
     });
   });
 });

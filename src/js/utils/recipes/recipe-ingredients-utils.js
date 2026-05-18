@@ -34,7 +34,8 @@
 
 /**
  * @typedef {Object} Ingredient
- * @property {string} amount - The quantity of the ingredient (as a string, e.g. "1", "1/2", "2.5")
+ * @property {number|null} amount - Canonical numeric quantity (e.g. 1, 0.5, 2.5); `null`
+ *   when unknown. Legacy string amounts still tolerated on read during rollout (#202).
  * @property {string} unit - The unit of measurement (e.g. "cup", "tbsp", "g")
  * @property {string} item - The name of the ingredient (e.g. "flour", "sugar")
  */
@@ -52,10 +53,33 @@ export const COMMON_FRACTIONS = {
   '¾': 3 / 4,
 };
 
-const COMMON_ENTRIES = Object.entries(COMMON_FRACTIONS); // [glyph, ratio][]
+// ASCII label per common fraction. Display uses ASCII ("1/2", "1 1/2") — more
+// legible than the compact vulgar-fraction glyph and bidi-safe in RTL Hebrew.
+const COMMON_ASCII = {
+  '⅛': '1/8',
+  '¼': '1/4',
+  '⅓': '1/3',
+  '½': '1/2',
+  '⅔': '2/3',
+  '¾': '3/4',
+};
+
 const COMMON_RATIOS = Object.values(COMMON_FRACTIONS);
 const RATIO_EPSILON = 1e-6; // fraction-notation must resolve (near) exactly
-const DISPLAY_TOLERANCE = 0.04; // nearest-glyph snap for computed values
+
+// Display rounding is conservative: a value only renders as a fraction when it
+// is essentially exact (EXACT_DISPLAY_TOLERANCE). The only exception is the
+// repeating decimals 1/3 and 2/3 — their decimal form is ugly/inaccurate, so a
+// looser tolerance is allowed there. Everything else prefers the decimal.
+const EXACT_DISPLAY_TOLERANCE = 1e-6;
+const REPEATING_DISPLAY_TOLERANCE = 0.01;
+
+// [asciiLabel, ratio, tolerance][] — used by formatAmount for display.
+const COMMON_ASCII_ENTRIES = Object.entries(COMMON_FRACTIONS).map(([glyph, ratio]) => [
+  COMMON_ASCII[glyph],
+  ratio,
+  glyph === '⅓' || glyph === '⅔' ? REPEATING_DISPLAY_TOLERANCE : EXACT_DISPLAY_TOLERANCE,
+]);
 
 const matchesCommonRatio = (value) =>
   COMMON_RATIOS.some((ratio) => Math.abs(value - ratio) < RATIO_EPSILON);
@@ -113,8 +137,11 @@ export function parseAmount(input) {
 }
 
 /**
- * Format a numeric amount for display, snapping the fractional part to
- * the nearest common unicode fraction when close enough.
+ * Format a numeric amount for display as a legible ASCII string, snapping the
+ * fractional part to the nearest common fraction when close enough:
+ * `0.5`→`"1/2"`, `1.5`→`"1 1/2"`, `2`→`"2"`, `0.375`→`"0.375"`.
+ * ASCII (not the ½ glyph) is used so it is readable at small sizes and does
+ * not bidi-reorder inside RTL Hebrew; the display layer keeps it LTR-isolated.
  * @param {number|string|null|undefined} value
  * @returns {string}
  */
@@ -133,18 +160,22 @@ export function formatAmount(value) {
   const whole = Math.trunc(abs);
   const frac = abs - whole;
 
-  // Nearest common fraction (minimum absolute difference).
+  // Nearest common fraction (minimum absolute difference), accepted only
+  // within that fraction's own tolerance — exact for terminating fractions,
+  // looser for the repeating 1/3 and 2/3. Otherwise prefer the decimal.
   let best = null;
   let bestDiff = Infinity;
-  for (const [glyph, ratio] of COMMON_ENTRIES) {
+  let bestTol = 0;
+  for (const [label, ratio, tol] of COMMON_ASCII_ENTRIES) {
     const diff = Math.abs(frac - ratio);
     if (diff < bestDiff) {
       bestDiff = diff;
-      best = glyph;
+      best = label;
+      bestTol = tol;
     }
   }
-  if (best !== null && bestDiff < DISPLAY_TOLERANCE) {
-    return whole > 0 ? `${sign}${whole}${best}` : `${sign}${best}`;
+  if (best !== null && bestDiff < bestTol) {
+    return whole > 0 ? `${sign}${whole} ${best}` : `${sign}${best}`;
   }
 
   // No nearby fraction → decimal rounded at the 3rd place, trailing zeros trimmed.
@@ -207,13 +238,10 @@ export function scaleIngredients(ingredients, originalServings, newServings) {
 
   const factor = newServings / originalServings;
 
-  // Helper function to scale a single ingredient
   const scaleIngredient = (ing) => {
-    const amountNum = parseFloat(ing.amount);
-    return {
-      ...ing,
-      amount: isNaN(amountNum) ? ing.amount : formatIngredientAmount(amountNum * factor),
-    };
+    const n = parseAmount(ing.amount);
+    if (n === null) return ing;
+    return { ...ing, amount: n * factor };
   };
 
   // Handle sectioned ingredients format (Firebase direct array format)
@@ -246,18 +274,14 @@ export function scaleIngredients(ingredients, originalServings, newServings) {
 }
 
 /**
- * Formats a number value for display in ingredients
- * @param {number|string} value - Numeric value
- * @returns {string} Formatted value (removes trailing zeros, etc.)
+ * Formats an ingredient amount (number or legacy string) for display as a
+ * common unicode fraction. Returns '' for null/unparseable.
+ * @param {number|string|null} value
+ * @returns {string}
  */
 export function formatIngredientAmount(value) {
-  const num = typeof value === 'string' ? parseFloat(value) : value;
-  if (isNaN(num)) return value?.toString() || '';
-  if (Number.isInteger(num)) return num.toString();
-  return num
-    .toFixed(2)
-    .replace(/\.00$/, '')
-    .replace(/(\.[1-9]*)0+$/, '$1');
+  const n = parseAmount(value);
+  return n === null ? '' : formatAmount(n);
 }
 
 /**
@@ -270,18 +294,18 @@ export function extractIngredientNames(ingredientsArray) {
   return ingredientsArray.map((ing) => ing.item).filter(Boolean);
 }
 
-// TODO: provide a more comprehensive validation for the ingredient object
-//       validate the amount is a number and unit is from a list of allowed units
 /**
- * Validates ingredient data structure
- * @param {Ingredient} ingredient - Ingredient object to validate
- * @returns {boolean} Whether ingredient is valid
+ * Validates ingredient structure. Amount must parse to a positive number
+ * (accepts number or legacy string; tighten to numeric-only post-migration #202).
+ * @param {Ingredient} ingredient
+ * @returns {boolean}
  */
 export function validateIngredient(ingredient) {
   if (!ingredient || typeof ingredient !== 'object') return false;
+  const amount = parseAmount(ingredient.amount);
   return (
-    typeof ingredient.amount === 'string' &&
-    ingredient.amount.trim() !== '' &&
+    amount !== null &&
+    amount > 0 &&
     typeof ingredient.unit === 'string' &&
     ingredient.unit.trim() !== '' &&
     typeof ingredient.item === 'string' &&
@@ -294,5 +318,5 @@ export function validateIngredient(ingredient) {
  * @returns {Ingredient} New ingredient with empty fields
  */
 export function createEmptyIngredient() {
-  return { amount: '', unit: '', item: '' };
+  return { amount: null, unit: '', item: '' };
 }

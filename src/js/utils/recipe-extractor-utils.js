@@ -1,3 +1,5 @@
+import { parseAmount } from './recipes/recipe-ingredients-utils.js';
+
 /**
  * Maps the extracted recipe data from Gemini to the RecipeForm structure.
  *
@@ -32,7 +34,7 @@ export function mapExtractedDataToForm(extractedData) {
       title: section.title || 'כללי',
       items: (section.items || []).map((ing) => ({
         item: ing.item || '',
-        amount: ing.amount || '',
+        amount: parseAmount(ing.amount),
         unit: ing.unit || '',
       })),
     }));
@@ -41,7 +43,7 @@ export function mapExtractedDataToForm(extractedData) {
   } else if (extractedData.ingredients && Array.isArray(extractedData.ingredients)) {
     mappedData.ingredients = extractedData.ingredients.map((ing) => ({
       item: ing.item || '',
-      amount: ing.amount || '',
+      amount: parseAmount(ing.amount),
       unit: ing.unit || '',
     }));
     mappedData.ingredientSections = null;

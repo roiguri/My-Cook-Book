@@ -32,13 +32,13 @@
  */
 
 import { FirestoreService } from '../../services/firestore-service.js';
-import { formatIngredientAmount } from './recipe-ingredients-utils.js';
+import { parseAmount, validateIngredient } from './recipe-ingredients-utils.js';
 import { removeAllRecipeImages } from './recipe-image-utils.js';
 import { removeAllMediaInstructions } from './recipe-media-utils.js';
 
 /**
  * @typedef {Object} Ingredient
- * @property {string} amount - Quantity of ingredient (e.g., "2", "1.5", "to taste")
+ * @property {number|null} amount - Canonical numeric quantity; `null` when unknown.
  * @property {string} unit - Unit of measurement (e.g., "cup", "tbsp", "kg", "" for unitless)
  * @property {string} item - Name of the ingredient (e.g., "flour", "salt", "chicken")
  */
@@ -101,24 +101,6 @@ export const CATEGORY_ICONS = {
 };
 
 /**
- * Validates a single ingredient object structure
- * @param {Object} ingredient - Ingredient object to validate
- * @returns {boolean} Whether the ingredient has valid structure
- */
-function validateIngredientObject(ingredient) {
-  return (
-    ingredient &&
-    typeof ingredient === 'object' &&
-    typeof ingredient.amount === 'string' &&
-    ingredient.amount.trim() &&
-    typeof ingredient.unit === 'string' &&
-    ingredient.unit.trim() &&
-    typeof ingredient.item === 'string' &&
-    ingredient.item.trim()
-  );
-}
-
-/**
  * Validates an ingredient section object structure
  * @param {Object} section - IngredientSection object to validate
  * @returns {boolean} Whether the section has valid structure
@@ -131,7 +113,7 @@ function validateIngredientSection(section) {
     section.title.trim() &&
     Array.isArray(section.items) &&
     section.items.length > 0 &&
-    section.items.every(validateIngredientObject)
+    section.items.every((item) => validateIngredient(item))
   );
 }
 
@@ -151,7 +133,7 @@ function sanitizeIngredientSections(rawSections) {
         ? section.items
             .filter((item) => item && typeof item === 'object' && item.item && item.item.trim())
             .map((item) => ({
-              amount: String(item.amount || '').trim(),
+              amount: parseAmount(item.amount),
               unit: String(item.unit || '').trim(),
               item: String(item.item || '').trim(),
             }))
@@ -181,11 +163,9 @@ export function scaleIngredientSections(ingredientSections, originalServings, ne
   return ingredientSections.map((section) => ({
     ...section,
     items: section.items.map((item) => {
-      const amountNum = parseFloat(item.amount);
-      return {
-        ...item,
-        amount: isNaN(amountNum) ? item.amount : formatIngredientAmount(amountNum * factor),
-      };
+      const n = parseAmount(item.amount);
+      if (n === null) return item;
+      return { ...item, amount: n * factor };
     }),
   }));
 }

@@ -26,7 +26,7 @@ describe('Recipe Extractor Utils', () => {
       expect(result.category).toBe('Dessert');
       expect(result.prepTime).toBe(10);
       expect(result.ingredients).toHaveLength(2);
-      expect(result.ingredients[0]).toEqual({ item: 'Flour', amount: '2', unit: 'cups' });
+      expect(result.ingredients[0]).toEqual({ item: 'Flour', amount: 2, unit: 'cups' });
       expect(result.instructions).toEqual(['Mix', 'Bake']);
       expect(result.comments).toEqual(['Enjoy']);
       expect(result.tags).toEqual(['sweet']);
@@ -71,7 +71,7 @@ describe('Recipe Extractor Utils', () => {
       };
 
       const result = mapExtractedDataToForm(input);
-      expect(result.ingredients[0]).toEqual({ item: 'Salt', amount: '', unit: '' });
+      expect(result.ingredients[0]).toEqual({ item: 'Salt', amount: null, unit: '' });
     });
 
     it('should map recipe with sections and stages correctly', () => {
@@ -108,7 +108,7 @@ describe('Recipe Extractor Utils', () => {
       expect(result.ingredientSections[0].title).toBe('Cake');
       expect(result.ingredientSections[0].items[0]).toEqual({
         item: 'Flour',
-        amount: '2',
+        amount: 2,
         unit: 'cups',
       });
       expect(result.ingredientSections[1].title).toBe('Frosting');

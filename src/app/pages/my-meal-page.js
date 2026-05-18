@@ -755,6 +755,9 @@ export default {
             const amountSpan = document.createElement('span');
             amountSpan.className = 'amount';
             amountSpan.textContent = formatIngredientAmount(item.amount);
+            // Keep "1 1/2" LTR-isolated inside the RTL Hebrew layout.
+            amountSpan.setAttribute('dir', 'ltr');
+            amountSpan.style.unicodeBidi = 'isolate';
 
             const unitSpan = document.createElement('span');
             unitSpan.className = 'unit';
@@ -836,6 +839,9 @@ export default {
             const amountSpan = document.createElement('span');
             amountSpan.className = 'amount';
             amountSpan.textContent = formatIngredientAmount(item.amount);
+            // Keep "1 1/2" LTR-isolated inside the RTL Hebrew layout.
+            amountSpan.setAttribute('dir', 'ltr');
+            amountSpan.style.unicodeBidi = 'isolate';
 
             const unitSpan = document.createElement('span');
             unitSpan.className = 'unit';
