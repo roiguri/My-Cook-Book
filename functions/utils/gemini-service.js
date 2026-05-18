@@ -248,11 +248,11 @@ const RECIPE_SCHEMA = {
             nullable: false,
           },
           amount: {
-            type: 'string',
+            type: 'number',
             description:
-              'Numeric quantity only: a number ("2", "2.5"), a simple common ' +
-              'fraction ("1/2","1/3","1/4","2/3","3/4","1/8"), or a mixed number ' +
-              '("1 1/2"). No ranges, no words. If not a clear number, set null.',
+              'Quantity as a number: convert fractions/mixed numbers to decimals ' +
+              '(½→0.5, ⅓→0.333, 1 ½→1.5). Use null when there is no clear single ' +
+              'numeric quantity (e.g. a range like 2-3, or "to taste").',
             nullable: true,
           },
           unit: {
@@ -285,12 +285,11 @@ const RECIPE_SCHEMA = {
               properties: {
                 item: { type: 'string', nullable: false },
                 amount: {
-                  type: 'string',
+                  type: 'number',
                   nullable: true,
                   description:
-                    'Numeric quantity only: number, common fraction ' +
-                    '(1/2,1/3,1/4,2/3,3/4,1/8) or mixed (1 1/2). No ranges/words; ' +
-                    'null if not a clear number.',
+                    'Quantity as a number: fractions/mixed → decimals ' +
+                    '(½→0.5, ⅓→0.333, 1 ½→1.5). null for ranges or "to taste".',
                 },
                 unit: { type: 'string', nullable: true },
               },
@@ -368,7 +367,7 @@ REQUIRED METADATA (always populate these based on recipe content):
 - mainIngredient: Identify the primary/central ingredient (in Hebrew)
 
 Data Formatting:
-- Ingredients: Split into item, amount, and unit. amount MUST be numeric only — a number, a simple common fraction (1/2, 1/3, 1/4, 2/3, 3/4, 1/8), or a mixed number (1 1/2). No ranges (not "2-3") and no words (not "to taste"); if there is no clear numeric amount, set amount to null and keep item/unit.
+- Ingredients: Split into item, amount, and unit. amount MUST be a number — convert any fraction or mixed number to a decimal (½ → 0.5, ⅓ → 0.333, 1 ½ → 1.5). Use null (not a string) when there is no single clear numeric quantity, e.g. a range ("2-3") or "to taste"; keep item/unit.
 - Instructions: Split into logical steps.
 - Language: Translate ALL text to Hebrew.`;
 
@@ -386,7 +385,7 @@ REQUIRED METADATA (always populate these based on recipe content):
 - mainIngredient: Identify the primary/central ingredient (in Hebrew)
 
 Data Formatting:
-- Ingredients: Split into item, amount, and unit. amount MUST be numeric only — a number, a simple common fraction (1/2, 1/3, 1/4, 2/3, 3/4, 1/8), or a mixed number (1 1/2). No ranges (not "2-3") and no words (not "to taste"); if there is no clear numeric amount, set amount to null and keep item/unit.
+- Ingredients: Split into item, amount, and unit. amount MUST be a number — convert any fraction or mixed number to a decimal (½ → 0.5, ⅓ → 0.333, 1 ½ → 1.5). Use null (not a string) when there is no single clear numeric quantity, e.g. a range ("2-3") or "to taste"; keep item/unit.
 - Instructions: Split into logical steps.
 - Language: Translate ALL text to Hebrew.
 

@@ -162,8 +162,14 @@ function validateIngredientSections(ingredientSections) {
       if (!ingredient.item || typeof ingredient.item !== 'string') {
         errors.push(`Section ${sectionIndex}, Item ${itemIndex}: missing or invalid item`);
       }
-      if (ingredient.amount && typeof ingredient.amount !== 'string') {
-        errors.push(`Section ${sectionIndex}, Item ${itemIndex}: amount must be string`);
+      if (
+        ingredient.amount != null &&
+        typeof ingredient.amount !== 'string' &&
+        typeof ingredient.amount !== 'number'
+      ) {
+        errors.push(
+          `Section ${sectionIndex}, Item ${itemIndex}: amount must be a string or number`,
+        );
       }
       if (ingredient.unit && typeof ingredient.unit !== 'string') {
         errors.push(`Section ${sectionIndex}, Item ${itemIndex}: unit must be string`);
@@ -193,8 +199,12 @@ function validateFlatIngredients(ingredients) {
     if (!ingredient.item || typeof ingredient.item !== 'string') {
       errors.push(`Ingredient ${index}: missing or invalid item`);
     }
-    if (ingredient.amount && typeof ingredient.amount !== 'string') {
-      errors.push(`Ingredient ${index}: amount must be string`);
+    if (
+      ingredient.amount != null &&
+      typeof ingredient.amount !== 'string' &&
+      typeof ingredient.amount !== 'number'
+    ) {
+      errors.push(`Ingredient ${index}: amount must be a string or number`);
     }
     if (ingredient.unit && typeof ingredient.unit !== 'string') {
       errors.push(`Ingredient ${index}: unit must be string`);
