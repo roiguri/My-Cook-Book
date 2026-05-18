@@ -6,6 +6,10 @@
  */
 
 import { SectionedListComponent } from './sectioned-list-component.js';
+import {
+  parseAmount,
+  formatIngredientAmount,
+} from '../../../../js/utils/recipes/recipe-ingredients-utils.js';
 
 class RecipeIngredientsList extends SectionedListComponent {
   constructor() {
@@ -47,11 +51,12 @@ class RecipeIngredientsList extends SectionedListComponent {
   }
 
   createListItemHTML(ingredient, includeRemove) {
-    const escapedQuantity = String(ingredient.amount || '')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-    const escapedUnit = (ingredient.unit || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    const escapedItem = (ingredient.item || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const escape = (v) => String(v).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    // Show the amount in readable form (number 0.5 → "1/2", legacy "1/2" →
+    // "1/2"); getItemData re-parses it back to a number on collect.
+    const escapedQuantity = escape(formatIngredientAmount(ingredient.amount));
+    const escapedUnit = escape(ingredient.unit || '');
+    const escapedItem = escape(ingredient.item || '');
     const removeButtonHTML = `<button type="button" class="recipe-form__button ${this.removeButtonClass}"${!includeRemove ? ' style="visibility:hidden;pointer-events:none"' : ''}>-</button>`;
 
     return `
@@ -74,18 +79,23 @@ class RecipeIngredientsList extends SectionedListComponent {
     const itemInput = itemElement.querySelector('.recipe-form__input--item');
 
     return {
-      amount: quantityInput ? quantityInput.value.trim() : '',
+      // Canonical numeric amount (or null if empty / not a clean number).
+      amount: quantityInput ? parseAmount(quantityInput.value) : null,
       unit: unitInput ? unitInput.value.trim() : '',
       item: itemInput ? itemInput.value.trim() : '',
     };
   }
 
   getInitialItems() {
-    return [{ amount: '', unit: '', item: '' }];
+    return [{ amount: null, unit: '', item: '' }];
   }
 
   isItemPopulated(itemData) {
-    return itemData.amount || itemData.unit || itemData.item;
+    return (
+      itemData.amount != null ||
+      (itemData.unit && itemData.unit.trim()) ||
+      (itemData.item && itemData.item.trim())
+    );
   }
 
   /**
@@ -96,7 +106,8 @@ class RecipeIngredientsList extends SectionedListComponent {
   validateItemFields(item) {
     const errors = {};
 
-    if (!item.amount || !item.amount.trim()) {
+    // amount is already parsed by getItemData → must be a positive number.
+    if (typeof item.amount !== 'number' || !(item.amount > 0)) {
       errors.amount = true;
     }
     if (!item.unit || !item.unit.trim()) {
